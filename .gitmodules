@@ -1,0 +1,3 @@
+[submodule "reftype"]
+	path = reftype
+	url = git@github.com:pdf-jube-joba/ref-type.git
