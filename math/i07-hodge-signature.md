@@ -10,6 +10,6 @@
 ## Dependencies
 
 - [A17 Analytic index of elliptic operators](a17-elliptic-fredholm.md)
-- [Connections and covariant derivatives](../../libs/geometry/bundle_connections/README.md)
+- [Connections and covariant derivatives](../libs/geometry/bundle_connections/README.md)
 - [D04 De Rham comparison theorem](d04-de-rham-comparison.md)
 - [G12 Poincaré–Lefschetz duality](g12-poincare-duality.md)

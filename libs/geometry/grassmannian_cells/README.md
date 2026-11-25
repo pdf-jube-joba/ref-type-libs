@@ -1,9 +1,7 @@
 # Grassmannian Schubert cells and CW structures
 
-Definitions/proof terms cover B08 requirements.
-Includes real/complex finite CW structures, standard-inclusion skeleton comparisons, oriented real coverings/lifted CW structures, stabilization limits/finite stages.
-On 2026-11-20, type checks passed for 225 B08 modules and 7,852 dependency-closure modules.
-Source commits, actual checks/cache reuse, and full-check results: [validation records](../../../work/b08-type-check/README.md).
+Real/complex Grassmannian Schubert cells and finite CW structures, standard-inclusion comparisons, oriented real coverings, and stable finite-stage factorizations.
+Historical check results appear under [type checking](#type-checking).
 
 ## Schubert symbols and echelon forms
 
@@ -147,16 +145,14 @@ Cell dimensions match base cells; `CW.With.projects` states characteristic-map/c
 
 ## Type checking
 
-B08/dependency checks passed at source commit `5deadd6563878d1a010b9b628b7e9d68229a9cfe`.
-Final standard CLI accepted 1,206 modules including dependencies from the canonical cache.
-Subsequent new-driver runs validated all 7,852 dependency-closure modules with canonical cache successfully.
-Final full runs also actually checked all 225 B08 modules successfully.
-No new axioms or unproved replacements added.
+Historical upstream source `5deadd6563878d1a010b9b628b7e9d68229a9cfe`, checked on 2026-11-20:
 
-B08-only full libs checked 11,895/15,749 modules, stopping at known G06 `tubular_neighborhoods` name resolution errors.
-Remaining 3,854 modules unconfirmed in that run.
-Temporary local integration with G06 fixes confirmed 13,276/15,750 modules.
-Full checks stopped for disk exhaustion; same-input resume was interrupted after another package proof continued near memory limits.
-Remaining 2,474 modules unconfirmed; temporary integration did not establish full libs success.
+| Run | Result |
+| --- | --- |
+| B08 target | All 225 modules actually checked; standard CLI accepted 1,206 modules including cached dependencies |
+| Dependency-closure driver | All 7,852 modules accepted using verified caches |
+| Workspace | 11,895/15,749 accepted; stopped at G06 name resolution, leaving 3,854 unconfirmed |
+| Temporary G06 integration | 13,276/15,750 accepted; disk exhaustion and subsequent memory-related interruption left 2,474 unconfirmed |
 
-Commands, temporary integration commits/counts, first diagnostics, compressed raw reports/logs: [validation records](../../../work/b08-type-check/README.md).
+No new axioms or unproved replacements were added; neither workspace run established full success.
+See [raw validation records](../../../reftype/work/b08-type-check/README.md) for commits, commands, diagnostics, and check/reuse counts, and [checking the libraries](../../USAGE.md) for current runs.

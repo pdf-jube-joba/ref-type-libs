@@ -19,6 +19,8 @@
 `Cohomology.Cup[p, q].onClasses` identifies products with actual representative cup classes.
 `Cohomology.DegreeTransport` handles degree-addition equality transport.
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-target/debug/cli libs/topology/singular/products --module singular_products.Cochains --diagnostics compact
+reftype/target/debug/cli libs/topology/singular/products --module singular_products.Cochains --diagnostics compact
 ```

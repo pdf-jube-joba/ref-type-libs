@@ -15,7 +15,7 @@
 ## Implementation
 
 Implemented.
-Public API and theorem scope: [manifold_gluing](../../libs/geometry/manifold_gluing/README.md).
+Public API and theorem scope: [manifold_gluing](../libs/geometry/manifold_gluing/README.md).
 
 | Requirements | Implementation |
 | --- | --- |

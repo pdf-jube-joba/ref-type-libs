@@ -67,10 +67,11 @@ Constructs comparisons from the newly glued bundle to the original.
 Includes zero-bundle tensors, zeroth exterior powers, varying-rank two-component tensors, empty-base sums.
 [Operations.Examples](src/Operations/Examples.ref) instantiates both scalars and realification/complexification pullback isomorphisms.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --locked --offline
-target/debug/cli libs/geometry/bundle_operations --memory-mib 8192 --cache-stats
-target/debug/cli libs --module bundle_operations --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/geometry/bundle_operations --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs --module bundle_operations --memory-mib 8192 --cache-stats
 ```
 
 Target/dependency checks passed for 4,265 modules: 271 new, 3,430 source steps, 3,994 reused.

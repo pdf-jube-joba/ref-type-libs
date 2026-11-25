@@ -30,32 +30,13 @@ The same real API requires explicit gauges on both disks for isomorphism criteri
 
 ## Checks and integration records
 
-Branch: `math/b04-bundle-homotopy`; [PR #43](https://github.com/pdf-jube-joba/ref-type/pull/43).
-Last implementation change: `2f786058`; package baseline: `ca2a13df`; workspace baseline: `ad9d9af9` (documentation-only differences).
-Latest-snapshot `work/b04-package-current`: 4,728 target/dependency modules, saved successfully, exit 0.
-53,943 source steps, peak RSS roughly 4,415 MiB, one worker; zero recoveries/duplicates/reruns/lost steps/save failures.
-Includes real/complex examples, sums/stabilization, disk trivialization, gauge criteria, local-frame comparison compatibility.
+Historical upstream [PR #43](https://github.com/pdf-jube-joba/ref-type/pull/43), implementation `2f786058`:
 
-- `cargo test --workspace --locked`: 383 passed, exit 0.
-- `cargo test -p cli --locked --offline`: 8 passed after time-limit-condition lint fixes, exit 0.
-- `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: exit 0.
-- `python3 tests/tests.py --command /workspace/ref-type/target/debug/cli`: 401 passed, exit 0.
-- `rustfmt --edition 2024 --check` on 10 changed Rust files and standard build: exit 0.
+| Input | Result |
+| --- | --- |
+| Package `ca2a13df` | 4,728 target/dependency modules accepted |
+| Workspace `ad9d9af9` | 7,557 modules accepted on same-snapshot retry after a save-time timeout |
+| Rust / integration tests | 383 / 401 passed; CLI tests, format, and Clippy passed |
 
-Checker changes bounded scratch-cache records, improved batched substitution of consecutive lambda applications and transparent-definition comparison.
-Ran 78 kernel tests including rejection of invalid captured-argument types/counts.
-Earlier allocation/time failures resolved; interrupted checks remain distinguished as exit 130/incomplete.
-Temporarily `exec-server transport disconnected`; access to the same workspace recovered and saving exit 0 was confirmed.
-Disconnection root cause unknown.
-
-Initial full 7,557-module `work/b04-workspace` processed every module but hit 3600 seconds during final save: exit 2, time-limit, incomplete.
-Same-snapshot/cache `work/b04-workspace-retry` reused all 7,557 modules and passed in roughly 26 seconds, saved successfully, exit 0.
-Recheck: zero source steps, recoveries, duplicates, reruns, lost steps, save failures.
-No implementation/check work remains.
-See PR #43 integration status; if unmerged on resume, confirm final CI/source agreement, merge normally, and confirm main inclusion.
-Recheck from the repository root:
-
-```sh
-target/debug/cli libs --parse-only --save-source-snapshot work/b04-workspace-snapshot.json
-target/debug/cli libs --source-snapshot work/b04-workspace-snapshot.json --memory-mib 10240 --cache-budget-mib 12288 --time-limit-seconds 7200 --diagnostics compact --report-json work/b04-workspace-retry.json --cache-stats
-```
+Successful runs reported zero save failures, recoveries, duplicate/rerun checks, or lost steps.
+For current commands and the scope of historical results, see [checking the libraries](../../USAGE.md).

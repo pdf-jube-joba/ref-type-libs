@@ -90,12 +90,12 @@ Ring computations are explicit equality proofs using associativity, commutativit
 Run from the repository root.
 
 ```sh
+cargo build --manifest-path reftype/Cargo.toml -p cli --locked
 python3 libs/algebra/characteristic_series/tools/generate.py
-cargo build -p cli --locked
 mkdir -p work
-./target/debug/cli libs/algebra/characteristic_series --module characteristic_series --full-check-local --cache-stats --report-json work/l04-target.json
-./target/debug/cli libs/algebra/characteristic_series --cache-stats --report-json work/l04-dependencies.json
+reftype/target/debug/cli libs/algebra/characteristic_series --module characteristic_series --full-check-local --cache-stats --report-json work/l04-target.json
+reftype/target/debug/cli libs/algebra/characteristic_series --cache-stats --report-json work/l04-dependencies.json
 ```
 
 Use the shared workspace cache `libs/refcache/`.
-For precision notation, resuming, and resource limits, see [CLI usage](../../../src/USAGE.md#%E6%A4%9C%E6%9F%BB%E3%81%A8%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5).
+For precision notation, resuming, and resource limits, see [CLI usage](../../USAGE.md#cache-resources-and-fixed-inputs).

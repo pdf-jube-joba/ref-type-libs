@@ -11,5 +11,5 @@
 
 - [B06 Bundle classifying maps and stabilization](b06-bundle-classification.md)
 - [C02 Disk bundles, sphere bundles, and Thom spaces](c02-thom-spaces.md)
-- [K02 CW cofibrations and Puppe sequences](../../libs/topology/puppe_sequences/README.md)
+- [K02 CW cofibrations and Puppe sequences](../libs/topology/puppe_sequences/README.md)
 - [B08 Grassmannian cell decompositions](b08-grassmannian-cells.md)

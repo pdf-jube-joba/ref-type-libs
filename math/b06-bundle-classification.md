@@ -9,12 +9,12 @@
 
 ## Dependencies
 
-- [B04 Bundle homotopy invariance and clutching](../../libs/geometry/bundle_homotopy/README.md)
+- [B04 Bundle homotopy invariance and clutching](../libs/geometry/bundle_homotopy/README.md)
 - [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)
 
 ## Implementation
 
-Implemented in [bundle_classification](../../libs/geometry/bundle_classification/README.md).
+Implemented in [bundle_classification](../libs/geometry/bundle_classification/README.md).
 
 - Continuous finite-Grassmannian classifying maps for real and complex bundles, and comparison isomorphisms to universal-bundle pullbacks.
 - Classification of bundles with componentwise varying ranks by all-rank projection families in finite-dimensional spaces.

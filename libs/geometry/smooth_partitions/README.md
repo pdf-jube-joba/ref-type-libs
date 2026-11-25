@@ -77,9 +77,8 @@ Uses frame zero preservation and local gluing via `GluingOn.smooth`.
 
 ## Checks
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-source /workspace/ref-type-env.sh
-cargo build -p cli --release --locked
-target/release/cli libs/geometry/smooth_partitions --module smooth_partitions --memory-mib 10240
-python3 scripts/check_all.py --initial-memory-mib 10240 --memory-mib 10240
+reftype/target/release/cli libs/geometry/smooth_partitions --module smooth_partitions --memory-mib 10240
 ```

@@ -10,4 +10,4 @@
 ## Dependencies
 
 - [A06 Schwartz spaces and the Fourier transform](a06-schwartz-fourier.md)
-- [A08 Distributions and weak derivatives](../../libs/analysis/distributions/README.md)
+- [A08 Distributions and weak derivatives](../libs/analysis/distributions/README.md)

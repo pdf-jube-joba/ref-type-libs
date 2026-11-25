@@ -1,7 +1,7 @@
 # Continuous spectral splitting
 
 K06 public entry: `spectral_splitting.Spectral`.
-Completed units: [roadmap](../../../_plans/math/_roadmap.md).
+Completed units: [roadmap](../../../math/_roadmap.md).
 Reuses [root clusters](../complex_polynomial_roots/README.md), [polynomial linear algebra](../polynomial_linear_algebra/README.md), [Hermitian local frames](../hermitian_frames/README.md), [bundle complements](../../geometry/bundle_complements/README.md).
 
 ## Projection construction
@@ -61,22 +61,14 @@ Used in [B09](../../geometry/bundle_extension/README.md) real/complex neighborho
 
 ## Validation and resuming
 
-K06 constructions, proofs, naturality, comparisons, and examples are complete.
-K06 integration math sources: `1b012836`; final workspace validation used mathematical inputs identical to `cdc57da7`.
-Branch: `math/k06-spectral-splitting`; integration status: [PR #42](https://github.com/pdf-jube-joba/ref-type/pull/42).
-No Rust changes.
+Historical upstream [PR #42](https://github.com/pdf-jube-joba/ref-type/pull/42): implementation `1b012836`, workspace inputs matching `cdc57da7`.
 
-| Check (all shared cache) | Modules | Exit code |
-| --- | ---: | ---: |
-| `target/debug/cli libs/algebra/spectral_splitting --memory-mib 8192 --cache-stats` | 4,765（328 checked、4,437 reused） | 0 |
-| `target/debug/cli libs/geometry/bundle_complements --memory-mib 8192 --cache-stats` | 4,345 reused | 0 |
-| `target/debug/cli libs --memory-mib 8192 --cache-stats` | 7,441 reused | 0 |
+| Check | Result |
+| --- | --- |
+| K06 and dependencies | 328 modules checked, 4,437 reused |
+| B03 regression | 4,345 modules reused |
+| Workspace | 7,441 modules reused |
 
-Fix sources using per-input `--parse-only --save-source-snapshot` and specify `--source-snapshot`, `--diagnostics compact`, `--report-json` at the same input location.
-Do not track generated snapshots, JSON, or logs.
-K06/full-dependency check: 4,196 steps, peak RSS 5,259,356 KiB.
-Confirmed process termination/exit 0; one worker; zero recoveries, duplicates, reruns, lost steps, or cache save failures.
-Includes shared B03 basis constructions, all dependencies, and downstream tangent/normal uses.
-
-Next: inspect PR #42 diff/CI/integration and main inclusion, then read B04 plans and this API on latest main.
-B04, K01, and K04 implementations were outside K06 scope.
+All exited 0 with zero save failures, recoveries, duplicate/rerun checks, or lost steps.
+B09-specific additions are covered by its [validation summary](../../geometry/bundle_extension/README.md#validation-and-resuming).
+See [checking the libraries](../../USAGE.md) for fresh runs and historical-record scope.

@@ -69,9 +69,8 @@ Prove inverse laws on kernels and injective inclusion derivatives.
 `Examples.Manifold` instantiates regular \(u-z^2=0\) submanifolds, inclusion embeddings, tangent/kernel isomorphisms.
 `Examples.ZeroDimension` checks dimension-zero inverse functions.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-source /workspace/ref-type-env.sh
-cargo build -p cli --release --locked
-target/release/cli libs/geometry/inverse_implicit --module inverse_implicit --full-check-local --memory-mib 8192 --cache-stats
-python3 scripts/check_all.py --initial-memory-mib 8192 --memory-mib 12288 --cache-budget-mib 12288 --min-free-mib 512
+reftype/target/release/cli libs/geometry/inverse_implicit --module inverse_implicit --full-check-local --memory-mib 8192 --cache-stats
 ```

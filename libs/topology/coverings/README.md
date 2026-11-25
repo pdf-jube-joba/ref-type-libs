@@ -35,6 +35,8 @@ Conjugacy convention: \(g\mapsto aga^{-1}\).
 `QuotientIsomorphism.product` ensures \([a][b]=[ab]\), so the quotient is \(N(H)/H\).
 Regular covers correspond to normal \(H\), equivalently transitive deck actions on basepoint fibers.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-target/debug/cli libs/topology/coverings --module covering_spaces
+reftype/target/debug/cli libs/topology/coverings --module covering_spaces
 ```

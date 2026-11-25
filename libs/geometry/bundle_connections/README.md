@@ -92,8 +92,8 @@ Local uniqueness yields affine connection transforms.
 
 `Examples` handles real/complex rank-zero bundles over dimension-zero bases, \(\nabla1=1\) for nonzero constant one-dimensional connections, flat parallel constants, and Euclidean Levi–Civita.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --release --locked
-python3 scripts/check_all.py libs/geometry/bundle_connections
-python3 scripts/check_all.py
+python3 reftype/scripts/check_all.py --binary reftype/target/release/cli libs/geometry/bundle_connections
 ```

@@ -9,7 +9,7 @@
 
 ## Dependencies
 
-- [K11 Thom isomorphism in K-theory](k11-k-thom.md)
+- [K11 Thom isomorphism in K-theory](../libs/topology/k_theory_thom/README.md)
 - [C09 Chern character and multiplicative characteristic classes](c09-chern-character-genera.md)
-- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)
+- [C03 Thom classes and the Thom isomorphism](../libs/topology/cohomology_thom/README.md)
 - [C12 Compactly supported cohomology](c12-compact-support-cohomology.md)

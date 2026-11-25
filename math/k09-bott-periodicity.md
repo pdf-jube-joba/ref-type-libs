@@ -13,7 +13,7 @@
 
 ## Published implementation
 
-Implemented in [periodic_k_theory](../../libs/topology/periodic_k_theory/README.md).
+Implemented in [periodic_k_theory](../libs/topology/periodic_k_theory/README.md).
 
 - `Reduced` and `RelativePair` construct actual Bott external products/inverses; `Formula.productFormula` proves agreement with existing relative external products.
 - `TwoShift`, `Negative`, `Integer` give double-suspension comparisons, natural two-periodicity, all integer degrees, and comparisons with original negative degrees.
@@ -23,4 +23,4 @@ Implemented in [periodic_k_theory](../../libs/topology/periodic_k_theory/README.
 - `Point.At`, `Spheres.At`, `Spheres.Ordinary`, `Spheres.OrdinaryOdd` compute point/sphere groups; `BottSpheres` gives iterated Bott external-product generators.
 - `Examples` exposes minimal point-vanishing, generator, Bott-isomorphism, and negative-periodicity round-trip examples.
 
-Standard checks use repository `cargo build -p cli --release --locked` and `python3 scripts/check_all.py --memory-mib 10240`.
+For builds and workspace checks with the compiler submodule, use [checking the libraries](../libs/USAGE.md).

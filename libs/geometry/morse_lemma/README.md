@@ -131,11 +131,11 @@ For example, packages depending on `morse_lemma`, `calculus`, `std` obtain local
 
 ## Checks
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --release --locked
-target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json work/g13-target.json
-python3 scripts/check_all.py libs --memory-mib 4096 --cache-budget-mib 12288 --min-free-mib 512 --time-limit-seconds 3600 --state-dir work/g13-repository-check
-cargo test --workspace --locked -j 4
+mkdir -p work
+reftype/target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json work/g13-target.json
 ```
 
 Use shared caches to check all target modules/loaded dependencies.

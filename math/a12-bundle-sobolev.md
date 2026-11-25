@@ -9,7 +9,7 @@
 
 ## Dependencies
 
-- [Smooth bundles, frame bundles, and associated bundles](../../libs/geometry/smooth_bundles/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../libs/geometry/smooth_bundles/README.md)
 - [A09 Sobolev estimates on Euclidean spaces](a09-euclidean-sobolev.md)
 - [A10 Rellich compactness](a10-rellich.md)
-- [A04 Change of variables in multiple integrals](../../libs/analysis/change_of_variables/README.md)
+- [A04 Change of variables in multiple integrals](../libs/analysis/change_of_variables/README.md)

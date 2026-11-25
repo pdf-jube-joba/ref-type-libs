@@ -20,6 +20,8 @@ General double-complex totals use finite-support sums on each integer diagonal.
 External products first annihilate both boundaries, then descend from cycle tensors to homology tensors.
 Integer shifts compare `Chain.Prior` type transport and derive homology comparisons from cycle/boundary isomorphisms.
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/algebra/homological/tensor_chains --module tensor_chains.TensorChain
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/homological/tensor_chains --module tensor_chains.TensorChain
 ```

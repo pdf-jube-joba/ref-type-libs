@@ -10,4 +10,4 @@
 ## Dependencies
 
 - [A13 Symbols and local quantization](a13-symbol-quantization.md)
-- [A04 Change of variables in multiple integrals](../../libs/analysis/change_of_variables/README.md)
+- [A04 Change of variables in multiple integrals](../libs/analysis/change_of_variables/README.md)

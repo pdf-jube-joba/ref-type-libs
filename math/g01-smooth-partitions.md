@@ -22,7 +22,7 @@ None.
 - [x] Published smoothness of locally finite sums on Euclidean spaces and manifolds.
 - [x] Added real-line cutoff/partition examples and finite partitions on zero-dimensional compact manifolds.
 
-See [smooth_partitions](../../libs/geometry/smooth_partitions/README.md) for the public API and proof structure.
+See [smooth_partitions](../libs/geometry/smooth_partitions/README.md) for the public API and proof structure.
 
 Standard checks at implementation commit `51799530317db36f73adc63a2d9b2aa743378414` passed all 1,883 target/dependency modules and all 10,233 repository modules.
 Full check: 9,538 newly checked, 695 reused, 0 save failures or corrupt reads; source agreement confirmed.

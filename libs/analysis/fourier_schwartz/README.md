@@ -94,7 +94,8 @@ Inversion identifies the Gaussian approximate-identity limit of regularized inte
   Inversion.inverse (transformed f) x = S.value f x := Inversion.theorem f x;
 ```
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-target/release/cli libs/analysis/fourier_schwartz --module fourier_schwartz --memory-mib 12288 --diagnostics compact --cache-stats
-python3 scripts/check_all.py --initial-memory-mib 12288 --memory-mib 12288
+reftype/target/release/cli libs/analysis/fourier_schwartz --module fourier_schwartz --memory-mib 12288 --diagnostics compact --cache-stats
 ```

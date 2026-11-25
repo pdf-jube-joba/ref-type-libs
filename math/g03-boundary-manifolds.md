@@ -14,7 +14,7 @@
 ## Implementation
 
 Implemented.
-Public API and assumptions: [boundary_manifolds](../../libs/geometry/boundary_manifolds/README.md).
+Public API and assumptions: [boundary_manifolds](../libs/geometry/boundary_manifolds/README.md).
 
 | Requirements | Implementation |
 | --- | --- |

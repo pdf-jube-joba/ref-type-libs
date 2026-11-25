@@ -18,6 +18,8 @@ Jacobi uses \([x,[y,z]]=[[x,y],z]+[y,[x,z]]\).
 Antisymmetry follows from alternation, so characteristic \(2\) is included.
 `Classical.On.Orthogonal.LieAlgebra` in `geometry/lie_groups` proves skew-symmetric endomorphisms closed under commutators, instantiating \(\mathfrak{so}(n)\).
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/algebra/lie_algebras --module lie_algebras
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/lie_algebras --module lie_algebras
 ```

@@ -23,7 +23,9 @@ Negative-term vanishing also restricts homotopies/equivalences.
 
 Package/bridge example checks:
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/topology/singular/cech --cache-dir libs/refcache
-cargo run -p cli -- libs/topology/singular/cech --module singular_cech.Algebra.ProjectiveQuasi.Contracted.Equivalence --module-only --cache-dir libs/refcache
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/topology/singular/cech --cache-dir libs/refcache
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/topology/singular/cech --module singular_cech.Algebra.ProjectiveQuasi.Contracted.Equivalence --module-only --cache-dir libs/refcache
 ```

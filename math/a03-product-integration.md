@@ -13,7 +13,7 @@
 
 ## Implementation API
 
-Implemented in [product_integration](../../libs/analysis/product_integration/README.md).
+Implemented in [product_integration](../libs/analysis/product_integration/README.md).
 `Product` provides σ-finite product measures; `Integration` provides Tonelli and real-valued Fubini; `Complex` and `Vector` in the same module provide component-valued integrals.
 `EuclideanProduct.Comparison.theorem` proves agreement of product measure under coordinate concatenation with the Borel restriction of Euclidean Lebesgue measure.
 `Convolution.For.exists` derives a.e. integrability, integral interchange, and L1 bounds from conditions on jointly measurable convolution kernels; `Support.theorem` gives support inclusion.

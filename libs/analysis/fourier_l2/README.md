@@ -58,9 +58,10 @@ Completeness gives limits common to all approximations, uniquely defining the ma
 Derivative estimates bound squared symbols by \((1+|\xi|^2)^{|d|}\), then use actual L² norm monotonicity.
 No new mathematical axioms.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-target/release/cli libs/analysis/fourier_l2 --module fourier_l2 --memory-mib 8192 --diagnostics compact --no-progress --cache-stats
-python3 scripts/check_all.py --initial-memory-mib 12288 --memory-mib 12288
+reftype/target/release/cli libs/analysis/fourier_l2 --module fourier_l2 --memory-mib 8192 --diagnostics compact --no-progress --cache-stats
 ```
 
 Rechecked all 22 fixed-source A07 modules from source; reused 970 dependencies.

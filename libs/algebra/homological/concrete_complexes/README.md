@@ -13,8 +13,10 @@
 | `Finite.Bounded.IntegerTensorNaturality` | Both short-exact squares under nontrivial basis changes |
 | `Field.Tensor` | Canonical external products, splitting changes, swap signs, left/right units |
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/algebra/homological/concrete_complexes --module concrete_complexes --memory-mib 15872 --batch-seconds 60 --diagnostics compact
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/homological/concrete_complexes --module concrete_complexes --memory-mib 15872 --diagnostics compact
 ```
 
 Select examples with `--module concrete_complexes.Finite.Bounded.UniversalCoefficient` and similar options.

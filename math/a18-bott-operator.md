@@ -9,5 +9,5 @@
 
 ## Dependencies
 
-- [A07 Plancherel and Fourier multipliers](../../libs/analysis/fourier_l2/README.md)
+- [A07 Plancherel and Fourier multipliers](../libs/analysis/fourier_l2/README.md)
 - [A11 Fredholm operators and the index](a11-fredholm-operators.md)

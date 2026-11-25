@@ -46,15 +46,13 @@ Reuse existing real/complex reciprocal-continuity proofs.
 
 [Examples.ref](src/Examples.ref) checks determinant \(1\) in dimension zero and determinant/invertibility/continuous inverses of real shear matrices \(\begin{pmatrix}1&t\\0&1\end{pmatrix}\).
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --locked
-target/debug/cli libs/algebra/matrix_invariants --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/algebra/matrix_invariants --memory-mib 8192 --cache-stats
 ```
 
-Standard-check target/all dependencies with the shared workspace cache.
-
-Target/dependency-closure check passed: 1,205 modules checked, 88 reused.
-15,635 source steps, peak RSS roughly 853 MiB; zero recoveries, duplicate checks, or lost steps.
-No checker changes.
+The historical target/dependency check accepted 1,205 newly checked modules and 88 reused modules, with zero recoveries, duplicates, or lost steps.
+See [historical-record scope](../../USAGE.md#validation-records).
 
 For polynomial-determinant/adjugate Cayley–Hamilton proofs, see [polynomial_linear_algebra](../polynomial_linear_algebra/README.md).

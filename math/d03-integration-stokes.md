@@ -9,5 +9,5 @@
 
 ## Dependencies
 
-- [A04 Change of variables in multiple integrals](../../libs/analysis/change_of_variables/README.md)
+- [A04 Change of variables in multiple integrals](../libs/analysis/change_of_variables/README.md)
 - [G04 Collars and boundary gluing](g04-collars-gluing.md)

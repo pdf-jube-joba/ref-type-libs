@@ -63,9 +63,9 @@ Radical closure, constructibility, and rational algebraic-closure definitions: [
 
 ## Checks
 
-Run from the repository root.
+[Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-cargo run -p cli -- libs/algebra/galois --module galois --full-check-local
-cargo run -p cli -- libs/algebra/quintic --module quintic --full-check-local
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/galois --module galois --full-check-local
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/quintic --module quintic --full-check-local
 ```

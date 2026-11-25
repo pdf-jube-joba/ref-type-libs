@@ -2,7 +2,7 @@
 
 ## Implementation
 
-Implemented in [morse_lemma](../../libs/geometry/morse_lemma/README.md).
+Implemented in [morse_lemma](../libs/geometry/morse_lemma/README.md).
 The public theorems below construct actual linear isomorphisms, smooth two-sided inverses, and open neighborhoods without assuming their conclusions.
 
 | Requirements | Public API |
@@ -13,7 +13,7 @@ The public theorems below construct actual linear isomorphisms, smooth two-sided
 | Critical-point properties | `CriticalPoints.At.isolated` / `locallyConstant`, `Parametric.Function.Indices.locallyConstant` |
 
 `Examples` contains standalone nonlinear one-variable, saddle, nonconstant critical-family, and zero-dimensional examples.
-Implementation/use and type-check scope, reproduction, and limitations are documented separately in [README](../../libs/geometry/morse_lemma/README.md) and [validation records](../../libs/geometry/morse_lemma/VALIDATION.md).
+Implementation/use and type-check scope, reproduction, and limitations are documented separately in [README](../libs/geometry/morse_lemma/README.md) and [validation records](../libs/geometry/morse_lemma/VALIDATION.md).
 Rechecks of all 137 target modules and verification of the dependency closure passed.
 The full-library check fails with the same `euclidean_sobolev/Euclidean/Order/Weight.ref:14` as base main; distinguish this from a full pass.
 
@@ -27,4 +27,4 @@ The full-library check fails with the same `euclidean_sobolev/Euclidean/Order/We
 ## Dependencies
 
 - [G02 Inverse and implicit functions and local forms of regular values](g02-inverse-implicit.md)
-- [Hermitian matrices and continuous local frames](../../libs/algebra/hermitian_frames/README.md)
+- [Hermitian matrices and continuous local frames](../libs/algebra/hermitian_frames/README.md)

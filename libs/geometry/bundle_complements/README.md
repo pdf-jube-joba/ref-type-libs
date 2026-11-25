@@ -58,23 +58,7 @@ Also uses equal classes for ambient dimensions one/two, square-map pullbacks, me
 [FiniteBases](src/Complements/Over/Examples/FiniteBases.ref) proves two-point compact Hausdorffness; applies embedding/metric existence to rank-zero/one bundles, zero bundles, and empty bases.
 [Examples](src/Complements/Examples.ref) instantiates real/complex scalars.
 
-## Validation
-
-B03 merged via [PR #41](https://github.com/pdf-jube-joba/ref-type/pull/41) into main `6bf92837`.
-At restored commit `5d993911`, confirmed original 55 sources and two manifests match Git blob hashes.
-Root cause of the earlier environment disconnection is unknown.
-
-K06 extracted `Finite.ImageBasis` to share bases for general idempotents and Hermitian projections.
-B03/full-dependency recheck at `e3aecc2e`: exit 0, all 4,345 modules reused.
-Zero source rechecks, recoveries, duplicates, reruns, lost steps, save failures.
-No Rust changes.
-
-```sh
-target/debug/cli libs/geometry/bundle_complements --memory-mib 8192 --cache-stats
-```
-
-K06 workspace validation/resume details: [spectral_splitting handoff](../../algebra/spectral_splitting/README.md#validation-and-resuming).
-[B09](../bundle_extension/README.md) uses finite embeddings/image bundles/retractions to extend bundles/maps from closed subspaces.
+## Coordinate families and general idempotents
 
 `CoordinateFamily` turns arbitrary continuous coordinate-linear families into trivial-bundle maps without injectivity.
 `CoordinateEmbedding` shares that construction, also exposing finite embeddings when injective.
@@ -83,4 +67,11 @@ K06 workspace validation/resume details: [spectral_splitting handoff](../../alge
 `Over.Idempotents[n]` handles real/complex idempotents without self-adjointness.
 `Algebra`, `With` give complements, finite image bases, both kernels, and direct sums.
 `Image` gives image bundles/inclusions/projections/complements/pullbacks; `Comparison` gives invertible-intertwiner isomorphisms; `Gap` gives open nearby-comparison invertibility.
-This B09 entry applies K06 image construction to the same `Finite.ImageBasis` and general scalars; validated 569 modules including dependencies, exit 0, zero cache save failures.
+This B09 entry applies K06 image construction to the same `Finite.ImageBasis` and general scalars.
+
+## Validation
+
+Historical upstream [PR #41](https://github.com/pdf-jube-joba/ref-type/pull/41), merged at `6bf92837`.
+The K06 shared-basis recheck at `e3aecc2e` accepted 4,345 reused dependency-closure modules with zero save failures or worker recoveries.
+The later B09 idempotent entry accepted 569 modules including dependencies, with zero save failures.
+See [checking the libraries](../../USAGE.md) and [K06 validation](../../algebra/spectral_splitting/README.md#validation-and-resuming) for reruns and historical context.

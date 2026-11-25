@@ -59,10 +59,11 @@ For multiple separated clusters, apply to each cluster and the remaining region.
 For repeated roots \(1,1\) in one region, constructs a degree-two factor and checks multiplicities using actual root lists.
 Also includes continuity from arbitrary monic quadratics to unordered roots and the zero-dimensional homeomorphism.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --locked
-target/debug/cli libs/algebra/complex_polynomial_roots --memory-mib 8192 --cache-stats
-target/debug/cli libs --module complex_polynomial_roots --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/algebra/complex_polynomial_roots --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs --module complex_polynomial_roots --memory-mib 8192 --cache-stats
 ```
 
 Check target constructions/proofs/examples and all dependencies using the shared cache.

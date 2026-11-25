@@ -16,6 +16,8 @@ Instantiate public libraries from another package to check analysis/exterior/man
 | `Contravariance` | Contravariant composition for forms/cohomology |
 | `Pointwise` / `Cohomology` | Point/degree-dependent quotient carriers, extensionality, quotient APIs |
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-target/debug/cli libs/geometry/coordinate_calculus --module coordinate_calculus --full-check-local --diagnostics compact
+reftype/target/debug/cli libs/geometry/coordinate_calculus --module coordinate_calculus --full-check-local --diagnostics compact
 ```

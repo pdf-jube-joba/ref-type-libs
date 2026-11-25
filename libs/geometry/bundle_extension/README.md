@@ -68,30 +68,13 @@ Also checks real/complex identity matrices in dimensions zero/one.
 
 ## Validation and resuming
 
-Base: PR #48-integrated main `d6ecc14d499efbd782a70ae5c837c4da97c7abc8`.
-Ancestors include K07 `76e6084094f810eaf51e18663bb33d111dd409d7`, K02 `29f3f43b7a760485ad516dec1c6835d6e09aa41e`, initial B09 `96731109fb2466c72de286aee73ab659e30743a2`.
-Continuation branch: `math/b09-complete-extension`; [PR #49](https://github.com/pdf-jube-joba/ref-type/pull/49).
+Historical upstream [PR #49](https://github.com/pdf-jube-joba/ref-type/pull/49): implementation `fb8cc1a36a3f343e4e88fbd44ae75790e5c8567f`, fixed-input baseline `c5632cf7bf185d6c0d47ea290e7e8973c32c1c04`.
 
-Last implementation change: `fb8cc1a36a3f343e4e88fbd44ae75790e5c8567f`; math-input baseline after trailing-blank cleanup: `c5632cf7bf185d6c0d47ea290e7e8973c32c1c04`.
-Current math inputs match the full-check fixed snapshot.
+| Check | Accepted modules |
+| --- | ---: |
+| Package and dependency closure | 5,580 |
+| Workspace | 8,287 |
 
-| Check | Modules | Exit code |
-| --- | ---: | ---: |
-| Package and dependency closure | 5,580 | 0 |
-| Full workspace | 8,287 | 0 |
-
-Shared cache: `libs/refcache`; fixed snapshots/reports: `work/b09-resume/package-final.*`, `workspace-final.*`.
-Full check completed 100,406 source steps, one worker, peak RSS 9,040,752 KiB.
-Both confirmed cache saving; zero recoveries, duplicates, reruns, unsaved steps, save failures.
-When interruption invalidated the full-check handle, kept the process running and recovered original-shell exit 0 and accepted reports.
-No further math fixes or check restarts.
-No B09 implementation/validation work remains; see PR #49 for integration.
-
-Recheck from the repository root.
-
-```sh
-target/debug/cli libs/geometry/bundle_extension --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --cache-stats --diagnostics compact --report-json work/b09-resume/package.json
-target/debug/cli libs --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --cache-stats --diagnostics compact --report-json work/b09-resume/workspace.json
-```
-
-CLI built with `cargo build -p cli --locked` (exit 0).
+Both exited 0 with zero save failures, recoveries, duplicate/rerun checks, or lost steps.
+Original reports: `work/b09-resume/{package,workspace}-final.*`.
+See [checking the libraries](../../USAGE.md) for fresh runs and historical-record scope.

@@ -9,4 +9,4 @@
 
 ## Dependencies
 
-- [Bundle metrics, complements, and isomorphism classes](../../libs/geometry/bundle_complements/README.md)
+- [Bundle metrics, complements, and isomorphism classes](../libs/geometry/bundle_complements/README.md)

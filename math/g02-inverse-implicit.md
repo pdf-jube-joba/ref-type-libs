@@ -9,11 +9,11 @@
 
 ## Dependencies
 
-- [L01 Determinants and invertible matrices](../../libs/algebra/matrix_invariants/README.md)
+- [L01 Determinants and invertible matrices](../libs/algebra/matrix_invariants/README.md)
 
 ## Implementation
 
-[inverse_implicit](../../libs/geometry/inverse_implicit/README.md) implements each item for smooth finite-dimensional maps.
+[inverse_implicit](../libs/geometry/inverse_implicit/README.md) implements each item for smooth finite-dimensional maps.
 
 | Requirements | Public API |
 | --- | --- |
@@ -23,4 +23,4 @@
 | Local coordinates of regular fibers | `Product.Submersion.localExistence`, `LocalFiber` |
 | Regular-value submanifolds and tangent kernels | `Product.RegularValue.Of.manifold`, `Smooth.embedding`, `Smooth.At.identificationExists` |
 
-[Examples](../../libs/geometry/inverse_implicit/src/Examples.ref) instantiate nonlinear shears, implicit functions, nonlinear rank-one maps, the parabola as a regular-value submanifold and its tangent kernel, and dimension zero.
+[Examples](../libs/geometry/inverse_implicit/src/Examples.ref) instantiate nonlinear shears, implicit functions, nonlinear rank-one maps, the parabola as a regular-value submanifold and its tangent kernel, and dimension zero.

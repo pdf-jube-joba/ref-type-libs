@@ -26,4 +26,5 @@ Original `Real.Grassmannian`, `Complex.Grassmannian` are projection-structure au
 Right sides of `Stabilization.ambientBundleIsomorphism` and `dimensionBundleIsomorphism` sum factor universal bundles pulled back successively from sum bases to stabilization bases.
 `ambientMapFormula` and `dimensionMapFormula` identify isomorphism base maps with public stabilization maps.
 
-Check/resume instructions: `work/b05-resume.md`.
+For current check and resume commands, see [checking the libraries](../../USAGE.md).
+The original `work/b05-resume.md` handoff is not included in this repository.

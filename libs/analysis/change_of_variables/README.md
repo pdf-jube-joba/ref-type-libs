@@ -80,8 +80,8 @@ Densities use absolute determinants; oriented top forms use signed determinants.
 
 Use standard release checkers for targets, local source rechecks, dependency regressions, and the full repository.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --release --locked
-target/release/cli libs/analysis/change_of_variables --module change_of_variables --full-check-local --memory-mib 8192
-python3 scripts/check_all.py --initial-memory-mib 12288 --memory-mib 12288
+reftype/target/release/cli libs/analysis/change_of_variables --module change_of_variables --full-check-local --memory-mib 8192
 ```

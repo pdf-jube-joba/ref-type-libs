@@ -20,8 +20,10 @@ Check public `singular_cohomology` APIs from another package.
 [sphere_maps](../../spheres/README.md) connects reflections/circle powers with these oriented computations.
 [cohomology_examples](../finite_models/README.md) uses actual-singular comparisons for finite graphs/tori/projective planes.
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-target/debug/cli libs/topology/examples/cohomology --module cohomology_models --diagnostics compact
+reftype/target/debug/cli libs/topology/examples/cohomology --module cohomology_models --diagnostics compact
 ```
 
 Use common dependency `libs/refcache/`.

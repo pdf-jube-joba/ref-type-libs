@@ -32,12 +32,14 @@ Checked consumers of the same public API: `KTheory.Examples`.
 
 ## Validation and resuming
 
-Base: B04-integrated main `4f411dda`; work: `math/k01-grothendieck-k` / [PR #44](https://github.com/pdf-jube-joba/ref-type/pull/44).
-Full-requirement `d48cc565` package/dependencies saved/exit 0 via `work/k01-package`: 4,236 checked, 4,345 reused, 53,089 steps, zero recoveries/duplicates/reruns/lost steps/save failures.
-Target/examples also passed `work/k01-complete` on `bac1d6e9`: 841 modules, saved/exit 0.
-Package command: `target/debug/cli libs/topology/k_theory --source-snapshot work/k01-package.source.json --memory-mib 8192 --cache-budget-mib 12288 --time-limit-seconds 1800 --report-json work/k01-package.json`.
-Later changes are completion documentation only; no unverified math changes.
-Full `764af78a` workspace via `work/k01-workspace`: 7,644 reused, saved/exit 0; zero recoveries/duplicates/reruns/lost steps/save failures.
-Workspace command: `target/debug/cli libs --source-snapshot work/k01-workspace.source.json --memory-mib 10240 --cache-budget-mib 12288 --time-limit-seconds 7200 --report-json work/k01-workspace.json`.
-Post-validation changes only this record; no unverified math/remaining implementation.
-Next inspect final PR CI/diff, merge normally, confirm main tree equals verified branch.
+Historical upstream [PR #44](https://github.com/pdf-jube-joba/ref-type/pull/44):
+
+| Input | Result |
+| --- | --- |
+| Package/dependencies `d48cc565` | 4,236 modules checked, 4,345 reused |
+| Targets/examples `bac1d6e9` | 841 modules accepted |
+| Workspace `764af78a` | 7,644 modules reused |
+
+All exited 0; package/workspace runs reported zero save failures, recoveries, duplicate/rerun checks, or lost steps.
+Original reports used `work/k01-{package,complete,workspace}`.
+See [checking the libraries](../../USAGE.md) for fresh runs and historical-record scope.

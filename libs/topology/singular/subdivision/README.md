@@ -29,6 +29,8 @@ Open-cover equivalences serve [excision](../excision/README.md) and finite-model
 `Small` is cover-contained simplices; `OpenCover.On` its inclusion homotopy inverse.
 `OpenCover.On.Subspace.Relative` has subspace comparisons/arbitrary coefficients.
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/topology/singular/subdivision
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/topology/singular/subdivision
 ```

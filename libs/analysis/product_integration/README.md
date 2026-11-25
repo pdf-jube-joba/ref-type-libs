@@ -47,9 +47,8 @@ Joint measurability is an explicit sufficient product-σ-algebra condition.
 Auxiliary APIs: π–λ for generated σ-algebras, finite-measure uniqueness, real-integral transport by measure-preserving maps, lower integrals of countable measure sums, suprema/nonnegative-series interchange.
 `Examples[n]` has checked zero Fubini, zero/arbitrary-integrable convolution, and box-comparison examples.
 
-Run these standard checks from the repository root:
+[Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-target/release/cli libs/analysis/product_integration --module product_integration --diagnostics compact --no-progress --memory-mib 6144
-cargo build -p cli --release --locked && python3 scripts/check_all.py
+reftype/target/release/cli libs/analysis/product_integration --module product_integration --diagnostics compact --no-progress --memory-mib 6144
 ```

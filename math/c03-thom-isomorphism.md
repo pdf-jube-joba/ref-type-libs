@@ -9,5 +9,5 @@
 
 ## Dependencies
 
-- [C02 Disk bundles, sphere bundles, and Thom spaces](../../libs/topology/thom_spaces/README.md)
-- [C01 Cap products and relative products](../../libs/topology/singular/cap/README.md)
+- [C02 Disk bundles, sphere bundles, and Thom spaces](../libs/topology/thom_spaces/README.md)
+- [C01 Cap products and relative products](../libs/topology/singular/cap/README.md)

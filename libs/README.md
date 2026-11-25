@@ -1,6 +1,9 @@
 # Libraries
 
 Dependencies are in each `ref.toml`; public modules are in `src/root.ref`.
+The workspace [ref.toml](ref.toml) registers 112 packages, all linked below.
+Build and check them using the compiler in the `reftype/` submodule; see [checking the libraries](USAGE.md).
+Requirements and known gaps are tracked in the [mathematics roadmap](../math/_roadmap.md).
 Except for `std`, aim for roughly 5,000 lines per package, organized by dependencies from shared foundations to applications.
 
 ## Foundations
@@ -44,6 +47,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [algebra/spectral_splitting](algebra/spectral_splitting/README.md) | `spectral_splitting` | Root factors inside/outside the unit circle, continuous spectral projections, image bundles, homotopy comparisons |
 | [algebra/lie_algebras](algebra/lie_algebras/README.md) | `lie_algebras` | Lie algebras, adjoint representations, commutators, Lie subalgebras, endomorphism algebras |
 | [algebra/clifford](algebra/clifford/README.md) | `clifford` | Clifford quotient construction and universality, Pin/Spin and complex-extension group structures |
+| [algebra/spinor_representations](algebra/spinor_representations/README.md) | `spinor_representations` | Clifford modules, spinor representations and Spin/Spin-c actions |
 | [algebra/homological/chain_complexes](algebra/homological/chain_complexes/README.md) | `chain_complexes` | Natural/integer-graded complexes, homology, maps, homotopies, categories of complexes |
 | [algebra/homological/double_complexes](algebra/homological/double_complexes/README.md) | `double_complexes` | Nonnegative chain complexes, double complexes, totalization, exact comparisons, signed swaps |
 | [algebra/homological/resolutions](algebra/homological/resolutions/README.md) | `resolutions` | Projective resolutions, comparison theorem, Hom/tensor complexes, double-total resolution comparisons |
@@ -69,7 +73,8 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [analysis/euclidean_sobolev](analysis/euclidean_sobolev/README.md) | `euclidean_sobolev` | Integer-order Sobolev spaces, weak-derivative comparisons, duality, local coordinate changes and embeddings |
 | [analysis/lp_spaces](analysis/lp_spaces/README.md) | `lp_spaces` | Real Lp/L∞ Banach structures, real/complex L2, density, translations, convolution/approximate identities |
 | [analysis/measure_convergence](analysis/measure_convergence/README.md) | `measure_convergence` | Monotone convergence, Fatou, dominated convergence, a.e.-quotient integration, real/complex/finite-dimensional integration and series interchange |
-| [analysis/complex_hilbert](analysis/complex_hilbert/README.md) | `complex_hilbert` | In progress: complex Riesz representation, bounded adjoints, closed-subspace projections, finite-rank factorization |
+| [analysis/complex_hilbert](analysis/complex_hilbert/README.md) | `complex_hilbert` | Complex Riesz representation, bounded adjoints, closed-subspace projections, finite-rank factorization and compact operators |
+| [analysis/fredholm_operators](analysis/fredholm_operators/README.md) | `fredholm_operators` | Compact-operator ideals, Atkinson equivalence, kernel/cokernel indices, index laws and local constancy |
 | [analysis/integration](analysis/integration/README.md) | `integration` | Riemann integration, Lebesgue integration via L¹ completion |
 
 ## Geometry
@@ -81,7 +86,9 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [geometry/inverse_implicit](geometry/inverse_implicit/README.md) | `inverse_implicit` | Local inverses, parameterized implicit functions, constant-rank coordinates, regular-value submanifolds and tangent kernels |
 | [geometry/morse_lemma](geometry/morse_lemma/README.md) | `morse_lemma` | Symmetric-form inertia, Morse coordinates, parameterized local normal forms, isolated critical points and locally constant indices |
 | [geometry/boundary_manifolds](geometry/boundary_manifolds/README.md) | `boundary_manifolds` | Half-space/orthant charts, tangent cones and invariant derivatives, boundary/face tangent bundles, neat embeddings, products/intervals/disks |
+| [geometry/manifold_gluing](geometry/manifold_gluing/README.md) | `manifold_gluing` | Collars, boundary gluing, smooth structures and comparison maps |
 | [geometry/compact_embeddings](geometry/compact_embeddings/README.md) | `compact_embeddings` | Compact-manifold embeddings from finite charts/cutoffs, collar-compatible neat embeddings, stabilized relative embedding families |
+| [geometry/tubular_neighborhoods](geometry/tubular_neighborhoods/README.md) | `tubular_neighborhoods` | Tubular neighborhoods, collapse maps, boundary comparisons and product/stabilization identities; requirements and checks remain partly unverified |
 | [geometry/vector_bundles](geometry/vector_bundles/README.md) | `vector_bundles` | General real/complex bundles, locally constant rank, bundle maps/sections/pullbacks and universality |
 | [geometry/bundle_operations](geometry/bundle_operations/README.md) | `bundle_operations` | Cocycle gluing, direct sums/tensors/duals/Hom/exterior powers, realification/complexification and pullback |
 | [geometry/smooth_bundles](geometry/smooth_bundles/README.md) | `smooth_bundles` | Real/complex smooth bundles and metrics, duals/tensors/exterior powers, smooth frame actions/local diffeomorphisms, representation-associated bundles, tangent/normal comparisons |
@@ -89,7 +96,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [geometry/bundle_complements](geometry/bundle_complements/README.md) | `bundle_complements` | Metrics/finite embeddings from finite partitions, orthogonal complements, continuous-projection images and sets of isomorphism classes |
 | [geometry/bundle_extension](geometry/bundle_extension/README.md) | `bundle_extension` | Tietze, neighborhood extension of bundles/maps/isomorphisms over closed subspaces, shrinking comparisons and stabilization |
 | [geometry/grassmannians](geometry/grassmannians/README.md) | `grassmannians` | Finite Grassmannians, graph coordinates, universal bundles and stabilization |
-| [geometry/grassmannian_cells](geometry/grassmannian_cells/README.md) | `grassmannian_cells` | In progress; type checking incomplete: free Schubert coordinates, closed standard inclusions, finite stages of increasing weak-topology sequences |
+| [geometry/grassmannian_cells](geometry/grassmannian_cells/README.md) | `grassmannian_cells` | Schubert coordinates, finite CW structures, oriented coverings, standard inclusions and stable finite-stage comparisons |
 | [geometry/bundle_homotopy](geometry/bundle_homotopy/README.md) | `bundle_homotopy` | Bundle homotopy comparisons, relative extension along cofibrations, sphere clutching and gauge isomorphism criteria |
 | [geometry/bundle_classification](geometry/bundle_classification/README.md) | `bundle_classification` | Finite classifying maps for real/complex bundles, stabilized homotopy classification, oriented/framed bundles and naturality |
 | [geometry/tangent_bundles](geometry/tangent_bundles/README.md) | `tangent_bundles` | Tangent total spaces, tangent maps, functor laws, smooth fiber operations |
@@ -110,6 +117,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [topology/clutching_linearization](topology/clutching_linearization/README.md) | `clutching_linearization` | Laurent approximation, stable companion linearization, choice-independent spectral inverse classes, naturality/direct sums/basic-product inverse identities |
 | [topology/k_theory](topology/k_theory/README.md) | `topological_k_theory` | Complex-bundle Grothendieck rings, stable isomorphism criteria, contravariant pullback, rank/reduced groups, finite discrete computations |
 | [topology/relative_k_theory](topology/relative_k_theory/README.md) | `relative_k_theory` | Relative-triple/reduced-group comparisons, negative-degree exact sequences, excision, Mayer–Vietoris, external products, disk/sphere pairs |
+| [topology/bott_product](topology/bott_product/README.md) | `bott_product` | Bott external-product maps, inverse comparisons and naturality |
 | [topology/periodic_k_theory](topology/periodic_k_theory/README.md) | `periodic_k_theory` | Relative/reduced Bott isomorphisms, integer degrees, six-term exactness/naturality, point/sphere computations, iterated Bott generators |
 | [topology/compact_support_k](topology/compact_support_k/README.md) | `compact_support_k` | Compactly supported K-groups, general bundle-triple comparisons, neighborhood independence, proper pullback and extension by zero |
 | [topology/k_theory_thom](topology/k_theory_thom/README.md) | `k_theory_thom` | Complex Koszul classes, Thom isomorphisms via Bott/complements, pullback/direct sums/composition, real-bundle complexification |
@@ -124,6 +132,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [topology/singular/cohomology](topology/singular/cohomology/README.md) | `singular_cohomology` | Singular chains/cochains, relative/reduced theories, homotopy invariance, path components and contractible spaces |
 | [topology/singular/subdivision](topology/singular/subdivision/README.md) | `singular_subdivision` | Barycentric subdivision, small chains, open-cover/subspace comparisons |
 | [topology/singular/products](topology/singular/products/README.md) | `singular_products` | Cup products on singular cochains/cohomology, Leibniz rules, units/associativity/naturality |
+| [topology/singular/cap](topology/singular/cap/README.md) | `singular_cap` | Cap and relative products, Kronecker evaluation and adjunction formulas |
 | [topology/singular/excision](topology/singular/excision/README.md) | `singular_excision` | Excision, Mayer–Vietoris, good-pair/quotient comparisons |
 | [topology/singular/eilenberg_zilber](topology/singular/eilenberg_zilber/README.md) | `singular_eilenberg_zilber` | Alexander–Whitney/shuffle chain homotopy equivalence |
 | [topology/singular/symmetry](topology/singular/symmetry/README.md) | `singular_symmetry` | Cup commutation homotopies and graded commutativity |
@@ -138,18 +147,20 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [topology/spheres](topology/spheres/README.md) | `sphere_maps` | Sphere orientations, reflection and circle integer-power degrees |
 | [topology/examples/cohomology](topology/examples/cohomology/README.md) | `cohomology_models` | Empty/contractible/sphere computations and relative-theory examples |
 | [topology/examples/finite_models](topology/examples/finite_models/README.md) | `cohomology_examples` | Finite graphs, torus, real projective plane: groups/products/induced maps |
+| [topology/examples/cap](topology/examples/cap/README.md) | `cap_models` | Point, relative cross-product and connecting-map examples; missing `Line` source |
+| [topology/examples/cells](topology/examples/cells/README.md) | `cell_spaces` | Group completion, homotopy, quotient/cell, matrix, finite-space and simplex examples |
 
 ## Type checking
 
 ```sh
-cargo run -p cli -- libs
-cargo run -p cli -- libs/std --module std.Data.Nat
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/std --module std.Data.Nat
 ```
 
 The `libs/ref.toml` workspace shares `libs/refcache/` throughout.
-For rechecking, resource limits, and progress, see [usage](../src/USAGE.md#%E6%A4%9C%E6%9F%BB%E3%81%A8%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5).
+For builds, full-workspace reports, rechecking, paging targets, and historical validation records, see [usage](USAGE.md).
 
-Examples: [complexes](algebra/homological/concrete_complexes/README.md), [coordinate calculus](geometry/coordinate_calculus/README.md), [cell_spaces](topology/examples/cells/src/root.ref), [scalar compatibility](analysis/scalar_compatibility/README.md), [small categories](category/src/SmallCategories.ref), and [limits in the terminal category](category/src/TerminalLimits.ref).
+Examples: [complexes](algebra/homological/concrete_complexes/README.md), [coordinate calculus](geometry/coordinate_calculus/README.md), [cell_spaces](topology/examples/cells/README.md), [scalar compatibility](analysis/scalar_compatibility/README.md), [small categories](category/src/SmallCategories.ref), and [limits in the terminal category](category/src/TerminalLimits.ref).
 
 [Singular cohomology examples](topology/examples/cohomology/README.md) check representative cochains, relative connecting maps, coefficient-induced maps, path components, and empty/point/interval computations.
 [Finite-model examples](topology/examples/finite_models/README.md) compute groups and cohomology products using comparison maps with spaces.

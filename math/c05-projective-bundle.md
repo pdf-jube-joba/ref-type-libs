@@ -10,5 +10,5 @@
 ## Dependencies
 
 - [C04 Cohomology of projective spaces and canonical line bundles](c04-projective-cohomology.md)
-- [Bundle gluing and linear operations](../../libs/geometry/bundle_operations/README.md)
+- [Bundle gluing and linear operations](../libs/geometry/bundle_operations/README.md)
 - [C11 Leray–Hirsch comparison](c11-leray-hirsch.md)

@@ -27,6 +27,8 @@ Left/right contraction coefficients separate kernels for injectivity; generation
 
 [Examples](src/Examples.ref) includes one-dimensional square/adjoint and standard-lift/determinant examples; [ZeroTensor](src/Examples/ZeroTensor.ref) checks zero-dimensional tensor round trips; [Manifold](src/Examples/Manifold/On.ref) gives smooth lifts of identity unitary families on arbitrary smooth manifolds.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-target/debug/cli libs/algebra/spinor_representations --memory-mib 8192 --cache-stats --no-progress
+reftype/target/debug/cli libs/algebra/spinor_representations --memory-mib 8192 --cache-stats --no-progress
 ```

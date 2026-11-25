@@ -59,5 +59,5 @@ Minimal examples: [Examples.ref](src/Periodicity/Examples.ref), [Examples/Reduce
   \forall (x: Point.Odd) -> x = Point.oddGroup.base.unit := Point.oddZero;
 ```
 
-Run `cargo build -p cli --release --locked` and `python3 scripts/check_all.py` at the repository root for standard checks.
+For builds and workspace checks from this repository root, see [checking the libraries](../../USAGE.md).
 Large comparison diagrams may need `--memory-mib 10240`.

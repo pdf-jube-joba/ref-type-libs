@@ -86,9 +86,10 @@ Compare identity coefficient changes with `IdentityChange.mapIdentity`.
 Also uses division, Euclidean algorithms, and Chinese-remainder inverses for these factors.
 [Examples.ref](src/Examples.ref) checks real-to-complex coefficient/projection compatibility, zero-dimensional characteristic polynomials, and Cayley–Hamilton for nonzero two-dimensional nilpotents.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --locked
-target/debug/cli libs/algebra/polynomial_linear_algebra --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/algebra/polynomial_linear_algebra --memory-mib 8192 --cache-stats
 ```
 
 Check targets/all dependencies using the shared workspace cache.

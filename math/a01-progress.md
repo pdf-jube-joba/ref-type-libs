@@ -1,33 +1,18 @@
-# A01 Work notes
+# A01 validation summary
 
-Base: main `bd8fd86d`; working branch: `codex/a01-measure-convergence`.
-Run standard checks using the existing shared `libs/refcache` and `target/debug/cli`.
-Monotonicity, downward inheritance of finiteness, and uniqueness of integral values in `functional_analysis.Measure.Integral` have been checked.
-Dependency order: finite operations on measurable sets and measures; nonnegative extended-real arithmetic; simple-function partitions and integration; lower-integral additivity and approximation; monotone convergence; Fatou; dominated convergence; signed-integral linearity and a.e. equivalence; complex and finite-dimensional vector values; interchange with series.
-Validate each stage with a focused standard check; commit and push at milestones and before long checks.
+Historical work on branch `codex/a01-measure-convergence`, based on upstream main `bd8fd86d`.
+The [package README](../libs/analysis/measure_convergence/README.md) documents the resulting API; use [current checking instructions](../libs/USAGE.md) for new runs.
 
-Added nonemptiness of the lower integral via the empty simple function, suprema of finite functions, existence and uniqueness of integrals of integrable functions, measurable binary unions/intersections/differences, reflexivity and symmetry of a.e. equality, and commutativity, associativity, and zero for extended addition.
-Checked finite additivity and monotonicity of measures, finite unions of null sets, transitivity of a.e. equality, preservation of simple integrals upon removing null sets, a.e. invariance of lower integrals and integrals, and descent of integration to the quotient.
-Also checked continuity of measures from below, countable unions of null sets, and monotone convergence of lower integrals for increasing measurable real-function sequences.
-Checked measurable tail infima and Fatou's inequality, equality for finite pointwise lower limits, complex and finite-coordinate integration and a.e. invariance, and integrability and integral value of the zero function.
-Checked homogeneity under arbitrary real scalars, negation, integrability of absolute values, order preservation and absolute-value bounds for integrals, integrability by domination, and preservation of integrability under a.e. equivalence.
-Checked splitting simple functions by measurable sets and decomposing their integrals, extended finite sums and nonnegative scalar multiplication, and measurable sums, negation, maxima, absolute values, and nonnegative scalar multiples.
-Next: common refinements and additivity of finite simple functions, additivity of lower and signed integrals, dominated convergence, interchange with series, and complex and finite-dimensional norm estimates.
+The implementation covers monotone convergence, Fatou, dominated convergence and series interchange for real, complex, and finite-dimensional values, including a.e. forms, quotient linearity, and indicator/zero-sequence examples.
+Intermediate work on simple-function refinements and lower-integral additivity is included in those results.
 
-Prepared common refinements by adding measures of unions and intersections of finite disjoint families, distributivity of extended scalar multiplication over addition of nonnegative coefficients, overlap-cell simple functions and integral decompositions, and assembly of finite disjoint simple-function families. Focused standard checks passed. Latest `Integral.Overlap` check: exit 0, 166 modules reused, 15 writes, 0 save failures. Next: residual cells and interchange of finite double sums, then additivity of simple and lower integrals.
+The final fixed-source checks reported `accepted`, exit 0:
 
-Proved residual-cell and finite-double-sum interchange results, equality of the integral of the common refinement dominating a simple-function sum with the sum of the original integrals, and superadditivity of nonnegative lower integrals. Standard `Integral.Additive` check: exit 0, 166 reused, 21 writes, 0 save failures. Next: the reverse bound via measurable simple-function approximation, then lower-integral additivity and remaining convergence and linearity requirements.
+| Target | Reused modules | Writes |
+| --- | ---: | ---: |
+| `measure_convergence` | 201 | 89 |
+| `functional_analysis.Measure` | 240 | 66 |
+| `functional_analysis.Sobolev.On` | 218 | 16 |
 
-Represented globally covering simple functions as `CompleteSimple` and proved existence, uniqueness, cell values, nonnegativity, and measurability of their evaluation functions. Checked comparison of arbitrary simple approximations on intersection cells and equality of the evaluation function's lower integral with the original simple integral. `Integral.Evaluation.Exact` check: exit 0, 165 reused, 13 writes, 0 save failures. Next: rational-threshold approximation of nonnegative measurable functions and the reverse additive bound.
-
-Constructed approximations from measurable rational thresholds: every stage is a globally covering, nonnegative, measurable, increasing simple function, with the original function as pointwise supremum. Standard `Integral.Approximation` check: exit 0, 175 reused, 24 writes, 0 save failures. Next: derive value and integral identities for sums of complete simple functions via common refinements, then general lower-integral additivity by monotone convergence.
-
-Proved full additivity of nonnegative lower integrals using simple-function approximation and monotone convergence. Added closure of integrable functions under sums, signed-integral additivity, and real, complex, and finite-coordinate addition APIs; all standard checks exited 0. Latest public API: 179 reused, 59 writes, 0 save failures; coordinate and complex rechecks were entirely cached. Next: dominated convergence, series interchange, quotient operations, complex scalars and norm bounds, examples, and the public README.
-
-Proved quotient addition, real scalar multiplication, and integral linearity. Derived measurability and integrability of pointwise dominated limits without assuming them, and checked convergence of integrals via Fatou's inequality. `Integral.Dominated`: exit 0, 176 reused, 52 writes, 0 save failures. Next: correct values on null sets for the a.e. version, then series interchange, complex and finite-dimensional bounds, and public examples.
-
-Corrected values to zero on a measurable null set, constructing an integrable representative equal to the a.e. limit and convergence of integrals from convergence and domination off that set. If the original limit is measurable, it too is integrable. Standard `Integral.AEDominated` check: exit 0, 177 reused, 56 writes, 0 save failures. Next: series interchange, complex linearity, finite-dimensional bounds, examples, README, and dependency regression checks.
-
-Published real, complex, and finite-coordinate dominated convergence and dominated-series interchange in pointwise and a.e. forms. Added complex scalar linearity, component estimates for complex norms, finite-coordinate ℓ¹ bounds, and indicator integrals. Standard target-module and example checks: exit 0, 0 save failures. Run the full public package and Sobolev dependency regressions against fixed sources and the existing cache.
-
-Final standard checks on fixed sources all exited 0 with report outcome accepted. Public `measure_convergence`: 201 reused, 89 writes; `functional_analysis.Measure`: 240 reused, 66 writes; existing `functional_analysis.Sobolev.On`: 218 reused, 16 writes. All had 0 save failures, duplicate runs, and lost checks. Completed pointwise and a.e. real, complex, and finite-coordinate dominated convergence and series interchange, quotient linearity, indicator and zero-sequence examples, and the public README.
+All three reported zero save failures, duplicate runs, and lost checks.
+These historical checks do not establish acceptance of the current checkout.

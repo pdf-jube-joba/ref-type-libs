@@ -1,69 +1,42 @@
 # Validation records
 
-Checked changes based on main `6e2106dfaf0a5370e84213a1c60fccf126d359a4` on 2026-11-19.
-This base includes `dce3d353e75972c507928253d6c33420f6f55a0f`.
-No Rust/checker source changes.
-Rebuilt the checker from current sources; used Rust 1.100.0 release builds.
-Machine-readable summaries, input/result SHA-256, raw-record locations: [verification.json](verification.json).
+Historical checks from 2026-11-19, based on upstream main `6e2106dfaf0a5370e84213a1c60fccf126d359a4`, using a rebuilt Rust 1.100.0 release checker.
+[verification.json](verification.json) preserves source/binary hashes, metrics, and raw-record locations.
+These results do not establish acceptance of the current checkout.
 
 ## Targets and dependency closure
 
-`--full-check-local` **rechecked all 137 modules of `morse_lemma` and accepted them**.
-Includes ordinary/parameterized top existence, index connections, local constancy, all standalone examples.
-Focused checks also verify the entire loaded dependency closure.
+`--full-check-local` rechecked all 137 `morse_lemma` modules, including ordinary/parameterized existence, index comparisons, local constancy, and standalone examples.
+The dependency closure accepted 1,926 modules: 142 newly checked and 1,784 reused.
+README examples also passed as standalone packages.
+Cache corruption/save failures, worker recoveries, duplicates, reruns, and missing steps were all zero.
+No cold run rechecked every dependency proof without cache.
 
-| Metric | Result |
-| --- | --- |
-| Target modules rechecked | 137 / 137 |
-| Verified modules including dependencies | 1,926 |
-| Newly checked modules including dependencies | 142 |
-| Matching verified modules reused | 1,784 |
-| source steps | 1,952 |
-| Elapsed time | 36.49 seconds |
-| Peak RSS | 1,936,868 KiB |
-| Worker recoveries/duplicates/reruns/missing steps | All 0 |
-| Cache corruption/save failures | Both 0 |
-
-README usage examples also accepted from standalone packages.
-No additional axioms or unproved parts.
-Uses existing function/set extensionality.
+No new axioms or unproved parts were added; the implementation uses existing function/set extensionality.
 
 ## Full library
 
-Full `python3 scripts/check_all.py libs` check **failed**.
-Enumerated 111 packages/15,524 targets; accepted 68 scopes/7,522 targets, then stopped at existing `euclidean_sobolev`.
-Total 461.73 seconds, peak RSS 2,167,828 KiB.
-Zero corrupt caches/save failures/worker recoveries.
-
-Stop location: `positiveNonzero _ (positive x)` in `Reciprocal` module arguments at [Euclidean/Order/Weight.ref:14](../../analysis/euclidean_sobolev/src/Euclidean/Order/Weight.ref#L14).
+The workspace driver accepted 68 scopes/7,522 of 15,524 targets across 111 packages, then failed in `euclidean_sobolev` at [Euclidean/Order/Weight.ref:14](../../analysis/euclidean_sobolev/src/Euclidean/Order/Weight.ref#L14):
 
 ```text
 Resolution Error: module arguments do not allow inference holes (`_` or `?`)
 ```
 
-File matches base main; SHA-256: `c98df52b2a9936e8e6ac7d5760e45ce4264498fe13fa6308d9a5b485ec23c802`.
-Confirmed all full-run sources/targets unchanged before/after; 1,738 target-check sources match the full snapshot.
-
-Remaining **8,002 targets are unverified by the full driver**.
-Includes the failed scope and subsequent unreached scopes.
-G13/full-dependency success comes from the separate focused recheck above.
-No full-check success claimed.
+The failing `positiveNonzero _ (positive x)` module argument matched the upstream base; sources and targets were unchanged during the run.
+The remaining 8,002 targets, including the failed scope, were unverified by this run.
+G13 and its closure passed in the separate focused check above.
 
 ## Rust checks
 
-`cargo test --workspace --locked -j 4` accepted: 34 suites, **384 passed / 0 failed / 0 ignored**.
-Changes only affect math libraries, registration, and documentation; Rust test sources remain as checked.
-`git diff --cached --check` also passed.
+The upstream workspace tests passed: 34 suites, 384 tests, zero failures or ignored tests.
+`git diff --cached --check` also passed; no Rust/checker source changes were made.
 
-## Reproduction commands and scope
+## Current rerun commands and historical scope
+
+[Build the checker](../../USAGE.md#build-the-checker), then recheck the package from this repository root:
 
 ```sh
-cargo build -p cli --release --locked -j 4
-target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json /tmp/g13-target.json
-python3 scripts/check_all.py libs --memory-mib 4096 --cache-budget-mib 12288 --min-free-mib 512 --time-limit-seconds 3600 --state-dir /tmp/g13-repository-check
-cargo test --workspace --locked -j 4
+reftype/target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json /tmp/g13-target.json
 ```
 
-Used matching shared workspace caches.
-No cold check rechecked every dependency proof without cache.
-Scopes after the full-driver stop were not run; the existing error above blocks full completion.
+Use the [workspace driver](../../USAGE.md#check-the-workspace) for a fresh full run; its results may differ from the historical record.

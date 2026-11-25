@@ -66,8 +66,8 @@ Use actual local diffeomorphisms from G02 `Submersion.localExistence` to straigh
 
 ## Checks
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --release --locked
-target/release/cli libs/geometry/boundary_manifolds --module boundary_manifolds --full-check-local --memory-mib 12288 --cache-stats
-python3 scripts/check_all.py --initial-memory-mib 12288 --memory-mib 12288 --cache-budget-mib 12288 --min-free-mib 512
+reftype/target/release/cli libs/geometry/boundary_manifolds --module boundary_manifolds --full-check-local --memory-mib 12288 --cache-stats
 ```

@@ -17,9 +17,11 @@ Compare horizontal/vertical signs on sum generators; boundaries crossing zero va
 No finite generation/freeness assumptions.
 Sum/tensor universality constructs actual linear maps/inverse laws.
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/topology/singular/tensor_bridge \
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/topology/singular/tensor_bridge \
   --module singular_tensor_bridge.Integer.Factor.With --module-only
-cargo run -p cli -- libs/topology/singular/tensor_bridge \
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/topology/singular/tensor_bridge \
   --module singular_tensor_bridge.Integer.Tensor.With --module-only
 ```

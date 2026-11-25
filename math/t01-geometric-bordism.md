@@ -9,5 +9,5 @@
 
 ## Dependencies
 
-- [G05 Embeddings of compact manifolds](../../libs/geometry/compact_embeddings/README.md)
-- [Smooth bundles, frame bundles, and associated bundles](../../libs/geometry/smooth_bundles/README.md)
+- [G05 Embeddings of compact manifolds](../libs/geometry/compact_embeddings/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../libs/geometry/smooth_bundles/README.md)

@@ -45,20 +45,12 @@ L01 inverses and constant rank give neighborhood bases/inverse coordinates, then
 [Examples.MovingLine](src/Hermitian/Examples/MovingLine.ref) orthonormalizes the continuous column family \((1,z)\), then applies the local-frame theorem to its rank-one projection.
 Specializes to [reals](src/Hermitian/Examples/Real.ref) and [complexes](src/Hermitian/Examples/Complex.ref); also checks dimension-zero complex unitary groups.
 
-```sh
-cargo build -p cli --locked
-target/debug/cli libs/algebra/hermitian_frames --memory-mib 8192 --cache-stats
-```
-
-Use the shared workspace cache to check targets and all loaded dependency packages.
-
-Target/full-dependency-closure standard check passed: 10,851 source steps, 913 modules checked, 1,098 reused, peak RSS roughly 908 MiB.
-Existing tangent/normal examples and `lie_groups` were also checked through dependencies with shared caches matching current sources.
-Full fixed-final-source workspace standard check passed, reusing results for 65 packages and 6,852 modules.
-Zero worker recoveries, duplicate checks, reruns, lost steps, or cache save failures.
+[Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-target/debug/cli libs/geometry/examples/tangent_normal --memory-mib 8192 --cache-stats
-target/debug/cli libs/geometry/lie_groups --memory-mib 8192 --cache-stats
-target/debug/cli libs --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/algebra/hermitian_frames --memory-mib 8192 --cache-stats
 ```
+
+Historical checks accepted 913 newly checked modules and 1,098 reused modules, including the dependency closure.
+Tangent/normal examples and `lie_groups` regressions passed; the final workspace reused 6,852 modules across 65 packages.
+The runs reported zero save failures, recoveries, duplicate/rerun checks, or lost steps; see [historical-record scope](../../USAGE.md#validation-records).

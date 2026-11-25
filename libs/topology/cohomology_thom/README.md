@@ -1,6 +1,6 @@
 # Operations in relative Thom cohomology
 
-`Thom.Real.For[X, F, bundle].With[metric]` uses actual disk/sphere pairs of real metric bundles.
+`Thom.Real.For[X, F, bundle].With[metric]` uses disk/sphere pairs of real metric bundles.
 `Coefficients[R, ring]` takes commutative-ring coefficients; `Additive[M]` integer-module coefficients.
 
 | API | Contents |
@@ -23,7 +23,7 @@
 
 `Thom.Real.For.Change[left, right].Additive[M, z].isomorphism` gives relative isomorphisms from metric-change disk homeomorphisms preserving sphere boundaries.
 
-`RelativeMayerVietoris.OpenCover[A, source, subset].On[cover].Cohomology[coefficients].At[z]` gives actual relative-singular Mayer–Vietoris for open covers.
+`RelativeMayerVietoris.OpenCover[A, source, subset].On[cover].Cohomology[coefficients].At[z]` gives relative-singular Mayer–Vietoris for open covers.
 Exposes `restriction`, `difference`, `connecting` and termwise `exactAtSum`, `exactAtIntersection`, `exactAtWhole`.
 Free bases of simplices outside boundaries construct split small-relative-chain short exact sequences.
 Apply Hom into arbitrary integer modules; compare small chains/direct sums, transferring to ordinary relative cohomology.
@@ -39,16 +39,14 @@ Apply Hom into arbitrary integer modules; compare small chains/direct sums, tran
 
 `RelativeSuspension.On[A, source, subset].Covering.With[M].At[z].isomorphism` is the degree-one shift for cylinder-pair
 \((I\times A,\partial I\times A\cup I\times B)\) relative cohomology.
-Use time-below-one/above-zero covers, explicitly constructing piece retractions and intersection comparisons.
 
-`LocalDisk.On[X, source].With[M].isomorphism n z` gives
-Gives \(H^z(X;M)\cong H^{\operatorname{shift}(n,z)}(X\times D^n,X\times\partial D^n;M)\).
+`LocalDisk.On[X, source].With[M].isomorphism n z` gives \(H^z(X;M)\cong H^{\operatorname{shift}(n,z)}(X\times D^n,X\times\partial D^n;M)\).
 `shift` applies integer successor \(n\) times.
 `With.Negative[n, k].zero` proves vanishing of relative groups from negative base degrees.
 `Ring[R, ring].Rank[n].localClass` is the additive-comparison image of units; `coordinateOfClass`, `unique` characterize normalization.
 
 `RelativePullback.On.To.Along.Cup.Cohomology.naturality` gives relative cup naturality for pair maps.
-`Thom.Real.For.With.Pullback[Y, source, f, regular].Ring[R, ring]` uses actual pullback bundles/metrics.
+`Thom.Real.For.With.Pullback[Y, source, f, regular].Ring[R, ring]` uses pullback bundles/metrics.
 `Product[p, n].law` and `Degree[n].Euler.law` give pullback compatibility for products/zero-section images.
 
 `RelativeMayerVietoris.OpenCover.On.With.Coordinates.Cohomology[z].law` identifies sequence restrictions with ordinary pair-map restrictions.
@@ -64,7 +62,6 @@ Gives \(H^z(X;M)\cong H^{\operatorname{shift}(n,z)}(X\times D^n,X\times\partial 
 Its `Compare.law` agrees with ordinary restrictions; `Differential.law` gives signed Leibniz for closed left factors.
 `Product.Positive[p, q]` descends to cohomology for positive right degrees.
 `Product.Connecting[p, q].Whole.law` gives ordinary relative Mayer–Vietoris \(\delta(a|_{U\cap V}\smile b)=(-1)^p a\smile\delta b\).
-
 
 `RelativeSuspension.On.Covering.Product[K, ring].Cup[p, q].law` gives signed suspension/cup comparisons.
 `LocalDisk.On.Step[n].Product[K, ring, p, q].Base.onClasses` compares disk degree raising with base pullbacks.
@@ -88,7 +85,7 @@ Rank zero uses empty-boundary forgetting/disk projection; successor ranks prove 
 
 `LocalDisk.Point[K, ring].Rank[n]` identifies point-disk generators with coefficient modules.
 `LocalDisk.On.Ring.Top[n]` exposes degree-zero normalization/point-evaluation coordinates.
-`Ring.Fibers[n].Fiber[x]` constructs actual disk-pair fiber restrictions; `value` agrees with evaluation coordinates.
+`Ring.Fibers[n].Fiber[x]` constructs disk-pair fiber restrictions; `value` agrees with evaluation coordinates.
 `Fibers.detectedOnFibers` and `uniqueNormalized` prove local classes unique by fiber generators.
 `RelativePullback.On.To.Homeomorphism.Degree[n].isomorphism` is a coefficient-linear pair-homeomorphism isomorphism.
 
@@ -111,63 +108,60 @@ Its `Ring.Degree[p].isomorphism`, `formula`, `Additive.below` expose local isomo
 `integerMap` and `ringMap` provide integer/coefficient linear structures; `Along.Degree.law` proves pair-pullback compatibility.
 
 `RelativeMayerVietoris.OpenCover.On.RightAction.Native[p, q]` constructs ordinary relative restriction/difference cup diagrams.
-`Diagram` structures simultaneous regrading; `Five` constructs actual five-term sequences from Mayer–Vietoris.
+`Diagram` structures simultaneous regrading; `Five` constructs five-term sequences from Mayer–Vietoris.
 `Gluing[p, q].With[u].isomorphism` derives degree-\(p+1\) cup isomorphisms from piece/intersection local isomorphisms.
 `Zero[q].With[u].isomorphism` handles degree zero using preceding intersection vanishing.
 
-`Thom.Real.For.With.Chart[c].Restrict[U, open, contained].chart` constructs actual charts by restricting original frames to smaller opens.
-`Chart.Fiber[x].fiberPair` identifies actual bundle fibers with point-standard-disk pairs.
+`Thom.Real.For.With.Chart[c].Restrict[U, open, contained].chart` constructs charts by restricting original frames to smaller opens.
+`Chart.Fiber[x].fiberPair` identifies bundle fibers with point-standard-disk pairs.
 `Fiber.Ring[K, ring].generator` transports generators; `isomorphism`, `normalized` normalize by coefficient one.
 `Fiber.Ring.Normalization.normalized` proves chart Thom fiber restrictions equal these generators.
-`Open.Ring.Fibers.detected` proves actual fibers jointly detect local classes.
+`Open.Ring.Fibers.detected` proves fibers jointly detect local classes.
 
-`Thom.Real.For.With.Atlas.existsFiniteCW` gets finite bundle-chart covers from actual finite-CW compactness.
+`Thom.Real.For.With.Atlas.existsFiniteCW` gets finite bundle-chart covers from finite-CW compactness.
 
-`Thom.Real.For.With.Local[K, ring].Rank[n].Orientation.SignedOrientation` orientation data consists of actual fiber classes agreeing with normalized chart generators or negatives.
-Chart dimensions equal \(n\); signed local classes come from actual disk-pair constructions.
-Prove restrictions preserve fibers; finite-CW compactness gives compatible finite covers.
-From the empty set, finitely induct and glue classes, fiber detection, below-rank vanishing, cup isomorphisms simultaneously.
+`Thom.Real.For.With.Local[K, ring].Rank[n].Orientation.SignedOrientation` orientation data consists of fiber classes agreeing with normalized chart generators or negatives.
+Chart dimensions equal \(n\); signed local classes come from disk-pair constructions.
+Finite Mayer–Vietoris gluing constructs classes and isomorphisms while preserving fiber normalization and below-rank vanishing.
 
 `Thom.Real.For.With.Oriented[K, ring, n, orientation, complex]` is the global finite-CW-base entry.
 
 | API | Contents |
 | --- | --- |
 | `class` | Global Thom classes in \(H^n(D(E),S(E);K)\). |
-| `normalized` | Actual disk-fiber restrictions agree with specified classes. |
+| `normalized` | Disk-fiber restrictions agree with specified classes. |
 | `uniqueNormalized` | Uniqueness for equal fiber values. |
-| `Degree[p].isomorphism` | \(H^p(X;K)\cong H^{p+n}(D(E),S(E);K)\), actual forward \(a\mapsto\pi^*a\smile u\). |
+| `Degree[p].isomorphism` | \(H^p(X;K)\cong H^{p+n}(D(E),S(E);K)\), forward \(a\mapsto\pi^*a\smile u\). |
 | `euler` | Zero-section Thom pullbacks. |
 | `Degree[p].zeroSection` | Zero-section pullbacks of Thom images multiply by Euler classes. |
 | `Below[k].zero` | Vanishing in \(\operatorname{shift}(n,-k-1)\). |
 
 `Local.Rank[n].Fiber[x].Generator` states a coefficient-ring/top-fiber-group module isomorphism sends one to the class.
-`Orientation.generates` proves orientation fiber classes actual generators from signed local compatibility.
+`Orientation.generates` proves orientation fiber classes are generators from signed local compatibility.
 
 `Thom.Real.For.With.ModTwo[n, constantRank, complex]` takes no orientation argument.
-Over `algebra.Two`'s two-element field, prove unique actual fiber generators and choose them.
-Normalized chart classes agree, constructing `class`, `euler`, `Degree[p].isomorphism` over finite CW bases.
-`normalized` and `uniqueNormalized` give actual-fiber normalization/uniqueness.
+Over `algebra.Two`'s two-element field, prove unique fiber generators and choose them.
+Normalized chart classes agree, giving the same class, Euler, Thom isomorphism, and fiber normalization APIs over finite CW bases.
 
 `CoefficientChange.FromIntegers[K, ring]` constructs \(\mathbb Z\to K\) from integer action on one.
 `linear`, `multiply`, `unit` prove addition/product/unit preservation; `OnSpace[A, source].morphism` canonical arbitrary-ring coefficient changes.
 
 `Oriented.Change[L, targetRing, morphism]` sends fiber generators through coefficients, constructing new orientation `targetOrientation` with the same charts/signs.
 `classLaw` changes global Thom coefficients; `Degree[p].law`, `inverseLaw` give both Thom-direction diagrams; `eulerLaw` Euler changes.
-Compare standard-disk/actual-metric fiber generators, then apply global-class uniqueness.
 
 `Thom.Real.For.With.Integral[n, orientation, complex]` is the integral entry.
 `Coefficients[K, ring]` gives canonical \(\mathbb Z\to K\) orientation/Thom changes and Thom/Euler comparisons.
 `Oriented.Integer.isomorphism z` gives in every integer degree
 \(H^z(X;K)\cong H^{\operatorname{shift}(n,z)}(D(E),S(E);K)\).
-Nonnegative orders restrict actual cup isomorphisms to integer modules; negative orders use both groups' vanishing.
+Nonnegative orders restrict cup isomorphisms to integer modules; negative orders use both groups' vanishing.
 
 `Additive[M].Degree[z].forget` and `sphereRestriction` expose two disk-pair long-exact maps.
 `forgetCycles` and `forgetOnClass` compute the first on cochain representatives.
-`Coefficients[R, ring].SphereSequence.Sphere.homeomorphism` identifies actual sphere bundles with disk boundaries; `isomorphism z` identifies integer boundary/sphere cohomology.
+`Coefficients[R, ring].SphereSequence.Sphere.homeomorphism` identifies sphere bundles with disk boundaries; `isomorphism z` identifies integer boundary/sphere cohomology.
 `SphereSequence.zeroSectionAt z` is integer-linear forgetting/zero pullback; `Natural[t].law` agrees with ordinary zero-section maps in nonnegative degrees.
 `SphereSequence.Functor.At[z].law` proves integer pullbacks preserve composition.
 
-`Oriented.Reverse.reversed` constructs actual orientations negating every generator/chart sign.
+`Oriented.Reverse.reversed` constructs orientations negating every generator/chart sign.
 `classLaw` and `eulerLaw` negate Thom/Euler classes; `Degree[p].law` and `inverseLaw` negate both Thom directions.
 `ModTwo.Compare[given].classLaw` identifies arbitrary signed mod 2 classes with standard classes.
 `Integral.ModTwo.classLaw` and `eulerLaw` identify canonical reductions of integral classes with standard mod 2 classes.
@@ -183,12 +177,11 @@ Groups/maps are integer modules; `LocalDisk.shift n z` implements degree \(z+n\)
 `cupEuler`, `pullback`, `integration`, `higherCupEuler` are its four maps.
 `Positive[p].law` identifies the first with Euler cup in nonnegative base degrees; `Negative[k].law` handles negative bases.
 `Degree[z].higherLaw` regrades the final Euler term.
-`Degree[z].Pullback.law` identifies the second with actual sphere-projection pullback.
+`Degree[z].Pullback.law` identifies the second with sphere-projection pullback.
 `Integral.Gysin` and `ModTwo.Gysin` are integral and canonical-mod-2 entries.
 
 `Pullback.Fiber[y].Ring[K, ring].Degree[n].law` gives actual-fiber restriction compatibility for pullback/original bundles.
 `Pullback.Ring.Chart[c].Fiber[y].generator` identifies pulled-chart standard generators with pullbacks of originals.
-Explicitly compare transport into restricted local bundles; prove radial coordinate compatibility.
 `Pullback.Ring.Oriented[n, orientation, complex, sourceComplex].pulledOrientation` constructs signed pullback orientations from these fiber maps.
 `classLaw`, `eulerLaw`, `Degree[p].law`, `inverseLaw` give naturality for global Thom/Euler/forward/inverse Thom respectively.
 `Pullback.ModTwo[n, constantRank, complex, sourceComplex]` compares standard pullback mod 2 classes.
@@ -202,14 +195,13 @@ Geometry reuses `singular_cap.Triple`; coefficients/cups use the specified commu
 \(H^z(X,B;M)\cong H^{z+n}(X\times D^n,X\times\partial D^n\cup B\times D^n;M)\).
 Uses all-rank relative suspensions; `From.With.law` gives base-pair naturality.
 `Thom.Real.For.With.Shell` gives open \(\|v\|>1/2\) shells and continuous zero-section-fixing `clip`.
-`Shell.Over[U].equivalence` gives actual pair equivalences between sphere-boundary-plus-\(U\) and open-shell-plus-\(U\) pairs.
+`Shell.Over[U].equivalence` gives pair equivalences between sphere-boundary-plus-\(U\) and open-shell-plus-\(U\) pairs.
 
 `MixedCup.Union.Cover.On.Cup.Forget.law` proves mixed products become ordinary cups after forgetting relative conditions.
-`MixedCup.From[Y, target, firstPart, secondPart, f, regular, firstContained, secondContained].Covers[conditions, newConditions].Cup[p, q].law` gives naturality for actual maps preserving both parts.
+`MixedCup.From[Y, target, firstPart, secondPart, f, regular, firstContained, secondContained].Covers[conditions, newConditions].Cup[p, q].law` gives naturality for maps preserving both parts.
 `MixedCup.Change[L, targetRing, morphism].Covers[conditions].Cup[p, q].law` gives coefficient/mixed-relative-product compatibility.
-Prove all by explicitly identifying ordinary/common-vanishing comparisons on representatives.
 
-`Thom.Real.DirectSum[X, F, G, left, right, same, leftMetric, rightMetric].With[metric]` exposes actual sum-metric/box-disk homeomorphism `pair`.
+`Thom.Real.DirectSum[X, F, G, left, right, same, leftMetric, rightMetric].With[metric]` exposes sum-metric/box-disk homeomorphism `pair`.
 `Additive[M, z].isomorphism` is its relative isomorphism; `thomHomeomorphism` compares iterated Thom quotients.
 `Ring[K, ring].Product[n, m].apply u v` defines products of two relative classes on direct sums.
 Continuous `clip` sends open factor shells to sphere boundaries; pull both classes back and take mixed cup.
@@ -218,38 +210,36 @@ Shell unions contain box boundaries; restrict to box pairs and transport to spec
 `DirectSum.With.Ring.Product[n, m].Euler.law` proves zero-section images of arbitrary sum products equal cups of individual images.
 Align right base topology by identity pullback through `same`.
 `DirectSum.With.Fiber[x].Ring[K, ring].Product[n, m].Naturality.law` proves global-product fiber restriction equals the product of fiber restrictions.
-`Fiber.homeomorphism` and `pair` compare actual direct-sum metric fibers with box-fiber pairs.
+`Fiber.homeomorphism` and `pair` compare direct-sum metric fibers with box-fiber pairs.
 
 `FamilyMayerVietoris[A, source, family, cover]` is Mayer–Vietoris for small chains relative to specified subspace families.
 `With[M].sequence` and `At[z].connecting` cover arbitrary integer modules/degrees.
 `FamilyPair.InCover.With[M].quasiIsomorphism` compares ordinary chains using subdivision homotopies/replacement maps preserving families.
 No need to identify every simplex in two closed parts' union with a simplex in one part.
 
-
 `Local.Rank[n].Models.Orientation` groups fiber generators and local Thom models restricted to every open subset.
 `With.Modeled[K, ring, n, orientation, complex]` constructs global classes by finite Mayer–Vietoris gluing.
-Exposes `class`, `normalized`, `uniqueNormalized`, `Degree[p].isomorphism`, `Below[k].zero`; `Models.Signed` compares signed-chart orientations.
+Its class, normalization, Thom isomorphism, and below-rank vanishing APIs match `Oriented`; `Models.Signed` compares signed-chart orientations.
 
-`DirectSum.With.IntegralProduct[n, m, leftOrientation, rightOrientation, complex]` constructs sum-fiber orientation `orientation` from actual products of integral Thom classes.
+`DirectSum.With.IntegralProduct[n, m, leftOrientation, rightOrientation, complex]` constructs sum-fiber orientation `orientation` from products of integral Thom classes.
 Standard-disk product generators follow from degree-zero units/signed suspension through local coordinates.
 Relativize both closed faces as separate family members; identify with `Ring.Product.apply` products by open-shell homotopy comparison.
 
 | API | Contents |
 | --- | --- |
 | `IntegralProduct.classLaw` | Integral Thom products equal global Thom classes for constructed sum orientations. |
-| `IntegralProduct.Degree[p].isomorphism` | Thom isomorphisms by cups with actual classes. |
+| `IntegralProduct.Degree[p].isomorphism` | Thom isomorphisms by cups with classes. |
 | `IntegralProduct.Euler.law` | Sum Euler classes equal cups of factor Euler classes. |
 | `IntegralProduct.Compare[given, fiberLaw]` | Class/Euler/Thom comparisons with signed-chart orientations having equal fiber orientations. |
 | `ModTwoProduct.canonicalProductLaw` | Products of canonical mod 2 Thom classes equal canonical sum classes. |
 | `IntegralProduct.ModTwo.classLaw` | Coefficient changes of constructed integral classes equal canonical sum mod 2 classes. |
 | `IntegralProduct.ModTwo.Degree[p].law` / `inverseLaw` | Forward/inverse Thom compatibility with canonical integral-to-mod-2 changes. |
 
-`DirectSum.With.Ring[K, ring].Change[L, targetRing, morphism].Product[n, m].law` proves arbitrary actual relative sum products commute with coefficients.
+`DirectSum.With.Ring[K, ring].Change[L, targetRing, morphism].Product[n, m].law` proves arbitrary relative sum products commute with coefficients.
 `Change.Euler[n].law` gives zero-section/coefficient compatibility.
 `fiberLaw` in `Compare` asserts fiber agreement of supplied orientations; global Thom equality is derived.
 
-
 Standard-disk comparisons distinguish coefficient-ring modules from underlying integer modules.
-`IntegralComparison.Point[n].isomorphism` identifies actual integral point-disk relative groups with standard integers as integer modules.
+`IntegralComparison.Point[n].isomorphism` identifies integral point-disk relative groups with standard integers as integer modules.
 `normalized` sends one to standard generators; `forwardLaw` and `backwardLaw` agree with coefficient-ring standard comparisons.
 `RelativePullback.On.To.Homeomorphism.Degree[n].native` gives integer-module isomorphisms; same-degree `isomorphism` gives coefficient-ring module isomorphisms.

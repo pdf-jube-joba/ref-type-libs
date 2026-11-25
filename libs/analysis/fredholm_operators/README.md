@@ -64,9 +64,9 @@ Direct-sum norms use square roots of inner products; component Cauchy sequences 
 
 ## Checks
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-source /workspace/ref-type-env.sh
-cargo build -p cli --release --locked
-target/release/cli libs/analysis/fredholm_operators --module fredholm_operators --full-check-local --diagnostics compact --cache-stats --time-limit-seconds 300 --report-json work/a11-target.json
-python3 scripts/check_all.py
+mkdir -p work
+reftype/target/release/cli libs/analysis/fredholm_operators --module fredholm_operators --full-check-local --diagnostics compact --cache-stats --time-limit-seconds 300 --report-json work/a11-target.json
 ```

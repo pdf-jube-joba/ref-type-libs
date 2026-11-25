@@ -70,28 +70,20 @@ Below write `Split[n, include, project, retraction]` as `Split` and set \(P=EC\)
 `Matrices.On.Margin.exists` constructs \(0<\eta\leq\lvert\det a(x)\rvert\) on compact bases; `invertibleError` derives inverses from uniform determinant error \(<\eta\).
 Impose this on `Lift.matrix` for bundles, reusing L01 inverses/L03 continuity.
 
-## Examples, validation, and resuming
+## Examples and historical validation
 
 [Examples.Circle](src/Approximation/Examples/Circle.ref) approximates \(\lvert\operatorname{Re}z\rvert\) using 2×2 and zero-size Laurent matrices.
 [Examples.Coefficients](src/Approximation/Examples/Coefficients.ref) compares actual polynomials/evaluations for \(g(x)z^{-1}\).
 [Examples.Bundle](src/Approximation/Examples/Bundle.ref) uniformly approximates trivial-circle-line endomorphisms on the unit ball.
 [Examples.IdentityMatrix](src/Approximation/Examples/IdentityMatrix.ref) uses invertibility-error conditions on arbitrary identity dimensions.
 
-Base: K01-integrated main `f6c3dcfb`; branch: `math/k04-uniform-approximation`; [PR #45](https://github.com/pdf-jube-joba/ref-type/pull/45).
-Target/examples `work/k04-examples` on `71ddcdd1`: saved successfully, exit 0.
-Target/full-dependency `work/k04-package-retry` on `97e259ec` snapshot: saved successfully, exit 0.
-4,702 modules checked, 640 reused, 59,627 source steps, peak RSS 5,708,712 KiB; zero recoveries/duplicates/reruns/unsaved steps/cache-write or save failures.
-`work/k04-workspace` on `9004f57b` snapshot also saved successfully, exit 0.
-Includes B03 shared-API consumers/all examples: of 7,753 modules, 2,314 checked, 5,439 reused; 31,422 steps, peak RSS 9,112,984 KiB; zero recoveries/duplicates/reruns/unsaved steps/cache-write or save failures.
-Math sources/package settings match verified snapshots; no unverified math sources or implementation remain.
-Check PR #45/main for integration; recreate snapshots with the commands below for revalidation.
+Historical upstream [PR #45](https://github.com/pdf-jube-joba/ref-type/pull/45):
 
-```sh
-target/debug/cli libs/analysis/uniform_approximation --parse-only --save-source-snapshot work/k04-package-retry.source.json
-target/debug/cli libs/analysis/uniform_approximation --source-snapshot work/k04-package-retry.source.json --memory-mib 8192 --cache-budget-mib 12288 --time-limit-seconds 1800 --report-json work/k04-package-retry.report.json
-target/debug/cli libs --parse-only --save-source-snapshot work/k04-workspace.source.json
-target/debug/cli libs --source-snapshot work/k04-workspace.source.json --memory-mib 10240 --cache-budget-mib 12288 --time-limit-seconds 7200 --report-json work/k04-workspace.report.json
-```
+| Input | Result |
+| --- | --- |
+| Package/dependencies `97e259ec` | 4,702 modules checked, 640 reused |
+| Workspace `9004f57b` | 2,314 modules checked, 5,439 reused |
 
-Initial `work/k04-package` exited 2 due to snapshot/input-entry mismatch; resolved by package-entry rechecks above.
-Updated dependencies/library index/roadmap to match implementation, moving completed plans to public APIs.
+Both exited 0 with zero save failures, recoveries, duplicate/rerun checks, or lost steps; the workspace included shared-API consumers and examples.
+Original reports: `work/k04-package-retry` and `work/k04-workspace`.
+See [checking the libraries](../../USAGE.md) for fresh runs and historical-record scope.

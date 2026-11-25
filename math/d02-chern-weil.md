@@ -9,5 +9,5 @@
 
 ## Dependencies
 
-- [Connections and covariant derivatives](../../libs/geometry/bundle_connections/README.md)
+- [Connections and covariant derivatives](../libs/geometry/bundle_connections/README.md)
 - [L04 Symmetric polynomials and characteristic series](l04-symmetric-series.md)

@@ -47,6 +47,8 @@ Choose shared intersection base paths; define small holonomy from both homomorph
 Prove overlap/constant/subdivision/square-boundary laws and apply local descent.
 Finally prove both restrictions and uniqueness.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-target/debug/cli libs/topology/fundamental --module fundamental_groups
+reftype/target/debug/cli libs/topology/fundamental --module fundamental_groups
 ```

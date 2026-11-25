@@ -56,8 +56,10 @@ Negative forms give the \(v^2=-\|v\|^2\) convention.
 `group` constructed here is a group structure.
 This package does not construct finite-dimensional atlases, covering maps to orthogonal groups, or Lie group structures.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/algebra/clifford --module clifford
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/clifford --module clifford
 ```
 
 Standard inner products use \(\iota(v)^2=\lVert v\rVert^2\).

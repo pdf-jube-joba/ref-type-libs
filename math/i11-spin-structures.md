@@ -9,6 +9,6 @@
 
 ## Dependencies
 
-- [Smooth bundles, frame bundles, and associated bundles](../../libs/geometry/smooth_bundles/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../libs/geometry/smooth_bundles/README.md)
 - [I10 Complex spinor representations](i10-spinor-representations.md)
-- [Connections and covariant derivatives](../../libs/geometry/bundle_connections/README.md)
+- [Connections and covariant derivatives](../libs/geometry/bundle_connections/README.md)

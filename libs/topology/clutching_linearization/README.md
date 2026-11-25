@@ -43,33 +43,14 @@ Standard-loop recovery and clutching products give both inverse identities for t
 
 ## Validation and resuming
 
-Working branch: `math/k07-clutching-linearization`; [PR #46](https://github.com/pdf-jube-joba/ref-type/pull/46).
-Shared cache: `libs/refcache`.
-Fast-forward existing branches through GitHub integration; confirm equal local/remote trees before saving.
+Historical upstream [PR #46](https://github.com/pdf-jube-joba/ref-type/pull/46):
 
-| Check | Saved input | Result |
-| --- | --- | --- |
-| All K07 targets/references | `bb2e4c2f` | 1,491 modules, accepted, exit 0, save failures 0 |
-| K07 full dependency closure (earlier input) | `58f2d50a` | 5,781 modules, accepted, exit 0, save failures 0 |
-| Full workspace (earlier input) | `0a2e29ec` | 7,878 modules, accepted, exit 0, save failures 0 |
-| Rust workspace/format/Clippy | Same checker | 383 tests passed; format and warnings-as-errors Clippy exited 0 |
-| Outside-factor degree adjustments | `073b61c3` | accepted, exit 0, save failures 0 |
-| Matrix sums/power addition | `13a479b9` | accepted, exit 0, save failures 0 |
-| Polynomial-sum/block identification | `8bdb90ae` | accepted, exit 0, save failures 0 |
+| Input | Result |
+| --- | --- |
+| Full K07 with nilpotent/sum examples `6c784da7` | 1,505 modules accepted (`k07-complete.json`) |
+| Matching-math workspace | 8,065 modules accepted (`k07-final-workspace.json`) |
+| Earlier dependency closure `58f2d50a` | 5,781 modules accepted |
+| Rust workspace / format / Clippy | 383 tests passed; format and Clippy passed |
 
-`On.DirectSum.additivity` on `1972b9e5`: accepted, exit 0, save failures 0.
-General inverse-class sum additivity verified.
-Full K07 including nilpotent/sum examples: `6c784da7`, 1,505 modules, accepted/exit 0/save failures 0 (`k07-complete.json`, roughly 189 seconds).
-Same-math full workspace: 8,065 modules, accepted/exit 0/save failures 0 (`k07-final-workspace.json`, roughly 26 seconds).
-Shared cache reused; zero recoveries/duplicates/lost steps.
-Subsequent changes only public index/roadmap/validation records.
-Final PR-head confirmation/main merge remain.
-
-```sh
-target/debug/cli libs --parse-only --save-source-snapshot /tmp/k07-resume/final.source.json
-target/debug/cli libs --source-snapshot /tmp/k07-resume/final.source.json --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact --time-limit-seconds 3600 --report-json /tmp/k07-resume/final.json
-```
-
-For K07 alone, input `libs/topology/clutching_linearization` and add `--module clutching_linearization`.
-Omit `--module` for full package dependencies.
-Confirm process exit 0 and report `outcome=accepted`, `storage.save_failures=0`.
+Library runs exited 0 with zero save failures; final runs reported zero recoveries, duplicates, or lost steps.
+See [checking the libraries](../../USAGE.md) for fresh runs and historical-record scope.

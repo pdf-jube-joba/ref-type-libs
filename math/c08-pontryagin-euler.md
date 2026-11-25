@@ -12,4 +12,4 @@
 
 - [C06 Chern classes](c06-chern-classes.md)
 - [C07 Stiefel–Whitney classes](c07-stiefel-whitney.md)
-- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)
+- [C03 Thom classes and the Thom isomorphism](../libs/topology/cohomology_thom/README.md)

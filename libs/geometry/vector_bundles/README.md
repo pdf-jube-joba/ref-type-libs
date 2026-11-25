@@ -63,11 +63,12 @@ Components have ranks \(n,m\); prove both trivialization continuities.
 [Examples.ref](src/Bundles/Examples.ref) pulls real section \(s(x)=x\) along squares, computing \(s(x^2)=x^2\).
 Checks identity/composite comparisons, empty totals on empty bases, rank-zero bundles, rank-zero/one components, complex lines.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --locked
-target/debug/cli libs/geometry/vector_bundles --memory-mib 8192 --cache-stats
-target/debug/cli libs --module vector_bundles --memory-mib 8192 --cache-stats
-target/debug/cli libs --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/geometry/vector_bundles --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs --module vector_bundles --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs --memory-mib 8192 --cache-stats
 ```
 
 Total induced topology/continuity universality exposed as `topological_constructions.Induced`.

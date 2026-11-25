@@ -10,4 +10,4 @@
 ## Dependencies
 
 - [C01 Cap products and relative products](c01-cap-products.md)
-- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)
+- [C03 Thom classes and the Thom isomorphism](../libs/topology/cohomology_thom/README.md)

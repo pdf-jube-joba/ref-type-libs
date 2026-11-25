@@ -96,6 +96,8 @@ Derivation/left invariance survive commutators; construct `lie` as an endomorphi
 `bracket` and `ad` are operations on this Lie algebra.
 `TangentAtOne` gives tangent APIs for `Ad` and `exp`; `Euclidean.soLieAlgebra` gives skew-matrix Lie APIs.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo run -p cli -- libs/geometry/lie_groups --module lie_groups
+cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/geometry/lie_groups --module lie_groups
 ```

@@ -10,5 +10,5 @@
 ## Dependencies
 
 - [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)
-- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)
+- [C03 Thom classes and the Thom isomorphism](../libs/topology/cohomology_thom/README.md)
 - [B08 Grassmannian cell decompositions](b08-grassmannian-cells.md)

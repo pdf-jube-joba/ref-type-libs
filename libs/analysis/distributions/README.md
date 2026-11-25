@@ -96,8 +96,8 @@ Higher chain rules and compact coefficient bounds prove finite-order continuity 
 
 Use the ordinary cached checker for dependency closure, related packages, and the full registered workspace.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --release --locked
-target/release/cli libs/analysis/distributions --module distributions --memory-mib 8192
-python3 scripts/check_all.py --initial-memory-mib 12288 --memory-mib 12288
+reftype/target/release/cli libs/analysis/distributions --module distributions --memory-mib 8192
 ```

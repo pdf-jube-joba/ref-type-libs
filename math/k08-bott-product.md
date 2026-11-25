@@ -9,6 +9,6 @@
 
 ## Dependencies
 
-- [K07 Stable clutching linearization](../../libs/topology/clutching_linearization/README.md)
-- [K03 Relative K-groups and negative-degree exact sequences](../../libs/topology/relative_k_theory/README.md)
+- [K07 Stable clutching linearization](../libs/topology/clutching_linearization/README.md)
+- [K03 Relative K-groups and negative-degree exact sequences](../libs/topology/relative_k_theory/README.md)
 - [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)

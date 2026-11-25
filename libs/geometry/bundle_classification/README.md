@@ -19,8 +19,6 @@ Entry: `Classification`.
 | `RealGeometry.Between` / `ComplexGeometry.Between` | Stabilization homotopies in fixed-rank finite Grassmannians from isomorphic rank-\(k\) images |
 
 `AtRank.HasRank` requires \(k\)-dimensional fibers, without continuous global frames.
-For varying ranks use `Graded`.
-Uses all-rank finite-dimensional projections; constant ranks map into B05 Grassmannians.
 
 ## Choice independence and bijections
 
@@ -39,7 +37,6 @@ Thus `On.Compact.criterion` equates stabilization homotopies with bundle isomorp
 This differs from fixed-ambient finite-stage classification or identifying bundles by stable isomorphism.
 
 `On.Compact.toBundles` and `fromBundles` biject stabilized homotopy classes with B03 bundle isomorphism classes.
-`leftInverse`, `rightInverse` prove both round trips.
 `On.Compact.For.classification` and `classCriterion` give isomorphism criteria independent of classifying-map/embedding choices.
 
 ## Oriented and framed bundles
@@ -51,7 +48,7 @@ This differs from fixed-ambient finite-stage classification or identifying bundl
 
 `Oriented.On.Compact.Between.Homotopy` consists of constant-rank projection homotopies, continuous cylinder orientations, and agreement with standard zero-padded endpoints.
 `criterion` equates such homotopies with oriented bundle isomorphism existence.
-`Classes` and `BundleClasses` bijections have `toBundles`, `fromBundles` and both inverse proofs as for ordinary bundles.
+`Classes` and `BundleClasses` have the same `toBundles`/`fromBundles` bijection API.
 Orientation invariance uses B04 cylinder isomorphisms and `Orientations.Path.endpoints` sign constancy along nonzero determinant-covector paths.
 
 `Over.Frames[n, k]` is the finite Stiefel space of \(k\) independent columns.
@@ -66,32 +63,22 @@ Globally framed rank-\(k\) isomorphism classes and stable Stiefel homotopy class
 - Framed classification: `Framed.Pullback`, `FrameSum`, `FrameStabilization` construct frame composition, block sums, identity-frame addition.
 - B05 `Model.DirectSum` and `Model.Stabilization` also provide continuous Grassmannian sums/ambient/rank stabilization and universal comparisons.
 
-`Framed.For.class` exposes framed classification classes; `classification` and `independent` prove finite embedded presentations give the same classes.
-Finite-presentation comparisons/frame preservation remain in `For.FromEmbedding.isomorphism` and `preservesFrame`.
+`Framed.For` exposes `class`, `classification`, and `independent`; `FromEmbedding.isomorphism` and `preservesFrame` compare finite presentations.
 `Framed.Addition.add` descends `FrameSum.presentation` sums to quotients; `onClasses` proves finite-matrix agreement.
 `Framed.Addition.For.naturality`, `Framed.Stabilization.For.naturality`, `Framed.For.Pullback.naturality` give compatibility from bundle classes to finite presentations.
-Singleton framed classes use existing `uniqueClass` to prove quotient maps well-defined.
 
-`Oriented.WhitneySum` constructs standard sum orientation `orientation` from orientations of rank-\(k,l\) real factors.
-Factor orientations are inputs; the sum orientation is constructed.
-No compact base or global frame required.
-`Oriented.Trivial.orientation` is the standard normalized-top-form orientation; `Oriented.StandardStabilization.orientation` adds this oriented trivial bundle.
-Rank zero uses the same definitions/proofs.
+`Oriented.WhitneySum.orientation` constructs the product orientation from rank-\(k,l\) factor orientations, without compactness or global frames, including rank zero.
+`Oriented.Trivial.orientation` uses normalized top forms; `Oriented.StandardStabilization.orientation` adds this oriented trivial bundle.
 
 Finite-dimensional `DeterminantProduct.product` constructs the unique top form from \(\alpha\in\Lambda^k E^*\), \(\beta\in\Lambda^l F^*\) satisfying
 \[
  (\alpha\mathbin{\boxtimes}\beta)((u_1,0),\ldots,(u_k,0),(0,v_1),\ldots,(0,v_l))
  =\alpha(u_1,\ldots,u_k)\,\beta(v_1,\ldots,v_l)
 \]
-Existence/uniqueness uses existing `FiniteCoordinates.Top` normalization, one-dimensionality, and argument-restriction lemmas.
 `independent` gives basis independence; `Laws` bilinearity/nonvanishing; `Mapping.naturality` linear-pullback compatibility.
 `Blocks.blockDeterminant` proves normalized-top-form determinants of block diagonals equal factor determinant products.
 
-Sum positive rays are products of positive factor forms.
-`WhitneySum.Open.open` extends positive local forms in rank-compatible trivializations, gluing positive open rays from continuous coefficient products to prove openness.
-Prove nonvanishing, fiberwise existence, sign separation, positive scaling, same-ray conditions to construct `Orientations.Orientation`.
-`WhitneySum.Pairing.continuous` proves this bilinear product continuous on the determinant-bundle fiber product.
-Local top-form coordinates equal basis evaluation; product coordinates multiply continuous coefficients.
+`WhitneySum.Open.open` proves product rays open; `WhitneySum.Pairing.continuous` gives continuity on the determinant-bundle fiber product.
 
 | API | Standard product-orientation compatibility |
 | --- | --- |
@@ -106,11 +93,8 @@ Local top-form coordinates equal basis evaluation; product coordinates multiply 
 `Oriented.Sum.With` takes two ordinary finite classifications, a determinant orientation of the original sum, and classification data for that sum.
 Construct comparison `Sum.comparison` to the sum of classified factors; `targetOrientation` transports the supplied orientation.
 `determinantNaturality`, `isomorphism`, `naturality` expose determinant equalities, oriented isomorphisms, and class equalities for transport/classification compatibility.
-Orientation preservation is not an input assumption.
-`With.Changing.independent` proves classes unchanged when factor classification data change.
-`Oriented.Stabilization.With.naturality` gives the same comparison for trivial-bundle addition.
-These APIs take orientations of the entire sum.
-Use `WhitneySum` and `StandardStabilization` above to construct standard product orientations.
+Orientation preservation is derived. `With.Changing.independent` handles changes of factor classifications; `Oriented.Stabilization.With.naturality` handles trivial addition.
+These transport a supplied whole-sum orientation; `WhitneySum` and `StandardStabilization` construct standard product orientations.
 
 [Minimal examples](src/Classification/Examples/BoolLine.ref) classify real lines on discrete two-point spaces.
 [Trivial examples](src/Classification/Examples/Trivial.ref) check finite classifying maps, universal comparisons, and stabilized frame homotopies for arbitrary bases/dimensions.

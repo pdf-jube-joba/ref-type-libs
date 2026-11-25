@@ -13,7 +13,8 @@
 
 ## Completion status
 
-All requirements implemented and checked.
+The upstream completion record reports all requirements implemented and checked.
+These are historical results; use the [package README](../libs/analysis/fredholm_operators/README.md) and [current checking instructions](../libs/USAGE.md) for a new run.
 Implementation sources: `58f20c30015fd6d343ff3f77f8dcc7ec1240afc0`.
 
 | Requirement | Status and public API |
@@ -25,4 +26,4 @@ Implementation sources: `58f20c30015fd6d343ff3f77f8dcc7ec1240afc0`.
 | Computation from actual finite-dimensional decompositions, minimal examples, and documentation | Complete. `At.Index.Decomposition`, `indexFromDecomposition`, `Examples.indexZero`, public README |
 
 Full A11, isolated-cache examples, and A19 regressions passed.
-Standard `cargo build -p cli --release --locked && python3 scripts/check_all.py` also exited 0, verifying 9,887/9,887 targets with 0 unverified targets or save failures.
+The original combined-repository build and workspace driver also exited 0, verifying 9,887/9,887 targets with 0 unverified targets or save failures.

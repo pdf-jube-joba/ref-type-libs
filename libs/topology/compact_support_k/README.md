@@ -120,9 +120,4 @@ Identify endpoint parity bundles by specified global isomorphisms.
 `existence` gives formal representatives; `criterion` equates generated representative equivalence with K-equality.
 Three-nonzero-term zero-differential examples: `Examples.ThreeTerm`.
 
-Run standard checks from the repository root.
-
-```sh
-source /workspace/ref-type-env.sh && cargo build -p cli --release --locked
-python3 scripts/check_all.py --initial-memory-mib 10240 --memory-mib 10240
-```
+For builds and checks, see [checking the libraries](../../USAGE.md).

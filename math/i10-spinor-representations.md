@@ -10,4 +10,4 @@
 
 ## Dependencies
 
-- [Hermitian matrices and continuous local frames](../../libs/algebra/hermitian_frames/README.md)
+- [Hermitian matrices and continuous local frames](../libs/algebra/hermitian_frames/README.md)

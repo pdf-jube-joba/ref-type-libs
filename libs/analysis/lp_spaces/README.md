@@ -79,9 +79,8 @@ Since a.e.-equal representatives have everywhere-equal convolutions, transfer op
 Extend compact-smooth-input dominated convergence to general inputs by contraction and density.
 These Euclidean theorems include dimension zero.
 
-Run standard checks from the repository root.
+[Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-target/release/cli libs/analysis/lp_spaces --module lp_spaces --diagnostics compact --no-progress --memory-mib 12288
-source /workspace/ref-type-env.sh && cargo build -p cli --release --locked && python3 scripts/check_all.py --initial-memory-mib 12288 --memory-mib 12288
+reftype/target/release/cli libs/analysis/lp_spaces --module lp_spaces --diagnostics compact --no-progress --memory-mib 12288
 ```

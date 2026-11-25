@@ -37,9 +37,11 @@ Construct inverses by homotopy extension rather than assuming them.
 `Examples.intervalBoundary` and `Examples.planeBoundary` check one/two-dimensional disk-boundary inclusions.
 `Examples.identityComparison` and `Examples.constantComparison` iterate two-point identity/constant comparisons; `identityOnClasses`, `constantOnClasses` check actual class actions.
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-target/debug/cli libs/topology/puppe_sequences --module puppe_sequences.Puppe --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
-target/debug/cli libs --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
+reftype/target/debug/cli libs/topology/puppe_sequences --module puppe_sequences.Puppe --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
+reftype/target/debug/cli libs --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
 ```
 
 Added shared `topological_constructions.Quotient.Descent`, `Coproduct.ProductUniversal`, `Pushout.Of.Families`, `RelationQuotient.Families` APIs.
@@ -47,6 +49,9 @@ Product/quotient interchange uses compact Hausdorff intervals.
 [Relative K03](../relative_k_theory/README.md) uses these sequences/finite-CW comparisons.
 
 ## Validation and saving
+
+Recorded results in this section belong to the original combined repository.
+See [validation records](../../USAGE.md#validation-records) for their scope and current rerun instructions.
 
 Base: K07-integrated main `76e6084094f810eaf51e18663bb33d111dd409d7`.
 Branch: `math/k02-cofibration-puppe`; [PR #47](https://github.com/pdf-jube-joba/ref-type/pull/47).

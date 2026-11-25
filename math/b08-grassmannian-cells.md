@@ -2,8 +2,8 @@
 
 ## Work status
 
-[grassmannian_cells](../../libs/geometry/grassmannian_cells/README.md) contains definitions and proof terms for all requirements.
-The following distinguishes implemented scope from scope lacking type-check confirmation.
+[grassmannian_cells](../libs/geometry/grassmannian_cells/README.md) contains definitions and proof terms for all requirements.
+The table maps the requirements to their implemented APIs.
 
 | Requirement | Implemented API |
 | --- | --- |
@@ -16,12 +16,13 @@ The following distinguishes implemented scope from scope lacking type-check conf
 | Lifted finite CW structures and comparisons on coverings | `OrientedReal.CW.exists`, `With.projects` and `filtrationEqualsPreimage` |
 | Stabilization limits and finite stages for sphere maps/homotopies | `weakTopology`, `Maps.exists`, `Spheres.sphereMap`, `sphereHomotopy` of `StableReal` and `StableComplex` |
 
-In the 2026-11-20 supplement, the target package's `--parse-only --diagnostics compact` and `git diff --check` completed with exit code 0.
-Neither target nor full type checking was run.
-Parsing does not check name resolution or type consistency, so the entire supplement above lacks type-check confirmation.
-The initial pre-handoff type check also remained incomplete after 300 seconds; B08 formal verification is not declared complete.
-No new axioms or unproved replacements added.
-Continue collecting results in the existing [Draft PR #81](https://github.com/pdf-jube-joba/ref-type/pull/81).
+The later 2026-11-20 [upstream validation record](../reftype/work/b08-type-check/README.md) supersedes the earlier parse-only supplement and incomplete 300-second run.
+At upstream source commit `5deadd6563878d1a010b9b628b7e9d68229a9cfe`, all 225 B08 modules were actually checked successfully, and a separate driver run accepted all 7,852 dependency-closure modules using verified caches.
+No new axioms or unproved replacements were added.
+
+The full-workspace run stopped at a G06 name-resolution error after 11,895/15,749 modules; a temporary G06 integration reached 13,276/15,750 before resource-related interruptions.
+Neither run established full-workspace success.
+These are historical upstream results, not a new check of the current checkout; see the [package validation summary](../libs/geometry/grassmannian_cells/README.md#type-checking) and [current checking instructions](../libs/USAGE.md).
 
 ## Requirements
 
@@ -33,4 +34,4 @@ Continue collecting results in the existing [Draft PR #81](https://github.com/pd
 ## Dependencies
 
 - [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)
-- [K02 CW cofibrations and Puppe sequences](../../libs/topology/puppe_sequences/README.md)
+- [K02 CW cofibrations and Puppe sequences](../libs/topology/puppe_sequences/README.md)

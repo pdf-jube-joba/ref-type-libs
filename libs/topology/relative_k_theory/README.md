@@ -95,6 +95,9 @@ Also used for `compact_support_k` arbitrary-triple localization/naturality.
 
 ## Validation
 
+Recorded results in this section belong to the original combined repository.
+See [validation records](../../USAGE.md#validation-records) for their scope and current rerun instructions.
+
 Use shared cache `libs/refcache`.
 Checked triples/quotients, general exactness/naturality, smash/closed-pair products, closed gluing/Mayer–Vietoris, actual disk homeomorphisms, rank-zero/one examples with dependencies.
 All accepted, exit 0, cache save/write failures 0.
@@ -114,12 +117,12 @@ Earlier interrupted/resource-limit reports retained in the same directory.
 Standard root commands:
 
 ```sh
-MIMALLOC_ARENA_RESERVE=64M REF_TYPE_GRAPH_RESIDENT_MIB=256 target/debug/cli libs \
+MIMALLOC_ARENA_RESERVE=64M REF_TYPE_GRAPH_RESIDENT_MIB=256 reftype/target/debug/cli libs \
   --cache-dir libs/refcache --cache-budget-mib 16384 --memory-mib 0 \
   --checkpoint-seconds 600 --diagnostics compact
 ```
 
-Fixed inputs/checking: [checks and cache](../../../src/USAGE.md#%E6%A4%9C%E6%9F%BB%E3%81%A8%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5).
+Fixed inputs/checking: [checks and cache](../../USAGE.md#cache-resources-and-fixed-inputs).
 
 `Relative.PointPair` exposes pointed equivalences between compact pointed spaces and quotients collapsing their basepoints.
 Degree-zero triple comparisons use this independently of Bott periodicity.

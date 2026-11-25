@@ -23,9 +23,10 @@ Real parameters use one-coordinate standard isomorphism `CoordinateLine` because
 
 Run checks at the repository root.
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --locked
-target/debug/cli libs/geometry/examples/tangent_normal --cache-dir libs/refcache --memory-mib 7168 --diagnostics compact
+reftype/target/debug/cli libs/geometry/examples/tangent_normal --cache-dir libs/refcache --memory-mib 7168 --diagnostics compact
 ```
 
 Standard checks cover this package and every dependency-closure module.

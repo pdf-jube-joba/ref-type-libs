@@ -1,37 +1,27 @@
 # Mathematics library roadmap
 
-Develop characteristic classes, cobordism, and complex K-theory toward the Atiyah–Singer index theorem for complex elliptic operators on closed compact manifolds and concrete index formulas.
-Each individual `.md` is an implementation task describing requirements and direct dependencies.
-This file tracks overall scope, estimates, parallel work, and integration milestones.
+Develop characteristic classes, cobordism, and complex K-theory toward the Atiyah–Singer theorem for complex elliptic operators on closed compact manifolds and its index formulas.
+Task specifications retain requirements and dependencies; the API map and check status identify existing implementations.
 
-## Starting point
+## Repository layout and available foundations
 
-Based on the existing libraries as of 2026-10-21.
-Fundamental groups and coverings, homological algebra, and singular cohomology plans are complete; build on the public APIs in the [library index](../../libs/README.md).
-Tangent and normal bundles, differential forms, Clifford algebras, Spin and Spin-c groups, and real Gram–Schmidt are also available.
-Construct general vector bundles, tubular neighborhoods, manifolds with boundary, characteristic classes, and K-theory in these tasks.
-Existing Lp and Sobolev work is mainly definitions; scope also includes Euclidean Lebesgue measure, completeness, Fourier analysis, and elliptic regularity.
-Compare and reuse overlapping existing APIs during implementation.
-Document public APIs in each library's README; track implementation progress and completion verification in the task list below.
+The [library index](../libs/README.md) covers the 112 packages in [libs/ref.toml](../libs/ref.toml).
+Use package READMEs for APIs, source files for exact assumptions, and [checking instructions](../libs/USAGE.md) for the compiler in `reftype/`.
+A retained specification or README alone does not establish task completion.
 
 ## Goals and proof routes
 
-For real and complex bundles over finite CW bases, develop characteristic classes through Thom isomorphisms, the projective bundle theorem, and the splitting principle to Chern, Stiefel–Whitney, Pontryagin, and Euler classes and characteristic numbers.
-Apply these to compact smooth manifolds via finite CW types obtained from Morse functions and handle decompositions.
-Develop connections and curvature separately, then identify their classes with topological characteristic classes through the de Rham comparison.
+Characteristic classes: finite-CW bundles → Thom isomorphisms → projective bundle/splitting principles → Chern, Stiefel–Whitney, Pontryagin, and Euler classes and characteristic numbers.
+Morse functions and handles extend this route to compact smooth manifolds; de Rham comparison identifies topological classes with connection/curvature classes.
 
-First-stage cobordism covers unoriented, oriented, and framed groups and products, the Pontryagin–Thom isomorphism, characteristic-number invariants, and explicit nonzero examples.
-Construct Thom spectra from finite Grassmannian Thom spaces and stabilization, using set-valued finite-stage representatives.
+Cobordism: unoriented, oriented, and framed groups/products, finite-stage Thom spectra, Pontryagin–Thom, characteristic-number invariants, and nonzero examples.
 
-Start K-theory with complex bundles on compact Hausdorff spaces, then relative theory, Bott periodicity, compact supports, and Thom isomorphisms via Koszul complexes.
-Prove Bott periodicity via Laurent approximation, spectral splitting, and clutching.
-Construct the analytic index afterward, avoiding circular dependencies between the index theorem and Bott periodicity.
+K-theory: complex bundles → relative groups → Bott periodicity via Laurent approximation, spectral splitting, and clutching → compact supports and Koszul Thom isomorphisms.
+Keep Bott independent of the index theorem.
 
-The index theorem concerns elliptic pseudodifferential operators between complex bundles on closed compact smooth manifolds.
-Analytic route: measure, Fourier, Sobolev, pseudodifferential operators, parametrices, and Fredholm theory.
-Topological route: Euclidean embeddings, complex structures on cotangent normal bundles, Thom maps, and Bott isomorphisms to construct the topological index.
-Compare both indices by compatibility of the analytic index with excision and Thom maps, then derive Chern-character formulas.
-Applications: Gauss–Bonnet, Hirzebruch's signature formula, and the Spin-c Dirac index formula.
+The analytic index route uses measure, Fourier, Sobolev, pseudodifferential operators, parametrices, and Fredholm theory.
+The topological route uses Euclidean embeddings, cotangent normal complex structures, Thom maps, and Bott isomorphisms.
+Compare the indices through excision and Thom compatibility, then derive Chern-character formulas, Gauss–Bonnet, signature, and Spin-c Dirac applications.
 
 ```mermaid
 flowchart TD
@@ -53,127 +43,108 @@ flowchart TD
   C --> E
 ```
 
-The diagram shows the main integration points between fields.
-Use each task's dependency list to determine when work can begin.
-Characteristic classes and K-theory proceed in parallel after the shared bundle foundations; the index theorem can proceed without waiting for cobordism-ring computations.
+Dependencies determine implementation order; the index theorem does not require cobordism-ring computations.
 
 ## Estimates and completion units
 
-Each task is a design estimate centered on roughly 5,000 lines of new or substantially rewritten `.ref`, including proofs, comparison maps, and examples.
-Tables use thousands of lines; documentation and generated code are counted separately.
-Before measurement, use a rough range of 3,000–7,000 lines, depending on proof detail and existing API reuse.
-For scale, current `field_kunneth` has roughly 4,200 lines and `singular_products` roughly 3,200 lines of `.ref`.
-Estimates are particularly uncertain for transversality, Bott linearization, pseudodifferential operators, and analytic Thom comparisons.
-Check dependency APIs and proof routes before assignment. If a task will greatly exceed 7,000 lines, split off additional tasks whose completion criterion is publication of independent lemmas.
-An assigned task is one completion unit including its requirements, naturality, concrete examples, and dependency-closure checks.
+Tasks were sized at roughly 5,000 lines of new or substantially rewritten `.ref`, including proofs, comparisons, and examples; table values are in thousands of lines.
+Treat 3,000–7,000 lines as a planning range, excluding documentation and generated code.
+Reassess large or uncertain tasks, especially transversality, Bott linearization, pseudodifferential operators, and analytic Thom comparisons; split out reusable lemmas when needed.
 
-Primary package names are provisional; follow existing placement within each field.
-Build constructions from actual mathematical objects and expose proofs of existence, inverses, equalities, and exactness.
-Quantify theorem objects and assumptions in propositions; group construction data and laws into structures.
-Update direct dependencies, workspace members, README, and small examples; check targets and dependency closures using the [shared cache](../../src/USAGE.md#%E6%A4%9C%E6%9F%BB%E3%81%A8%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5).
-On upstream completion, record its public API and check results in its README, replace downstream task links with the corresponding README, then remove the completed task.
-Do not infer unstarted/completed status or API availability solely from remaining plans or README presence.
-Assess progress against actual code and requirements; record known outstanding work separately from unverified scope.
-Separately record type-check targets and dependency closure, source commit or snapshot, checker, and result references.
-Mark completion only with evidence that requirements, comparisons, and examples are fulfilled and checks cover the target sources.
-If evidence is unavailable, mark checks unconfirmed; source or cache presence does not prove success.
-Assess dependencies against their public API, check status, and downstream needs.
+A completion unit includes constructions from mathematical objects, explicit assumptions and laws, naturality, examples, and target/dependency-closure checks.
+Update dependencies, workspace registration, and public documentation together.
+Retain useful specifications, linking downstream work to published APIs.
+Record requirement gaps separately from unverified scope, and record source/checker identity and results as described in [validation records](../libs/USAGE.md#validation-records).
 
 <a id="progress-and-checks"></a>
 
 ## Implementation progress and check status
 
-Read-only inspection of main `dce3d353e75972c507928253d6c33420f6f55a0f` on 2026-11-19 covered the following scope.
-Both items below have workspace registration and actual implementations; work has started, but full-plan completion remains unconfirmed.
-Other task statuses were not reinvestigated.
+No type checks were run during the 2026-11-25 documentation cleanup.
+The following upstream records refer to historical sources and do not establish current workspace acceptance.
 
-| Task | Implementation progress and outstanding verification | Type-check evidence |
-| --- | --- | --- |
-| [G06](g06-tubular-neighborhoods.md#status) | Implements tubular neighborhoods, continuous collapse, boundary preservation, comparison families within a fixed lift, and product/stabilization identities. The connection from neat embeddings to `Extension`, comparison generality, and stabilized normal Thom spaces remain unverified. README and standalone examples are missing. | Current G06 and dependency-closure success unconfirmed. |
-| [A09](a09-euclidean-sobolev.md#status) | Code and README cover integer-order Fourier models, duality, weak-derivative comparison on Schwartz functions, support-restricted multiplication and coordinate changes, embedding, and smoothness. General \(H^k\)–\(W^{k,2}\) comparison, coefficient-class requirements, and standalone examples remain unverified. | Current A09 and dependency-closure success unconfirmed. |
+| Task | Status and evidence |
+| --- | --- |
+| [G06](g06-tubular-neighborhoods.md#status) | Tubular/collapse APIs exist; boundary extensions, choice comparisons, stabilization, and examples need verification. Current package/closure checks are unconfirmed; the B08 workspace run stopped here. |
+| [A09](a09-euclidean-sobolev.md#status) | Sobolev APIs exist; general weak-derivative comparison, coefficient classes, and examples need verification. Current package/closure checks are unconfirmed; the G13 workspace run stopped here. |
+| [B08](b08-grassmannian-cells.md) | Later [2026-11-20 evidence](../libs/geometry/grassmannian_cells/README.md#type-checking) supersedes parse-only status: 225 target modules checked, 7,852 closure modules accepted; workspace runs incomplete. |
+| [G13](g13-morse-lemma.md) | [2026-11-19 evidence](../libs/geometry/morse_lemma/VALIDATION.md): 137 target modules rechecked, 1,926 closure modules accepted; workspace stopped in A09 with 8,002 targets unverified. |
 
-Three snapshots remaining in `libs/refcache/.check-*` in the inspected environment omit G06/A09 sources and workspace registration and have no final reports.
-The environment's `/workspace/.ref-type-toolchain/std-nat.json` is `accepted`, but targets `std`.
-The repository's [existing full report](c01-integrated-workspace-report.json) is `internal-error` with empty `verified_modules`.
-These do not demonstrate successful checks of current G06, A09, or the entire current library.
-No type checking was run during this inspection; unconfirmed checks do not imply current source failures.
+The older [C01 workspace report](c01-integrated-workspace-report.json) is `internal-error` with no verified modules.
+[A01](a01-progress.md) and [C01](c01-resume.md) summarize historical work; unconfirmed checks alone do not imply a current source failure.
 
-## Parallel assignment
+## Implementation workflow
 
-Assign one task at a time to each available agent once all its dependencies are integrated.
-Work on each task in a separate branch/worktree, scoped to its primary package.
-Coordinate APIs and task ownership before changing shared foundations.
-Include `libs/ref.toml` and library-index changes in each branch so it can be checked; reconcile registration and dependencies during integration.
-Manage parallel implementation of independent tasks separately from integration order for shared files.
-Downstream agents work on independent tasks until upstream integration, then connect to its public APIs.
+Choose work by direct dependencies, available APIs, and validation coverage.
+Update package dependencies, registration, documentation, examples, and check evidence together.
 
-Tasks available initially:
+## Published API map
 
-- [A01 Convergence theorems for measure integration](a01-measure-convergence.md)
-- [A19 Complex Hilbert spaces and compact operators](a19-complex-hilbert.md)
-- [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)
-- [C01 Cap products and relative products](c01-cap-products.md)
-- [G01 Smooth bump functions and partitions of unity](g01-smooth-partitions.md)
-- [G02 Inverse and implicit functions and local forms of regular values](../../libs/geometry/inverse_implicit/README.md) (implemented)
-- [L04 Symmetric polynomials and characteristic series](l04-symmetric-series.md)
-
-L01 determinants/inverses, L02 polynomial factorization, and L03 Hermitian matrices/local frames are available. G02 [inverse_implicit](../../libs/geometry/inverse_implicit/README.md) exposes local inverses, parameterized implicit functions, constant-rank local forms, regular-value submanifolds, and tangent kernels.
-B03 metrics, complements, and sets of isomorphism classes are available, enabling B05.
-B09 [bundle_extension](../../libs/geometry/bundle_extension/README.md) exposes real and complex Tietze extension, neighborhood extension of bundles/maps/isomorphisms, shrinking comparisons, and stabilization for reuse in K03.
-K06 continuous spectral splitting underpins B04 bundle comparisons; reuse it with B04 clutching in K07.
-Reuse K01 Grothendieck rings, stable criteria, and contravariant pullback in K03 and K07.
-K04 real and complex Stone–Weierstrass, Laurent approximation, and uniform matrix/bundle estimates are also available for K07.
-K07 [clutching_linearization](../../libs/topology/clutching_linearization/README.md) exposes choice-independent spectral inverse classes, naturality, direct sums, and inverse identities for the basic product for K08.
-K02 [puppe_sequences](../../libs/topology/puppe_sequences/README.md) exposes finite CW-pair cofibrations, natural Puppe sequences, and contravariant Hom exactness for K03, B08, C02, and T02.
-K03 [relative_k_theory](../../libs/topology/relative_k_theory/README.md) exposes relative triples/reduced-group comparisons, negative-degree exact sequences, excision, Mayer–Vietoris, natural external products, and bundle disk/sphere pairs for K08.
-B07 [smooth_bundles](../../libs/geometry/smooth_bundles/README.md) exposes real and complex smooth bundles, metrics, frame/associated bundles, and tangent/normal comparisons for [D01](../../libs/geometry/bundle_connections/README.md), G06, I11, T01, and A12.
-B02 bundle operations also serve C05; A02 can follow A01.
-Assign C01, L04, and A19 to available contributors to advance the long analytic route early.
-Section numbers are identifiers; dependency lists determine implementation order.
-
-## Completed units
+Existing APIs, with requirement and check gaps recorded separately above.
 
 | Unit | Public API |
 | --- | --- |
-| L01 Determinants and invertible matrices | [matrix_invariants](../../libs/algebra/matrix_invariants/README.md) |
-| L02 Polynomial Euclidean algorithm and Cayley–Hamilton | [polynomial_linear_algebra](../../libs/algebra/polynomial_linear_algebra/README.md) |
-| L03 Hermitian matrices and continuous local frames | [hermitian_frames](../../libs/algebra/hermitian_frames/README.md) |
-| K13 Existence of complex polynomial roots | [fundamental_algebra](../../libs/algebra/fundamental_algebra/README.md) |
-| K05 Fundamental theorem of algebra and continuity of root clusters | [complex_polynomial_roots](../../libs/algebra/complex_polynomial_roots/README.md) |
-| B01 General real and complex vector bundles | [vector_bundles](../../libs/geometry/vector_bundles/README.md) |
-| B02 Bundle gluing and linear operations | [bundle_operations](../../libs/geometry/bundle_operations/README.md) |
-| B03 Bundle metrics, complements, and set presentations | [bundle_complements](../../libs/geometry/bundle_complements/README.md) |
-| K06 Continuous spectral splitting | [spectral_splitting](../../libs/algebra/spectral_splitting/README.md) |
-| B04 Bundle homotopy invariance and clutching | [bundle_homotopy](../../libs/geometry/bundle_homotopy/README.md) |
-| B07 Smooth bundles and existing tangent/normal comparisons | [smooth_bundles](../../libs/geometry/smooth_bundles/README.md) |
-| B09 Bundle extension from closed subspaces | [bundle_extension](../../libs/geometry/bundle_extension/README.md) |
-| K01 Grothendieck rings of bundles | [topological_k_theory](../../libs/topology/k_theory/README.md) |
-| K04 Stone–Weierstrass and Laurent approximation | [uniform_approximation](../../libs/analysis/uniform_approximation/README.md) |
-| K07 Stable clutching linearization | [clutching_linearization](../../libs/topology/clutching_linearization/README.md) |
-| K02 CW cofibrations and Puppe sequences | [puppe_sequences](../../libs/topology/puppe_sequences/README.md) |
-| K03 Relative K-groups and negative-degree exact sequences | [relative_k_theory](../../libs/topology/relative_k_theory/README.md) |
-| K09 Bott periodicity and integer degrees | [periodic_k_theory](../../libs/topology/periodic_k_theory/README.md) |
-| A07 Plancherel and Fourier multipliers | [fourier_l2](../../libs/analysis/fourier_l2/README.md) |
-| A04 Change of variables in multiple integrals | [change_of_variables](../../libs/analysis/change_of_variables/README.md) |
-| D01 Connections and covariant derivatives | [bundle_connections](../../libs/geometry/bundle_connections/README.md) |
+| A01 | [measure_convergence](../libs/analysis/measure_convergence/README.md) |
+| A02 | [euclidean_measure](../libs/analysis/euclidean_measure/README.md) |
+| A03 | [product_integration](../libs/analysis/product_integration/README.md) |
+| A04 | [change_of_variables](../libs/analysis/change_of_variables/README.md) |
+| A05 | [lp_spaces](../libs/analysis/lp_spaces/README.md) |
+| A06 | [fourier_schwartz](../libs/analysis/fourier_schwartz/README.md) |
+| A07 | [fourier_l2](../libs/analysis/fourier_l2/README.md) |
+| A08 | [distributions](../libs/analysis/distributions/README.md) |
+| A09 | [euclidean_sobolev](../libs/analysis/euclidean_sobolev/README.md) |
+| A11 | [fredholm_operators](../libs/analysis/fredholm_operators/README.md) |
+| A19 | [complex_hilbert](../libs/analysis/complex_hilbert/README.md) |
+| B01 | [vector_bundles](../libs/geometry/vector_bundles/README.md) |
+| B02 | [bundle_operations](../libs/geometry/bundle_operations/README.md) |
+| B03 | [bundle_complements](../libs/geometry/bundle_complements/README.md) |
+| B04 | [bundle_homotopy](../libs/geometry/bundle_homotopy/README.md) |
+| B05 | [grassmannians](../libs/geometry/grassmannians/README.md) |
+| B06 | [bundle_classification](../libs/geometry/bundle_classification/README.md) |
+| B07 | [smooth_bundles](../libs/geometry/smooth_bundles/README.md) |
+| B08 | [grassmannian_cells](../libs/geometry/grassmannian_cells/README.md) |
+| B09 | [bundle_extension](../libs/geometry/bundle_extension/README.md) |
+| C01 | [singular_cap](../libs/topology/singular/cap/README.md) |
+| C02 | [thom_spaces](../libs/topology/thom_spaces/README.md) |
+| C03 | [cohomology_thom](../libs/topology/cohomology_thom/README.md) |
+| D01 | [bundle_connections](../libs/geometry/bundle_connections/README.md) |
+| G01 | [smooth_partitions](../libs/geometry/smooth_partitions/README.md) |
+| G02 | [inverse_implicit](../libs/geometry/inverse_implicit/README.md) |
+| G03 | [boundary_manifolds](../libs/geometry/boundary_manifolds/README.md) |
+| G04 | [manifold_gluing](../libs/geometry/manifold_gluing/README.md) |
+| G05 | [compact_embeddings](../libs/geometry/compact_embeddings/README.md) |
+| G06 | [tubular_neighborhoods](../libs/geometry/tubular_neighborhoods/README.md) |
+| G13 | [morse_lemma](../libs/geometry/morse_lemma/README.md) |
+| I10 | [spinor_representations](../libs/algebra/spinor_representations/README.md) |
+| K01 | [topological_k_theory](../libs/topology/k_theory/README.md) |
+| K02 | [puppe_sequences](../libs/topology/puppe_sequences/README.md) |
+| K03 | [relative_k_theory](../libs/topology/relative_k_theory/README.md) |
+| K04 | [uniform_approximation](../libs/analysis/uniform_approximation/README.md) |
+| K05 | [complex_polynomial_roots](../libs/algebra/complex_polynomial_roots/README.md) |
+| K06 | [spectral_splitting](../libs/algebra/spectral_splitting/README.md) |
+| K07 | [clutching_linearization](../libs/topology/clutching_linearization/README.md) |
+| K08 | [bott_product](../libs/topology/bott_product/README.md) |
+| K09 | [periodic_k_theory](../libs/topology/periodic_k_theory/README.md) |
+| K10 | [compact_support_k](../libs/topology/compact_support_k/README.md) |
+| K11 | [k_theory_thom](../libs/topology/k_theory_thom/README.md) |
+| K13 | [fundamental_algebra](../libs/algebra/fundamental_algebra/README.md) |
+| L01 | [matrix_invariants](../libs/algebra/matrix_invariants/README.md) |
+| L02 | [polynomial_linear_algebra](../libs/algebra/polynomial_linear_algebra/README.md) |
+| L03 | [hermitian_frames](../libs/algebra/hermitian_frames/README.md) |
+| L04 | [characteristic_series](../libs/algebra/characteristic_series/README.md) |
 
 ## Task list
 
-Tracking 70 tasks, initially estimated at 367,000 lines.
-Includes implemented, verification-pending, and uninvestigated units; this is not an unstarted-task count or an estimate of remaining work.
-Inspected G06/A09 status appears under [implementation progress and check status](#progress-and-checks).
+The 70 retained planning entries total an original estimate of 367,000 lines, including implemented and uninvestigated work.
+Use the [API map](#published-api-map) and [check status](#progress-and-checks) to assess remaining work.
 
 ### Linear algebra and characteristic series
-
-1 task, approximately 5,000 lines.
 
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
 | [L04 Symmetric polynomials and characteristic series](l04-symmetric-series.md) | 5 |
 
 ### Vector bundles
-
-3 tasks, approximately 16,000 lines.
 
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
@@ -182,8 +153,6 @@ Inspected G06/A09 status appears under [implementation progress and check status
 | [B08 Grassmannian cell decompositions](b08-grassmannian-cells.md) | 6 |
 
 ### Characteristic classes
-
-12 tasks, approximately 60,000 lines.
 
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
@@ -202,26 +171,22 @@ Inspected G06/A09 status appears under [implementation progress and check status
 
 ### Topological K-theory
 
-4 tasks, approximately 22,000 lines.
-
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
 | [K08 Bott's basic product theorem](k08-bott-product.md) | 5 |
 | [K10 Compactly supported K-theory and symbol presentations](k10-compact-support-k.md) | 6 |
-| [K11 Thom isomorphism in K-theory](../../libs/topology/k_theory_thom/README.md) | 5 |
+| [K11 Thom isomorphism in K-theory](../libs/topology/k_theory_thom/README.md) | 5 |
 | [K12 Comparing the Chern character and Thom classes](k12-chern-character-thom.md) | 6 |
 
 ### Differential topology
 
-13 tasks, approximately 67,000 lines.
-
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
 | [G01 Smooth bump functions and partitions of unity](g01-smooth-partitions.md) | 5 |
-| [G02 Inverse and implicit functions and local forms of regular values](../../libs/geometry/inverse_implicit/README.md) (implemented) | 5 |
+| [G02 Inverse and implicit functions and local forms of regular values](../libs/geometry/inverse_implicit/README.md) (implemented) | 5 |
 | [G03 Manifolds with boundary and corners](g03-boundary-manifolds.md) | 5 |
-| [G04 Collars and boundary gluing](../../libs/geometry/manifold_gluing/README.md) (implemented) | 5 |
-| [G05 Embeddings of compact manifolds](../../libs/geometry/compact_embeddings/README.md) | 5 |
+| [G04 Collars and boundary gluing](../libs/geometry/manifold_gluing/README.md) (implemented) | 5 |
+| [G05 Embeddings of compact manifolds](../libs/geometry/compact_embeddings/README.md) | 5 |
 | [G06 Tubular neighborhoods and collapse maps](g06-tubular-neighborhoods.md#status) (implemented; requirements pending verification; checks unconfirmed) | 5 |
 | [G07 Sard's theorem](g07-sard.md) | 6 |
 | [G08 Smooth approximation and relative transversality](g08-transversality.md) | 6 |
@@ -232,8 +197,6 @@ Inspected G06/A09 status appears under [implementation progress and check status
 | [G13 Local analysis of the Morse lemma](g13-morse-lemma.md) | 5 |
 
 ### Cobordism
-
-6 tasks, approximately 31,000 lines.
 
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
@@ -246,8 +209,6 @@ Inspected G06/A09 status appears under [implementation progress and check status
 
 ### Connections and differential forms
 
-4 tasks, approximately 20,000 lines.
-
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
 | [D02 Curvature and Chern–Weil classes](d02-chern-weil.md) | 5 |
@@ -256,8 +217,6 @@ Inspected G06/A09 status appears under [implementation progress and check status
 | [D05 Agreement of topological characteristic classes and characteristic forms](d05-characteristic-form-comparison.md) | 5 |
 
 ### Measure, functional analysis, and elliptic operators
-
-16 tasks, approximately 88,000 lines.
 
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
@@ -280,8 +239,6 @@ Inspected G06/A09 status appears under [implementation progress and check status
 
 ### Index theorem and applications
 
-11 tasks, approximately 58,000 lines.
-
 | Task | Estimate (thousands of lines) |
 | --- | ---: |
 | [I01 Symbol K-classes and the analytic index map](i01-symbol-index.md) | 5 |
@@ -300,7 +257,7 @@ Inspected G06/A09 status appears under [implementation progress and check status
 
 | Milestone | Completed tasks | Results |
 | --- | --- | --- |
-| Shared bundle foundations | B03, B04, [B07](../../libs/geometry/smooth_bundles/README.md) | Sets of isomorphism classes, complements, homotopy invariance, existing tangent/normal comparisons |
+| Shared bundle foundations | B03, B04, [B07](../libs/geometry/smooth_bundles/README.md) | Sets of isomorphism classes, complements, homotopy invariance, existing tangent/normal comparisons |
 | Topological characteristic classes | C08, C09, C10 | Integral, mod 2, and rational characteristic classes, characteristic numbers, projective-space computations |
 | Topological K-theory | K09, K11, K12 | Periodicity, compactly supported Thom isomorphisms, Chern-character comparison |
 | Cobordism | T04, T05, T06 | Pontryagin–Thom isomorphism, invariants, explicit nonzero classes |

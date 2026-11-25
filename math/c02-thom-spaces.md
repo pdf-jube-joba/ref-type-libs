@@ -9,13 +9,13 @@
 
 ## Dependencies
 
-- [Bundle metrics, complements, and isomorphism classes](../../libs/geometry/bundle_complements/README.md)
-- [K02 CW cofibrations and Puppe sequences](../../libs/topology/puppe_sequences/README.md)
-- [B04 Bundle homotopy invariance and clutching](../../libs/geometry/bundle_homotopy/README.md)
+- [Bundle metrics, complements, and isomorphism classes](../libs/geometry/bundle_complements/README.md)
+- [K02 CW cofibrations and Puppe sequences](../libs/topology/puppe_sequences/README.md)
+- [B04 Bundle homotopy invariance and clutching](../libs/geometry/bundle_homotopy/README.md)
 
 ## ImplementationStatus
 
-Implemented: [thom_spaces](../../libs/topology/thom_spaces/README.md).
+Implemented: [thom_spaces](../libs/topology/thom_spaces/README.md).
 Constructed real/complex metric disk and sphere bundles, pointed Thom quotients, homeomorphisms between arbitrary continuous metrics, and direct-sum/iterated-Thom comparisons.
 Trivial bundles are homeomorphic to disk-suspension models of real dimensions \(n\)/\(2n\), also compared with arbitrary natural-degree iterated existing suspensions.
 

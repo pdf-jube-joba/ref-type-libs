@@ -59,10 +59,11 @@ No new axioms or checker changes.
 Also includes nonmonic \(i(X^2+1)\) factorization/unordered presentation and minimum theorems for zero/constants.
 Public APIs can be imported from children of [Complex.ref](src/Complex.ref).
 
+[Build and check](../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli --locked
-target/debug/cli libs/algebra/fundamental_algebra --memory-mib 8192 --cache-stats
-target/debug/cli libs/algebra/fundamental_algebra --full-check-local --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/algebra/fundamental_algebra --memory-mib 8192 --cache-stats
+reftype/target/debug/cli libs/algebra/fundamental_algebra --full-check-local --memory-mib 8192 --cache-stats
 ```
 
 Check targets, all dependencies, and examples using the shared workspace cache.

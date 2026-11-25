@@ -58,10 +58,11 @@ Cochains are all functions on simplices; finite support is required only for cha
 [Examples](../../examples/cohomology/README.md) checks representatives, both square-zero laws, augmentation, coefficient maps, relative connecting, and empty spaces from another package.
 [Singular theory index](../README.md) and [concrete computations](../../examples/finite_models/README.md) collect excision/finite comparisons/products/examples.
 
+[Build and check](../../../USAGE.md) from the repository root:
+
 ```sh
-cargo build -p cli
-target/debug/cli libs/topology/singular/cohomology --module singular_cohomology --diagnostics compact
-target/debug/cli libs/topology/examples/cohomology --module cohomology_models --diagnostics compact
+reftype/target/debug/cli libs/topology/singular/cohomology --module singular_cohomology --diagnostics compact
+reftype/target/debug/cli libs/topology/examples/cohomology --module cohomology_models --diagnostics compact
 ```
 
 Use shared workspace `libs/refcache/`.
