@@ -1,8 +1,8 @@
-# Measure on Euclidean spaces
+# `euclidean_measure` notes
 
-Construction details and records for [euclidean_measure](../../../libs/analysis/euclidean_measure/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/euclidean_measure/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `euclidean_measure.Euclidean[n]` constructs outer measure from countable closed-box covers.
 Volumes multiply side lengths; empty boxes are allowed.
@@ -22,7 +22,6 @@ Cover costs are volume series as extended-nonnegative lower cuts; `outer` rounds
 `Scaling` gives measurability/measure transformation under positive coordinate dilations.
 `Borel` constructs the least σ-algebra containing Euclidean open sets.
 `EuclideanBorel` proves open/Borel measurability in every dimension.
-`Examples` contains examples of these results.
 
 `CoverExpansion.outerRegular` identifies arbitrary-set outer measures with infima over containing open sets.
 `InnerRegular.innerRegular` identifies measurable-set measures with suprema over contained compact sets.
@@ -38,3 +37,7 @@ Lower-cut equalities include infinite measure.
 `RealLine.CompletionAgreement.linkedRepresentative` compares arbitrary existing L1-completion representative sequences with measure-integrable representatives and equal integrals.
 Select a subsequence with summable L1 successive differences from the original Cauchy sequence, then take its a.e. limit.
 `linkedAgreement` gives this correspondence for arbitrary completion elements; `agreement` extracts integral equality.
+
+## Examples
+
+`Examples` contains examples of these results.

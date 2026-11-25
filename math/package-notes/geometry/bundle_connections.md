@@ -1,14 +1,14 @@
-# Connections and covariant derivatives
+# `bundle_connections` notes
 
-Construction details and records for [bundle_connections](../../../libs/geometry/bundle_connections/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/bundle_connections/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `bundle_connections` constructs connections on [smooth_bundles](../../../libs/geometry/smooth_bundles/README.md) smooth bundles.
 Bases are second-countable Hausdorff finite-dimensional real manifolds.
 Express local frame matrices as actual smooth one-forms, prove affine chart-change laws, and glue.
 
-## Local covariant derivatives and connection matrices
+### Local covariant derivatives and connection matrices
 
 `Local[n,r].On[U].Connection` has smooth coefficients \(A_{i,a,b}\).
 `Of[connection].partial` is \(\nabla_i s=\partial_i s+A_i s\), additive with the smooth-function Leibniz rule.
@@ -21,7 +21,7 @@ Express local frame matrices as actual smooth one-forms, prove affine chart-chan
 `Pullback.Between` pulls back forms/matrices and proves covariant-exterior naturality.
 `After` handles composition; `Forms.On.Identity` identities.
 
-## Global connections and existence
+### Global connections and existence
 
 `Real[n,r].On[M].Family[F,space].Of[I,bundle].Connection` assigns B07 frames connection matrices satisfying overlap transformations.
 `existsConnection` constructs this family from smooth partitions of unity.
@@ -38,7 +38,7 @@ Project real matrices \(A\) to \((A-JAJ)/2\); derive transforms from \(J^2=-I\) 
 `existsConnection` asserts complex-connection existence by this construction.
 `Operators` constructs actual \(is\) and proves \(\nabla(is)=i\nabla s\).
 
-## Bundle-valued forms and bundle operations
+### Bundle-valued forms and bundle operations
 
 `BundleForms[n,r].On[M].Family[F,space].Of[I,bundle].Alternating[k,enumeration].Tensor[enumeration]` constructs actual smooth bundles \(E\otimes\Lambda^kT^*M\).
 `Form` is their B07 smooth-section type, with zero sections and fiberwise pure tensors.
@@ -76,7 +76,7 @@ Prove both reconstruction laws and derivative/product/pullback comparisons.
 `Complex.On.Family.Of.InducedPaired.Using.Tensor.value` and `InducedExterior.value` are induced connections on actual B07 complex tensor/exterior bundles.
 `ComplexEvaluation` differentiates smooth complex multilinear forms on varying vectors; `ComplexExteriorGauge` derives exterior-representation derivatives/frame naturality.
 
-## Metrics and Levi–Civita connections
+### Metrics and Levi–Civita connections
 
 `Metric` and `ComplexMetric` handle real symmetric/Hermitian local metrics.
 Construct smooth inverses from positivity.
@@ -92,6 +92,6 @@ Local uniqueness yields affine connection transforms.
 `OnManifold.With[metric].connection`, `laws`, `unique`, `value`, `exists` give global Levi–Civita constructions/properties/uniqueness/existence for B07 tangent metrics.
 `Restriction` and `Euclidean` compare open restrictions and standard Euclidean flat connections.
 
-## Examples and checks
+## Examples
 
 `Examples` handles real/complex rank-zero bundles over dimension-zero bases, \(\nabla1=1\) for nonzero constant one-dimensional connections, flat parallel constants, and Euclidean Levi–Civita.

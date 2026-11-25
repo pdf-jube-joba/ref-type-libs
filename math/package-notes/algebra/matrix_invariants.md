@@ -1,14 +1,14 @@
-# Determinants and invertible matrices
+# `matrix_invariants` notes
 
-Construction details and records for [matrix_invariants](../../../libs/algebra/matrix_invariants/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/algebra/matrix_invariants/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Finite-square determinants, cofactors, adjugates, inverses, and continuity.
 `Ring[K := K, scalars := ring]` covers arbitrary commutative rings, including zero rings and dimension zero.
 Exterior algebras and normalized top-form proofs are shared with [linear_algebra.Commutative](../../../libs/algebra/linear_algebra/README.md).
 
-## Algebraic API
+### Algebraic construction
 
 `Matrix` in `Ring.At[n := n]` is `Fin n -> Fin n -> K`, indexed row first, column second.
 `determinant` substitutes columns into normalized top forms.
@@ -20,7 +20,7 @@ Over commutative rings, prove \(\operatorname{adj}(A)A=A\operatorname{adj}(A)=\d
 For basis changes with proved inverse \(Q=P^{-1}\), show \(\det(QAP)=\det(A)\).
 Transpose/adjugate comparisons follow from the same determinant.
 
-## Matrix families and existing analysis APIs
+### Matrix families and existing analysis APIs
 
 `Topological[K := K, ring := ring].At[n := n]` uses the product topology on `topological_algebra` matrices.
 `determinantContinuous` gives continuity over arbitrary topological commutative rings.
@@ -35,9 +35,11 @@ Reuse existing real/complex reciprocal-continuity proofs.
 `Real.At.Smooth[d := d]` compares `calculus.MatrixFamily` standard bases and entries.
 `inverseFormula` identifies existing inverse-map entries with cofactor formulas; `smoothFormula` transfers `calculus.InverseFamily.regular` smoothness to that formula.
 
-## Examples and checks
+## Examples
 
 [Examples.ref](../../../libs/algebra/matrix_invariants/src/Examples.ref) checks determinant \(1\) in dimension zero and determinant/invertibility/continuous inverses of real shear matrices \(\begin{pmatrix}1&t\\0&1\end{pmatrix}\).
+
+## Historical validation
 
 The historical target/dependency check accepted 1,205 newly checked modules and 88 reused modules, with zero recoveries, duplicates, or lost steps.
 See [historical-record scope](../../../libs/USAGE.md#validation-records).

@@ -1,14 +1,14 @@
-# Concrete singular cohomology examples
+# `cohomology_examples` notes
 
-Construction details and records for [cohomology_examples](../../../../libs/topology/examples/finite_models/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/examples/finite_models/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 Finite-chain computations and comparisons with actual-space singular cohomology.
 Supply coefficients \(A\) as integer-module bundles.
 Explicit cochain values, quotient projections, coefficient changes track products/connecting maps on common representatives.
 
-## Representatives and signs
+### Representatives and signs
 
 Surface constructs semisimplicial chains from vertices/edges/triangles/three faces.
 Edge coboundaries subtract start from end; triangle coboundaries are back minus diagonal plus front.
@@ -28,7 +28,7 @@ a^2=b^2=0,\qquad b\smile a=-a\smile b
 \]
 Factor swaps interchange \(a,b\), acting by \(-1\) in degree two.
 
-## Comparison entries
+### Comparison entries
 
 Graph.On.Geometry.Indexing gives injective integer vertex labels, subdivided-edge order, injective endpoint pairs.
 Apply singular_simplicial realization comparisons to the resulting simplicial complexes.

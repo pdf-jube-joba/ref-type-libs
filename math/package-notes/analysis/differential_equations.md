@@ -1,8 +1,8 @@
-# Differential equations
+# `differential_equations` notes
 
-Construction details and records for [differential_equations](../../../libs/analysis/differential_equations/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/differential_equations/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Euclidean[n].BoundedLipschitzField` represents autonomous vector fields bounded and Lipschitz in maximum norm.
 `On[field, initial]` chooses positive time on both sides of the initial time and constructs Picard operators on the closed unit ball of continuous curves centered at the initial value.

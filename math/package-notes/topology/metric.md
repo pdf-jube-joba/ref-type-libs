@@ -1,12 +1,12 @@
-# Metric spaces and real continuous functions
+# `metric_spaces` notes
 
-Construction details and records for [metric_spaces](../../../libs/topology/metric/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/metric/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Metric topology, metrization, real line/functions, finite partitions of unity.
 
-## Finite partitions of unity
+### Finite partitions of unity
 
 `existsPartition` in `metric_spaces.PartitionOfUnity.Of[source := ..., family := ...].Construction` proves `Partition` exists from compact Hausdorffness/open covers.
 `Partition.parts` is finite lists; each `Entry` has cover opens, continuous unit-interval functions, support-containment proofs.

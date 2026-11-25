@@ -1,8 +1,8 @@
-# Compactly supported K-theory
+# `compact_support_k` notes
 
-Construction details and records for [compact_support_k](../../../libs/topology/compact_support_k/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/compact_support_k/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Entry: `compact_support_k.Support`.
 Actually construct one-point compactifications of locally compact Hausdorff spaces and apply K09 integer groups.
@@ -26,16 +26,7 @@ Supply projection presentations to `Disk`.
 For general bundles, choose `r` with `relative_k_theory.Relative.BundleDisk.existence` and pass `r.presentation`.
 `BundleDisk.With[r].OriginalUnit` gives original-unit-disk homeomorphisms and sphere conditions.
 
-Minimal examples: [Examples.ref](../../../libs/topology/compact_support_k/src/Support/Examples.ref).
-Instantiates all integer groups on finite points and rank-zero/one trivial disk bundles.
-
-```ref
-\import std.Data[].Nat[] \as N;
-\import compact_support_k.Support[].Examples[].TrivialDisk[n := N.Nat^::zero] \as Zero;
-\definition zeroDisk: \Set := Zero.Interior;
-```
-
-## General bundle triples on original spaces
+### General bundle triples on original spaces
 
 `On.BundleModel.From` accepts arbitrary locally trivial complex bundles with the specified base topology.
 `On.BundleTriples[F, G, firstModel, secondModel].Supported[K, compactK].With[alpha]` takes two original-space bundles and an isomorphism outside compact \(K\).
@@ -56,9 +47,7 @@ Compactification representative equality can be tested by `On.Symbols.EqualityCr
 `With.Enlarge.comparison` restricts outside enlarged supports; `equation`, `symbolEquation` agree with original classes/symbols.
 `On.Pullback.BundleTriples.Supported.With.naturality` proves general triples commute with proper pullback.
 
-`Examples.Raw` inputs finite-point trivial bundles, comparing empty/full neighborhood choices.
-
-## Original-space triple relation presentations
+### Original-space triple relation presentations
 
 `On.Triples.Group` generators are supported original-space triples.
 `Relation` includes global isomorphisms, compatible bundle isomorphisms, sums, composition, continuous outside-support isomorphism homotopies.
@@ -68,12 +57,13 @@ Compactification representative equality can be tested by `On.Symbols.EqualityCr
 `DirectSumInput.With.Stabilization` stabilizes by adding globally isomorphic diagonal triples.
 
 `Group.ToK` adds via compact-neighborhood restrictions/zero extensions.
+`FromCompact` and `Group.FromSymbols` compare compactification representatives with these classes; `Group.FromK.LeftInverse` proves the inverse comparison.
 Inverse comparisons add complements to negative local-model bundles, descending through quotient spaces using boundary frames.
 `Triples.Normalize` compares descended pullbacks with originals by gluing local stable and outside-support isomorphisms.
 `Group.Comparison` gives additive two-sided inverses; `Group.EqualityCriterion` equates K-equality with generated geometric equivalence.
 `On.Pullback.Group` constructs proper pullback; `On.Pullback.BundleTriples.Supported.With.GroupNaturality.equation` agrees with actual bundle-triple pullback.
 
-## General finite complexes
+### General finite complexes
 
 `On.FiniteComplexes.Complex` accepts arbitrary finite bundle/differential sequences.
 Foundational `bundle_operations.Operations.Over.Models.Chains.Data` has no length bound; `fold` constructs parity sums and both differentials.
@@ -97,6 +87,24 @@ Identify endpoint parity bundles by specified global isomorphisms.
 
 `Of.Supported.Representatives` connects original-space formal triple representatives of finite complexes to geometric equality criteria.
 `existence` gives formal representatives; `criterion` equates generated representative equivalence with K-equality.
+
+## Examples
+
+Minimal examples: [Examples.ref](../../../libs/topology/compact_support_k/src/Support/Examples.ref).
+Instantiates all integer groups on finite points and rank-zero/one trivial disk bundles.
+
+```ref
+\import std.Data[].Nat[] \as N;
+\import compact_support_k.Support[].Examples[].TrivialDisk[n := N.Nat^::zero] \as Zero;
+\definition zeroDisk: \Set := Zero.Interior;
+```
+
+`Examples.Raw` inputs finite-point trivial bundles, comparing empty/full neighborhood choices.
+
 Three-nonzero-term zero-differential examples: `Examples.ThreeTerm`.
 
-For builds and checks, see [checking the libraries](../../../libs/USAGE.md).
+## Historical validation
+
+At source `caf1837dd3fbb05f29b90ffb95e53af87f3d8583`, the standard workspace check accepted all 10,999 targets: 281 newly checked, 10,718 reused, zero save failures or corrupt cache reads, exit 0.
+
+Focused checks covered general-triple relations and comparisons, proper pullback, finite-complex choice independence, homotopy, support enlargement, sums, stabilization, and formal-representative equality criteria.

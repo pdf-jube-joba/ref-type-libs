@@ -1,8 +1,8 @@
-# Eilenberg–Zilber comparison
+# `singular_eilenberg_zilber` notes
 
-Construction details and records for [singular_eilenberg_zilber](../../../../libs/topology/singular/eilenberg_zilber/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/eilenberg_zilber/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 Compare product-space singular chains with tensor totals of factor chains.
 Expose `singular_products` Alexander–Whitney/shuffle maps with both chain homotopies.

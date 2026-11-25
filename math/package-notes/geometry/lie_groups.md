@@ -1,8 +1,8 @@
-# Foundations of Lie groups
+# `lie_groups` notes
 
-Construction details and records for [lie_groups](../../../libs/geometry/lie_groups/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/lie_groups/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Dimension[n].OnManifold[M].LieGroup` is a group on Hausdorff second-countable smooth \(M\) with smooth multiplication/inversion.
 Joint multiplication smoothness means products of two smooth maps from arbitrary finite-dimensional manifolds are smooth.

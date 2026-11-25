@@ -1,14 +1,14 @@
-# Bundle gluing and linear operations
+# `bundle_operations` notes
 
-Construction details and records for [bundle_operations](../../../libs/geometry/bundle_operations/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/bundle_operations/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `bundle_operations.Operations.Over` constructs gluing and linear operations on [vector_bundles](../../../libs/geometry/vector_bundles/README.md) real/complex bundles.
 Supply the same `K, field, conjugation, scalar` for scalars, topology, and frames.
 Construct total topologies/trivializations; prove bundle-map/isomorphism continuity and inverse laws.
 
-## Cocycles and presentation comparisons
+### Cocycles and presentation comparisons
 
 `Cocycle[X, I, baseSpace, domain, dimension].With[cocycle]` accepts ordinary transitions and identity/composition laws.
 Fibers `Fiber x` are coordinate families compatible with transitions in every chart containing the point.
@@ -23,7 +23,7 @@ Frame changes \(g_j\) yield transitions \(g_k\tau_{\rho(j),\rho(k)}g_j^{-1}\).
 `ChartRestriction`, `GaugeChart`, `CoordinateGauge`, `AtlasChange` also apply to existing bundle charts.
 `ScalarGauge.regular` proves both frame-change continuities for continuous nonzero scalar families.
 
-## Linear operations
+### Linear operations
 
 `Mapping`, `Contramap`, realification/complexification `Maps` construct continuous maps from supplied continuous bundle maps.
 `Hom.Of.Mapping.evaluation` proves evaluation of \(h\mapsto b\circ h\circ a\).
@@ -35,7 +35,7 @@ Each `Pullback.isomorphism` is an actual isomorphism comparing pullback of opera
 Binary operations use `Of[same].Pullback`.
 Including realification/complexification, both comparison directions are fiber identities; compatible frames prove continuity.
 
-## Local models and compatibility
+### Local models and compatibility
 
 `CoordinateSum` concatenates/splits coordinates.
 `TensorFrame` maps pure tensors to coefficient products, proving finite-sum inverses.
@@ -53,13 +53,15 @@ Exposes `DirectSumAssociator`, `DirectSum.Of.Symmetry`, `DirectSumUnit`, `Direct
 `TensorDistribution` constructs \(E\otimes(F\oplus G)\cong(E\otimes F)\oplus(E\otimes G)\) via projections/inclusions/pure tensors, proving both inverses.
 `TensorRightDistribution` constructs right distribution via swap comparisons.
 
-## Examples and checks
+## Examples
 
 [Over.GaugeExample](../../../libs/geometry/bundle_operations/src/Operations/Over/GaugeExample.ref) refines real trivial lines into whole/positive-half-line charts, changing one frame by continuous nonconstant nonzero scalars.
 Constructs comparisons from the newly glued bundle to the original.
 [Over.Examples](../../../libs/geometry/bundle_operations/src/Operations/Over/Examples.ref) applies sums/tensors/duals/Hom/exterior powers, square-map pullback comparisons, Hom evaluation, and associator naturality.
 Includes zero-bundle tensors, zeroth exterior powers, varying-rank two-component tensors, empty-base sums.
 [Operations.Examples](../../../libs/geometry/bundle_operations/src/Operations/Examples.ref) instantiates both scalars and realification/complexification pullback isomorphisms.
+
+## Historical validation
 
 Target/dependency checks passed for 4,265 modules: 271 new, 3,430 source steps, 3,994 reused.
 Peak RSS roughly 4,843 MiB, one worker; zero recoveries/duplicates/reruns/lost steps/cache save failures.

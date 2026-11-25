@@ -1,8 +1,8 @@
-# Commutation homotopies of singular cochains
+# `singular_symmetry` notes
 
-Construction details and records for [singular_symmetry](../../../../libs/topology/singular/symmetry/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/symmetry/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 `On[A, source].forward` composes diagonals with Alexander–Whitney.
 `backward` follows with Koszul tensor swaps.

@@ -1,8 +1,6 @@
 # `cap_models`
 
-Point, relative cross-product and connecting-map examples; missing `Line` source.
-
-The public root declares `Line`, but its source is missing in this checkout; package loading and check success remain unconfirmed.
+Point, relative cross-product and connecting-map examples.
 
 | Entry | Purpose |
 | --- | --- |

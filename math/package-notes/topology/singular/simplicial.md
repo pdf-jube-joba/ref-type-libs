@@ -1,8 +1,8 @@
-# Finite ordered simplicial complexes
+# `singular_simplicial` notes
 
-Construction details and records for [singular_simplicial](../../../../libs/topology/singular/simplicial/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/simplicial/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 `Complex[d].Object` is a downward-closed family of subsets of \(\{0,\ldots,d\}\).
 `Complex[d].On[K].Simplex n` is strictly increasing \((n+1)\)-vertex lists spanning faces.

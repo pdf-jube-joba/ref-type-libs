@@ -1,15 +1,15 @@
-# Real and complex finite-rank vector bundles
+# `vector_bundles` notes
 
-Construction details and records for [vector_bundles](../../../libs/geometry/vector_bundles/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/vector_bundles/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Public entry: `vector_bundles.Bundles`.
 `Bundles.Real.scalar` and `Bundles.Complex.scalar` group [L03](../../../libs/algebra/hermitian_frames/README.md) topological fields/conjugation and existing real/complex dimension uniqueness.
 `Over[K, field, conjugation, scalar]` uses this shared API.
 Reuse [linear_algebra](../../../libs/algebra/linear_algebra/README.md) maps/isomorphisms/bases/traces.
 
-## Bundles and local trivializations
+### Bundles and local trivializations
 
 `Family[X := X, F := F]` takes base \(X\), fiber sets \(F:X\to\mathrm{Set}\).
 `Point` pairs base `base` and vector `vector: F base` dependently; `include`, `projection` insert/project total spaces.
@@ -29,7 +29,7 @@ Rank is not input data.
 `rankLocallyConstant` proves rank locally constant.
 Handles empty bases, dimension zero, varying finite component ranks.
 
-## Pullback and restriction
+### Pullback and restriction
 
 `Of.Pullback[Y, source, f]` constructs actual totals with fibers \(F(f(y))\).
 Topology is induced by the natural embedding into \(Y\times E\); `pulled[regular]` constructs pullback bundles from continuous \(f\).
@@ -45,17 +45,21 @@ Comparisons are fiber identities; universality proves continuity between induced
 `Of.Restriction[U].restricted` restricts arbitrary subspaces via inclusion pullbacks.
 `Restriction.homeomorphism` compares totals with original projection preimages in subspace topology.
 
-## Constructions and examples
+### Basic constructions
 
 `Over.Trivial[X, n, baseSpace].bundle` is trivial bundles over arbitrary bases; `homeomorphism` compares totals with ordinary products.
 `Over.TwoRanks[n, m].bundle` constructs bundles on discrete two-point bases from coproduct topologies.
 Components have ranks \(n,m\); prove both trivialization continuities.
 
+Total induced topology/continuity universality exposed as `topological_constructions.Induced`.
+Check targets/dependencies/examples and full workspace effects of shared topology changes using shared caches.
+
+## Examples
+
 [Examples.ref](../../../libs/geometry/vector_bundles/src/Bundles/Examples.ref) pulls real section \(s(x)=x\) along squares, computing \(s(x^2)=x^2\).
 Checks identity/composite comparisons, empty totals on empty bases, rank-zero bundles, rank-zero/one components, complex lines.
 
-Total induced topology/continuity universality exposed as `topological_constructions.Induced`.
-Check targets/dependencies/examples and full workspace effects of shared topology changes using shared caches.
+## Historical validation
 
 Final target/dependency standard check passed: 38 modules, 548 source steps, 1,380 dependencies reused.
 Peak RSS roughly 1,033 MiB, one worker; zero recoveries/duplicates/reruns/lost steps/cache save failures.

@@ -1,14 +1,14 @@
-# Continuous spectral splitting
+# `spectral_splitting` notes
 
-Construction details and records for [spectral_splitting](../../../libs/algebra/spectral_splitting/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/algebra/spectral_splitting/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 K06 public entry: `spectral_splitting.Spectral`.
 Completed units: [roadmap](../../_roadmap.md).
 Reuses [root clusters](../../../libs/algebra/complex_polynomial_roots/README.md), [polynomial linear algebra](../../../libs/algebra/polynomial_linear_algebra/README.md), [Hermitian local frames](../../../libs/algebra/hermitian_frames/README.md), [bundle complements](../../../libs/geometry/bundle_complements/README.md).
 
-## Projection construction
+### Projection construction
 
 Split characteristic polynomials into root factors \(p\) inside and \(q\) outside the unit circle.
 No common roots gives \(up+vq=1\); Cayley–Hamilton yields decomposition by \(P=v(T)q(T)\), \(R=u(T)p(T)\).
@@ -20,7 +20,7 @@ Compare order-independent factors with K05 continuous local factors, connecting 
 `Spectral.At.Eigenvalues` equates this condition with vanishing of unit-circle eigenvectors.
 `Spectral.InFrame` and `FiniteSpace.On` transport projections through finite frames, choosing unique frame-independent maps.
 
-## Continuous families and bundles
+### Continuous families and bundles
 
 Nearby comparisons use \(H=QP+(I-Q)(I-P)\).
 At \(Q=P\), this is identity; where invertible, \(HP=QH\) gives image isomorphisms.
@@ -29,6 +29,14 @@ General image trivializations apply the matrix construction in bundle frames, li
 For general homotopies, apply B03 finite embeddings to cylinder image bundles, composing projection-family comparisons with embedded-image isomorphisms.
 Matrix families use base compactness; general bundles need compact Hausdorffness for finite embeddings.
 
+### Projection recovery and conjugation for B09
+
+`Circle.At.domainOff` obtains `OffSpectrum` from points in the unit-circle-avoiding region.
+`At.Neighborhood.open` proves the unit-circle-avoiding spectral locus open in matrix space.
+`At.ProjectionRecovery[P, idempotent]` exposes \(2(I-P)\), unit-circle avoidance, and `recovers` recovering spectral projection \(P\).
+`Conjugation.At.On[A, off, real].natural` proves real-matrix actions commuting with coordinate conjugation have conjugation-compatible spectral projections.
+Used in [B09](../../../libs/geometry/bundle_extension/README.md) real/complex neighborhood extensions; see its [validation records](../geometry/bundle_extension.md#historical-validation).
+
 ## Examples
 
 `Examples.Empty` constructs zero-dimensional projections.
@@ -36,15 +44,7 @@ Matrix families use base compactness; general bundles need compact Hausdorffness
 Its `Homotopy` applies to interval families and uses endpoint image comparisons.
 `Examples.MixedRanksHomotopy` pulls a rank-zero/rank-one two-component bundle to a cylinder, applying general comparison to zero-endomorphism spectral images.
 
-## Projection recovery and conjugation for B09
-
-`Circle.At.domainOff` obtains `OffSpectrum` from points in the unit-circle-avoiding region.
-`At.Neighborhood.open` proves the unit-circle-avoiding spectral locus open in matrix space.
-`At.ProjectionRecovery[P, idempotent]` exposes \(2(I-P)\), unit-circle avoidance, and `recovers` recovering spectral projection \(P\).
-`Conjugation.At.On[A, off, real].natural` proves real-matrix actions commuting with coordinate conjugation have conjugation-compatible spectral projections.
-Used in [B09](../../../libs/geometry/bundle_extension/README.md) real/complex neighborhood extensions; see its [validation records](../geometry/bundle_extension.md#validation-and-resuming).
-
-## Validation and resuming
+## Historical validation
 
 Historical upstream [PR #42](https://github.com/pdf-jube-joba/ref-type/pull/42): implementation `1b012836`, workspace inputs matching `cdc57da7`.
 
@@ -55,5 +55,4 @@ Historical upstream [PR #42](https://github.com/pdf-jube-joba/ref-type/pull/42):
 | Workspace | 7,441 modules reused |
 
 All exited 0 with zero save failures, recoveries, duplicate/rerun checks, or lost steps.
-B09-specific additions are covered by its [validation summary](../geometry/bundle_extension.md#validation-and-resuming).
-See [checking the libraries](../../../libs/USAGE.md) for fresh runs and historical-record scope.
+B09-specific additions are covered by its [validation summary](../geometry/bundle_extension.md#historical-validation).

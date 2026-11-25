@@ -1,8 +1,8 @@
-# Bott's basic product
+# `bott_product` notes
 
-Construction details and records for [bott_product](../../../libs/topology/bott_product/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/bott_product/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Bott.ProjectiveLine.Homeomorphism.homeomorphism` explicitly identifies rank-one orthogonal projections on complex two-space with \(S^2\).
 Forward maps use matrix entries as three real coordinates; inverses construct trace-one Hermitian idempotents from sphere points.

@@ -1,13 +1,13 @@
-# Distributions and weak derivatives
+# `distributions` notes
 
-Construction details and records for [distributions](../../../libs/analysis/distributions/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/distributions/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Euclidean test functions, distributions, locally integrable functions, and weak derivatives over Dedekind reals.
 Entry: `distributions.Euclidean[n]`; includes dimension zero.
 
-## Test functions and continuous duals
+### Test functions and continuous duals
 
 `Test` has the same underlying set as existing `lp_spaces.Euclidean[n].SmoothCompact`.
 `TestOperations` constructs addition, scaling, partials, pointwise products, and arbitrary-order `jet directions test`.
@@ -29,7 +29,7 @@ Prove final-topology axioms and compare continuity with stagewise \(\varepsilon\
 `TestTopology.Linear.dualCharacterization` equates these estimates with actual topological continuity.
 Also exposes inverse conversions `ContinuousDual` and `Distribution`.
 
-## Locally integrable functions
+### Locally integrable functions
 
 `Regular.LocallyIntegrable f` expresses measurability and integrability on every compact set.
 `Regular.For[f].pair test` is the actual Lebesgue integral \(\int f\phi\).
@@ -38,7 +38,7 @@ Construct regular distributions from product integrability, linearity, and local
 `Regular.Space` is the a.e. quotient of locally integrable functions; `embed` injects it into distributions.
 Injectivity first separates global L1 functions using convolution/approximate identities, then localizes by compact cutoffs and countable box exhaustion.
 
-## Differentiation and convergence
+### Differentiation and convergence
 
 `Dual.partial T i` is \((\partial_iT)(\phi)=-T(\partial_i\phi)\).
 Shift finite-order bounds by one to prove it a distribution.
@@ -47,9 +47,8 @@ Also exposes addition/scaling compatibility and mixed-partial commutation.
 
 `Dual.Converges` is real convergence on every test function.
 `derivativesConverge` proves compatibility of convergence with arbitrary derivatives; `convergesUnique` proves limit uniqueness.
-`Examples.dirac` and `diracDerivative` are point-evaluation distributions and derivative examples.
 
-## Comparison with existing Sobolev spaces
+### Comparison with existing Sobolev spaces
 
 `Regular.Sobolev` compares existing `functional_analysis.Sobolev[n].On[Open.whole]`.
 Transport actual Lebesgue measure to the whole-space subtype; compare integrals and a.e. equivalence.
@@ -60,14 +59,14 @@ Construct inverse conversions between existing all-partial-family `Test` and sta
 Covers \(1\le p<\infty\), all nonnegative integer orders, and whole Euclidean spaces.
 `Regular.SmoothFunction[f].derivative` proves classical/distribution derivative agreement via A04 integration by parts.
 
-## Support
+### Support
 
 `SupportTheory.support T` is the complement of the union of open sets annihilating all local tests.
 `regularVanishes` uses A04 finite decomposition to annihilate tests supported in this entire union.
 Supports are closed; inclusion in closed sets is equivalent to vanishing on their complements.
 Also proves empty support iff zero distribution, derivative support inclusion in every order, and singleton Dirac support.
 
-## Convolution
+### Convolution
 
 `Convolution.function T rho x` is \(T_y(\rho(x-y))\).
 Kernels `rho` are arbitrary smooth compact-support functions; no global growth condition on \(T\).
@@ -75,9 +74,8 @@ Construct common compact supports and all-order partial formulas for reflected t
 Mean-value finite-order uniform difference-quotient error bounds, followed by local distribution estimates, prove actual partials.
 `Convolution.smooth` gives all-order smoothness; `Differentiation.partial` partial formulas; `DerivativeFormula.iterated` agreement of distribution/kernel derivatives.
 `Convolution.Regular.integral` gives actual convolution integrals for locally integrable functions; `LpComparison.agreement` agrees with existing Lp convolution.
-`Examples.Smoothing` computes Dirac/derivative convolutions.
 
-## Open sets and diffeomorphisms
+### Open sets and diffeomorphisms
 
 `On[U].LocallyConvex` transfers seminorm construction and continuous-dual comparisons to open sets.
 `On[U]` handles tests supported in \(U\) and their continuous duals.
@@ -94,4 +92,11 @@ Multiply tests by the inverse absolute Jacobian.
 Higher chain rules and compact coefficient bounds prove finite-order continuity estimates.
 `Composition.distributions`, `InverseLaw.source/target`, `PullbackIdentity.distribution` give composition, inverse, and identity laws.
 `SmoothRegular.distribution` derives \(e^*T_f=T_{f\circ e}\) from A04 substitution and inverse-Jacobian cancellation.
+
+## Examples
+
+`Examples.dirac` and `diracDerivative` are point-evaluation distributions and derivative examples.
+
+`Examples.Smoothing` computes Dirac/derivative convolutions.
+
 `Examples.Pullback.diracValue` computes point-distribution density factors.

@@ -1,8 +1,8 @@
-# Schwartz spaces and the Fourier transform
+# `fourier_schwartz` notes
 
-Construction details and records for [fourier_schwartz](../../../libs/analysis/fourier_schwartz/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/fourier_schwartz/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Construct finite-dimensional real/complex Schwartz functions, Lebesgue Fourier transforms, Schwartz preservation, Gaussian transforms, and inversion via approximate identities.
 Dimensions are arbitrary natural numbers, including zero.
@@ -29,7 +29,7 @@ Real/imaginary-sum estimates are auxiliary; complex seminorms themselves use com
 `Convolution.partialFunction` and `Convolution.Complex.partial` move convolution partials to the second factor.
 `Convolution.Complex.commutative` swaps both factors.
 
-## Gaussian and normalization
+### Gaussian and normalization
 
 \[
 M_n=\int G_n(x)\,dx,\quad c=M_1,\quad \pi=\frac{c^2}{2},\quad
@@ -57,7 +57,7 @@ f(x)=\frac1{(2\pi)^n}\int\widehat f(\xi)e^{i x\cdot\xi}\,d\xi
 `Inversion.inverse` defines the right-hand side; `theorem` proves equality.
 `inverseSchwartz`, `inverseValue`, `leftInverse`, `rightInverse` give the same inverse as Schwartz functions.
 
-## Proof structure
+### Proof structure
 
 `Decay` constructs integrable common bounds from increasing dyadic-box indicator sums, deriving Schwartz integrability.
 The mean value theorem verifies `lp_spaces.On.Differentiation.derivative` difference-quotient domination; continuity uses `On.Parametric.continuous`.

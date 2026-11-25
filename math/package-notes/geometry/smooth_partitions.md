@@ -1,13 +1,12 @@
-# Smooth cutoffs and partitions of unity
+# `smooth_partitions` notes
 
-Construction details and records for [smooth_partitions](../../../libs/geometry/smooth_partitions/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/smooth_partitions/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Construct flat functions, Euclidean compact cutoffs, and smooth partitions on second-countable Hausdorff manifolds over Dedekind reals.
-Examples: [real line](../../../libs/geometry/smooth_partitions/src/Examples/Line.ref) and [zero-dimensional compact manifolds](../../../libs/geometry/smooth_partitions/src/Examples/Point.ref).
 
-## Analytic constructions
+### Analytic constructions
 
 `Exponential.Global.value` is globally positive exponential with \(E(0)=1\), \(E'=E\).
 Extend existing smooth local ODE solutions by doubling intervals; quotient derivatives/mean values prove agreement.
@@ -23,13 +22,13 @@ Splitting exponential coefficients in half for products proves boundary converge
 `Exponential.Step.value` is a smooth step, zero at \(t\le0\), one at \(t\ge1\), valued in \([0,1]\).
 `Plateau.value` is one on \([-1,1]\), zero outside \((-2,2)\).
 
-## Euclidean spaces
+### Euclidean spaces
 
 `CompactCutoff.Data` stores functions, open neighborhoods of \(K\), value-one proofs, support containment/compactness, range bounds.
 Smoothness uses existing `calculus.Open.Smooth` all-partial specifications.
 Includes dimension zero; empty coordinate products equal one.
 
-## Manifolds
+### Manifolds
 
 Entry: `Manifold[n].On[M]`.
 `IsSmooth f` states actual coordinate functions smooth in every maximal-atlas chart.
@@ -57,7 +56,7 @@ Exposes `FinitePartition.size` and functions/assignments/sum specifications belo
 Its `ZeroExtension.smooth` and `ZeroExtension.Closed.smooth` give support-conditional zero extensions.
 `LocallyFinite.Sum.smooth` constructs locally finite manifold sums by local agreement with finite partial sums.
 
-## Extension by zero of sections
+### Extension by zero of sections
 
 `Sections[F, zero]` takes fiber sets/zeros and finite local coordinates `Frame`.
 Frames have open domains, coordinates/inverses, both inverse laws, and zero preservation.
@@ -68,3 +67,13 @@ Applies to bundles with zero-preserving local coordinates, including linear triv
 Supports are closures of nonzero-vector loci.
 `smooth` proves smoothness when support lies in \(U\); `Closed.smooth` when vanishing off closed \(F\subset U\).
 Uses frame zero preservation and local gluing via `GluingOn.smooth`.
+
+## Examples
+
+Examples: [real line](../../../libs/geometry/smooth_partitions/src/Examples/Line.ref) and [zero-dimensional compact manifolds](../../../libs/geometry/smooth_partitions/src/Examples/Point.ref).
+
+## Historical validation
+
+Standard checks at implementation commit `51799530317db36f73adc63a2d9b2aa743378414` passed all 1,883 target/dependency modules and all 10,233 repository modules.
+Full check: 9,538 newly checked, 695 reused, 0 save failures or corrupt reads; source agreement confirmed.
+Final `periodic_k_theory` recovered one worker under a 10 GiB virtual-memory limit, resumed from a checkpoint, and passed.

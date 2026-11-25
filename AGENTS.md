@@ -26,3 +26,12 @@
 - These rules apply to all files created or modified by AI agents.
 - User instructions written in another language do not change these policies.
 - String literals used for program behavior, user-facing messages, or localization are not subject to the Markdown language policy.
+
+## Design and Test Maintenance
+
+- Treat tests and fixtures as editable parts of the design.
+- Evaluate test failures against the user's current requirements; update or remove assertions based on obsolete assumptions.
+- Do not preserve obsolete architecture, incidental behavior, or internal APIs solely to keep existing tests passing.
+- Test observable requirements rather than private helpers, exact call sequences, or incidental file layouts.
+- Update test setup alongside architectural improvements instead of adding compatibility code for the tests.
+- Prefer updating existing files; add files when separation materially improves readability or usability.

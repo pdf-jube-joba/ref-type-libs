@@ -1,6 +1,17 @@
 # G06 Tubular neighborhoods and collapse maps
 
-<a id="status"></a>
+## Requirements
+
+- Primary implementation: [`tubular_neighborhoods`](../libs/geometry/tubular_neighborhoods/README.md).
+- Construct a diffeomorphism from a zero-section neighborhood in the normal bundle of a compact Euclidean submanifold to a neighborhood of its image.
+- Construct boundary-compatible versions for neat half-space embeddings and families comparing tubular choices.
+- Construct continuous collapse outside the normal disk bundle; prove stabilization, product, and homotopy comparisons.
+
+## Dependencies
+
+- [G05 Embeddings of compact manifolds](../libs/geometry/compact_embeddings/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../libs/geometry/smooth_bundles/README.md)
+- [C02 Disk bundles, sphere bundles, and Thom spaces](c02-thom-spaces.md)
 
 ## Status
 
@@ -19,16 +30,3 @@ An implementation exists, but the following verification remains; full-plan comp
 
 No record confirming successful type checking of the current sources and dependency closure has been found.
 The scope of inspected records is documented in the [roadmap check status](_roadmap.md#progress-and-checks).
-
-## Requirements
-
-- Primary implementation: `tubular_neighborhoods`.
-- Construct a diffeomorphism from a zero-section neighborhood in the normal bundle of a compact Euclidean submanifold to a neighborhood of its image.
-- Construct boundary-compatible versions for neat half-space embeddings and families comparing tubular choices.
-- Construct continuous collapse outside the normal disk bundle; prove stabilization, product, and homotopy comparisons.
-
-## Dependencies
-
-- [G05 Embeddings of compact manifolds](../libs/geometry/compact_embeddings/README.md)
-- [Smooth bundles, frame bundles, and associated bundles](../libs/geometry/smooth_bundles/README.md)
-- [C02 Disk bundles, sphere bundles, and Thom spaces](c02-thom-spaces.md)

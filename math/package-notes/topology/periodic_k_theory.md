@@ -1,8 +1,8 @@
-# Periodic K-theory
+# `periodic_k_theory` notes
 
-Construction details and records for [periodic_k_theory](../../../libs/topology/periodic_k_theory/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/periodic_k_theory/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `periodic_k_theory` constructs relative/reduced Bott and integer complex K-theory from K08.
 Relative groups use closed quotients, negative degrees reduced suspensions, integers parity normal forms.
@@ -39,6 +39,10 @@ Thus `Spheres.Ordinary` gives \(\mathbb Z^2\) in even and \(\mathbb Z\) in odd d
 `BottSpheres.comparison` identifies iterated-smash even-sphere models with suspensions.
 `iteratedBott` identifies successive generators as Bott products; `normalized` gives integer coordinate one.
 
+Large comparison diagrams may need `--memory-mib 10240`.
+
+## Examples
+
 Minimal examples: [Examples.ref](../../../libs/topology/periodic_k_theory/src/Periodicity/Examples.ref), [Examples/Reduced.ref](../../../libs/topology/periodic_k_theory/src/Periodicity/Examples/Reduced.ref).
 
 ```ref
@@ -47,6 +51,3 @@ Minimal examples: [Examples.ref](../../../libs/topology/periodic_k_theory/src/Pe
 \definition pointMinusOne:
   \forall (x: Point.Odd) -> x = Point.oddGroup.base.unit := Point.oddZero;
 ```
-
-For builds and workspace checks from this repository root, see [checking the libraries](../../../libs/USAGE.md).
-Large comparison diagrams may need `--memory-mib 10240`.

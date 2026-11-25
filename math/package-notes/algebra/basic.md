@@ -1,8 +1,8 @@
-# Abstract algebra
+# `algebra` notes
 
-Construction details and records for [algebra](../../../libs/algebra/basic/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/algebra/basic/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Homomorphisms, group completion, quotients, and polynomial rings.
 

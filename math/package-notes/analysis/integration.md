@@ -1,13 +1,13 @@
-# Integration
+# `integration` notes
 
-Construction details and records for [integration](../../../libs/analysis/integration/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/integration/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Riemann integration on bounded Dedekind-real closed intervals and Lebesgue integration by \(L^1\) completion.
 Real estimates/limits use `real.Analysis.Estimates` / `Sequence`.
 
-## Riemann integration
+### Riemann integration
 
 For \(a\le b\), \(x_{n,k}=a+(b-a)k/2^n\), and arbitrary tags \(\xi_k\in[x_{n,k},x_{n,k+1}]\), define
 \[
@@ -26,7 +26,7 @@ Uses uniform refinement and small-interval slope increment estimates.
 Proves the same maximum-norm estimates for vectors, including dimension zero.
 `Continuous.Of.Uniqueness.agrees` uses the mean value theorem to identify continuous functions with the same derivative as initial values plus primitives.
 
-## Lebesgue integration
+### Lebesgue integration
 
 Bound tagged sums of \(|f-g|\) on the same partitions; define `SmallL1`, Cauchy conditions, and equivalence by differences tending to zero.
 `Representation` consists of \(L^1\) Cauchy sequences of Riemann-integrable functions; `Function` is their quotient.

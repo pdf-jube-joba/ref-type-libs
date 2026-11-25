@@ -1,8 +1,8 @@
-# L² Fourier transform and multipliers
+# `fourier_l2` notes
 
-Construction details and records for [fourier_l2](../../../libs/analysis/fourier_l2/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/fourier_l2/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Extend A06 [fourier_schwartz](../../../libs/analysis/fourier_schwartz/README.md) Lebesgue Fourier transforms to unitary isomorphisms on existing [lp_spaces](../../../libs/analysis/lp_spaces/README.md) `On.Complex.Space`.
 Dimensions are arbitrary natural numbers, including zero.
@@ -40,6 +40,8 @@ Extensions use dyadic-error Schwartz approximations; isometry proves Fourier ima
 Completeness gives limits common to all approximations, uniquely defining the map.
 Derivative estimates bound squared symbols by \((1+|\xi|^2)^{|d|}\), then use actual L² norm monotonicity.
 No new mathematical axioms.
+
+## Historical validation
 
 Rechecked all 22 fixed-source A07 modules from source; reused 970 dependencies.
 A06/Lp/complex-Hilbert regressions and the standard full 11,729-target check exited 0.

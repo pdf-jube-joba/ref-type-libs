@@ -1,13 +1,13 @@
-# Change of variables in multiple integrals
+# `change_of_variables` notes
 
-Construction details and records for [change_of_variables](../../../libs/analysis/change_of_variables/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/change_of_variables/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Lebesgue measure, smooth compactly supported functions, and open-set diffeomorphisms over Dedekind reals.
 Measure/integration use `euclidean_measure`, `functional_analysis.Measure`, `product_integration`; differentiation/local inverses use `calculus`, `inverse_implicit`.
 
-## Diffeomorphism change of variables
+### Diffeomorphism change of variables
 
 `Change.theorem n U V e f within` applies in arbitrary dimension to smooth \(e:U\to V\) and smooth compactly supported \(f\) supported inside \(V\):
 \[
@@ -23,7 +23,7 @@ Finally glue local formulas by finite compact-support decompositions.
 `Composition` and `Restriction` prove equality of actual weighted-pullback integrals under composition/restriction.
 `NonlinearExample.integral` applies the theorem to nonlinear shear \((p,q)\mapsto(p-q^2,q)\).
 
-## Linear maps and Jacobians
+### Linear maps and Jacobians
 
 `Linear[n].Generated.measure` proves for invertible \(L\) and arbitrary sets \(S\):
 \[
@@ -40,7 +40,7 @@ On measurable sets this is the Lebesgue transformation law.
 `signedSmooth`, `Composition.signed/absolute`, `Inverse.nonzero/positive/cancellation` prove smoothness, chain rules, inverse nonvanishing/cancellation.
 `Diffeomorphism.Regularity` derives absolute-Jacobian smoothness from square roots of nonzero determinant squares.
 
-## Localization and parameters
+### Localization and parameters
 
 `Euclidean.Localization[U]` transfers local smooth functions with compact zero-extended support in \(U\) to global `SmoothCompact` and integrable representatives.
 `cutoff` returns smooth cutoffs equal to one near compact sets.
@@ -52,7 +52,7 @@ On measurable sets this is the Lebesgue transformation law.
 `Parameters.Compact[function,partial].For[conditions].theorem` constructs dominating functions for parameterized smooth compact-support functions from common finite-measure regions and uniform partial bounds nearby.
 `Parameters.Multivariable.At.theorem` transfers this to every partial derivative in arbitrary finite-dimensional parameters.
 
-## Integration by parts and boundaries
+### Integration by parts and boundaries
 
 `Euclidean.Compact.integralDerivative` proves integrals of partial derivatives of smooth compact-support functions vanish in every coordinate.
 `Compact.IntegrationByParts[f,g,i].theorem` applies to compactly supported \(f\) and arbitrary smooth \(g\):
@@ -71,11 +71,13 @@ Handles Fubini exceptional null sets and concludes boundary-difference integrabi
 `For.theorem` and `Strip.HalfSpace.theorem` in each `Strip`, `Rectangle`, `IntegrationByParts` give actual Euclidean boundary formulas; `Permuted` permutes to arbitrary coordinates.
 Coordinate Borel measurability is explicit.
 
-## Densities and top forms
+### Densities and top forms
 
 `Euclidean.Density.pullback` is \(h\mapsto |\det Df|h\circ f\), with positivity, composition, and inverse recovery.
 `TopCoordinates[U]` gives inverse correspondences between smooth coefficients and top forms \(h\,dx_1\wedge\cdots\wedge dx_n\).
 `TopForm.coordinate` proves actual `euclidean_forms` pullback top coefficients equal \((\det Df)h\circ f\).
 Densities use absolute determinants; oriented top forms use signed determinants.
+
+## Examples
 
 `Examples[n].IdentityOn` checks identity Jacobians/density transforms including dimension zero.

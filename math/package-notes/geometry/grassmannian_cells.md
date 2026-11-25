@@ -1,13 +1,12 @@
-# Grassmannian Schubert cells and CW structures
+# `grassmannian_cells` notes
 
-Construction details and records for [grassmannian_cells](../../../libs/geometry/grassmannian_cells/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/grassmannian_cells/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Real/complex Grassmannian Schubert cells and finite CW structures, standard-inclusion comparisons, oriented real coverings, and stable finite-stage factorizations.
-Historical check results appear under [type checking](#type-checking).
 
-## Schubert symbols and echelon forms
+### Schubert symbols and echelon forms
 
 `Symbols[n, k].Symbol` has strictly increasing zero-based pivot lists.
 `Below` is componentwise order, with reflexivity/transitivity/antisymmetry.
@@ -42,7 +41,7 @@ Reorders pivots and returns echelon forms with the original injective map's imag
 `DecompositionReal.disjoint`, `DecompositionComplex.disjoint` state disjointness of distinct-symbol cells.
 `Symbols.Enumeration` specifies finite symbol sets and duplicate-free enumerations.
 
-## Ambient inclusions
+### Ambient inclusions
 
 `AmbientReal[n, k, m]`, `AmbientComplex[n, k, m]` construct rank-\(k\)-preserving inclusions appending \(m\) zero coordinates.
 `RankTransportReal`, `RankTransportComplex` transport existing stabilization codomain rank \(0+k\) to \(k\), preserving entries/continuity.
@@ -51,7 +50,7 @@ Restriction to original blocks recovers projections, proving injectivity.
 `AmbientReal.CW`, `AmbientComplex.CW` expose standard-inclusion skeleton `cellular`, `reflects` and cellwise `cellHomeomorphism`.
 `CWReal.With.filtrationEquals`, `CWComplex.With.filtrationEquals` compare these with actual constructed finite-CW skeletons.
 
-## Weak topology and finite stages
+### Weak topology and finite stages
 
 `WeakUnion[X, stages, spaces]` constructs weak topology for stages given as subsets of a common set.
 Sets are open iff restrictions to every stage are open.
@@ -72,7 +71,7 @@ Reading finite blocks gives continuous stage inverses; `FiniteStage.homeomorphis
 `weakTopology` characterizes opens by pullback to finite Grassmannians.
 `WeakUnion.CommonTopology` proves stages inherit weak subspace topology; `Maps.exists`, `Spheres.sphereMap`, `Spheres.sphereHomotopy` return continuous actual finite-Grassmannian factorizations.
 
-## Finite coordinates and closed parameter spaces
+### Finite coordinates and closed parameter spaces
 
 `FiniteIndex` converts distinct finite enumerations to finite-index bijections.
 `Symbols.FreeEnumeration` proves free-coordinate finiteness; `Symbols.Column.indexExists` bijects column-\(j\) free rows with \(\mathrm{Fin}(p_j-j)\).
@@ -91,7 +90,7 @@ Reading finite blocks gives continuous stage inverses; `FiniteStage.homeomorphis
 `StandardDisk.interiorImage` identifies interior images with cells; `interiorHomeomorphism` specifies interior homeomorphisms.
 `StandardDisk.cellLaws` uses compact disks and Hausdorff Grassmannians to construct existing `CW.CellLaws`.
 
-## Standard disks and interior algebra
+### Standard disks and interior algebra
 
 `FinitePartition` sums bijections over fibers of finitely many distinct labels.
 `Symbols.FreeCount` applies this to free column entries.
@@ -112,7 +111,7 @@ Free-coordinate bijections or complex realification give `Characteristic.diskExi
 `Rotations.FrameInjectivity` proves equal rotation frames imply equal parameters.
 `Characteristic.interiorSurjective` gives interior preimages for cell points; `injectiveInterior` states interior injectivity.
 
-## Boundaries and finite CW structures
+### Boundaries and finite CW structures
 
 `TriangularGram.At.FlagComparison` states staircase-supported injective frames reduce to echelon pivots bounded by original symbols.
 If first \(j+1\) columns had higher pivots, restricting coefficients to first \(j\) coordinates gives an injection contradicting `Reduction.rankBound`.
@@ -127,7 +126,7 @@ Inverse continuity uses closed images of complements of disk-open sets.
 `CWReal.exists`, `CWComplex.exists` combine finite symbols and characteristic maps, asserting existing `algebraic_topology.CW.FiniteComplex` without assumptions.
 Supply interior coverage/disjointness, lower-dimensional boundaries, and weak topology to this structure.
 
-## Oriented real Grassmannians
+### Oriented real Grassmannians
 
 `OrientedReal[n, k].Orientation` assigns signs to every orthonormal frame of the same plane.
 `Change` constructs frame-change orthogonal matrices, using existing `lie_groups.OrthogonalOrientation.determinantSign`.
@@ -147,9 +146,10 @@ Separate different bases by Hausdorffness and same-base points by local frame si
 Cell dimensions match base cells; `CW.With.projects` states characteristic-map/cover-projection compatibility.
 `filtrationEqualsPreimage` identifies oriented skeletons with preimages of corresponding base skeletons.
 
-## Type checking
+## Historical validation
 
-Historical upstream source `5deadd6563878d1a010b9b628b7e9d68229a9cfe`, checked on 2026-11-20:
+Historical upstream source `5deadd6563878d1a010b9b628b7e9d68229a9cfe`, checked on 2026-11-20.
+These results supersede the earlier parse-only supplement and incomplete 300-second run.
 
 | Run | Result |
 | --- | --- |

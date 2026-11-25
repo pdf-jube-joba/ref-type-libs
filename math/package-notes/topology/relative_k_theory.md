@@ -1,14 +1,14 @@
-# Relative K-groups and negative-degree exact sequences
+# `relative_k_theory` notes
 
-Construction details and records for [relative_k_theory](../../../libs/topology/relative_k_theory/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/relative_k_theory/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Compare bundle triples with reduced added-point-quotient K-groups for compact Hausdorff closed pairs.
 Entry: `relative_k_theory.Relative`.
 Exposes triple/quotient comparisons, negative exactness, excision, Mayer–Vietoris, external products, disk/sphere pairs.
 
-## Groups and comparisons
+### Groups and comparisons
 
 `Pair` takes space `X`, topology `space`, compactness `compact`, Hausdorffness `hausdorff`, closed subspace `subset` and `closed`.
 `Pair.Triple` is two projections and a subspace isomorphism; `Pair.Group` gives relations for extendible isomorphisms/sums/composites/homotopies.
@@ -20,7 +20,7 @@ Includes empty subspaces.
 `Descent`, `FramedClass`, `FramedSum`, `BundleSwitch` construct boundary-framed descent, independence/additivity/stabilization/homotopy invariance.
 `Pair.Mapping.Group` pulls triple groups back via comparisons, exposing addition/zero/comparison naturality.
 
-## Negative degrees, exactness, and naturality
+### Negative degrees, exactness, and naturality
 
 `Negative[original, degree]` defines negative degrees by iterated reduced suspensions.
 `NegativeMap`, `PullbackIdentity`, `PullbackComposition`, `HomotopyInvariance` give pullback/identity/composition/homotopy laws.
@@ -37,7 +37,7 @@ The four maps and image/kernel equality at every internal term are exposed.
 `Pair.Mapping.Augmented.Negative` gives connecting/forgetting/restriction naturality for general closed-pair maps.
 Foundational `PairIteration`, `PairMapping.Iteration` iterate pairs, constructing whole/subspace/quotient suspension comparisons and map compatibility.
 
-## Excision and Mayer–Vietoris
+### Excision and Mayer–Vietoris
 
 `Pair.Excision` explicitly compares original quotients with pairs removing opens contained in closed subspaces.
 Negative-degree comparison: `Excision.Negative`.
@@ -52,7 +52,7 @@ Degree-zero gluing: `ClosedCover.Patching`.
 Construct both rectangular maps from intersection isomorphisms; use B09 Tietze, invertible shears, closed-cover idempotent gluing, image bundles.
 `Patching.Ordinary.existence` uses K01 stable criteria/virtual normal forms to return ordinary classes satisfying both restrictions.
 
-## External products
+### External products
 
 `Smash` constructs compact Hausdorff quotients collapsing both product axes.
 `Smash.External` uniquely lifts degree-zero products relatively, giving biadditivity/zero formulas.
@@ -64,12 +64,32 @@ Boundary \(A\times Y\cup X\times B\) compares pair quotients with smash products
 `External` and `Negative[firstDegree, secondDegree]` give products via comparisons; `Pullback.External`, `Pullback.Negative` naturality.
 Negative output degree: `secondDegree + firstDegree`.
 
-## Disk/sphere bundles and examples
+### Disk and sphere bundles
 
 `DiskPair[p]` constructs compact projection-model disks, closed norm-one boundaries, relative groups.
 `BundleDisk.existence` presents arbitrary compact bundles.
 `BundleDisk.With[r]` with chosen `r` exposes continuous injections/norm conditions; `OriginalUnit.homeomorphism` original-unit-disk homeomorphisms; `sphereEquation` sphere agreement.
 Thus pass disk/sphere pairs to general sequences/products.
+
+### General triples and pullbacks
+
+`Pair.BundleTriples[F, G, firstModel, secondModel].With[alpha]` constructs triple-group `value` and relative `reduced` from arbitrary bundles isomorphic on closed subsets.
+`agreement` agrees with finite projections.
+`Framing.With.equation` proves independence of auxiliary complements trivializing negative bundles.
+`To.With` compares changes by compatible bundle isomorphisms.
+
+`Pair.Mapping.BundleTriples.With.naturality` and `reducedNaturality` give group/relative pullback compatibility.
+`Pair.Mapping.Framed.With.naturality` gives the framed version.
+Uses quotient descent, pullback composition, coordinate-frame compatibility.
+`PullbackCongruence`, `RestrictedPullback`, `PairPullback` expose required isomorphisms/fiber formulas.
+Also used for `compact_support_k` arbitrary-triple localization/naturality.
+
+### Pointed quotients
+
+`Relative.PointPair` exposes pointed equivalences between compact pointed spaces and quotients collapsing their basepoints.
+Degree-zero triple comparisons use this independently of Bott periodicity.
+
+## Examples
 
 `Examples.TrivialDisk[n]` constructs point-trivial rank-`n` bundle coordinate homeomorphisms `diskHomeomorphism`.
 Rank zero/one registered as check targets.
@@ -84,20 +104,7 @@ Rank zero/one registered as check targets.
 `Zero.Disk`, `Line.Disk` are disks; `Zero.Relative`, `Line.Relative` corresponding groups.
 `Examples.zeroBoundaryEmpty` proves rank-zero sphere boundaries empty.
 
-## General triples and pullbacks
-
-`Pair.BundleTriples[F, G, firstModel, secondModel].With[alpha]` constructs triple-group `value` and relative `reduced` from arbitrary bundles isomorphic on closed subsets.
-`agreement` agrees with finite projections.
-`Framing.With.equation` proves independence of auxiliary complements trivializing negative bundles.
-`To.With` compares changes by compatible bundle isomorphisms.
-
-`Pair.Mapping.BundleTriples.With.naturality` and `reducedNaturality` give group/relative pullback compatibility.
-`Pair.Mapping.Framed.With.naturality` gives the framed version.
-Uses quotient descent, pullback composition, coordinate-frame compatibility.
-`PullbackCongruence`, `RestrictedPullback`, `PairPullback` expose required isomorphisms/fiber formulas.
-Also used for `compact_support_k` arbitrary-triple localization/naturality.
-
-## Validation
+## Historical validation
 
 Recorded results in this section belong to the original combined repository.
 See [validation records](../../../libs/USAGE.md#validation-records) for their scope and current rerun instructions.
@@ -113,8 +120,3 @@ Preserves main `f8b80a154a3b61d2dccebd0ea13adc44bfaa4bdb` changes, updating Gras
 Report: `work/k03-resume/workspace-audit-15.{log,json,exit}`; fixed input: `workspace-audit-12.source.json`.
 Confirmed 7,942 input files match final math/manifests.
 Earlier interrupted/resource-limit reports retained in the same directory.
-
-Fixed inputs/checking: [checks and cache](../../../libs/USAGE.md#cache-resources-and-fixed-inputs).
-
-`Relative.PointPair` exposes pointed equivalences between compact pointed spaces and quotients collapsing their basepoints.
-Degree-zero triple comparisons use this independently of Bott periodicity.

@@ -1,6 +1,17 @@
 # A09 Sobolev estimates on Euclidean spaces
 
-<a id="status"></a>
+## Requirements
+
+- Primary implementation: [`euclidean_sobolev`](../libs/analysis/euclidean_sobolev/README.md).
+- Construct integer-order \(H^s\) using weighted Fourier norms; compare nonnegative orders with weak-derivative \(W^{k,2}\).
+- Prove negative-order duality, multiplication by smooth functions, and boundedness of coordinate changes preserving compact support.
+- Expose Sobolev embedding and smoothness from Sobolev regularity in all orders.
+
+## Dependencies
+
+- [A07 Plancherel and Fourier multipliers](../libs/analysis/fourier_l2/README.md)
+- [A08 Distributions and weak derivatives](../libs/analysis/distributions/README.md)
+- [A04 Change of variables in multiple integrals](../libs/analysis/change_of_variables/README.md)
 
 ## Status
 
@@ -18,16 +29,3 @@ The following implementations were inspected in addition to the README; completi
 
 No record confirming successful type checking of the current sources and dependency closure has been found.
 The scope of inspected records is documented in the [roadmap check status](_roadmap.md#progress-and-checks).
-
-## Requirements
-
-- Primary implementation: `euclidean_sobolev`.
-- Construct integer-order \(H^s\) using weighted Fourier norms; compare nonnegative orders with weak-derivative \(W^{k,2}\).
-- Prove negative-order duality, multiplication by smooth functions, and boundedness of coordinate changes preserving compact support.
-- Expose Sobolev embedding and smoothness from Sobolev regularity in all orders.
-
-## Dependencies
-
-- [A07 Plancherel and Fourier multipliers](../libs/analysis/fourier_l2/README.md)
-- [A08 Distributions and weak derivatives](../libs/analysis/distributions/README.md)
-- [A04 Change of variables in multiple integrals](../libs/analysis/change_of_variables/README.md)

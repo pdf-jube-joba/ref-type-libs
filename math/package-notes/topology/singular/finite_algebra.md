@@ -1,8 +1,8 @@
-# Finite models and coefficient comparisons
+# `singular_finite_algebra` notes
 
-Construction details and records for [singular_finite_algebra](../../../../libs/topology/singular/finite_algebra/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/finite_algebra/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 Finite-free-integer/singular chain equivalences give arbitrary-coefficient universal short exact sequences.
 Finite model `homological_algebra.Finite.Bounded.Complex` stores degreewise finiteness, square-zero boundaries, boundedness.

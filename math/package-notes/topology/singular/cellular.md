@@ -1,8 +1,8 @@
-# Finite CW complexes and singular chains
+# `singular_cellular` notes
 
-Construction details and records for [singular_cellular](../../../../libs/topology/singular/cellular/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/cellular/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 `On[A, source, complex]` uses actual Euclidean closed balls for finite-CW characteristic domains.
 `complex` requires continuous characteristic maps/interior inverses, closed images, lower-cell boundaries, cellular weak topology.

@@ -1,11 +1,13 @@
-# Operations in relative Thom cohomology
+# `cohomology_thom` notes
 
-Construction details and records for [cohomology_thom](../../../libs/topology/cohomology_thom/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/cohomology_thom/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Thom.Real.For[X, F, bundle].With[metric]` uses disk/sphere pairs of real metric bundles.
 `Coefficients[R, ring]` takes commutative-ring coefficients; `Additive[M]` integer-module coefficients.
+
+### Disk pairs and relative cohomology
 
 `Thom.StandardFiber[n].With[M]` identifies top cohomology of standard real \(n+1\) disk/sphere pairs with coefficients.
 `lift` and `coordinate` are linear maps both ways; `unique` proves specified-coordinate uniqueness.
@@ -26,6 +28,8 @@ Apply Hom into arbitrary integer modules; compare small chains/direct sums, tran
 `Degree[p].isomorphism` maps \(a\mapsto\pi^*a\smile u\) forward, zero-section pullback backward.
 `euler` proves this Euler class is the unit.
 `ZeroRank.With[M, z].isomorphism` compares with base cohomology in arbitrary integer coefficients/degrees.
+
+### Local disk isomorphisms
 
 `RelativeSuspension.On[A, source, subset].Covering.With[M].At[z].isomorphism` is the degree-one shift for cylinder-pair
 \((I\times A,\partial I\times A\cup I\times B)\) relative cohomology.
@@ -79,6 +83,8 @@ Rank zero uses empty-boundary forgetting/disk projection; successor ranks prove 
 `Fibers.detectedOnFibers` and `uniqueNormalized` prove local classes unique by fiber generators.
 `RelativePullback.On.To.Homeomorphism.Degree[n].isomorphism` is a coefficient-linear pair-homeomorphism isomorphism.
 
+### Bundle charts and gluing
+
 `Thom.Real.For.With.Chart[c]` constructs radial trivialization-to-standard-disk-pair homeomorphisms.
 `Chart.Ring.Degree[p].isomorphism` and `formula` give local cup Thom isomorphisms.
 `Chart.Open` identifies restricted-bundle disk pairs with original chart-corresponding opens.
@@ -110,6 +116,8 @@ Its `Ring.Degree[p].isomorphism`, `formula`, `Additive.below` expose local isomo
 
 `Thom.Real.For.With.Atlas.existsFiniteCW` gets finite bundle-chart covers from finite-CW compactness.
 
+### Orientations and coefficient changes
+
 `Thom.Real.For.With.Local[K, ring].Rank[n].Orientation.SignedOrientation` orientation data consists of fiber classes agreeing with normalized chart generators or negatives.
 Chart dimensions equal \(n\); signed local classes come from disk-pair constructions.
 Finite Mayer–Vietoris gluing constructs classes and isomorphisms while preserving fiber normalization and below-rank vanishing.
@@ -135,6 +143,8 @@ Normalized chart classes agree, giving the same class, Euler, Thom isomorphism, 
 \(H^z(X;K)\cong H^{\operatorname{shift}(n,z)}(D(E),S(E);K)\).
 Nonnegative orders restrict cup isomorphisms to integer modules; negative orders use both groups' vanishing.
 
+### Sphere bundles and Gysin sequences
+
 `Additive[M].Degree[z].forget` and `sphereRestriction` expose two disk-pair long-exact maps.
 `forgetCycles` and `forgetOnClass` compute the first on cochain representatives.
 `Coefficients[R, ring].SphereSequence.Sphere.homeomorphism` identifies sphere bundles with disk boundaries; `isomorphism z` identifies integer boundary/sphere cohomology.
@@ -159,6 +169,8 @@ Groups/maps are integer modules; `LocalDisk.shift n z` implements degree \(z+n\)
 `Degree[z].higherLaw` regrades the final Euler term.
 `Degree[z].Pullback.law` identifies the second with sphere-projection pullback.
 `Integral.Gysin` and `ModTwo.Gysin` are integral and canonical-mod-2 entries.
+
+### Pullbacks and direct sums
 
 `Pullback.Fiber[y].Ring[K, ring].Degree[n].law` gives actual-fiber restriction compatibility for pullback/original bundles.
 `Pullback.Ring.Chart[c].Fiber[y].generator` identifies pulled-chart standard generators with pullbacks of originals.

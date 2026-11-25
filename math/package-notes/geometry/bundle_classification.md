@@ -1,21 +1,21 @@
-# Bundle classifying maps and stabilization (B06)
+# `bundle_classification` notes
 
-Construction details and records for [bundle_classification](../../../libs/geometry/bundle_classification/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/bundle_classification/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Classify finite-rank real/complex bundles on compact Hausdorff spaces using finite-dimensional projection families.
 Uses [B03](../../../libs/geometry/bundle_complements/README.md) embeddings/image projections, [B04](../../../libs/geometry/bundle_homotopy/README.md) homotopy invariance, [B05](../../../libs/geometry/grassmannians/README.md) finite Grassmannians/universal bundles.
 No new axioms added.
 
-## Classifying maps
+### Classifying maps
 
 Entry: `Classification`.
 `Over` is shared across real/complex cases, with scalar arguments as in existing `vector_bundles`.
 
 `AtRank.HasRank` requires \(k\)-dimensional fibers, without continuous global frames.
 
-## Choice independence and bijections
+### Choice independence and bijections
 
 `Over.On[X, baseSpace].Between[p, q].Witness` enlarges ambient dimension to the sum of both presentations and joins zero-padded left-block \(p\) to right-block \(q\) by continuous projection homotopies.
 `Witness.start` and `end` state actual projection-matrix equalities.
@@ -34,7 +34,7 @@ This differs from fixed-ambient finite-stage classification or identifying bundl
 `On.Compact.toBundles` and `fromBundles` biject stabilized homotopy classes with B03 bundle isomorphism classes.
 `On.Compact.For.classification` and `classCriterion` give isomorphism criteria independent of classifying-map/embedding choices.
 
-## Oriented and framed bundles
+### Oriented and framed bundles
 
 `Oriented` treats open positive rays in real determinant cotangent lines \(\Lambda^k E^*\) as orientations.
 `Orientations.Laws` includes nonvanishing, fiberwise existence, sign separation, positive scaling, and same-ray conditions.
@@ -51,7 +51,7 @@ Orientation invariance uses B04 cylinder isomorphisms and `Orientations.Path.end
 `Framed.Between.concordance`, `homotopy`, `leftFormula`, `rightFormula` give stabilized homotopies between arbitrary frame families; `preservesFrame` proves frame preservation.
 Globally framed rank-\(k\) isomorphism classes and stable Stiefel homotopy classes are both singleton; `Framed.uniqueClass` proves the latter.
 
-## Naturality and examples
+### Naturality
 
 - Ordinary classification: `On.Compact.Pullback`, `On.Compact.Hausdorff.Sum.naturality`, `Hausdorff.Stabilization.For.naturality` give pullback/sum/trivial-addition compatibility.
 - Oriented pullback: `Oriented.On.Pullback` and `Oriented.On.Compact.Pullback` also transport determinant rays.
@@ -82,6 +82,8 @@ Construct comparison `Sum.comparison` to the sum of classified factors; `targetO
 `determinantNaturality`, `isomorphism`, `naturality` expose determinant equalities, oriented isomorphisms, and class equalities for transport/classification compatibility.
 Orientation preservation is derived. `With.Changing.independent` handles changes of factor classifications; `Oriented.Stabilization.With.naturality` handles trivial addition.
 These transport a supplied whole-sum orientation; `WhitneySum` and `StandardStabilization` construct standard product orientations.
+
+## Examples
 
 [Minimal examples](../../../libs/geometry/bundle_classification/src/Classification/Examples/BoolLine.ref) classify real lines on discrete two-point spaces.
 [Trivial examples](../../../libs/geometry/bundle_classification/src/Classification/Examples/Trivial.ref) check finite classifying maps, universal comparisons, and stabilized frame homotopies for arbitrary bases/dimensions.

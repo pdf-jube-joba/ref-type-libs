@@ -1,16 +1,14 @@
-# Morse lemma and inertia
+# `morse_lemma` notes
 
-Construction details and records for [morse_lemma](../../../libs/geometry/morse_lemma/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/morse_lemma/README.md) · [Checking](../../../libs/USAGE.md)
 
-Focused-check results, workspace failures and source/binary identities are in the [validation record](morse_lemma-validation.md).
+## Construction
 
 Finite-dimensional symmetric bilinear forms and smooth functions over Dedekind reals.
 Includes dimension zero.
 Entry: `morse_lemma`; differentiation/smooth maps share `calculus`; local inverses/parameterized implicit functions share `inverse_implicit`.
 
-## Bilinear forms and inertia
+### Bilinear forms and inertia
 
 `Inertia[n].Form` is existing `linear_algebra.Commutative.Form.Bilinear`.
 `Symmetric` means argument-swap invariance; `Nondegenerate` means vectors annihilating all vectors are zero.
@@ -32,7 +30,7 @@ Normalize nonzero diagonal coefficients with real square roots.
 Negative-projection traces/Gram–Schmidt frames compare negative dimensions under arbitrary invertible congruences.
 Inverse congruences give reverse bounds, proving both indices independent of normal forms.
 
-## Smooth form families
+### Smooth form families
 
 For smooth symmetric \(A(x)\) with nonsingular \(A(a)\), `Normalization[d, n].On[U].At[A, a].localExistence` constructs a smooth matrix family \(C(x)\) on an open neighborhood satisfying
 \[
@@ -50,7 +48,7 @@ Antisymmetric parts of local preimages of \(A(x)-B\) yield \(BH=H^TB\); \(C=I+H\
 `IndexFamily[d, n].On[U, A, a].localExistence` uses congruence/inertia invariance to prove locally constant negative/positive indices.
 Returned `Local` stores opens, inclusion, basepoint membership, classified pointwise forms, central-index equalities.
 
-## Local normal forms of functions
+### Local normal forms of functions
 
 `Euclidean[n].Function[U, f]` constructs gradients/Hessians of smooth scalars.
 `Critical x` is vanishing of all partials, proved equivalent to zero total derivative.
@@ -79,7 +77,7 @@ Neighborhood `unique` states every critical point inside equals the basepoint.
 Uses local gradient inverses.
 `CriticalPoints.index` and `coindex` are numerical Hessian indices; `At[a].locallyConstant` gives their local constancy.
 
-## Parameters
+### Parameters
 
 `Parametric[p, n].Function[U, f]` splits \((p,q)\), using unknown-\(q\) gradients/Hessians.
 `criticalBranchExists` constructs smooth critical families \(q=c(p)\) through nondegenerate points by implicit functions.
@@ -113,3 +111,36 @@ For example, packages depending on `morse_lemma`, `calculus`, `std` obtain local
     Morse.localExistence Nonlinear.critical Nonlinear.nondegenerate;
 }
 ```
+
+## Historical validation
+
+Historical checks from 2026-11-19, based on upstream main `6e2106dfaf0a5370e84213a1c60fccf126d359a4`, using a rebuilt Rust 1.100.0 release checker.
+[The machine-readable record](../../records/g13-validation.json) preserves source/binary hashes, metrics, and raw-record locations.
+These results do not establish acceptance of the current checkout.
+
+### Targets and dependency closure
+
+`--full-check-local` rechecked all 137 `morse_lemma` modules, including ordinary/parameterized existence, index comparisons, local constancy, and standalone examples.
+The dependency closure accepted 1,926 modules: 142 newly checked and 1,784 reused.
+README examples also passed as standalone packages.
+Cache corruption/save failures, worker recoveries, duplicates, reruns, and missing steps were all zero.
+No cold run rechecked every dependency proof without cache.
+
+No new axioms or unproved parts were added; the implementation uses existing function/set extensionality.
+
+### Workspace check
+
+The workspace driver accepted 68 scopes/7,522 of 15,524 targets across 111 packages, then failed in `euclidean_sobolev` at [Euclidean/Order/Weight.ref:14](../../../libs/analysis/euclidean_sobolev/src/Euclidean/Order/Weight.ref#L14):
+
+```text
+Resolution Error: module arguments do not allow inference holes (`_` or `?`)
+```
+
+The failing `positiveNonzero _ (positive x)` module argument matched the upstream base; sources and targets were unchanged during the run.
+The remaining 8,002 targets, including the failed scope, were unverified by this run.
+G13 and its closure passed in the separate focused check above.
+
+### Rust checks
+
+The upstream workspace tests passed: 34 suites, 384 tests, zero failures or ignored tests.
+`git diff --cached --check` also passed; no Rust/checker source changes were made.

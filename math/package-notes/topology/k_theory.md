@@ -1,13 +1,13 @@
-# Grothendieck rings of bundles (K01)
+# `topological_k_theory` notes
 
-Construction details and records for [topological_k_theory](../../../libs/topology/k_theory/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/k_theory/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Construct commutative \(K^0\) from complex bundles on compact Hausdorff spaces.
 Reuses [B03 classes/complements](../../../libs/geometry/bundle_complements/README.md), [B02 operations](../../../libs/geometry/bundle_operations/README.md), existing [`algebra.GroupCompletion`](../../../libs/algebra/basic/README.md).
 
-## Public API
+### Conventions
 
 `KTheory.On[X, baseSpace, compact, hausdorff]` handles compact-Hausdorff complex bundles.
 `Bundle.value` and `Compare.criterion` compare general bundles with B03 projection classes.
@@ -21,6 +21,9 @@ Reuses [B03 classes/complements](../../../libs/geometry/bundle_complements/READM
 `VariableRanks` constructs arbitrary natural-rank bundles over discrete bases.
 `FiniteDiscrete.Classification` classifies by rank; `FiniteDiscrete.Computation` gives inverse integer-function maps.
 `FiniteDiscrete.RingComputation.isomorphism` and `Point.Ring.isomorphism` identify integer-function rings/integer rings respectively.
+
+## Examples
+
 `Examples` checks positive/negative ranks over empty/point/two-point spaces.
 
 For example, use point-integer virtual bundles as follows.
@@ -34,7 +37,7 @@ For example, use point-integer virtual bundles as follows.
 
 Checked consumers of the same public API: `KTheory.Examples`.
 
-## Validation and resuming
+## Historical validation
 
 Historical upstream [PR #44](https://github.com/pdf-jube-joba/ref-type/pull/44):
 
@@ -46,4 +49,3 @@ Historical upstream [PR #44](https://github.com/pdf-jube-joba/ref-type/pull/44):
 
 All exited 0; package/workspace runs reported zero save failures, recoveries, duplicate/rerun checks, or lost steps.
 Original reports used `work/k01-{package,complete,workspace}`.
-See [checking the libraries](../../../libs/USAGE.md) for fresh runs and historical-record scope.

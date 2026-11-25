@@ -1,13 +1,13 @@
-# Fundamental groupoids and groups
+# `fundamental_groups` notes
 
-Construction details and records for [fundamental_groups](../../../libs/topology/fundamental/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/fundamental/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Quotient continuous real-unit-interval paths by endpoint-fixed homotopies.
 Group multiplication follows the left path first, then the right.
 
-## Descent form of van Kampen
+### Descent form of van Kampen
 
 `VanKampen[A, source, G, group].Cover[family]` handles arbitrary open covers.
 `SmallPath` is paths lying in single cover members.
@@ -20,7 +20,8 @@ Extensions send concatenations to products and are endpoint-homotopy invariant.
 `Descent.AtPoint.homomorphism` returns fundamental-group homomorphisms into specified groups.
 
 Uses finite binary interval subdivisions, agreement across subdivisions, finite square subdivisions/boundary-product gluing.
-## van Kampen theorem
+
+### van Kampen theorem
 
 `TwoOpenSets[A, source, U, V].vanKampen` quantifies basepoints and `Hypotheses`.
 Assumes \(X=U\cup V\), open \(U,V\), path-connected \(U,V,U\cap V\), basepoint in intersection.

@@ -1,14 +1,14 @@
-# Hermitian matrices and continuous local frames
+# `hermitian_frames` notes
 
-Construction details and records for [hermitian_frames](../../../libs/algebra/hermitian_frames/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/algebra/hermitian_frames/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Positive-definite real/complex Hermitian forms, Gram–Schmidt, continuous local frames and inverse coordinates for constant-rank orthogonal projections.
 Finite dimensions include zero; bases are arbitrary topological spaces.
 Complex inner products are conjugate-linear in the first argument and linear in the second.
 
-## Scalars and shared orthonormalization
+### Scalars and shared orthonormalization
 
 Algebraic constructions are shared with [linear_algebra.Hermitian](../../../libs/algebra/linear_algebra/README.md).
 `Hermitian.Scalar` groups real embedding, real part, and field conjugation; real/complex implementations are `Hermitian.Real.scalar` and `Hermitian.Complex.scalar`.
@@ -26,10 +26,12 @@ Inputs need not be orthonormal or continuous; `frameExists` orthonormalizes them
 L01 inverses and constant rank give neighborhood bases/inverse coordinates, then continuous Gram–Schmidt applies.
 `Local` stores the open set, central membership, frame, inverse image coordinates, and continuity of both maps.
 
-## Examples and checks
+## Examples
 
 [Examples.MovingLine](../../../libs/algebra/hermitian_frames/src/Hermitian/Examples/MovingLine.ref) orthonormalizes the continuous column family \((1,z)\), then applies the local-frame theorem to its rank-one projection.
 Specializes to [reals](../../../libs/algebra/hermitian_frames/src/Hermitian/Examples/Real.ref) and [complexes](../../../libs/algebra/hermitian_frames/src/Hermitian/Examples/Complex.ref); also checks dimension-zero complex unitary groups.
+
+## Historical validation
 
 Historical checks accepted 913 newly checked modules and 1,098 reused modules, including the dependency closure.
 Tangent/normal examples and `lie_groups` regressions passed; the final workspace reused 6,852 modules across 65 packages.

@@ -1,21 +1,21 @@
-# Collars and boundary gluing
+# `manifold_gluing` notes
 
-Construction details and records for [manifold_gluing](../../../libs/geometry/manifold_gluing/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/manifold_gluing/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Construct compact-boundary collars, diffeomorphism gluings/doubles, and supported product-corner rounding from actual maps/inverses/charts.
 Uses `boundary_manifolds` corner manifolds and `smooth_partitions` smooth bumps.
 Existence does not assume global collars or post-gluing smooth structures.
 
-## collar
+### Collars
 
 The relative theorem contains collar images in prescribed neighborhoods.
 Stronger extensions agreeing with existing partial collars are not exposed.
 `GlobalPush` smoothly connects compactly supported coordinate push-ins with identity and composes finitely many.
 Positive initial normal velocities yield actual half-space local inverses; compact boundaries uniformize time widths.
 
-## Boundary gluing and doubles
+### Boundary gluing and doubles
 
 `BoundarySeam` constructs quotients from actual boundary diffeomorphisms, proving compact Hausdorffness/second countability.
 `SeamCollar` identifies signed collars homeomorphically with open quotient seams.
@@ -27,7 +27,7 @@ Results retain collars, atlas/construction agreement, actual smooth whole-left/r
 `SeamCollar.Image.Compact.Cover.Inclusions` constructs whole-left/right and signed-seam inclusions as actual smooth maps.
 `CollarMaps` in the same `Cover` glues collar-preserving smooth maps into quotient maps and includes an identity example.
 
-## Rounding products
+### Rounding products
 
 `SupportedRounding` constructs \(\psi(d)=\sqrt{d^2+b(d)}\) from smooth bumps.
 `Higher` regular sublevel \(u+v-\psi(u-v)\geq0\) lies in the orthant, agreeing when \(u\geq3\) or \(v\geq3\).
@@ -43,7 +43,7 @@ The region is closed/compact, modifications stay inside compact interiors, remov
 `Compact.Of.boundaryCover` returns actual `Boundary.Cover`; `noHigherCorners` ensures charts with at most one active boundary coordinate per point.
 `Compact.Of` also exposes compactness, exterior agreement, corner removal.
 
-## Orientations and auxiliary theorems
+### Orientations and auxiliary theorems
 
 `Reflection.Orientation` proves normal-reflection determinants/sign reversal of arbitrary top forms.
 `BoundarySigns` proves outward-normal reversal, two-normal contraction swap, boundary-cancellation signs.

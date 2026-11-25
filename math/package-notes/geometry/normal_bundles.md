@@ -1,8 +1,8 @@
-# Normal bundles of Euclidean immersions
+# `normal_bundles` notes
 
-Construction details and records for [normal_bundles](../../../libs/geometry/normal_bundles/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/normal_bundles/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Dimension[n := n, k := k].On[M := M].Of[i := i]` constructs normal bundles of smooth immersions \(i:M\to\mathbb R^{n+k}\).
 Keeps basepoints in \(M\), not image points, allowing self-intersections.

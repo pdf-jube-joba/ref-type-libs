@@ -1,8 +1,8 @@
-# Maps of spheres
+# `sphere_maps` notes
 
-Construction details and records for [sphere_maps](../../../libs/topology/spheres/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/spheres/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Construct continuous existing-Euclidean-sphere maps and compute singular cohomology actions.
 

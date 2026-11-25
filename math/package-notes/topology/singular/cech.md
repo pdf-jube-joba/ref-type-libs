@@ -1,8 +1,8 @@
-# Chain algebra for Čech comparisons
+# `singular_cech` notes
 
-Construction details and records for [singular_cech](../../../../libs/topology/singular/cech/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/cech/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 `Algebra[R, ring].ProjectiveQuasi[C, D, f].equivalenceExists` constructs chain equivalences retaining forward nonnegative \(f:C\to D\).
 Assumes projective terms, degreewise surjectivity, and kernel cycles bounding inside kernels.

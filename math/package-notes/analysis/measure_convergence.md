@@ -1,10 +1,15 @@
-# A01 validation summary
+# `measure_convergence` notes
 
-Historical work on branch `codex/a01-measure-convergence`, based on upstream main `bd8fd86d`.
-The [package README](../libs/analysis/measure_convergence/README.md) documents the resulting API; use [current checking instructions](../libs/USAGE.md) for new runs.
+[Package API](../../../libs/analysis/measure_convergence/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 The implementation covers monotone convergence, Fatou, dominated convergence and series interchange for real, complex, and finite-dimensional values, including a.e. forms, quotient linearity, and indicator/zero-sequence examples.
 Intermediate work on simple-function refinements and lower-integral additivity is included in those results.
+
+## Historical validation
+
+Historical work on branch `codex/a01-measure-convergence`, based on upstream main `bd8fd86d`.
 
 The final fixed-source checks reported `accepted`, exit 0:
 

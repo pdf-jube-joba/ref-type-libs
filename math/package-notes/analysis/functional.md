@@ -1,13 +1,13 @@
-# Functional analysis
+# `functional_analysis` notes
 
-Construction details and records for [functional_analysis](../../../libs/analysis/functional/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/functional/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Normed/Hilbert spaces and linear functionals over Dedekind reals.
 Uses real vector spaces from `linear_algebra`, real distances from `metric_spaces`, and open-set partials from `calculus`.
 
-## Hahn–Banach
+### Hahn–Banach
 
 `Sublinear` has \(p(0)=0\), subadditivity, and nonnegative-real homogeneity.
 `LinearGraph` is a subspace-functional graph bounded above pointwise by \(p\).
@@ -17,7 +17,7 @@ Uses real vector spaces from `linear_algebra`, real distances from `metric_space
 Construct one-direction extension values from real infima; apply Zorn to unions of partial-extension chains.
 `Functional` and `hahnBanachOnSubspace` in `OnSubspace[subspace]` apply directly to existing `linear_algebra` subspaces/maps.
 
-## Hilbert spaces and Riesz representation
+### Hilbert spaces and Riesz representation
 
 `Hilbert[inner]` requires \(\langle x,x\rangle=\lVert x\rVert^2\) and induced-metric completeness.
 `Riesz.Functional` is a norm-bounded real functional.
@@ -30,9 +30,8 @@ f(x)=\langle y,x\rangle\qquad(x\in V)
 Construct minimum-norm points in closed affine \(f^{-1}(1)\).
 Parallelogram identities make minimizing sequences Cauchy; completeness gives limits, kernel orthogonality yields representation.
 Handle zero functionals separately.
-`Examples.identityVector` checks the real-line identity functional has representing vector \(1\).
 
-## Open mapping theorem
+### Open mapping theorem
 
 `Operators.OpenMapping[f].openMapping` proves bounded surjective maps between real Banach spaces open.
 Inputs: domain/codomain completeness, surjectivity, and domain open sets; outputs: open images.
@@ -42,7 +41,7 @@ Prove the approximation-image set closed; codomain Baire yields a zero neighborh
 Halve errors dyadically; nested closed balls in the domain give exact preimages.
 `Metric.Geometry.Baire` provides dense countable intersections of open dense sets and nonempty interiors in countable closed covers.
 
-## Arzelà–Ascoli
+### Arzelà–Ascoli
 
 `Continuous.Uniform.topology` is the uniform topology on real continuous functions.
 Domains are arbitrary compact spaces, including empty ones.
@@ -52,9 +51,8 @@ Domains are arbitrary compact spaces, including empty ones.
 The proof uses ultrafilters.
 Put point values in compact real intervals and take limits; equicontinuity proves limit continuity.
 Finite subcovers turn pointwise into uniform convergence; apply ultrafilter compactness.
-`Examples.Ascoli` verifies assumptions for constant functions bounded in modulus by \(1\), then applies the theorem.
 
-## Measure, \(L^p\), and Sobolev spaces
+### Measure, \(L^p\), and Sobolev spaces
 
 `Measure.Value` represents nonnegative extended reals as downward-open real cuts, including infinity.
 Measures have σ-algebras and countable additivity.
@@ -87,6 +85,10 @@ for every test function, then take equivalence classes of functions whose weak d
 Supply Lebesgue measure for ordinary \(W^{k,p}(U)\).
 This package does not construct Euclidean Lebesgue measure.
 
-## Checks
-
 On whole Euclidean Lebesgue spaces, [distributions](../../../libs/analysis/distributions/README.md) provides test conversions, distribution-derivative equivalence, and inverse comparisons with existing \(W^{k,p}\) quotients.
+
+## Examples
+
+`Examples.identityVector` checks the real-line identity functional has representing vector \(1\).
+
+`Examples.Ascoli` verifies assumptions for constant functions bounded in modulus by \(1\), then applies the theorem.

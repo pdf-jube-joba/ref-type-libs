@@ -1,13 +1,13 @@
-# CW cofibrations and Puppe sequences (K02)
+# `puppe_sequences` notes
 
-Construction details and records for [puppe_sequences](../../../libs/topology/puppe_sequences/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/puppe_sequences/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Entry: `puppe_sequences.Puppe`.
 Disk/finite-CW homotopy extension, iterated pointed cofibers, reduced-suspension comparisons, contravariant pointed-homotopy Hom exactness.
 
-## Public API
+### Conventions
 
 `Sequence.Arrow` bundles pointed maps.
 Supply two carriers and `Sequence.Details` to `Sequence.pack`; construct sequences via `Sequence.Of`.
@@ -18,16 +18,18 @@ Convention follows cone base time zero/apex time one.
 `Pair.equivalence` accepts existing `algebraic_topology.Cofibration.IsCofibration`, returning equivalences with specified comparisons forward.
 Construct inverses by homotopy extension rather than assuming them.
 
-## Examples and checks
+### Shared constructions
+
+Shared constructions use `topological_constructions.Quotient.Descent`, `Coproduct.ProductUniversal`, `Pushout.Of.Families`, and `RelationQuotient.Families`.
+Product/quotient interchange uses compact Hausdorff intervals.
+[Relative K-groups](../../../libs/topology/relative_k_theory/README.md) uses these sequences and finite-CW comparisons for negative exactness and naturality.
+
+## Examples
 
 `Examples.intervalBoundary` and `Examples.planeBoundary` check one/two-dimensional disk-boundary inclusions.
 `Examples.identityComparison` and `Examples.constantComparison` iterate two-point identity/constant comparisons; `identityOnClasses`, `constantOnClasses` check actual class actions.
 
-Added shared `topological_constructions.Quotient.Descent`, `Coproduct.ProductUniversal`, `Pushout.Of.Families`, `RelationQuotient.Families` APIs.
-Product/quotient interchange uses compact Hausdorff intervals.
-[Relative K03](../../../libs/topology/relative_k_theory/README.md) uses these sequences/finite-CW comparisons.
-
-## Validation and saving
+## Historical validation
 
 Recorded results in this section belong to the original combined repository.
 See [validation records](../../../libs/USAGE.md#validation-records) for their scope and current rerun instructions.
@@ -41,4 +43,3 @@ Full report: `workspace-unbounded.json`; one recovery, `lost_steps` 4,322, rerun
 Successful completion resolved previous time-limit incompleteness.
 Roadmap/K03/B08/C02/T02 links updated to public APIs.
 B09 integrated in [PR #49](https://github.com/pdf-jube-joba/ref-type/pull/49).
-[Relative K-groups](../../../libs/topology/relative_k_theory/README.md) exposes negative exactness/naturality using these foundations.

@@ -1,8 +1,8 @@
-# Clifford algebras and Clifford groups
+# `clifford` notes
 
-Construction details and records for [clifford](../../../libs/algebra/clifford/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/algebra/clifford/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Field[K, field].On[V, space].Of[form]` constructs Clifford algebras from bilinear forms via \(q(v)=\operatorname{form}(v,v)\).
 Quotient the noncommutative free associative coefficient-ring algebra by generator linearity and \(\iota(v)^2=q(v)1\).

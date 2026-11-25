@@ -1,13 +1,13 @@
-# Disk bundles, sphere bundles, and Thom quotients
+# `thom_spaces` notes
 
-Construction details and records for [thom_spaces](../../../libs/topology/thom_spaces/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/thom_spaces/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Implements C02 disk/sphere bundles and Thom spaces.
 For real/complex continuous metrics, constructs metric-independent comparisons, trivial suspensions, sum iterated quotients, finite-CW-pair types, cofibration/relative-singular comparisons.
 
-## Disk bundles and basepoints
+### Disk bundles and basepoints
 
 Entry: `Thom.Over[K, field, conjugation, scalar].For[X, F, bundle].With[metric]`.
 Metrics use continuous positive `bundle_complements`.
@@ -19,7 +19,7 @@ Hence rank zero gives \(X_+\), empty bases a point.
 `class`, `point`, `collapsed`, `quotientContinuous` are basic quotient APIs.
 `Thom.Collapse.Lift` descends continuous maps taking spheres to specified basepoints.
 
-## Comparisons
+### Comparisons
 
 Metric-change total maps send zeros to zero, other vectors to
 \(v\mapsto\lVert v\rVert_h\lVert v\rVert_k^{-1}v\).
@@ -45,7 +45,7 @@ Inputs specify iteration, not disk-model comparison.
 `ordinaryIsomorphism` composes excision/collar comparisons, with actual unpointed \((D(E),S(E))\) relative domains/codomains.
 No sphere-point assumption for rank zero/empty bases.
 
-## Finite CW pairs
+### Finite CW pairs
 
 For finite CW bases, `FiniteBase.Coordinates.sphereFiniteType` identifies actual sphere bundles with finite CW complexes up to homotopy.
 `Real.For.FiniteBase` and `Complex.For.FiniteBase` select standard real coordinates.

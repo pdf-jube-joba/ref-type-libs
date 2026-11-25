@@ -1,14 +1,14 @@
-# Thom classes in complex K-theory
+# `k_theory_thom` notes
 
-Construction details and records for [k_theory_thom](../../../libs/topology/k_theory_thom/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/k_theory_thom/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Continuous complex bundles on compact Hausdorff spaces.
 Entry: `Thom[].For[X, F, bundle, compact, hausdorff]`.
 `thom` lies in total-space \(K^0_c(E)\); `forward` multiplies it by base coefficients.
 
-## Koszul complexes
+### Koszul complexes
 
 `Koszul` constructs pulled-back dual exterior algebras \(\Lambda^k\pi^*E^*\) and contraction by tautological sections.
 `Contraction` and `Algebra` handle degreewise contraction, square zero, graded wedge Leibniz, Cartan relations.
@@ -20,12 +20,12 @@ Compact-base uniform rank bounds package complexes as finite parity complexes.
 `For.Choices`, `For.Bounds`, `For.ChoicesAny` prove coordinate/truncation independence.
 Define `For.thom` as the unique class represented by these complexes.
 
-## Public API
+### Conventions
 
 `BundleIsomorphism` explicitly takes target compactness/Hausdorffness too.
 Prove total pullbacks proper, using actual compactification maps.
 
-## Bott classes and isomorphism proofs
+### Bott classes and isomorphism proofs
 
 `Isomorphism.Point[n]` exposes point-trivial complex \(n\)-bundles and actual Koszul classes.
 Rank-zero classes equal \(S^0\) units.
@@ -43,6 +43,6 @@ Trivialize complementary sums, transfer to Bott, then use double stabilization/a
 
 `Complexification` applies existing continuous complexifications to real bundles, returning complex Koszul classes/Thom isomorphisms.
 
-## Checks
+## Historical validation
 
 Full APIs, K10/B07/G04/A04 regressions, and standard full-repository checks accepted.

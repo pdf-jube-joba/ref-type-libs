@@ -1,8 +1,8 @@
-# Covering spaces and classification
+# `covering_spaces` notes
 
-Construction details and records for [covering_spaces](../../../libs/topology/coverings/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/coverings/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Projection[E, B, total, base, projection]` takes totals/bases/topologies/projections.
 `Covering` requires continuous surjections and local products with discrete fibers near every basepoint.

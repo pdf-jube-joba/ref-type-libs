@@ -1,8 +1,8 @@
-# Tensor duals of finite-free chains
+# `singular_tensor_dual` notes
 
-Construction details and records for [singular_tensor_dual](../../../../libs/topology/singular/tensor_dual/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/tensor_dual/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 `Over[R, ring]` is over commutative rings.
 `Finite[V, rank].Frame` decomposes identity by finite vectors/functionals, including projective dual frames beyond free bases.

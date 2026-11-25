@@ -1,15 +1,15 @@
-# Smooth vector bundles
+# `smooth_bundles` notes
 
-Construction details and records for [smooth_bundles](../../../libs/geometry/smooth_bundles/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/smooth_bundles/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `Real[n,r].On[M].Family[F,space]` and `Complex[n,r].On[M].Family[F,space]` construct constant-rank real/complex smooth bundles on second-countable Hausdorff real manifolds.
 `Bundle[I]` has base-chart/fiber-isomorphism covers and smooth overlap matrices.
 `Of[I,bundle].manifold` is the actual total smooth manifold constructed from local coordinates.
 Real total dimension: \(n+r\); complex: \(n+2r\).
 
-## Sections, maps, and forgetting structure
+### Sections, maps, and forgetting structure
 
 `Of.Sections` sections are fiber-element families with smooth total-space maps.
 Exposes zero sections, base projections, formulas.
@@ -22,7 +22,7 @@ Real `Of.Forget.forget` and complex `Of.Forget.continuous` construct [vector_bun
 Prove total topology/trivialization/inverse continuity; expose `homeomorphism` or two-way `embed`, `recover` with smooth totals.
 Complex `Of.forget` separately returns rank-\(2r\) real smooth bundles.
 
-## Linear operations and metrics
+### Linear operations and metrics
 
 `Paired` takes other-bundle frames over the same charts; `Using` receives transition smoothness.
 Tensor/exterior coordinates take [bundle_operations](../../../libs/geometry/bundle_operations/README.md) finite enumerations.
@@ -36,7 +36,7 @@ Unit weight sums/nonnegative terms give positivity; zero extension off closed su
 Handles empty cover indices.
 Hermitian forms are conjugate-linear first, linear second.
 
-## General linear groups, frame bundles, associated bundles
+### General linear groups, frame bundles, associated bundles
 
 `GeneralLinear` constructs finite-dimensional automorphism groups.
 `MatrixModel.homeomorphism` identifies open nonzero-determinant coefficient matrices, proving continuous products/inverses.
@@ -68,12 +68,14 @@ Also constructs identity representation `standard`.
 `Of.Associated[s,representation].associated` glues via represented transitions \(\rho(\tau_{ij})\).
 Proves identity/triple cocycles, local fiber isomorphisms, actual transition formulas/smoothness.
 
-## Comparison with existing geometry
+### Comparison with existing geometry
 
 `Tangent.On.bundle` and `Normal.On.Of.bundle` transfer existing tangent/normal frames to general smooth bundles.
 Tangent bundles expose `FrameComparison.diffeomorphism`; normal bundles expose total topology/projection agreement.
 `Normal.On.Of.Splitting.directSum` is the general sum with total topology matching existing tangent/normal decompositions.
 `Splitting.diffeomorphism` exposes existing decompositions to ambient trivial bundles.
 `Stabilization.diffeomorphism` gives stabilized-normal/original-normal-times-scalar diffeomorphisms; `splittingCompatibility` sum compatibility.
+
+## Examples
 
 [Examples](../../../libs/geometry/smooth_bundles/src/Examples.ref) gives metrics on real/complex rank-zero bundles over dimension-zero bases and identity representations for both scalars.

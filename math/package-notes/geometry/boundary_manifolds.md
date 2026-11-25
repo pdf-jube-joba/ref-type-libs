@@ -1,14 +1,14 @@
-# Manifolds with boundary and corners
+# `boundary_manifolds` notes
 
-Construction details and records for [boundary_manifolds](../../../libs/geometry/boundary_manifolds/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/boundary_manifolds/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Local models intersect open finite-dimensional Dedekind-real sets with orthants constraining selected coordinates nonnegative.
 `Dimension.Manifold` has local homeomorphisms to these models, open covers, smoothly extendible transitions, Hausdorffness, and second countability.
 One constraint gives half-spaces, all give orthants, none give ordinary open sets.
 
-## Coordinate invariance
+### Coordinate invariance
 
 Smoothness assumes existence of open-set extensions.
 Agreement of extension derivatives and cone preservation are not inputs.
@@ -26,7 +26,7 @@ For regular defining functions, `Sublevel.Of.Face.Kernel` exposes strict inward/
 `Neat.At.Coordinates.criterion` equates surjectivity with active-coordinate normal equations.
 Identity example: `NeatIdentity`.
 
-## Faces and examples
+### Boundary faces
 
 `cover` in `Boundary.Build` covers the boundary by half-space charts.
 At corners, `Face.On` retains remaining constraints, constructing faces as corner manifolds.
@@ -40,6 +40,8 @@ Use actual local diffeomorphisms from G02 `Submersion.localExistence` to straigh
 `Disk[n]` uses \(1-\sum_i x_i^2\), proving surjectivity from sphere radial derivatives.
 `Disk.boundary` is the general boundary construction; `regularBoundary` is the G02 regular-value sphere.
 `Interval.At.criterion` identifies interval boundaries with endpoints; `Cylinder.On.At.criterion` identifies product boundaries with two end faces.
+
+## Examples
 
 [Examples.ref](../../../libs/geometry/boundary_manifolds/src/Examples.ref) instantiates half-lines, planar orthants, face embeddings, disks, intervals, strips, and ordinary interiors.
 `Examples.Nonlinear` checks smoothness/derivatives of \(t\mapsto t^2\) on half-lines.

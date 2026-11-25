@@ -1,14 +1,14 @@
-# Bundle extension from closed subspaces (B09)
+# `bundle_extension` notes
 
-Construction details and records for [bundle_extension](../../../libs/geometry/bundle_extension/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/geometry/bundle_extension/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Extend real/complex functions, bundles, maps, and isomorphisms from closed \(A\) in compact Hausdorff \(X\).
 Extend bundles to open neighborhoods of \(A\), constructing restriction comparisons.
 No assumptions exclude empty subspaces, dimension zero, or componentwise varying ranks.
 
-## Public API
+### Conventions
 
 Entry: `bundle_extension.Extension`.
 `Real`, `Complex` take base set `A`, topology `source`, closed subset `subset`.
@@ -18,7 +18,7 @@ Usually set `baseSpace := source.baseSpace`, `sourceSame := \refl(source.baseSpa
 Bundle-extension `Witness` stores finite projections/matrix extensions; `With` exposes `domain`, `open`, `contains`, `Fiber`, `extended`, `restricted`, `comparison`.
 Isomorphism-extension `Result` stores open neighborhoods, isomorphisms with continuous inverses, and agreement with supplied closed-subspace isomorphisms.
 
-## Construction
+### Construction
 
 Real Tietze uses normality/Urysohn functions and continuous limits of uniform geometric-error approximations.
 Apply separately to real/imaginary parts for complex functions.
@@ -35,7 +35,7 @@ Encode closed-subspace maps as rectangular matrices, extend entries, project bac
 For isomorphisms, extend both maps and restrict to common open neighborhoods where both composites invert.
 `Over.Endomorphisms` extends endomorphisms by identity on trivial complements, constructing inverses from nonzero determinant loci and continuous matrix inverses.
 
-## Extension comparison and relative triples
+### Extension comparison and relative triples
 
 Restrict two extensions to common neighborhoods, compose closed-subspace comparisons, and pass to `RealLocalIsomorphisms` or `ComplexLocalIsomorphisms`.
 `extend` constructs isomorphisms on smaller neighborhoods agreeing with specified comparisons.
@@ -56,7 +56,7 @@ These transport specified extensions without requiring uniqueness of choices in 
 `Examples.EmptyRealBundle`, `EmptyComplexBundle` instantiate extensions from empty closed subspaces.
 Also checks real/complex identity matrices in dimensions zero/one.
 
-## Validation and resuming
+## Historical validation
 
 Historical upstream [PR #49](https://github.com/pdf-jube-joba/ref-type/pull/49): implementation `fb8cc1a36a3f343e4e88fbd44ae75790e5c8567f`, fixed-input baseline `c5632cf7bf185d6c0d47ea290e7e8973c32c1c04`.
 
@@ -67,4 +67,3 @@ Historical upstream [PR #49](https://github.com/pdf-jube-joba/ref-type/pull/49):
 
 Both exited 0 with zero save failures, recoveries, duplicate/rerun checks, or lost steps.
 Original reports: `work/b09-resume/{package,workspace}-final.*`.
-See [checking the libraries](../../../libs/USAGE.md) for fresh runs and historical-record scope.

@@ -1,8 +1,8 @@
-# Integer/nonnegative tensor-chain comparison
+# `singular_tensor_bridge` notes
 
-Construction details and records for [singular_tensor_bridge](../../../../libs/topology/singular/tensor_bridge/README.md).
-See [building and checking](../../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../../libs/topology/singular/tensor_bridge/README.md) · [Checking](../../../../libs/USAGE.md)
+
+## Construction
 
 `Integer.Factor[C].With[negative]` gives chain isomorphism `isomorphism` and equivalence `equivalence` between negative-vanishing integer `C` and zero-extended nonnegative restrictions.
 Nonnegative maps retain elements; negative maps send to zero.

@@ -1,8 +1,8 @@
-# Product measures and iterated integrals
+# `product_integration` notes
 
-Construction details and records for [product_integration](../../../libs/analysis/product_integration/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/analysis/product_integration/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 `product_integration` provides σ-finite products, Tonelli/Fubini, and convolution estimates.
 Measure/real integration: `functional_analysis.Measure`; Euclidean measure: [euclidean_measure](../../../libs/analysis/euclidean_measure/README.md); complex/finite-dimensional integration: [measure_convergence](../../../libs/analysis/measure_convergence/README.md).
@@ -13,18 +13,6 @@ Split into disjoint increments; `Product[A, B, mu, nu, left, right].measure` sum
 `Product.sigmaFinite` proves the product itself σ-finite.
 `Product.Rectangle.formula` gives extended double-series formulas for measurable rectangles; `FiniteRectangle.theorem` gives product formulas when both measures are finite.
 `Symmetry.map` expresses measure-preserving factor swaps.
-
-```ref
-\import product_integration.Integration[
-  A := A, B := B, mu := mu, nu := nu, left := left, right := right] \as F;
-\import product_integration.Product[
-  A := A, B := B, mu := mu, nu := nu, left := left, right := right] \as P;
-\import product_integration.ProductSigma[
-  A := A, B := B, left := mu.sigma, right := nu.sigma] \as S;
-\import functional_analysis.Measure[A := S.Point].Integral[mu := P.measure] \as I;
-
-\definition example: \forall (f: I.Representatives) -> \exists F.AEFubini[f] := F.fubini;
-```
 
 `Integration.tonelli` identifies product lower integrals of nonnegative measurable real functions with iterated slice lower integrals.
 Includes infinite inner integrals; `ExtendedIntegral.lowerIntegral` represents outer extended-nonnegative integration.
@@ -49,4 +37,19 @@ Joint measurability is an explicit sufficient product-σ-algebra condition.
 `Euclidean[n].translation` gives measure-preserving \(x\mapsto x-a\); `Euclidean[n].Convolution` is the Euclidean API.
 
 Auxiliary APIs: π–λ for generated σ-algebras, finite-measure uniqueness, real-integral transport by measure-preserving maps, lower integrals of countable measure sums, suprema/nonnegative-series interchange.
+
+## Examples
+
+```ref
+\import product_integration.Integration[
+  A := A, B := B, mu := mu, nu := nu, left := left, right := right] \as F;
+\import product_integration.Product[
+  A := A, B := B, mu := mu, nu := nu, left := left, right := right] \as P;
+\import product_integration.ProductSigma[
+  A := A, B := B, left := mu.sigma, right := nu.sigma] \as S;
+\import functional_analysis.Measure[A := S.Point].Integral[mu := P.measure] \as I;
+
+\definition example: \forall (f: I.Representatives) -> \exists F.AEFubini[f] := F.fubini;
+```
+
 `Examples[n]` has checked zero Fubini, zero/arbitrary-integrable convolution, and box-comparison examples.

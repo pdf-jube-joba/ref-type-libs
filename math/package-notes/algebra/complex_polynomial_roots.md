@@ -1,15 +1,15 @@
-# Complex root clusters and finite symmetric products
+# `complex_polynomial_roots` notes
 
-Construction details and records for [complex_polynomial_roots](../../../libs/algebra/complex_polynomial_roots/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/algebra/complex_polynomial_roots/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Public entry: `complex_polynomial_roots.Roots`.
 Uses [K13](../../../libs/algebra/fundamental_algebra/README.md) complete factorization, multiplicity-preserving root-list permutations, and root-to-coefficient `RootProduct`.
 Degree-\(n\) monic coefficient space has the usual product topology on ascending coefficients \(\mathbf C^n\), omitting the leading \(1\).
 Dimension zero represents constant polynomial \(1\) and empty root families.
 
-## Coefficients and root families
+### Coefficients and root families
 
 `Roots.Vector n` is `Fin n -> Complex`.
 `polynomial n p` is the existing abstract polynomial from coefficients; `product n a` is \(\prod_i(X-a_i)\).
@@ -21,7 +21,7 @@ Dimension zero represents constant polynomial \(1\) and empty root families.
 Root bounds put preimages of sufficiently small coefficient neighborhoods inside compact root boxes.
 These estimates prove `closedMap` and `quotientMap`, yielding continuity of the inverse from coefficients to root families.
 
-## Factors in separated regions
+### Factors in separated regions
 
 `Separated[U := U, V := V]` takes two regions and selects roots in \(U\) with multiplicities.
 `At[n].laws` proves selection locally constant within disjoint open regions \(U,V\).
@@ -46,11 +46,13 @@ Thus regional root counts are locally constant; splitting repeated roots preserv
 For multiple separated clusters, apply to each cluster and the remaining region.
 `Cluster.Families[X].pullback`, `regular`, `natural` give application to arbitrary continuous coefficient families and compatibility with base maps.
 
-## Examples and checks
+## Examples
 
 [Examples.ref](../../../libs/algebra/complex_polynomial_roots/src/Roots/Examples.ref) separates \(1,-1\) by positive/negative real part, constructing continuous degree-one factors.
 For repeated roots \(1,1\) in one region, constructs a degree-two factor and checks multiplicities using actual root lists.
 Also includes continuity from arbitrary monic quadratics to unordered roots and the zero-dimensional homeomorphism.
+
+## Historical validation
 
 Target/dependency checks passed: 27 new modules, 380 source-check steps, 1,456 dependency modules reused.
 Full fixed-final-source workspace check also passed, reusing verified caches for 68 packages and 6,936 modules.

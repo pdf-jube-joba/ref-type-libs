@@ -150,7 +150,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [topology/spheres](topology/spheres/README.md) | `sphere_maps` | Sphere orientations, reflection and circle integer-power degrees |
 | [topology/examples/cohomology](topology/examples/cohomology/README.md) | `cohomology_models` | Empty/contractible/sphere computations and relative-theory examples |
 | [topology/examples/finite_models](topology/examples/finite_models/README.md) | `cohomology_examples` | Finite graphs, torus, real projective plane: groups/products/induced maps |
-| [topology/examples/cap](topology/examples/cap/README.md) | `cap_models` | Point, relative cross-product and connecting-map examples; missing `Line` source |
+| [topology/examples/cap](topology/examples/cap/README.md) | `cap_models` | Point, relative cross-product and connecting-map examples |
 | [topology/examples/cells](topology/examples/cells/README.md) | `cell_spaces` | Group completion, homotopy, quotient/cell, matrix, finite-space and simplex examples |
 
 ## Type checking

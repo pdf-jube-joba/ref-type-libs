@@ -1,8 +1,8 @@
-# Stable clutching linearization (K07)
+# `clutching_linearization` notes
 
-Construction details and records for [clutching_linearization](../../../libs/topology/clutching_linearization/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/topology/clutching_linearization/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Entry: `clutching_linearization.Linearization`.
 Reuses K04 Laurent approximation, K06 spectral splitting, K01 bundle classes/K0.
@@ -12,7 +12,7 @@ Shears/signed swaps share `linear_algebra.Commutative.Blocks`, `Rotation` implem
 Existing field `galois` coefficient operations and `polynomial_linear_algebra.Field.Representatives.exists` share it.
 Expose K04 `Circle.Coefficients.valueContinuous` and use evaluation continuity.
 
-## Connecting proofs
+### Connecting proofs
 
 Compare adding monic-companion linear factors with triangular blocks by continuous similarity.
 Zero factors increase rank corrections; outside-circle factors preserve corrected indices.
@@ -20,7 +20,7 @@ Error-controlled Laurent approximation of arbitrary invertible homotopies and en
 Common shift/degree sum presentations give polynomial spectral-index additivity.
 Standard-loop recovery and clutching products give both inverse identities for the basic product theorem.
 
-## Validation and resuming
+## Historical validation
 
 Historical upstream [PR #46](https://github.com/pdf-jube-joba/ref-type/pull/46):
 
@@ -32,4 +32,3 @@ Historical upstream [PR #46](https://github.com/pdf-jube-joba/ref-type/pull/46):
 | Rust workspace / format / Clippy | 383 tests passed; format and Clippy passed |
 
 Library runs exited 0 with zero save failures; final runs reported zero recoveries, duplicates, or lost steps.
-See [checking the libraries](../../../libs/USAGE.md) for fresh runs and historical-record scope.

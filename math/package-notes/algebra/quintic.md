@@ -1,13 +1,13 @@
-# General quintic insolubility by radicals
+# `quintic` notes
 
-Construction details and records for [quintic](../../../libs/algebra/quintic/README.md).
-See [building and checking](../../../libs/USAGE.md) for current commands.
-The API overview is maintained in the package README; recorded checks describe earlier runs.
+[Package API](../../../libs/algebra/quintic/README.md) · [Checking](../../../libs/USAGE.md)
+
+## Construction
 
 Package: `quintic`.
 Use `galois` field extensions, minimal polynomials, automorphism extensions, and derived series to prove radical insolubility of the quintic from five independent roots.
 
-## Theorem
+### Theorem
 
 Take algebraically closed constants \(C\) and \(C\)-algebraically independent \(r_a,r_b,r_c,r_d,r_e\).
 Ambient \(K\) is countable, algebraically closed, and algebraic over \(C(r_a,r_b,r_c,r_d,r_e)\).
@@ -30,7 +30,7 @@ Supply an enumeration of all \(K\) elements as a module argument.
 Algebraic independence means the multivariate evaluation kernel is zero.
 `Distinctness.independentImpliesDistinct` derives distinct roots.
 
-## Proof structure
+### Proof structure
 
 1. Prove variable permutations preserve polynomial-ring relations.
 2. Independence preserves polynomial-fraction relations under permutations, constructing isomorphisms of \(C(r_a,r_b,r_c,r_d,r_e)\).
@@ -43,7 +43,9 @@ Algebraic independence means the multivariate evaluation kernel is zero.
 Extension of root permutations and radical-fixing properties are proved conclusions.
 Classical choice uses existing `classicalIndefiniteChoice`.
 
-## Modules used
+## Examples
+
+### Imports
 
 ```text
 \import quintic.Generic[].Field[K := K, field := field]
