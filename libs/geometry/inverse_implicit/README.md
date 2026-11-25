@@ -72,5 +72,5 @@ Prove inverse laws on kernels and injective inclusion derivatives.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/release/cli libs/geometry/inverse_implicit --module inverse_implicit --full-check-local --memory-mib 8192 --cache-stats
+ref-type/target/release/cli libs/geometry/inverse_implicit --module inverse_implicit --full-check-local --memory-mib 8192 --cache-stats
 ```

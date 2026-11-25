@@ -19,5 +19,5 @@ Instantiate public libraries from another package to check analysis/exterior/man
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/geometry/coordinate_calculus --module coordinate_calculus --full-check-local --diagnostics compact
+ref-type/target/debug/cli libs/geometry/coordinate_calculus --module coordinate_calculus --full-check-local --diagnostics compact
 ```

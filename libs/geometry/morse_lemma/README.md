@@ -135,7 +135,7 @@ For example, packages depending on `morse_lemma`, `calculus`, `std` obtain local
 
 ```sh
 mkdir -p work
-reftype/target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json work/g13-target.json
+ref-type/target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json work/g13-target.json
 ```
 
 Use shared caches to check all target modules/loaded dependencies.

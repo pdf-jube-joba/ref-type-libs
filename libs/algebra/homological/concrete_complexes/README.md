@@ -16,7 +16,7 @@
 [Build and check](../../../USAGE.md) from the repository root:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/homological/concrete_complexes --module concrete_complexes --memory-mib 15872 --diagnostics compact
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/algebra/homological/concrete_complexes --module concrete_complexes --memory-mib 15872 --diagnostics compact
 ```
 
 Select examples with `--module concrete_complexes.Finite.Bounded.UniversalCoefficient` and similar options.

@@ -50,5 +50,5 @@ Auxiliary APIs: π–λ for generated σ-algebras, finite-measure uniqueness, re
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/release/cli libs/analysis/product_integration --module product_integration --diagnostics compact --no-progress --memory-mib 6144
+ref-type/target/release/cli libs/analysis/product_integration --module product_integration --diagnostics compact --no-progress --memory-mib 6144
 ```

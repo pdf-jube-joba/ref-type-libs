@@ -49,7 +49,7 @@ Reuse existing real/complex reciprocal-continuity proofs.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/algebra/matrix_invariants --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs/algebra/matrix_invariants --memory-mib 8192 --cache-stats
 ```
 
 The historical target/dependency check accepted 1,205 newly checked modules and 88 reused modules, with zero recoveries, duplicates, or lost steps.

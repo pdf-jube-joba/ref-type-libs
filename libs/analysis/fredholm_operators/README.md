@@ -68,5 +68,5 @@ Direct-sum norms use square roots of inner products; component Cauchy sequences 
 
 ```sh
 mkdir -p work
-reftype/target/release/cli libs/analysis/fredholm_operators --module fredholm_operators --full-check-local --diagnostics compact --cache-stats --time-limit-seconds 300 --report-json work/a11-target.json
+ref-type/target/release/cli libs/analysis/fredholm_operators --module fredholm_operators --full-check-local --diagnostics compact --cache-stats --time-limit-seconds 300 --report-json work/a11-target.json
 ```

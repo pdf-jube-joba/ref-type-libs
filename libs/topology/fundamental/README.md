@@ -50,5 +50,5 @@ Finally prove both restrictions and uniqueness.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/topology/fundamental --module fundamental_groups
+ref-type/target/debug/cli libs/topology/fundamental --module fundamental_groups
 ```

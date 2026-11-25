@@ -155,4 +155,4 @@ Historical upstream source `5deadd6563878d1a010b9b628b7e9d68229a9cfe`, checked o
 | Temporary G06 integration | 13,276/15,750 accepted; disk exhaustion and subsequent memory-related interruption left 2,474 unconfirmed |
 
 No new axioms or unproved replacements were added; neither workspace run established full success.
-See [raw validation records](../../../reftype/work/b08-type-check/README.md) for commits, commands, diagnostics, and check/reuse counts, and [checking the libraries](../../USAGE.md) for current runs.
+See [raw validation records](../../../ref-type/work/b08-type-check/README.md) for commits, commands, diagnostics, and check/reuse counts, and [checking the libraries](../../USAGE.md) for current runs.

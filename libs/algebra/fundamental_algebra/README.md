@@ -62,8 +62,8 @@ Public APIs can be imported from children of [Complex.ref](src/Complex.ref).
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/algebra/fundamental_algebra --memory-mib 8192 --cache-stats
-reftype/target/debug/cli libs/algebra/fundamental_algebra --full-check-local --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs/algebra/fundamental_algebra --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs/algebra/fundamental_algebra --full-check-local --memory-mib 8192 --cache-stats
 ```
 
 Check targets, all dependencies, and examples using the shared workspace cache.

@@ -110,8 +110,8 @@ This package does not construct Euclidean Lebesgue measure.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/analysis/functional --module functional_analysis
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/analysis/functional --module functional_analysis.Examples
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/analysis/functional --module functional_analysis
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/analysis/functional --module functional_analysis.Examples
 ```
 
 Share workspace `libs/refcache/`.

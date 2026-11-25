@@ -83,5 +83,5 @@ Providing algebraic-closure structure requires proofs of algebraicity and algebr
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/galois --module galois
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/algebra/galois --module galois
 ```

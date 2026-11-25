@@ -48,7 +48,7 @@ Specializes to [reals](src/Hermitian/Examples/Real.ref) and [complexes](src/Herm
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/algebra/hermitian_frames --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs/algebra/hermitian_frames --memory-mib 8192 --cache-stats
 ```
 
 Historical checks accepted 913 newly checked modules and 1,098 reused modules, including the dependency closure.

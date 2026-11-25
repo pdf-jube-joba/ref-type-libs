@@ -21,5 +21,5 @@ Antisymmetry follows from alternation, so characteristic \(2\) is included.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/lie_algebras --module lie_algebras
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/algebra/lie_algebras --module lie_algebras
 ```

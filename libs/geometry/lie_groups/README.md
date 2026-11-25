@@ -99,5 +99,5 @@ Derivation/left invariance survive commutators; construct `lie` as an endomorphi
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/geometry/lie_groups --module lie_groups
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/geometry/lie_groups --module lie_groups
 ```

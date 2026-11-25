@@ -62,8 +62,8 @@ Also includes continuity from arbitrary monic quadratics to unordered roots and 
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/algebra/complex_polynomial_roots --memory-mib 8192 --cache-stats
-reftype/target/debug/cli libs --module complex_polynomial_roots --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs/algebra/complex_polynomial_roots --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs --module complex_polynomial_roots --memory-mib 8192 --cache-stats
 ```
 
 Check target constructions/proofs/examples and all dependencies using the shared cache.

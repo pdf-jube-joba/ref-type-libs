@@ -38,5 +38,5 @@ Regular covers correspond to normal \(H\), equivalently transitive deck actions 
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/topology/coverings --module covering_spaces
+ref-type/target/debug/cli libs/topology/coverings --module covering_spaces
 ```

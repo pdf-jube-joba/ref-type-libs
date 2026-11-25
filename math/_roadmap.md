@@ -6,7 +6,7 @@ Task specifications retain requirements and dependencies; the API map and check 
 ## Repository layout and available foundations
 
 The [library index](../libs/README.md) covers the 112 packages in [libs/ref.toml](../libs/ref.toml).
-Use package READMEs for APIs, source files for exact assumptions, and [checking instructions](../libs/USAGE.md) for the compiler in `reftype/`.
+Use package READMEs for APIs, source files for exact assumptions, and [checking instructions](../libs/USAGE.md) for the compiler in `ref-type/`.
 A retained specification or README alone does not establish task completion.
 
 ## Goals and proof routes

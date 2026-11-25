@@ -99,5 +99,5 @@ Use the ordinary cached checker for dependency closure, related packages, and th
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/release/cli libs/analysis/distributions --module distributions --memory-mib 8192
+ref-type/target/release/cli libs/analysis/distributions --module distributions --memory-mib 8192
 ```

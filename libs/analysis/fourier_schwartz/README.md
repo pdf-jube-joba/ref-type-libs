@@ -97,5 +97,5 @@ Inversion identifies the Gaussian approximate-identity limit of regularized inte
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/release/cli libs/analysis/fourier_schwartz --module fourier_schwartz --memory-mib 12288 --diagnostics compact --cache-stats
+ref-type/target/release/cli libs/analysis/fourier_schwartz --module fourier_schwartz --memory-mib 12288 --diagnostics compact --cache-stats
 ```

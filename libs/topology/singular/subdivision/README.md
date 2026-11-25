@@ -32,5 +32,5 @@ Open-cover equivalences serve [excision](../excision/README.md) and finite-model
 [Build and check](../../../USAGE.md) from the repository root:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/topology/singular/subdivision
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/topology/singular/subdivision
 ```

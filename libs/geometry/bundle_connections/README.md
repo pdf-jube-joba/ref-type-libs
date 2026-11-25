@@ -95,5 +95,5 @@ Local uniqueness yields affine connection transforms.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-python3 reftype/scripts/check_all.py --binary reftype/target/release/cli libs/geometry/bundle_connections
+python3 ref-type/scripts/check_all.py --binary ref-type/target/release/cli libs/geometry/bundle_connections
 ```

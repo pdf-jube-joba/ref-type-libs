@@ -23,7 +23,7 @@ Check public `singular_cohomology` APIs from another package.
 [Build and check](../../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/topology/examples/cohomology --module cohomology_models --diagnostics compact
+ref-type/target/debug/cli libs/topology/examples/cohomology --module cohomology_models --diagnostics compact
 ```
 
 Use common dependency `libs/refcache/`.

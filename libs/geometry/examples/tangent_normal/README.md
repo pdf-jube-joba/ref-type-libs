@@ -26,7 +26,7 @@ Run checks at the repository root.
 [Build and check](../../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/geometry/examples/tangent_normal --cache-dir libs/refcache --memory-mib 7168 --diagnostics compact
+ref-type/target/debug/cli libs/geometry/examples/tangent_normal --cache-dir libs/refcache --memory-mib 7168 --diagnostics compact
 ```
 
 Standard checks cover this package and every dependency-closure module.

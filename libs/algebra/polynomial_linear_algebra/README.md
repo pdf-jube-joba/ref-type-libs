@@ -89,7 +89,7 @@ Also uses division, Euclidean algorithms, and Chinese-remainder inverses for the
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/algebra/polynomial_linear_algebra --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs/algebra/polynomial_linear_algebra --memory-mib 8192 --cache-stats
 ```
 
 Check targets/all dependencies using the shared workspace cache.

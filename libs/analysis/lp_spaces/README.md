@@ -82,5 +82,5 @@ These Euclidean theorems include dimension zero.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/release/cli libs/analysis/lp_spaces --module lp_spaces --diagnostics compact --no-progress --memory-mib 12288
+ref-type/target/release/cli libs/analysis/lp_spaces --module lp_spaces --diagnostics compact --no-progress --memory-mib 12288
 ```

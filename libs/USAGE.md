@@ -1,6 +1,6 @@
 # Building and checking the libraries
 
-Run commands from the `ref-type-libs` root: libraries are in `libs/`, and the compiler and check driver are in the `reftype/` Git submodule.
+Run commands from the `ref-type-libs` root: libraries are in `libs/`, and the compiler and check driver are in the `ref-type/` Git submodule.
 The submodule tracks `pdf-jube-joba/ref-type` at a pinned revision.
 See the [library index](README.md) for APIs, [ref.toml](ref.toml) for workspace packages, and [roadmap](../math/_roadmap.md) for requirements and gaps.
 
@@ -10,25 +10,25 @@ Initialize the compiler submodule and build its CLI:
 
 ```sh
 git submodule update --init --recursive
-cargo build --manifest-path reftype/Cargo.toml -p cli --release --locked
+cargo build --manifest-path ref-type/Cargo.toml -p cli --release --locked
 ```
 
 Use a Rust toolchain supporting the compiler's Rust 2024 edition and locked dependencies.
-Binary paths assume Cargo's default `reftype/target/`; adjust them for `CARGO_TARGET_DIR`.
-For debug builds, omit `--release` and use `reftype/target/debug/cli`, or run through Cargo:
+Binary paths assume Cargo's default `ref-type/target/`; adjust them for `CARGO_TARGET_DIR`.
+For debug builds, omit `--release` and use `ref-type/target/debug/cli`, or run through Cargo:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli --release -- libs/std --module std.Data.Nat
+cargo run --manifest-path ref-type/Cargo.toml -p cli --release -- libs/std --module std.Data.Nat
 ```
 
-Run from this repository root so `libs/` selects these libraries rather than the copy inside `reftype/`.
+Run from this repository root so `libs/` selects these libraries rather than the copy inside `ref-type/`.
 
 ## Check a package or module
 
 ```sh
-reftype/target/release/cli libs/geometry/morse_lemma --full-check-local --diagnostics compact --cache-stats --report-json /tmp/morse-lemma-check.json
-reftype/target/release/cli libs/std --module std.Data.Nat --diagnostics compact
-reftype/target/release/cli libs --list-modules
+ref-type/target/release/cli libs/geometry/morse_lemma --full-check-local --diagnostics compact --cache-stats --report-json /tmp/morse-lemma-check.json
+ref-type/target/release/cli libs/std --module std.Data.Nat --diagnostics compact
+ref-type/target/release/cli libs --list-modules
 ```
 
 | Option | Scope |
@@ -43,20 +43,20 @@ reftype/target/release/cli libs --list-modules
 ## Check the workspace
 
 ```sh
-reftype/target/release/cli libs --diagnostics compact --cache-stats --report-json /tmp/ref-type-libs-check.json
+ref-type/target/release/cli libs --diagnostics compact --cache-stats --report-json /tmp/ref-type-libs-check.json
 ```
 
 For per-scope reports, use the driver on Linux with Python 3.11+.
 Pass `--binary`: its default path assumes the old combined repository layout.
 
 ```sh
-python3 reftype/scripts/check_all.py libs --binary reftype/target/release/cli --state-dir /tmp/ref-type-libs-check --memory-mib 3072 --cache-budget-mib 12288
+python3 ref-type/scripts/check_all.py libs --binary ref-type/target/release/cli --state-dir /tmp/ref-type-libs-check --memory-mib 3072 --cache-budget-mib 12288
 ```
 
 Replace `libs` with a package directory for a package run.
 Each timestamped attempt stores snapshots, targets, logs, and `report.json`; `latest.json` in the state directory points to the latest report.
 `--resume-report PATH` carries forward accepted scopes only after validating identical sources, binary, and targets.
-Run `python3 reftype/scripts/check_all.py --help` for splitting and resource options.
+Run `python3 ref-type/scripts/check_all.py --help` for splitting and resource options.
 
 ## Cache, resources, and fixed inputs
 
@@ -72,8 +72,8 @@ Run `python3 reftype/scripts/check_all.py --help` for splitting and resource opt
 To check fixed inputs:
 
 ```sh
-reftype/target/release/cli libs/std --parse-only --save-source-snapshot /tmp/std.source.json
-reftype/target/release/cli libs/std --source-snapshot /tmp/std.source.json --report-json /tmp/std.report.json
+ref-type/target/release/cli libs/std --parse-only --save-source-snapshot /tmp/std.source.json
+ref-type/target/release/cli libs/std --source-snapshot /tmp/std.source.json --report-json /tmp/std.report.json
 ```
 
 Save and load with the same input entry; regenerate snapshots after source changes.

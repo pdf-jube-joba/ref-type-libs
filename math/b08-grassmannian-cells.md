@@ -16,7 +16,7 @@ The table maps the requirements to their implemented APIs.
 | Lifted finite CW structures and comparisons on coverings | `OrientedReal.CW.exists`, `With.projects` and `filtrationEqualsPreimage` |
 | Stabilization limits and finite stages for sphere maps/homotopies | `weakTopology`, `Maps.exists`, `Spheres.sphereMap`, `sphereHomotopy` of `StableReal` and `StableComplex` |
 
-The later 2026-11-20 [upstream validation record](../reftype/work/b08-type-check/README.md) supersedes the earlier parse-only supplement and incomplete 300-second run.
+The later 2026-11-20 [upstream validation record](../ref-type/work/b08-type-check/README.md) supersedes the earlier parse-only supplement and incomplete 300-second run.
 At upstream source commit `5deadd6563878d1a010b9b628b7e9d68229a9cfe`, all 225 B08 modules were actually checked successfully, and a separate driver run accepted all 7,852 dependency-closure modules using verified caches.
 No new axioms or unproved replacements were added.
 

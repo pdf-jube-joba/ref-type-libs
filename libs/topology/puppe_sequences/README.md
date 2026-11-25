@@ -40,8 +40,8 @@ Construct inverses by homotopy extension rather than assuming them.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/topology/puppe_sequences --module puppe_sequences.Puppe --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
-reftype/target/debug/cli libs --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
+ref-type/target/debug/cli libs/topology/puppe_sequences --module puppe_sequences.Puppe --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
+ref-type/target/debug/cli libs --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --diagnostics compact
 ```
 
 Added shared `topological_constructions.Quotient.Descent`, `Coproduct.ProductUniversal`, `Pushout.Of.Families`, `RelationQuotient.Families` APIs.

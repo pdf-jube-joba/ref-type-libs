@@ -17,7 +17,7 @@ Point-unit examples: [examples/cap](../../examples/cap). Focused standard checks
 [Build and check](../../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/topology/singular/cap --module singular_cap.Integral.Pair.At.Adjunction --cache-stats --diagnostics compact
+ref-type/target/debug/cli libs/topology/singular/cap --module singular_cap.Integral.Pair.At.Adjunction --cache-stats --diagnostics compact
 ```
 
 If \(A,B\subseteq X\) are open in their union, `Triple.Union.Cover.On.Cup` gives \(H^p(X,A)\times H^q(X,B)\to H^{p+q}(X,A\cup B)\). Under the same condition, `CapCohomology*.Transfer` gives \(H^q(X,A)\times H_{p+q}(X,A\cup B)\to H_p(X,B)\); `Transfer.onSmall` agrees with small-relative-chain actions. Positive/zero cases: `CapCohomology`, `CapCohomologyZero`, `CapCohomologyZeroTarget`, `CapCohomologyZeroZero`.

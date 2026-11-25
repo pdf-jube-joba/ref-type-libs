@@ -117,7 +117,7 @@ Earlier interrupted/resource-limit reports retained in the same directory.
 Standard root commands:
 
 ```sh
-MIMALLOC_ARENA_RESERVE=64M REF_TYPE_GRAPH_RESIDENT_MIB=256 reftype/target/debug/cli libs \
+MIMALLOC_ARENA_RESERVE=64M REF_TYPE_GRAPH_RESIDENT_MIB=256 ref-type/target/debug/cli libs \
   --cache-dir libs/refcache --cache-budget-mib 16384 --memory-mib 0 \
   --checkpoint-seconds 600 --diagnostics compact
 ```

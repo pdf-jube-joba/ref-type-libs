@@ -80,5 +80,5 @@ Uses frame zero preservation and local gluing via `GluingOn.smooth`.
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/release/cli libs/geometry/smooth_partitions --module smooth_partitions --memory-mib 10240
+ref-type/target/release/cli libs/geometry/smooth_partitions --module smooth_partitions --memory-mib 10240
 ```

@@ -30,5 +30,5 @@ Left/right contraction coefficients separate kernels for injectivity; generation
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/algebra/spinor_representations --memory-mib 8192 --cache-stats --no-progress
+ref-type/target/debug/cli libs/algebra/spinor_representations --memory-mib 8192 --cache-stats --no-progress
 ```

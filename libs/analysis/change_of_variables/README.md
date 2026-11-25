@@ -83,5 +83,5 @@ Use standard release checkers for targets, local source rechecks, dependency reg
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/release/cli libs/analysis/change_of_variables --module change_of_variables --full-check-local --memory-mib 8192
+ref-type/target/release/cli libs/analysis/change_of_variables --module change_of_variables --full-check-local --memory-mib 8192
 ```

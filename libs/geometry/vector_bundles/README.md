@@ -66,9 +66,9 @@ Checks identity/composite comparisons, empty totals on empty bases, rank-zero bu
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-reftype/target/debug/cli libs/geometry/vector_bundles --memory-mib 8192 --cache-stats
-reftype/target/debug/cli libs --module vector_bundles --memory-mib 8192 --cache-stats
-reftype/target/debug/cli libs --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs/geometry/vector_bundles --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs --module vector_bundles --memory-mib 8192 --cache-stats
+ref-type/target/debug/cli libs --memory-mib 8192 --cache-stats
 ```
 
 Total induced topology/continuity universality exposed as `topological_constructions.Induced`.

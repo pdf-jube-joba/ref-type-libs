@@ -59,7 +59,7 @@ This package does not construct finite-dimensional atlases, covering maps to ort
 [Build and check](../../USAGE.md) from the repository root:
 
 ```sh
-cargo run --manifest-path reftype/Cargo.toml -p cli -- libs/algebra/clifford --module clifford
+cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/algebra/clifford --module clifford
 ```
 
 Standard inner products use \(\iota(v)^2=\lVert v\rVert^2\).

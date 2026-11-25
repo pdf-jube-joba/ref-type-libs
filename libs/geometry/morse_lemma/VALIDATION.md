@@ -36,7 +36,7 @@ The upstream workspace tests passed: 34 suites, 384 tests, zero failures or igno
 [Build the checker](../../USAGE.md#build-the-checker), then recheck the package from this repository root:
 
 ```sh
-reftype/target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json /tmp/g13-target.json
+ref-type/target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json /tmp/g13-target.json
 ```
 
 Use the [workspace driver](../../USAGE.md#check-the-workspace) for a fresh full run; its results may differ from the historical record.
