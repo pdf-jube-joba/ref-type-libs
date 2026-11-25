@@ -1,8 +1,10 @@
-# Manifolds
+# `manifolds`
 
-`Dimension[n := n]` uses coordinate spaces \(\mathrm{Fin}(n)\to\mathbb R\).
+Atlases, smooth maps, tangent spaces and derivatives.
 
-| Module | Contents |
+`Dimension[n]` uses coordinate spaces `Fin n -> Real` on Hausdorff second-countable smooth manifolds.
+
+| Entry | Purpose |
 | --- | --- |
 | `Chart.Transition` | Open homeomorphisms and transitions |
 | `Topological` / `AtlasData` / `Atlas` | Hausdorff second-countable covers, smooth transitions |
@@ -16,22 +18,7 @@
 | `SmoothCover` / `Tangent.On.Transport` | Open-cover gluing of smooth Euclidean maps, tangent/coordinate transport over equal bases |
 | `Dimension.Examples` | Euclidean spaces/opens, point/empty manifolds |
 | `EuclideanMap.Between` / `ChartMap.On.At` | Open-map/manifold-map conversions, smooth chart parametrizations |
+| `IndexedAtlas` / `BundleAtlas` / `FromCharts.Between.Covered` | Total-space atlases, countable local products and smooth chart gluing |
+| `Immersion` / `EmbeddingRetraction` | Immersions, image-subspace embeddings and embeddings from smooth left inverses |
 
-Examples: [Geometry.ref](../coordinate_calculus/src/Geometry.ref).
-
-## Bundle totals and immersion foundations
-
-`IndexedAtlas` constructs topology/smoothness from arbitrarily indexed local parameters.
-`BundleAtlas.Over` shares base-chart/finite-coordinate local products, selects countable subcovers, proving second countability of all-local-coordinate topologies.
-Separate different bases in the base; different same-fiber points in one local product.
-`FromCharts.Between.Covered` constructs smooth maps from covering small atlases without enumerating maximal atlases.
-`ChartRestriction` restricts open chart images; `GlobalChart` constructs explicit diffeomorphisms from single covering charts.
-
-`Immersion.Between.IsImmersion` means pointwise derivative injectivity.
-`IsEmbedding` means immersion and image-subspace homeomorphism.
-`EmbeddingLaws` equivalently requires point injectivity/open ambient lifts; `embeddingCriterion` connects them.
-`OfEmbedding.homeomorphism` constructs actual image-subspace homeomorphisms.
-`ImmersionIdentity`, `ImmersionComposition`, `DiffeomorphismImmersion` handle identity/composition/diffeomorphism pre/postcomposition.
-`EmbeddingRetraction` constructs embeddings from smooth left inverses.
-`EuclideanGlobal`, `EuclideanLinear`, `EuclideanPair` pass concrete whole-Euclidean maps/derivatives to manifold APIs.
-Tangent/normal examples: [tangent_normal](../examples/tangent_normal/README.md).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

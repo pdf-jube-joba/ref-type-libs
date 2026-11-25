@@ -1,8 +1,12 @@
-# Low-degree normalization of singular chains
+# `singular_low_degree`
 
-`Normalize.With` extends base-to-point paths to explicit augmentation lifts of singular zero-chains.
-Correct identity by boundaries, constructing homotopies to maps with basepoint augmentation in degree zero and cycle-valued degree one.
-Path connectedness supplies required path families.
+Path-choice chain normalization and first cohomology of products.
 
-`Product.With.Coefficients` uses normalization/actual shuffles to detect first product cohomology by restrictions to two pointed axes.
-Coefficients are arbitrary integer modules.
+Normalization uses base-to-point paths; product detection allows arbitrary integer-module coefficients.
+
+| Entry | Purpose |
+| --- | --- |
+| `Normalize.With` | Path-based augmentation lifts and low-degree chain normalization |
+| `Product.With.Coefficients` | First product cohomology detected by restrictions to pointed axes |
+
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md)

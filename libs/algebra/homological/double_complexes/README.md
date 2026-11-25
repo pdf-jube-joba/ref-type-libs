@@ -1,6 +1,8 @@
-# Nonnegative chain complexes and double complexes
+# `double_complexes`
 
-| Module | Contents |
+Nonnegative chain complexes, double complexes, totalization, exact comparisons, signed swaps.
+
+| Entry | Purpose |
 | --- | --- |
 | `NonnegativeChain.Over` | Nonnegative chains, maps/homotopies, homology, short exact sequences and connecting maps |
 | `ZeroExtension` | Integer-degree extension by zero and homology isomorphisms |
@@ -15,6 +17,4 @@
 | `TensorMapping.With` / `TensorSwap` | Both-factor maps, signed \((-1)^{pq}\) swap chain isomorphisms |
 | `TensorSplitSequence.With.Split` | Tensor totals of degreewise split short exact sequences |
 
-`Collapse` uses finite induction eliminating the largest first degree on each diagonal by boundaries.
-Correct signs with `SignedTranspose` to apply to horizontal exactness too.
-See [applications to resolutions](../resolutions/README.md) and [integer-graded totalization](../tensor_chains/README.md).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md)

@@ -1,7 +1,7 @@
-# Validation records
+# Morse-lemma validation records
 
 Historical checks from 2026-11-19, based on upstream main `6e2106dfaf0a5370e84213a1c60fccf126d359a4`, using a rebuilt Rust 1.100.0 release checker.
-[verification.json](verification.json) preserves source/binary hashes, metrics, and raw-record locations.
+[The machine-readable record](morse_lemma-verification.json) preserves source/binary hashes, metrics, and raw-record locations.
 These results do not establish acceptance of the current checkout.
 
 ## Targets and dependency closure
@@ -16,7 +16,7 @@ No new axioms or unproved parts were added; the implementation uses existing fun
 
 ## Full library
 
-The workspace driver accepted 68 scopes/7,522 of 15,524 targets across 111 packages, then failed in `euclidean_sobolev` at [Euclidean/Order/Weight.ref:14](../../analysis/euclidean_sobolev/src/Euclidean/Order/Weight.ref#L14):
+The workspace driver accepted 68 scopes/7,522 of 15,524 targets across 111 packages, then failed in `euclidean_sobolev` at [Euclidean/Order/Weight.ref:14](../../../libs/analysis/euclidean_sobolev/src/Euclidean/Order/Weight.ref#L14):
 
 ```text
 Resolution Error: module arguments do not allow inference holes (`_` or `?`)
@@ -31,12 +31,6 @@ G13 and its closure passed in the separate focused check above.
 The upstream workspace tests passed: 34 suites, 384 tests, zero failures or ignored tests.
 `git diff --cached --check` also passed; no Rust/checker source changes were made.
 
-## Current rerun commands and historical scope
+## Current checks
 
-[Build the checker](../../USAGE.md#build-the-checker), then recheck the package from this repository root:
-
-```sh
-ref-type/target/release/cli libs/geometry/morse_lemma --full-check-local --memory-mib 4096 --cache-stats --time-limit-seconds 1800 --report-json /tmp/g13-target.json
-```
-
-Use the [workspace driver](../../USAGE.md#check-the-workspace) for a fresh full run; its results may differ from the historical record.
+Use the [package and workspace checking instructions](../../../libs/USAGE.md) for a fresh run.

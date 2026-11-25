@@ -1,8 +1,10 @@
-# Differential forms on manifolds
+# `differential_forms`
 
-`Forms[n].On[M].Form(k)` assigns local forms to maximal-atlas charts, agreeing by pullback on overlaps.
+Global differential forms, gluing, pullbacks, de Rham cohomology.
 
-| Module | Contents |
+`Forms[n].On[M].Form(k)` assigns forms to maximal-atlas charts with pullback agreement on overlaps.
+
+| Entry | Purpose |
 | --- | --- |
 | `At` / `Wedge` / `ExteriorDerivative` / `Square` / `Leibniz` | Global linear forms, wedge/exterior-derivative laws |
 | `Pointwise` / `DegreeZero` | Tangent alternating families / smooth-function correspondence |
@@ -14,4 +16,4 @@
 | `Forms.On.DeRham` | Closed/exact quotients, graded products, induced maps |
 | `DeRham.DegreeZero` | Isomorphism with zero-derivative functions |
 
-[Coordinate calculations](../coordinate_calculus/README.md) has pullback/gluing/cohomology examples.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

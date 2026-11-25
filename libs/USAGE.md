@@ -86,4 +86,4 @@ Distinguish newly checked modules from reused results and partial runs from comp
 Historical summaries refer to the original combined `ref-type` repository.
 Their commits, PRs, counts, and `work/...` or `/workspace/...` paths describe those runs, not acceptance of this checkout; some artifacts are unavailable here.
 Machine-readable records retain their original commands and hashes.
-See [Morse-lemma evidence](geometry/morse_lemma/VALIDATION.md) and [Grassmannian-cell evidence](geometry/grassmannian_cells/README.md#type-checking).
+See [Morse-lemma evidence](../math/package-notes/geometry/morse_lemma-validation.md) and [Grassmannian-cell evidence](../math/package-notes/geometry/grassmannian_cells.md#type-checking).

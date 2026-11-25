@@ -24,7 +24,7 @@ Except for `std`, aim for roughly 5,000 lines per package, organized by dependen
 | [complex](complex/README.md) | `complex` | Complex numbers as real pairs and field structure |
 
 Standard reals pass from `dedekind_reals` to `real`.
-Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate operations from laws, and [eq_reason!](std/README.md#equality-and-congruence) for equality chains.
+Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate operations from laws, and [eq_reason!](std/USAGE.md#equality-and-congruence) for equality chains.
 
 ## Algebra
 
@@ -55,6 +55,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [algebra/homological/derived_functors](algebra/homological/derived_functors/README.md) | `derived_functors` | Ext/Tor, resolution independence and naturality, cyclic-module resolutions, universal coefficients |
 | [algebra/homological/field_kunneth](algebra/homological/field_kunneth/README.md) | `field_kunneth` | Finite free field-coefficient cochain complexes, canonical external-product isomorphisms, naturality, swap signs, units |
 | [algebra/homological/computations](algebra/homological/computations/README.md) | `homological_algebra` | Homology computations for finite integer complexes, natural universal-coefficient/integral-Künneth short exact sequences |
+| [algebra/homological/concrete_complexes](algebra/homological/concrete_complexes/README.md) | `concrete_complexes` | Finite-complex, universal-coefficient, tensor-product and integer-homology examples |
 
 ## Analysis
 
@@ -76,6 +77,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [analysis/complex_hilbert](analysis/complex_hilbert/README.md) | `complex_hilbert` | Complex Riesz representation, bounded adjoints, closed-subspace projections, finite-rank factorization and compact operators |
 | [analysis/fredholm_operators](analysis/fredholm_operators/README.md) | `fredholm_operators` | Compact-operator ideals, Atkinson equivalence, kernel/cokernel indices, index laws and local constancy |
 | [analysis/integration](analysis/integration/README.md) | `integration` | Riemann integration, Lebesgue integration via L¹ completion |
+| [analysis/scalar_compatibility](analysis/scalar_compatibility/README.md) | `scalar_compatibility` | Shared real arithmetic, distance, limit and scalar compatibility examples |
 
 ## Geometry
 
@@ -105,6 +107,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [geometry/lie_groups](geometry/lie_groups/README.md) | `lie_groups` | Lie groups/algebras, adjoint derivatives/exponentials, Lie structures on O/SO/Pin/Spin and complex extensions |
 | [geometry/euclidean_forms](geometry/euclidean_forms/README.md) | `euclidean_forms` | Local differential forms, wedge products/exterior derivatives, coordinate expressions, pullbacks |
 | [geometry/differential_forms](geometry/differential_forms/README.md) | `differential_forms` | Global differential forms, gluing, pullbacks, de Rham cohomology |
+| [geometry/coordinate_calculus](geometry/coordinate_calculus/README.md) | `coordinate_calculus` | Calculus, local/global forms, manifolds and cohomology compatibility examples |
 
 ## Topology
 
@@ -152,13 +155,9 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 
 ## Type checking
 
-```sh
-cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs
-cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/std --module std.Data.Nat
-```
-
-The `libs/ref.toml` workspace shares `libs/refcache/` throughout.
-For builds, full-workspace reports, rechecking, paging targets, and historical validation records, see [usage](USAGE.md).
+Use [building and checking](USAGE.md) for package and workspace commands, shared caches, resource options and reports.
+Package READMEs contain a scope summary, an API table and links to source, dependencies and shared checking instructions.
+Detailed constructions and historical records are in [mathematical notes](../math/package-notes/README.md); syntax and macro examples are in the [standard-library guide](std/USAGE.md).
 
 Examples: [complexes](algebra/homological/concrete_complexes/README.md), [coordinate calculus](geometry/coordinate_calculus/README.md), [cell_spaces](topology/examples/cells/README.md), [scalar compatibility](analysis/scalar_compatibility/README.md), [small categories](category/src/SmallCategories.ref), and [limits in the terminal category](category/src/TerminalLimits.ref).
 

@@ -1,77 +1,18 @@
-# Bundle metrics, orthogonal complements, and isomorphism classes
+# `bundle_complements`
 
-Entry: `bundle_complements.Complements.Over[K, field, conjugation, scalar]`.
-Supply real/complex [vector_bundles](../vector_bundles/README.md) scalars; operations use [bundle_operations](../bundle_operations/README.md), orthonormalization/matrix continuity use [hermitian_frames](../../algebra/hermitian_frames/README.md).
+Metrics/finite embeddings from finite partitions, orthogonal complements, continuous-projection images and sets of isomorphism classes.
 
-## Metrics and finite embeddings
-
-`For[X, F, bundle].embeddingExists` constructs finite partitions subordinate to trivializations on compact Hausdorff bases.
-`Weighted` extends weighted local coordinates by zero off supports; `build` concatenates coordinates.
-`FromPartition` derives zero kernels from weights summing to one.
-Existing `PartitionOfUnity` and `ZeroExtension` prove extension-by-zero continuity.
-Ambient dimension sums finitely many local dimensions; no connectedness/constant-rank assumption.
-
-`Embedding` groups dimension, continuous bundle maps, fiberwise injectivity.
-`FromEmbedding.metric` pulls back standard positive real/Hermitian metrics, with continuous evaluation on total direct sums.
-`metricExists` applies this to finite embeddings.
-`CoordinateEmbedding` turns continuous injective matrix families into actual continuous trivial-bundle maps.
-
-## Projection images and orthogonal complements
-
-`Finite.ImageBasis[map, idempotent]` processes columns of general idempotents to construct orthonormal image-spanning frames.
-`Finite.ProjectionBasis` applies the shared construction to Hermitian projections, deriving coordinate reconstruction.
-
-| API | Constructions and proofs |
+| Entry | Purpose |
 | --- | --- |
-| `Finite.ProjectionBasis.basisExists` | Finite image bases by orthonormalizing projected standard vectors. |
-| `Projection[X, n, baseSpace, P, regular].bundle` | Continuous orthogonal-projection image bundles, induced topology and both trivialization continuities. |
-| `Projection.Around` | Local coordinates from center-identity \(P(x)P(a)+(I-P(x))(I-P(a))\) and continuous inverses; no extra constant-rank input. |
-| `Projection.inclusion` / `projectMap` | Image inclusions into trivial bundles and projections onto images. |
-| `Projection.Complement` | Complement images \(I-P\), orthogonality, \(\operatorname{im}P\oplus\operatorname{im}(I-P)\cong X\times K^n\), both inverses. |
-| `For.FromEmbedding.Image` | Unique continuous orthogonal projections onto embeddings and comparisons from original bundles to projection images. |
-| `For.FromEmbedding.Complement` | Orthogonal complements and finite-trivial sum isomorphisms. |
+| `Finite.ProjectionBasis.basisExists` | Finite image bases by orthonormalizing projected standard vectors |
+| `Projection[X, n, baseSpace, P, regular].bundle` | Continuous orthogonal-projection image bundles, induced topology and both trivialization continuities |
+| `Projection.Around` | Local coordinates from center-identity \(P(x)P(a)+(I-P(x))(I-P(a))\) and continuous inverses; no extra constant-rank input |
+| `Projection.inclusion` / `projectMap` | Image inclusions into trivial bundles and projections onto images |
+| `Projection.Complement` | Complement images \(I-P\), orthogonality, \(\operatorname{im}P\oplus\operatorname{im}(I-P)\cong X\times K^n\), both inverses |
+| `For.FromEmbedding.Image` | Unique continuous orthogonal projections onto embeddings and comparisons from original bundles to projection images |
+| `For.FromEmbedding.Complement` | Orthogonal complements and finite-trivial sum isomorphisms |
+| `Complements.Over.For` | Finite embeddings, positive metrics and orthogonal complements on compact Hausdorff bases |
+| `Complements.Over.Representations` | Projection presentations, isomorphism classes and bundle-classification criteria |
+| `Complements.Over.Idempotents` / `Complements.Over.CoordinateFamily` | General continuous idempotent images and coordinate-family comparisons |
 
-Projection uniqueness uses `Finite.Range.unique`; matrix/inverse-coordinate continuity uses L01/L03.
-
-## Set presentations and naturality
-
-`Representations[X, baseSpace].Presentation` pairs finite ambient dimension with continuous orthogonal projections.
-`Realize[p].bundle` constructs image bundles.
-`Equivalent p q` asserts isomorphism of two such bundles, allowing different ambient dimensions.
-Prove equivalence laws; construct isomorphism-class set `Classes` using existing `std.Set.Quotient`.
-`classCriterion` equates class equality with bundle isomorphism existence.
-
-`Of[F, original, same].class` is the isomorphism class of general bundles on compact Hausdorff bases.
-`Of.classification` compares realizations of projection presentations; `Comparison.criterion` equates general bundle isomorphisms with class equality.
-Classes are subsets of all isomorphic projection presentations, independent of embedding/frame choices.
-
-`Projection.Pullback.isomorphism` compares composed-projection images with pullbacks of image bundles.
-Prove fiberwise compatibility for inclusions/projections/complements and both direct-sum directions.
-`For.Pullback.metric` pulls back arbitrary continuous metrics.
-`FromEmbedding.Pullback` pulls back embeddings, proving metric evaluation and image-projection agreement.
-`Representations.Pullback.map` pulls back class sets; `onClass` gives representative formulas; `Of.naturality` compares general bundle classes.
-
-## Examples
-
-[Moving](src/Complements/Over/Examples/Moving.ref) reuses L03 columns \((1,z)\), constructing metrics, complements, and trivial-sum isomorphisms.
-Also uses equal classes for ambient dimensions one/two, square-map pullbacks, metric/projection/class naturality.
-[FiniteBases](src/Complements/Over/Examples/FiniteBases.ref) proves two-point compact Hausdorffness; applies embedding/metric existence to rank-zero/one bundles, zero bundles, and empty bases.
-[Examples](src/Complements/Examples.ref) instantiates real/complex scalars.
-
-## Coordinate families and general idempotents
-
-`CoordinateFamily` turns arbitrary continuous coordinate-linear families into trivial-bundle maps without injectivity.
-`CoordinateEmbedding` shares that construction, also exposing finite embeddings when injective.
-[uniform_approximation](../../analysis/uniform_approximation/README.md) uses this API/image comparisons to return matrix approximations to bundle endomorphisms.
-
-`Over.Idempotents[n]` handles real/complex idempotents without self-adjointness.
-`Algebra`, `With` give complements, finite image bases, both kernels, and direct sums.
-`Image` gives image bundles/inclusions/projections/complements/pullbacks; `Comparison` gives invertible-intertwiner isomorphisms; `Gap` gives open nearby-comparison invertibility.
-This B09 entry applies K06 image construction to the same `Finite.ImageBasis` and general scalars.
-
-## Validation
-
-Historical upstream [PR #41](https://github.com/pdf-jube-joba/ref-type/pull/41), merged at `6bf92837`.
-The K06 shared-basis recheck at `e3aecc2e` accepted 4,345 reused dependency-closure modules with zero save failures or worker recoveries.
-The later B09 idempotent entry accepted 569 modules including dependencies, with zero save failures.
-See [checking the libraries](../../USAGE.md) and [K06 validation](../../algebra/spectral_splitting/README.md#validation-and-resuming) for reruns and historical context.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md) · [Notes](../../../math/package-notes/geometry/bundle_complements.md)

@@ -1,8 +1,10 @@
-# Algebraic-topology space constructions
+# `algebraic_topology`
 
-Construct homotopies, pointed spaces, cell attachments, finite CW pairs from real closed intervals.
+Homotopies, pointed quotients, mapping cones, finite CW pairs, standard-simplex coordinates.
 
-| Module | Contents |
+Unreduced cones and suspensions of empty inputs are empty; cone contractions require an input point. Reduced suspensions and smash products require basepoints.
+
+| Entry | Purpose |
 | --- | --- |
 | `Interval` / `Arithmetic` / `IntervalFunctions` | Unit intervals, reversal/product/contraction time operations and continuity |
 | `Interval.Convex` / `Initial` / `Halves` | Convex interpolation, initial subintervals, continuous half-interval reparametrizations |
@@ -18,9 +20,9 @@ Construct homotopies, pointed spaces, cell attachments, finite CW pairs from rea
 | `Simplex` / `At` / `Insertion` | Standard simplices, graded carriers, coordinate faces |
 | `Simplex.Faces` / `Identities` | Continuous faces/composition identities |
 | `Simplex.Vertices` / `Affine` / `AffineIdentity` / `AffineFaces` | Vertices, affine continuity/composition/face compatibility |
-| `Simplex.Reindex` / `ReindexIdentity` / `ReindexFace` | Affine maps from vertex maps, composition/identity/face formulas. |
-| `Simplex.Degeneracy` / `Sections` / `Composition` / `Mixed` | Continuous adjacent-duplication degeneracies, two face right inverses, degeneracy/mixed identities. |
-| `Simplex.Boundary` / `BoundaryFace.Cover` | Closed/compact zero-coordinate boundaries, continuous face inclusions/coverage. |
+| `Simplex.Reindex` / `ReindexIdentity` / `ReindexFace` | Affine maps from vertex maps, composition/identity/face formulas |
+| `Simplex.Degeneracy` / `Sections` / `Composition` / `Mixed` | Continuous adjacent-duplication degeneracies, two face right inverses, degeneracy/mixed identities |
+| `Simplex.Boundary` / `BoundaryFace.Cover` | Closed/compact zero-coordinate boundaries, continuous face inclusions/coverage |
 | `Simplex.Interval` | One-simplex/unit-interval inverse maps, endpoints/faces |
 | `Simplex.Compactness` / `Barycentre` / `Metric` | Closedness/compactness, equal-weight barycenters, maximal-coordinate distances/Lebesgue numbers |
 | `Simplex.Convex` / `Contraction` | Continuous convex combinations, point contractions |
@@ -33,13 +35,4 @@ Construct homotopies, pointed spaces, cell attachments, finite CW pairs from rea
 | `PathComponent` / `IntervalPaths` / `Functions` | Path-component quotients, interval-path comparison, descent of componentwise constants |
 | `CW` / `Attach` / `Pair` | Finite CW complexes, attachments, subcomplexes/quotients |
 
-`FiniteComplex` is a subset type storing characteristic maps, attachments, Hausdorffness, weak topology.
-Disk opens use `Euclidean.Dimension.diskTopology`, checking characteristic continuity with the same singular-chain topology.
-`Cofibration.ForTarget.homotopyExtension` proves extension assuming cofibrations.
-
-`Cone` and unreduced suspensions quotient cylinders, hence are empty for empty inputs.
-`Cone.Contraction.contract` takes an input-space point.
-Reduced suspensions/smash products take input basepoints.
-
-[Examples](../examples/cells/src/root.ref) includes intervals, disks/spheres, one-cell attachments, empty CW pairs, graded simplices.
-Check instructions: [library index](../../README.md#type-checking).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

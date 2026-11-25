@@ -1,8 +1,8 @@
-# Foundations of real analysis
+# `real`
 
-Constructed real arithmetic, distance estimates, sequences, square roots, and finite sums.
+Constructed real arithmetic, distance estimates, sequences, square roots, finite sums.
 
-| Module | Contents |
+| Entry | Purpose |
 | --- | --- |
 | [Analysis](src/Analysis.ref) | Constructed Dedekind-real types and operations |
 | `Analysis.Algebra` | Arithmetic identities, nonnegative squares, `Field` structure |
@@ -13,17 +13,6 @@ Constructed real arithmetic, distance estimates, sequences, square roots, and fi
 | `Analysis.Estimates.Product` / `Analysis.Inverse` | Product/reciprocal distance bounds, reciprocal control on positive/negative regions |
 | `Analysis.FiniteSums.Convex` / `Exclusion` | Convex-combination distance bounds, finite-sum bounds excluding one vanishing term |
 | `Analysis.Geometric` | Powers of nonnegative coefficients below 1 become smaller than any positive value |
+| `Analysis.FiniteSums.blocks` | Splitting finite sums across consecutive coordinate blocks |
 
-`metric_spaces.RealMetric` connects to metric spaces; `linear_algebra.Real` connects to vector spaces.
-
-```text
-\import real.Analysis[] \as R;
-\import R.Distance[] \as Distance;
-\definition selfDistance: \forall (x: R.Real) -> R.distance x x = R.zero :=
-  Distance.distanceSelf;
-```
-
-[Examples](../../analysis/scalar_compatibility/src/Compatibility.ref) check constant-sequence limits and shared arithmetic across fields.
-
-
-`Analysis.FiniteSums.blocks` splits sums over consecutive finite-index blocks, for inner-product formulas on direct-sum coordinates.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

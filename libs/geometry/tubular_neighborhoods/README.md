@@ -1,9 +1,10 @@
-# Tubular neighborhoods and collapse maps
+# `tubular_neighborhoods`
 
-`tubular_neighborhoods` contains the G06 implementation for compact Euclidean submanifolds, boundary-compatible neighborhoods, and collapse maps.
-The public entry point is [src/root.ref](src/root.ref); direct dependencies are in [ref.toml](ref.toml).
+Tubular neighborhoods, collapse maps, boundary comparisons and product/stabilization identities; requirements and checks remain partly unverified.
 
-| Module | Implemented scope |
+Completion and full dependency checks remain unconfirmed. Half-space extensions, comparisons between different lifts and stabilized Thom-space identification still need verification; standalone examples are missing.
+
+| Entry | Purpose |
 | --- | --- |
 | [Euclidean.On.Of](src/Euclidean/On/Of.ref) | Normal-bundle lifts, the straight lift, and `tubularNeighborhood` for compact embedded manifolds |
 | [With.Compact](src/Euclidean/On/Of/With/Compact.ref) and [With.Restriction](src/Euclidean/On/Of/With/Restriction.ref) | Normal disk neighborhoods and their diffeomorphisms |
@@ -12,10 +13,4 @@ The public entry point is [src/root.ref](src/root.ref); direct dependencies are 
 | [Collapse.Of](src/Collapse/Of.ref) and [DiskImage](src/DiskImage.ref) | Continuous collapse from disk coordinates, including seam conditions |
 | [Product.Of](src/Product/Of.ref) and [Stabilized](src/Euclidean/On/Of/Stabilized.ref) | Product-collapse compatibility, endpoint formulas, and product-model suspension |
 
-Full G06 completion remains unconfirmed.
-Construction of the half-space extension from G05 neat embeddings, comparisons between different lifts, and identification with stabilized normal Thom spaces still need verification.
-`Line` is a construction model; standalone usage examples are still missing.
-See the [G06 requirements and status](../../../math/g06-tubular-neighborhoods.md#status) for the detailed gaps.
-
-No successful check of the current package and its full dependency closure is established by the records reviewed here.
-For current commands and reporting requirements, see [checking the libraries](../../USAGE.md).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md) · [Status](../../../math/g06-tubular-neighborhoods.md#status)

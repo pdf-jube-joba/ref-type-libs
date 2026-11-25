@@ -13,7 +13,7 @@ The public theorems below construct actual linear isomorphisms, smooth two-sided
 | Critical-point properties | `CriticalPoints.At.isolated` / `locallyConstant`, `Parametric.Function.Indices.locallyConstant` |
 
 `Examples` contains standalone nonlinear one-variable, saddle, nonconstant critical-family, and zero-dimensional examples.
-Implementation/use and type-check scope, reproduction, and limitations are documented separately in [README](../libs/geometry/morse_lemma/README.md) and [validation records](../libs/geometry/morse_lemma/VALIDATION.md).
+Implementation/use and type-check scope, reproduction, and limitations are documented separately in [README](../libs/geometry/morse_lemma/README.md) and [validation records](package-notes/geometry/morse_lemma-validation.md).
 Rechecks of all 137 target modules and verification of the dependency closure passed.
 The full-library check fails with the same `euclidean_sobolev/Euclidean/Order/Weight.ref:14` as base main; distinguish this from a full pass.
 

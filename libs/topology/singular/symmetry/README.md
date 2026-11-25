@@ -1,22 +1,12 @@
-# Commutation homotopies of singular cochains
+# `singular_symmetry`
 
-`On[A, source].forward` composes diagonals with Alexander–Whitney.
-`backward` follows with Koszul tensor swaps.
-`On.Homotopy.homotopy` homotopes both chain maps.
+Cup commutation homotopies and graded commutativity.
 
-Standard models: \(C_*(\Delta^n)\otimes C_*(\Delta^n)\).
-Equal-face transitions, zero degree-zero differences, explicit positive contractions inductively construct model homotopies.
-Evaluate by simplex postcomposition and extend by free universality.
+| Entry | Purpose |
+| --- | --- |
+| `On.forward` / `backward` / `Homotopy` | Alexander–Whitney diagonals and Koszul swaps connected by chain homotopies |
+| `Cochains.Pairing` | Tensor-chain evaluation and closed-cochain boundary annihilation |
+| `Cochains.GradedCommutativity` | Signed cup commutativity with explicit degree transport |
+| `Cochains.ExternalCup` | Product-space external cups and projection-pullback class formulas |
 
-`Cochains.Pairing[p, q]` evaluates two commutative-ring cochains on tensor chains.
-Closed evaluations annihilate total differentials; `HomComplex.Homotopy` transfers homotopies to cohomology.
-`Cochains.GradedCommutativity[p, q].law` proves for arbitrary cohomology classes \(x,y\):
-
-\[
-x\smile y=(-1)^{pq}y\smile x
-\]
-
-The public formula explicitly includes transport between degrees \(p+q\), \(q+p\).
-
-`Cochains.ExternalCup[p, q]` identifies tensor-cochain Alexander–Whitney pullbacks on products with cups of projection pullbacks.
-`Classes[alpha, beta]` identifies closed representatives and gives class formulas.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md) · [Notes](../../../../math/package-notes/topology/singular/symmetry.md)

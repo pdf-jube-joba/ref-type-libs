@@ -1,8 +1,8 @@
-# Coordinate calculations for manifolds and de Rham cohomology
+# `coordinate_calculus`
 
 Instantiate public libraries from another package to check analysis/exterior/manifold/cohomology connections.
 
-| Module | Constructions and laws used |
+| Entry | Purpose |
 | --- | --- |
 | `Calculus` / `OpenCalculus` / `MeanValue` | Limits, open derivatives, mean value theorem, smooth composition |
 | `Alternating` / `LocalForms.On.CoefficientExpression` | Arbitrary-degree alternating forms, finite coefficients, exterior-derivative coefficients |
@@ -16,8 +16,4 @@ Instantiate public libraries from another package to check analysis/exterior/man
 | `Contravariance` | Contravariant composition for forms/cohomology |
 | `Pointwise` / `Cohomology` | Point/degree-dependent quotient carriers, extensionality, quotient APIs |
 
-[Build and check](../../USAGE.md) from the repository root:
-
-```sh
-ref-type/target/debug/cli libs/geometry/coordinate_calculus --module coordinate_calculus --full-check-local --diagnostics compact
-```
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

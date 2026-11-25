@@ -1,17 +1,12 @@
-# Eilenberg–Zilber comparison
+# `singular_eilenberg_zilber`
 
-Compare product-space singular chains with tensor totals of factor chains.
-Expose `singular_products` Alexander–Whitney/shuffle maps with both chain homotopies.
+Alexander–Whitney/shuffle chain homotopy equivalence.
 
-`forward` in `On[A, B, left, right]` is Alexander–Whitney; `backward` shuffle.
-`productComposite` is the product-space composite; `tensorComposite` the tensor composite.
-`Equivalence.equivalence` returns nonnegative chain equivalences; `Equivalence.Signed.equivalence` integer zero-extended equivalences.
+| Entry | Purpose |
+| --- | --- |
+| `On.forward` / `backward` | Alexander–Whitney and shuffle chain maps |
+| `On.productComposite` / `tensorComposite` | Both composites compared by explicit chain homotopies |
+| `Equivalence` / `Equivalence.Signed` | Nonnegative and integer zero-extended chain equivalences |
+| `Models` / `TensorModels` / `TensorHomotopy` | Standard-simplex fillings and tensor-generator homotopies |
 
-Fill composite differences on diagonal simplices of standard-simplex products.
-Tensor-side models are tensors of two standard-simplex chain complexes.
-Prove alternating-face model maps commute with boundaries; contractions fill degreewise.
-Degree-zero differences vanish, so recursion starts positively.
-
-`TensorEvaluation` evaluates model chains on arbitrary simplex pairs.
-`TensorGenerators` gives pure generators of each total degree; `TensorHomotopy` extends model fillings from them.
-Generator boundary formulas/linearity prove both homotopy identities.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md) · [Notes](../../../../math/package-notes/topology/singular/eilenberg_zilber.md)

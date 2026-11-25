@@ -1,9 +1,10 @@
-# Complex numbers
+# `complex`
 
-Construct \(\mathbb{C}=\mathbb{R}\times\mathbb{R}\) as pairs of Dedekind reals.
-Real multiplication and reciprocals use signed operations from `dedekind_reals.DedekindReal.Arithmetic.Prop`.
+Complex numbers as real pairs and field structure.
 
-| Module | Contents |
+Complex numbers are pairs of Dedekind reals. Reciprocals and division at zero are defined as zero.
+
+| Entry | Purpose |
 | --- | --- |
 | `Complex` | `Real`, `Complex`, constructor `make`, real part `re`, imaginary part `im` |
 | `Complex.Def` | `zero`, `one`, `i`, real embedding, arithmetic, real scaling, conjugation, squared modulus |
@@ -12,17 +13,4 @@ Real multiplication and reciprocals use signed operations from `dedekind_reals.D
 | `Complex.Algebra` | Additive abelian group, commutative ring, field structures |
 | `Complex.Absolute` | Modulus as square root of squared norm, nonnegativity, zero criterion, product/conjugation/triangle inequalities |
 
-Use `real.Analysis.Algebra` for real identities and square properties.
-
-`make a b` represents \(a+bi\).
-Conjugation, squared modulus, and reciprocals are defined below.
-
-\[
-\overline{a+bi}=a-bi,\qquad
-\operatorname{normSq}(a+bi)=a^2+b^2,\qquad
-(a+bi)^{-1}=\frac{a-bi}{a^2+b^2}.
-\]
-
-The reciprocal of zero and division by zero are defined as zero.
-
-[Examples](src/SpecificValues.ref) check arithmetic, conjugation, and field structure.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../USAGE.md)

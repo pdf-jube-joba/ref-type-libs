@@ -1,8 +1,10 @@
-# Differentiation
+# `calculus`
 
-Limits and derivatives over Dedekind reals.
+Limits, mean value theorem, multivariable differentiation, smooth maps.
 
-| Module | Contents |
+`ContDiff k` requires continuous derivatives through order `k`; `Smooth` requires this for every order. Directional derivatives use two-sided curve limits.
+
+| Entry | Purpose |
 | --- | --- |
 | `Real` | Real arithmetic, constant/identity/linear functions |
 | `Real.Limit.Def` / `Prop` | Punctured ε–δ limits, constants/identity, equality transport |
@@ -19,29 +21,7 @@ Limits and derivatives over Dedekind reals.
 | `Curves[n]` / `Maps.Corestriction` | Global representatives/derivatives of smooth real curves, derivatives of open-range restrictions |
 | `Scaling[n]` / `Translation[n]` | Smooth dilations/translations, translation derivatives |
 | `Identity[n]` / `Diffeomorphism[n, m]` | Identities, inverse/composite diffeomorphisms, induced homeomorphisms |
+| `Real.Multivariable.Open.Smooth.SquareRoot` | Smooth positive square roots |
+| `LinearFamily` / `MatrixFamily` / `GramSchmidt` / `ProjectionFrames` | Smooth matrix actions, orthonormalization and constant-rank local frames |
 
-`ContDiff k f` asserts continuous derivative families through order k; `Smooth f` is `ContDiff k f` for every k.
-`Open.Smooth.Derivative.Function U` accepts smooth functions; `derivative U f i` returns smooth partial derivatives.
-`Maps.Differential[U, V, f, a].value` is a linear map on `linear_algebra`; `matrixEntry` is a smooth scalar function.
-
-`Directional` uses curves on open intervals containing zero and two-sided limits.
-`HasDirectionalDerivativeAt` quantifies over all curves with equal starting points/tangent vectors; tangent vectors include parameter speed.
-
-Examples: [Calculus.ref](../../geometry/coordinate_calculus/src/Calculus.ref) and [nonlinear diffeomorphisms](../../geometry/coordinate_calculus/src/Shear.ref).
-
-`Real.Derivative.SquareRoot` differentiates square roots of positive differentiable functions.
-`Real.Multivariable.Open.Analysis.SquareRoot` transfers this to partials; `Open.Smooth.SquareRoot` proves square roots of positive smooth functions smooth.
-Higher smoothness follows inductively from \(r=\sqrt f\), \(\partial_i r=\frac12 r f^{-1}\partial_i f\).
-
-## Matrix families and local orthonormal frames
-
-`LinearFamily` and `MatrixFamily` construct smooth matrix actions \((u,v)\mapsto A(u)v\) from finite sums.
-`Maps.Tangent` exposes smooth \((u,v)\mapsto(f(u),Df_u v)\); `Maps.FixedDifferential` exposes derivative actions on fixed vectors.
-`SmoothCoordinates` handles finite inner products and coordinate concatenation.
-`GramSchmidt.On.Rank` decomposes smooth injective matrix families into smooth orthonormal frames and invertible coefficients.
-Its `Projections` gives smooth tangent/normal projections and image inverses.
-`ProjectionFrames` constructs orthonormal frames from constant-rank smooth projections on positive-norm neighborhoods.
-`InverseFamily` derives smooth pointwise inverses of smooth invertible families; `LinearMap` shares linear smoothness/derivative formulas.
-
-Real Gram–Schmidt algebraic proofs are shared with `linear_algebra.Hermitian`.
-Real/complex continuous orthonormalization and projection frames over arbitrary topological bases: [hermitian_frames](../../algebra/hermitian_frames/README.md).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

@@ -1,8 +1,10 @@
-# Künneth isomorphisms over fields
+# `field_kunneth`
 
-Construct canonical splitting-independent external-product isomorphisms for bounded finite-free field-coefficient cochain complexes.
+Finite free field-coefficient cochain complexes, canonical external-product isomorphisms, naturality, swap signs, units.
 
-| Module | Contents |
+Comparisons apply to bounded finite-free field-coefficient cochain complexes and are independent of chosen splittings.
+
+| Entry | Purpose |
 | --- | --- |
 | `FieldFinite.Over.Of` | Projectivity of cycles/boundaries/cohomology, splittings/contractions |
 | `TensorCochain.Over.Total` | Finite diagonal sums, differential \(d_h+(-1)^p d_v\), square zero |
@@ -15,5 +17,4 @@ Construct canonical splitting-independent external-product isomorphisms for boun
 | `Kunneth.Field.Of.Symmetry` / `Unit` | Swap signs and left/right unit laws |
 | `Kunneth.Field.Assertions` | Theorems universally quantifying complexes, maps, and degrees |
 
-`With.At.ExteriorComparison.backwardExterior` identifies canonical external products with inverses of splitting-derived isomorphisms.
-Unit complexes have one coordinate in degree zero and none elsewhere.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md)

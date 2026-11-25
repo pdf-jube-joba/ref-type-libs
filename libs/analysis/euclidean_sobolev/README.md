@@ -1,14 +1,15 @@
-# Integer-order Sobolev spaces on Euclidean spaces
+# `euclidean_sobolev`
 
-`Euclidean[n := n].Signed[s := s]` represents Fourier transforms weighted by \((1+|\xi|^2)^{s/2}\) as complex \(L^2\) elements.
-`Order[k := k].Duality[]` gives \(H^{-k}\)–\(H^k\) pairings, \(L^2\) compatibility, and unique bounded-functional representations.
+Integer-order Sobolev spaces, weak-derivative comparisons, duality, local coordinate changes and embeddings.
 
-`Weak[].ofSchwartz` sends real Schwartz functions to weak-derivative \(W^{k,2}\).
-`Energy[].comparison` equates squared Fourier norms with multiplicity-weighted sums of squared iterated-derivative \(L^2\) norms for complex Schwartz functions.
-`Order[k := k].Density[].sequenceExists` approximates arbitrary \(H^k\) elements by these Schwartz images.
+Orders are integers. The C^r embedding requires 2p > n for H^(r+p); local transport includes smooth compact-support coefficients and zero extension.
 
-`Transport` gives positive/negative-order pullbacks along open diffeomorphisms, multiplied by smooth compact-support coefficients and extended by zero.
-`MultiplicationBy` specializes to identity maps, giving multiplication by real smooth compact-support functions.
+| Entry | Purpose |
+| --- | --- |
+| `Euclidean.Signed` / `Order.Duality` | Weighted Fourier spaces and positive/negative-order duality |
+| `Euclidean.Weak` / `Euclidean.Energy` | Weak-derivative images and Fourier/derivative norm comparisons |
+| `Euclidean.Order.Density` | Schwartz approximation of nonnegative integer-order elements |
+| `Euclidean.Transport` / `MultiplicationBy` | Local diffeomorphism pullbacks, compact coefficients and zero extension |
+| `Euclidean.EmbeddingTheorem` / `Regularity` | Sobolev embeddings and common smooth inverse Fourier representatives |
 
-`EmbeddingTheorem[r := r, p := p, range := range].theorem` proves inverse Fourier integrals of \(H^{r+p}\) elements are \(C^r\) when \(2p>n\).
-`Regularity[].smooth` gives common smooth inverse Fourier integrals for elements of every nonnegative integer order.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

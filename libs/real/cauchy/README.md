@@ -1,6 +1,10 @@
-# Cauchy reals
+# `cauchy_reals`
 
-Reals as quotients of rational Cauchy sequences, with arithmetic, order, and completeness.
+Reals from rational Cauchy-sequence quotients, arithmetic, order, completeness.
 
-`CauchyReal` constructs reals from equivalence classes of rational Cauchy sequences.
-`Sequences`, `Quotient`, `Order`, `Completeness` provide sequences, quotient arithmetic, order, and completeness.
+| Entry | Purpose |
+| --- | --- |
+| `CauchyReal.Sequences` / `Quotient` | Rational Cauchy sequences, equivalence classes and quotient arithmetic |
+| `CauchyReal.Order` / `Completeness` | Order laws and completeness |
+
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

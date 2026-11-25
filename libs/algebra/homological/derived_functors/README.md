@@ -1,8 +1,8 @@
-# Derived functors
+# `derived_functors`
 
-Ext/Tor over commutative rings, resolution independence, naturality, universal coefficients.
+Ext/Tor, resolution independence and naturality, cyclic-module resolutions, universal coefficients.
 
-| Module | Contents |
+| Entry | Purpose |
 | --- | --- |
 | `Ext.Over.Of` / `Tor.Over.Of` | Degreewise modules from specified projective resolutions |
 | `Independence` / `DegreeZero` | Resolution-change isomorphisms, degree-zero Hom/tensor isomorphisms |
@@ -17,5 +17,4 @@ Ext/Tor over commutative rings, resolution independence, naturality, universal c
 | `Selected` / `ChoiceIndependence` | Splitting choices and coordinate changes |
 | `ExactNaturality` / `ExactIdentity` / `ExactComposition` | Short-exact endpoint maps, identities/composition |
 
-Tor comparison uses total double resolutions; `onComparison` proves agreement with actual induced maps.
-Vanishing examples: [Cyclic.ProjectiveCoefficient](../concrete_complexes/src/Cyclic/ProjectiveCoefficient.ref).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md)

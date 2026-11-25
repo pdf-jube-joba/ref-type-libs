@@ -1,9 +1,10 @@
-# Covering spaces and classification
+# `covering_spaces`
 
-`Projection[E, B, total, base, projection]` takes totals/bases/topologies/projections.
-`Covering` requires continuous surjections and local products with discrete fibers near every basepoint.
+Covering lifts, subgroup/conjugacy classification, universal coverings and deck transformations.
 
-| Module | Contents |
+Fiber transport uses right actions; subgroup conjugacy is g -> a g a^-1. Deck-group multiplication is ordinary function composition.
+
+| Entry | Purpose |
 | --- | --- |
 | `Projection.Around` / `Sheets` | Trivializations, continuous local sections, open sheets |
 | `Projection.Lifting.Existence` / `Uniqueness` | Path-lift existence/uniqueness |
@@ -17,26 +18,4 @@
 | `Subgroups.existsUniversalCover` / `Comparison.universalLifting` | Simply connected universal covers, maps to other covers through prescribed points |
 | `Projection.Deck.normalizerQuotient` / `normalCoverCriterion` | Deck groups/normalizer quotients, regular-cover criteria |
 
-Lift existence uses compact intervals/squares and finite subdivisions.
-Discrete local fibers and constancy of paths into discrete spaces give uniqueness.
-
-`goodBasis` in `fundamental_groups.Neighborhoods` gives path-connected open bases with fundamental-group-killing inclusions from standard local/semilocal assumptions.
-`PathAction.Realization` uses path transport for sheets, proving topology axioms, continuous projections, local products.
-Right coset actions give `Subgroups.Realization[H]` with induced fundamental-group image \(H\).
-
-`Projection.Fundamental[e].Monodromy[covering].imageMembership` equates \(p_*\pi_1(E,e)\) with stabilizers.
-Classification `SameSubgroup` and `Conjugate` use these stabilizers.
-Conjugacy convention: \(g\mapsto aga^{-1}\).
-
-`Projection.Deck[point].Carrier` is a projection-commuting total homeomorphism; `group` multiplies by ordinary function composition.
-`Classification.NormalCosets` consists of \(H\backslash\pi_1(B,b)\) cosets whose representatives normalize \(H\).
-`normalizerToClass` and `classToNormalizer` prove this representative criterion.
-`normalizerQuotient` constructs group structures and inverse deck-group homomorphisms.
-`QuotientIsomorphism.product` ensures \([a][b]=[ab]\), so the quotient is \(N(H)/H\).
-Regular covers correspond to normal \(H\), equivalently transitive deck actions on basepoint fibers.
-
-[Build and check](../../USAGE.md) from the repository root:
-
-```sh
-ref-type/target/debug/cli libs/topology/coverings --module covering_spaces
-```
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md) · [Notes](../../../math/package-notes/topology/coverings.md)

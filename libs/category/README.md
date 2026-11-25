@@ -1,10 +1,8 @@
-# Category theory
+# `category`
 
-`category` handles categories with sets of objects and families of morphism sets.
-Store identity/composition data, category laws, functor maps, and functor laws separately.
-Natural transformations are component functions satisfying naturality; equality uses function extensionality.
+Categories, functors, natural transformations, universal properties, adjunctions, additive and abelian categories.
 
-| Module | Contents |
+| Entry | Purpose |
 | --- | --- |
 | `Category` | Categories, opposite categories, morphism congruence, isomorphisms and cancellation |
 | `Constructions` | Terminal category, functors to it, categories of functions on set families |
@@ -20,13 +18,4 @@ Natural transformations are component functions satisfying naturality; equality 
 | `Additive` | Zero objects and binary biproducts, map comparisons via projections/inclusions |
 | `Abelian` | Kernel/cokernel universality, normal monomorphisms/epimorphisms, uniqueness up to isomorphism |
 
-## Kan extensions
-
-`Kan.Along` accepts functors \(K:A\to B\) and \(F:A\to C\).
-`Left` bundles a functor \(L:B\to C\), a transformation \(\eta:F\Rightarrow LK\), and unique transformations \(L\Rightarrow G\) factoring arbitrary \(\alpha:F\Rightarrow GK\).
-`Right` bundles the dual universal property using a transformation \(RK\Rightarrow F\).
-Extract extension functors from `extension` and transformations to comparison functors from `factor`.
-Naturality and factorization equalities quantify over every object and morphism.
-`leftUnique` and `rightUnique` in `Kan.Along.Prop` construct natural isomorphisms between two extensions of the same \(K,F\).
-
-[Examples](src/root.ref) check categories, functors, transformations, and universal properties.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../USAGE.md)

@@ -1,9 +1,10 @@
-# Differential forms on Euclidean spaces
+# `euclidean_forms`
 
-`Euclidean[n := n].On[U := U]` handles smooth alternating forms on open \(U\subseteq\mathbb R^n\).
-`Form(k)` smoothness uses fixed-argument evaluation; `CoefficientSmooth.family` tests basis coefficients.
+Local differential forms, wedge products/exterior derivatives, coordinate expressions, pullbacks.
 
-| API | Contents |
+APIs specialize `Euclidean[n].On[U]` on open Euclidean sets. Form smoothness can be tested on fixed arguments or basis coefficients.
+
+| Entry | Purpose |
 | --- | --- |
 | `At[k].space` / `DegreeZero.isomorphism` | Vector spaces, degree-zero forms/smooth functions |
 | `Above[k]` / `coefficientExt` | Vanishing above dimension, coefficient equality criteria |
@@ -14,8 +15,4 @@
 | `DeRham.DegreeZero` | Isomorphism with \(df=0\) functions |
 | `CoordinateBasis.At.Enumeration` / `Differential.formula` | Finite bases, coefficient reconstruction/exterior formulas |
 
-`Euclidean.Pullback[m, U, V, f]` gives Jacobian pullbacks; `Identity`, `After` identity/composition laws.
-`Pullback.Product`, `DegreeZero` prove wedge/degree-zero exterior compatibility.
-`Evaluation` handles varying smooth evaluation; `Gluing` open-cover gluing.
-`Restriction` has inclusion restrictions commuting with partials/products/exterior derivatives.
-`Regrade[k,l].cast` gives set-valued transport; `RegradeIdentity`, `composition` its laws; `bridge` agrees with list transport.
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

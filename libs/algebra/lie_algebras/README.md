@@ -1,10 +1,10 @@
-# Lie algebras
+# `lie_algebras`
 
-`Field[K, field]` handles Lie algebras over arbitrary fields.
-`LieAlgebra V space` is an alternating bilinear bracket on a vector space satisfying Jacobi.
-Jacobi uses \([x,[y,z]]=[[x,y],z]+[y,[x,z]]\).
+Lie algebras, adjoint representations, commutators, Lie subalgebras, endomorphism algebras.
 
-| Module | Contents |
+APIs specialize `Field[K, field]`. Alternation implies antisymmetry, including in characteristic two.
+
+| Entry | Purpose |
 | --- | --- |
 | `Field.On` | Antisymmetry, linear `ad`, derivation law, `adRepresentation` |
 | `Field.On.Of` | Induced subalgebra vector spaces and brackets |
@@ -13,13 +13,4 @@ Jacobi uses \([x,[y,z]]=[[x,y],z]+[y,[x,z]]\).
 | `Field.Associative` | Associative commutators \([x,y]=xy-yx\), derivation/Jacobi proofs |
 | `Field.Endomorphisms` | Associative endomorphism algebras and commutator Lie algebras |
 
-`Field.Endomorphisms.scalarMap` maps coefficients to scalar identity maps; `scalarCentral` proves the image central.
-
-Antisymmetry follows from alternation, so characteristic \(2\) is included.
-`Classical.On.Orthogonal.LieAlgebra` in `geometry/lie_groups` proves skew-symmetric endomorphisms closed under commutators, instantiating \(\mathfrak{so}(n)\).
-
-[Build and check](../../USAGE.md) from the repository root:
-
-```sh
-cargo run --manifest-path ref-type/Cargo.toml -p cli -- libs/algebra/lie_algebras --module lie_algebras
-```
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

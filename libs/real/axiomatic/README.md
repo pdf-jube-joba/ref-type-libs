@@ -1,6 +1,9 @@
-# Ordered-field structures
+# `ordered_fields`
 
-Shared structures for ordered fields and supremum completeness.
+Shared ordered-field and supremum-completeness structures.
 
-`AxiomaticReals[Carrier := A]` bundles ordered-field laws and supremum completeness.
-[Dedekind reals](../dedekind/README.md) and [Cauchy reals](../cauchy/README.md) share this structure.
+| Entry | Purpose |
+| --- | --- |
+| `AxiomaticReals` | Ordered-field laws and supremum completeness shared by constructed real-number systems |
+
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)

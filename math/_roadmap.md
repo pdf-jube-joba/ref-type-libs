@@ -7,6 +7,7 @@ Task specifications retain requirements and dependencies; the API map and check 
 
 The [library index](../libs/README.md) covers the 112 packages in [libs/ref.toml](../libs/ref.toml).
 Use package READMEs for APIs, source files for exact assumptions, and [checking instructions](../libs/USAGE.md) for the compiler in `ref-type/`.
+Detailed constructions, proof explanations and historical validation records are in the [package notes](package-notes/README.md).
 A retained specification or README alone does not establish task completion.
 
 ## Goals and proof routes
@@ -67,8 +68,8 @@ The following upstream records refer to historical sources and do not establish 
 | --- | --- |
 | [G06](g06-tubular-neighborhoods.md#status) | Tubular/collapse APIs exist; boundary extensions, choice comparisons, stabilization, and examples need verification. Current package/closure checks are unconfirmed; the B08 workspace run stopped here. |
 | [A09](a09-euclidean-sobolev.md#status) | Sobolev APIs exist; general weak-derivative comparison, coefficient classes, and examples need verification. Current package/closure checks are unconfirmed; the G13 workspace run stopped here. |
-| [B08](b08-grassmannian-cells.md) | Later [2026-11-20 evidence](../libs/geometry/grassmannian_cells/README.md#type-checking) supersedes parse-only status: 225 target modules checked, 7,852 closure modules accepted; workspace runs incomplete. |
-| [G13](g13-morse-lemma.md) | [2026-11-19 evidence](../libs/geometry/morse_lemma/VALIDATION.md): 137 target modules rechecked, 1,926 closure modules accepted; workspace stopped in A09 with 8,002 targets unverified. |
+| [B08](b08-grassmannian-cells.md) | Later [2026-11-20 evidence](package-notes/geometry/grassmannian_cells.md#type-checking) supersedes parse-only status: 225 target modules checked, 7,852 closure modules accepted; workspace runs incomplete. |
+| [G13](g13-morse-lemma.md) | [2026-11-19 evidence](package-notes/geometry/morse_lemma-validation.md): 137 target modules rechecked, 1,926 closure modules accepted; workspace stopped in A09 with 8,002 targets unverified. |
 
 The older [C01 workspace report](c01-integrated-workspace-report.json) is `internal-error` with no verified modules.
 [A01](a01-progress.md) and [C01](c01-resume.md) summarize historical work; unconfirmed checks alone do not imply a current source failure.

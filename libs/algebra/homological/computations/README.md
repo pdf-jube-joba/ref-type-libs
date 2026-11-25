@@ -1,9 +1,10 @@
-# Homological algebra computations and products
+# `homological_algebra`
 
-Import name: `homological_algebra`.
-Homology of bounded finite-free integer complexes, universal coefficients, and integral Künneth.
+Homology computations for finite integer complexes, natural universal-coefficient/integral-Künneth short exact sequences.
 
-| Module | Contents |
+Inputs are bounded finite-free integer complexes; comparison maps retain canonical inclusions/projections and their actions on computed generators.
+
+| Entry | Purpose |
 | --- | --- |
 | `Finite.Pair.Of` | Isomorphisms from boundary images inside kernels to Smith-coordinate cokernels |
 | `Finite.Compute.Run` | Two-stage Smith computations, free ranks/diagonal factors/generator and inverse-coordinate matrices |
@@ -18,13 +19,4 @@ Homology of bounded finite-free integer complexes, universal coefficients, and i
 | `Theorem.Mapping.With.At.diagram` | Short-exact naturality for maps on both factors |
 | `Kunneth.Integer.Assertions` | Universally quantified exactness, naturality, and splitting theorems |
 
-\[
-0\longrightarrow\bigoplus_{p+q=n}H_p(C)\otimes H_q(D)
-\longrightarrow H_n(C\otimes D)
-\longrightarrow\bigoplus_{p+q=n-1}\operatorname{Tor}^{\mathbb Z}_1(H_p(C),H_q(D))
-\longrightarrow0.
-\]
-
-`inclusionEq`, `projectionEq` give agreement with canonical maps; `onComputedGenerators` gives actions on computed generators.
-Universal-coefficient `Derived.functorAgreement` identifies endpoint maps with existing Ext/Tor maps.
-See [field coefficients](../field_kunneth/README.md), [integer-graded totalization](../tensor_chains/README.md), and [examples](../concrete_complexes/README.md).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md)

@@ -1,8 +1,8 @@
-# Chain and cochain complexes
+# `chain_complexes`
 
-Natural/integer-graded complexes over rings, homology, maps, and homotopies.
+Natural/integer-graded complexes, homology, maps, homotopies, categories of complexes.
 
-| Module | Contents |
+| Entry | Purpose |
 | --- | --- |
 | `Cochain.Over` | Natural-graded cochains, cycles modulo boundaries, induced maps |
 | `Integer.Over` | Integer-graded cochain complexes |
@@ -18,6 +18,4 @@ Natural/integer-graded complexes over rings, homology, maps, and homotopies.
 | `ModuleCategory.Over.On` / `ShortExactCategory.Over.On` | Preadditive module-family categories, short-exact-sequence categories, connecting-map naturality |
 | `CochainEquivalence.Over.Of.With` | Cohomology isomorphisms from cochain homotopy equivalences |
 
-Degree-zero cochain boundaries are the zero submodule.
-Zero-extension `PositiveCohomology`, `NegativeCohomology` return original-cohomology isomorphisms and negative-degree vanishing.
-Field-coefficient splittings/contractions are in [field_kunneth](../field_kunneth/README.md).
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md)

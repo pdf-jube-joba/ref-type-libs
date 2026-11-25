@@ -22,7 +22,7 @@ No new axioms or unproved replacements were added.
 
 The full-workspace run stopped at a G06 name-resolution error after 11,895/15,749 modules; a temporary G06 integration reached 13,276/15,750 before resource-related interruptions.
 Neither run established full-workspace success.
-These are historical upstream results, not a new check of the current checkout; see the [package validation summary](../libs/geometry/grassmannian_cells/README.md#type-checking) and [current checking instructions](../libs/USAGE.md).
+These are historical upstream results, not a new check of the current checkout; see the [package validation summary](package-notes/geometry/grassmannian_cells.md#type-checking) and [current checking instructions](../libs/USAGE.md).
 
 ## Requirements
 

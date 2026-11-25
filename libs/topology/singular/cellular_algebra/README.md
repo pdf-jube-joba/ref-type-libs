@@ -1,12 +1,13 @@
-# Algebra for singular-chain comparisons
+# `singular_cellular_algebra`
 
-Compare singular quotients/sums, coefficient Hom, and homology.
-Also groups relative degreewise projectivity, pair squares, excision naturality.
+Relative-chain direct sums, Hom and comparison-map lemmas.
 
-- `Algebra.NeighborhoodMapping` gives naturality of relative comparisons combining actual neighborhood retractions/excision.
-- `Algebra.RelativeRepresentative` and `CellLiftStep` lift projective fundamental classes, correcting boundaries to specified chains.
-- `Algebra.SumTo`, `SumSequence`, `SumCochains` compare chain sums/Hom products.
-- `Algebra.PointRelative.Positive` proves positive-degree point-relative projection isomorphisms.
-- `Algebra.IntegerCoordinates` gives generator-preserving/integer-coordinate compatibility.
-  `PointClass` exposes actual constant-simplex degree-zero classes and naturality.
-- `Algebra.Refinement.ext` and `forgetEquality` convert subtype/original equality both ways.
+| Entry | Purpose |
+| --- | --- |
+| `Algebra.NeighborhoodMapping` | Relative comparison naturality from neighborhood retractions and excision |
+| `Algebra.RelativeRepresentative` / `CellLiftStep` | Projective fundamental-class lifts with prescribed boundaries |
+| `Algebra.SumTo` / `SumSequence` / `SumCochains` | Chain sums, coefficient Hom and exact-sequence comparisons |
+| `Algebra.PointRelative` / `PointClass` | Point-relative projection isomorphisms and constant-simplex classes |
+| `Algebra.IntegerCoordinates` / `Refinement` | Integer-generator compatibility and subtype/original equality |
+
+[Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../../USAGE.md)
