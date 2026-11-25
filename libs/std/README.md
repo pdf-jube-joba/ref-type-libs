@@ -1,23 +1,23 @@
-# 標準ライブラリ
+# Standard library
 
-`std` は他のパッケージに依存せず、論理・データ・集合・算術・代数構造を提供する。
+`std` has no package dependencies and provides logic, data, sets, arithmetic, and algebraic structures.
 
-| module | 内容 |
+| Module | Contents |
 | --- | --- |
-| [Logic](src/Logic.ref) | 命題、等式、古典論理、関係、順序、停止性 |
-| [Data](src/Data.ref) | Bool、Nat、Pair、List、Option、Sum、有限集合 |
-| [Set](src/Set.ref) | 商と有限部分集合 |
-| [Arithmetic](src/Arithmetic.ref) | 整数、有理数 |
-| [Alg](src/Alg.ref) | モノイド、群、環、体、加群、代数 |
-| [Program](src/Program.ref) | 実装と仕様の対応、停止性を持つ状態遷移 |
+| [Logic](src/Logic.ref) | Propositions, equality, classical logic, relations, orders, termination |
+| [Data](src/Data.ref) | Bool, Nat, Pair, List, Option, Sum, finite sets |
+| [Set](src/Set.ref) | Quotients and finite subsets |
+| [Arithmetic](src/Arithmetic.ref) | Integers and rationals |
+| [Alg](src/Alg.ref) | Monoids, groups, rings, fields, modules, algebras |
+| [Program](src/Program.ref) | Implementation/specification correspondence, terminating state transitions |
 
-`Data.FinSet.Tuples.Omission` は頂点列からの一要素の除去、先頭追加との公式、二要素を除く順序の交換を公開する。
-`Tuples.Mapping.omitMap` は写像の適用と除去の可換性を表す。
-`Data.FinSet.Choice.exists` は有限個の存在命題から、それらを満たす関数の存在を構成する。
+`Data.FinSet.Tuples.Omission` exposes removal of one vertex from a sequence, prepend formulas, and interchange of two removals.
+`Tuples.Mapping.omitMap` expresses commutation of mapping and removal.
+`Data.FinSet.Choice.exists` constructs a satisfying function from finitely many existential propositions.
 
-## 等式と合同則
+## Equality and congruence
 
-carrier をマクロ引数に指定して使う。
+Specify the carrier as a macro argument.
 
 ```text
 \import std.Logic[].Equality[] \as E;
@@ -39,12 +39,12 @@ eq_reason!{{ f a } "=" { f b } "by" { congr!{A B} f a b ab }}
 eq_reason_in!{A a "=" b "by" ab "=" c "by" bc}
 ```
 
-`congr!` は非依存な関数の引数を順に置き換える。
-型の列で合同則を取り出す形式と、各引数の等式を直接列挙する形式があり、引数の数によるマクロの使い分けは不要である。
-直接列挙する形式の `"in"` は、型を推論できる場合に省略できる。
-`eq_reason_in!` は中間項が部分集合型を持つ場合にも、等式の台集合を指定して連鎖する。
+`congr!` replaces arguments of nondependent functions in order.
+Forms accept either a sequence of types to obtain congruence or an explicit list of argument equalities; no arity-specific macros are needed.
+`"in"` in the explicit form may be omitted when its type can be inferred.
+`eq_reason_in!` chains equalities over a specified carrier even when intermediate terms have subset types.
 
-固定した carrier の名前付き API は `E.Prop[A := X]` にある。
+Named APIs for fixed carriers are in `E.Prop[A := X]`.
 
 ```text
 \import E.Prop[A := A] \as Laws;
@@ -54,7 +54,7 @@ Laws.congr2[B, C] f a b c d ab cd
 Laws.congr3[B, C, D] f a b c d e g ab cd eg
 ```
 
-同値関係の連鎖は、関係と三法則を具体化して使う。
+Instantiate the relation and its three laws to chain equivalences.
 
 ```text
 \import std.Logic[].Equivalence[A := A, R := R,
@@ -67,8 +67,8 @@ equiv_reason_terms!{a "~" b "by" ab "~" c "by_sym" cb}
 equiv_reason_terms!{a}
 ```
 
-`"by_sym"` は逆向きの関係の証明を使い、空の連鎖は反射性を使う。
-推移性だけを使う非空の連鎖は `Transitive` のマクロに推移性の証明を渡す。
+`"by_sym"` uses a proof of the reverse relation; empty chains use reflexivity.
+For nonempty chains requiring only transitivity, pass a transitivity proof to the `Transitive` macro.
 
 ```text
 \import std.Logic[].Transitive[] \as TR;
@@ -79,11 +79,11 @@ trans_reason!{transitive "by" ab "by" bc}
 trans_reason_terms!{transitive a "~" b "by" ab "~" c "by" bc}
 ```
 
-集合値の族の移送は `E.Transport[A := A]` の `cast F a b same value` を使う。
-`cast` は集合値の `\idelim` による移送、`castRefl`・`castComposition`・`castInverse`・`Constant.law` は恒等・合成・往復・定数族の法則を公開する。
-`natural`・`pointNatural`・`binaryNatural`・`reindex` は族上の写像・要素・二項演算・添字の写像と移送の整合性を示す。
-選言の消去には `Logic.Proposition.orElim` と `either` を使える。
-`either` は分岐対象から左右の命題を推論し、結論と二つの分岐を受け取る。
+Use `cast F a b same value` in `E.Transport[A := A]` for transport in set-valued families.
+`cast` exposes transport along set-valued `\idelim`; `castRefl`, `castComposition`, `castInverse`, `Constant.law` expose identity, composition, round-trip, and constant-family laws.
+`natural`, `pointNatural`, `binaryNatural`, `reindex` prove compatibility of transport with family maps, elements, binary operations, and index maps.
+Use `Logic.Proposition.orElim` and `either` for disjunction elimination.
+`either` infers both propositions from the scrutinee and accepts a conclusion and two branches.
 
 ```text
 \import std.Logic[].Proposition[] \as Logic;
@@ -94,7 +94,7 @@ trans_reason_terms!{transitive a "~" b "by" ab "~" c "by" bc}
   \fun (left: _) (right: _) (value: _) => either!{value R left right};
 ```
 
-`Logic.existsIntro[A, S] x member` は `x: A` と `member: \In[A] S x` から `\exists \Cast[A] S` を証明する。
+`Logic.existsIntro[A, S] x member` proves `\exists \Cast[A] S` from `x: A` and `member: \In[A] S x`.
 
 ```text
 \definition singletonInhabited[A: \Set][a: A]:
@@ -102,35 +102,35 @@ trans_reason_terms!{transitive a "~" b "by" ab "~" c "by" bc}
   Logic.existsIntro[A, { x: A \where x = a }] a (\refl(a));
 ```
 
-## Program と算術
+## Program and arithmetic
 
-Bool・Nat・Int は Program のデータで、反映した型は `Bool^`・`Nat^`・`Int^` である。
-Bool と Int の演算は `Program.Correspondence` の `program`・`specification`・`coherence` で実装、Set の仕様、一致証明をまとめる。
-Nat の演算は数学的な関数を `Def`、計算実装を `Program`、両者の対応を `ProgramProp` から参照する。
-反復計算は `Program.Machine` の `step`・`terminates`・`run` で扱う。
+Bool, Nat, and Int are Program data; their reflected types are `Bool^`, `Nat^`, `Int^`.
+Bool/Int operations group implementations, Set specifications, and agreement proofs in `program`, `specification`, `coherence` of `Program.Correspondence`.
+Nat mathematical functions are in `Def`, executable implementations in `Program`, and correspondence in `ProgramProp`.
+Iterative computations use `step`, `terminates`, `run` in `Program.Machine`.
 
-| module | 内容 |
+| Module | Contents |
 | --- | --- |
-| `Data.Nat.Basic` | 加減乗算、累乗、比較 |
-| `Data.Nat.Division` | 除算、剰余、整除の法則 |
-| `Data.Nat.Iteration` / `Parity` / `Gcd` | 有限反復、偶奇判定、最大公約数 |
-| `Arithmetic.Int.Math` | 自然数対の形式差と群完成 |
-| `Int.Math.Specification` | 正規形の整数と群完成の対応・法則 |
-| `Arithmetic.IntAlgebra` | 整数の加法可換群 |
-| `Arithmetic.Rat.Fractions` | 正分母の分数と交差積による同値関係 |
-| `Rat.Fractions.Quotient` | 商上の四則演算と代表元上の計算との一致 |
+| `Data.Nat.Basic` | Addition, subtraction, multiplication, powers, comparison |
+| `Data.Nat.Division` | Division, remainders, divisibility laws |
+| `Data.Nat.Iteration` / `Parity` / `Gcd` | Finite iteration, parity, greatest common divisors |
+| `Arithmetic.Int.Math` | Formal differences of natural pairs and group completion |
+| `Int.Math.Specification` | Normal-form integers, group-completion correspondence and laws |
+| `Arithmetic.IntAlgebra` | Additive abelian group of integers |
+| `Arithmetic.Rat.Fractions` | Positive-denominator fractions and cross-product equivalence |
+| `Rat.Fractions.Quotient` | Quotient arithmetic and agreement with representative computations |
 
-Nat の法則は `Prop`、汎用の Set 上の反復は `Data.Nat.Iteration.Def` にある。
-自然数では `div a 0 = 0`、`mod a 0 = a`、`0^0 = 1` とする。
-単項表現なので大きな具体値の評価には向かない。
-Int は `ofNat n` / `negSucc n` の正規形を持ち、`toMath` / `fromMath` が群完成と対応する。
-分数の `denominatorIndex d` は分母 `d+1` を表す。
+Nat laws are in `Prop`; generic Set iteration is in `Data.Nat.Iteration.Def`.
+For natural numbers, use `div a 0 = 0`, `mod a 0 = a`, `0^0 = 1`.
+Unary representation is unsuitable for evaluating large concrete values.
+Int has normal forms `ofNat n` / `negSucc n`; `toMath` / `fromMath` relate them to group completion.
+Fraction `denominatorIndex d` represents denominator `d+1`.
 
-## 対と集合
+## Pairs and sets
 
-`Data.Pair.Times[A, B]` は Program の対、`Times^[A, B]` は任意の Set を carrier に取れる反映型である。
-Set 側は `pair`、`first`、`second`、`swap`、`map`、`curry`、`uncurry`、`assoc`、`unassoc` を使う。
-Program 側の型関連操作は計算を返すので、結果を `\bind` で受け取る。
+`Data.Pair.Times[A, B]` is the Program pair; `Times^[A, B]` is a reflected type over arbitrary Set carriers.
+On the Set side, use `pair`, `first`, `second`, `swap`, `map`, `curry`, `uncurry`, `assoc`, `unassoc`.
+Program-side type operations return computations; receive results with `\bind`.
 
 ```text
 \import std.Data[].Pair[] \as P;
@@ -142,32 +142,32 @@ Program 側の型関連操作は計算を返すので、結果を `\bind` で受
   };
 ```
 
-`Pair.Program` の `Def`・`Mapping.Def`・`Functions.Def` は対応宣言として同じ操作を提供する。
-[FiniteSubset](src/Set/FiniteSubset.ref) は空集合と有限回の `insert` で生成される部分集合型である。
-`Data.FinSet` は要素の列挙と網羅性、`Fin(n+1)` と `Option[Fin(n)]` の往復を提供する。
-`Data.FinSet.Permutations` は有限集合上の全単射と交換の列を定義し、`PermutationDecomposition.decomposition` は任意の全単射が交換の列で表せることを証明する。
-`Data.FinSet.Scope.finiteWhole` は列挙から有限性を示し、`Set.FiniteSubset.Enumeration.finiteOfEnumeration` は一般の有限リストから集合の有限性を導く。
+`Def`, `Mapping.Def`, `Functions.Def` in `Pair.Program` provide the same operations as correspondence declarations.
+[FiniteSubset](src/Set/FiniteSubset.ref) is the subset type generated by the empty set and finitely many `insert` operations.
+`Data.FinSet` provides enumeration and coverage, and round trips between `Fin(n+1)` and `Option[Fin(n)]`.
+`Data.FinSet.Permutations` defines finite-set bijections and swap sequences; `PermutationDecomposition.decomposition` proves every bijection is a swap sequence.
+`Data.FinSet.Scope.finiteWhole` proves finiteness from enumerations; `Set.FiniteSubset.Enumeration.finiteOfEnumeration` derives set finiteness from arbitrary finite lists.
 
-## 商と代数構造
+## Quotients and algebraic structures
 
-[Quotient](src/Set/Quotient.ref) は同値類と代表元、商の帰納法、単項・二項演算の持ち上げを提供する。
-同値関係の法則は `EquivalenceLaws` として定理の前提で量化する。
-[Logic.Rel](src/Logic/Rel.ref) は carrier と関係をまとめた `RelationData` / `EquivalenceRelation`、[QuotientOf](src/Logic/Rel/QuotientOf.ref) はその商を束として扱う。
+[Quotient](src/Set/Quotient.ref) provides equivalence classes/representatives, quotient induction, and unary/binary operation lifting.
+Quantify equivalence-relation laws as `EquivalenceLaws` in theorem assumptions.
+[Logic.Rel](src/Logic/Rel.ref) groups carriers and relations as `RelationData` / `EquivalenceRelation`; [QuotientOf](src/Logic/Rel/QuotientOf.ref) treats their quotients as bundles.
 
-代数構造はデータと法則を `\structure` にまとめる。
-`Alg.Monoid`、`Alg.Alg`、`Alg.Ring`、`Alg.Field` が Monoid・Group・Semiring・Ring・Field と可換版を提供する。
-`RingModule` / `RingAlgebra` はスカラー環と carrier を指定する。
+Algebraic structures group data and laws in `\structure`.
+`Alg.Monoid`, `Alg.Alg`, `Alg.Ring`, `Alg.Field` provide Monoid, Group, Semiring, Ring, Field, and commutative variants.
+`RingModule` / `RingAlgebra` specify scalar rings and carriers.
 
-## 証明付き整数計算と有限探索
+## Verified integer computation and finite search
 
-`Arithmetic.ExtendedEuclid` は自然数と符号付き整数の Bézout 係数を計算し、最大公約数と整除の証明を返す数学的仕様との対応を公開する。
-`Signed.Division` は符号付きの商と余りを計算し、非零の除数について余りの絶対値の減少を証明する。
-`Arithmetic.IntegerSum` と `Arithmetic.NaturalSum` は有限和を実行する停止機械と、その仕様との対応を提供する。
-自然数の有限和は各成分の上界になり、整数行列の pivot 探索の減少量にも使える。
-`Data.Nat.Induction.Termination` は二つの自然数による辞書式の減少から停止性を証明する。
-`Logic.Termination.Results` は、各遷移で保つ状態の性質から反復の返却値の性質を証明する。
-`Data.Nat.Iteration.Program[A := T]` は実行用の型上の反復を、`Data.Nat.Find` と `Find.Grid` は一次元・二次元の有限探索を提供する。
-探索結果の範囲と条件、および探索が空の場合の全称的な条件不成立を証明している。
+`Arithmetic.ExtendedEuclid` computes natural/signed-integer Bézout coefficients and exposes correspondence with mathematical specifications returning gcd and divisibility proofs.
+`Signed.Division` computes signed quotients/remainders and proves decreasing remainder magnitude for nonzero divisors.
+`Arithmetic.IntegerSum` and `Arithmetic.NaturalSum` provide terminating finite-sum machines and specification correspondence.
+Natural finite sums bound each component and can measure decrease in integer-matrix pivot searches.
+`Data.Nat.Induction.Termination` proves termination from lexicographic decrease of two natural numbers.
+`Logic.Termination.Results` proves return-value properties from state invariants preserved by every transition.
+`Data.Nat.Iteration.Program[A := T]` provides iteration on executable types; `Data.Nat.Find` and `Find.Grid` provide one/two-dimensional finite searches.
+Proves result ranges/conditions and universal failure of the condition when searches are empty.
 
 
-`Data.FinSet.elementsLength` は標準有限添字の列挙の長さが添字の大きさに等しいことを示す。
+`Data.FinSet.elementsLength` proves standard finite-index enumeration length equals index size.

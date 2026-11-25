@@ -1,24 +1,24 @@
-# 位相幾何
+# Topology
 
-位相空間とホモトピーの基礎から、特異理論、具体的な空間の計算へ進む。
-パッケージの直接依存は各 `ref.toml`、全体の検査対象は [libs/ref.toml](../ref.toml) にある。
+From topology/homotopy foundations to singular theories and concrete space computations.
+Direct dependencies: each `ref.toml`; full check targets: [libs/ref.toml](../ref.toml).
 
-| 配置 | 内容 |
+| Location | Contents |
 | --- | --- |
-| [basic](basic/README.md) | 位相空間、部分空間、連続写像、コンパクト性、分離性 |
-| [metric](metric/README.md) | 距離空間、距離化、実数直線と従属分割 |
-| [constructions](constructions/README.md) | 積、商、直和、貼り合わせ、compact-open 位相 |
-| [algebra](algebra/README.md) | 位相的代数、座標空間と行列位相 |
-| [thom_spaces](thom_spaces/README.md) | 円板束・球面束、Thom 商、計量・懸垂・直和の比較、有限 CW 対型と相対特異理論 |
-| [cohomology_thom](cohomology_thom/README.md) | Thom 相対類の積・零切断、ファイバー制限と標準円板の生成元 |
-| [homotopy](homotopy/README.md) | ホモトピー、基点付き商、mapping cone、CW 対と標準単体 |
-| [singular](singular/README.md) | 特異鎖・余鎖、切除、積、有限モデルとの比較 |
-| [spheres](spheres/README.md) | 球面の向き、反転と円周の整数べき写像の次数 |
-| [examples](examples/README.md) | 特徴的な空間と有限モデルでの利用例 |
+| [basic](basic/README.md) | Spaces/subspaces, continuity, compactness, separation |
+| [metric](metric/README.md) | Metrics, metrization, real line, partitions of unity |
+| [constructions](constructions/README.md) | Products, quotients, coproducts, gluing, compact-open topology |
+| [algebra](algebra/README.md) | Topological algebra, coordinate/matrix topologies |
+| [thom_spaces](thom_spaces/README.md) | Disk/sphere bundles, Thom quotients, metric/suspension/sum comparisons, finite CW pair types, relative singular theory |
+| [cohomology_thom](cohomology_thom/README.md) | Relative Thom products/zero sections, fiber restrictions, standard-disk generators |
+| [homotopy](homotopy/README.md) | Homotopies, pointed quotients, mapping cones, CW pairs/standard simplices |
+| [singular](singular/README.md) | Singular chains/cochains, excision, products, finite-model comparisons |
+| [spheres](spheres/README.md) | Sphere orientations, reflection/circle-power degrees |
+| [examples](examples/README.md) | Examples on characteristic spaces and finite models |
 
-各パッケージの名前は、配置とは別に `ref.toml` の `name` で定まる。
-例えば `singular/cohomology` は `singular_cohomology`、`homotopy` は `algebraic_topology` として参照する。
+Package names are specified by `name` in `ref.toml`, independently of paths.
+For example, refer to `singular/cohomology` as `singular_cohomology` and `homotopy` as `algebraic_topology`.
 
-基本群と被覆については [fundamental](fundamental/README.md) と [coverings](coverings/README.md) を参照する。
+Fundamental groups/coverings: [fundamental](fundamental/README.md) and [coverings](coverings/README.md).
 
-CW 部分複体のホモトピー拡張性、基点付き cofiber の反復と反変 Hom の完全性は [puppe_sequences](puppe_sequences/README.md) にまとめる。
+CW-subcomplex homotopy extension, iterated pointed cofibers, and contravariant Hom exactness: [puppe_sequences](puppe_sequences/README.md).

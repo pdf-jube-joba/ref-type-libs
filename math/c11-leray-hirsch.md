@@ -1,12 +1,12 @@
-# C11 Leray–Hirsch の比較
+# C11 Leray–Hirsch comparison
 
-## 要件
+## Requirements
 
-- 主な実装先は `leray_hirsch`。
-- 有限 CW 底空間上の局所自明ファイバー束について、ファイバーの有限自由コホモロジー基底を全空間の類が持ち上げる条件を定式化する。
-- 底空間の類の引き戻しと基底類の積による加群同型を、セルと Mayer–Vietoris の比較から証明する。
-- 対・係数変更・底空間の引き戻しへの自然性を公開し、自明束で外積の同型と一致することを示す。
+- Primary implementation: `leray_hirsch`.
+- For locally trivial fibrations over finite CW bases, formulate lifting a finite free fiber-cohomology basis to total-space classes.
+- Prove the module isomorphism given by multiplying pulled-back base classes with basis classes, using cells and Mayer–Vietoris comparisons.
+- Expose naturality for pairs, coefficients, and base pullback; identify the trivial-bundle case with the external-product isomorphism.
 
-## 依存するタスク
+## Dependencies
 
-- [C03 Thom 類と Thom 同型](../../libs/topology/cohomology_thom/README.md)
+- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)

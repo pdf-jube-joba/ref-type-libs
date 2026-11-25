@@ -1,34 +1,34 @@
-# G06 管状近傍と collapse 写像
+# G06 Tubular neighborhoods and collapse maps
 
 <a id="status"></a>
 
-## 状況
+## Status
 
-2026-11-19、main の `dce3d353e75972c507928253d6c33420f6f55a0f` の実コードを読み取りで確認した。
-`tubular_neighborhoods` は workspace 登録済みで、40個の `.ref` ファイルがある。
-実装は存在するが、以下の確認残があり、計画全体の完了は未確認である。
+Read-only inspection of main `dce3d353e75972c507928253d6c33420f6f55a0f` on 2026-11-19.
+`tubular_neighborhoods` is registered in the workspace with 40 `.ref` files.
+An implementation exists, but the following verification remains; full-plan completion is unconfirmed.
 
-| 範囲 | 実コードと確認残 |
+| Scope | Implementation and outstanding verification |
 | --- | --- |
-| コンパクト部分多様体 | [Euclidean.On.Of.tubularNeighborhood](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of.ref) と `With.Compact` が法円板近傍を構成し、[Restriction.diffeomorphism](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/With/Restriction.ref) が微分同相を与える。 |
-| 境界互換 | [Neat.Crossing.HalfTube](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/Neat/Crossing/HalfTube.ref) に半空間への同相と境界保存がある。[HalfSpace.Of](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/HalfSpace.ref) は `Extension[f]` を入力に要求し、G05 の neat embedding からこの入力を構成する接続は未確認。 |
-| 選択とホモトピー | [With.Compare](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/With/Compare.ref) は同じ `lift` の近傍・半径を比較し、埋め込み族と collapse ホモトピーを与える。異なる tubular map の選択まで含む比較の要件対応は未確認。 |
-| collapse と積 | [Collapse.Of](../../libs/geometry/tubular_neighborhoods/src/Collapse/Of.ref) に連続性、`Disk.CollapseLaw` に円板内・外の式、[Product.Of](../../libs/geometry/tubular_neighborhoods/src/Product/Of.ref) に `multiplicative` がある。 |
-| 安定化 | [Stabilized](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/Stabilized.ref) に `endpointFormula` と積モデルの `suspension` がある。安定化した法束の Thom 空間との同一視を含む比較の完結性は未確認。 |
-| 文書・例 | パッケージの README と独立した Examples は未整備。`Line` は構成に使う円板モデル。 |
+| Compact submanifolds | [Euclidean.On.Of.tubularNeighborhood](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of.ref) and `With.Compact` construct normal disk neighborhoods; [Restriction.diffeomorphism](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/With/Restriction.ref) gives a diffeomorphism. |
+| Boundary compatibility | [Neat.Crossing.HalfTube](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/Neat/Crossing/HalfTube.ref) provides a half-space homeomorphism and boundary preservation. [HalfSpace.Of](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/HalfSpace.ref) requires `Extension[f]`; construction from G05 neat embeddings remains unconfirmed. |
+| Choices and homotopies | [With.Compare](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/With/Compare.ref) compares neighborhoods/radii for the same `lift`, providing embedding families and collapse homotopies. Coverage of comparisons between different tubular-map choices remains unconfirmed. |
+| Collapse and products | [Collapse.Of](../../libs/geometry/tubular_neighborhoods/src/Collapse/Of.ref) provides continuity, `Disk.CollapseLaw` inside/outside-disk formulas, and [Product.Of](../../libs/geometry/tubular_neighborhoods/src/Product/Of.ref) provides `multiplicative`. |
+| Stabilization | [Stabilized](../../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/Stabilized.ref) contains `endpointFormula` and product-model `suspension`. Completeness of comparison, including stabilized normal Thom-space identification, remains unconfirmed. |
+| Documentation and examples | Package README and standalone Examples are missing. `Line` is the disk model used in construction. |
 
-現行ソースと依存閉包の型検査通過を示す記録は確認できていない。
-確認した既存記録の範囲は[ロードマップの検査状況](_roadmap.md#progress-and-checks)に記す。
+No record confirming successful type checking of the current sources and dependency closure has been found.
+The scope of inspected records is documented in the [roadmap check status](_roadmap.md#progress-and-checks).
 
-## 要件
+## Requirements
 
-- 主な実装先は `tubular_neighborhoods`。
-- Euclid 空間内のコンパクト部分多様体の法束から、零切断の近傍を像の近傍へ送る微分同相を構成する。
-- 半空間内の neat embedding に対する境界互換版と、管状近傍の選択を比較する族を構成する。
-- 法円板束の外を潰す連続写像を構成し、安定化・積・ホモトピーに関する比較を証明する。
+- Primary implementation: `tubular_neighborhoods`.
+- Construct a diffeomorphism from a zero-section neighborhood in the normal bundle of a compact Euclidean submanifold to a neighborhood of its image.
+- Construct boundary-compatible versions for neat half-space embeddings and families comparing tubular choices.
+- Construct continuous collapse outside the normal disk bundle; prove stabilization, product, and homotopy comparisons.
 
-## 依存するタスク
+## Dependencies
 
-- [G05 コンパクト多様体の埋め込み](../../libs/geometry/compact_embeddings/README.md)
-- [滑らかな束・枠束・随伴束](../../libs/geometry/smooth_bundles/README.md)
-- [C02 円板束・球面束と Thom 空間](c02-thom-spaces.md)
+- [G05 Embeddings of compact manifolds](../../libs/geometry/compact_embeddings/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../../libs/geometry/smooth_bundles/README.md)
+- [C02 Disk bundles, sphere bundles, and Thom spaces](c02-thom-spaces.md)

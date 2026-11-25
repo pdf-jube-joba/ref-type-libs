@@ -1,12 +1,12 @@
-# A19 複素 Hilbert 空間とコンパクト作用素
+# A19 Complex Hilbert spaces and compact operators
 
-## 要件
+## Requirements
 
-- 主な実装先は `complex_hilbert`。
-- 実関数解析から複素ノルム空間・Hilbert 空間の構造を構成し、複素 Riesz 表現と有界作用素の随伴を証明する。
-- 閉部分空間への直交射影、直交補と商の比較、有限階数作用素を構成する。
-- コンパクト作用素の和・合成・ノルム極限・随伴による閉性と、恒等作用素がコンパクトなら有限次元であることを証明する。
+- Primary implementation: `complex_hilbert`.
+- Construct complex normed and Hilbert spaces from real functional analysis; prove complex Riesz representation and bounded-operator adjoints.
+- Construct orthogonal projections onto closed subspaces, comparisons of orthogonal complements with quotients, and finite-rank operators.
+- Prove closure of compact operators under sums, composition, norm limits, and adjoints, and finite dimensionality when the identity is compact.
 
-## 依存するタスク
+## Dependencies
 
-なし。
+None.

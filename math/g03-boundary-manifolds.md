@@ -1,27 +1,27 @@
-# G03 境界・角付き多様体
+# G03 Manifolds with boundary and corners
 
-## 要件
+## Requirements
 
-- 主な実装先は `boundary_manifolds`。
-- 半空間と象限のチャートによる境界・角付き多様体、境界面、滑らかな写像を構成する。
-- 境界の接束、内向き・外向き方向、neat embedding と積の境界面を定義し、座標変更との整合性を証明する。
-- 区間・円板・多様体と区間の積を構成し、既存の境界なし多様体への制限と比較する。
+- Primary implementation: `boundary_manifolds`.
+- Construct manifolds with boundary/corners, boundary faces, and smooth maps using half-space and orthant charts.
+- Define boundary tangent bundles, inward/outward directions, neat embeddings, and product faces; prove coordinate-change compatibility.
+- Construct intervals, disks, and manifold–interval products; compare restrictions to existing boundaryless manifolds.
 
-## 依存するタスク
+## Dependencies
 
-- [G02 逆関数・陰関数と正則値の局所形](g02-inverse-implicit.md)
+- [G02 Inverse and implicit functions and local forms of regular values](g02-inverse-implicit.md)
 
-## 実装
+## Implementation
 
-実装済み。
-公開 API と仮定は [boundary_manifolds](../../libs/geometry/boundary_manifolds/README.md) にまとめる。
+Implemented.
+Public API and assumptions: [boundary_manifolds](../../libs/geometry/boundary_manifolds/README.md).
 
-| 要件 | 実装 |
+| Requirements | Implementation |
 | --- | --- |
-| 半空間・象限チャート、多様体と滑らかな写像 | `Model`、`Dimension`、`SmoothMap`、`MapIdentity`、`MapComposition` |
-| 境界面と接束 | `Face.On` の残る角を含む面と接束、`Face.Global` の大域的な埋め込まれた面、`Boundary.Of.Build` の半空間被覆からの境界多様体と接束 |
-| 内向き・外向き方向と座標不変性 | `OneSided`、`Model.RayControl`、`ConeMap`、`Extensions.Local`、`Tangent.On.At.Cones`、`Differential` |
-| neat embedding | `Immersion`、`Neat` の内在的条件と法線座標の判定、`NeatIdentity` |
-| 積の境界面 | `Product` の積チャートと因子ごとの面の判定、内在的な境界の和集合則 |
-| 区間・円板・多様体と区間の積 | `Sublevel` の G02 局所形からの構成、`Disk`、`Interval`、`Cylinder`、`Examples` |
-| 境界なし多様体との比較 | `Boundaryless` の空の座標制約による構成と同相、`Interior` の既存の通常の多様体への制限 |
+| Half-space/orthant charts, manifolds, and smooth maps | `Model`, `Dimension`, `SmoothMap`, `MapIdentity`, `MapComposition` |
+| Boundary faces and tangent bundles | Faces retaining corners and tangent bundles in `Face.On`; globally embedded faces in `Face.Global`; boundary manifolds and tangent bundles from half-space covers in `Boundary.Of.Build` |
+| Inward/outward directions and coordinate invariance | `OneSided`, `Model.RayControl`, `ConeMap`, `Extensions.Local`, `Tangent.On.At.Cones`, `Differential` |
+| Neat embeddings | Intrinsic conditions and normal-coordinate criteria in `Immersion`, `Neat`; `NeatIdentity` |
+| Product boundary faces | Product charts, factorwise face criteria, and intrinsic boundary-union laws in `Product` |
+| Intervals, disks, and manifold–interval products | G02 local-form construction in `Sublevel`; `Disk`, `Interval`, `Cylinder`, `Examples` |
+| Boundaryless-manifold comparison | Empty-coordinate-constraint construction/homeomorphism in `Boundaryless`; restriction to existing ordinary manifolds in `Interior` |

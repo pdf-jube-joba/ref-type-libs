@@ -1,23 +1,23 @@
-# 鎖複体と余鎖複体
+# Chain and cochain complexes
 
-環上の自然数・整数次数の複体、ホモロジー、写像とホモトピーを扱う。
+Natural/integer-graded complexes over rings, homology, maps, and homotopies.
 
-| module | 内容 |
+| Module | Contents |
 | --- | --- |
-| `Cochain.Over` | 自然数次数の余鎖複体、サイクル・境界の商、誘導写像 |
-| `Integer.Over` | 整数次数の余鎖複体 |
-| `Cochain.Over.ZeroExtension` / `Recovery` | 負次数を零にする拡張と制限の往復、コホモロジー同型 |
-| `Chain.Over.At` / `Map.At` | 整数次数の鎖複体、ホモロジーと誘導写像 |
-| `Chain.Over.Homotopy` / `Equivalence.At` | \(f-g=dh+hd\)、ホモトピー同値による同型 |
-| `Chain.Over.Shift` / `Cone` / `ConeIdentity` | 符号 \(-d\) のシフト、mapping cone、恒等写像の cone の収縮 |
-| `Chain.Over.Zero` / `Concentrated` / `ZeroDifferential.At` | 零複体、単一次数、零微分のホモロジー |
-| `Chain.Over.Map.Kernel` | 項ごとの核、全射な比較写像の核の完全性から得るホモロジー同型 |
-| `Chain.Over.QuotientMapping.On` | 可換な正方形が誘導する商複体の写像と生成元での公式 |
-| `Chain.Over.ShortExact.Morphism.Diagram` / `Integer.Over.ShortExact.Morphism.Diagram` | 長完全列の自然性と五項完全列による相対群の比較 |
-| `Chain.Over.Reverse` / `Reversal.Over.ToChain` | 次数の符号反転による鎖・余鎖の変換 |
-| `ModuleCategory.Over.On` / `ShortExactCategory.Over.On` | 加群族の前加法圏、短完全列の圏と接続写像の自然性 |
-| `CochainEquivalence.Over.Of.With` | 余鎖ホモトピー同値によるコホモロジー同型 |
+| `Cochain.Over` | Natural-graded cochains, cycles modulo boundaries, induced maps |
+| `Integer.Over` | Integer-graded cochain complexes |
+| `Cochain.Over.ZeroExtension` / `Recovery` | Extension by zero in negative degrees, restriction round trips, cohomology isomorphisms |
+| `Chain.Over.At` / `Map.At` | Integer-graded chains, homology, induced maps |
+| `Chain.Over.Homotopy` / `Equivalence.At` | \(f-g=dh+hd\), isomorphisms from homotopy equivalences |
+| `Chain.Over.Shift` / `Cone` / `ConeIdentity` | Shifts with differential \(-d\), mapping cones, contraction of identity cones |
+| `Chain.Over.Zero` / `Concentrated` / `ZeroDifferential.At` | Homology of zero, concentrated, and zero-differential complexes |
+| `Chain.Over.Map.Kernel` | Termwise kernels, homology isomorphisms from exact kernels of surjective comparison maps |
+| `Chain.Over.QuotientMapping.On` | Quotient-complex maps induced by commutative squares, generator formulas |
+| `Chain.Over.ShortExact.Morphism.Diagram` / `Integer.Over.ShortExact.Morphism.Diagram` | Long-exact naturality and relative-group comparison via five-term exact sequences |
+| `Chain.Over.Reverse` / `Reversal.Over.ToChain` | Chain/cochain conversion by degree negation |
+| `ModuleCategory.Over.On` / `ShortExactCategory.Over.On` | Preadditive module-family categories, short-exact-sequence categories, connecting-map naturality |
+| `CochainEquivalence.Over.Of.With` | Cohomology isomorphisms from cochain homotopy equivalences |
 
-次数零の余鎖境界は零部分加群とする。
-零拡張の `PositiveCohomology`・`NegativeCohomology` は元のコホモロジーとの同型・負次数の消滅を返す。
-体係数の分裂と収縮は [field_kunneth](../field_kunneth/README.md) にある。
+Degree-zero cochain boundaries are the zero submodule.
+Zero-extension `PositiveCohomology`, `NegativeCohomology` return original-cohomology isomorphisms and negative-degree vanishing.
+Field-coefficient splittings/contractions are in [field_kunneth](../field_kunneth/README.md).

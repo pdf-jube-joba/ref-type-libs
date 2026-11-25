@@ -1,12 +1,12 @@
-# A02 Euclid 空間の Lebesgue 測度
+# A02 Lebesgue measure on Euclidean spaces
 
-## 要件
+## Requirements
 
-- 主な実装先は `euclidean_measure`。
-- 外測度から Euclid 空間の Lebesgue 測度を構成し、Borel 可測性、完備性、内外正則性を証明する。
-- 直方体の体積、平行移動・線形拡大による測度の変換、零集合の可算和の性質を公開する。
-- 一次元では既存のリーマン積分および L1 完備化による積分との一致を証明する。
+- Primary implementation: `euclidean_measure`.
+- Construct Euclidean Lebesgue measure from outer measure; prove Borel measurability, completeness, and inner and outer regularity.
+- Expose volumes of boxes, measure transformations under translations and linear dilations, and countable unions of null sets.
+- In dimension one, prove agreement with the existing Riemann integral and the integral defined by L1 completion.
 
-## 依存するタスク
+## Dependencies
 
-- [A01 測度積分の収束定理](a01-measure-convergence.md)
+- [A01 Convergence theorems for measure integration](a01-measure-convergence.md)

@@ -1,6 +1,6 @@
-# 順序体の構造
+# Ordered-field structures
 
-順序体と上限完備性の共通構造を扱う。
+Shared structures for ordered fields and supremum completeness.
 
-`AxiomaticReals[Carrier := A]` は順序体の法則と上限完備性を束ねる。
-[Dedekind 実数](../dedekind/README.md) と [Cauchy 実数](../cauchy/README.md) がこの構造を共有する。
+`AxiomaticReals[Carrier := A]` bundles ordered-field laws and supremum completeness.
+[Dedekind reals](../dedekind/README.md) and [Cauchy reals](../cauchy/README.md) share this structure.

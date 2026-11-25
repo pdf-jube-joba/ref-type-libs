@@ -1,13 +1,13 @@
-# A14 擬微分作用素の合成と座標変換
+# A14 Composition and coordinate changes of pseudodifferential operators
 
-## 要件
+## Requirements
 
-- 主な実装先は `pseudodifferential_calculus`。
-- 局所量子化の合成と随伴について漸近展開を証明し、各余項の次数と半ノルムを評価する。
-- 座標と束の枠の変更による変換則、主シンボルの不変性を証明する。
-- 多様体の余接束上の主シンボル、作用素の貼り合わせ、交換子の次数低下を公開する。
+- Primary implementation: `pseudodifferential_calculus`.
+- Prove asymptotic expansions for composition and adjoints of local quantizations; bound each remainder's order and seminorms.
+- Prove transformation laws under changes of coordinates and bundle frames and invariance of the principal symbol.
+- Expose principal symbols on manifold cotangent bundles, gluing of operators, and order reduction for commutators.
 
-## 依存するタスク
+## Dependencies
 
-- [A13 シンボルと局所量子化](a13-symbol-quantization.md)
-- [A04 多重積分の変数変換](../../libs/analysis/change_of_variables/README.md)
+- [A13 Symbols and local quantization](a13-symbol-quantization.md)
+- [A04 Change of variables in multiple integrals](../../libs/analysis/change_of_variables/README.md)

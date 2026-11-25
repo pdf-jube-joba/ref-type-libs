@@ -1,31 +1,31 @@
-# 複素スピノル表現
+# Complex spinor representations
 
-複素外代数上の生成・消滅作用から Clifford 代数と Spin、Spin-c の表現を構成する。
-内積は第1引数について共役線形、第2引数について線形で、実 Clifford 乗算は自己随伴である。
-有限次元の構成は零次元を含む。
+Construct Clifford/Spin/Spin-c representations from creation/annihilation on complex exterior algebras.
+Inner products are conjugate-linear first, linear second; real Clifford multiplication is self-adjoint.
+Finite-dimensional constructions include dimension zero.
 
-`Complex.Dimension[n]` は \(\mathbb C^n\) の全次数の外積形式をスピノル空間とする。
-`TotalInner.Adjoint` は生成作用と消滅作用の随伴関係を、`TotalInner.Adjoint.Isometry.PinAction` は Spin-c 作用の等長性を与える。
-`RealCoordinates.Clifford.Spin.Phase` は標準実 \(2n\) 次元 Clifford 代数からの Spin-c 作用と直交射影、行列式文字を与える。
+`Complex.Dimension[n]` uses all-degree exterior forms on \(\mathbb C^n\) as spinors.
+`TotalInner.Adjoint` gives creation/annihilation adjoints; `TotalInner.Adjoint.Isometry.PinAction` gives isometric Spin-c actions.
+`RealCoordinates.Clifford.Spin.Phase` gives Spin-c actions from standard real \(2n\)-Clifford algebras, orthogonal projections, and determinant characters.
 
-`UnitaryOrthogonal.CanonicalLift` の `homomorphism` は、真空を固定する条件で定まる \(U(n)\to\operatorname{Spin}^c(2n)\) である。
-`CanonicalLift.FockWords.Complete.actionEqual` はそのスピノル作用と外代数への引き戻し作用を比較する。
-`Pairing.Determinant.correspondence` は Spin-c の行列式文字がユニタリ写像の逆行列式に等しいことを示す。
-引き戻しを採用しているため、最高次数には逆行列式が作用する。
+`homomorphism` in `UnitaryOrthogonal.CanonicalLift` is \(U(n)\to\operatorname{Spin}^c(2n)\), determined by fixing the vacuum.
+`CanonicalLift.FockWords.Complete.actionEqual` compares its spinor action with exterior pullback.
+`Pairing.Determinant.correspondence` identifies Spin-c determinant characters with inverse unitary determinants.
+The pullback convention acts by inverse determinant in top degree.
 
-`Topology.topology` は全次数の評価写像が定めるスピノル空間の位相である。
-`Families.liftedOrbitContinuous` は連続なユニタリ族に対して、各固定スピノルの標準持ち上げによる軌道がこの位相で連続であることを示す。
-`Families.determinantContinuous` は標準持ち上げの Spin-c 行列式文字についても、連続なユニタリ族に沿った連続性を示す。
-`UnitaryOrthogonal.Smooth.lifted` は、行列成分の滑らかなユニタリ族の標準持ち上げが Spin-c の係数座標で滑らかであることを示す。
-`UnitaryOrthogonal.Smooth.FromManifold.On.smoothEntries` は任意の滑らかなソース多様体から、標準持ち上げを実際の Spin-c 多様体への滑らかな写像として与え、`continuousEntries` はその連続性を与える。これらは局所座標上の行列成分の滑らかさを前提とし、滑らかな遷移関数に適用できる。
-U(n) 自身の行列成分位相から Spin-c の多様体位相への一般的な連続性は別途未証明である。
+`Topology.topology` is the spinor topology from all-degree evaluations.
+`Families.liftedOrbitContinuous` proves standard-lift orbits of fixed spinors continuous for continuous unitary families.
+`Families.determinantContinuous` also proves continuity of standard-lift Spin-c determinant characters along continuous unitary families.
+`UnitaryOrthogonal.Smooth.lifted` proves lifts of entrywise smooth unitary families smooth in Spin-c coefficient coordinates.
+`UnitaryOrthogonal.Smooth.FromManifold.On.smoothEntries` gives standard lifts as smooth maps from arbitrary smooth manifolds to actual Spin-c manifolds; `continuousEntries` gives continuity. Assumes local matrix-entry smoothness and applies to smooth transitions.
+General continuity from U(n)'s matrix-entry topology to the Spin-c manifold topology remains unproved.
 
-`Over.Direct.Total.comparison` は左右のスピノルのテンソル積から直和の外代数への線形写像である。
-`Over.Direct.Total.Isomorphism` は右側と直和に有限基底を指定すると、この比較写像を前向きの写像とする線形同型を構成する。
-単射性は左右の縮約で取り出した係数によって核を分離し、全射性は真空からの生成で証明する。
-`Over.Direct.Total.Grading.intertwines` は偶奇次数の保存を、`Complex.Graded.Comparison.Algebra.intertwining` は Clifford 代数全体の作用との整合性を示し、`Over.Direct.Total.Vacuum.Words` は生成作用で作った状態の対応を与える。
+`Over.Direct.Total.comparison` is the linear tensor comparison from left/right spinors to direct-sum exterior algebras.
+With finite bases on the right and sum, `Over.Direct.Total.Isomorphism` constructs a linear isomorphism with this forward map.
+Left/right contraction coefficients separate kernels for injectivity; generation from the vacuum proves surjectivity.
+`Over.Direct.Total.Grading.intertwines` proves parity preservation; `Complex.Graded.Comparison.Algebra.intertwining` full Clifford-action compatibility; `Over.Direct.Total.Vacuum.Words` correspondence of creation-generated states.
 
-[Examples](src/Examples.ref) に一次元の平方・随伴公式、標準持ち上げと行列式文字の例があり、[ZeroTensor](src/Examples/ZeroTensor.ref) は零次元のテンソル比較の往復を検査し、[Manifold](src/Examples/Manifold/On.ref) は任意の滑らかな多様体上の単位ユニタリ族の滑らかな持ち上げを示す。
+[Examples](src/Examples.ref) includes one-dimensional square/adjoint and standard-lift/determinant examples; [ZeroTensor](src/Examples/ZeroTensor.ref) checks zero-dimensional tensor round trips; [Manifold](src/Examples/Manifold/On.ref) gives smooth lifts of identity unitary families on arbitrary smooth manifolds.
 
 ```sh
 target/debug/cli libs/algebra/spinor_representations --memory-mib 8192 --cache-stats --no-progress

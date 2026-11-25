@@ -1,29 +1,29 @@
-# G01 滑らかな bump 関数と従属分割
+# G01 Smooth bump functions and partitions of unity
 
-## 要件
+## Requirements
 
-- 主な実装先は `smooth_partitions`。
-- Euclid 空間のコンパクト集合と開近傍に対する滑らかな cutoff 関数を構成し、台と全階微分の性質を証明する。
-- 第二可算多様体の局所有限な被覆細分と滑らかな従属分割を構成し、コンパクトな場合の有限版を公開する。
-- 開集合上の関数・切断を台の条件付きで零延長する補題と、局所有限和の滑らかさを公開する。
+- Primary implementation: `smooth_partitions`.
+- Construct smooth cutoffs for Euclidean compact sets and open neighborhoods; prove support and all-order derivative properties.
+- Construct locally finite cover refinements and smooth partitions of unity on second-countable manifolds; expose finite compact versions.
+- Expose support-conditional extension by zero for functions/sections on open sets and smoothness of locally finite sums.
 
-## 依存するタスク
+## Dependencies
 
-なし。
+None.
 
-## 実装
+## Implementation
 
-- [x] `smooth_partitions` に実装。
-- [x] 指数関数から平坦関数を構成し、全階偏微分と境界での消滅を証明。
-- [x] Euclid 空間のコンパクト集合と開近傍に対する cutoff、開近傍上での値一、コンパクトな台とその包含を証明。
-- [x] 第二可算 Hausdorff 多様体で局所 bump から可算部分被覆を選び、台が局所有限な滑らかな従属分割と開細分を構成。
-- [x] コンパクトな多様体の有限版を公開。
-- [x] 開集合上の関数と局所ファイバー座標で表す切断の、台条件付き零延長を公開。
-- [x] Euclid 空間と多様体上の局所有限和の滑らかさを公開。
-- [x] 実直線での cutoff と従属分割、零次元コンパクト多様体での有限版の利用例を追加。
+- [x] Implemented in `smooth_partitions`.
+- [x] Constructed flat functions from exponentials; proved all-order partial derivatives and boundary vanishing.
+- [x] Proved Euclidean compact-set/open-neighborhood cutoffs, value one on open neighborhoods, compact support, and support inclusion.
+- [x] Selected countable subcovers from local bumps on second-countable Hausdorff manifolds; constructed smooth partitions with locally finite supports and open refinements.
+- [x] Published the finite version for compact manifolds.
+- [x] Published support-conditional extension by zero for functions and sections in local fiber coordinates.
+- [x] Published smoothness of locally finite sums on Euclidean spaces and manifolds.
+- [x] Added real-line cutoff/partition examples and finite partitions on zero-dimensional compact manifolds.
 
-公開 API と証明の構成は [smooth_partitions](../../libs/geometry/smooth_partitions/README.md) を参照。
+See [smooth_partitions](../../libs/geometry/smooth_partitions/README.md) for the public API and proof structure.
 
-通常検査は実装コミット `51799530317db36f73adc63a2d9b2aa743378414` で、対象と依存先の全 1,883 module、およびリポジトリ全体の全 10,233 module が成功した。
-全体は新規検査 9,538、再利用 695、保存失敗・破損読込 0、ソース一致を確認した。
-最後の `periodic_k_theory` は 10 GiB の仮想メモリ上限で worker を一度復旧し、checkpoint から再開して成功した。
+Standard checks at implementation commit `51799530317db36f73adc63a2d9b2aa743378414` passed all 1,883 target/dependency modules and all 10,233 repository modules.
+Full check: 9,538 newly checked, 695 reused, 0 save failures or corrupt reads; source agreement confirmed.
+Final `periodic_k_theory` recovered one worker under a 10 GiB virtual-memory limit, resumed from a checkpoint, and passed.

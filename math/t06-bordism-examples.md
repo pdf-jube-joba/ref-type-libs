@@ -1,13 +1,13 @@
-# T06 コボルディズムの具体的な計算
+# T06 Concrete cobordism computations
 
-## 要件
+## Requirements
 
-- 主な実装先は `bordism_examples`。
-- 零次の向き付き・非向き付き群、円板を境界に持つ球面、積による代表を具体的なコボルディズムで計算する。
-- 実射影平面の Stiefel–Whitney 数と複素射影平面の Pontryagin 数から、対応する非零なコボルディズム類を検出する。
-- 枠付き球面の collapse と安定ホモトピー類を比較し、幾何学的代表と Thom 空間による表示の双方から同じ演算を検査する。
+- Primary implementation: `bordism_examples`.
+- Compute degree-zero oriented/unoriented groups, spheres bounding disks, and product representatives using explicit cobordisms.
+- Detect nonzero cobordism classes from real-projective-plane Stiefel–Whitney numbers and complex-projective-plane Pontryagin numbers.
+- Compare framed-sphere collapse with stable homotopy classes; check identical operations via geometric and Thom-space representatives.
 
-## 依存するタスク
+## Dependencies
 
-- [T04 Pontryagin–Thom 同型](t04-pontryagin-thom-isomorphism.md)
-- [T05 特性数のコボルディズム不変性](t05-bordism-invariants.md)
+- [T04 Pontryagin–Thom isomorphism](t04-pontryagin-thom-isomorphism.md)
+- [T05 Cobordism invariance of characteristic numbers](t05-bordism-invariants.md)

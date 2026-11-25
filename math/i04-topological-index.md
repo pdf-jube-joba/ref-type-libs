@@ -1,13 +1,13 @@
-# I04 位相的指数写像
+# I04 Topological index map
 
-## 要件
+## Requirements
 
-- 主な実装先は `topological_index`。
-- 閉コンパクト多様体の Euclid 空間への埋め込みから、余接束の法束の標準的な複素構造を構成する。
-- Thom 写像・管状近傍・零延長・Bott 同型の合成により、コンパクト台付き K 群から整数への位相的指数を定義する。
-- 計量・埋め込み・安定化・管状近傍の選択独立性と、切除・積の法則を証明する。
+- Primary implementation: `topological_index`.
+- Construct canonical complex structures on cotangent normal bundles from Euclidean embeddings of closed compact manifolds.
+- Define the topological index from compactly supported K-groups to integers by composing Thom maps, tubular neighborhoods, extension by zero, and Bott isomorphisms.
+- Prove independence of metric, embedding, stabilization, and tubular choices, plus excision/product laws.
 
-## 依存するタスク
+## Dependencies
 
-- [K11 K 理論の Thom 同型](k11-k-thom.md)
-- [G06 管状近傍と collapse 写像](g06-tubular-neighborhoods.md)
+- [K11 Thom isomorphism in K-theory](k11-k-thom.md)
+- [G06 Tubular neighborhoods and collapse maps](g06-tubular-neighborhoods.md)

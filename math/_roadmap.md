@@ -1,324 +1,324 @@
-# 数学ライブラリのロードマップ
+# Mathematics library roadmap
 
-特性類、コボルディズム、複素 K 理論を育て、閉コンパクト多様体上の複素楕円作用素に対する Atiyah–Singer 指数定理と、その具体的な指数公式へ進む。
-個別の `.md` が一つの実装タスクで、要件と直接依存するタスクを記述する。
-このファイルは全体の範囲、見積もり、並列化と合流点を管理する。
+Develop characteristic classes, cobordism, and complex K-theory toward the Atiyah–Singer index theorem for complex elliptic operators on closed compact manifolds and concrete index formulas.
+Each individual `.md` is an implementation task describing requirements and direct dependencies.
+This file tracks overall scope, estimates, parallel work, and integration milestones.
 
-## 出発点
+## Starting point
 
-2026-10-21 時点の既存ライブラリを基準にする。
-基本群と被覆、ホモロジー代数、特異コホモロジーの計画は完了しており、[ライブラリ一覧](../../libs/README.md) の公開 API を土台にする。
-接束・法束、微分形式、Clifford 代数、Spin・Spin-c の群、実 Gram–Schmidt も利用できる。
-一般のベクトル束、管状近傍、境界付き多様体、特性類、K 理論は今回のタスクで構成する。
-既存の Lp・Sobolev は主に定義で、Euclid 空間の Lebesgue 測度、完備性、Fourier 解析、楕円正則性も実装範囲に含める。
-既存 API と重なる部分は実装時に比較して再利用する。
-公開 API は各ライブラリの README に記述し、以下のタスク一覧では実装進捗と完了確認の状況を追跡する。
+Based on the existing libraries as of 2026-10-21.
+Fundamental groups and coverings, homological algebra, and singular cohomology plans are complete; build on the public APIs in the [library index](../../libs/README.md).
+Tangent and normal bundles, differential forms, Clifford algebras, Spin and Spin-c groups, and real Gram–Schmidt are also available.
+Construct general vector bundles, tubular neighborhoods, manifolds with boundary, characteristic classes, and K-theory in these tasks.
+Existing Lp and Sobolev work is mainly definitions; scope also includes Euclidean Lebesgue measure, completeness, Fourier analysis, and elliptic regularity.
+Compare and reuse overlapping existing APIs during implementation.
+Document public APIs in each library's README; track implementation progress and completion verification in the task list below.
 
-## 到達点と証明の経路
+## Goals and proof routes
 
-特性類は有限 CW 底空間上の実・複素束を対象にし、Thom 同型、射影束定理、分裂原理から Chern・Stiefel–Whitney・Pontryagin・Euler 類と特性数へ進む。
-コンパクト滑らかな多様体には、Morse 関数と handle 分解から得る有限 CW 型を通じて適用する。
-接続と曲率による構成は別系統で進め、De Rham 比較を経て位相的特性類と一致させる。
+For real and complex bundles over finite CW bases, develop characteristic classes through Thom isomorphisms, the projective bundle theorem, and the splitting principle to Chern, Stiefel–Whitney, Pontryagin, and Euler classes and characteristic numbers.
+Apply these to compact smooth manifolds via finite CW types obtained from Morse functions and handle decompositions.
+Develop connections and curvature separately, then identify their classes with topological characteristic classes through the de Rham comparison.
 
-コボルディズムは、非向き付き・向き付き・枠付きの群と積、Pontryagin–Thom 同型、特性数による不変量と非零な具体例までを第一段階にする。
-Thom スペクトラムは有限 Grassmannian の Thom 空間と安定化から構成し、集合として表せる有限段階の代表を使う。
+First-stage cobordism covers unoriented, oriented, and framed groups and products, the Pontryagin–Thom isomorphism, characteristic-number invariants, and explicit nonzero examples.
+Construct Thom spectra from finite Grassmannian Thom spaces and stabilization, using set-valued finite-stage representatives.
 
-K 理論はコンパクト Hausdorff 空間の複素束から開始し、相対理論、Bott 周期性、コンパクト台、Koszul 複体による Thom 同型へ進む。
-Bott 周期性は Laurent 近似・スペクトル分離・clutching による経路で証明する。
-解析的指数はこの後に構成し、指数定理の証明と Bott 周期性の依存が循環しない構成にする。
+Start K-theory with complex bundles on compact Hausdorff spaces, then relative theory, Bott periodicity, compact supports, and Thom isomorphisms via Koszul complexes.
+Prove Bott periodicity via Laurent approximation, spectral splitting, and clutching.
+Construct the analytic index afterward, avoiding circular dependencies between the index theorem and Bott periodicity.
 
-指数定理は閉コンパクト滑らかな多様体と複素束間の楕円擬微分作用素を対象にする。
-解析側は測度・Fourier・Sobolev・擬微分作用素・parametrix・Fredholm の順に進む。
-位相側は Euclid 空間への埋め込み、余接束の法束の複素構造、Thom 写像と Bott 同型で位相的指数を作る。
-切除と Thom 写像に対する解析的指数の可換性で両者を比較し、その後 Chern 指標による公式へ移る。
-応用として Gauss–Bonnet、Hirzebruch の符号数公式、Spin-c Dirac 指数公式を扱う。
+The index theorem concerns elliptic pseudodifferential operators between complex bundles on closed compact smooth manifolds.
+Analytic route: measure, Fourier, Sobolev, pseudodifferential operators, parametrices, and Fredholm theory.
+Topological route: Euclidean embeddings, complex structures on cotangent normal bundles, Thom maps, and Bott isomorphisms to construct the topological index.
+Compare both indices by compatibility of the analytic index with excision and Thom maps, then derive Chern-character formulas.
+Applications: Gauss–Bonnet, Hirzebruch's signature formula, and the Spin-c Dirac index formula.
 
 ```mermaid
 flowchart TD
-  L[線形代数 L] --> B[束 B]
-  B --> C[特性類 C]
-  B --> K[K 理論 K]
-  G[微分位相 G] --> T[コボルディズム T]
+  L[Linear algebra L] --> B[Bundles B]
+  B --> C[Characteristic classes C]
+  B --> K[K-theory K]
+  G[Differential topology G] --> T[Cobordism T]
   B --> T
   C --> T
-  G --> D[接続・De Rham D]
+  G --> D[Connections and de Rham D]
   B --> D
-  A[測度・楕円解析 A] --> D
-  A --> I[指数比較 I01–I06]
+  A[Measure and elliptic analysis A] --> D
+  A --> I[Index comparison I01–I06]
   K --> I
   G --> I
   C --> I
-  I --> E[指数公式の応用 I07–I11]
+  I --> E[Index formula applications I07–I11]
   D --> E
   C --> E
 ```
 
-図は分野間の主な合流点を表す。
-実際の着手可否は個別タスクの依存リストで判断する。
-特性類と K 理論は共通の束基盤の後で並列に進み、指数定理の本体はコボルディズム環の計算を待たずに進められる。
+The diagram shows the main integration points between fields.
+Use each task's dependency list to determine when work can begin.
+Characteristic classes and K-theory proceed in parallel after the shared bundle foundations; the index theorem can proceed without waiting for cobordism-ring computations.
 
-## 見積もりと完了の単位
+## Estimates and completion units
 
-各タスクは証明・比較写像・利用例を含む新規または実質的に書き換える `.ref` の約5,000行を中心とした設計見積もりである。
-表の値は千行単位で、文書や自動生成コードは別に扱う。
-証明の粒度と既存 API の再利用で変わるため、実測前の目安はおおむね3,000〜7,000行とする。
-粒度の参考として、現行の `field_kunneth` は約4,200行、`singular_products` は約3,200行の `.ref` で構成されている。
-特に横断性、Bott の線形化、擬微分作用素、解析的 Thom 比較は見積もりの不確実性が大きい。
-割り当て前に依存 API と証明経路を確認し、7,000行を大きく超える見込みなら、独立した補題の公開を完了条件にする追加タスクへ分割する。
-一度割り当てたタスクは、その要件・自然性・具体例と依存閉包の検査までを一つの完了単位とする。
+Each task is a design estimate centered on roughly 5,000 lines of new or substantially rewritten `.ref`, including proofs, comparison maps, and examples.
+Tables use thousands of lines; documentation and generated code are counted separately.
+Before measurement, use a rough range of 3,000–7,000 lines, depending on proof detail and existing API reuse.
+For scale, current `field_kunneth` has roughly 4,200 lines and `singular_products` roughly 3,200 lines of `.ref`.
+Estimates are particularly uncertain for transversality, Bott linearization, pseudodifferential operators, and analytic Thom comparisons.
+Check dependency APIs and proof routes before assignment. If a task will greatly exceed 7,000 lines, split off additional tasks whose completion criterion is publication of independent lemmas.
+An assigned task is one completion unit including its requirements, naturality, concrete examples, and dependency-closure checks.
 
-主な実装先の package 名は予定名で、分野内の既存の配置に合わせて配置する。
-構成は実際の数学的対象から作り、存在・逆写像・等式・完全性の証明を含む公開 API にする。
-定理の対象と仮定は命題内で量化し、構成データと法則を structure でまとめる。
-必要な直接依存、workspace member、README と小さい利用例を更新し、[共有キャッシュ](../../src/USAGE.md#検査とキャッシュ)で対象と依存閉包を検査する。
-上流の完了時には、その公開 API と検査結果を README に残し、下流タスクの依存リンクを対応する README に置き換えてから完了タスクを削除する。
-個別計画の残存や README の有無だけでは、未着手・完了・依存 API の利用可否を判定しない。
-実装進捗は実コードと要件の対応で判断し、判明した残件と未確認の範囲を分けて記録する。
-型検査は別に、対象と依存閉包、対象ソースの commit または snapshot、checker、検査結果の参照先を記録する。
-完了への更新には要件・比較・利用例の充足と、その対象ソースを覆う検査通過の証跡を必要とする。
-証跡を確認できない場合は「検査未確認」とし、ソースやキャッシュの存在を通過の根拠にはしない。
-依存先は公開 API の内容・検査状況・下流で必要な範囲を照合して判断する。
+Primary package names are provisional; follow existing placement within each field.
+Build constructions from actual mathematical objects and expose proofs of existence, inverses, equalities, and exactness.
+Quantify theorem objects and assumptions in propositions; group construction data and laws into structures.
+Update direct dependencies, workspace members, README, and small examples; check targets and dependency closures using the [shared cache](../../src/USAGE.md#%E6%A4%9C%E6%9F%BB%E3%81%A8%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5).
+On upstream completion, record its public API and check results in its README, replace downstream task links with the corresponding README, then remove the completed task.
+Do not infer unstarted/completed status or API availability solely from remaining plans or README presence.
+Assess progress against actual code and requirements; record known outstanding work separately from unverified scope.
+Separately record type-check targets and dependency closure, source commit or snapshot, checker, and result references.
+Mark completion only with evidence that requirements, comparisons, and examples are fulfilled and checks cover the target sources.
+If evidence is unavailable, mark checks unconfirmed; source or cache presence does not prove success.
+Assess dependencies against their public API, check status, and downstream needs.
 
 <a id="progress-and-checks"></a>
 
-## 実装進捗と検査状況
+## Implementation progress and check status
 
-2026-11-19、main の `dce3d353e75972c507928253d6c33420f6f55a0f` を読み取りで確認した範囲を記す。
-以下の2件には workspace 登録と実コードがあり、未着手ではないが、計画全体の完了確認は残っている。
-他のタスクの状態は今回再調査していない。
+Read-only inspection of main `dce3d353e75972c507928253d6c33420f6f55a0f` on 2026-11-19 covered the following scope.
+Both items below have workspace registration and actual implementations; work has started, but full-plan completion remains unconfirmed.
+Other task statuses were not reinvestigated.
 
-| タスク | 実装進捗・確認残 | 型検査証跡 |
+| Task | Implementation progress and outstanding verification | Type-check evidence |
 | --- | --- | --- |
-| [G06](g06-tubular-neighborhoods.md#status) | 管状近傍、連続 collapse、境界保存、固定した lift 内の比較族、積・安定化の比較式を実装。neat embedding から `Extension` を得る接続、比較の一般性、安定化法束の Thom 空間との接続は確認残。README・独立例は未整備。 | 現行 G06 と依存閉包の通過は未確認。 |
-| [A09](a09-euclidean-sobolev.md#status) | 整数次数の Fourier モデル、双対性、Schwartz 上の弱微分比較、台を制限した乗算・座標変更、埋め込み・滑らかさの実コードと README あり。一般の \(H^k\) と \(W^{k,2}\) の比較、係数クラスの要件対応、独立例は確認残。 | 現行 A09 と依存閉包の通過は未確認。 |
+| [G06](g06-tubular-neighborhoods.md#status) | Implements tubular neighborhoods, continuous collapse, boundary preservation, comparison families within a fixed lift, and product/stabilization identities. The connection from neat embeddings to `Extension`, comparison generality, and stabilized normal Thom spaces remain unverified. README and standalone examples are missing. | Current G06 and dependency-closure success unconfirmed. |
+| [A09](a09-euclidean-sobolev.md#status) | Code and README cover integer-order Fourier models, duality, weak-derivative comparison on Schwartz functions, support-restricted multiplication and coordinate changes, embedding, and smoothness. General \(H^k\)–\(W^{k,2}\) comparison, coefficient-class requirements, and standalone examples remain unverified. | Current A09 and dependency-closure success unconfirmed. |
 
-確認環境に残る `libs/refcache/.check-*` の3件の snapshot は、G06・A09 のソースと workspace 登録を含まず、終了 report もない。
-同環境の `/workspace/.ref-type-toolchain/std-nat.json` は `accepted` だが対象は `std` である。
-リポジトリ内の [既存全体 report](c01-integrated-workspace-report.json) は `internal-error` で、`verified_modules` は空である。
-これらは現行 G06・A09、または現行ライブラリ全体の通過証跡にはならない。
-この状況確認では型検査を実行しておらず、「検査未確認」は現行ソースの検査失敗を意味しない。
+Three snapshots remaining in `libs/refcache/.check-*` in the inspected environment omit G06/A09 sources and workspace registration and have no final reports.
+The environment's `/workspace/.ref-type-toolchain/std-nat.json` is `accepted`, but targets `std`.
+The repository's [existing full report](c01-integrated-workspace-report.json) is `internal-error` with empty `verified_modules`.
+These do not demonstrate successful checks of current G06, A09, or the entire current library.
+No type checking was run during this inspection; unconfirmed checks do not imply current source failures.
 
-## 並列での割り当て
+## Parallel assignment
 
-依存タスクがすべて統合済みになったものを、空いているエージェントへ一件ずつ割り当てる。
-各タスクは別の branch / worktree で作業し、主な実装先の package を担当範囲にする。
-共通基盤の変更が必要なら、その API と担当タスクを先に合わせる。
-`libs/ref.toml` とライブラリ一覧の変更は各 branch で検査できる形に含め、統合時に登録と依存関係をまとめて整合させる。
-独立タスクの並列実装と、共有ファイルの統合の順序を分けて管理する。
-下流のエージェントは上流が統合されるまで独立タスクを進め、統合後の公開 API に接続する。
+Assign one task at a time to each available agent once all its dependencies are integrated.
+Work on each task in a separate branch/worktree, scoped to its primary package.
+Coordinate APIs and task ownership before changing shared foundations.
+Include `libs/ref.toml` and library-index changes in each branch so it can be checked; reconcile registration and dependencies during integration.
+Manage parallel implementation of independent tasks separately from integration order for shared files.
+Downstream agents work on independent tasks until upstream integration, then connect to its public APIs.
 
-初手に着手できるタスクは次のとおり。
+Tasks available initially:
 
-- [A01 測度積分の収束定理](a01-measure-convergence.md)
-- [A19 複素 Hilbert 空間とコンパクト作用素](a19-complex-hilbert.md)
-- [B05 有限 Grassmannian と普遍束](b05-grassmannians.md)
-- [C01 cap 積と相対積](c01-cap-products.md)
-- [G01 滑らかな bump 関数と従属分割](g01-smooth-partitions.md)
-- [G02 逆関数・陰関数と正則値の局所形](../../libs/geometry/inverse_implicit/README.md)（実装済み）
-- [L04 対称多項式と特性級数](l04-symmetric-series.md)
+- [A01 Convergence theorems for measure integration](a01-measure-convergence.md)
+- [A19 Complex Hilbert spaces and compact operators](a19-complex-hilbert.md)
+- [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)
+- [C01 Cap products and relative products](c01-cap-products.md)
+- [G01 Smooth bump functions and partitions of unity](g01-smooth-partitions.md)
+- [G02 Inverse and implicit functions and local forms of regular values](../../libs/geometry/inverse_implicit/README.md) (implemented)
+- [L04 Symmetric polynomials and characteristic series](l04-symmetric-series.md)
 
-L01 の行列式・逆行列、L02 の多項式分解、L03 の Hermitian 行列・局所枠が利用可能になり、G02 の [inverse_implicit](../../libs/geometry/inverse_implicit/README.md) は局所逆写像、パラメータ付き陰関数、定階数の局所形、正則値部分多様体と接空間の核を公開する。
-B03 の計量・補束と同型類の集合が利用可能になり、B05 に着手できる。
-B09 の [bundle_extension](../../libs/geometry/bundle_extension/README.md) は実・複素の Tietze、束・写像・同型の近傍延長、縮小比較と安定化を公開し、K03 で再利用できる。
-K06 の連続なスペクトル分離は B04 の束比較の基盤となり、B04 の clutching と合わせて K07 で再利用できる。
-K01 の Grothendieck 環・安定判定・反変引き戻しは K03・K07 で再利用する。
-K04 の実・複素 Stone–Weierstrass、Laurent 近似と行列・束の一様評価も K07 で利用できる。
-K07 の [clutching_linearization](../../libs/topology/clutching_linearization/README.md) は、選択に依存しないスペクトル逆クラス、自然性・直和・基本積の相互逆を公開し、K08 で利用できる。
-K02 の [puppe_sequences](../../libs/topology/puppe_sequences/README.md) は、有限 CW 対の cofibration、自然な Puppe 列と反変 Hom の完全性を公開し、K03・B08・C02・T02 で利用できる。
-K03 の [relative_k_theory](../../libs/topology/relative_k_theory/README.md) は、相対三つ組と被約群の比較、負次数の完全列、切除、Mayer–Vietoris、自然な外積と束の円板・球面対を公開し、K08 で利用できる。
-B07 の [smooth_bundles](../../libs/geometry/smooth_bundles/README.md) は、実・複素の滑らかな束、計量、枠束・随伴束と接束・法束の比較を公開し、[D01](../../libs/geometry/bundle_connections/README.md)・G06・I11・T01・A12 で利用できる。
-B02 の束演算は C05 でも利用でき、A01 の後は A02 へ進められる。
-空いた担当には C01・L04・A19 を割り当て、長い解析の経路を早めに進める。
-各節の番号は識別子で、実装順は依存リストから決まる。
+L01 determinants/inverses, L02 polynomial factorization, and L03 Hermitian matrices/local frames are available. G02 [inverse_implicit](../../libs/geometry/inverse_implicit/README.md) exposes local inverses, parameterized implicit functions, constant-rank local forms, regular-value submanifolds, and tangent kernels.
+B03 metrics, complements, and sets of isomorphism classes are available, enabling B05.
+B09 [bundle_extension](../../libs/geometry/bundle_extension/README.md) exposes real and complex Tietze extension, neighborhood extension of bundles/maps/isomorphisms, shrinking comparisons, and stabilization for reuse in K03.
+K06 continuous spectral splitting underpins B04 bundle comparisons; reuse it with B04 clutching in K07.
+Reuse K01 Grothendieck rings, stable criteria, and contravariant pullback in K03 and K07.
+K04 real and complex Stone–Weierstrass, Laurent approximation, and uniform matrix/bundle estimates are also available for K07.
+K07 [clutching_linearization](../../libs/topology/clutching_linearization/README.md) exposes choice-independent spectral inverse classes, naturality, direct sums, and inverse identities for the basic product for K08.
+K02 [puppe_sequences](../../libs/topology/puppe_sequences/README.md) exposes finite CW-pair cofibrations, natural Puppe sequences, and contravariant Hom exactness for K03, B08, C02, and T02.
+K03 [relative_k_theory](../../libs/topology/relative_k_theory/README.md) exposes relative triples/reduced-group comparisons, negative-degree exact sequences, excision, Mayer–Vietoris, natural external products, and bundle disk/sphere pairs for K08.
+B07 [smooth_bundles](../../libs/geometry/smooth_bundles/README.md) exposes real and complex smooth bundles, metrics, frame/associated bundles, and tangent/normal comparisons for [D01](../../libs/geometry/bundle_connections/README.md), G06, I11, T01, and A12.
+B02 bundle operations also serve C05; A02 can follow A01.
+Assign C01, L04, and A19 to available contributors to advance the long analytic route early.
+Section numbers are identifiers; dependency lists determine implementation order.
 
-## 完了した単位
+## Completed units
 
-| 単位 | 公開 API |
+| Unit | Public API |
 | --- | --- |
-| L01 行列式と可逆行列 | [matrix_invariants](../../libs/algebra/matrix_invariants/README.md) |
-| L02 多項式の互除法と Cayley–Hamilton | [polynomial_linear_algebra](../../libs/algebra/polynomial_linear_algebra/README.md) |
-| L03 Hermitian 行列と連続な局所枠 | [hermitian_frames](../../libs/algebra/hermitian_frames/README.md) |
-| K13 複素多項式の根の存在 | [fundamental_algebra](../../libs/algebra/fundamental_algebra/README.md) |
-| K05 代数学の基本定理と根群の連続性 | [complex_polynomial_roots](../../libs/algebra/complex_polynomial_roots/README.md) |
-| B01 一般の実・複素ベクトル束 | [vector_bundles](../../libs/geometry/vector_bundles/README.md) |
-| B02 束の貼り合わせと線形演算 | [bundle_operations](../../libs/geometry/bundle_operations/README.md) |
-| B03 束の計量・補束と集合による表示 | [bundle_complements](../../libs/geometry/bundle_complements/README.md) |
-| K06 連続なスペクトル分離 | [spectral_splitting](../../libs/algebra/spectral_splitting/README.md) |
-| B04 束のホモトピー不変性と clutching | [bundle_homotopy](../../libs/geometry/bundle_homotopy/README.md) |
-| B07 滑らかな束と既存の接束・法束との接続 | [smooth_bundles](../../libs/geometry/smooth_bundles/README.md) |
-| B09 閉部分空間からの束の延長 | [bundle_extension](../../libs/geometry/bundle_extension/README.md) |
-| K01 束の Grothendieck 環 | [topological_k_theory](../../libs/topology/k_theory/README.md) |
-| K04 Stone–Weierstrass と Laurent 近似 | [uniform_approximation](../../libs/analysis/uniform_approximation/README.md) |
-| K07 clutching の安定線形化 | [clutching_linearization](../../libs/topology/clutching_linearization/README.md) |
-| K02 CW cofibration と Puppe 列 | [puppe_sequences](../../libs/topology/puppe_sequences/README.md) |
-| K03 相対 K 群と負次数の完全列 | [relative_k_theory](../../libs/topology/relative_k_theory/README.md) |
-| K09 Bott 周期性と整数次数 | [periodic_k_theory](../../libs/topology/periodic_k_theory/README.md) |
-| A07 Plancherel と Fourier 乗算作用素 | [fourier_l2](../../libs/analysis/fourier_l2/README.md) |
-| A04 多重積分の変数変換 | [change_of_variables](../../libs/analysis/change_of_variables/README.md) |
-| D01 接続と共変微分 | [bundle_connections](../../libs/geometry/bundle_connections/README.md) |
+| L01 Determinants and invertible matrices | [matrix_invariants](../../libs/algebra/matrix_invariants/README.md) |
+| L02 Polynomial Euclidean algorithm and Cayley–Hamilton | [polynomial_linear_algebra](../../libs/algebra/polynomial_linear_algebra/README.md) |
+| L03 Hermitian matrices and continuous local frames | [hermitian_frames](../../libs/algebra/hermitian_frames/README.md) |
+| K13 Existence of complex polynomial roots | [fundamental_algebra](../../libs/algebra/fundamental_algebra/README.md) |
+| K05 Fundamental theorem of algebra and continuity of root clusters | [complex_polynomial_roots](../../libs/algebra/complex_polynomial_roots/README.md) |
+| B01 General real and complex vector bundles | [vector_bundles](../../libs/geometry/vector_bundles/README.md) |
+| B02 Bundle gluing and linear operations | [bundle_operations](../../libs/geometry/bundle_operations/README.md) |
+| B03 Bundle metrics, complements, and set presentations | [bundle_complements](../../libs/geometry/bundle_complements/README.md) |
+| K06 Continuous spectral splitting | [spectral_splitting](../../libs/algebra/spectral_splitting/README.md) |
+| B04 Bundle homotopy invariance and clutching | [bundle_homotopy](../../libs/geometry/bundle_homotopy/README.md) |
+| B07 Smooth bundles and existing tangent/normal comparisons | [smooth_bundles](../../libs/geometry/smooth_bundles/README.md) |
+| B09 Bundle extension from closed subspaces | [bundle_extension](../../libs/geometry/bundle_extension/README.md) |
+| K01 Grothendieck rings of bundles | [topological_k_theory](../../libs/topology/k_theory/README.md) |
+| K04 Stone–Weierstrass and Laurent approximation | [uniform_approximation](../../libs/analysis/uniform_approximation/README.md) |
+| K07 Stable clutching linearization | [clutching_linearization](../../libs/topology/clutching_linearization/README.md) |
+| K02 CW cofibrations and Puppe sequences | [puppe_sequences](../../libs/topology/puppe_sequences/README.md) |
+| K03 Relative K-groups and negative-degree exact sequences | [relative_k_theory](../../libs/topology/relative_k_theory/README.md) |
+| K09 Bott periodicity and integer degrees | [periodic_k_theory](../../libs/topology/periodic_k_theory/README.md) |
+| A07 Plancherel and Fourier multipliers | [fourier_l2](../../libs/analysis/fourier_l2/README.md) |
+| A04 Change of variables in multiple integrals | [change_of_variables](../../libs/analysis/change_of_variables/README.md) |
+| D01 Connections and covariant derivatives | [bundle_connections](../../libs/geometry/bundle_connections/README.md) |
 
-## タスク一覧
+## Task list
 
-追跡中70件、当初の設計見積もりの合計367千行。
-実装あり・確認残・状態未調査の単位を含み、この件数は未着手件数、見積もりは残作業量を表さない。
-確認した G06・A09 の状態は[実装進捗と検査状況](#progress-and-checks)に示す。
+Tracking 70 tasks, initially estimated at 367,000 lines.
+Includes implemented, verification-pending, and uninvestigated units; this is not an unstarted-task count or an estimate of remaining work.
+Inspected G06/A09 status appears under [implementation progress and check status](#progress-and-checks).
 
-### 線形代数と特性級数
+### Linear algebra and characteristic series
 
-1件、概算5千行。
+1 task, approximately 5,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [L04 対称多項式と特性級数](l04-symmetric-series.md) | 5 |
+| [L04 Symmetric polynomials and characteristic series](l04-symmetric-series.md) | 5 |
 
-### ベクトル束
+### Vector bundles
 
-3件、概算16千行。
+3 tasks, approximately 16,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [B05 有限 Grassmannian と普遍束](b05-grassmannians.md) | 5 |
-| [B06 束の分類写像と安定化](b06-bundle-classification.md) | 5 |
-| [B08 Grassmannian のセル分解](b08-grassmannian-cells.md) | 6 |
+| [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md) | 5 |
+| [B06 Bundle classifying maps and stabilization](b06-bundle-classification.md) | 5 |
+| [B08 Grassmannian cell decompositions](b08-grassmannian-cells.md) | 6 |
 
-### 特性類
+### Characteristic classes
 
-12件、概算60千行。
+12 tasks, approximately 60,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [C01 cap 積と相対積](c01-cap-products.md) | 5 |
-| [C02 円板束・球面束と Thom 空間](c02-thom-spaces.md) | 5 |
-| [C03 Thom 類と Thom 同型](c03-thom-isomorphism.md) | 5 |
-| [C04 射影空間と標準線束のコホモロジー](c04-projective-cohomology.md) | 5 |
-| [C05 射影束定理と分裂原理](c05-projective-bundle.md) | 5 |
-| [C06 Chern 類](c06-chern-classes.md) | 5 |
-| [C07 Stiefel–Whitney 類](c07-stiefel-whitney.md) | 5 |
-| [C08 Pontryagin 類と Euler 類の比較](c08-pontryagin-euler.md) | 5 |
-| [C09 Chern 指標と乗法的特性類](c09-chern-character-genera.md) | 5 |
-| [C10 特性数と具体的な多様体](c10-characteristic-numbers.md) | 5 |
-| [C11 Leray–Hirsch の比較](c11-leray-hirsch.md) | 5 |
-| [C12 コンパクト台付きコホモロジー](c12-compact-support-cohomology.md) | 5 |
+| [C01 Cap products and relative products](c01-cap-products.md) | 5 |
+| [C02 Disk bundles, sphere bundles, and Thom spaces](c02-thom-spaces.md) | 5 |
+| [C03 Thom classes and the Thom isomorphism](c03-thom-isomorphism.md) | 5 |
+| [C04 Cohomology of projective spaces and canonical line bundles](c04-projective-cohomology.md) | 5 |
+| [C05 Projective bundle theorem and splitting principle](c05-projective-bundle.md) | 5 |
+| [C06 Chern classes](c06-chern-classes.md) | 5 |
+| [C07 Stiefel–Whitney classes](c07-stiefel-whitney.md) | 5 |
+| [C08 Comparing Pontryagin and Euler classes](c08-pontryagin-euler.md) | 5 |
+| [C09 Chern character and multiplicative characteristic classes](c09-chern-character-genera.md) | 5 |
+| [C10 Characteristic numbers and concrete manifolds](c10-characteristic-numbers.md) | 5 |
+| [C11 Leray–Hirsch comparison](c11-leray-hirsch.md) | 5 |
+| [C12 Compactly supported cohomology](c12-compact-support-cohomology.md) | 5 |
 
-### 位相的 K 理論
+### Topological K-theory
 
-4件、概算22千行。
+4 tasks, approximately 22,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [K08 Bott の基本積定理](k08-bott-product.md) | 5 |
-| [K10 コンパクト台付き K 理論とシンボルの表示](k10-compact-support-k.md) | 6 |
-| [K11 K 理論の Thom 同型](../../libs/topology/k_theory_thom/README.md) | 5 |
-| [K12 Chern 指標と Thom 類の比較](k12-chern-character-thom.md) | 6 |
+| [K08 Bott's basic product theorem](k08-bott-product.md) | 5 |
+| [K10 Compactly supported K-theory and symbol presentations](k10-compact-support-k.md) | 6 |
+| [K11 Thom isomorphism in K-theory](../../libs/topology/k_theory_thom/README.md) | 5 |
+| [K12 Comparing the Chern character and Thom classes](k12-chern-character-thom.md) | 6 |
 
-### 微分位相
+### Differential topology
 
-13件、概算67千行。
+13 tasks, approximately 67,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [G01 滑らかな bump 関数と従属分割](g01-smooth-partitions.md) | 5 |
-| [G02 逆関数・陰関数と正則値の局所形](../../libs/geometry/inverse_implicit/README.md)（実装済み） | 5 |
-| [G03 境界・角付き多様体](g03-boundary-manifolds.md) | 5 |
-| [G04 collar と境界の貼り合わせ](../../libs/geometry/manifold_gluing/README.md)（実装済み） | 5 |
-| [G05 コンパクト多様体の埋め込み](../../libs/geometry/compact_embeddings/README.md) | 5 |
-| [G06 管状近傍と collapse 写像](g06-tubular-neighborhoods.md#status)（実装あり・要件確認残・検査未確認） | 5 |
-| [G07 Sard の定理](g07-sard.md) | 6 |
-| [G08 滑らかな近似と相対横断性](g08-transversality.md) | 6 |
-| [G09 Morse 関数と非臨界区間](g09-morse-functions.md) | 5 |
-| [G10 handle 分解と有限 CW 型](g10-handles-finite-cw.md) | 5 |
-| [G11 向きと基本類](g11-fundamental-classes.md) | 5 |
-| [G12 Poincaré–Lefschetz 双対性](g12-poincare-duality.md) | 5 |
-| [G13 Morse 補題の局所解析](g13-morse-lemma.md) | 5 |
+| [G01 Smooth bump functions and partitions of unity](g01-smooth-partitions.md) | 5 |
+| [G02 Inverse and implicit functions and local forms of regular values](../../libs/geometry/inverse_implicit/README.md) (implemented) | 5 |
+| [G03 Manifolds with boundary and corners](g03-boundary-manifolds.md) | 5 |
+| [G04 Collars and boundary gluing](../../libs/geometry/manifold_gluing/README.md) (implemented) | 5 |
+| [G05 Embeddings of compact manifolds](../../libs/geometry/compact_embeddings/README.md) | 5 |
+| [G06 Tubular neighborhoods and collapse maps](g06-tubular-neighborhoods.md#status) (implemented; requirements pending verification; checks unconfirmed) | 5 |
+| [G07 Sard's theorem](g07-sard.md) | 6 |
+| [G08 Smooth approximation and relative transversality](g08-transversality.md) | 6 |
+| [G09 Morse functions and noncritical intervals](g09-morse-functions.md) | 5 |
+| [G10 Handle decompositions and finite CW type](g10-handles-finite-cw.md) | 5 |
+| [G11 Orientations and fundamental classes](g11-fundamental-classes.md) | 5 |
+| [G12 Poincaré–Lefschetz duality](g12-poincare-duality.md) | 5 |
+| [G13 Local analysis of the Morse lemma](g13-morse-lemma.md) | 5 |
 
-### コボルディズム
+### Cobordism
 
-6件、概算31千行。
+6 tasks, approximately 31,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [T01 幾何学的コボルディズム群と積](t01-geometric-bordism.md) | 5 |
-| [T02 安定ホモトピー類と Thom スペクトラム](t02-stable-thom.md) | 6 |
-| [T03 Pontryagin–Thom の collapse 写像](t03-pontryagin-thom-collapse.md) | 5 |
-| [T04 Pontryagin–Thom 同型](t04-pontryagin-thom-isomorphism.md) | 6 |
-| [T05 特性数のコボルディズム不変性](t05-bordism-invariants.md) | 5 |
-| [T06 コボルディズムの具体的な計算](t06-bordism-examples.md) | 4 |
+| [T01 Geometric cobordism groups and products](t01-geometric-bordism.md) | 5 |
+| [T02 Stable homotopy classes and Thom spectra](t02-stable-thom.md) | 6 |
+| [T03 Pontryagin–Thom collapse maps](t03-pontryagin-thom-collapse.md) | 5 |
+| [T04 Pontryagin–Thom isomorphism](t04-pontryagin-thom-isomorphism.md) | 6 |
+| [T05 Cobordism invariance of characteristic numbers](t05-bordism-invariants.md) | 5 |
+| [T06 Concrete cobordism computations](t06-bordism-examples.md) | 4 |
 
-### 接続と微分形式
+### Connections and differential forms
 
-4件、概算20千行。
+4 tasks, approximately 20,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [D02 曲率と Chern–Weil 類](d02-chern-weil.md) | 5 |
-| [D03 多様体上の積分と Stokes](d03-integration-stokes.md) | 5 |
-| [D04 De Rham の比較定理](d04-de-rham-comparison.md) | 5 |
-| [D05 位相的特性類と特性形式の一致](d05-characteristic-form-comparison.md) | 5 |
+| [D02 Curvature and Chern–Weil classes](d02-chern-weil.md) | 5 |
+| [D03 Integration on manifolds and Stokes' theorem](d03-integration-stokes.md) | 5 |
+| [D04 De Rham comparison theorem](d04-de-rham-comparison.md) | 5 |
+| [D05 Agreement of topological characteristic classes and characteristic forms](d05-characteristic-form-comparison.md) | 5 |
 
-### 測度・関数解析・楕円作用素
+### Measure, functional analysis, and elliptic operators
 
-16件、概算88千行。
+16 tasks, approximately 88,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [A01 測度積分の収束定理](a01-measure-convergence.md) | 5 |
-| [A02 Euclid 空間の Lebesgue 測度](a02-lebesgue-measure.md) | 6 |
-| [A03 積測度と Fubini](a03-product-integration.md) | 5 |
-| [A05 Lp 空間のノルムと完備性](a05-lp-completeness.md) | 5 |
-| [A06 Schwartz 空間と Fourier 変換](a06-schwartz-fourier.md) | 6 |
-| [A09 Euclid 空間の Sobolev 評価](a09-euclidean-sobolev.md#status)（実装あり・要件確認残・検査未確認） | 6 |
-| [A10 Rellich コンパクト性](a10-rellich.md) | 5 |
-| [A11 Fredholm 作用素と指数](a11-fredholm-operators.md) | 5 |
-| [A12 束切断の Sobolev 空間](a12-bundle-sobolev.md) | 5 |
-| [A13 シンボルと局所量子化](a13-symbol-quantization.md) | 6 |
-| [A14 擬微分作用素の合成と座標変換](a14-symbol-calculus.md) | 6 |
-| [A15 擬微分作用素の Sobolev 有界性](a15-pseudodifferential-bounds.md) | 6 |
-| [A16 楕円 parametrix と正則性](a16-elliptic-parametrix.md) | 6 |
-| [A17 楕円作用素の解析的指数](a17-elliptic-fredholm.md) | 5 |
-| [A18 Bott 作用素の解析的正規化](a18-bott-operator.md) | 6 |
-| [A19 複素 Hilbert 空間とコンパクト作用素](a19-complex-hilbert.md) | 5 |
+| [A01 Convergence theorems for measure integration](a01-measure-convergence.md) | 5 |
+| [A02 Lebesgue measure on Euclidean spaces](a02-lebesgue-measure.md) | 6 |
+| [A03 Product measures and Fubini](a03-product-integration.md) | 5 |
+| [A05 Norms and completeness of Lp spaces](a05-lp-completeness.md) | 5 |
+| [A06 Schwartz spaces and the Fourier transform](a06-schwartz-fourier.md) | 6 |
+| [A09 Sobolev estimates on Euclidean spaces](a09-euclidean-sobolev.md#status) (implemented; requirements pending verification; checks unconfirmed) | 6 |
+| [A10 Rellich compactness](a10-rellich.md) | 5 |
+| [A11 Fredholm operators and the index](a11-fredholm-operators.md) | 5 |
+| [A12 Sobolev spaces of bundle sections](a12-bundle-sobolev.md) | 5 |
+| [A13 Symbols and local quantization](a13-symbol-quantization.md) | 6 |
+| [A14 Composition and coordinate changes of pseudodifferential operators](a14-symbol-calculus.md) | 6 |
+| [A15 Sobolev boundedness of pseudodifferential operators](a15-pseudodifferential-bounds.md) | 6 |
+| [A16 Elliptic parametrices and regularity](a16-elliptic-parametrix.md) | 6 |
+| [A17 Analytic index of elliptic operators](a17-elliptic-fredholm.md) | 5 |
+| [A18 Analytic normalization of the Bott operator](a18-bott-operator.md) | 6 |
+| [A19 Complex Hilbert spaces and compact operators](a19-complex-hilbert.md) | 5 |
 
-### 指数定理と応用
+### Index theorem and applications
 
-11件、概算58千行。
+11 tasks, approximately 58,000 lines.
 
-| タスク | 概算（千行） |
+| Task | Estimate (thousands of lines) |
 | --- | ---: |
-| [I01 シンボルの K 類と解析的指数写像](i01-symbol-index.md) | 5 |
-| [I02 解析的指数の局所化と切除](i02-analytic-excision.md) | 6 |
-| [I03 解析的指数と Thom 写像](i03-analytic-thom.md) | 6 |
-| [I04 位相的指数写像](i04-topological-index.md) | 5 |
-| [I05 Atiyah–Singer 指数定理](i05-atiyah-singer.md) | 4 |
-| [I06 コホモロジーによる指数公式](i06-cohomological-index.md) | 5 |
-| [I07 Hodge 理論と符号数作用素](i07-hodge-signature.md) | 6 |
-| [I08 Spin-c Dirac 作用素](i08-spin-dirac.md) | 5 |
-| [I09 Gauss–Bonnet・符号数・Dirac 指数公式](i09-index-applications.md) | 6 |
-| [I10 複素スピノル表現](i10-spinor-representations.md) | 5 |
-| [I11 Spin・Spin-c 構造とスピノル束](i11-spin-structures.md) | 5 |
+| [I01 Symbol K-classes and the analytic index map](i01-symbol-index.md) | 5 |
+| [I02 Localization and excision of the analytic index](i02-analytic-excision.md) | 6 |
+| [I03 Analytic index and Thom maps](i03-analytic-thom.md) | 6 |
+| [I04 Topological index map](i04-topological-index.md) | 5 |
+| [I05 Atiyah–Singer index theorem](i05-atiyah-singer.md) | 4 |
+| [I06 Cohomological index formula](i06-cohomological-index.md) | 5 |
+| [I07 Hodge theory and the signature operator](i07-hodge-signature.md) | 6 |
+| [I08 Spin-c Dirac operator](i08-spin-dirac.md) | 5 |
+| [I09 Gauss–Bonnet, signature, and Dirac index formulas](i09-index-applications.md) | 6 |
+| [I10 Complex spinor representations](i10-spinor-representations.md) | 5 |
+| [I11 Spin and Spin-c structures and spinor bundles](i11-spin-structures.md) | 5 |
 
-## 合流して確認する成果
+## Integration milestones
 
-| 合流点 | 完了タスク | 得られるもの |
+| Milestone | Completed tasks | Results |
 | --- | --- | --- |
-| 共通の束基盤 | B03・B04・[B07](../../libs/geometry/smooth_bundles/README.md) | 同型類の集合、補束、ホモトピー不変性、既存の接束・法束との比較 |
-| 位相的特性類 | C08・C09・C10 | 整数・mod 2・有理特性類、特性数、射影空間の計算 |
-| 位相的 K 理論 | K09・K11・K12 | 周期性、コンパクト台の Thom 同型、Chern 指標による比較 |
-| コボルディズム | T04・T05・T06 | Pontryagin–Thom 同型、不変量、具体的な非零類 |
-| 特性形式 | D05 | 位相的特性類と曲率形式の一致 |
-| 解析的指数 | A17・I01 | 楕円作用素の Fredholm 性とシンボルの K 群上の指数 |
-| 指数定理 | I05・I06 | 解析的指数と位相的指数の一致、コホモロジー表示 |
-| 指数公式の応用 | I09 | Euler 標数・符号数・Spin-c Dirac 指数の特性類による公式 |
+| Shared bundle foundations | B03, B04, [B07](../../libs/geometry/smooth_bundles/README.md) | Sets of isomorphism classes, complements, homotopy invariance, existing tangent/normal comparisons |
+| Topological characteristic classes | C08, C09, C10 | Integral, mod 2, and rational characteristic classes, characteristic numbers, projective-space computations |
+| Topological K-theory | K09, K11, K12 | Periodicity, compactly supported Thom isomorphisms, Chern-character comparison |
+| Cobordism | T04, T05, T06 | Pontryagin–Thom isomorphism, invariants, explicit nonzero classes |
+| Characteristic forms | D05 | Agreement of topological characteristic classes and curvature forms |
+| Analytic index | A17, I01 | Fredholm elliptic operators and the index on symbol K-groups |
+| Index theorem | I05, I06 | Agreement of analytic and topological indices; cohomological expression |
+| Index formula applications | I09 | Characteristic-class formulas for Euler characteristic, signature, and Spin-c Dirac index |
 
-## その後の展開
+## Further development
 
-非向き付きコボルディズム環の全計算、向き付きコボルディズムのねじれ、複素コボルディズム MU と形式群は、Steenrod 演算・スペクトル系列・安定ホモトピーの追加計画として展開する。
-実 K 理論と8周期性、KO による実指数と mod 2 指数、外冪・Adams 演算を次の K 理論の段階に置く。
-指数定理の先には、複素多様体と Dolbeault 理論から Hirzebruch–Riemann–Roch、族の指数、同変指数、境界と APS 指数、熱核による局所指数公式を置く。
-各段階は必要な基盤が見えた時点で、同じ粒度の個別タスクへ展開する。
+Plan full unoriented cobordism-ring computations, oriented cobordism torsion, complex cobordism MU, and formal groups as additional Steenrod-operation, spectral-sequence, and stable-homotopy work.
+Next K-theory stage: real K-theory and eightfold periodicity, real and mod 2 indices via KO, exterior powers, and Adams operations.
+Beyond the index theorem: complex manifolds and Dolbeault theory toward Hirzebruch–Riemann–Roch, family and equivariant indices, boundaries and APS indices, and heat-kernel local index formulas.
+Expand each stage into tasks of comparable size once its required foundations are clear.
 
-## 参照する証明
+## Proof references
 
-束・特性類・Bott の経路は [Hatcher, Vector Bundles & K-Theory](https://pi.math.cornell.edu/~hatcher/VBKT/VB.pdf) を参照する。
-特性類・Thom 空間・コボルディズムの接続は [Haynes Miller, Algebraic Topology II](https://ocw.mit.edu/courses/18-906-algebraic-topology-ii-spring-2020/pages/lecture-notes/) を参照する。
-指数の埋め込み・切除・Thom 写像による構成は [Landweber, K-theory and elliptic operators](https://arxiv.org/abs/math/0504555) とそこで参照される Atiyah–Singer の証明を照合先にする。
-このタスク分割と行数は既存ライブラリを踏まえた設計上の見積もりである。
+For bundles, characteristic classes, and Bott, see [Hatcher, Vector Bundles & K-Theory](https://pi.math.cornell.edu/~hatcher/VBKT/VB.pdf).
+For characteristic classes, Thom spaces, and cobordism, see [Haynes Miller, Algebraic Topology II](https://ocw.mit.edu/courses/18-906-algebraic-topology-ii-spring-2020/pages/lecture-notes/).
+For the index construction via embeddings, excision, and Thom maps, compare [Landweber, K-theory and elliptic operators](https://arxiv.org/abs/math/0504555) and the Atiyah–Singer proofs it references.
+Task divisions and line counts are design estimates based on the existing libraries.

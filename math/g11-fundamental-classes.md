@@ -1,13 +1,13 @@
-# G11 向きと基本類
+# G11 Orientations and fundamental classes
 
-## 要件
+## Requirements
 
-- 主な実装先は `manifold_orientation`。
-- 局所整数ホモロジーによる向きと、チャートの行列式・接束の向きを比較する。
-- コンパクト多様体の相対基本類と mod 2 基本類を構成し、境界写像が境界の基本類を与えることを証明する。
-- 積、向きの反転、微分同相、局所次数と基本類の評価の法則を公開する。
+- Primary implementation: `manifold_orientation`.
+- Compare orientations via local integral homology with chart determinants and tangent-bundle orientations.
+- Construct relative and mod 2 fundamental classes of compact manifolds; prove boundary maps yield boundary fundamental classes.
+- Expose laws for products, orientation reversal, diffeomorphisms, local degree, and fundamental-class evaluation.
 
-## 依存するタスク
+## Dependencies
 
-- [G04 collar と境界の貼り合わせ](g04-collars-gluing.md)
-- [C01 cap 積と相対積](c01-cap-products.md)
+- [G04 Collars and boundary gluing](g04-collars-gluing.md)
+- [C01 Cap products and relative products](c01-cap-products.md)

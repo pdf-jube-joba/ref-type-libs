@@ -1,8 +1,8 @@
-# 特異鎖の低次の正規化
+# Low-degree normalization of singular chains
 
-`Normalize.With` は基点から各点への道を、特異零鎖の増大写像の明示的な持ち上げに拡張する。
-その境界で恒等鎖写像を補正し、零次を基点への増大射にし、一次の像をサイクルにする鎖写像と元の恒等写像との鎖ホモトピーを構成する。
-道連結性から必要な道の族が存在することも示す。
+`Normalize.With` extends base-to-point paths to explicit augmentation lifts of singular zero-chains.
+Correct identity by boundaries, constructing homotopies to maps with basepoint augmentation in degree zero and cycle-valued degree one.
+Path connectedness supplies required path families.
 
-`Product.With.Coefficients` はこの正規化と実際の shuffle 写像を使い、道連結な二空間の積の一次コホモロジーが二つの基点付き軸への制限で決定されることを示す。
-係数は任意の整数加群である。
+`Product.With.Coefficients` uses normalization/actual shuffles to detect first product cohomology by restrictions to two pointed axes.
+Coefficients are arbitrary integer modules.

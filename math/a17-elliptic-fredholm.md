@@ -1,13 +1,13 @@
-# A17 楕円作用素の解析的指数
+# A17 Analytic index of elliptic operators
 
-## 要件
+## Requirements
 
-- 主な実装先は `elliptic_fredholm`。
-- 閉コンパクト多様体の楕円作用素が Sobolev 切断上で Fredholm になることを証明する。
-- 核と余核を滑らかな解空間および随伴の核と比較し、Sobolev 次数によらない解析的指数を構成する。
-- シンボルを固定した摂動、楕円な連続族、直和・合成・随伴に関する指数の法則を公開する。
+- Primary implementation: `elliptic_fredholm`.
+- Prove that elliptic operators on closed compact manifolds are Fredholm on Sobolev sections.
+- Compare kernels and cokernels with smooth solution spaces and adjoint kernels; construct an analytic index independent of Sobolev order.
+- Expose index laws for fixed-symbol perturbations, continuous elliptic families, direct sums, composition, and adjoints.
 
-## 依存するタスク
+## Dependencies
 
-- [A16 楕円 parametrix と正則性](a16-elliptic-parametrix.md)
-- [A11 Fredholm 作用素と指数](a11-fredholm-operators.md)
+- [A16 Elliptic parametrices and regularity](a16-elliptic-parametrix.md)
+- [A11 Fredholm operators and the index](a11-fredholm-operators.md)

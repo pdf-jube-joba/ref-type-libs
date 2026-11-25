@@ -1,155 +1,155 @@
-# ライブラリ
+# Libraries
 
-依存先は各 `ref.toml`、公開 module は `src/root.ref` にある。
-`std` 以外は約5,000行を目安に、共有基盤から応用へ依存する単位で分ける。
+Dependencies are in each `ref.toml`; public modules are in `src/root.ref`.
+Except for `std`, aim for roughly 5,000 lines per package, organized by dependencies from shared foundations to applications.
 
-## 基礎
+## Foundations
 
-| 配置 | パッケージ | 内容 |
+| Location | Package | Contents |
 | --- | --- | --- |
-| [std](std/README.md) | `std` | 論理、データ、整数・有理数、商、代数構造 |
-| [category](category/README.md) | `category` | 圏、関手、自然変換、普遍性、随伴、加法圏・アーベル圏 |
+| [std](std/README.md) | `std` | Logic, data, integers/rationals, quotients, algebraic structures |
+| [category](category/README.md) | `category` | Categories, functors, natural transformations, universal properties, adjunctions, additive and abelian categories |
 
-## 数系
+## Number systems
 
-| 配置 | パッケージ | 内容 |
+| Location | Package | Contents |
 | --- | --- | --- |
-| [real/axiomatic](real/axiomatic/README.md) | `ordered_fields` | 順序体と上限完備性の共通構造 |
-| [real/dedekind](real/dedekind/README.md) | `dedekind_reals` | 有理数の切断による実数、演算・順序・完備性 |
-| [real/cauchy](real/cauchy/README.md) | `cauchy_reals` | 有理数 Cauchy 列の商による実数、演算・順序・完備性 |
-| [real/basic](real/basic/README.md) | `real` | 構成済みの実数の演算、距離評価、数列、平方根、有限和 |
-| [complex](complex/README.md) | `complex` | 実数対による複素数と体の構造 |
+| [real/axiomatic](real/axiomatic/README.md) | `ordered_fields` | Shared ordered-field and supremum-completeness structures |
+| [real/dedekind](real/dedekind/README.md) | `dedekind_reals` | Reals from rational cuts, arithmetic, order, completeness |
+| [real/cauchy](real/cauchy/README.md) | `cauchy_reals` | Reals from rational Cauchy-sequence quotients, arithmetic, order, completeness |
+| [real/basic](real/basic/README.md) | `real` | Constructed real arithmetic, distance estimates, sequences, square roots, finite sums |
+| [complex](complex/README.md) | `complex` | Complex numbers as real pairs and field structure |
 
-標準の実数は `dedekind_reals` から `real` に渡す。
-共通の数値補題は `real.Analysis`、演算と法則の分離には `Def` / `Prop`、等式連鎖には [eq_reason!](std/README.md#等式と合同則) を使う。
+Standard reals pass from `dedekind_reals` to `real`.
+Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate operations from laws, and [eq_reason!](std/README.md#equality-and-congruence) for equality chains.
 
-## 代数
+## Algebra
 
-| 配置 | パッケージ | 内容 |
+| Location | Package | Contents |
 | --- | --- | --- |
-| [algebra/basic](algebra/basic/README.md) | `algebra` | 準同型、群完成、商、多項式環 |
-| [algebra/characteristic_series](algebra/characteristic_series/README.md) | `characteristic_series` | 有理係数対称多項式、Newton 恒等式、切断級数、Chern 指標・Todd・L・A-hat の有限多項式と係数 |
-| [algebra/galois](algebra/galois/README.md) | `galois` | 体拡大、最小多項式、自己同型の延長、ガロア接続、根号・作図可能性、有理数の代数閉包の定義 |
-| [algebra/quintic](algebra/quintic/README.md) | `quintic` | 一般5次方程式の根号非可解性と作図不可能性 |
-| [algebra/module_theory](algebra/module_theory/README.md) | `module_theory` | 環上の加群、自由加群、直和、テンソル積、完全列 |
-| [algebra/commutative_algebra](algebra/commutative_algebra/README.md) | `commutative_algebra` | Hom とテンソル積、射影性、有限自由加群の行列 |
-| [algebra/integer_matrices](algebra/integer_matrices/README.md) | `integer_matrices` | 整数行列の演算、Smith 標準形と変換行列 |
-| [algebra/finitely_generated_modules](algebra/finitely_generated_modules/README.md) | `finitely_generated_modules` | 整数の核・像・部分加群の基底、巡回加群、体上の有限次元部分空間 |
-| [algebra/linear_algebra](algebra/linear_algebra/README.md) | `linear_algebra` | 可換環上の線形・多重線形・外代数、実数・複素数への具体化 |
-| [algebra/matrix_invariants](algebra/matrix_invariants/README.md) | `matrix_invariants` | 行列式、余因子・随伴行列、逆行列、実・複素行列族の連続性と開性 |
-| [algebra/polynomial_linear_algebra](algebra/polynomial_linear_algebra/README.md) | `polynomial_linear_algebra` | 多項式の除法・互除法と Bézout 係数、中国剰余定理、Cayley–Hamilton、核の直和分解と係数変更 |
-| [algebra/fundamental_algebra](algebra/fundamental_algebra/README.md) | `fundamental_algebra` | 複素多項式の無限遠での評価・最小値・根の存在、重複度付き完全分解と一意な有限根族 |
-| [algebra/complex_polynomial_roots](algebra/complex_polynomial_roots/README.md) | `complex_polynomial_roots` | 根の有界性、有限対称積と係数空間の同相、分離した根群の連続な因子 |
-| [algebra/hermitian_frames](algebra/hermitian_frames/README.md) | `hermitian_frames` | Hermitian 形式、連続な正規直交化、射影の局所枠と逆座標、ユニタリ群 |
-| [algebra/spectral_splitting](algebra/spectral_splitting/README.md) | `spectral_splitting` | 単位円内外の根因子、連続なスペクトル射影、像束とホモトピー比較 |
-| [algebra/lie_algebras](algebra/lie_algebras/README.md) | `lie_algebras` | リー代数、随伴表現、交換子、部分リー代数、自己準同型代数 |
-| [algebra/clifford](algebra/clifford/README.md) | `clifford` | クリフォード代数の商構成と普遍性、Pin・Spin と複素拡張の群構造 |
-| [algebra/homological/chain_complexes](algebra/homological/chain_complexes/README.md) | `chain_complexes` | 自然数・整数次数の複体、ホモロジー、写像・ホモトピー・複体の圏 |
-| [algebra/homological/double_complexes](algebra/homological/double_complexes/README.md) | `double_complexes` | 非負鎖複体、二重複体、total、比較の完全性と符号付き交換 |
-| [algebra/homological/resolutions](algebra/homological/resolutions/README.md) | `resolutions` | 射影分解、比較定理、Hom・テンソル複体、二重 total による分解比較 |
-| [algebra/homological/tensor_chains](algebra/homological/tensor_chains/README.md) | `tensor_chains` | 整数次数のテンソル total、外積と自然性、符号付き次数移動、可換四角形 |
-| [algebra/homological/derived_functors](algebra/homological/derived_functors/README.md) | `derived_functors` | Ext・Tor、分解からの独立性と自然性、巡回加群の分解、普遍係数 |
-| [algebra/homological/field_kunneth](algebra/homological/field_kunneth/README.md) | `field_kunneth` | 有限自由体係数余鎖複体、標準外積同型、自然性・交換符号・単位 |
-| [algebra/homological/computations](algebra/homological/computations/README.md) | `homological_algebra` | 有限整数複体のホモロジー計算、普遍係数・整数 Künneth の自然な短完全列 |
+| [algebra/basic](algebra/basic/README.md) | `algebra` | Homomorphisms, group completion, quotients, polynomial rings |
+| [algebra/characteristic_series](algebra/characteristic_series/README.md) | `characteristic_series` | Rational symmetric polynomials, Newton identities, truncated series, finite Chern-character/Todd/L/A-hat polynomials and coefficients |
+| [algebra/galois](algebra/galois/README.md) | `galois` | Field extensions, minimal polynomials, automorphism extensions, Galois connections, radicals, constructibility, definition of the algebraic closure of the rationals |
+| [algebra/quintic](algebra/quintic/README.md) | `quintic` | Insolubility of the general quintic by radicals and nonconstructibility |
+| [algebra/module_theory](algebra/module_theory/README.md) | `module_theory` | Modules over rings, free modules, direct sums, tensor products, exact sequences |
+| [algebra/commutative_algebra](algebra/commutative_algebra/README.md) | `commutative_algebra` | Hom and tensor products, projectivity, matrices of finite free modules |
+| [algebra/integer_matrices](algebra/integer_matrices/README.md) | `integer_matrices` | Integer matrix operations, Smith normal form, transformation matrices |
+| [algebra/finitely_generated_modules](algebra/finitely_generated_modules/README.md) | `finitely_generated_modules` | Bases of integer kernels/images/submodules, cyclic modules, finite-dimensional subspaces over fields |
+| [algebra/linear_algebra](algebra/linear_algebra/README.md) | `linear_algebra` | Linear, multilinear, and exterior algebra over commutative rings; real/complex specializations |
+| [algebra/matrix_invariants](algebra/matrix_invariants/README.md) | `matrix_invariants` | Determinants, cofactors/adjugates, inverses, continuity and openness of real/complex matrix families |
+| [algebra/polynomial_linear_algebra](algebra/polynomial_linear_algebra/README.md) | `polynomial_linear_algebra` | Polynomial division/Euclidean algorithm, Bézout coefficients, Chinese remainder theorem, Cayley–Hamilton, kernel direct sums, coefficient changes |
+| [algebra/fundamental_algebra](algebra/fundamental_algebra/README.md) | `fundamental_algebra` | Complex polynomial bounds at infinity, minima, roots, complete factorization with multiplicities, unique finite root families |
+| [algebra/complex_polynomial_roots](algebra/complex_polynomial_roots/README.md) | `complex_polynomial_roots` | Root boundedness, finite symmetric-product/coefficient-space homeomorphism, continuous factors for separated root clusters |
+| [algebra/hermitian_frames](algebra/hermitian_frames/README.md) | `hermitian_frames` | Hermitian forms, continuous orthonormalization, local projection frames and inverse coordinates, unitary groups |
+| [algebra/spectral_splitting](algebra/spectral_splitting/README.md) | `spectral_splitting` | Root factors inside/outside the unit circle, continuous spectral projections, image bundles, homotopy comparisons |
+| [algebra/lie_algebras](algebra/lie_algebras/README.md) | `lie_algebras` | Lie algebras, adjoint representations, commutators, Lie subalgebras, endomorphism algebras |
+| [algebra/clifford](algebra/clifford/README.md) | `clifford` | Clifford quotient construction and universality, Pin/Spin and complex-extension group structures |
+| [algebra/homological/chain_complexes](algebra/homological/chain_complexes/README.md) | `chain_complexes` | Natural/integer-graded complexes, homology, maps, homotopies, categories of complexes |
+| [algebra/homological/double_complexes](algebra/homological/double_complexes/README.md) | `double_complexes` | Nonnegative chain complexes, double complexes, totalization, exact comparisons, signed swaps |
+| [algebra/homological/resolutions](algebra/homological/resolutions/README.md) | `resolutions` | Projective resolutions, comparison theorem, Hom/tensor complexes, double-total resolution comparisons |
+| [algebra/homological/tensor_chains](algebra/homological/tensor_chains/README.md) | `tensor_chains` | Integer-graded tensor totalization, external products and naturality, signed shifts, commutative squares |
+| [algebra/homological/derived_functors](algebra/homological/derived_functors/README.md) | `derived_functors` | Ext/Tor, resolution independence and naturality, cyclic-module resolutions, universal coefficients |
+| [algebra/homological/field_kunneth](algebra/homological/field_kunneth/README.md) | `field_kunneth` | Finite free field-coefficient cochain complexes, canonical external-product isomorphisms, naturality, swap signs, units |
+| [algebra/homological/computations](algebra/homological/computations/README.md) | `homological_algebra` | Homology computations for finite integer complexes, natural universal-coefficient/integral-Künneth short exact sequences |
 
-## 解析
+## Analysis
 
-| 配置 | パッケージ | 内容 |
+| Location | Package | Contents |
 | --- | --- | --- |
-| [analysis/uniform_approximation](analysis/uniform_approximation/README.md) | `uniform_approximation` | 実・複素 Stone–Weierstrass、円周と積上の Laurent 近似、行列・束自己準同型の一様評価 |
-| [analysis/calculus](analysis/calculus/README.md) | `calculus` | 極限、平均値定理、多変数微分、滑らかな写像 |
-| [analysis/euclidean_measure](analysis/euclidean_measure/README.md) | `euclidean_measure` | Euclid 空間の Lebesgue 測度、正則性と積分の比較 |
-| [analysis/change_of_variables](analysis/change_of_variables/README.md) | `change_of_variables` | 可逆線形測度変換、微分同相のコンパクト台変数変換、局所化、パラメータ積分、境界項、密度と最高次形式 |
-| [analysis/product_integration](analysis/product_integration/README.md) | `product_integration` | σ 有限積測度、Tonelli・実複素有限次元 Fubini、Euclid 測度の Borel 比較、畳み込みの積分・台・L1 評価 |
-| [analysis/differential_equations](analysis/differential_equations/README.md) | `differential_equations` | Picard の積分作用素、常微分方程式の局所解の存在・一意性、滑らかなベクトル場の解の滑らかさ |
-| [analysis/functional](analysis/functional/README.md) | `functional_analysis` | 実ノルム空間・Hilbert 空間、Arzelà–Ascoli・Riesz 表現・Hahn–Banach・開写像定理、コンパクト台、\(L^p\)・弱微分・Sobolev 空間の定義 |
-| [analysis/fourier_schwartz](analysis/fourier_schwartz/README.md) | `fourier_schwartz` | Schwartz 空間、Fourier 変換の諸公式・保存、Gaussian 変換、近似単位による反転公式 |
-| [analysis/fourier_l2](analysis/fourier_l2/README.md) | `fourier_l2` | Parseval、ユニタリ L² Fourier 変換、有界乗算作用素、重み付きノルムと整数階微分比較 |
-| [analysis/distributions](analysis/distributions/README.md) | `distributions` | 試験関数の位相、連続双対、局所可積分関数の単射、分布微分・台・平滑化、Sobolev 比較と微分同相の引き戻し |
-| [analysis/euclidean_sobolev](analysis/euclidean_sobolev/README.md) | `euclidean_sobolev` | 整数階 Sobolev 空間、弱微分との比較、双対性、局所座標変更と埋め込み |
-| [analysis/lp_spaces](analysis/lp_spaces/README.md) | `lp_spaces` | 実 Lp・L∞ の Banach 構造、実・複素 L2、稠密性、平行移動、畳み込み・近似単位 |
-| [analysis/measure_convergence](analysis/measure_convergence/README.md) | `measure_convergence` | 単調収束・Fatou・優収束、a.e. 同値類の積分、実・複素・有限次元の積分と級数交換 |
-| [analysis/complex_hilbert](analysis/complex_hilbert/README.md) | `complex_hilbert` | 作業中：複素 Riesz 表現、有界随伴、閉部分空間への直交射影と有限階数の因子分解 |
-| [analysis/integration](analysis/integration/README.md) | `integration` | リーマン積分、L¹ 完備化によるルベーグ積分 |
+| [analysis/uniform_approximation](analysis/uniform_approximation/README.md) | `uniform_approximation` | Real/complex Stone–Weierstrass, Laurent approximation on circles/products, uniform matrix/bundle-endomorphism estimates |
+| [analysis/calculus](analysis/calculus/README.md) | `calculus` | Limits, mean value theorem, multivariable differentiation, smooth maps |
+| [analysis/euclidean_measure](analysis/euclidean_measure/README.md) | `euclidean_measure` | Euclidean Lebesgue measure, regularity, integral comparisons |
+| [analysis/change_of_variables](analysis/change_of_variables/README.md) | `change_of_variables` | Invertible linear measure transformations, compact-support diffeomorphism substitution, localization, parameter integrals, boundary terms, densities/top forms |
+| [analysis/product_integration](analysis/product_integration/README.md) | `product_integration` | σ-finite product measures, Tonelli, real/complex/finite-dimensional Fubini, Euclidean Borel comparison, convolution integrals/support/L1 estimates |
+| [analysis/differential_equations](analysis/differential_equations/README.md) | `differential_equations` | Picard integral operators, local ODE existence/uniqueness, smooth solutions of smooth vector fields |
+| [analysis/functional](analysis/functional/README.md) | `functional_analysis` | Real normed/Hilbert spaces, Arzelà–Ascoli, Riesz representation, Hahn–Banach, open mapping, compact supports, definitions of \(L^p\), weak derivatives, and Sobolev spaces |
+| [analysis/fourier_schwartz](analysis/fourier_schwartz/README.md) | `fourier_schwartz` | Schwartz spaces, Fourier formulas/preservation, Gaussian transform, inversion via approximate identities |
+| [analysis/fourier_l2](analysis/fourier_l2/README.md) | `fourier_l2` | Parseval, unitary L² Fourier transform, bounded multipliers, weighted norms and integer-derivative comparisons |
+| [analysis/distributions](analysis/distributions/README.md) | `distributions` | Test-function topology, continuous duals, injection of locally integrable functions, distribution derivatives/support/smoothing, Sobolev comparisons and diffeomorphism pullbacks |
+| [analysis/euclidean_sobolev](analysis/euclidean_sobolev/README.md) | `euclidean_sobolev` | Integer-order Sobolev spaces, weak-derivative comparisons, duality, local coordinate changes and embeddings |
+| [analysis/lp_spaces](analysis/lp_spaces/README.md) | `lp_spaces` | Real Lp/L∞ Banach structures, real/complex L2, density, translations, convolution/approximate identities |
+| [analysis/measure_convergence](analysis/measure_convergence/README.md) | `measure_convergence` | Monotone convergence, Fatou, dominated convergence, a.e.-quotient integration, real/complex/finite-dimensional integration and series interchange |
+| [analysis/complex_hilbert](analysis/complex_hilbert/README.md) | `complex_hilbert` | In progress: complex Riesz representation, bounded adjoints, closed-subspace projections, finite-rank factorization |
+| [analysis/integration](analysis/integration/README.md) | `integration` | Riemann integration, Lebesgue integration via L¹ completion |
 
-## 幾何
+## Geometry
 
-| 配置 | パッケージ | 内容 |
+| Location | Package | Contents |
 | --- | --- | --- |
-| [geometry/smooth_partitions](geometry/smooth_partitions/README.md) | `smooth_partitions` | 平坦関数、コンパクト台付き cutoff、局所有限な滑らかな従属分割、零延長と局所有限和 |
-| [geometry/manifolds](geometry/manifolds/README.md) | `manifolds` | アトラス、滑らかな写像、接空間と微分 |
-| [geometry/inverse_implicit](geometry/inverse_implicit/README.md) | `inverse_implicit` | 局所逆写像、パラメータ付き陰関数、定階数の局所座標、正則値部分多様体と接空間の核 |
-| [geometry/morse_lemma](geometry/morse_lemma/README.md) | `morse_lemma` | 対称形式の慣性指数、Morse 座標、パラメータ付き局所正規形、臨界点の孤立性と指数の局所定数性 |
-| [geometry/boundary_manifolds](geometry/boundary_manifolds/README.md) | `boundary_manifolds` | 半空間・象限チャート、接錐と座標不変な微分、境界・面の接束、neat embedding、積・区間・円板 |
-| [geometry/compact_embeddings](geometry/compact_embeddings/README.md) | `compact_embeddings` | 有限チャート・cutoff によるコンパクト多様体の埋め込み、collar と整合する neat embedding、安定化した相対埋め込みの族 |
-| [geometry/vector_bundles](geometry/vector_bundles/README.md) | `vector_bundles` | 一般の実・複素束、局所定数ランク、束写像・切断・引き戻しと普遍性 |
-| [geometry/bundle_operations](geometry/bundle_operations/README.md) | `bundle_operations` | Cocycle の貼り合わせ、直和・テンソル・双対・Hom・外冪、実化・複素化と引き戻し |
-| [geometry/smooth_bundles](geometry/smooth_bundles/README.md) | `smooth_bundles` | 実・複素滑らかな束と計量、双対・テンソル・外冪、枠束の滑らかな作用・局所微分同相、表現による随伴束、接束・法束との比較 |
-| [geometry/bundle_connections](geometry/bundle_connections/README.md) | `bundle_connections` | 実・複素束の接続、束値微分形式と誘導接続、計量適合接続、Levi–Civita 接続 |
-| [geometry/bundle_complements](geometry/bundle_complements/README.md) | `bundle_complements` | 有限分割からの計量・有限埋め込み、直交補束、連続射影の像と同型類の集合 |
-| [geometry/bundle_extension](geometry/bundle_extension/README.md) | `bundle_extension` | Tietze、閉部分空間上の束・写像・同型の近傍延長、縮小比較と安定化 |
-| [geometry/grassmannians](geometry/grassmannians/README.md) | `grassmannians` | 有限 Grassmannian、グラフ座標、普遍束と安定化 |
-| [geometry/grassmannian_cells](geometry/grassmannian_cells/README.md) | `grassmannian_cells` | 作業中・型検査未完了：Schubert セルの自由座標、標準包含の閉埋め込み、弱位相の増大列の有限段階化 |
-| [geometry/bundle_homotopy](geometry/bundle_homotopy/README.md) | `bundle_homotopy` | 束のホモトピー比較、cofibration に沿う相対延長、球面の clutching と gauge による同型判定 |
-| [geometry/bundle_classification](geometry/bundle_classification/README.md) | `bundle_classification` | 実・複素束の有限分類写像、安定化ホモトピー分類、向き付き・枠付き束と自然性 |
-| [geometry/tangent_bundles](geometry/tangent_bundles/README.md) | `tangent_bundles` | 接束の全空間、接写像、関手則、滑らかなファイバー演算 |
-| [geometry/normal_bundles](geometry/normal_bundles/README.md) | `normal_bundles` | はめ込みの法束、局所正規直交枠、直和分解、底空間変更と安定化 |
-| [geometry/examples/tangent_normal](geometry/examples/tangent_normal/README.md) | `tangent_normal` | ユークリッド接束、座標包含、放物線、退化次数の利用例 |
-| [geometry/lie_groups](geometry/lie_groups/README.md) | `lie_groups` | リー群・リー代数、随伴微分・指数写像、O・SO・Pin・Spin と複素拡張のリー群構造 |
-| [geometry/euclidean_forms](geometry/euclidean_forms/README.md) | `euclidean_forms` | 局所微分形式、外積・外微分、座標表示、引き戻し |
-| [geometry/differential_forms](geometry/differential_forms/README.md) | `differential_forms` | 大域微分形式、貼り合わせ、引き戻し、De Rham コホモロジー |
+| [geometry/smooth_partitions](geometry/smooth_partitions/README.md) | `smooth_partitions` | Flat functions, compactly supported cutoffs, locally finite smooth partitions of unity, extension by zero and locally finite sums |
+| [geometry/manifolds](geometry/manifolds/README.md) | `manifolds` | Atlases, smooth maps, tangent spaces and derivatives |
+| [geometry/inverse_implicit](geometry/inverse_implicit/README.md) | `inverse_implicit` | Local inverses, parameterized implicit functions, constant-rank coordinates, regular-value submanifolds and tangent kernels |
+| [geometry/morse_lemma](geometry/morse_lemma/README.md) | `morse_lemma` | Symmetric-form inertia, Morse coordinates, parameterized local normal forms, isolated critical points and locally constant indices |
+| [geometry/boundary_manifolds](geometry/boundary_manifolds/README.md) | `boundary_manifolds` | Half-space/orthant charts, tangent cones and invariant derivatives, boundary/face tangent bundles, neat embeddings, products/intervals/disks |
+| [geometry/compact_embeddings](geometry/compact_embeddings/README.md) | `compact_embeddings` | Compact-manifold embeddings from finite charts/cutoffs, collar-compatible neat embeddings, stabilized relative embedding families |
+| [geometry/vector_bundles](geometry/vector_bundles/README.md) | `vector_bundles` | General real/complex bundles, locally constant rank, bundle maps/sections/pullbacks and universality |
+| [geometry/bundle_operations](geometry/bundle_operations/README.md) | `bundle_operations` | Cocycle gluing, direct sums/tensors/duals/Hom/exterior powers, realification/complexification and pullback |
+| [geometry/smooth_bundles](geometry/smooth_bundles/README.md) | `smooth_bundles` | Real/complex smooth bundles and metrics, duals/tensors/exterior powers, smooth frame actions/local diffeomorphisms, representation-associated bundles, tangent/normal comparisons |
+| [geometry/bundle_connections](geometry/bundle_connections/README.md) | `bundle_connections` | Real/complex bundle connections, bundle-valued forms and induced connections, metric-compatible and Levi–Civita connections |
+| [geometry/bundle_complements](geometry/bundle_complements/README.md) | `bundle_complements` | Metrics/finite embeddings from finite partitions, orthogonal complements, continuous-projection images and sets of isomorphism classes |
+| [geometry/bundle_extension](geometry/bundle_extension/README.md) | `bundle_extension` | Tietze, neighborhood extension of bundles/maps/isomorphisms over closed subspaces, shrinking comparisons and stabilization |
+| [geometry/grassmannians](geometry/grassmannians/README.md) | `grassmannians` | Finite Grassmannians, graph coordinates, universal bundles and stabilization |
+| [geometry/grassmannian_cells](geometry/grassmannian_cells/README.md) | `grassmannian_cells` | In progress; type checking incomplete: free Schubert coordinates, closed standard inclusions, finite stages of increasing weak-topology sequences |
+| [geometry/bundle_homotopy](geometry/bundle_homotopy/README.md) | `bundle_homotopy` | Bundle homotopy comparisons, relative extension along cofibrations, sphere clutching and gauge isomorphism criteria |
+| [geometry/bundle_classification](geometry/bundle_classification/README.md) | `bundle_classification` | Finite classifying maps for real/complex bundles, stabilized homotopy classification, oriented/framed bundles and naturality |
+| [geometry/tangent_bundles](geometry/tangent_bundles/README.md) | `tangent_bundles` | Tangent total spaces, tangent maps, functor laws, smooth fiber operations |
+| [geometry/normal_bundles](geometry/normal_bundles/README.md) | `normal_bundles` | Immersion normal bundles, local orthonormal frames, direct-sum decompositions, base change and stabilization |
+| [geometry/examples/tangent_normal](geometry/examples/tangent_normal/README.md) | `tangent_normal` | Euclidean tangent bundles, coordinate inclusions, parabolas, degenerate-degree examples |
+| [geometry/lie_groups](geometry/lie_groups/README.md) | `lie_groups` | Lie groups/algebras, adjoint derivatives/exponentials, Lie structures on O/SO/Pin/Spin and complex extensions |
+| [geometry/euclidean_forms](geometry/euclidean_forms/README.md) | `euclidean_forms` | Local differential forms, wedge products/exterior derivatives, coordinate expressions, pullbacks |
+| [geometry/differential_forms](geometry/differential_forms/README.md) | `differential_forms` | Global differential forms, gluing, pullbacks, de Rham cohomology |
 
-## 位相幾何
+## Topology
 
-[分野内の配置と依存の案内](topology/README.md)。
+[Guide to layout and dependencies within the field](topology/README.md).
 
-| 配置 | パッケージ | 内容 |
+| Location | Package | Contents |
 | --- | --- | --- |
-| [topology/basic](topology/basic/README.md) | `topology` | 位相・部分空間、連続写像、コンパクト性、分離性 |
-| [topology/metric](topology/metric/README.md) | `metric_spaces` | 距離位相、距離化、実数直線、実数値関数、有限従属分割 |
-| [topology/clutching_linearization](topology/clutching_linearization/README.md) | `clutching_linearization` | Laurent 近似、companion 安定線形化、選択に依存しないスペクトル逆クラス、自然性・直和・基本積の相互逆 |
-| [topology/k_theory](topology/k_theory/README.md) | `topological_k_theory` | 複素束の Grothendieck 環、安定同型判定、反変引き戻し、ランクと被約群、有限離散計算 |
-| [topology/relative_k_theory](topology/relative_k_theory/README.md) | `relative_k_theory` | 相対三つ組と被約群の比較、負次数の完全列、切除、Mayer–Vietoris、外積、円板球面対 |
-| [topology/periodic_k_theory](topology/periodic_k_theory/README.md) | `periodic_k_theory` | 相対・被約 Bott 同型、整数次数、6項完全列と自然性、一点・球面の計算、反復 Bott 生成元 |
-| [topology/compact_support_k](topology/compact_support_k/README.md) | `compact_support_k` | コンパクト台付き K 群、一般の束三つ組の比較、近傍の選択独立性、proper 引き戻しと零延長 |
-| [topology/k_theory_thom](topology/k_theory_thom/README.md) | `k_theory_thom` | 複素束の Koszul 類、Bott・補束による Thom 同型、引き戻し・直和・合成と実束の複素化 |
-| [topology/constructions](topology/constructions/README.md) | `topological_constructions` | 積、商、直和、貼り合わせ、compact-open 位相 |
-| [topology/algebra](topology/algebra/README.md) | `topological_algebra` | 位相的代数、座標空間・行列位相、連続性判定 |
-| [topology/homotopy](topology/homotopy/README.md) | `algebraic_topology` | ホモトピー、基点付き商、mapping cone、有限 CW 対、標準単体の座標 |
-| [topology/thom_spaces](topology/thom_spaces/README.md) | `thom_spaces` | 円板束・球面束、Thom 商、計量変更・懸垂・直和の比較、有限 CW 対型と相対特異理論 |
-| [topology/cohomology_thom](topology/cohomology_thom/README.md) | `cohomology_thom` | Thom 相対類の積・零切断、ファイバー制限と標準円板の生成元 |
-| [topology/puppe_sequences](topology/puppe_sequences/README.md) | `puppe_sequences` | CW cofibration、基点付き cofiber の反復と suspension 比較、商比較、反変 Hom の完全性 |
-| [topology/fundamental](topology/fundamental/README.md) | `fundamental_groups` | 基本亜群・基本群、融合積の van Kampen の定理、単連結性 |
-| [topology/coverings](topology/coverings/README.md) | `covering_spaces` | 被覆の持ち上げ、部分群・共役類による分類、普遍被覆と deck 変換 |
-| [topology/singular/cohomology](topology/singular/cohomology/README.md) | `singular_cohomology` | 特異鎖・余鎖、相対・被約理論、ホモトピー不変性、道成分と可縮空間 |
-| [topology/singular/subdivision](topology/singular/subdivision/README.md) | `singular_subdivision` | 重心細分、小鎖、開被覆と部分空間の比較 |
-| [topology/singular/products](topology/singular/products/README.md) | `singular_products` | 特異余鎖とコホモロジーのカップ積、Leibniz 則、単位・結合・自然性 |
-| [topology/singular/excision](topology/singular/excision/README.md) | `singular_excision` | 切除、Mayer–Vietoris、良い対と商空間の比較 |
-| [topology/singular/eilenberg_zilber](topology/singular/eilenberg_zilber/README.md) | `singular_eilenberg_zilber` | Alexander–Whitney と shuffle の鎖ホモトピー同値 |
-| [topology/singular/symmetry](topology/singular/symmetry/README.md) | `singular_symmetry` | カップ積の交換ホモトピーと次数付き可換性 |
-| [topology/singular/cech](topology/singular/cech/README.md) | `singular_cech` | 被覆の二重複体と射影的複体の比較 |
-| [topology/singular/simplicial](topology/singular/simplicial/README.md) | `singular_simplicial` | 有限単体複体の実現、アフィン特異鎖と積の比較 |
-| [topology/singular/cellular](topology/singular/cellular/README.md) | `singular_cellular` | 有限 CW 複体のセル基底・付着次数、任意係数の比較と自然性 |
-| [topology/singular/cellular_algebra](topology/singular/cellular_algebra/README.md) | `singular_cellular_algebra` | 相対鎖の直和、Hom と比較写像の補題 |
-| [topology/singular/finite_algebra](topology/singular/finite_algebra/README.md) | `singular_finite_algebra` | 有限モデルとの係数比較、普遍係数と Künneth |
-| [topology/singular/tensor_dual](topology/singular/tensor_dual/README.md) | `singular_tensor_dual` | 有限双対基底によるテンソル積と Hom の比較 |
-| [topology/singular/tensor_bridge](topology/singular/tensor_bridge/README.md) | `singular_tensor_bridge` | 整数次数と非負次数のテンソル複体の比較 |
-| [topology/singular/low_degree](topology/singular/low_degree/README.md) | `singular_low_degree` | 道の選択による鎖の正規化と積空間の一次コホモロジー |
-| [topology/spheres](topology/spheres/README.md) | `sphere_maps` | 球面の向き、反転と円周の整数べき写像の次数 |
-| [topology/examples/cohomology](topology/examples/cohomology/README.md) | `cohomology_models` | 空空間・可縮空間・球面の計算と相対理論の利用例 |
-| [topology/examples/finite_models](topology/examples/finite_models/README.md) | `cohomology_examples` | 有限グラフ、トーラス、実射影平面の群・積・誘導写像 |
+| [topology/basic](topology/basic/README.md) | `topology` | Topologies/subspaces, continuous maps, compactness, separation |
+| [topology/metric](topology/metric/README.md) | `metric_spaces` | Metric topologies, metrization, real line, real-valued functions, finite partitions of unity |
+| [topology/clutching_linearization](topology/clutching_linearization/README.md) | `clutching_linearization` | Laurent approximation, stable companion linearization, choice-independent spectral inverse classes, naturality/direct sums/basic-product inverse identities |
+| [topology/k_theory](topology/k_theory/README.md) | `topological_k_theory` | Complex-bundle Grothendieck rings, stable isomorphism criteria, contravariant pullback, rank/reduced groups, finite discrete computations |
+| [topology/relative_k_theory](topology/relative_k_theory/README.md) | `relative_k_theory` | Relative-triple/reduced-group comparisons, negative-degree exact sequences, excision, Mayer–Vietoris, external products, disk/sphere pairs |
+| [topology/periodic_k_theory](topology/periodic_k_theory/README.md) | `periodic_k_theory` | Relative/reduced Bott isomorphisms, integer degrees, six-term exactness/naturality, point/sphere computations, iterated Bott generators |
+| [topology/compact_support_k](topology/compact_support_k/README.md) | `compact_support_k` | Compactly supported K-groups, general bundle-triple comparisons, neighborhood independence, proper pullback and extension by zero |
+| [topology/k_theory_thom](topology/k_theory_thom/README.md) | `k_theory_thom` | Complex Koszul classes, Thom isomorphisms via Bott/complements, pullback/direct sums/composition, real-bundle complexification |
+| [topology/constructions](topology/constructions/README.md) | `topological_constructions` | Products, quotients, coproducts, gluing, compact-open topology |
+| [topology/algebra](topology/algebra/README.md) | `topological_algebra` | Topological algebra, coordinate/matrix topologies, continuity criteria |
+| [topology/homotopy](topology/homotopy/README.md) | `algebraic_topology` | Homotopies, pointed quotients, mapping cones, finite CW pairs, standard-simplex coordinates |
+| [topology/thom_spaces](topology/thom_spaces/README.md) | `thom_spaces` | Disk/sphere bundles, Thom quotients, metric/suspension/direct-sum comparisons, finite CW pair types and relative singular theory |
+| [topology/cohomology_thom](topology/cohomology_thom/README.md) | `cohomology_thom` | Relative Thom-class products/zero sections, fiber restrictions, standard-disk generators |
+| [topology/puppe_sequences](topology/puppe_sequences/README.md) | `puppe_sequences` | CW cofibrations, iterated pointed cofibers/suspension comparisons, quotient comparisons, contravariant Hom exactness |
+| [topology/fundamental](topology/fundamental/README.md) | `fundamental_groups` | Fundamental groupoids/groups, amalgamated van Kampen theorem, simple connectedness |
+| [topology/coverings](topology/coverings/README.md) | `covering_spaces` | Covering lifts, subgroup/conjugacy classification, universal coverings and deck transformations |
+| [topology/singular/cohomology](topology/singular/cohomology/README.md) | `singular_cohomology` | Singular chains/cochains, relative/reduced theories, homotopy invariance, path components and contractible spaces |
+| [topology/singular/subdivision](topology/singular/subdivision/README.md) | `singular_subdivision` | Barycentric subdivision, small chains, open-cover/subspace comparisons |
+| [topology/singular/products](topology/singular/products/README.md) | `singular_products` | Cup products on singular cochains/cohomology, Leibniz rules, units/associativity/naturality |
+| [topology/singular/excision](topology/singular/excision/README.md) | `singular_excision` | Excision, Mayer–Vietoris, good-pair/quotient comparisons |
+| [topology/singular/eilenberg_zilber](topology/singular/eilenberg_zilber/README.md) | `singular_eilenberg_zilber` | Alexander–Whitney/shuffle chain homotopy equivalence |
+| [topology/singular/symmetry](topology/singular/symmetry/README.md) | `singular_symmetry` | Cup commutation homotopies and graded commutativity |
+| [topology/singular/cech](topology/singular/cech/README.md) | `singular_cech` | Cover double complexes and projective-complex comparisons |
+| [topology/singular/simplicial](topology/singular/simplicial/README.md) | `singular_simplicial` | Finite simplicial realizations, affine singular chains and product comparisons |
+| [topology/singular/cellular](topology/singular/cellular/README.md) | `singular_cellular` | Finite CW cellular bases/attaching degrees, arbitrary-coefficient comparisons and naturality |
+| [topology/singular/cellular_algebra](topology/singular/cellular_algebra/README.md) | `singular_cellular_algebra` | Relative-chain direct sums, Hom and comparison-map lemmas |
+| [topology/singular/finite_algebra](topology/singular/finite_algebra/README.md) | `singular_finite_algebra` | Finite-model coefficient comparisons, universal coefficients and Künneth |
+| [topology/singular/tensor_dual](topology/singular/tensor_dual/README.md) | `singular_tensor_dual` | Tensor/Hom comparison using finite dual bases |
+| [topology/singular/tensor_bridge](topology/singular/tensor_bridge/README.md) | `singular_tensor_bridge` | Integer/nonnegative tensor-complex comparisons |
+| [topology/singular/low_degree](topology/singular/low_degree/README.md) | `singular_low_degree` | Path-choice chain normalization and first cohomology of products |
+| [topology/spheres](topology/spheres/README.md) | `sphere_maps` | Sphere orientations, reflection and circle integer-power degrees |
+| [topology/examples/cohomology](topology/examples/cohomology/README.md) | `cohomology_models` | Empty/contractible/sphere computations and relative-theory examples |
+| [topology/examples/finite_models](topology/examples/finite_models/README.md) | `cohomology_examples` | Finite graphs, torus, real projective plane: groups/products/induced maps |
 
-## 型検査
+## Type checking
 
 ```sh
 cargo run -p cli -- libs
 cargo run -p cli -- libs/std --module std.Data.Nat
 ```
 
-`libs/ref.toml` の workspace 全体で `libs/refcache/` を共有する。
-再検査・資源制限・進捗は [利用方法](../src/USAGE.md#検査とキャッシュ) を参照。
+The `libs/ref.toml` workspace shares `libs/refcache/` throughout.
+For rechecking, resource limits, and progress, see [usage](../src/USAGE.md#%E6%A4%9C%E6%9F%BB%E3%81%A8%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5).
 
-具体例は [複体](algebra/homological/concrete_complexes/README.md)、[座標計算](geometry/coordinate_calculus/README.md)、[cell_spaces](topology/examples/cells/src/root.ref)、[スカラーの互換性](analysis/scalar_compatibility/README.md)、[小さい圏](category/src/SmallCategories.ref) と [終対象の圏の極限](category/src/TerminalLimits.ref) にある。
+Examples: [complexes](algebra/homological/concrete_complexes/README.md), [coordinate calculus](geometry/coordinate_calculus/README.md), [cell_spaces](topology/examples/cells/src/root.ref), [scalar compatibility](analysis/scalar_compatibility/README.md), [small categories](category/src/SmallCategories.ref), and [limits in the terminal category](category/src/TerminalLimits.ref).
 
-[特異コホモロジーの利用例](topology/examples/cohomology/README.md)は代表余鎖、相対接続、係数付き誘導写像、道成分と空空間・一点・区間の計算を検査する。
-[有限モデルの利用例](topology/examples/finite_models/README.md)は空間との比較写像を使って群とコホモロジーの積を計算する。
+[Singular cohomology examples](topology/examples/cohomology/README.md) check representative cochains, relative connecting maps, coefficient-induced maps, path components, and empty/point/interval computations.
+[Finite-model examples](topology/examples/finite_models/README.md) compute groups and cohomology products using comparison maps with spaces.

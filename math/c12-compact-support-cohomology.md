@@ -1,13 +1,13 @@
-# C12 コンパクト台付きコホモロジー
+# C12 Compactly supported cohomology
 
-## 要件
+## Requirements
 
-- 主な実装先は `compact_support_cohomology`。
-- 局所コンパクト空間でコンパクト集合の外との相対コホモロジーの直極限を構成し、台付き cochain による表示と比較する。
-- proper map による引き戻し、開埋め込みによる零延長、cup・外積、切除と長完全列を構成する。
-- 有限 CW 型のコンパクト底空間上の束について、円板・球面束の相対群、Thom 空間、全空間のコンパクト台付き群を比較する。
+- Primary implementation: `compact_support_cohomology`.
+- Construct compactly supported cohomology as a direct limit relative to complements of compact sets in locally compact spaces; compare supported cochains.
+- Construct proper pullback, extension by zero for open embeddings, cup/external products, excision, and long exact sequences.
+- For bundles over compact finite-CW-type bases, compare disk/sphere-relative groups, Thom spaces, and compactly supported total-space groups.
 
-## 依存するタスク
+## Dependencies
 
-- [C01 cap 積と相対積](c01-cap-products.md)
-- [C03 Thom 類と Thom 同型](../../libs/topology/cohomology_thom/README.md)
+- [C01 Cap products and relative products](c01-cap-products.md)
+- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)

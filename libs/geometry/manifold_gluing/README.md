@@ -1,65 +1,65 @@
-# collar と境界の貼り合わせ
+# Collars and boundary gluing
 
-コンパクトな境界付き多様体の滑らかな collar、境界の微分同相に沿う貼り合わせと double、積の角近傍に支持された丸めを、実際の写像・逆写像・チャートから構成する。
-`boundary_manifolds` の角付き多様体と `smooth_partitions` の滑らかな bump を使う。
-存在定理の入力に、大域 collar や貼り合わせ後の滑らかな構造を仮定しない。
+Construct compact-boundary collars, diffeomorphism gluings/doubles, and supported product-corner rounding from actual maps/inverses/charts.
+Uses `boundary_manifolds` corner manifolds and `smooth_partitions` smooth bumps.
+Existence does not assume global collars or post-gluing smooth structures.
 
 ## collar
 
-| API | 証明した内容 |
+| API | Proved results |
 | --- | --- |
-| `CollarEmbedding.On.With.exists` | コンパクト性と実際の境界チャート被覆から、横断的な押し込みと一様な collar を構成する |
-| `CollarEmbedding.From.Of` | 開いた像への同相、単射性、連続な逆写像、逆写像の各点での実際の滑らかな局所表示 |
-| `CollarWidth` | 共通時間近傍に入る正の半開区間の幅 |
-| `CollarRelative.On.With.In.exists` | 指定された境界全体の開近傍に collar の像が収まる相対版 |
-| `CollarComparison` | 二つの構成された collar の共通時間近傍上の滑らかな比較と、境界を固定する法則 |
-| `CollarRestriction` | 任意の小さい開いたパラメータ領域とその像との実際の微分同相 |
-| `CollarWindow.Core` | 閉時間区間から得られるコンパクトな collar 領域と、その時間座標による判定 |
+| `CollarEmbedding.On.With.exists` | Transverse push-ins/uniform collars from compactness and actual boundary-chart covers |
+| `CollarEmbedding.From.Of` | Open-image homeomorphisms, injectivity, continuous inverses, actual pointwise smooth inverse charts |
+| `CollarWidth` | Positive half-open widths inside common time neighborhoods |
+| `CollarRelative.On.With.In.exists` | Relative collars contained in prescribed whole-boundary open neighborhoods |
+| `CollarComparison` | Smooth comparison on common times of two constructed collars, fixing boundaries |
+| `CollarRestriction` | Actual diffeomorphisms on arbitrary small open parameter regions/images |
+| `CollarWindow.Core` | Compact closed-time collar regions and time-coordinate criteria |
 
-相対版は collar の像を指定近傍内に収める定理である。
-既存の部分 collar と一致するように延長する、より強い定理は公開していない。
-`GlobalPush` はコンパクトな台を持つ座標内の押し込みを恒等写像と滑らかに接続し、有限個を合成する。
-その初期法線速度の正値性から実際の半空間局所逆写像を構成し、コンパクトな境界上で時間幅を一様化する。
+The relative theorem contains collar images in prescribed neighborhoods.
+Stronger extensions agreeing with existing partial collars are not exposed.
+`GlobalPush` smoothly connects compactly supported coordinate push-ins with identity and composes finitely many.
+Positive initial normal velocities yield actual half-space local inverses; compact boundaries uniformize time widths.
 
-## 境界の貼り合わせと double
+## Boundary gluing and doubles
 
-`BoundarySeam` は境界の実際の微分同相から商空間を構成し、コンパクト性・Hausdorff 性・第二可算性を証明する。
-`SeamCollar` は符号付き collar を、商空間の開いた継ぎ目への同相として構成する。
-左右の内部と継ぎ目の全9種類のチャートの重なりで滑らかな遷移を構成する。
-`CompactGluing.Between.With.Along.Compact.exists` は実際の商の滑らかな atlas と、境界が残らないことを公開する。
-結果には構成した collar のデータ、atlas と構成の一致、左右全体と符号付き継ぎ目の実際の滑らかな包含、および各写像の点ごとの値の法則を保持する。
-`Double.Compact.left` と `right` からも、公開結果に対応する滑らかな包含を直接取り出せる。
-`Double.On.With.Compact.exists` は境界の恒等微分同相による double を構成する。
-`SeamCollar.Image.Compact.Cover.Inclusions` は左右全体の包含と符号付き継ぎ目の包含を、実際の滑らかな写像として構成する。
-同じ `Cover` の `CollarMaps` は collar を保つ二つの滑らかな写像を商の滑らかな写像へ貼り合わせ、その恒等写像の例も持つ。
+`BoundarySeam` constructs quotients from actual boundary diffeomorphisms, proving compact Hausdorffness/second countability.
+`SeamCollar` identifies signed collars homeomorphically with open quotient seams.
+Construct smooth transitions for all nine left/right-interior/seam overlap types.
+`CompactGluing.Between.With.Along.Compact.exists` exposes actual quotient smooth atlases and absence of residual boundaries.
+Results retain collars, atlas/construction agreement, actual smooth whole-left/right/signed-seam inclusions, and pointwise values.
+`Double.Compact.left` and `right` also directly extract corresponding smooth inclusions.
+`Double.On.With.Compact.exists` doubles along boundary identity diffeomorphisms.
+`SeamCollar.Image.Compact.Cover.Inclusions` constructs whole-left/right and signed-seam inclusions as actual smooth maps.
+`CollarMaps` in the same `Cover` glues collar-preserving smooth maps into quotient maps and includes an identity example.
 
-## 積の丸め
+## Rounding products
 
-`SupportedRounding` は滑らかな bump から \(\psi(d)=\sqrt{d^2+b(d)}\) を構成する。
-`Higher` の正則な sublevel \(u+v-\psi(u-v)\geq0\) は元の象限に含まれ、\(u\geq3\) または \(v\geq3\) では元の象限と一致する。
-`Quarter.Outside` は外側の開部分の実際の恒等微分同相を構成する。
-`ProductCollar` は共通の正のスケール \(q\) を選び、\(3q<4q<\varepsilon\leq1\) の積 collar を構成する。
-`Rounded` は正規化された丸め関数が負となる開集合を実際の積から除く。
-得られる領域は閉じていてコンパクトであり、変更は内側のコンパクト領域に収まり、元の角の点を除く。
-`NearModel.Image` はその開いた角近傍と、境界の積と丸めた正規モデルの積との実際の同相を構成する。
-`Rounded.Global.Using.Cover` は内側と外側の全4種類の滑らかなチャート変換を構成する。
-`ProductCollar.Between.With.Compact.exists` は入力のコンパクト性と境界チャート被覆から、collar・スケール・丸め領域・大域 atlas まで構成する。
-`Compact.Of` はその多様体、コンパクト性、コンパクト領域の外側での一致、元の角を除く法則を公開する。
-`RoundedBoundary.Between.With.Compact.exists` は同じ丸め領域上に、正規化した境界付き多様体の atlas を構成する。
-`Compact.Of.boundaryCover` は実際の `Boundary.Cover` を返し、`noHigherCorners` は各点で有効な境界座標が高々一つとなるチャートの存在を保証する。
-`Compact.Of` はコンパクト性、コンパクト領域の外側での一致、元の角を除く法則も公開する。
+`SupportedRounding` constructs \(\psi(d)=\sqrt{d^2+b(d)}\) from smooth bumps.
+`Higher` regular sublevel \(u+v-\psi(u-v)\geq0\) lies in the orthant, agreeing when \(u\geq3\) or \(v\geq3\).
+`Quarter.Outside` constructs actual outer-open identity diffeomorphisms.
+`ProductCollar` chooses positive scale \(q\), constructing product collars with \(3q<4q<\varepsilon\leq1\).
+`Rounded` removes opens where normalized rounding functions are negative from actual products.
+The region is closed/compact, modifications stay inside compact interiors, removing original corners.
+`NearModel.Image` constructs actual homeomorphisms of open corner neighborhoods with boundary products times rounded normal models.
+`Rounded.Global.Using.Cover` constructs all four inner/outer smooth transition types.
+`ProductCollar.Between.With.Compact.exists` constructs collars/scales/regions/global atlases from compactness/boundary covers.
+`Compact.Of` exposes manifolds/compactness, exterior agreement, and original-corner removal.
+`RoundedBoundary.Between.With.Compact.exists` constructs normalized boundary atlases on the same rounded region.
+`Compact.Of.boundaryCover` returns actual `Boundary.Cover`; `noHigherCorners` ensures charts with at most one active boundary coordinate per point.
+`Compact.Of` also exposes compactness, exterior agreement, corner removal.
 
-## 向きと補助定理
+## Orientations and auxiliary theorems
 
-`Reflection.Orientation` は法線反射の行列式と任意の最高次交代形式の符号反転を証明する。
-`BoundarySigns` は外向き法線の反転、二つの法線の収縮順序の交換、境界の打ち消しの符号を証明する。
-`BoundaryForms` は実際の境界包含の微分による引き戻しにこれらの符号を適用する。
-`GluingForms.Between.With.Along.Compact.For` は返された `CompactGluing.Result` を取り、実際の継ぎ目写像が正負の collar 上で左右の包含と一致する `leftSide`・`rightSide` を証明する。
-`For.At.In` は任意の境界点とそのチャートで、実際の継ぎ目写像の微分から左右の法線座標 frame を構成する。
-`frameCoordinates` と `recoverForm` はこの微分が座標同型を与え、最高次形式の情報を失わないことを示す。
-`orientationCoherence` は右の frame への引き戻しが左の引き戻しの \(-1\) 倍となることを証明する。
-`normalOpposite`・`horizontal`・`outwardOpposite`・`boundaryCancellation` は左右の内向き法線の反転、共通の接方向、外向き境界形式の符号と打ち消しを証明する。
-`DoubleForms.On.With.Compact.For.At.In` は同じ符号と境界の打ち消しを、実際の double の結果へ特殊化する。
-`DiffeomorphismCones` は実際の滑らかな逆写像から境界と接方向の保存を導く。
-`OpenManifoldCones` は開部分の包含について、境界の一致と、その微分による接方向・厳密な法線方向の判定を証明する。
-`OpenSmoothExtension` は開集合上の滑らかな写像と閉集合の外の写像が重なりで一致するとき、その実際の滑らかな接続を構成する。
+`Reflection.Orientation` proves normal-reflection determinants/sign reversal of arbitrary top forms.
+`BoundarySigns` proves outward-normal reversal, two-normal contraction swap, boundary-cancellation signs.
+`BoundaryForms` applies these to actual boundary-inclusion derivative pullbacks.
+`GluingForms.Between.With.Along.Compact.For` takes returned `CompactGluing.Result`, proving `leftSide`, `rightSide` identify actual seams with left/right inclusions on signed collars.
+`For.At.In` constructs both normal-coordinate frames from actual seam derivatives at arbitrary boundary charts/points.
+`frameCoordinates` and `recoverForm` prove coordinate isomorphisms retain top-form information.
+`orientationCoherence` proves right-frame pullbacks equal \(-1\) times left pullbacks.
+`normalOpposite`, `horizontal`, `outwardOpposite`, `boundaryCancellation` prove inward-normal reversal, common tangents, outward-form signs/cancellation.
+`DoubleForms.On.With.Compact.For.At.In` specializes signs/cancellation to actual doubles.
+`DiffeomorphismCones` derives boundary/tangent preservation from actual smooth inverses.
+`OpenManifoldCones` proves open-inclusion boundary agreement and derivative criteria for tangent/strict normal directions.
+`OpenSmoothExtension` glues actual smooth maps on opens and off closed sets when agreeing on overlaps.

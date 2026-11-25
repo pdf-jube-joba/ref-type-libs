@@ -1,36 +1,36 @@
-# 有限順序付き単体複体
+# Finite ordered simplicial complexes
 
-`Complex[d].Object` は頂点集合 \(\{0,\ldots,d\}\) の部分集合からなる面族で、部分集合について閉じている。
-`Complex[d].On[K].Simplex n` は面を張る狭義単調な \((n+1)\) 頂点列である。
-`Finiteness[n]` は各次数の単体の有限性と \(n>d\) での消滅を示す。
+`Complex[d].Object` is a downward-closed family of subsets of \(\{0,\ldots,d\}\).
+`Complex[d].On[K].Simplex n` is strictly increasing \((n+1)\)-vertex lists spanning faces.
+`Finiteness[n]` proves finite degreewise simplices, vanishing for \(n>d\).
 
-`Realization` は面のアフィン包の合併を標準単体の部分空間として構成する。
-`Chains.comparison` は各向き付き単体をそのアフィン特異単体へ送り、面の公式から鎖写像になる。
-`Chains.integerComparison` は同じ写像を整数次数で公開する。
-`Chains.With` は任意の整数加群係数で余鎖への引き戻しを与える。
+`Realization` realizes unions of affine faces as standard-simplex subspaces.
+`Chains.comparison` sends oriented simplices to affine singular simplices; face formulas prove chain compatibility.
+`Chains.integerComparison` exposes the same integer-degree map.
+`Chains.With` pulls cochains back for arbitrary integer modules.
 
-`Realization.Stars` は正の重心座標による開被覆を与える。
-面に対応する星の共通部分は、その面の重心への線形ホモトピーで可縮になる。
-`Cech` は順序付きの被覆添字と共通部分内の特異単体から二重複体を作る。
-縦方向はこの可縮性で、横方向は最小の被覆頂点を付け加える作用素で解消する。
-二つの増大写像と、特異単体を含む面の単体的な担体を保つホモトピーから、アフィン比較を同定する。
+`Realization.Stars` gives positive-barycentric-coordinate star covers.
+Face-star intersections contract linearly to face barycenters.
+`Cech` builds double complexes from ordered cover indices/intersection simplices.
+Contract intersections vertically; add least cover vertices horizontally.
+Both augmentations and carrier-preserving homotopies identify affine comparisons.
 
-`Chains.HomotopyEquivalence.existence` と `integerExistence` は、前向き写像が実際のアフィン比較である鎖ホモトピー同値の存在を示す。
-`quasiIsomorphism` と `At[z].isomorphism` は整数次数のホモロジー比較を公開する。
-`Chains.With[coefficients].Comparison.At[n].isomorphism` の前向き写像は、余鎖の制限が誘導するコホモロジー写像である。
+`Chains.HomotopyEquivalence.existence` and `integerExistence` prove equivalences with actual affine comparisons forward.
+`quasiIsomorphism` and `At[z].isomorphism` expose integer homology comparisons.
+`Chains.With[coefficients].Comparison.At[n].isomorphism` maps forward by cohomology induced from cochain restriction.
 
-`Coordinates.Indexing` は各次数の単体を有限順序集合で列挙するデータであり、`indexingExistence` がその存在を示す。
-`Coordinates.With[indexing].Bounded.model` は境界行列を持つ有界有限自由複体である。
-`Comparison.equivalenceExists` はこの行列模型から実際の特異鎖複体への比較を与える。
+`Coordinates.Indexing` is finite-order degreewise enumeration data; `indexingExistence` proves existence.
+`Coordinates.With[indexing].Bounded.model` is bounded finite-free with boundary matrices.
+`Comparison.equivalenceExists` compares this matrix model to actual singular chains.
 
-`Cup[R, ring].Product[p, q]` は前半と後半の頂点列による Alexander–Whitney 積を定義する。
-`Compatibility.law` はアフィン比較による特異余鎖の制限がこの積を厳密に保つことを示す。
-`Cup.Finite.Leibniz[p, q].law` は任意の有限余鎖に対する Leibniz 則を与え、`Finite.Product[p, q].Closed.law` は有限コサイクルの積の閉性を示す。
-`Finite.Boundaries.left` と `right` は境界とコサイクルの積が境界になることを示す。
-`Finite.Product[p, q].Cohomology.leftDescent` と `rightDescent` は代表元変更への不変性を与え、`onClasses` は任意の有限コサイクル対について面公式の類を比較済みのコホモロジーの積と同定する。
+`Cup[R, ring].Product[p, q]` defines front/back Alexander–Whitney products.
+`Compatibility.law` proves affine restriction strictly preserves them.
+`Cup.Finite.Leibniz[p, q].law` gives finite-cochain Leibniz; `Finite.Product[p, q].Closed.law` closed finite products.
+`Finite.Boundaries.left` and `right` prove boundary/cocycle products bound.
+`Finite.Product[p, q].Cohomology.leftDescent` and `rightDescent` give representative invariance; `onClasses` identifies face-formula classes with compared products.
 
-`Complex[d].LineGraph[V, E]` は、頂点ラベルと重複のない順序付き辺対から一次元の複体を構成する。
-`With[graph].Chains.Zero` と `One` は、頂点・辺上の自由加群から実際の単体鎖群への同型を与える。
-`Higher[n].vanishes` は二次以上の鎖群の消滅を、`Boundary.law` は境界が終点から始点を引く接続行列であることを示す。
-`Coefficients[A].Zero` と `One` は、任意の整数加群係数の余鎖を頂点・辺上の関数として同定する。
-`Differential.law` は零次の余境界が終点の値から始点の値を引く写像であることを示す。
+`Complex[d].LineGraph[V, E]` constructs one-dimensional complexes from vertex labels/distinct ordered edges.
+`With[graph].Chains.Zero` and `One` identify vertex/edge free modules with actual simplicial chains.
+`Higher[n].vanishes` vanishes above degree one; `Boundary.law` gives endpoint-minus-start incidence boundaries.
+`Coefficients[A].Zero` and `One` identify arbitrary coefficient cochains with vertex/edge functions.
+`Differential.law` identifies zero coboundaries with endpoint-value minus start-value maps.

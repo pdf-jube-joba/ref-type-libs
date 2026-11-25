@@ -1,12 +1,12 @@
-# C01 cap 積と相対積
+# C01 Cap products and relative products
 
-## 要件
+## Requirements
 
-- 主な実装先は `singular_cap`。
-- 既存の特異鎖・余鎖に cap 積を構成し、境界公式と cup 積との随伴関係を証明する。
-- 対・三つ組の相対 cup 積、cap 積、Kronecker 評価を構成し、切除と長完全列との符号を固定する。
-- 外積、射影公式、誘導写像との自然性を、相対部分空間の条件を保持した形で公開する。
+- Primary implementation: `singular_cap`.
+- Construct cap products on existing singular chains/cochains; prove the boundary formula and cup-product adjunction.
+- Construct relative cup/cap products and Kronecker evaluation for pairs and triples; fix signs for excision and long exact sequences.
+- Expose external products, projection formulas, and naturality of induced maps while preserving relative-subspace conditions.
 
-## 依存するタスク
+## Dependencies
 
-なし。
+None.

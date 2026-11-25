@@ -1,13 +1,13 @@
-# T01 幾何学的コボルディズム群と積
+# T01 Geometric cobordism groups and products
 
-## 要件
+## Requirements
 
-- 主な実装先は `geometric_bordism`。
-- コンパクト多様体の Euclid 空間内の表示を使い、非向き付き・向き付き・枠付きコボルディズム類の集合を構成する。
-- collar と貼り合わせから同値関係を証明し、直和、向き反転、積、次元による次数を構成する。
-- 境界の安定接束・法束の構造を比較し、代表や埋め込みの選択によらない次数付き群・環を公開する。
+- Primary implementation: `geometric_bordism`.
+- Use Euclidean presentations of compact manifolds to construct sets of unoriented, oriented, and framed cobordism classes.
+- Prove equivalence relations using collars/gluing; construct disjoint sums, orientation reversal, products, and dimension gradings.
+- Compare stable tangent/normal structures on boundaries; expose graded groups/rings independent of representatives and embeddings.
 
-## 依存するタスク
+## Dependencies
 
-- [G05 コンパクト多様体の埋め込み](../../libs/geometry/compact_embeddings/README.md)
-- [滑らかな束・枠束・随伴束](../../libs/geometry/smooth_bundles/README.md)
+- [G05 Embeddings of compact manifolds](../../libs/geometry/compact_embeddings/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../../libs/geometry/smooth_bundles/README.md)

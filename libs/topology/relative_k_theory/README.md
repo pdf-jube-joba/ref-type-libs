@@ -1,74 +1,74 @@
-# 相対 K 群と負次数の完全列
+# Relative K-groups and negative-degree exact sequences
 
-コンパクト Hausdorff 空間と閉部分空間の対に対して、束の三つ組による相対群と一点付加商の被約 K 群を比較する。
-入口は `relative_k_theory.Relative`。
-三つ組と商の比較、負次数の完全列、切除、Mayer–Vietoris、外積、束の円板・球面対を公開する。
+Compare bundle triples with reduced added-point-quotient K-groups for compact Hausdorff closed pairs.
+Entry: `relative_k_theory.Relative`.
+Exposes triple/quotient comparisons, negative exactness, excision, Mayer–Vietoris, external products, disk/sphere pairs.
 
-## 群と比較
+## Groups and comparisons
 
-`Pair` の引数は空間 `X`、位相 `space`、コンパクト性 `compact`、Hausdorff 性 `hausdorff`、閉部分空間 `subset` と `closed`。
-`Pair.Triple` は二つの射影表示と部分空間上の束同型、`Pair.Group` は延長可能な同型・直和・合成・ホモトピーの関係による群を与える。
-`FromBundles`・`SumConstruction`・`Normalize` は一般の束の表示、直和、負側の安定自明化を構成する。
+`Pair` takes space `X`, topology `space`, compactness `compact`, Hausdorffness `hausdorff`, closed subspace `subset` and `closed`.
+`Pair.Triple` is two projections and a subspace isomorphism; `Pair.Group` gives relations for extendible isomorphisms/sums/composites/homotopies.
+`FromBundles`, `SumConstruction`, `Normalize` construct general presentations/sums/negative stable trivializations.
 
-`Pair.Quotient` は空間へ基点を付加し、基点と閉部分空間を一緒に潰す。
-空の部分空間も同じ構成で扱う。
-`Pair.Comparison` は三つ組の群とこの商の被約群との加法的比較、および左右の逆を与える。
-`Descent`・`FramedClass`・`FramedSum`・`BundleSwitch` は境界の自明化からの束の降下と、選択独立性・加法性・安定化・ホモトピー不変性を構成する。
-`Pair.Mapping.Group` は比較を通じて三つ組の群の引き戻しを与え、加法・零元と比較の自然性を公開する。
+`Pair.Quotient` adds basepoints then collapses them with closed subspaces.
+Includes empty subspaces.
+`Pair.Comparison` gives additive triple/reduced comparisons and both inverses.
+`Descent`, `FramedClass`, `FramedSum`, `BundleSwitch` construct boundary-framed descent, independence/additivity/stabilization/homotopy invariance.
+`Pair.Mapping.Group` pulls triple groups back via comparisons, exposing addition/zero/comparison naturality.
 
-## 負次数、完全列と自然性
+## Negative degrees, exactness, and naturality
 
-`Negative[original, degree]` は反復 suspension の被約群として負次数を定義する。
-`NegativeMap`、`PullbackIdentity`、`PullbackComposition`、`HomotopyInvariance` は引き戻しと恒等・合成・ホモトピーの法則を与える。
-`Absolute` は一点付加した空間の零次数群と通常の K 群を比較する。
+`Negative[original, degree]` defines negative degrees by iterated reduced suspensions.
+`NegativeMap`, `PullbackIdentity`, `PullbackComposition`, `HomotopyInvariance` give pullback/identity/composition/homotopy laws.
+`Absolute` compares added-point degree-zero groups with ordinary K.
 
-`Pair.Augmented.Sequence[degree := n]` は
+`Pair.Augmented.Sequence[degree := n]` gives
 \[
 K^{-(n+1)}(X)\longrightarrow K^{-(n+1)}(A)\longrightarrow K^{-n}(X,A)
 \longrightarrow K^{-n}(X)\longrightarrow K^{-n}(A)
 \]
-の四つの写像と各内部項での像と核の一致を公開する。
-`restrictionNegative`・`boundary`・`forget`・`restriction` は加法的で、`exactSecond`・`exactThird`・`exactFourth` が完全性を表す。
-`Pair.Augmented.OrdinaryEnd` は次数0の端を通常の K 群の忘却・制限へ比較する。
-`Pair.Mapping.Augmented.Negative` は一般の閉対の写像に対する接続・忘却・制限の自然性を与える。
-基盤の `PairIteration`・`PairMapping.Iteration` は対を反復し、全体・部分空間・商の suspension 比較と写像の可換性を構成する。
+The four maps and image/kernel equality at every internal term are exposed.
+`restrictionNegative`, `boundary`, `forget`, `restriction` are additive; `exactSecond`, `exactThird`, `exactFourth` give exactness.
+`Pair.Augmented.OrdinaryEnd` compares degree-zero endpoints with ordinary forgetting/restriction.
+`Pair.Mapping.Augmented.Negative` gives connecting/forgetting/restriction naturality for general closed-pair maps.
+Foundational `PairIteration`, `PairMapping.Iteration` iterate pairs, constructing whole/subspace/quotient suspension comparisons and map compatibility.
 
-## 切除と Mayer–Vietoris
+## Excision and Mayer–Vietoris
 
-`Pair.Excision` は閉部分空間に含まれる開集合を取り除いた対と元の対の商を、明示的な連続逆写像によって比較する。
-各負次数の比較は `Excision.Negative`。
-`Pair.ClosedCover[V, closedV, covers]` は二つの閉部分空間が全体を覆う場合の商比較を与え、開集合による切除を補集合の閉被覆として扱える。
+`Pair.Excision` explicitly compares original quotients with pairs removing opens contained in closed subspaces.
+Negative-degree comparison: `Excision.Negative`.
+`Pair.ClosedCover[V, closedV, covers]` compares closed-cover quotients, treating open excision via complementary closed covers.
 
-`ClosedCover.MayerVietoris[degree]` は接続写像、二片への制限、交叉への制限の差を構成する。
-`exactWhole` は全体の群での完全性、`Positive` は以降の二位置の完全性を与える。
-`MayerVietorisZero.exactPieces` は次数0で二片上の類の貼合せを与える。
-`ClosedCover.Mapping.Negative` は被覆を保つ写像に対する切除比較・制限・差・接続の自然性を公開する。
+`ClosedCover.MayerVietoris[degree]` constructs connecting maps, piece restrictions, intersection differences.
+`exactWhole` gives whole-group exactness; `Positive` the next two positions.
+`MayerVietorisZero.exactPieces` glues degree-zero classes.
+`ClosedCover.Mapping.Negative` exposes excision/restriction/difference/connecting naturality for cover-preserving maps.
 
-次数0の貼合せは `ClosedCover.Patching` にある。
-交叉上の束同型から二方向の矩形写像を作り、B09 の Tietze 延長、可逆な剪断、閉被覆上の冪等写像の貼合せ、像束の構成を使う。
-`Patching.Ordinary.existence` は K01 の安定同型判定と仮想束の正規形を使い、両側の制限式を満たす通常の K 群の類を返す。
+Degree-zero gluing: `ClosedCover.Patching`.
+Construct both rectangular maps from intersection isomorphisms; use B09 Tietze, invertible shears, closed-cover idempotent gluing, image bundles.
+`Patching.Ordinary.existence` uses K01 stable criteria/virtual normal forms to return ordinary classes satisfying both restrictions.
 
-## 外積
+## External products
 
-`Smash` は積空間の二軸を潰したコンパクト Hausdorff 空間を構成する。
-`Smash.External` は零次数外積を一意な相対持ち上げとして構成し、双加法性と零元の式を与える。
-`Smash.Suspension`・`Symmetry`・左右の反復比較から `Smash.Graded` が負次数外積を構成する。
-比較同相は共通のコンパクトな代表空間上のファイバーの一致から作り、自然性を実際の代表写像で証明する。
+`Smash` constructs compact Hausdorff quotients collapsing both product axes.
+`Smash.External` uniquely lifts degree-zero products relatively, giving biadditivity/zero formulas.
+`Smash.Suspension`, `Symmetry` and left/right iterative comparisons give negative products `Smash.Graded`.
+Compare fibers on common compact representative spaces for homeomorphisms; prove naturality on actual representatives.
 
-二つの閉対には `Pair.Product` を使う。
-境界は \(A\times Y\cup X\times B\) で、その相対商と二つの相対商の smash を比較する。
-`External` と `Negative[firstDegree, secondDegree]` はこの比較を通じた外積、`Pullback.External` と `Pullback.Negative` はその自然性を与える。
-負次数の結果の次数は `secondDegree + firstDegree`。
+For two closed pairs use `Pair.Product`.
+Boundary \(A\times Y\cup X\times B\) compares pair quotients with smash products of quotients.
+`External` and `Negative[firstDegree, secondDegree]` give products via comparisons; `Pullback.External`, `Pullback.Negative` naturality.
+Negative output degree: `secondDegree + firstDegree`.
 
-## 束の円板・球面対と利用例
+## Disk/sphere bundles and examples
 
-`DiskPair[p]` は射影表示からコンパクトな円板とノルム1の閉境界、相対群を構成する。
-`BundleDisk.existence` は任意のコンパクト束にその表示を与える。
-表示 `r` を選んだ `BundleDisk.With[r]` は元の束への連続単射とノルム条件を公開し、`OriginalUnit.homeomorphism` は元の束の単位円板との同相、`sphereEquation` は球面条件の一致を与える。
-したがって円板・球面対を一般の閉対の列・外積へ渡せる。
+`DiskPair[p]` constructs compact projection-model disks, closed norm-one boundaries, relative groups.
+`BundleDisk.existence` presents arbitrary compact bundles.
+`BundleDisk.With[r]` with chosen `r` exposes continuous injections/norm conditions; `OriginalUnit.homeomorphism` original-unit-disk homeomorphisms; `sphereEquation` sphere agreement.
+Thus pass disk/sphere pairs to general sequences/products.
 
-`Examples.TrivialDisk[n]` は一点上のランク `n` の自明束で、円板の座標表示との明示的な同相 `diskHomeomorphism` を構成する。
-ランク0・1は package の検査範囲に登録されている。
+`Examples.TrivialDisk[n]` constructs point-trivial rank-`n` bundle coordinate homeomorphisms `diskHomeomorphism`.
+Rank zero/one registered as check targets.
 
 ```ref
 \import std.Data[].Nat[] \as Nat;
@@ -77,41 +77,41 @@ K^{-(n+1)}(X)\longrightarrow K^{-(n+1)}(A)\longrightarrow K^{-n}(X,A)
 \import Examples.TrivialDisk[n := (Nat.Nat^::succ Nat.Nat^::zero)] \as Line;
 ```
 
-`Zero.Disk`・`Line.Disk` は円板、`Zero.Relative`・`Line.Relative` は対応する相対群。
-`Examples.zeroBoundaryEmpty` はランク0の球面境界が空であることを示す。
+`Zero.Disk`, `Line.Disk` are disks; `Zero.Relative`, `Line.Relative` corresponding groups.
+`Examples.zeroBoundaryEmpty` proves rank-zero sphere boundaries empty.
 
-## 一般の束の三つ組と引き戻し
+## General triples and pullbacks
 
-`Pair.BundleTriples[F, G, firstModel, secondModel].With[alpha]` は、閉集合上で同型となる二つの任意の束から三つ組群の `value` と相対群の `reduced` を構成する。
-`agreement` は有限射影表示との一致を示す。
-`Framing.With.equation` は、負の束を自明化する任意の補助束を使った構成が同じ相対類を与えることを示す。
-`To.With` は可換な束同型による変更を比較する。
+`Pair.BundleTriples[F, G, firstModel, secondModel].With[alpha]` constructs triple-group `value` and relative `reduced` from arbitrary bundles isomorphic on closed subsets.
+`agreement` agrees with finite projections.
+`Framing.With.equation` proves independence of auxiliary complements trivializing negative bundles.
+`To.With` compares changes by compatible bundle isomorphisms.
 
-`Pair.Mapping.BundleTriples.With.naturality` と `reducedNaturality` は群と相対群のそれぞれで引き戻しとの可換性を与える。
-`Pair.Mapping.Framed.With.naturality` は枠付き束についての同じ主張である。
-これらの証明は、商空間への束の降下、引き戻しの合成、座標枠の整合性を使う。
-`PullbackCongruence`、`RestrictedPullback`、`PairPullback` はそのための束同型とファイバー上の公式を公開する。
-これらは `compact_support_k` の任意の束三つ組の局所化と自然性にも使う。
+`Pair.Mapping.BundleTriples.With.naturality` and `reducedNaturality` give group/relative pullback compatibility.
+`Pair.Mapping.Framed.With.naturality` gives the framed version.
+Uses quotient descent, pullback composition, coordinate-frame compatibility.
+`PullbackCongruence`, `RestrictedPullback`, `PairPullback` expose required isomorphisms/fiber formulas.
+Also used for `compact_support_k` arbitrary-triple localization/naturality.
 
-## 検証
+## Validation
 
-共有キャッシュ `libs/refcache` を使用する。
-三つ組と商の比較、一般の対の完全列、写像の自然性、smash と閉対の外積、閉被覆の貼合せと Mayer–Vietoris、元の束の単位円板との同相、ランク0・1の利用例を対象と依存閉包で検査した。
-いずれも accepted・終了0・キャッシュ保存失敗0・書込失敗0。
+Use shared cache `libs/refcache`.
+Checked triples/quotients, general exactness/naturality, smash/closed-pair products, closed gluing/Mayer–Vietoris, actual disk homeomorphisms, rank-zero/one examples with dependencies.
+All accepted, exit 0, cache save/write failures 0.
 
-2026-10-28 の最終 workspace 全体検査も9,048モジュールで accepted・終了0・キャッシュ保存失敗0・書込失敗0を確認した。
-308モジュールを検査し、内容の一致する8,740モジュールを共有キャッシュから再利用した。
-K03 全体、全依存、共通補題の移動による影響先、利用例を含む。
-worker 1・自動復旧0・重複0・再実行0・未保存0で、約1,384秒。
-物理メモリ上限16 GiBの環境で、最大 RSS は14,399,064 KiB。
+Final 2026-10-28 workspace: 9,048 modules accepted, exit 0, cache save/write failures 0.
+Checked 308 modules, reused 8,740 matching modules.
+Includes K03, all dependencies, shared-lemma consumers, examples.
+One worker; zero recoveries/duplicates/reruns/unsaved steps; roughly 1,384 seconds.
+16 GiB physical limit; peak RSS 14,399,064 KiB.
 
-検査した数学ソースのリモート commit は `ad55f6f4243e6bc060ec74ef48af363f7a23abc9`、tree は `3ecfdb61538c923656af74f55d283d3cf15de754`。
-main `f8b80a154a3b61d2dccebd0ea13adc44bfaa4bdb` の変更を保持し、Grassmannian の分離補題への参照も共通 API の移動先へ合わせている。
-報告は `work/k03-resume/workspace-audit-15.{log,json,exit}`、固定入力は `workspace-audit-12.source.json` に保存した。
-固定入力7,942ファイルと検証後の数学ソース・manifest の一致も確認した。
-以前の中断・資源上限による終了の報告も同じディレクトリに保持している。
+Checked remote math commit: `ad55f6f4243e6bc060ec74ef48af363f7a23abc9`; tree: `3ecfdb61538c923656af74f55d283d3cf15de754`.
+Preserves main `f8b80a154a3b61d2dccebd0ea13adc44bfaa4bdb` changes, updating Grassmannian separation references to relocated shared APIs.
+Report: `work/k03-resume/workspace-audit-15.{log,json,exit}`; fixed input: `workspace-audit-12.source.json`.
+Confirmed 7,942 input files match final math/manifests.
+Earlier interrupted/resource-limit reports retained in the same directory.
 
-リポジトリ直下からの通常検査は次のとおり。
+Standard root commands:
 
 ```sh
 MIMALLOC_ARENA_RESERVE=64M REF_TYPE_GRAPH_RESIDENT_MIB=256 target/debug/cli libs \
@@ -119,7 +119,7 @@ MIMALLOC_ARENA_RESERVE=64M REF_TYPE_GRAPH_RESIDENT_MIB=256 target/debug/cli libs
   --checkpoint-seconds 600 --diagnostics compact
 ```
 
-固定入力の保存と検査方法は [検査とキャッシュ](../../../src/USAGE.md#検査とキャッシュ) を参照。
+Fixed inputs/checking: [checks and cache](../../../src/USAGE.md#%E6%A4%9C%E6%9F%BB%E3%81%A8%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5).
 
-`Relative.PointPair` はコンパクトな基点付き空間と、その基点を潰す商空間との基点付き同値を公開する。
-次数0の三つ組の比較は、この補題を Bott 周期性から独立に利用できる。
+`Relative.PointPair` exposes pointed equivalences between compact pointed spaces and quotients collapsing their basepoints.
+Degree-zero triple comparisons use this independently of Bott periodicity.

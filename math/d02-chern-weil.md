@@ -1,13 +1,13 @@
-# D02 曲率と Chern–Weil 類
+# D02 Curvature and Chern–Weil classes
 
-## 要件
+## Requirements
 
-- 主な実装先は `chern_weil`。
-- 曲率、Bianchi 恒等式、共役不変多項式の評価による閉形式を構成する。
-- 二つの接続の間の transgression 形式を構成し、De Rham 類の接続独立性と自然性を証明する。
-- Chern・Pontryagin・Euler の微分形式を正規化定数とともに構成し、直和と積の公式を公開する。
+- Primary implementation: `chern_weil`.
+- Construct curvature, the Bianchi identity, and closed forms obtained by evaluating conjugation-invariant polynomials.
+- Construct transgression forms between connections; prove connection independence and naturality of de Rham classes.
+- Construct normalized Chern, Pontryagin, and Euler forms; expose direct-sum and product formulas.
 
-## 依存するタスク
+## Dependencies
 
-- [接続と共変微分](../../libs/geometry/bundle_connections/README.md)
-- [L04 対称多項式と特性級数](l04-symmetric-series.md)
+- [Connections and covariant derivatives](../../libs/geometry/bundle_connections/README.md)
+- [L04 Symmetric polynomials and characteristic series](l04-symmetric-series.md)

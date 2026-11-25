@@ -1,24 +1,24 @@
-# 特異理論
+# Singular theories
 
-`cohomology` を基盤に、細分と開被覆の比較を `subdivision`、切除を `excision` に分ける。
-積、単体的・セル的な比較、係数についての代数もそれぞれのパッケージで扱う。
+Based on `cohomology`; subdivision/open-cover comparisons in `subdivision`, excision in `excision`.
+Products, simplicial/cellular comparisons, coefficient algebra have separate packages.
 
-| 配置 | 内容 |
+| Location | Contents |
 | --- | --- |
-| [cohomology](cohomology/README.md) | 特異鎖・余鎖、相対・被約理論、ホモトピー不変性 |
-| [subdivision](subdivision/README.md) | 重心細分、小鎖、開被覆と部分空間の比較 |
-| [excision](excision/README.md) | 切除、Mayer–Vietoris、良い対と商空間 |
-| [products](products/README.md) | カップ積、Leibniz 則、単位・結合・自然性 |
-| [cap](cap/README.md) | cap 積、相対積と Kronecker 評価 |
-| [eilenberg_zilber](eilenberg_zilber/README.md) | Alexander–Whitney と shuffle の鎖ホモトピー同値 |
-| [symmetry](symmetry/README.md) | 積の交換ホモトピーと次数付き可換性 |
-| [cech](cech/README.md) | 被覆の二重複体と射影的複体の比較 |
-| [simplicial](simplicial/README.md) | 有限単体複体の実現と特異理論の比較 |
-| [cellular](cellular/README.md) | 有限 CW 複体、付着次数、係数比較と自然性 |
-| [cellular_algebra](cellular_algebra/README.md) | 相対鎖の直和、Hom と比較写像の補題 |
-| [finite_algebra](finite_algebra/README.md) | 有限モデルとの係数比較、普遍係数と Künneth |
-| [tensor_bridge](tensor_bridge/README.md) | 整数次数と非負次数のテンソル複体の比較 |
-| [tensor_dual](tensor_dual/README.md) | 有限双対基底によるテンソル積と Hom の比較 |
-| [low_degree](low_degree/README.md) | 道の選択による鎖の正規化と積空間の一次コホモロジー |
+| [cohomology](cohomology/README.md) | Singular chains/cochains, relative/reduced theories, homotopy invariance |
+| [subdivision](subdivision/README.md) | Barycentric subdivision, small chains, cover/subspace comparisons |
+| [excision](excision/README.md) | Excision, Mayer–Vietoris, good pairs/quotients |
+| [products](products/README.md) | Cups, Leibniz, units/associativity/naturality |
+| [cap](cap/README.md) | Cap/relative products, Kronecker evaluation |
+| [eilenberg_zilber](eilenberg_zilber/README.md) | Alexander–Whitney/shuffle homotopy equivalence |
+| [symmetry](symmetry/README.md) | Product commutation homotopies/graded commutativity |
+| [cech](cech/README.md) | Cover double/projective-complex comparisons |
+| [simplicial](simplicial/README.md) | Finite realizations/singular comparisons |
+| [cellular](cellular/README.md) | Finite CW/attaching degrees/coefficient comparison/naturality |
+| [cellular_algebra](cellular_algebra/README.md) | Relative sums, Hom/comparison lemmas |
+| [finite_algebra](finite_algebra/README.md) | Finite coefficient comparisons, universal coefficients/Künneth |
+| [tensor_bridge](tensor_bridge/README.md) | Integer/nonnegative tensor comparisons |
+| [tensor_dual](tensor_dual/README.md) | Finite-dual-basis tensor/Hom comparisons |
+| [low_degree](low_degree/README.md) | Path-choice normalization, product first cohomology |
 
-全体の案内は [位相幾何](../README.md)、空間での利用例は [examples](../examples/README.md) にある。
+Overview: [topology](../README.md); space examples: [examples](../examples/README.md).

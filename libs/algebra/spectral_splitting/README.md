@@ -1,82 +1,82 @@
-# 連続なスペクトル分離
+# Continuous spectral splitting
 
-K06 の公開入口は `spectral_splitting.Spectral`。
-実装済み単位の一覧は [ロードマップ](../../../_plans/math/_roadmap.md) を参照する。
-[根群](../complex_polynomial_roots/README.md)、[多項式線形代数](../polynomial_linear_algebra/README.md)、[Hermitian 局所枠](../hermitian_frames/README.md)、[束の補空間](../../geometry/bundle_complements/README.md) を再利用する。
+K06 public entry: `spectral_splitting.Spectral`.
+Completed units: [roadmap](../../../_plans/math/_roadmap.md).
+Reuses [root clusters](../complex_polynomial_roots/README.md), [polynomial linear algebra](../polynomial_linear_algebra/README.md), [Hermitian local frames](../hermitian_frames/README.md), [bundle complements](../../geometry/bundle_complements/README.md).
 
-## 射影の構成
+## Projection construction
 
-特性多項式を単位円の内側の根因子 \(p\) と外側の根因子 \(q\) に分ける。
-共通根がないことから Bézout 係数 \(up+vq=1\) を構成し、Cayley–Hamilton を適用して \(P=v(T)q(T)\)、\(R=u(T)p(T)\) による分解を得る。
-この射影は Bézout 係数の選び方に依存しない。
-評価和 \(M=p(T)+q(T)\) の逆を分解上で構成すると、同じ射影は \(P=q(T)M^{-1}\) と書ける。
-連続性にはこの逆行列の式を使う。
-根の並べ方によらない因子を K05 の局所的な連続因子と比較し、Horner 評価と逆行列の連続性を接続する。
+Split characteristic polynomials into root factors \(p\) inside and \(q\) outside the unit circle.
+No common roots gives \(up+vq=1\); Cayley–Hamilton yields decomposition by \(P=v(T)q(T)\), \(R=u(T)p(T)\).
+Projections are independent of Bézout choices.
+Inverting \(M=p(T)+q(T)\) on the decomposition gives the same projection \(P=q(T)M^{-1}\).
+Use this inverse-matrix expression for continuity.
+Compare order-independent factors with K05 continuous local factors, connecting Horner evaluation and inverse continuity.
 
-| 公開入口 | 内容 |
+| Public entry | Contents |
 | --- | --- |
-| `Spectral.Action.With` | Bézout 射影・補射影、核での計算、独立性 |
-| `Spectral.At.Characteristic` | 有限係数表示、最高次係数1、係数族の連続性 |
-| `Spectral.Circle.At` | 根の順序に依存しない内外の因子と互いに素性 |
-| `Spectral.At.Splitting.Separated` | 単位円上に根がない行列の射影、冪等性、核への包含 |
+| `Spectral.Action.With` | Bézout/complement projections, kernel computations, independence |
+| `Spectral.At.Characteristic` | Finite coefficients, leading coefficient one, continuous families |
+| `Spectral.Circle.At` | Root-order-independent inside/outside factors and coprimality |
+| `Spectral.At.Splitting.Separated` | Unit-circle-avoiding matrix projections, idempotence, kernel inclusions |
 
-`Spectral.At.Eigenvalues` はこの条件と「単位円上の固有ベクトルは零」を相互に導く。
-`Spectral.InFrame` と `FiniteSpace.On` は有限枠を通して射影を移し、枠によらない一意な写像を選ぶ。
+`Spectral.At.Eigenvalues` equates this condition with vanishing of unit-circle eigenvectors.
+`Spectral.InFrame` and `FiniteSpace.On` transport projections through finite frames, choosing unique frame-independent maps.
 
-## 連続な族と束
+## Continuous families and bundles
 
-| 公開入口 | 内容 |
+| Public entry | Contents |
 | --- | --- |
-| `At.Continuous` / `Bundle` | 連続な射影、内側と補側の像束、包含・射影、直和分解 |
-| `Comparison` / `FiniteSpace.On.Naturality` | intertwiner と射影の可換性 |
-| `Idempotents.Image` | 自己共役性を仮定しない連続冪等射影の像束 |
-| `Idempotents.Comparison` / `Gap` | 近接する冪等射影の像の比較同型と可逆領域の開性 |
-| `Idempotents.Homotopy` / `At.Homotopy` | コンパクトな底空間上のホモトピーの両端の像束の同型 |
-| `BundleCoordinates` | 束写像の局所行列と係数の連続性 |
-| `BundleImage` / `Pullback` | 束の冪等写像の像の局所自明化と引き戻し比較 |
-| `BundleEndomorphism` / `Naturality` / `Pullback` | スペクトル射影の貼り合わせ、像の部分束、自然性 |
-| `BundleHomotopy` | コンパクト Hausdorff 底上で、一般の束のスペクトル像の両端を比較 |
+| `At.Continuous` / `Bundle` | Continuous projections, inside/complement image bundles, inclusions/projections, direct sums |
+| `Comparison` / `FiniteSpace.On.Naturality` | Intertwiner/projection compatibility |
+| `Idempotents.Image` | Image bundles of continuous idempotents without self-adjointness |
+| `Idempotents.Comparison` / `Gap` | Nearby-idempotent image isomorphisms, open invertibility loci |
+| `Idempotents.Homotopy` / `At.Homotopy` | Endpoint image-bundle isomorphisms for homotopies over compact bases |
+| `BundleCoordinates` | Local bundle-map matrices and coefficient continuity |
+| `BundleImage` / `Pullback` | Idempotent-image local trivializations and pullback comparisons |
+| `BundleEndomorphism` / `Naturality` / `Pullback` | Spectral projection gluing, image subbundles, naturality |
+| `BundleHomotopy` | Spectral-image endpoint comparisons for general bundles over compact Hausdorff bases |
 
-近接比較には \(H=QP+(I-Q)(I-P)\) を用いる。
-\(Q=P\) では恒等写像であり、可逆な範囲で \(HP=QH\) から像束の同型を得る。
-コンパクトな底空間では tube lemma で時間の共通近傍を取り、区間の細分で両端の比較同型を合成する。
-一般の束の像の局所自明化は、元の束の枠でこの行列の構成を適用し、開部分空間のチャートを底空間へ持ち上げて作る。
-一般の束のホモトピーでは、円柱上の像束に B03 の有限埋め込みを適用し、射影族の比較を埋め込み像との同型と合成する。
-行列族では底のコンパクト性を使い、一般の束では有限埋め込みの存在にコンパクト Hausdorff 性を使う。
+Nearby comparisons use \(H=QP+(I-Q)(I-P)\).
+At \(Q=P\), this is identity; where invertible, \(HP=QH\) gives image isomorphisms.
+On compact bases, the tube lemma gives common time neighborhoods; subdivide the interval and compose endpoint comparisons.
+General image trivializations apply the matrix construction in bundle frames, lifting open-subspace charts to the base.
+For general homotopies, apply B03 finite embeddings to cylinder image bundles, composing projection-family comparisons with embedded-image isomorphisms.
+Matrix families use base compactness; general bundles need compact Hausdorffness for finite embeddings.
 
-## 利用例
+## Examples
 
-`Examples.Empty` は零次元の射影を構成する。
-`Examples.MovingNilpotent` は \(T_a=\begin{pmatrix}0&a\\0&0\end{pmatrix}\) を複素平面上で動かし、\(T_a^2=0\) からスペクトル条件を導いて像束を構成する。
-その `Homotopy` は区間上の族にも適用し、両端の像束の比較を使用する。
-`Examples.MixedRanksHomotopy` はランク0と1の二つの成分を持つ束を円柱へ引き戻し、零自己準同型のスペクトル像に一般の束の比較を適用する。
+`Examples.Empty` constructs zero-dimensional projections.
+`Examples.MovingNilpotent` varies \(T_a=\begin{pmatrix}0&a\\0&0\end{pmatrix}\) over the complex plane, derives spectral conditions from \(T_a^2=0\), and constructs image bundles.
+Its `Homotopy` applies to interval families and uses endpoint image comparisons.
+`Examples.MixedRanksHomotopy` pulls a rank-zero/rank-one two-component bundle to a cylinder, applying general comparison to zero-endomorphism spectral images.
 
-## B09 向けの射影回復と共役
+## Projection recovery and conjugation for B09
 
-`Circle.At.domainOff` は、単位円を避ける領域の点から `OffSpectrum` を得る。
-`At.Neighborhood.open` は、行列空間内で単位円上のスペクトルを避ける領域が開であることを与える。
-`At.ProjectionRecovery[P, idempotent]` は \(2(I-P)\) の行列、単位円を避ける証明、スペクトル射影を \(P\) に戻す `recovers` を公開する。
-`Conjugation.At.On[A, off, real].natural` は、実行列の作用と座標ごとの共役が可換なら、そのスペクトル射影も共役と可換であることを示す。
-これらは [B09](../../geometry/bundle_extension/README.md) の実・複素束の近傍延長に用い、追加分の検証記録は同 README にまとめる。
+`Circle.At.domainOff` obtains `OffSpectrum` from points in the unit-circle-avoiding region.
+`At.Neighborhood.open` proves the unit-circle-avoiding spectral locus open in matrix space.
+`At.ProjectionRecovery[P, idempotent]` exposes \(2(I-P)\), unit-circle avoidance, and `recovers` recovering spectral projection \(P\).
+`Conjugation.At.On[A, off, real].natural` proves real-matrix actions commuting with coordinate conjugation have conjugation-compatible spectral projections.
+Used in [B09](../../geometry/bundle_extension/README.md) real/complex neighborhood extensions; validation records for additions are in that README.
 
-## 検証と再開
+## Validation and resuming
 
-K06 の構成・証明・自然性・比較・利用例は完了した。
-K06 統合時の数学コードは `1b012836`、workspace の最終検証は `cdc57da7` と同一の数学入力であった。
-ブランチは `math/k06-spectral-splitting`、統合状態は [PR #42](https://github.com/pdf-jube-joba/ref-type/pull/42) を参照する。
-Rust の変更はない。
+K06 constructions, proofs, naturality, comparisons, and examples are complete.
+K06 integration math sources: `1b012836`; final workspace validation used mathematical inputs identical to `cdc57da7`.
+Branch: `math/k06-spectral-splitting`; integration status: [PR #42](https://github.com/pdf-jube-joba/ref-type/pull/42).
+No Rust changes.
 
-| 検査（いずれも共有キャッシュ） | module 数 | 終了コード |
+| Check (all shared cache) | Modules | Exit code |
 | --- | ---: | ---: |
 | `target/debug/cli libs/algebra/spectral_splitting --memory-mib 8192 --cache-stats` | 4,765（328 checked、4,437 reused） | 0 |
 | `target/debug/cli libs/geometry/bundle_complements --memory-mib 8192 --cache-stats` | 4,345 reused | 0 |
 | `target/debug/cli libs --memory-mib 8192 --cache-stats` | 7,441 reused | 0 |
 
-実行時には入力ごとの `--parse-only --save-source-snapshot` でソースを固定し、同じ入力位置に `--source-snapshot`・`--diagnostics compact`・`--report-json` を指定した。
-生成 snapshot・JSON・ログは追跡しない。
-K06 と全依存の検査は4,196ステップ、最大 RSS は5,259,356 KiBであった。
-各プロセスの終了と終了コード0を確認し、worker は1、復旧・重複・再実行・失われたステップ・キャッシュ保存失敗はすべて0である。
-B03 の基底構成の共通化、全依存、下流の接束・法束などの利用箇所も含む。
+Fix sources using per-input `--parse-only --save-source-snapshot` and specify `--source-snapshot`, `--diagnostics compact`, `--report-json` at the same input location.
+Do not track generated snapshots, JSON, or logs.
+K06/full-dependency check: 4,196 steps, peak RSS 5,259,356 KiB.
+Confirmed process termination/exit 0; one worker; zero recoveries, duplicates, reruns, lost steps, or cache save failures.
+Includes shared B03 basis constructions, all dependencies, and downstream tangent/normal uses.
 
-次の手順は PR #42 の差分・CI・統合状態と main への反映を確認し、最新 main 上で B04 の計画とこの公開 API を読むことである。
-B04・K01・K04 の実装は、この K06 の作業には含めていない。
+Next: inspect PR #42 diff/CI/integration and main inclusion, then read B04 plans and this API on latest main.
+B04, K01, and K04 implementations were outside K06 scope.

@@ -1,33 +1,33 @@
-# A01 作業メモ
+# A01 Work notes
 
-基準は main `bd8fd86d`、作業ブランチは `codex/a01-measure-convergence`。
-既存 `libs/refcache` と `target/debug/cli` を共有して通常検査を実行する。
-`functional_analysis.Measure.Integral` の単調性、有限性の下方継承、積分値の一意性は検査済み。
-依存順序は、可測集合と測度の有限演算、非負拡張実数の演算、単関数の分割と積分、下積分の加法性と近似、単調収束、Fatou、優収束、符号付き積分の線形性と a.e. 同値、複素・有限次元ベクトル値および級数との交換である。
-各段階は狭い通常検査で確認し、区切りと長い検査の前に commit と push を行う。
+Base: main `bd8fd86d`; working branch: `codex/a01-measure-convergence`.
+Run standard checks using the existing shared `libs/refcache` and `target/debug/cli`.
+Monotonicity, downward inheritance of finiteness, and uniqueness of integral values in `functional_analysis.Measure.Integral` have been checked.
+Dependency order: finite operations on measurable sets and measures; nonnegative extended-real arithmetic; simple-function partitions and integration; lower-integral additivity and approximation; monotone convergence; Fatou; dominated convergence; signed-integral linearity and a.e. equivalence; complex and finite-dimensional vector values; interchange with series.
+Validate each stage with a focused standard check; commit and push at milestones and before long checks.
 
-空単関数による下積分の非空性、有限関数の上限、可積分関数の積分値の存在と一意性、可測な二項和・共通部分・差、a.e. 一致の反射性と対称性、拡張値の加法の可換・結合・零元を追加した。
-測度の有限加法性と単調性、零集合の有限合併、a.e. 一致の推移性、零集合除去による単関数積分の保存、下積分と積分の a.e. 不変性、積分の商への降下は検査済み。
-測度の下からの連続性と零集合の可算合併、可測な増加実関数列の下積分の単調収束も検査済み。
-Fatou の可測な末尾下限と不等式、有限の各点下極限の場合の等式、複素・有限座標の積分と a.e. 不変性、零関数の可積分性と積分値を検査済み。
-実可積分関数の任意実スカラー倍の斉次性、符号反転、絶対値の可積分性、積分の順序保存と絶対値評価、優関数による可積分性、a.e. 同値による可積分性の保存を検査済み。
-単関数の可測集合による二分と積分値の分解、拡張値の有限和と非負スカラー倍の演算、可測関数の和・符号反転・最大・絶対値・非負スカラー倍を検査済み。
-次は有限単関数の共通細分と加法性、下積分と符号付き積分の加法性、優収束、級数との積分交換と複素・有限次元のノルム評価である。
+Added nonemptiness of the lower integral via the empty simple function, suprema of finite functions, existence and uniqueness of integrals of integrable functions, measurable binary unions/intersections/differences, reflexivity and symmetry of a.e. equality, and commutativity, associativity, and zero for extended addition.
+Checked finite additivity and monotonicity of measures, finite unions of null sets, transitivity of a.e. equality, preservation of simple integrals upon removing null sets, a.e. invariance of lower integrals and integrals, and descent of integration to the quotient.
+Also checked continuity of measures from below, countable unions of null sets, and monotone convergence of lower integrals for increasing measurable real-function sequences.
+Checked measurable tail infima and Fatou's inequality, equality for finite pointwise lower limits, complex and finite-coordinate integration and a.e. invariance, and integrability and integral value of the zero function.
+Checked homogeneity under arbitrary real scalars, negation, integrability of absolute values, order preservation and absolute-value bounds for integrals, integrability by domination, and preservation of integrability under a.e. equivalence.
+Checked splitting simple functions by measurable sets and decomposing their integrals, extended finite sums and nonnegative scalar multiplication, and measurable sums, negation, maxima, absolute values, and nonnegative scalar multiples.
+Next: common refinements and additivity of finite simple functions, additivity of lower and signed integrals, dominated convergence, interchange with series, and complex and finite-dimensional norm estimates.
 
-共通細分の準備として、有限の互いに素な集合族の合併と交差の測度、非負係数の加法に関する拡張値スカラー倍の分配則、重なりセルの単関数とその積分分解、および互いに素な単関数の有限族を一つに組み立てる構成を追加し、狭い通常検査で確認した。`Integral.Overlap` の直近検査は exit 0、166 モジュール再利用、15 書き込み、保存失敗 0。次は共通細分の残余セルと有限二重和の交換を証明し、単関数・下積分の加法性につなげる。
+Prepared common refinements by adding measures of unions and intersections of finite disjoint families, distributivity of extended scalar multiplication over addition of nonnegative coefficients, overlap-cell simple functions and integral decompositions, and assembly of finite disjoint simple-function families. Focused standard checks passed. Latest `Integral.Overlap` check: exit 0, 166 modules reused, 15 writes, 0 save failures. Next: residual cells and interchange of finite double sums, then additivity of simple and lower integrals.
 
-共通細分の残余セルと有限二重和の交換を証明し、単関数の和を支配する共通細分の積分が元の積分の和と等しいこと、そこから非負下積分の優加法性を導いた。`Integral.Additive` の通常検査は exit 0、166 再利用、21 書き込み、保存失敗 0。次は可測関数の単関数近似を用いて逆向きの評価を構成し、下積分加法性と残る収束・線形性の要件へ接続する。
+Proved residual-cell and finite-double-sum interchange results, equality of the integral of the common refinement dominating a simple-function sum with the sum of the original integrals, and superadditivity of nonnegative lower integrals. Standard `Integral.Additive` check: exit 0, 166 reused, 21 writes, 0 save failures. Next: the reverse bound via measurable simple-function approximation, then lower-integral additivity and remaining convergence and linearity requirements.
 
-単関数の全域被覆を `CompleteSimple` として表し、評価関数の存在・一意性・各セルでの値、非負性、可測性を証明した。任意の単関数近似を交差セルで比較し、評価関数の下積分が元の単関数積分と一致することも検査済み。`Integral.Evaluation.Exact` の検査は exit 0、165 再利用、13 書き込み、保存失敗 0。次は有理数列のしきい値を用いた非負可測関数の単関数近似と、下積分の逆向きの加法評価を構成する。
+Represented globally covering simple functions as `CompleteSimple` and proved existence, uniqueness, cell values, nonnegativity, and measurability of their evaluation functions. Checked comparison of arbitrary simple approximations on intersection cells and equality of the evaluation function's lower integral with the original simple integral. `Integral.Evaluation.Exact` check: exit 0, 165 reused, 13 writes, 0 save failures. Next: rational-threshold approximation of nonnegative measurable functions and the reverse additive bound.
 
-有理数列の可測しきい値から、各段階が全域被覆の単関数であり非負・可測・増加し、元の非負可測関数を各点の上限として持つ近似列を構成した。`Integral.Approximation` 通常検査 exit 0、175 モジュール再利用、24 書き込み、保存失敗 0。次は完全単関数の和の値・積分等式を共通細分から導き、単調収束で一般の下積分加法性へ接続する。
+Constructed approximations from measurable rational thresholds: every stage is a globally covering, nonnegative, measurable, increasing simple function, with the original function as pointwise supremum. Standard `Integral.Approximation` check: exit 0, 175 reused, 24 writes, 0 save failures. Next: derive value and integral identities for sums of complete simple functions via common refinements, then general lower-integral additivity by monotone convergence.
 
-非負可測関数の下積分の完全な加法性を、単関数近似と単調収束から証明した。可積分関数の和の閉性、符号付き積分の加法性、実・複素・有限座標の加法 API を追加し、各通常検査は exit 0。直近の公開 API は 179 モジュール再利用・59 書き込み・保存失敗 0、座標と複素の再検査は全件キャッシュヒット。次は優収束、級数交換、商演算、複素スカラーとノルム評価、例と公開 README を完成する。
+Proved full additivity of nonnegative lower integrals using simple-function approximation and monotone convergence. Added closure of integrable functions under sums, signed-integral additivity, and real, complex, and finite-coordinate addition APIs; all standard checks exited 0. Latest public API: 179 reused, 59 writes, 0 save failures; coordinate and complex rechecks were entirely cached. Next: dominated convergence, series interchange, quotient operations, complex scalars and norm bounds, examples, and the public README.
 
-商上の加法・実スカラー倍と積分の線形性を証明した。各点収束の優収束について、極限の可測性・可積分性を仮定せず導き、Fatou の不等式から積分列の収束まで検査済み。`Integral.Dominated` は exit 0、176 再利用、52 書き込み、保存失敗 0。次は零集合上の値を補正して a.e. 版に拡張し、級数交換、複素・有限次元評価と公開例を仕上げる。
+Proved quotient addition, real scalar multiplication, and integral linearity. Derived measurability and integrability of pointwise dominated limits without assuming them, and checked convergence of integrals via Fatou's inequality. `Integral.Dominated`: exit 0, 176 reused, 52 writes, 0 save failures. Next: correct values on null sets for the a.e. version, then series interchange, complex and finite-dimensional bounds, and public examples.
 
-可測零集合の外での収束・優関数評価から零集合上を零に補正し、a.e. 極限と一致する可積分代表、および積分列の収束を構成した。元の極限が可測なら元の関数自身も可積分となる。`Integral.AEDominated` 通常検査 exit 0、177 再利用、56 書き込み、保存失敗 0。次は級数との交換、複素線形性と有限次元評価、公開例・README・依存回帰検査を完成する。
+Corrected values to zero on a measurable null set, constructing an integrable representative equal to the a.e. limit and convergence of integrals from convergence and domination off that set. If the original limit is measurable, it too is integrable. Standard `Integral.AEDominated` check: exit 0, 177 reused, 56 writes, 0 save failures. Next: series interchange, complex linearity, finite-dimensional bounds, examples, README, and dependency regression checks.
 
-実・複素・有限座標の優収束と、各点版・a.e. 版の優級数交換を公開し、複素スカラー線形性、複素ノルムの成分評価、有限座標 ℓ¹ 評価と指示関数の積分を追加した。対象モジュール・利用例の通常検査は exit 0、保存失敗 0。公開パッケージ全体と Sobolev 依存の回帰検査を、固定ソース・既存キャッシュで実行する。
+Published real, complex, and finite-coordinate dominated convergence and dominated-series interchange in pointwise and a.e. forms. Added complex scalar linearity, component estimates for complex norms, finite-coordinate ℓ¹ bounds, and indicator integrals. Standard target-module and example checks: exit 0, 0 save failures. Run the full public package and Sobolev dependency regressions against fixed sources and the existing cache.
 
-固定ソースを使った最終通常検査はすべて exit 0、report の outcome は accepted。公開 `measure_convergence` は 201 再利用・89 書き込み、`functional_analysis.Measure` は 240 再利用・66 書き込み、既存 `functional_analysis.Sobolev.On` は 218 再利用・16 書き込みで、各保存失敗・重複実行・失われた検査は 0。実・複素・有限座標の各点版と a.e. 版の優収束・級数交換、商上の線形性、指示関数と零列の例、公開 README を揃えた。
+Final standard checks on fixed sources all exited 0 with report outcome accepted. Public `measure_convergence`: 201 reused, 89 writes; `functional_analysis.Measure`: 240 reused, 66 writes; existing `functional_analysis.Sobolev.On`: 218 reused, 16 writes. All had 0 save failures, duplicate runs, and lost checks. Completed pointwise and a.e. real, complex, and finite-coordinate dominated convergence and series interchange, quotient linearity, indicator and zero-sequence examples, and the public README.

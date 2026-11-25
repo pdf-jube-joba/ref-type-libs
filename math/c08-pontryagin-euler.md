@@ -1,15 +1,15 @@
-# C08 Pontryagin 類と Euler 類の比較
+# C08 Comparing Pontryagin and Euler classes
 
-## 要件
+## Requirements
 
-- 主な実装先は `pontryagin_euler`。
-- 実束の複素化から整数 Pontryagin 類を構成し、自然性を証明する。
-- 直和の整数公式を複素化の奇数 Chern 類による2ねじれの補正まで扱い、有理係数の Whitney 和公式を導く。
-- 複素束の最高 Chern 類と実化の Euler 類、Chern 類と実化の Stiefel–Whitney 類を比較する。
-- 偶数階数の向き付き実束について最高 Pontryagin 類と Euler 類の平方を比較し、接束・法束の安定関係へ適用する。
+- Primary implementation: `pontryagin_euler`.
+- Construct integral Pontryagin classes via complexification of real bundles; prove naturality.
+- Handle integral direct-sum formulas including 2-torsion corrections from odd Chern classes of complexifications; derive rational Whitney sums.
+- Compare top Chern classes with Euler classes of realifications, and Chern classes with Stiefel–Whitney classes of realifications.
+- Compare top Pontryagin classes with Euler squares for even-rank oriented real bundles; apply to stable tangent/normal relations.
 
-## 依存するタスク
+## Dependencies
 
-- [C06 Chern 類](c06-chern-classes.md)
-- [C07 Stiefel–Whitney 類](c07-stiefel-whitney.md)
-- [C03 Thom 類と Thom 同型](../../libs/topology/cohomology_thom/README.md)
+- [C06 Chern classes](c06-chern-classes.md)
+- [C07 Stiefel–Whitney classes](c07-stiefel-whitney.md)
+- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)

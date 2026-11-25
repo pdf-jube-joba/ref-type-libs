@@ -1,41 +1,41 @@
-# Fredholm 作用素と指数
+# Fredholm operators and the index
 
-複素 Hilbert 空間の有界線形作用素について、Atkinson の定理と整数指数の四つの法則を実装する。
-核は線形写像の核、像は実際の線形像、余核は像による商空間である。
-有限次元性は恒等写像が有限個の複素座標を経由して因子分解することで定義し、そこから実際の基底を構成する。
-追加公理は使わず、既存の関数の外延性を利用する。
+Implement Atkinson's theorem and four integer-index laws for bounded operators on complex Hilbert spaces.
+Kernels are linear kernels, images actual linear images, cokernels image quotients.
+Finite dimensionality factors identity through finite complex coordinates, from which actual bases are constructed.
+No additional axioms; uses existing function extensionality.
 
-## 公開 API
+## Public API
 
-以下の `At` は `Space[V, space, norm].Operators[W, target, targetNorm].At[f]`、`H` はその `Hilbert[inner, targetInner]` を表す。
+Below `At` denotes `Space[V, space, norm].Operators[W, target, targetNorm].At[f]`; `H` denotes its `Hilbert[inner, targetInner]`.
 
-| API | 内容 |
+| API | Contents |
 | --- | --- |
-| `Operators.After` / `Ideal` | コンパクト作用素の左右イデアル性、コンパクト差による同値関係と合成の整合性 |
-| `At.kernel` / `image` / `CokernelSpace` | 実際の核、像、商余核。`kernelClosed` と `ClosedRange` も公開する |
-| `At.Parametrix` / `HasParametrix` | 左右の誤差がコンパクトな逆作用素候補と、その存在 |
-| `H.Fredholm` | 閉像と有限次元の核・余核 |
-| `H.atkinsonEquivalence` / `fredholmOfParametrix` / `atkinson` | parametrix から Fredholm 性を導く |
-| `H.parametrixExists` / `FromFredholm` | Fredholm 作用素から有限階数の左右誤差を持つ有界 parametrix を構成する |
-| `At.Index.Decomposition` | 実際の核・商余核の基底を保持する |
-| `At.Index.fromDecomposition` / `independent` | 基底から整数の次元差を計算し、基底からの独立性を示す |
-| `H.index` / `indexFromDecomposition` | Fredholm 性から得る標準の指数と、与えた分解での計算式 |
-| `At.Composition.Hilbert.fredholm` / `indexComposition` | 合成の Fredholm 性と \(\operatorname{ind}(gf)=\operatorname{ind}f+\operatorname{ind}g\) |
-| `H.DirectSum.At.fredholm` / `indexDirectSum` | 構成した Hilbert 直和上の作用素と指数の直和則 |
-| `H.Change.fredholm` / `H.CompactPerturbation.indexInvariant` | コンパクト摂動に対する Fredholm 性と指数の不変性 |
-| `H.indexLocallyConstant` | 正の作用素ノルム近傍を構成し、その中で Fredholm 性と指数が一定になることを示す |
-| `Operators.Hilbert.Family.At.locallyConstant` | 任意の位相空間をパラメータとするノルム連続族の局所定数性 |
-| `FiniteSpace` | 有限次元空間の基底、次元の一意性、部分空間、同型による移送、有限次元空間を経由する写像 |
-| `Sum` / `Sum.MapsTo` | Hilbert 直和の内積・ノルム・完備性、座標射影・包含、有界な直和写像 |
-| `Space.Hilbert.Trace` | 有限階数トレース、因子分解からの独立性、加法性、スカラー倍、巡回性 |
+| `Operators.After` / `Ideal` | Compact left/right ideals, compact-difference equivalence and composition compatibility |
+| `At.kernel` / `image` / `CokernelSpace` | Actual kernels/images/quotient cokernels; also `kernelClosed`, `ClosedRange` |
+| `At.Parametrix` / `HasParametrix` | Candidate inverses with compact errors on both sides and their existence |
+| `H.Fredholm` | Closed images and finite-dimensional kernels/cokernels |
+| `H.atkinsonEquivalence` / `fredholmOfParametrix` / `atkinson` | Fredholm property from parametrices |
+| `H.parametrixExists` / `FromFredholm` | Bounded parametrices with finite-rank errors from Fredholm operators |
+| `At.Index.Decomposition` | Actual kernel/quotient-cokernel bases |
+| `At.Index.fromDecomposition` / `independent` | Integer dimension differences from bases and basis independence |
+| `H.index` / `indexFromDecomposition` | Canonical Fredholm index and computation from supplied decompositions |
+| `At.Composition.Hilbert.fredholm` / `indexComposition` | Fredholm composition, \(\operatorname{ind}(gf)=\operatorname{ind}f+\operatorname{ind}g\) |
+| `H.DirectSum.At.fredholm` / `indexDirectSum` | Operators on constructed Hilbert sums and direct-sum index laws |
+| `H.Change.fredholm` / `H.CompactPerturbation.indexInvariant` | Fredholm/index invariance under compact perturbations |
+| `H.indexLocallyConstant` | Positive operator-norm neighborhoods with constant Fredholm property/index |
+| `Operators.Hilbert.Family.At.locallyConstant` | Local constancy for norm-continuous families over arbitrary topological spaces |
+| `FiniteSpace` | Finite bases, unique dimension, subspaces, isomorphism transport, maps through finite spaces |
+| `Sum` / `Sum.MapsTo` | Hilbert-sum inner products/norms/completeness, coordinate projections/inclusions, bounded sum maps |
+| `Space.Hilbert.Trace` | Finite-rank traces, factorization independence, additivity/scaling/cyclicity |
 
-`H.FiniteParametrix` と `H.defectIndex` は、有限階数の左右誤差からトレースの差を取る補助 API である。
-`H.Compare.independent` と `H.Defect.calculate` により、parametrix の選択から独立で、実際の核・余核の整数の次元差に一致する。
+`H.FiniteParametrix` and `H.defectIndex` are auxiliary trace-difference APIs for finite-rank errors on both sides.
+`H.Compare.independent` and `H.Defect.calculate` prove parametrix independence and agreement with actual integer kernel/cokernel dimension differences.
 
-## 最小利用例
+## Minimal examples
 
-[Examples.ref](src/Examples.ref) は零 Hilbert 空間上の恒等作用素で、Atkinson の両方向、実際の核・余核の基底、指数の計算、合成則、直和則、コンパクト摂動不変性、ノルム近傍と連続族の定理を適用する。
-基底を与えた指数の計算は次の形で使う。
+[Examples.ref](src/Examples.ref) applies both Atkinson directions, actual bases/index computations, composition/sum/compact-perturbation laws, and norm-neighborhood/family theorems to identity on the zero Hilbert space.
+Compute indices from supplied bases as follows.
 
 ```ref
 \definition decomposition: Index.Decomposition := Index.Decomposition {
@@ -46,23 +46,23 @@
   Fredholm.indexFromDecomposition fredholm decomposition;
 ```
 
-一般の有限次元分解では `FiniteSpace.Frame` に基底を渡す。
-`fromDecomposition` は \(\dim\ker f-\dim(W/\operatorname{im}f)\) を `std.Arithmetic.Int.Integer` として返す。
+For general finite-dimensional decompositions, supply bases to `FiniteSpace.Frame`.
+`fromDecomposition` returns \(\dim\ker f-\dim(W/\operatorname{im}f)\) as `std.Arithmetic.Int.Integer`.
 
-## 証明の構成
+## Proof structure
 
-`FromFredholm` は核の直交補から閉像への制限を全単射とし、有界逆写像定理と像への直交射影から parametrix を構成する。
-左右の誤差は核と余核を経由するため有限階数になる。
-逆方向は右誤差の有限階数近似と Neumann 逆作用素で閉像を示し、コンパクトな左右誤差を核と閉像の直交補へ制限して有限次元性を得る。
-余核への移送は、商に恒等作用素を誘導するコンパクト作用素を扱う独立した `CompactQuotient` 補題に分けている。
+`FromFredholm` restricts the kernel complement bijectively onto the closed image, constructing parametrices by bounded inverse and image projection.
+Both errors factor through kernel/cokernel, hence have finite rank.
+Conversely, finite-rank approximation of right errors and Neumann inverses prove closed image; restricting compact errors to kernel and image complement proves finite dimensionality.
+Cokernel transport is a separate `CompactQuotient` lemma on compact operators inducing quotient identities.
 
-指数の法則は有限階数トレースの巡回性と核・余核の基底での計算式から得る。
-ノルム近傍では Neumann 逆作用素で有限階数 parametrix を補正する。
-コンパクト摂動は有限階数近似とその近傍の定理に帰着する。
-`Limits.Near` は単位球全体での一様なノルム差であり、`Family.NormContinuous` はその正の半径ごとに開近傍を要求する。
-直和には内積から平方根でノルムを構成し、成分ごとの Cauchy 列から完備性を示す。
+Index laws follow from finite-rank trace cyclicity and actual-basis formulas.
+On norm neighborhoods, correct finite-rank parametrices with Neumann inverses.
+Reduce compact perturbations to finite-rank approximation and neighborhood theorems.
+`Limits.Near` is uniform norm difference on the unit ball; `Family.NormContinuous` requires open neighborhoods for every positive radius.
+Direct-sum norms use square roots of inner products; component Cauchy sequences prove completeness.
 
-## 検査
+## Checks
 
 ```sh
 source /workspace/ref-type-env.sh

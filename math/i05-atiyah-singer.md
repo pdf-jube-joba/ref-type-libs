@@ -1,13 +1,13 @@
-# I05 Atiyah–Singer 指数定理
+# I05 Atiyah–Singer index theorem
 
-## 要件
+## Requirements
 
-- 主な実装先は `atiyah_singer`。
-- 閉コンパクト滑らかな多様体と複素束間の楕円擬微分作用素について、解析的指数とシンボルの位相的指数の一致を証明する。
-- 埋め込みとの可換性と Bott 作用素の正規化から証明を組み立て、微分作用素の場合を公開する。
-- 零次元、空多様体、直和、随伴、積に適用した具体例で両方の指数を比較する。
+- Primary implementation: `atiyah_singer`.
+- Prove equality of analytic and topological symbol indices for elliptic pseudodifferential operators between complex bundles on closed compact smooth manifolds.
+- Assemble the proof from embedding compatibility and Bott normalization; expose the differential-operator case.
+- Compare both indices in examples for dimension zero, empty manifolds, direct sums, adjoints, and products.
 
-## 依存するタスク
+## Dependencies
 
-- [I03 解析的指数と Thom 写像](i03-analytic-thom.md)
-- [I04 位相的指数写像](i04-topological-index.md)
+- [I03 Analytic index and Thom maps](i03-analytic-thom.md)
+- [I04 Topological index map](i04-topological-index.md)

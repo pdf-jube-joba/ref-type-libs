@@ -1,13 +1,13 @@
-# C06 Chern 類
+# C06 Chern classes
 
-## 要件
+## Requirements
 
-- 主な実装先は `chern_classes`。
-- 有限 CW 底空間の複素束の整数 Chern 類を射影束の関係式から構成する。
-- 自然性、正規化、階数による消滅、Whitney 和公式を証明する。
-- 分裂原理を用いて双対・共役・テンソル・外冪の公式を証明し、線束と射影空間で値を計算する。
+- Primary implementation: `chern_classes`.
+- Construct integral Chern classes of complex bundles over finite CW bases from projective-bundle relations.
+- Prove naturality, normalization, rank vanishing, and the Whitney sum formula.
+- Use splitting to prove dual, conjugate, tensor, and exterior-power formulas; compute values for line bundles and projective spaces.
 
-## 依存するタスク
+## Dependencies
 
-- [C05 射影束定理と分裂原理](c05-projective-bundle.md)
-- [L04 対称多項式と特性級数](l04-symmetric-series.md)
+- [C05 Projective bundle theorem and splitting principle](c05-projective-bundle.md)
+- [L04 Symmetric polynomials and characteristic series](l04-symmetric-series.md)

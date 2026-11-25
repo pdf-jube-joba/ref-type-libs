@@ -1,13 +1,13 @@
-# D03 多様体上の積分と Stokes
+# D03 Integration on manifolds and Stokes' theorem
 
-## 要件
+## Requirements
 
-- 主な実装先は `manifold_integration`。
-- 向き付き多様体のコンパクト台付き最高次形式の積分を、座標と従属分割によらない形で構成する。
-- 境界・角付きコンパクト多様体の Stokes の定理を、境界向きと符号を含めて証明する。
-- 滑らかな特異単体上の積分を構成し、外微分と特異余境界の対応を公開する。
+- Primary implementation: `manifold_integration`.
+- Construct integrals of compactly supported top forms on oriented manifolds, independent of coordinates and partitions of unity.
+- Prove Stokes' theorem for compact manifolds with boundary/corners, including boundary orientations and signs.
+- Construct integration on smooth singular simplices; expose correspondence between exterior derivative and singular coboundary.
 
-## 依存するタスク
+## Dependencies
 
-- [A04 多重積分の変数変換](../../libs/analysis/change_of_variables/README.md)
-- [G04 collar と境界の貼り合わせ](g04-collars-gluing.md)
+- [A04 Change of variables in multiple integrals](../../libs/analysis/change_of_variables/README.md)
+- [G04 Collars and boundary gluing](g04-collars-gluing.md)

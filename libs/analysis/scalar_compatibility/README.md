@@ -1,3 +1,3 @@
-# 実数の構造の互換性
+# Compatibility of real-number structures
 
-実解析・距離空間・線形代数で共有する実数の演算と、距離・極限・スカラーの法則を示す。
+Shared real arithmetic across analysis, metric spaces, and linear algebra, with distance/limit/scalar laws.

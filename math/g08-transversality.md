@@ -1,13 +1,13 @@
-# G08 滑らかな近似と相対横断性
+# G08 Smooth approximation and relative transversality
 
-## 要件
+## Requirements
 
-- 主な実装先は `transversality`。
-- コンパクトな定義域の連続写像を滑らかに近似し、既に滑らかな閉集合の近傍を固定する相対版を証明する。
-- パラメータ付き Sard と局所摂動から、部分多様体に横断的な写像への近似とホモトピーの相対横断性を証明する。
-- 横断的逆像の接束・法束と引き戻し束を比較し、境界の逆像と向きの整合性を公開する。
+- Primary implementation: `transversality`.
+- Smoothly approximate continuous maps on compact domains; prove relative versions fixing neighborhoods of closed sets where maps are already smooth.
+- Use parameterized Sard and local perturbations to prove approximation by transverse maps and relative transversality of homotopies.
+- Compare tangent/normal bundles of transverse preimages with pullback bundles; expose boundary-preimage and orientation compatibility.
 
-## 依存するタスク
+## Dependencies
 
-- [G06 管状近傍と collapse 写像](g06-tubular-neighborhoods.md)
-- [G07 Sard の定理](g07-sard.md)
+- [G06 Tubular neighborhoods and collapse maps](g06-tubular-neighborhoods.md)
+- [G07 Sard's theorem](g07-sard.md)

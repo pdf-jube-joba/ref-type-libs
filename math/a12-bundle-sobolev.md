@@ -1,15 +1,15 @@
-# A12 束切断の Sobolev 空間
+# A12 Sobolev spaces of bundle sections
 
-## 要件
+## Requirements
 
-- 主な実装先は `bundle_sobolev`。
-- コンパクト多様体上の滑らかな複素束について、局所自明化と正の密度から L2 と整数次数の Sobolev 空間を構成する。
-- 計量・密度・座標・従属分割によるノルムの同値、完備性、滑らかな切断の稠密性を証明する。
-- 双対束との pairing、次数を下げる包含のコンパクト性、全次数での正則性と滑らかさの対応を公開する。
+- Primary implementation: `bundle_sobolev`.
+- Construct L2 and integer-order Sobolev spaces for smooth complex bundles on compact manifolds using local trivializations and positive densities.
+- Prove equivalence of norms from metrics, densities, coordinates, and partitions of unity, completeness, and density of smooth sections.
+- Expose pairing with dual bundles, compactness of order-lowering inclusions, and correspondence between regularity in all orders and smoothness.
 
-## 依存するタスク
+## Dependencies
 
-- [滑らかな束・枠束・随伴束](../../libs/geometry/smooth_bundles/README.md)
-- [A09 Euclid 空間の Sobolev 評価](a09-euclidean-sobolev.md)
-- [A10 Rellich コンパクト性](a10-rellich.md)
-- [A04 多重積分の変数変換](../../libs/analysis/change_of_variables/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../../libs/geometry/smooth_bundles/README.md)
+- [A09 Sobolev estimates on Euclidean spaces](a09-euclidean-sobolev.md)
+- [A10 Rellich compactness](a10-rellich.md)
+- [A04 Change of variables in multiple integrals](../../libs/analysis/change_of_variables/README.md)

@@ -1,67 +1,67 @@
-# 実・複素の有限ランクベクトル束
+# Real and complex finite-rank vector bundles
 
-公開入口は `vector_bundles.Bundles`。
-`Bundles.Real.scalar` と `Bundles.Complex.scalar` は、[L03](../../algebra/hermitian_frames/README.md) の位相体・共役と、既存の実・複素次元の一意性をまとめる。
-`Over[K, field, conjugation, scalar]` の構成はこの共通 API を使う。
-線形写像・線形同型・有限基底・trace は [linear_algebra](../../algebra/linear_algebra/README.md) を再利用する。
+Public entry: `vector_bundles.Bundles`.
+`Bundles.Real.scalar` and `Bundles.Complex.scalar` group [L03](../../algebra/hermitian_frames/README.md) topological fields/conjugation and existing real/complex dimension uniqueness.
+`Over[K, field, conjugation, scalar]` uses this shared API.
+Reuse [linear_algebra](../../algebra/linear_algebra/README.md) maps/isomorphisms/bases/traces.
 
-## 束と局所自明化
+## Bundles and local trivializations
 
-`Family[X := X, F := F]` は底の集合 \(X\) とファイバーの集合族 \(F:X\to\mathrm{Set}\) を取る。
-`Point` は底点 `base` とベクトル `vector: F base` を持つ依存対で、`include` と `projection` が全空間への挿入と射影である。
-`Data` は底空間の位相、全空間の位相、各ファイバーの線形構造を保持し、`Bundle` は局所自明性を満たすデータの型である。
+`Family[X := X, F := F]` takes base \(X\), fiber sets \(F:X\to\mathrm{Set}\).
+`Point` pairs base `base` and vector `vector: F base` dependently; `include`, `projection` insert/project total spaces.
+`Data` stores base/total topologies and fiber linear structures; `Bundle` is locally trivial data.
 
-`With[data].ChartData` は開領域、有限次元、領域の各点のファイバーと標準座標の線形同型をまとめる。
-`With.In[c].Laws` は底と全空間の領域の開性、局所座標と逆座標の連続性を表す。
-`Chart` はその法則を持つ局所自明化である。
-`With.In.homeomorphism` は線形同型の逆写像の法則から、全空間の開部分と底の開部分・標準座標の積との同相を作る。
+`With[data].ChartData` groups open domains, finite dimensions, fiber/standard-coordinate isomorphisms.
+`With.In[c].Laws` means open base/total regions and continuous coordinates/inverses.
+`Chart` is a trivialization with these laws.
+`With.In.homeomorphism` constructs homeomorphisms from total opens to base-open/standard products using inverse linear laws.
 
-`Of[bundle].projectionContinuous` は局所自明化を貼り合わせて射影の連続性を導く。
-`Of.Fiber[x].isomorphism` は射影の実際の逆像と \(F(x)\) の間の線形同型で、`decodeEncode` と `encodeDecode` が両側逆を保証する。
+`Of[bundle].projectionContinuous` glues trivializations to prove projection continuity.
+`Of.Fiber[x].isomorphism` linearly identifies actual projection preimages with \(F(x)\); `decodeEncode`, `encodeDecode` guarantee inverses.
 
-ランクは入力データとして要求しない。
-`Dimension.At.basis` はファイバーと標準座標の線形同型から有限基底を構成し、trace による基底の比較とスカラーの自然数埋め込みの単射性で次元の一意性を証明する。
-`Of.rank` はその一意な次元、`rankFrame` は局所座標の次元との一致である。
-`rankLocallyConstant` は各点の開近傍でランクが一定になることを証明する。
-空の底空間、零次元、連結成分ごとに異なる有限ランクを扱える。
+Rank is not input data.
+`Dimension.At.basis` constructs finite bases from coordinate isomorphisms, proving unique dimensions via traces and injective scalar natural embeddings.
+`Of.rank` is unique dimension; `rankFrame` agrees with local dimensions.
+`rankLocallyConstant` proves rank locally constant.
+Handles empty bases, dimension zero, varying finite component ranks.
 
-## 束写像・束同型・切断
+## Bundle maps, isomorphisms, and sections
 
-| API | 内容 |
+| API | Contents |
 | --- | --- |
-| `Over.Morphisms` | 底の写像 \(f:X\to Y\) 上のファイバー線形写像と、その全空間での連続性。 |
-| `Morphisms.total` / `projection` / `onFiber` / `ext` | 全空間の写像、射影との可換性、ファイバー上の計算と外延性。 |
-| `Morphisms.Composition.compose` / `Over.Identity.map` | 束写像の合成と恒等写像。 |
-| `Over.ArrowLaws` / `Associativity` | 単位則と結合則、零切断を用いて束写像から底の写像の連続性を導く証明。 |
-| `Over.Isomorphisms` | 同じ底空間上の相互に逆な束写像、全空間の同相と逆の束同型。 |
-| `Isomorphisms.inverseExists` | 束同型の存在から逆方向の束同型の存在を導く。 |
-| `Of.Sections` | 連続な全空間の写像を与える依存ベクトル族としての切断。 |
-| `Sections.regular` / `zero` | 局所座標による切断の連続性判定と零切断の構成。 |
+| `Over.Morphisms` | Fiber-linear maps over \(f:X\to Y\) with total continuity. |
+| `Morphisms.total` / `projection` / `onFiber` / `ext` | Total maps, projection compatibility, fiber formulas/extensionality. |
+| `Morphisms.Composition.compose` / `Over.Identity.map` | Composition/identity bundle maps. |
+| `Over.ArrowLaws` / `Associativity` | Unit/associative laws, base continuity derived using zero sections. |
+| `Over.Isomorphisms` | Inverse maps over common bases, total homeomorphisms, inverse bundle isomorphisms. |
+| `Isomorphisms.inverseExists` | Reverse isomorphism existence from forward existence. |
+| `Of.Sections` | Sections as dependent vectors giving continuous total maps. |
+| `Sections.regular` / `zero` | Local-coordinate section continuity, zero sections. |
 
-## 引き戻しと制限
+## Pullback and restriction
 
-`Of.Pullback[Y, source, f]` はファイバー \(F(f(y))\) を持つ実際の全空間を作る。
-その位相は \(Y\times E\) への自然な埋め込みから誘導し、`pulled[regular]` は \(f\) の連続性から引き戻し束を構成する。
-`mapContinuous` は元の全空間への写像の連続性、`In[c].trivialization` は元の局所自明化を引き戻した座標である。
+`Of.Pullback[Y, source, f]` constructs actual totals with fibers \(F(f(y))\).
+Topology is induced by the natural embedding into \(Y\times E\); `pulled[regular]` constructs pullback bundles from continuous \(f\).
+`mapContinuous` gives continuity to original totals; `In[c].trivialization` pulls back original coordinates.
 
-`Universal.Cone` は底と全空間への可換な二つの写像を保持する。
-`lift` はファイバーの等式に沿ってベクトルを移送して普遍写像を作り、`baseFormula`、`mapFormula`、`liftContinuous`、`unique` が可換性・連続性・一意性を証明する。
-`Pullback.Of.rank` はランクの引き戻し、`Sections.pullback` と `formula` は切断の引き戻しを与える。
-`ArrowLaws.Pullback.Of.map` は束写像の引き戻しである。
+`Universal.Cone` stores commuting maps to bases/totals.
+`lift` transports vectors along fiber equalities to universal maps; `baseFormula`, `mapFormula`, `liftContinuous`, `unique` prove compatibility/continuity/uniqueness.
+`Pullback.Of.rank` pulls ranks back; `Sections.pullback`, `formula` pull sections back.
+`ArrowLaws.Pullback.Of.map` pulls bundle maps back.
 
-`Of.PullbackIdentity.isomorphism` と `Of.PullbackComposition.Of.isomorphism` は、恒等写像と合成による引き戻しの比較を実際の束同型として与える。
-比較写像は各ファイバーで恒等写像で、二つの誘導位相の間の連続性を普遍性から証明する。
-`Of.Restriction[U].restricted` は任意の部分空間への制限で、包含写像に沿う引き戻しとして構成する。
-`Restriction.homeomorphism` はその全空間と元の全空間の射影の逆像を、部分空間位相で比較する。
+`Of.PullbackIdentity.isomorphism` and `Of.PullbackComposition.Of.isomorphism` give actual identity/composite pullback isomorphisms.
+Comparisons are fiber identities; universality proves continuity between induced topologies.
+`Of.Restriction[U].restricted` restricts arbitrary subspaces via inclusion pullbacks.
+`Restriction.homeomorphism` compares totals with original projection preimages in subspace topology.
 
-## 構成と利用例
+## Constructions and examples
 
-`Over.Trivial[X, n, baseSpace].bundle` は任意の底空間上の自明束で、`homeomorphism` がその全空間と通常の積位相を比較する。
-`Over.TwoRanks[n, m].bundle` は離散な二点の底空間上の束を直和位相から構成する。
-二つの成分のランクは \(n,m\) で、各成分の局所自明化の両方向の連続性を証明する。
+`Over.Trivial[X, n, baseSpace].bundle` is trivial bundles over arbitrary bases; `homeomorphism` compares totals with ordinary products.
+`Over.TwoRanks[n, m].bundle` constructs bundles on discrete two-point bases from coproduct topologies.
+Components have ranks \(n,m\); prove both trivialization continuities.
 
-[Examples.ref](src/Bundles/Examples.ref) は実直線上の切断 \(s(x)=x\) を二乗写像で引き戻して \(s(x^2)=x^2\) を計算する。
-合成と恒等の引き戻しの束同型、空の底空間の全空間が空であること、零ランク束、ランク0と1を持つ二成分、複素直線束も検査する。
+[Examples.ref](src/Bundles/Examples.ref) pulls real section \(s(x)=x\) along squares, computing \(s(x^2)=x^2\).
+Checks identity/composite comparisons, empty totals on empty bases, rank-zero bundles, rank-zero/one components, complex lines.
 
 ```sh
 cargo build -p cli --locked
@@ -70,14 +70,14 @@ target/debug/cli libs --module vector_bundles --memory-mib 8192 --cache-stats
 target/debug/cli libs --memory-mib 8192 --cache-stats
 ```
 
-全空間の誘導位相と連続性の普遍性は `topological_constructions.Induced` として公開する。
-共有キャッシュを使い、対象・全依存・利用例と、共通の位相構成の変更による workspace への影響を検査する。
+Total induced topology/continuity universality exposed as `topological_constructions.Induced`.
+Check targets/dependencies/examples and full workspace effects of shared topology changes using shared caches.
 
-対象と全依存の通常検査は最終ソースの38 module・548ソース検査ステップを検査し、依存1,380 module を再利用して成功した。
-最大 RSS は約1,033 MiB、worker は1、復旧・重複・再実行・失われたステップ・キャッシュ保存失敗はすべて0であった。
-先行する依存閉包の検査でも11,963ソース検査ステップを検査して成功している。
+Final target/dependency standard check passed: 38 modules, 548 source steps, 1,380 dependencies reused.
+Peak RSS roughly 1,033 MiB, one worker; zero recoveries/duplicates/reruns/lost steps/cache save failures.
+Earlier dependency-closure checks also passed 11,963 source steps.
 
-共通の位相構成の変更を含む workspace 全体の検査も、69 package・6,976 module で成功した。
-初回全体検査では73,864ソース検査ステップの後、終了処理中に worker が一度 checkpoint から再開し、checkpoint 未保存の4,739ステップが記録されたが、確定済みの全6,976 module のキャッシュを再検査して全範囲が受理された。
-コミット済みソースの対象と全依存の通常検査は、1,418 module を再利用し、ソース再検査0ステップで成功した。
-workspace からの `--module vector_bundles` も38 module・548ステップの再検査と411 module の再利用で成功し、これら最終検査の復旧・重複・再実行・失われたステップ・キャッシュ保存失敗はすべて0であった。
+Full workspace including shared topology changes passed: 69 packages/6,976 modules.
+Initial full run processed 73,864 steps; one shutdown checkpoint recovery recorded 4,739 unsaved steps, but rechecking all 6,976 committed caches accepted the entire scope.
+Committed-source target/dependency standard recheck passed with 1,418 modules reused and zero source steps.
+Workspace `--module vector_bundles` passed 38 modules/548 recheck steps with 411 reused; all final recoveries/duplicates/reruns/lost steps/cache save failures zero.

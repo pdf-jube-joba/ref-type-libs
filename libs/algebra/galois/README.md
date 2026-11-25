@@ -1,31 +1,31 @@
-# 体拡大とガロア理論
+# Field extensions and Galois theory
 
-部分体、体の埋め込み、多項式除法、最小多項式、自己同型の延長、固定体、根号による生成、作図可能数を扱う。
-パッケージ名は `galois`。
+Subfields, field embeddings, polynomial division, minimal polynomials, automorphism extension, fixed fields, radical generation, and constructible numbers.
+Package: `galois`.
 
-| module | 内容 |
+| Module | Contents |
 | --- | --- |
-| `Field.Over` | 任意の体の演算、非零元の逆数、零の逆数を零に正規化した演算。 |
-| `Field.Over.Subfield` | 部分体、共通部分、生成部分体、単純添加、生成の最小性・単調性・冪等性。 |
-| `Field.Over.Subfield.Of` | 部分体の台集合と体の法則。 |
-| `Field.Over.Morphism` | 体準同型、単射性の証明、埋め込み、合成、べきの保存。 |
-| `Field.Over.Automorphism` | 自己同型、逆、合成。 |
-| `Field.Over.Correspondence` | 固定体、安定化群、ガロア群、反変なガロア接続、三重適用の恒等式。 |
-| `Field.Over.Polynomial` | 係数列とモニック多項式、評価、既存の多項式環への変換、分解、代数性、根号可解性。 |
-| `Field.Over.Polynomial.Raw` | 係数列の加法・積・正規化、モニック多項式による除法と次数の上界。 |
-| `Field.Over.Polynomial.Extension.At` | 最小多項式の存在、零化多項式の可除性、根への埋め込みの延長。 |
-| `Field.Over.Polynomial.Splitting` | 根での一次式による除法、代数的閉性からの完全分解、1の根の包含。 |
-| `Field.Over.Partial.Countable` | 部分体の同型を可算な代数閉拡大の自己同型へ延長する。 |
-| `Field.Over.Automorphism.Kummer` / `RadicalAction` | 1の根を固定する自己同型の交換子と根号、根号閉包の元を交換子列のある段階で固定すること。 |
-| `Field.Over.Generation` | 根号閉包と平方根閉包、部分体としての閉性、作図可能なら根号で表せること。 |
-| `Field.Over.Generation.Construction` | 有限の体演算と平方根の式、式の妥当性、作図可能性との同値性。 |
-| `Field.Over.Generation.RadicalExpression` | 有限の体演算と根号の式、根号閉包との同値性。 |
-| `Permutation` | 置換、部分群、正規部分群、交換子部分群、交換子列、可解性、可換商による有限列。 |
-| `Quintic` | 5点の具体的な置換による \(S_5\) の非可解性と、可換商を持つ有限の部分群列が存在しないこと。 |
-| `RationalClosure` | 有理数の埋め込み、代数的数の集合、\(\mathbb Q\) の代数閉包の構造。 |
-| `Examples.InField` | \(\sqrt2\) の作図可能性と有限の式、\(X^5-X-1\) の係数列。 |
+| `Field.Over` | Arbitrary field arithmetic, nonzero reciprocals, zero-normalized reciprocal operations. |
+| `Field.Over.Subfield` | Subfields, intersections, generated subfields, simple adjunction, minimality/monotonicity/idempotence. |
+| `Field.Over.Subfield.Of` | Subfield carriers and field laws. |
+| `Field.Over.Morphism` | Field homomorphisms, injectivity, embeddings, composition, preservation of powers. |
+| `Field.Over.Automorphism` | Automorphisms, inverses, composition. |
+| `Field.Over.Correspondence` | Fixed fields, stabilizers, Galois groups, contravariant Galois connection, triple-application identities. |
+| `Field.Over.Polynomial` | Coefficient lists/monic polynomials, evaluation, existing-polynomial conversion, splitting, algebraicity, radical solvability. |
+| `Field.Over.Polynomial.Raw` | Coefficient-list addition/multiplication/normalization, monic division and degree bounds. |
+| `Field.Over.Polynomial.Extension.At` | Minimal-polynomial existence, divisibility of annihilators, embedding extension to roots. |
+| `Field.Over.Polynomial.Splitting` | Linear division at roots, complete splitting from algebraic closedness, inclusion of roots of unity. |
+| `Field.Over.Partial.Countable` | Extend subfield isomorphisms to automorphisms of countable algebraically closed extensions. |
+| `Field.Over.Automorphism.Kummer` / `RadicalAction` | Commutators of automorphisms fixing roots of unity and radicals; radical-closure elements fixed at some derived-series stage. |
+| `Field.Over.Generation` | Radical/square-root closures, subfield closure, constructibility implies expression by radicals. |
+| `Field.Over.Generation.Construction` | Finite field/square-root expressions, validity, equivalence with constructibility. |
+| `Field.Over.Generation.RadicalExpression` | Finite field/radical expressions, equivalence with radical closure. |
+| `Permutation` | Permutations, subgroups, normal/commutator subgroups, derived series, solvability, finite chains with abelian quotients. |
+| `Quintic` | Explicit five-point permutations proving \(S_5\) nonsolvable and absence of finite subgroup chains with abelian quotients. |
+| `RationalClosure` | Rational embeddings, algebraic numbers, algebraic-closure structure for \(\mathbb Q\). |
+| `Examples.InField` | Constructibility/finite expression for \(\sqrt2\), coefficients of \(X^5-X-1\). |
 
-## 使い方
+## Usage
 
 ```toml
 [dependencies]
@@ -42,45 +42,45 @@ galois = { path = "../galois" }
 \import galois.RationalClosure[] \as Closure;
 ```
 
-`Generation.Constructible S x` は、基礎集合 \(S\) を含み、体演算と平方根で閉じたすべての部分集合に \(x\) が属することをいう。
-`Construction.characterization` は、この定義が有限の体演算と平方根の式による表示と同値であることを証明する。
-`RadicalExpression.characterization` は、指数が2以上の根号について同じことを証明する。
-実数体の部分体に適用すると、通常の実数の作図可能性の代数的な定義になる。
+`Generation.Constructible S x` states \(x\) belongs to every subset containing the base set \(S\) and closed under field operations and square roots.
+`Construction.characterization` proves equivalence with finite field/square-root expressions.
+`RadicalExpression.characterization` proves the analogous result for radicals of exponent at least two.
+Applied to subfields of the reals, this is the usual algebraic definition of real constructibility.
 
-モニック多項式は、最高次の係数1を除いた低次からの係数列で表す。
-空列は1、長さは次数であり、代数性の証人には正の次数を要求する。
-最高次係数が1であるため、零多項式はこの表現に含まれない。
-分解は `algebra.Polynomial.Over` の多項式環での一次式の積との等式で表す。
-`SolvableByRadicals` は、指定した周囲の体における根号閉包内の分解と、全根が根号閉包に属することを要求する。
+Monic polynomials are ascending coefficient lists omitting the leading one.
+The empty list is one; length is degree; algebraicity witnesses require positive degree.
+Leading coefficient one excludes the zero polynomial.
+Splitting is equality with products of linear factors in the `algebra.Polynomial.Over` polynomial ring.
+`SolvableByRadicals` requires splitting inside the radical closure of the specified ambient field and all roots in that closure.
 
-## \(S_5\) の非可解性
+## Nonsolvability of \(S_5\)
 
-`Quintic.symmetricFiveNotSolvable` は、仮定を持たない \(\neg\operatorname{Solvable}(S_5)\) の証明である。
-3サイクル \(c=(a\ b\ c)\) と2つの具体的な置換 \(s,t\) に対し、
+`Quintic.symmetricFiveNotSolvable` proves \(\neg\operatorname{Solvable}(S_5)\) without assumptions.
+For the 3-cycle \(c=(a\ b\ c)\) and explicit permutations \(s,t\),
 
 \[
 [scs^{-1},tct^{-1}]=c
 \]
 
-を5点それぞれで計算して証明する。
-交換子部分群が共役で閉じることから、\(c\) は交換子列のすべての段階に残る。
-\(c(a)\ne a\) なので、この列は単位部分群に到達しない。
-`Permutation.Obstruction.persists` がこの議論の一般形である。
+prove the identity by computation on all five points.
+Closure of commutator subgroups under conjugation leaves \(c\) in every derived-series stage.
+Since \(c(a)\ne a\), the series never reaches the trivial subgroup.
+`Permutation.Obstruction.persists` is the general form of this argument.
 
-`Correspondence.galoisConnection` は固定体と安定化群の順序に関する接続を述べる。
-`Quintic.Field.Over.threeLiftsObstruction` は、この群の障害と根号に対する作用を結び付け、根が根号閉包に属さないことを導く。
-[quintic](../quintic/README.md) は独立な5つの根から自己同型を構成し、一般5次方程式の根号非可解性と作図不可能性を証明する。
+`Correspondence.galoisConnection` states the order connection between fixed fields and stabilizers.
+`Quintic.Field.Over.threeLiftsObstruction` combines the group obstruction with radical actions to show roots lie outside radical closure.
+[quintic](../quintic/README.md) constructs automorphisms from five independent roots, proving general-quintic radical insolubility and nonconstructibility.
 
-## 有理数の代数閉包
+## Algebraic closure of the rationals
 
-`RationalClosure.AlgebraicClosureOfQ` は、台集合、体の構造、有理数の埋め込み、全元の \(\mathbb Q\) 上の代数性、代数的閉性を束ねる。
-代数的閉性は、正の次数のすべてのモニック多項式に根が存在することで定義する。
-`RationalClosure.In.AlgebraicNumbers` は、指定した周囲の体で有理数上代数的な元を取った refinement である。
-代数閉包の構造を与えるには、代数性と代数的閉性の証明が必要になる。
+`RationalClosure.AlgebraicClosureOfQ` bundles a carrier, field structure, rational embedding, algebraicity of all elements over \(\mathbb Q\), and algebraic closedness.
+Algebraic closedness means every positive-degree monic polynomial has a root.
+`RationalClosure.In.AlgebraicNumbers` refines an ambient field to elements algebraic over the rationals.
+Providing algebraic-closure structure requires proofs of algebraicity and algebraic closedness.
 
-## 検査
+## Checks
 
-リポジトリのルートから実行する。
+Run from the repository root.
 
 ```sh
 cargo run -p cli -- libs/algebra/galois --module galois

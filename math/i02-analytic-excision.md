@@ -1,12 +1,12 @@
-# I02 解析的指数の局所化と切除
+# I02 Localization and excision of the analytic index
 
-## 要件
+## Requirements
 
-- 主な実装先は `analytic_index_excision`。
-- コンパクトな台の近傍で一致するシンボルを比較し、開埋め込みによる零延長が指数を保つことを証明する。
-- 非コンパクトな開集合上のコンパクト台付きシンボルをコンパクト化して指数を定義し、コンパクト化の独立性を証明する。
-- 作用素の貼り合わせと parametrix の交換による切除の証明を公開し、球面と Euclid 空間の局所モデルを比較する。
+- Primary implementation: `analytic_index_excision`.
+- Compare symbols agreeing near compact supports; prove extension by zero under open embeddings preserves index.
+- Define indices of compactly supported symbols on noncompact open sets by compactification; prove compactification independence.
+- Expose excision proofs by operator gluing and parametrix interchange; compare local sphere/Euclidean models.
 
-## 依存するタスク
+## Dependencies
 
-- [I01 シンボルの K 類と解析的指数写像](i01-symbol-index.md)
+- [I01 Symbol K-classes and the analytic index map](i01-symbol-index.md)

@@ -1,13 +1,13 @@
-# G07 Sard の定理
+# G07 Sard's theorem
 
-## 要件
+## Requirements
 
-- 主な実装先は `sard`。
-- Euclid 空間の滑らかな写像の臨界値が Lebesgue 零集合になることを、階数と次元に関する帰納法で証明する。
-- 可算チャートで多様体へ移し、正則値の稠密性とパラメータ空間内の例外集合の零性を公開する。
-- 境界・各境界面への制限にも同時に適用できる形を用意する。
+- Primary implementation: `sard`.
+- Prove critical values of smooth Euclidean maps form Lebesgue null sets by induction on rank and dimension.
+- Transfer to manifolds via countable charts; expose density of regular values and null exceptional parameter sets.
+- Provide simultaneous applicability to the boundary and each boundary face.
 
-## 依存するタスク
+## Dependencies
 
-- [G02 逆関数・陰関数と正則値の局所形](g02-inverse-implicit.md)
-- [A02 Euclid 空間の Lebesgue 測度](a02-lebesgue-measure.md)
+- [G02 Inverse and implicit functions and local forms of regular values](g02-inverse-implicit.md)
+- [A02 Lebesgue measure on Euclidean spaces](a02-lebesgue-measure.md)

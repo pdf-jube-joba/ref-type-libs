@@ -1,13 +1,13 @@
-# A15 擬微分作用素の Sobolev 有界性
+# A15 Sobolev boundedness of pseudodifferential operators
 
-## 要件
+## Requirements
 
-- 主な実装先は `pseudodifferential_bounds`。
-- 零階シンボルの有限個の半ノルムによる L2 有界性を証明する。
-- m 階作用素の \(H^s\) から \(H^{s-m}\) への有界性、負次数の双対性との整合性を証明する。
-- シンボルの連続な族に対する作用素ノルムの連続性と、平滑化余項の全次数の評価を公開する。
+- Primary implementation: `pseudodifferential_bounds`.
+- Prove L2 boundedness from finitely many seminorms of order-zero symbols.
+- Prove boundedness of order-m operators from \(H^s\) to \(H^{s-m}\) and compatibility with negative-order duality.
+- Expose operator-norm continuity for continuous symbol families and all-order bounds for smoothing remainders.
 
-## 依存するタスク
+## Dependencies
 
-- [A13 シンボルと局所量子化](a13-symbol-quantization.md)
-- [A09 Euclid 空間の Sobolev 評価](a09-euclidean-sobolev.md)
+- [A13 Symbols and local quantization](a13-symbol-quantization.md)
+- [A09 Sobolev estimates on Euclidean spaces](a09-euclidean-sobolev.md)

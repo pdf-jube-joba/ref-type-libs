@@ -1,97 +1,97 @@
-# 閉部分空間からの束の延長（B09）
+# Bundle extension from closed subspaces (B09)
 
-コンパクト Hausdorff 空間 \(X\) の閉部分空間 \(A\) から、実・複素の関数、束、束写像、束同型を延長する。
-束は \(A\) を含む開近傍へ延長し、元の束との制限比較同型も構成する。
-空の部分空間、次元0、連結成分ごとに階数が異なる束を排除する仮定は置かない。
+Extend real/complex functions, bundles, maps, and isomorphisms from closed \(A\) in compact Hausdorff \(X\).
+Extend bundles to open neighborhoods of \(A\), constructing restriction comparisons.
+No assumptions exclude empty subspaces, dimension zero, or componentwise varying ranks.
 
-## 公開 API
+## Public API
 
-入口は `bundle_extension.Extension`。
-`Real`・`Complex` の引数は底集合 `A`、底位相 `source`、閉部分集合 `subset` である。
+Entry: `bundle_extension.Extension`.
+`Real`, `Complex` take base set `A`, topology `source`, closed subset `subset`.
 
-| API | 内容 |
+| API | Contents |
 | --- | --- |
-| `Real.tietze`・`Complex.tietze` | 実数値・複素数値の連続関数を \(X\) 全体へ延長 |
-| `Real.Components`・`Complex.Components` | 任意の添字集合による成分族の延長 |
-| `Real.Matrices`・`Complex.Matrices` | 有限矩形行列族の成分ごとの延長 |
-| `Real.Square`・`Complex.Square` | 可逆行列の開近傍への延長、連続な逆行列と制限式 |
-| `RealProjections`・`Complex.Projections` | 冪等行列族の開近傍への延長、像束と制限比較 |
-| `RealBundleExtension`・`Complex.BundleExtension` | 任意の有限階数束の近傍への延長 |
-| `Sections`・`RealSections.extend`・`ComplexSections.extend` | \(X\) 上の束の閉部分空間上の切断を \(X\) 全体へ延長 |
-| `RealMaps.extend`・`ComplexMaps.extend` | \(X\) 上の二束間の閉部分空間上の束写像を \(X\) 全体へ延長 |
-| `RealIsomorphisms.extend`・`ComplexIsomorphisms.extend` | 閉部分空間上の同型を開近傍上の同型へ延長 |
-| `RealLocalIsomorphisms.extend`・`ComplexLocalIsomorphisms.extend` | 開近傍上の二束の同型を、より小さい共通開近傍へ延長 |
-| `CompactNeighborhood` | 開近傍内にコンパクトな閉近傍を取り、相対開近傍を \(X\) の開近傍へ持ち上げる |
+| `Real.tietze`, `Complex.tietze` | Extend real/complex continuous functions to all \(X\) |
+| `Real.Components`, `Complex.Components` | Extend arbitrarily indexed component families |
+| `Real.Matrices`, `Complex.Matrices` | Entrywise extension of finite rectangular matrices |
+| `Real.Square`, `Complex.Square` | Invertible extensions to open neighborhoods, continuous inverses/restriction laws |
+| `RealProjections`, `Complex.Projections` | Idempotent neighborhood extensions, image bundles/restriction comparisons |
+| `RealBundleExtension`, `Complex.BundleExtension` | Neighborhood extension of arbitrary finite-rank bundles |
+| `Sections`, `RealSections.extend`, `ComplexSections.extend` | Extend closed-subspace sections of \(X\)-bundles globally |
+| `RealMaps.extend`, `ComplexMaps.extend` | Extend closed-subspace maps between \(X\)-bundles globally |
+| `RealIsomorphisms.extend`, `ComplexIsomorphisms.extend` | Extend closed-subspace isomorphisms to open neighborhoods |
+| `RealLocalIsomorphisms.extend`, `ComplexLocalIsomorphisms.extend` | Extend isomorphisms between neighborhood bundles to smaller common neighborhoods |
+| `CompactNeighborhood` | Compact closed neighborhoods inside open ones; lift relatively open neighborhoods to \(X\) |
 
-`RealMaps`・`ComplexMaps` は共通の底位相 `baseSpace` と `sourceSame`・`same` で束の底位相との一致を受け取る。
-通常は `baseSpace := source.baseSpace`、`sourceSame := \refl(source.baseSpace)` とする。
-束の延長の `Witness` は有限射影表示と行列の延長を保持し、`With` は `domain`・`open`・`contains`・`Fiber`・`extended`・`restricted`・`comparison` を公開する。
-同型の延長の `Result` は開近傍、連続な逆写像を持つ同型、閉部分空間上で与えられた同型と一致する式を保持する。
+`RealMaps`, `ComplexMaps` take common topology `baseSpace` and agreement with bundle topologies via `sourceSame`, `same`.
+Usually set `baseSpace := source.baseSpace`, `sourceSame := \refl(source.baseSpace)`.
+Bundle-extension `Witness` stores finite projections/matrix extensions; `With` exposes `domain`, `open`, `contains`, `Fiber`, `extended`, `restricted`, `comparison`.
+Isomorphism-extension `Result` stores open neighborhoods, isomorphisms with continuous inverses, and agreement with supplied closed-subspace isomorphisms.
 
-## 構成
+## Construction
 
-実数値 Tietze は、正規性から得る Urysohn 関数と、幾何級数で誤差を抑えた一様近似列の連続な極限から作る。
-複素数値の場合は実部と虚部に適用する。
-成分族・矩形行列の延長では、各成分の延長を選んで連続性と制限式をまとめる。
+Real Tietze uses normality/Urysohn functions and continuous limits of uniform geometric-error approximations.
+Apply separately to real/imaginary parts for complex functions.
+Select each component extension; group continuity/restriction laws for families/rectangles.
 
-束には [B03 の有限埋め込みと射影表示](../bundle_complements/README.md)を使う。
-冪等写像 \(P\) に対する \(2(I-P)\) のスペクトルは0と2に分かれ、[K06 のスペクトル射影](../../algebra/spectral_splitting/README.md)で元の \(P\) を回復する。
-行列の延長後、単位円上のスペクトルを避ける開領域へ制限して像束を得る。
-実束では実行列を複素化し、共役を保つスペクトル射影を実座標へ戻す。
-`RealLinear` が複素化・制限・行列積・射影回復の整合性を証明する。
+Bundles use [B03 finite embeddings and projections](../bundle_complements/README.md).
+For idempotent \(P\), \(2(I-P)\) has spectrum zero/two; [K06 spectral projections](../../algebra/spectral_splitting/README.md) recover \(P\).
+After matrix extension, restrict to the open unit-circle-avoiding locus to obtain image bundles.
+For real bundles, complexify matrices and return conjugation-preserving spectral projections to real coordinates.
+`RealLinear` proves complexification/restriction/products/projection-recovery compatibility.
 
-束写像には、両束の有限埋め込みとレトラクションを使う。
-閉部分空間上の写像を矩形行列に符号化し、成分を延長して束へ射影し直す。
-同型の場合は順写像と逆写像を延長し、二つの合成が可逆になる共通開近傍へ制限する。
-`Over.Endomorphisms` は、束の自己写像を自明束の補束上で恒等写像に拡張し、行列式の非零領域と連続な逆行列から逆写像を構成する。
+Bundle maps use finite embeddings and retractions of both bundles.
+Encode closed-subspace maps as rectangular matrices, extend entries, project back to bundles.
+For isomorphisms, extend both maps and restrict to common open neighborhoods where both composites invert.
+`Over.Endomorphisms` extends endomorphisms by identity on trivial complements, constructing inverses from nonzero determinant loci and continuous matrix inverses.
 
-## 延長の比較と相対三つ組
+## Extension comparison and relative triples
 
-二つの束の延長は、定義域を共通開近傍へ制限し、閉部分空間上での比較同型を合成して `RealLocalIsomorphisms` または `ComplexLocalIsomorphisms` に渡す。
-`extend` は、指定した比較同型と一致する同型を、さらに小さい開近傍上で構成する。
-開近傍自体のコンパクト性は要求せず、`CompactNeighborhood` の閉近傍へ制限してから延長を戻す。
-相対 K 理論の三つ組 \((E,F,\alpha)\) の閉部分空間上の同型 \(\alpha\) にもこの入口を使える。
+Restrict two extensions to common neighborhoods, compose closed-subspace comparisons, and pass to `RealLocalIsomorphisms` or `ComplexLocalIsomorphisms`.
+`extend` constructs isomorphisms on smaller neighborhoods agreeing with specified comparisons.
+Open neighborhoods need not be compact: restrict to `CompactNeighborhood` closed neighborhoods, then extend back.
+This also extends relative-K triple isomorphisms \(\alpha\) in \((E,F,\alpha)\).
 
-`Over.Isomorphisms.With.Pullback` は指定された延長同型を引き戻し、反復引き戻しを一段の引き戻しと比較する。
-`With.Stabilize[n]` は自明な \(n\) 次元束との直和を取り、閉部分空間上で \(\alpha\oplus\mathrm{id}\) に一致する式を与える。
-縮小比較にも `Over.LocalIsomorphisms.With.Stabilize[n]` を用いる。
-束の延長の `With.Pullback` は、元の閉部分空間への連続写像に沿って、元の束と延長束の制限比較同型を引き戻す。
-いずれも指定した延長を運ぶ構成であり、存在証明で選ばれる延長の一意性は要求しない。
+`Over.Isomorphisms.With.Pullback` pulls back specified extensions and compares iterated/single pullback.
+`With.Stabilize[n]` sums with trivial \(n\)-bundles, agreeing with \(\alpha\oplus\mathrm{id}\) on closed subspaces.
+Shrinking comparisons also use `Over.LocalIsomorphisms.With.Stabilize[n]`.
+Bundle-extension `With.Pullback` pulls back original/extended restriction comparisons along continuous maps into the original closed subspace.
+These transport specified extensions without requiring uniqueness of choices in existence proofs.
 
-## 利用例
+## Examples
 
-`Examples.RealBundle`・`ComplexBundle` は一点空間上の実・複素自明束を延長し、次元0と1で実体化する。
-`Examples.Mobius` は \(S^1\times[0,1]\) の閉端面 \(S^1\times\{0\}\) 上の Möbius 束を開近傍へ延長する。
-`Examples.ComplexLine` は \(S^2\times[0,1]\) の閉端面上の、[B04 の単位円遷移による複素線束](../bundle_homotopy/README.md)に同じ構成を適用する。
-`Examples.EmptyRealBundle`・`EmptyComplexBundle` は、空の閉部分空間からの束の延長を実体化する。
-行列についても実・複素の恒等行列を次元0と1で検査する。
+`Examples.RealBundle`, `ComplexBundle` extend real/complex trivial bundles over points, instantiated in dimensions zero/one.
+`Examples.Mobius` extends Möbius bundles from closed \(S^1\times\{0\}\) in \(S^1\times[0,1]\) to open neighborhoods.
+`Examples.ComplexLine` applies the same construction to [B04 unit-circle-transition complex lines](../bundle_homotopy/README.md) on closed faces in \(S^2\times[0,1]\).
+`Examples.EmptyRealBundle`, `EmptyComplexBundle` instantiate extensions from empty closed subspaces.
+Also checks real/complex identity matrices in dimensions zero/one.
 
-## 検証と再開
+## Validation and resuming
 
-基点は PR #48 統合済み main `d6ecc14d499efbd782a70ae5c837c4da97c7abc8`。
-K07 の `76e6084094f810eaf51e18663bb33d111dd409d7`、K02 の `29f3f43b7a760485ad516dec1c6835d6e09aa41e`、B09 初期実装の `96731109fb2466c72de286aee73ab659e30743a2` は祖先に含まれる。
-継続ブランチは `math/b09-complete-extension`、[PR #49](https://github.com/pdf-jube-joba/ref-type/pull/49) を使う。
+Base: PR #48-integrated main `d6ecc14d499efbd782a70ae5c837c4da97c7abc8`.
+Ancestors include K07 `76e6084094f810eaf51e18663bb33d111dd409d7`, K02 `29f3f43b7a760485ad516dec1c6835d6e09aa41e`, initial B09 `96731109fb2466c72de286aee73ab659e30743a2`.
+Continuation branch: `math/b09-complete-extension`; [PR #49](https://github.com/pdf-jube-joba/ref-type/pull/49).
 
-実装の最終変更は `fb8cc1a36a3f343e4e88fbd44ae75790e5c8567f`、末尾空行を整えた数学入力の基準は `c5632cf7bf185d6c0d47ea290e7e8973c32c1c04`。
-現在の数学入力は全体検査に使った固定 snapshot と一致する。
+Last implementation change: `fb8cc1a36a3f343e4e88fbd44ae75790e5c8567f`; math-input baseline after trailing-blank cleanup: `c5632cf7bf185d6c0d47ea290e7e8973c32c1c04`.
+Current math inputs match the full-check fixed snapshot.
 
-| 検査 | module 数 | 終了コード |
+| Check | Modules | Exit code |
 | --- | ---: | ---: |
-| package と依存閉包 | 5,580 | 0 |
-| workspace 全体 | 8,287 | 0 |
+| Package and dependency closure | 5,580 | 0 |
+| Full workspace | 8,287 | 0 |
 
-共有キャッシュは `libs/refcache`、固定 snapshot と結果レポートは `work/b09-resume/package-final.*`・`workspace-final.*`。
-全体検査は100,406ソース検査ステップ、worker 1、最大 RSS 9,040,752 KiBで完了した。
-両検査ともキャッシュ保存完了を確認し、復旧・重複・再実行・未保存ステップ・保存失敗は0。
-中断で操作ハンドルが失効した全体検査は、既存プロセスを継続し、元のコマンドシェルの終了状態0と accepted レポートを回収した。
-数学コードの追加修正や検査の再起動は行っていない。
-B09 の実装・検証の残作業はなく、統合状態は PR #49 を参照する。
+Shared cache: `libs/refcache`; fixed snapshots/reports: `work/b09-resume/package-final.*`, `workspace-final.*`.
+Full check completed 100,406 source steps, one worker, peak RSS 9,040,752 KiB.
+Both confirmed cache saving; zero recoveries, duplicates, reruns, unsaved steps, save failures.
+When interruption invalidated the full-check handle, kept the process running and recovered original-shell exit 0 and accepted reports.
+No further math fixes or check restarts.
+No B09 implementation/validation work remains; see PR #49 for integration.
 
-再検査はリポジトリルートから行う。
+Recheck from the repository root.
 
 ```sh
 target/debug/cli libs/geometry/bundle_extension --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --cache-stats --diagnostics compact --report-json work/b09-resume/package.json
 target/debug/cli libs --memory-mib 10240 --cache-dir libs/refcache --cache-budget-mib 12288 --cache-stats --diagnostics compact --report-json work/b09-resume/workspace.json
 ```
 
-CLI は `cargo build -p cli --locked` でビルド済み（終了0）。
+CLI built with `cargo build -p cli --locked` (exit 0).

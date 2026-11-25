@@ -1,21 +1,21 @@
-# 複素数
+# Complex numbers
 
-Dedekind 実数の対として \(\mathbb{C}=\mathbb{R}\times\mathbb{R}\) を構成する。
-実数の乗法と逆数には `dedekind_reals.DedekindReal.Arithmetic.Prop` の符号付き演算を使う。
+Construct \(\mathbb{C}=\mathbb{R}\times\mathbb{R}\) as pairs of Dedekind reals.
+Real multiplication and reciprocals use signed operations from `dedekind_reals.DedekindReal.Arithmetic.Prop`.
 
-| モジュール | 内容 |
+| Module | Contents |
 | --- | --- |
-| `Complex` | `Real`、`Complex`、構築関数 `make`、実部 `re`、虚部 `im` |
-| `Complex.Def` | `zero`、`one`、`i`、実数の埋め込み、四則演算、実数倍、共役、絶対値の二乗 |
-| `Complex.Multiplication` | 複素乗法の結合則に使う実部・虚部の計算 |
-| `Complex.Prop` | 外延性、埋め込みの単射性と演算保存、算術法則、共役、絶対値の二乗、逆数と除法の法則 |
-| `Complex.Algebra` | 加法可換群、可換環、体の構造 |
-| `Complex.Absolute` | 二乗ノルムの平方根による絶対値、非負性、零の判定、積・共役・三角不等式 |
+| `Complex` | `Real`, `Complex`, constructor `make`, real part `re`, imaginary part `im` |
+| `Complex.Def` | `zero`, `one`, `i`, real embedding, arithmetic, real scaling, conjugation, squared modulus |
+| `Complex.Multiplication` | Real/imaginary computations for associativity of complex multiplication |
+| `Complex.Prop` | Extensionality, embedding injectivity/arithmetic preservation, arithmetic laws, conjugation, squared modulus, reciprocal/division laws |
+| `Complex.Algebra` | Additive abelian group, commutative ring, field structures |
+| `Complex.Absolute` | Modulus as square root of squared norm, nonnegativity, zero criterion, product/conjugation/triangle inequalities |
 
-実数の恒等式と平方の性質は `real.Analysis.Algebra` を使う。
+Use `real.Analysis.Algebra` for real identities and square properties.
 
-`make a b` は \(a+bi\) を表す。
-共役と絶対値の二乗、逆数は次の式で定義する。
+`make a b` represents \(a+bi\).
+Conjugation, squared modulus, and reciprocals are defined below.
 
 \[
 \overline{a+bi}=a-bi,\qquad
@@ -23,6 +23,6 @@ Dedekind 実数の対として \(\mathbb{C}=\mathbb{R}\times\mathbb{R}\) を構�
 (a+bi)^{-1}=\frac{a-bi}{a^2+b^2}.
 \]
 
-零の逆数と零による除法は零とする。
+The reciprocal of zero and division by zero are defined as zero.
 
-[利用例](src/SpecificValues.ref) は演算・共役・体の構造を検査する。
+[Examples](src/SpecificValues.ref) check arithmetic, conjugation, and field structure.

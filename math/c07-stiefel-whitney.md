@@ -1,12 +1,12 @@
-# C07 Stiefel–Whitney 類
+# C07 Stiefel–Whitney classes
 
-## 要件
+## Requirements
 
-- 主な実装先は `stiefel_whitney`。
-- 有限 CW 底空間の実束の mod 2 Stiefel–Whitney 類を構成し、自然性、正規化、Whitney 和公式を証明する。
-- 第1類と向き付けの障害を同定し、最高次類を mod 2 Euler 類と比較する。
-- 実射影空間の標準線束と接束の全 Stiefel–Whitney 類を計算する。
+- Primary implementation: `stiefel_whitney`.
+- Construct mod 2 Stiefel–Whitney classes for real bundles over finite CW bases; prove naturality, normalization, and Whitney sums.
+- Identify the first class with the orientation obstruction; compare the top class with the mod 2 Euler class.
+- Compute total Stiefel–Whitney classes of canonical line bundles and tangent bundles on real projective spaces.
 
-## 依存するタスク
+## Dependencies
 
-- [C05 射影束定理と分裂原理](c05-projective-bundle.md)
+- [C05 Projective bundle theorem and splitting principle](c05-projective-bundle.md)

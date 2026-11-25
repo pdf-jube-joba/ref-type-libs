@@ -1,29 +1,29 @@
-# 有限 Grassmannian
+# Finite Grassmannians
 
-有限次元の実・複素 Grassmannian とその普遍束を扱う。
-公開入口 `Real[n, k].Model[].Carrier` と `Complex[n, k].Model[].Carrier` は、それぞれ標準 \(n\) 次元空間上の直交射影のうち、像が \(k\) 個の基底を持つものの型である。
-射影と階数は `hermitian_frames` の `Projection` と `OnProjection.Rank.HasRank` を再利用する。
-`Examples` は任意の周囲次元で恒等射影と基底を構成し、特に零次元の Grassmannian と階数1の実・複素射影空間に具体的な点を与える。
+Finite-dimensional real/complex Grassmannians and universal bundles.
+Public `Real[n, k].Model[].Carrier` and `Complex[n, k].Model[].Carrier` are standard \(n\)-space orthogonal projections whose images have \(k\)-element bases.
+Reuse `Projection` and `OnProjection.Rank.HasRank` in `hermitian_frames` for projections/rank.
+`Examples` constructs identity projections/bases in arbitrary dimensions, giving explicit dimension-zero Grassmannian and rank-one projective-space points.
 
-射影の行列成分から誘導位相を構成し、連続射影族の像として普遍束とその直交補束を構成する。
-各点の近傍に連続な正規直交フレームが存在する。
-`Real.Model` と `Complex.Model` は線形写像をデータとし、射影と階数の条件を課した表現である。
-この表現について行列成分の単射性、Hausdorff 性、正規直交フレーム空間からの連続全射によるコンパクト性を証明し、普遍束・直交補束・連続な直和写像を構成した。
-`ProjectiveReal` と `ProjectiveComplex` はこのモデルを階数1に特殊化し、標準線束と直交補束を公開する。
-連続な一定階数の射影族から Grassmannian への連続写像を `Family.map` として構成する。
-任意の連続写像による普遍束の引き戻しと、合成した射影族の像束との同型を `Pullback.isomorphism` として公開する。
-直和では、ブロック射影の階数加法と写像の連続性を証明する。
-`Graph` は基準点の近傍で射影像を基準部分空間からその直交補へのグラフとして表し、像の復元を証明する。
-`Model.Graph.Reconstruction.homeomorphismExists` は局所グラフ座標を順写像とする同相写像の存在を証明し、`Model.Charts.exists` は各点でこの座標の存在を与える。
-零射影・恒等射影との直和から、周囲次元と階数を安定化する連続写像を構成する。
-直交補写像と、引き戻した普遍束から元の直交補束への同型を構成する。
-直和写像に沿う普遍束の引き戻しと、両因子から引き戻した普遍束の直和との同型を構成する。
-安定化についても、普遍束の引き戻しと各因子から引き戻した束の直和との同型を構成する。
-既存の `bundle_complements.Projection` は連続な射影族から像束を構成し、`Projection.Pullback` は引き戻しを比較する。
-`hermitian_frames` は射影の直交補とブロック和を提供する。
-元の `Real.Grassmannian`・`Complex.Grassmannian` は射影構造体に基づく補助表現で、Model との両方向の連続写像と Model 側の往復等式を提供する。
+Entry-induced topologies and continuous-projection image bundles give universal/orthogonal-complement bundles.
+Continuous local orthonormal frames exist near every point.
+`Real.Model` and `Complex.Model` store linear maps subject to projection/rank conditions.
+Proved entry injectivity, Hausdorffness, compactness via continuous orthonormal-frame surjections; constructed universal/complement bundles and continuous sums.
+`ProjectiveReal` and `ProjectiveComplex` specialize rank one, exposing canonical lines/complements.
+`Family.map` constructs continuous Grassmannian maps from continuous constant-rank projections.
+`Pullback.isomorphism` compares universal pullbacks by arbitrary continuous maps with composed-projection images.
+Prove block-sum rank addition/map continuity.
+`Graph` represents nearby images as graphs from reference planes to complements, proving image reconstruction.
+`Model.Graph.Reconstruction.homeomorphismExists` proves homeomorphisms with local graph coordinates as forward maps; `Model.Charts.exists` gives existence at every point.
+Sums with zero/identity projections construct continuous ambient/rank stabilizations.
+Construct complement maps and universal-pullback/original-complement isomorphisms.
+Compare universal sum pullbacks with sums of factor universal pullbacks.
+Stabilization likewise compares universal pullbacks with factorwise pulled-back sums.
+Existing `bundle_complements.Projection` constructs continuous projection images; `Projection.Pullback` compares pullbacks.
+`hermitian_frames` provides orthogonal complements/block sums.
+Original `Real.Grassmannian`, `Complex.Grassmannian` are projection-structure auxiliary models, with continuous maps both ways and Model round trips.
 
-`Stabilization.ambientBundleIsomorphism` と `dimensionBundleIsomorphism` の右辺は、各因子の普遍束を直和の基底から安定化の基底へ順に引き戻した束の直和である。
-同型の基底写像が公開する安定化写像と一致することは `ambientMapFormula` と `dimensionMapFormula` が示す。
+Right sides of `Stabilization.ambientBundleIsomorphism` and `dimensionBundleIsomorphism` sum factor universal bundles pulled back successively from sum bases to stabilization bases.
+`ambientMapFormula` and `dimensionMapFormula` identify isomorphism base maps with public stabilization maps.
 
-検査と再開方法は `work/b05-resume.md` に記載する。
+Check/resume instructions: `work/b05-resume.md`.

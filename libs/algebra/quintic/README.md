@@ -1,13 +1,13 @@
-# 一般5次方程式の根号非可解性
+# General quintic insolubility by radicals
 
-パッケージ名は `quintic`。
-`galois` の体拡大・最小多項式・自己同型の延長・交換子列を使い、独立な5つの根から作る一般5次方程式の根号非可解性を証明する。
+Package: `quintic`.
+Use `galois` field extensions, minimal polynomials, automorphism extensions, and derived series to prove radical insolubility of the quintic from five independent roots.
 
-## 定理
+## Theorem
 
-代数的に閉じた定数体 \(C\) と、\(C\) 上代数的に独立な \(r_a,r_b,r_c,r_d,r_e\) を取る。
-周囲の体 \(K\) は、\(C(r_a,r_b,r_c,r_d,r_e)\) 上代数的で、可算かつ代数的に閉じているものとする。
-定数体内の自然数からの単射を与えて、部分体の無限性を表す。
+Take algebraically closed constants \(C\) and \(C\)-algebraically independent \(r_a,r_b,r_c,r_d,r_e\).
+Ambient \(K\) is countable, algebraically closed, and algebraic over \(C(r_a,r_b,r_c,r_d,r_e)\).
+An injection from naturals into constants expresses infinitude.
 
 \[
 P(T)=\prod_{i\in\{a,b,c,d,e\}}(T-r_i)
@@ -15,39 +15,39 @@ P(T)=\prod_{i\in\{a,b,c,d,e\}}(T-r_i)
 \qquad F=C(a_0,a_1,a_2,a_3,a_4).
 \]
 
-`Generic.Field.Over.Equation` は、この係数列と係数体 \(F\) を構成する。
-`degree` は次数が5であること、`over` は全係数が \(F\) に属すること、`firstRoot` は \(P(r_a)=0\) を証明する。
+`Generic.Field.Over.Equation` constructs the coefficient list and coefficient field \(F\).
+`degree` proves degree five; `over` proves coefficients in \(F\); `firstRoot` proves \(P(r_a)=0\).
 
-`Generic.Field.Over.AbelRuffini` は次を証明する。
+`Generic.Field.Over.AbelRuffini` proves:
 
-| 定理 | 結論 |
+| Theorem | Conclusion |
 | --- | --- |
-| `firstRootNotRadical` | \(r_a\) は \(F\) 上の根号閉包に属さない。 |
-| `noRadicalFormula` | \(F\) の元、四則演算、有限回の根号から \(r_a\) を表す式は存在しない。 |
-| `notSolvableByRadicals` | \(P\) は \(F\) 上根号で可解でない。 |
-| `firstRootNotConstructible` / `noConstruction` | \(r_a\) は \(F\) 上の有限回の体演算と平方根では構成できない。 |
-| `notConstructible` | 全根を \(F\) 上作図可能数で得ることはできない。 |
+| `firstRootNotRadical` | \(r_a\) is outside the radical closure over \(F\). |
+| `noRadicalFormula` | No expression from \(F\), arithmetic, and finitely many radicals represents \(r_a\). |
+| `notSolvableByRadicals` | \(P\) is not solvable by radicals over \(F\). |
+| `firstRootNotConstructible` / `noConstruction` | \(r_a\) is not constructible over \(F\) by finite field/square-root operations. |
+| `notConstructible` | Not all roots are constructible over \(F\). |
 
-これらの定理は `Closure.Conditions` と定数体の代数的閉性を仮定とする含意である。
-`Closure.Conditions` の内容は、\(K\) の代数的閉性、根の代数的独立性、定数体内の単射、\(K/C(r_a,r_b,r_c,r_d,r_e)\) の代数性である。
-\(K\) の全元を尽くす列挙を module の引数として与える。
-代数的独立性は、多変数多項式の評価の核が零であることで定義する。
-`Distinctness.independentImpliesDistinct` が根の相異なることを導く。
+These implications assume `Closure.Conditions` and algebraically closed constants.
+`Closure.Conditions` includes algebraic closedness of \(K\), root independence, an injection into constants, and algebraicity of \(K/C(r_a,r_b,r_c,r_d,r_e)\).
+Supply an enumeration of all \(K\) elements as a module argument.
+Algebraic independence means the multivariate evaluation kernel is zero.
+`Distinctness.independentImpliesDistinct` derives distinct roots.
 
-## 証明の構成
+## Proof structure
 
-1. 多変数多項式の変数の置換が環の関係を保つことを証明する。
-2. 独立性から、多項式の分数による表示の関係が置換後も一致することを示し、\(C(r_a,r_b,r_c,r_d,r_e)\) の同型を構成する。
-3. 最小多項式と単純拡大の同型を使い、可算な \(K\) の元を定義域と値域へ交互に加えて自己同型へ延長する。
-4. 3つの具体的な置換について一次式の積を並べ替え、自己同型が \(P\) の係数を固定することを示す。
-5. 根号で表せる元は交換子列のある段階で固定されることを使う。
-   一方、\(c=(a\ b\ c)\) と具体的な \(s,t\) に対する \([scs^{-1},tct^{-1}]=c\) により、この3サイクルの作用はすべての段階で残る。
-   \(r_a\ne r_b\) と矛盾する。
+1. Prove variable permutations preserve polynomial-ring relations.
+2. Independence preserves polynomial-fraction relations under permutations, constructing isomorphisms of \(C(r_a,r_b,r_c,r_d,r_e)\).
+3. Use minimal polynomials/simple-extension isomorphisms to extend automorphisms back and forth through countable \(K\).
+4. Reorder linear factors for three explicit permutations to show automorphisms fix \(P\)'s coefficients.
+5. Radical expressions are fixed at some derived-series stage.
+   But \([scs^{-1},tct^{-1}]=c\) for \(c=(a\ b\ c)\) and explicit \(s,t\) leaves this 3-cycle action in every stage.
+   This contradicts \(r_a\ne r_b\).
 
-根の置換を延長できることも、根号による固定の性質も、結論として証明している。
-利用する古典的選択は、既存の `classicalIndefiniteChoice` である。
+Extension of root permutations and radical-fixing properties are proved conclusions.
+Classical choice uses existing `classicalIndefiniteChoice`.
 
-## 使用する module
+## Modules used
 
 ```text
 \import quintic.Generic[].Field[K := K, field := field]
@@ -57,13 +57,13 @@ P(T)=\prod_{i\in\{a,b,c,d,e\}}(T-r_i)
 \import Generic.AbelRuffini[enumeration := enumeration, index := index] \as AbelRuffini;
 ```
 
-`K` は体の台集合、`field` は `std.Alg.Field.Field[K]`、`constants` は `galois.Field.Over.Subfield.Subfield`、`roots` は `galois.Quintic.Five -> K`。
-`enumeration` は `std.Set.Countability[K].Enumerator`、`index` は `Nat -> K` である。
-根号閉包と作図可能性の定義、有理数の代数閉包の定義は [galois](../galois/README.md) にある。
+`K` is the field carrier; `field` is `std.Alg.Field.Field[K]`; `constants` is `galois.Field.Over.Subfield.Subfield`; `roots` is `galois.Quintic.Five -> K`.
+`enumeration` is `std.Set.Countability[K].Enumerator`; `index` is `Nat -> K`.
+Radical closure, constructibility, and rational algebraic-closure definitions: [galois](../galois/README.md).
 
-## 検査
+## Checks
 
-リポジトリのルートから実行する。
+Run from the repository root.
 
 ```sh
 cargo run -p cli -- libs/algebra/galois --module galois --full-check-local

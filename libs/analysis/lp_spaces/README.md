@@ -1,51 +1,51 @@
-# Lp 空間
+# Lp spaces
 
-`lp_spaces.On[A, mu]` は任意の測度空間で、既存の `functional_analysis.Measure.Lp.Finite` の商を使う。
-有限指数 \(1\le p<\infty\) の実線形・ノルム構造、Hölder・Minkowski、完備性、実・複素 \(L^2\) の Hilbert 構造と可積分単関数の稠密性を提供する。
-既存の `LInfinity` 商についても essential supremum ノルムと実 Banach 空間構造を与える。
-これらに測度の有限性・σ 有限性・完備性は要求しない。
+`lp_spaces.On[A, mu]` uses existing `functional_analysis.Measure.Lp.Finite` quotients on arbitrary measure spaces.
+Provides real linear/norm structures for \(1\le p<\infty\), Hölder/Minkowski, completeness, real/complex \(L^2\) Hilbert structures, and density of integrable simple functions.
+Existing `LInfinity` quotients also receive essential-supremum norms and real Banach structures.
+No finiteness, σ-finiteness, or measure completeness required.
 
-| API | 内容 |
+| API | Contents |
 | --- | --- |
-| `Powers.value` / `Powers.law` / `Powers.Unique.unique` | 非負実数の冪、既存の有理数冪比較との一致と一意性 |
-| `Powers.Algebra` / `Powers.Convergence` | 冪の積・反復・順序・根と数列極限 |
-| `Powers.Young.inequality` | 共役な有限正指数の Young 不等式 |
-| `On.Finite[p]` | 既存商、加法・逆元・スカラー倍、代表元の標準モーメントとノルム値 |
-| `On.Infinity.Vector.space` / `Norm.structure` / `Completion.complete` | 既存 L∞ 商の実ベクトル・ノルム・Banach 構造 |
-| `On.Endpoint.inequality` / `rightInequality` | L1–L∞ と L∞–L1 の積の可積分性と Hölder の評価 |
-| `On.Finite[p].Vector.space` | 既存商の実ベクトル空間構造 |
-| `On.Norm[p].norm` / `metric` | Minkowski を含むノルム空間と誘導距離 |
-| `On.Holder[exponents]` | 共役指数の積の可積分性と Hölder の評価 |
-| `On.Norm[p].Dominated[d].theorem` | 共通の Lp 支配関数の下でのノルム収束 |
-| `On.Completion[p].complete` | 任意の Cauchy 列に対する商内の極限の存在 |
-| `On.Hilbert.inner` / `hilbert` | 積の積分による実 L2 内積と Hilbert 構造 |
-| `On.Complex.Geometry.norm` / `On.Complex.Inner.inner` / `On.Complex.Complete.hilbert` | 任意の測度上の複素 L2 のノルム・内積・完備性 |
-| `On.Complex.Characterization.equivalence` | 実部・虚部の L2 条件と、複素可測かつ絶対値の L2 条件の同値 |
-| `On.SimpleApproximation[p].dense` | L1 可積分な実単関数による Lp 近似 |
-| `On.Restriction[p, S].integrable` | 有限測度集合上に制限した任意の有限 p の関数の L1 可積分性 |
-| `On.Parametric.continuous` / `On.Differentiation.derivative` | 共通の可積分支配関数の下でのパラメータ極限・微分と積分の交換 |
-| `On.Jensen[p].inequality` | 質量 1 の非負密度に対する積分の p 乗の評価 |
-| `On.Pullback[p, map]` | 測度保存写像の引き戻し、a.e. 商上の定義・ノルム・距離の保存 |
-| `Euclidean[n].Translation[p].continuous` / `Group.continuousAt` | 有限 p の Lebesgue Lp における平行移動の ε–δ ノルム連続性、合成則と等長性 |
-| `Euclidean[n].BorelRepresentative[p].existsRepresentative` | 各有限 p の Lebesgue Lp 類に対する Borel 可測代表の構成 |
-| `Euclidean[n].Joint.measurableKernel` | Borel 代表に対する `f(x−y)ρ(y)` の積 σ 代数上の共同可測性 |
-| `Euclidean[n].Compact[p]` | コンパクト台付き連続・滑らかな関数の可測性・有界性・Lp 代表元 |
-| `Euclidean[n].Approximation[p].smoothDense` / `continuousDense` | Euclid の Lebesgue 測度、有限実指数 `1 ≤ p < ∞` での C∞ コンパクト台・連続コンパクト台関数の稠密性 |
-| `Euclidean[n].Convolution[p].smooth` / `Derivative.derivative` | 任意の有限 p の代表元とコンパクト台滑らかな核の畳み込み、全点での積分存在・滑らかさ・偏微分表示 |
-| `Euclidean[n].Convolution[p].Normalized.norm` / `Operator` | 非負・質量 1 の核による Lp 縮小作用素、代表元によらない商上の定義 |
-| `Euclidean[n].Convolution[p].approximateIdentity` / `Smoothing.convergence` | 正規化 bump から構成した近似単位と全 Lp 類に対するノルム収束 |
-| `Euclidean[n].Convolution[p].CompactSupport.value` | コンパクト台連続関数の畳み込みによるコンパクト台滑らかな関数 |
-| `Examples[A, mu, p]` | 一般の代表元・商・指数を使う検査される利用例 |
+| `Powers.value` / `Powers.law` / `Powers.Unique.unique` | Nonnegative-real powers, agreement/uniqueness with rational-power comparisons |
+| `Powers.Algebra` / `Powers.Convergence` | Power products/iteration/order/roots/sequence limits |
+| `Powers.Young.inequality` | Young inequalities for finite positive conjugate exponents |
+| `On.Finite[p]` | Existing quotients, addition/inverses/scaling, canonical moments/norms of representatives |
+| `On.Infinity.Vector.space` / `Norm.structure` / `Completion.complete` | Existing L∞ real vector/norm/Banach structures |
+| `On.Endpoint.inequality` / `rightInequality` | L1–L∞/L∞–L1 integrable products and Hölder bounds |
+| `On.Finite[p].Vector.space` | Real vector structures on existing quotients |
+| `On.Norm[p].norm` / `metric` | Normed spaces including Minkowski, induced metrics |
+| `On.Holder[exponents]` | Integrable conjugate-exponent products and Hölder |
+| `On.Norm[p].Dominated[d].theorem` | Norm convergence under common Lp domination |
+| `On.Completion[p].complete` | Quotient limits for arbitrary Cauchy sequences |
+| `On.Hilbert.inner` / `hilbert` | Real L2 integral inner products and Hilbert structures |
+| `On.Complex.Geometry.norm` / `On.Complex.Inner.inner` / `On.Complex.Complete.hilbert` | Complex L2 norms/inner products/completeness over arbitrary measures |
+| `On.Complex.Characterization.equivalence` | Equivalence of component L2 and complex measurability/modulus L2 conditions |
+| `On.SimpleApproximation[p].dense` | Lp approximation by L1-integrable real simple functions |
+| `On.Restriction[p, S].integrable` | L1 integrability of finite-p functions restricted to finite-measure sets |
+| `On.Parametric.continuous` / `On.Differentiation.derivative` | Parameter-limit/derivative interchange under common integrable domination |
+| `On.Jensen[p].inequality` | Integral p-power bounds for nonnegative mass-one densities |
+| `On.Pullback[p, map]` | Measure-preserving pullbacks, a.e.-quotient definitions, norm/distance preservation |
+| `Euclidean[n].Translation[p].continuous` / `Group.continuousAt` | Finite-p Lebesgue translation ε–δ norm continuity, composition/isometry |
+| `Euclidean[n].BorelRepresentative[p].existsRepresentative` | Borel representatives of all finite-p Lebesgue classes |
+| `Euclidean[n].Joint.measurableKernel` | Joint measurability of `f(x−y)ρ(y)` for Borel representatives in product σ-algebras |
+| `Euclidean[n].Compact[p]` | Measurability/bounds/Lp representatives of continuous/smooth compact-support functions |
+| `Euclidean[n].Approximation[p].smoothDense` / `continuousDense` | Euclidean compact-support smooth/continuous density for finite real exponents `1 ≤ p < ∞` |
+| `Euclidean[n].Convolution[p].smooth` / `Derivative.derivative` | Finite-p representative/smooth compact-kernel convolution, everywhere integral existence/smoothness/partial formulas |
+| `Euclidean[n].Convolution[p].Normalized.norm` / `Operator` | Nonnegative mass-one Lp contractions, representative-independent quotient definitions |
+| `Euclidean[n].Convolution[p].approximateIdentity` / `Smoothing.convergence` | Approximate identities from normalized bumps and norm convergence for all Lp classes |
+| `Euclidean[n].Convolution[p].CompactSupport.value` | Smooth compact-support convolutions of continuous compact-support functions |
+| `Examples[A, mu, p]` | Checked examples with general representatives/quotients/exponents |
 
-補助の非負指数 API は零底を零とする `PositivePower.atZero` の規約に従う。
-Lp の指数とノルムの根の指数は正である。
+Auxiliary nonnegative exponent APIs follow `PositivePower.atZero`, assigning zero to zero bases.
+Lp exponents and norm-root exponents are positive.
 
-`On.ConjugateExponents` は既存の有限指数二つと \(p^{-1}+q^{-1}=1\) をまとめる。
-`Holder.representative` は実際の点ごとの積の可積分代表で、積の可測性も関数の可測性から証明する。
+`On.ConjugateExponents` groups two existing finite exponents and \(p^{-1}+q^{-1}=1\).
+`Holder.representative` represents actual pointwise integrable products, deriving product measurability from factor measurability.
 
-完備性の証明は Cauchy 列から二進的に小さい差分を持つ部分列を選び、絶対差分の部分和の p 乗に単調収束を適用する。
-a.e. 極限を例外零集合上で零にした可測代表を構成するため、元の測度が完備である必要はない。
-単関数近似は正・負部分に対する既存の有限単関数近似を使い、各段階の L1 可積分性を別に示す。
+Completeness selects Cauchy subsequences with dyadically small differences, applying monotone convergence to p-powers of absolute-difference partial sums.
+Set a.e. limits to zero on measurable exceptional null sets; measure completeness is unnecessary.
+Simple approximation uses existing positive/negative finite simple approximations, separately proving each stage L1.
 
 ```ref
 \import lp_spaces.On[A := A, mu := mu] \as L;
@@ -57,29 +57,29 @@ a.e. 極限を例外零集合上で零にした可測代表を構成するため
 \definition complete: Normed.IsBanach N.norm := L.Completion[p := p].complete;
 ```
 
-複素 L2 の内積は第二変数について線形で、点ごとの `conj(f) * g` の積分である。
-実部・虚部の Cauchy 列の実 L2 極限から複素 L2 の極限を構成する。
+Complex L2 inner products are second-variable linear and integrate pointwise `conj(f) * g`.
+Construct complex L2 limits from real L2 limits of real/imaginary Cauchy components.
 
-Euclid 上の稠密性は、任意の Lp 関数の箱による切り詰め、単関数の有限セル分解、測度の正則性、G01 の滑らかな cutoff と Lp の優収束から証明する。
-この稠密性は有限 p に限定され、L∞ については主張しない。`EuclideanExamples[n, p]` が一般の次元・指数・商の元を使う検査対象の利用例である。
+Euclidean density uses box truncation, finite simple cells, measure regularity, G01 cutoffs, and Lp dominated convergence.
+Density is claimed only for finite p, not L∞. `EuclideanExamples[n, p]` is a checked example for general dimensions/exponents/classes.
 
-L∞ の完備性は、列の各項と全ての差分の上界に対する可算例外集合をまとめ、その外で点ごとの Cauchy 極限を取り、可測な零集合上で零にした代表を構成して証明する。
+L∞ completeness combines countable exceptional sets for terms/difference bounds, takes pointwise Cauchy limits outside, and sets representatives to zero on measurable null sets.
 
-Borel 代表は、滑らかな近似列に対する完備性証明の a.e. 極限を再利用し、例外集合を Borel 零集合で覆い、その集合上で零にした代表として構成する。
-共同可測性は、積 σ 代数上の座標関数と座標差の可測性から Borel σ 代数の引き戻しを構成して証明する。
+Borel representatives reuse completeness a.e. limits of smooth approximations, covering exceptions by Borel null sets and zeroing there.
+Joint measurability follows by pulling back Borel σ-algebras through measurable product coordinates/differences.
 
-畳み込みは \(f*\rho)(x)=\int f(y)\rho(x-y)\,dy\) として全点で定義し、反射・平行移動による変数変換で \(\int f(x-y)\rho(y)\,dy\) と一致することを示す。
-局所 L1 可積分性、核のコンパクト台、偏微分の有界性から積分と微分を交換し、全ての有限階の滑らかさを帰納的に証明する。
-Lp の縮小評価に使う Fubini は、Borel 代表のモーメントと核の共同可測性を証明して適用する。
-その後、a.e. 等しい代表の畳み込みは全点で等しいことから、作用素を元の Lebesgue Lp 商へ移す。
+Define convolution everywhere by \((f*\rho)(x)=\int f(y)\rho(x-y)\,dy\); reflection/translation substitution identifies \(\int f(x-y)\rho(y)\,dy\).
+Local L1, compact kernels, and bounded partials interchange derivatives/integrals, inductively proving all finite-order smoothness.
+Fubini in contraction estimates uses proved joint measurability of Borel moments and kernels.
+Since a.e.-equal representatives have everywhere-equal convolutions, transfer operators to original Lebesgue quotients.
 
-`Convolution.ApproximateIdentity` は非負で積分 1、台の半径が 1 以下で零へ縮む滑らかな核の列を表す。
-`approximateIdentity` は G01 の bump を各段階で積分により正規化して構成し、半径は二進数列である。
-`Smoothing[identity].convergence` は任意のこの列と任意の有限 p の Lp 類に対するノルム収束であり、入力に滑らかさやコンパクト台を要求しない。
-コンパクト台滑らかな入力に対する優収束と、縮小評価・稠密性で一般の入力へ拡張する。
-これらの Euclid の定理は零次元も含む。
+`Convolution.ApproximateIdentity` is a sequence of nonnegative smooth mass-one kernels with support radii at most one shrinking to zero.
+`approximateIdentity` normalizes G01 bumps by integrals at dyadic radii.
+`Smoothing[identity].convergence` gives norm convergence for arbitrary such sequences and finite-p classes, requiring no smoothness/compact support of inputs.
+Extend compact-smooth-input dominated convergence to general inputs by contraction and density.
+These Euclidean theorems include dimension zero.
 
-通常検査はリポジトリのルートから実行する。
+Run standard checks from the repository root.
 
 ```sh
 target/release/cli libs/analysis/lp_spaces --module lp_spaces --diagnostics compact --no-progress --memory-mib 12288

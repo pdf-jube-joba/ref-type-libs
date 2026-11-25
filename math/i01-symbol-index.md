@@ -1,14 +1,14 @@
-# I01 シンボルの K 類と解析的指数写像
+# I01 Symbol K-classes and the analytic index map
 
-## 要件
+## Requirements
 
-- 主な実装先は `symbol_index`。
-- 楕円作用素の主シンボルを余接束のコンパクト台付き K 類に送り、安定化とホモトピーを比較する。
-- 任意の K 類の代表を滑らかなシンボルへ移し、必要な安定化の後に楕円擬微分作用素として量子化する。
-- 解析的指数が代表と量子化に依存しない群準同型になることを証明する。
+- Primary implementation: `symbol_index`.
+- Send elliptic principal symbols to compactly supported cotangent K-classes; compare stabilization and homotopy.
+- Move arbitrary K-class representatives to smooth symbols; quantize as elliptic pseudodifferential operators after necessary stabilization.
+- Prove the analytic index is a group homomorphism independent of representatives and quantization.
 
-## 依存するタスク
+## Dependencies
 
-- [A17 楕円作用素の解析的指数](a17-elliptic-fredholm.md)
-- [K10 コンパクト台付き K 理論とシンボルの表示](k10-compact-support-k.md)
-- [G08 滑らかな近似と相対横断性](g08-transversality.md)
+- [A17 Analytic index of elliptic operators](a17-elliptic-fredholm.md)
+- [K10 Compactly supported K-theory and symbol presentations](k10-compact-support-k.md)
+- [G08 Smooth approximation and relative transversality](g08-transversality.md)

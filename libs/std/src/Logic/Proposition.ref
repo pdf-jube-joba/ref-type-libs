@@ -64,7 +64,7 @@
   rtl: Q -> P,
 };
 
-/* これは PropEquiv にしなくていい */
+/* This does not need to be PropEquiv. */
 \definition andComm[P, Q: \Prop]: And[P, Q] -> And[Q, P] := \fun (h: _) =>
   And[Q, P]::# (h.right) (h.left);
 

@@ -1,50 +1,50 @@
-# 抽象代数
+# Abstract algebra
 
-準同型、群完成、商、多項式環を扱う。
+Homomorphisms, group completion, quotients, and polynomial rings.
 
-| module | 公開する内容 |
+| Module | Public contents |
 | --- | --- |
-| `Hom` | モノイド・群・半環・環の準同型とモノイド準同型の合成。 |
-| `Quotient` | 同値関係による商、演算の降下、代表元によらない写像の一意な延長。 |
-| `Quotient.Groups` / `Quotient.Rings` | 合同関係による可換群・可換環の商構造。 |
-| `Group.Of.Subgroups` | 零元・和・逆元で閉じた部分集合上の可換群。 |
-| `GroupCompletion.Of` | 一般の可換モノイドの群完成と、可換群への準同型の一意な延長。 |
-| `GroupCompletion.Natural` | 自然数の加法モノイドの群完成と既存の整数との同型、加法の保存。 |
-| `GroupCompletion.Semiring` | 半環の群完成の環構造、半環準同型の環準同型への一意な延長、積の可換性の保存。 |
-| `Exact` | 核・像・完全性、完全性から合成が零になること、可換群準同型の核・像の群構造。 |
-| `FreeCommutativeRing.Over.Presentation` | 係数環と変数・関係から作る可換環の表示と普遍性。 |
-| `FreeAssociativeRing.Over.Presentation` | 中心的な係数を持つ非可換な結合環の表示、結合代数構造と普遍性。 |
-| `Groups.On` | 一般の群の逆元・共役、部分群、生成部分群、直積、中心的な符号元による商。 |
-| `Groups.Units` | 環の可逆元群、逆元の一意性と可逆元の外延性。 |
-| `Polynomial.Over` | 一変数多項式環、係数写像と変数の値で定まる評価準同型とその一意性。 |
-| `LaurentPolynomial.Over` | Laurent 多項式環、可逆元への評価準同型とその一意性。 |
+| `Hom` | Monoid/group/semiring/ring homomorphisms and composition of monoid homomorphisms. |
+| `Quotient` | Equivalence quotients, operation descent, unique representative-independent extensions of maps. |
+| `Quotient.Groups` / `Quotient.Rings` | Abelian-group/commutative-ring quotients by congruences. |
+| `Group.Of.Subgroups` | Abelian groups on subsets closed under zero, addition, and inverses. |
+| `GroupCompletion.Of` | Group completion of arbitrary commutative monoids and unique homomorphism extensions into abelian groups. |
+| `GroupCompletion.Natural` | Group completion of additive naturals, isomorphism to existing integers, preservation of addition. |
+| `GroupCompletion.Semiring` | Ring structures on semiring completions, unique ring extensions of semiring homomorphisms, preservation of commutative multiplication. |
+| `Exact` | Kernels/images/exactness, zero composites from exactness, abelian kernel/image group structures. |
+| `FreeCommutativeRing.Over.Presentation` | Presentations and universality of commutative rings from coefficient rings, variables, and relations. |
+| `FreeAssociativeRing.Over.Presentation` | Noncommutative associative-ring presentations with central coefficients, associative-algebra structure and universality. |
+| `Groups.On` | General group inverses/conjugation, subgroups, generated subgroups, products, quotients by central sign elements. |
+| `Groups.Units` | Ring unit groups, inverse uniqueness and unit extensionality. |
+| `Polynomial.Over` | Univariate polynomial rings, unique evaluation homomorphisms specified by coefficient maps and variable values. |
+| `LaurentPolynomial.Over` | Laurent polynomial rings, unique evaluations at units. |
 
-可換モノイドの群完成は、形式差の関係
+Group completion of commutative monoids is defined by the formal-difference relation
 
 \[
 (a,b)\sim(c,d)\quad\Longleftrightarrow\quad\exists e,\quad a+d+e=c+b+e
 \]
 
-で定義する。
-この関係の同値性、演算との整合性、群の法則、普遍性を証明している。
-半環の積は加法に関する普遍性を二度使って延長する。
+below.
+Proves equivalence, operation compatibility, group laws, and universality of this relation.
+Extend semiring multiplication by using additive universality twice.
 
-多項式環と Laurent 多項式環は、式の集合を最小の環合同関係で割って構成する。
-`FreeCommutativeRing` の表示は追加の関係を持つ係数環上の可換環にも利用できる。
-体上の係数列のモニック化とモニック除法は `galois.Field.Over.Polynomial.Raw`、一般の非零除数への除法・互除法と Bézout 係数は [polynomial_linear_algebra](../polynomial_linear_algebra/README.md) を参照。
+Construct polynomial and Laurent rings by quotienting expressions by the least ring congruence.
+`FreeCommutativeRing` presentations also handle coefficient-ring algebras with additional relations.
+For monic normalization/division of coefficient lists over fields, see `galois.Field.Over.Polynomial.Raw`; for division by arbitrary nonzero divisors, Euclidean algorithms, and Bézout coefficients, see [polynomial_linear_algebra](../polynomial_linear_algebra/README.md).
 
-`Noncommutative` は一般の群、部分群、右作用、安定化部分群、左剰余類の右作用を扱う。
-`Actions.At` は、推移的な右作用と選んだ点の安定化部分群の剰余類作用の間の同変全単射を構成する。
+`Noncommutative` handles general groups, subgroups, right actions, stabilizers, and right actions on left cosets.
+`Actions.At` constructs equivariant bijections between transitive right actions and coset actions of chosen-point stabilizers.
 
-`AmalgamatedProduct` は群の融合積の普遍性と、普遍性を満たす二つの群の標準同型を提供する。
-`Noncommutative.Actions.PointedMaps` は推移的な群作用間の基点付き同変写像を安定化部分群の包含から構成する。
-`GroupTransport` は相互逆な全単射で群構造を移す。
+`AmalgamatedProduct` provides amalgamated-product universality and canonical isomorphisms between groups satisfying it.
+`Noncommutative.Actions.PointedMaps` constructs pointed equivariant maps between transitive actions from stabilizer inclusions.
+`GroupTransport` transports group structures along inverse bijections.
 
-`Polynomial.Over.induction` と `LaurentPolynomial.Over.induction` は、定数・変数・和・負・積について閉じた命題をすべての多項式へ拡張する。
+`Polynomial.Over.induction` and `LaurentPolynomial.Over.induction` extend propositions closed under constants, variables, sums, negation, and products to all polynomials.
 
-`LaurentPolynomial.Over.Universal` の `onConstant`・`onVariable`・`onInverseVariable` は、評価の生成元での計算法則を公開する。
-[uniform_approximation](../../analysis/uniform_approximation/README.md) は多項式・Laurent 環の帰納法と評価を使い、実際の環の元として一様近似を構成する。
+`onConstant`, `onVariable`, `onInverseVariable` in `LaurentPolynomial.Over.Universal` expose evaluation laws on generators.
+[uniform_approximation](../../analysis/uniform_approximation/README.md) uses polynomial/Laurent induction and evaluation to construct uniform approximations as actual ring elements.
 
-`Two` は Bool を台とする二元体である。
-加法は xor、乗法は and で、可換環・体の法則と \(0\ne1\) を証明している。
-整数加群としての演算と剰余環との比較は `cohomology_examples.Two` がこの共通の体構造を使う。
+`Two` is the two-element field on Bool.
+Addition is xor, multiplication is and; commutative-ring/field laws and \(0\ne1\) are proved.
+`cohomology_examples.Two` uses this shared field structure for integer-module operations and residue-ring comparisons.

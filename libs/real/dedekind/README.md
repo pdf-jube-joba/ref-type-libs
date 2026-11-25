@@ -1,7 +1,7 @@
-# Dedekind 実数
+# Dedekind reals
 
-有理数の切断による実数、演算・順序・完備性を扱う。
+Reals from rational cuts, with arithmetic, order, and completeness.
 
-`DedekindReal` は有理数の下方切断から実数を構成する。
-`Arithmetic`、`Order`、`Completeness`、`Field` が演算・順序・完備性・体の構造を提供する。
-[real](../basic/README.md) が解析で利用する演算と補題をまとめる。
+`DedekindReal` constructs reals from rational lower cuts.
+`Arithmetic`, `Order`, `Completeness`, `Field` provide arithmetic, order, completeness, and field structure.
+[real](../basic/README.md) collects operations and lemmas used in analysis.

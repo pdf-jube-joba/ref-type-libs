@@ -1,36 +1,36 @@
-# B08 Grassmannian のセル分解
+# B08 Grassmannian cell decompositions
 
-## 作業状況
+## Work status
 
-[grassmannian_cells](../../libs/geometry/grassmannian_cells/README.md) に全要件に対応する定義と証明項を記述した。
-実装した範囲と型検査による確認がない範囲を区別し、以下を記録する。
+[grassmannian_cells](../../libs/geometry/grassmannian_cells/README.md) contains definitions and proof terms for all requirements.
+The following distinguishes implemented scope from scope lacking type-check confirmation.
 
-| 要件 | 実装した API |
+| Requirement | Implemented API |
 | --- | --- |
-| Schubert 座標、総次元式、階段形分解、網羅性・非交叉 | `Symbols.FreeCount`、`Canonical.FiniteCoordinates`、`Reduction`、`DecompositionReal`・`DecompositionComplex` |
-| 閉球の積と標準円板の同一視 | `Rotations.Parameters.Disk`、`Characteristic.diskExists` |
-| 特性写像の内部同相、境界の低次元セルへの包含 | `StandardDisk.interiorImage`・`interiorHomeomorphism`、`Characteristic.boundaryLower` |
-| 実・複素の有限 CW 構造 | `CWReal.exists`・`CWComplex.exists`、既存の `algebraic_topology.CW.FiniteComplex` |
-| 周囲次元の標準包含と CW 構造の比較 | `AmbientReal.CW`・`AmbientComplex.CW` の `cellular`・`reflects`・`cellHomeomorphism`、`With.filtrationEquals` |
-| 向き付き実 Grassmannian の被覆 | `OrientedReal.covering`・`twoSheets`、`Atlas.In.homeomorphism` |
-| 被覆へ持ち上げた有限 CW 構造と比較 | `OrientedReal.CW.exists`、`With.projects`・`filtrationEqualsPreimage` |
-| 安定化極限、球面写像・ホモトピーの有限段階化 | `StableReal`・`StableComplex` の `weakTopology`・`Maps.exists`・`Spheres.sphereMap`・`sphereHomotopy` |
+| Schubert coordinates, total dimension, echelon decomposition, coverage and disjointness | `Symbols.FreeCount`, `Canonical.FiniteCoordinates`, `Reduction`, `DecompositionReal` and `DecompositionComplex` |
+| Identification of products of closed balls with standard disks | `Rotations.Parameters.Disk`, `Characteristic.diskExists` |
+| Interior homeomorphism of characteristic maps; boundary inclusion in lower-dimensional cells | `StandardDisk.interiorImage` and `interiorHomeomorphism`, `Characteristic.boundaryLower` |
+| Real and complex finite CW structures | `CWReal.exists` and `CWComplex.exists`, existing `algebraic_topology.CW.FiniteComplex` |
+| Standard ambient inclusions and CW-structure comparison | `cellular`, `reflects`, `cellHomeomorphism` of `AmbientReal.CW` and `AmbientComplex.CW`; `With.filtrationEquals` |
+| Coverings of oriented real Grassmannians | `OrientedReal.covering` and `twoSheets`, `Atlas.In.homeomorphism` |
+| Lifted finite CW structures and comparisons on coverings | `OrientedReal.CW.exists`, `With.projects` and `filtrationEqualsPreimage` |
+| Stabilization limits and finite stages for sphere maps/homotopies | `weakTopology`, `Maps.exists`, `Spheres.sphereMap`, `sphereHomotopy` of `StableReal` and `StableComplex` |
 
-2026-11-20 の追補では、対象パッケージの `--parse-only --diagnostics compact` と `git diff --check` が終了コード0で完了した。
-対象・全体の型検査は実行していない。
-構文解析は名前解決や型の整合性を検査しないため、上表の追補全体は型検査による確認がない。
-引き継ぎ前の初回型検査も300秒で未完了であり、B08 の形式的な検証完了は宣言しない。
-新しい公理宣言や未証明のための置き換えは追加していない。
-成果は既存の [Draft PR #81](https://github.com/pdf-jube-joba/ref-type/pull/81) に継続してまとめる。
+In the 2026-11-20 supplement, the target package's `--parse-only --diagnostics compact` and `git diff --check` completed with exit code 0.
+Neither target nor full type checking was run.
+Parsing does not check name resolution or type consistency, so the entire supplement above lacks type-check confirmation.
+The initial pre-handoff type check also remained incomplete after 300 seconds; B08 formal verification is not declared complete.
+No new axioms or unproved replacements added.
+Continue collecting results in the existing [Draft PR #81](https://github.com/pdf-jube-joba/ref-type/pull/81).
 
-## 要件
+## Requirements
 
-- 主な実装先は `grassmannian_cells`。
-- 実・複素の有限 Grassmannian に Schubert セルの座標を構成し、閉包の付着による有限 CW 構造を証明する。
-- 周囲次元の標準包含と向き付き Grassmannian の被覆に、CW 構造とその比較を与える。
-- 安定化の直極限に弱位相を与え、コンパクトな球面からの写像とホモトピーを有限段階で表す補題を公開する。
+- Primary implementation: `grassmannian_cells`.
+- Construct Schubert coordinates for finite real and complex Grassmannians; prove finite CW structures by attaching closures.
+- Give CW structures and comparisons for standard ambient inclusions and coverings of oriented Grassmannians.
+- Equip stabilization direct limits with weak topology; expose finite-stage representation lemmas for maps and homotopies from compact spheres.
 
-## 依存するタスク
+## Dependencies
 
-- [B05 有限 Grassmannian と普遍束](b05-grassmannians.md)
-- [K02 CW cofibration と Puppe 列](../../libs/topology/puppe_sequences/README.md)
+- [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)
+- [K02 CW cofibrations and Puppe sequences](../../libs/topology/puppe_sequences/README.md)

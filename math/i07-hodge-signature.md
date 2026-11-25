@@ -1,15 +1,15 @@
-# I07 Hodge 理論と符号数作用素
+# I07 Hodge theory and the signature operator
 
-## 要件
+## Requirements
 
-- 主な実装先は `hodge_signature`。
-- 計量と向きから Hodge star、形式的随伴、Laplacian を構成し、楕円性と Hodge 分解を証明する。
-- De Rham コホモロジーと調和形式を比較し、偶奇の De Rham 作用素の指数が Euler 標数になることを証明する。
-- 4の倍数次元で符号数作用素とその次数付けを構成し、解析的指数が交叉形式の符号数になることを証明する。
+- Primary implementation: `hodge_signature`.
+- Construct Hodge star, formal adjoints, and Laplacians from metrics/orientations; prove ellipticity and Hodge decomposition.
+- Compare de Rham cohomology with harmonic forms; prove the even/odd de Rham operator index equals Euler characteristic.
+- Construct graded signature operators in dimensions divisible by four; prove analytic index equals intersection-form signature.
 
-## 依存するタスク
+## Dependencies
 
-- [A17 楕円作用素の解析的指数](a17-elliptic-fredholm.md)
-- [接続と共変微分](../../libs/geometry/bundle_connections/README.md)
-- [D04 De Rham の比較定理](d04-de-rham-comparison.md)
-- [G12 Poincaré–Lefschetz 双対性](g12-poincare-duality.md)
+- [A17 Analytic index of elliptic operators](a17-elliptic-fredholm.md)
+- [Connections and covariant derivatives](../../libs/geometry/bundle_connections/README.md)
+- [D04 De Rham comparison theorem](d04-de-rham-comparison.md)
+- [G12 Poincaré–Lefschetz duality](g12-poincare-duality.md)

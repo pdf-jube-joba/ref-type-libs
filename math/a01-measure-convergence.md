@@ -1,12 +1,12 @@
-# A01 測度積分の収束定理
+# A01 Convergence theorems for measure integration
 
-## 要件
+## Requirements
 
-- 主な実装先は `measure_convergence`。
-- 既存の単関数による積分について、単調収束、Fatou、優収束を証明する。
-- 可積分関数の線形性、絶対値評価、ほとんど至る所の一致と商への降下を構成する。
-- 実・複素・有限次元ベクトル値積分と級数の積分交換を、後続のノルム評価に使える形で公開する。
+- Primary implementation: `measure_convergence`.
+- Prove monotone convergence, Fatou's lemma, and dominated convergence for the existing simple-function integral.
+- Construct linearity, absolute-value bounds, almost-everywhere equality, and descent to the quotient for integrable functions.
+- Expose real, complex, and finite-dimensional vector-valued integrals and interchange of integration with series for use in subsequent norm estimates.
 
-## 依存するタスク
+## Dependencies
 
-なし。
+None.

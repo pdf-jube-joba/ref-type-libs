@@ -1,14 +1,14 @@
-# C04 射影空間と標準線束のコホモロジー
+# C04 Cohomology of projective spaces and canonical line bundles
 
-## 要件
+## Requirements
 
-- 主な実装先は `projective_cohomology`。
-- 有限次元の実・複素射影空間のセル鎖と特異コホモロジーの比較を構成する。
-- 複素射影空間の整数コホモロジー環と実射影空間の mod 2 コホモロジー環を、標準線束の生成元とその冪で計算する。
-- 次元の包含、双対線束、Hopf 線束、既存の実射影平面・球面モデルとの比較と符号を証明する。
+- Primary implementation: `projective_cohomology`.
+- Construct cellular-chain/singular-cohomology comparisons for finite-dimensional real and complex projective spaces.
+- Compute integral complex-projective and mod 2 real-projective cohomology rings using canonical-line-bundle generators and their powers.
+- Prove comparisons/signs for dimension inclusions, dual and Hopf line bundles, and existing real-projective-plane/sphere models.
 
-## 依存するタスク
+## Dependencies
 
-- [B05 有限 Grassmannian と普遍束](b05-grassmannians.md)
-- [C03 Thom 類と Thom 同型](../../libs/topology/cohomology_thom/README.md)
-- [B08 Grassmannian のセル分解](b08-grassmannian-cells.md)
+- [B05 Finite Grassmannians and universal bundles](b05-grassmannians.md)
+- [C03 Thom classes and the Thom isomorphism](../../libs/topology/cohomology_thom/README.md)
+- [B08 Grassmannian cell decompositions](b08-grassmannian-cells.md)

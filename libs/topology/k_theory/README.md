@@ -1,25 +1,25 @@
-# 束の Grothendieck 環（K01）
+# Grothendieck rings of bundles (K01)
 
-コンパクト Hausdorff 空間上の複素束から、Grothendieck の可換環 \(K^0\) を構成する。
-[B03 の同型類と補束](../../geometry/bundle_complements/README.md)、[B02 の束演算](../../geometry/bundle_operations/README.md)、既存の [`algebra.GroupCompletion`](../../algebra/basic/README.md) を再利用する。
+Construct commutative \(K^0\) from complex bundles on compact Hausdorff spaces.
+Reuses [B03 classes/complements](../../geometry/bundle_complements/README.md), [B02 operations](../../geometry/bundle_operations/README.md), existing [`algebra.GroupCompletion`](../../algebra/basic/README.md).
 
-## 公開 API
+## Public API
 
-`KTheory.On[X, baseSpace, compact, hausdorff]` はコンパクト Hausdorff 空間上の複素束を扱う。
-`Bundle.value` と `Compare.criterion` が一般の束を B03 の射影表示の同型類と比較する。
-`AdditiveMonoid`・`MultiplicativeMonoid`・`Semiring` は B02 の実際の束同型から演算の法則を導く。
-`K0` は既存の半環の群完成を用いる可換環で、`Stability.ForBundles.criterion` は同じ自明束を加える安定同型による等式判定である。
-`Stability.differenceCriterion` は一般の仮想束の差の等式を、交差直和に同じ自明束を加える判定へ帰着する。
-`Pullback.K0.map`、`IdentityPullback.onK0`、`Pullback.Composition.onK0` が反変関手を与える。
-`Pullback.Ranks.naturality` はランクと引き戻しの可換性を証明する。
-`Pullback.Ranks.Reduced` は基点を保つ写像による被約群の引き戻しである。
-`Ranks.rank` は局所定数な整数値ランク、`Ranks.Reduced[point].group` は基点でのランクの核である。
-`VariableRanks` は離散底上に任意の自然数値ランクを持つ束を構成する。
-`FiniteDiscrete.Classification` はランクによる束の分類、`FiniteDiscrete.Computation` は整数値関数群との往復写像を与える。
-`FiniteDiscrete.RingComputation.isomorphism` と `Point.Ring.isomorphism` は、それぞれ整数値関数環・整数環との環同型である。
-`Examples` は空空間・一点・二点上の正負のランクを検査する。
+`KTheory.On[X, baseSpace, compact, hausdorff]` handles compact-Hausdorff complex bundles.
+`Bundle.value` and `Compare.criterion` compare general bundles with B03 projection classes.
+`AdditiveMonoid`, `MultiplicativeMonoid`, `Semiring` derive operation laws from actual B02 isomorphisms.
+`K0` uses existing semiring completion; `Stability.ForBundles.criterion` tests equality by adding common trivial bundles.
+`Stability.differenceCriterion` reduces virtual-difference equality to common trivial stabilization of cross sums.
+`Pullback.K0.map`, `IdentityPullback.onK0`, `Pullback.Composition.onK0` give contravariant functors.
+`Pullback.Ranks.naturality` proves rank/pullback compatibility.
+`Pullback.Ranks.Reduced` pulls reduced groups back along pointed maps.
+`Ranks.rank` is locally constant integer rank; `Ranks.Reduced[point].group` its basepoint kernel.
+`VariableRanks` constructs arbitrary natural-rank bundles over discrete bases.
+`FiniteDiscrete.Classification` classifies by rank; `FiniteDiscrete.Computation` gives inverse integer-function maps.
+`FiniteDiscrete.RingComputation.isomorphism` and `Point.Ring.isomorphism` identify integer-function rings/integer rings respectively.
+`Examples` checks positive/negative ranks over empty/point/two-point spaces.
 
-例えば一点上の整数に対応する仮想束は、次のように使える。
+For example, use point-integer virtual bundles as follows.
 
 ```ref
 \import topological_k_theory.KTheory[].Point[] \as Point;
@@ -28,16 +28,16 @@
 \definition rank: Point.forward minusOne = I.Neg.specification I.One.specification := Point.rightInverse (I.Neg.specification I.One.specification);
 ```
 
-同じ公開 API を使う検査対象は `KTheory.Examples` に置く。
+Checked consumers of the same public API: `KTheory.Examples`.
 
-## 検証と再開
+## Validation and resuming
 
-基点は B04 統合済み main `4f411dda`、作業は `math/k01-grothendieck-k` / [PR #44](https://github.com/pdf-jube-joba/ref-type/pull/44)。
-全要件の実装を含む `d48cc565` の package・全依存閉包は `work/k01-package` で保存完了・終了0（4,236件検査／4,345件再利用、53,089ステップ、復旧・重複・再実行・失われたステップ・保存失敗は各0）。
-対象スコープ・利用例は `bac1d6e9` の `work/k01-complete`（841 module、保存完了・終了0）でも成功した。
-package コマンドは `target/debug/cli libs/topology/k_theory --source-snapshot work/k01-package.source.json --memory-mib 8192 --cache-budget-mib 12288 --time-limit-seconds 1800 --report-json work/k01-package.json`。
-その後の変更は完了ドキュメントのみで、数学ソースの未検証変更はない。
-`764af78a` の workspace 全体は `work/k01-workspace` で7,644 moduleを再利用、保存完了・終了0（復旧・重複・再実行・失われたステップ・保存失敗は各0）。
-workspace コマンドは `target/debug/cli libs --source-snapshot work/k01-workspace.source.json --memory-mib 10240 --cache-budget-mib 12288 --time-limit-seconds 7200 --report-json work/k01-workspace.json`。
-検証後の変更はこの記録のみで、未検証の数学ソースや残る実装はない。
-次は PR の最終 head の CI・差分を確認して通常の merge を行い、main の tree が検証済みブランチと一致することを確認する。
+Base: B04-integrated main `4f411dda`; work: `math/k01-grothendieck-k` / [PR #44](https://github.com/pdf-jube-joba/ref-type/pull/44).
+Full-requirement `d48cc565` package/dependencies saved/exit 0 via `work/k01-package`: 4,236 checked, 4,345 reused, 53,089 steps, zero recoveries/duplicates/reruns/lost steps/save failures.
+Target/examples also passed `work/k01-complete` on `bac1d6e9`: 841 modules, saved/exit 0.
+Package command: `target/debug/cli libs/topology/k_theory --source-snapshot work/k01-package.source.json --memory-mib 8192 --cache-budget-mib 12288 --time-limit-seconds 1800 --report-json work/k01-package.json`.
+Later changes are completion documentation only; no unverified math changes.
+Full `764af78a` workspace via `work/k01-workspace`: 7,644 reused, saved/exit 0; zero recoveries/duplicates/reruns/lost steps/save failures.
+Workspace command: `target/debug/cli libs --source-snapshot work/k01-workspace.source.json --memory-mib 10240 --cache-budget-mib 12288 --time-limit-seconds 7200 --report-json work/k01-workspace.json`.
+Post-validation changes only this record; no unverified math/remaining implementation.
+Next inspect final PR CI/diff, merge normally, confirm main tree equals verified branch.

@@ -1,12 +1,12 @@
-# 可換環上の加群
+# Modules over commutative rings
 
-Hom とテンソル積、射影性、有限自由加群の行列を扱う。
+Hom, tensor products, projectivity, and finite-free-module matrices.
 
-| module | 公開する内容 |
+| Module | Public contents |
 | --- | --- |
-| `commutative_algebra.Modules.Matrix` | 有限自由加群の準同型と行列の往復、積と合成、転置、恒等行列、逆行列と加群同型の対応。 |
-| `commutative_algebra.Modules.Elementary` | 行交換、異なる行の整数倍の加算、符号反転の加群同型と逆行列の証明。 |
-| `commutative_algebra.Modules.HomSpace` / `FreeHom` | 準同型の加群構造と \(\operatorname{Hom}_R(R^{(S)},A)\cong A^S\)。 |
-| `commutative_algebra.Modules.Tensor.Adjunction` | テンソル積の双線形な普遍性と Hom–tensor の加群同型。 |
-| `commutative_algebra.Modules.ProjectiveTensor`、`ProjectiveTensorShortExact` | 射影加群とのテンソル積による単射性・短完全列の保存。 |
-| `commutative_algebra.Modules.TensorProjective` | 二つの射影加群のテンソル積の射影性。 |
+| `commutative_algebra.Modules.Matrix` | Finite-free homomorphism/matrix round trips, multiplication/composition, transpose, identity, inverse/isomorphism correspondence. |
+| `commutative_algebra.Modules.Elementary` | Row swaps, integer row additions, sign-change module isomorphisms and inverse-matrix proofs. |
+| `commutative_algebra.Modules.HomSpace` / `FreeHom` | Module structures on homomorphisms and \(\operatorname{Hom}_R(R^{(S)},A)\cong A^S\). |
+| `commutative_algebra.Modules.Tensor.Adjunction` | Bilinear tensor universality and Hom–tensor module isomorphisms. |
+| `commutative_algebra.Modules.ProjectiveTensor`, `ProjectiveTensorShortExact` | Preservation of injections/short exact sequences by tensoring with projectives. |
+| `commutative_algebra.Modules.TensorProjective` | Projectivity of tensor products of projectives. |

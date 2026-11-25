@@ -1,13 +1,13 @@
-# G12 Poincaré–Lefschetz 双対性
+# G12 Poincaré–Lefschetz duality
 
-## 要件
+## Requirements
 
-- 主な実装先は `poincare_duality`。
-- 向き付きコンパクト多様体対で基本類との cap 積による Poincaré–Lefschetz 双対性を証明する。
-- 体係数の非退化な cup 積対、整数係数でのねじれを除いた交叉形式を構成する。
-- 境界・積・向きの反転との整合性を公開し、4の倍数次元の有理交叉形式の符号数を定義する。
+- Primary implementation: `poincare_duality`.
+- Prove Poincaré–Lefschetz duality by cap product with fundamental classes of oriented compact manifold pairs.
+- Construct nondegenerate cup pairings over fields and torsion-free integral intersection forms.
+- Expose boundary/product/orientation-reversal compatibility; define signatures of rational intersection forms in dimensions divisible by four.
 
-## 依存するタスク
+## Dependencies
 
-- [G11 向きと基本類](g11-fundamental-classes.md)
-- [G10 handle 分解と有限 CW 型](g10-handles-finite-cw.md)
+- [G11 Orientations and fundamental classes](g11-fundamental-classes.md)
+- [G10 Handle decompositions and finite CW type](g10-handles-finite-cw.md)

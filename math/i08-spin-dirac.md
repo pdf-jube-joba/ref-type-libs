@@ -1,14 +1,14 @@
-# I08 Spin-c Dirac 作用素
+# I08 Spin-c Dirac operator
 
-## 要件
+## Requirements
 
-- 主な実装先は `spin_dirac`。
-- Spin-c 構造を持つ閉偶数次元多様体について、接続と補助複素束から捩れた Dirac 作用素を構成する。
-- 主シンボルを Clifford 乗算と同定し、楕円性・次数付け・形式的随伴を証明してシンボルの K 類を公開する。
-- 補助束による捩り、積、接続変更の際のシンボルと解析的指数の比較を公開する。
+- Primary implementation: `spin_dirac`.
+- Construct twisted Dirac operators from connections and auxiliary complex bundles on closed even-dimensional Spin-c manifolds.
+- Identify principal symbols with Clifford multiplication; prove ellipticity, grading, and formal-adjoint formulas; expose symbol K-classes.
+- Expose symbol and analytic-index comparisons under auxiliary-bundle twisting, products, and connection changes.
 
-## 依存するタスク
+## Dependencies
 
-- [I11 Spin・Spin-c 構造とスピノル束](i11-spin-structures.md)
-- [A17 楕円作用素の解析的指数](a17-elliptic-fredholm.md)
-- [K10 コンパクト台付き K 理論とシンボルの表示](k10-compact-support-k.md)
+- [I11 Spin and Spin-c structures and spinor bundles](i11-spin-structures.md)
+- [A17 Analytic index of elliptic operators](a17-elliptic-fredholm.md)
+- [K10 Compactly supported K-theory and symbol presentations](k10-compact-support-k.md)

@@ -1,28 +1,28 @@
-# 微分方程式
+# Differential equations
 
-`Euclidean[n].BoundedLipschitzField` は、最大値ノルムについて有界で Lipschitz な自律ベクトル場を表す。
-`On[field, initial]` は、その定数から初期時刻の両側の正の時間幅を選び、初期値を中心とする半径一の連続曲線の閉球上に Picard の積分作用素を構成する。
-作用素は \(y_0+J(t)-J(0)\) を返す。
+`Euclidean[n].BoundedLipschitzField` represents autonomous vector fields bounded and Lipschitz in maximum norm.
+`On[field, initial]` chooses positive time on both sides of the initial time and constructs Picard operators on the closed unit ball of continuous curves centered at the initial value.
+The operator returns \(y_0+J(t)-J(0)\).
 
-連続曲線の空間の完備性、積分のノルム評価、二つの入力に対する積分の差の評価から、作用素が閉球を保つことと縮小率が高々 \(1/2\) であることを証明する。
-Banach の不動点定理で得た曲線を `curve` として公開する。
+Completeness, integral norm bounds, and integral-difference estimates prove ball preservation and contraction ratio at most \(1/2\).
+Expose the Banach-fixed-point curve as `curve`.
 
-`On[field, initial].step` は構成した時間幅と評価である。
-`On[field, initial].Step[step]` は、その条件を満たす時間幅について Picard 構成を行う。
-`Step.Solution.value` は実数上の関数で、構成した時間区間上で曲線と一致する。
-`initialValue` は初期値、`continuous` は閉時間区間上の連続性、`derivative` は区間内部で各座標が \(y'=F(y)\) を満たすことを示す。
-`initialDerivative` は初期時刻での微分である。
-`integralEquationUnique` は、この閉球内で Picard の積分方程式を満たす曲線の一意性である。
-`solutionUnique` は、微分方程式と初期値を満たす閉球内の連続曲線の一意性を示す。
-平均値の定理による原始関数の一意性から、微分方程式の解が積分方程式を満たすことを導く。
+`On[field, initial].step` contains the constructed time width and bounds.
+`On[field, initial].Step[step]` performs Picard construction for time widths satisfying those conditions.
+`Step.Solution.value` is a real-domain function agreeing with the curve on the constructed interval.
+`initialValue` gives the initial value; `continuous` closed-interval continuity; `derivative` coordinatewise \(y'=F(y)\) in the interior.
+`initialDerivative` is the initial-time derivative.
+`integralEquationUnique` proves uniqueness of Picard integral-equation solutions in this ball.
+`solutionUnique` proves uniqueness of continuous ball-valued curves satisfying the ODE/initial value.
+Mean-value uniqueness of primitives shows ODE solutions satisfy the integral equation.
 
-`LocalSolution` は正の半径、実数上の曲線、初期値、開時間区間上の微分方程式をまとめる。
-`localExistence` は任意の有界 Lipschitz ベクトル場と初期値について、この解の存在を証明する。
-`localUniqueness` は、二つの局所解が共通の正の時間幅で一致することを示す。
+`LocalSolution` groups positive radius, real-domain curve, initial value, and open-interval ODE.
+`localExistence` proves such solutions exist for arbitrary bounded Lipschitz fields and initial values.
+`localUniqueness` proves local solutions agree on a common positive interval.
 
-`Euclidean[n].Smooth[U, field, a].localExistence` は、開集合上の滑らかなベクトル場とその点に対する局所解の存在を証明する。
-連続な偏微分の近傍での評価から Lipschitz 定数を求め、座標ごとの切り詰めで有界 Lipschitz ベクトル場へ拡張する。
-構成した解が十分短い時間は切り詰めの内部に留まることを積分評価で示し、元のベクトル場の微分方程式を得る。
-`Smooth.localUniqueness` は滑らかな場の局所解に対する同じ一致定理である。
-`Smooth.Regularity[solution].map` は、任意の局所解を開時間区間から元の開集合への滑らかな写像として表す。
-連鎖律と微分方程式を使い、任意の滑らかな関数と解の合成について連続微分可能性を次数ごとに示す。
+`Euclidean[n].Smooth[U, field, a].localExistence` proves local existence at points of smooth vector fields on open sets.
+Bound continuous partials nearby to obtain Lipschitz constants; extend to bounded Lipschitz fields by coordinate clipping.
+Integral bounds keep solutions inside the clipping region for short times, recovering the original ODE.
+`Smooth.localUniqueness` is the same agreement theorem for smooth-field local solutions.
+`Smooth.Regularity[solution].map` represents arbitrary local solutions as smooth maps from open time intervals into the original open set.
+Chain rules and the ODE inductively prove continuous differentiability of every order for smooth functions composed with solutions.

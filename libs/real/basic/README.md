@@ -1,20 +1,20 @@
-# 実解析の基礎
+# Foundations of real analysis
 
-構成済みの実数の演算、距離評価、数列、平方根、有限和を扱う。
+Constructed real arithmetic, distance estimates, sequences, square roots, and finite sums.
 
-| module | 内容 |
+| Module | Contents |
 | --- | --- |
-| [Analysis](src/Analysis.ref) | 構成済みの Dedekind 実数の型と演算 |
-| `Analysis.Algebra` | 算術の恒等式、平方の非負性、`Field` 構造 |
-| `Analysis.Distance` | 有理数の埋め込み、最大・最小、距離の法則 |
-| `Analysis.Estimates` | 重み付き距離、中点、微小な誤差による順序・等式の判定 |
-| `Analysis.Sequence` | 実数列の Cauchy 条件、収束、極限の構成と一意性 |
-| `Analysis.SquareRoot` | 上限からの平方根の構成、非負性・平方・一意性、平方根の距離評価 |
-| `Analysis.Estimates.Product` / `Analysis.Inverse` | 積と逆数の距離評価、正負の領域での逆数の制御 |
-| `Analysis.FiniteSums.Convex` / `Exclusion` | 凸結合の距離評価と、消える一項を除いた有限和の上界 |
-| `Analysis.Geometric` | 非負で 1 未満の係数の冪が、任意の正の値より小さくなること |
+| [Analysis](src/Analysis.ref) | Constructed Dedekind-real types and operations |
+| `Analysis.Algebra` | Arithmetic identities, nonnegative squares, `Field` structure |
+| `Analysis.Distance` | Rational embeddings, maxima/minima, distance laws |
+| `Analysis.Estimates` | Weighted distances, midpoints, order/equality criteria from arbitrarily small errors |
+| `Analysis.Sequence` | Real Cauchy sequences, convergence, limit construction and uniqueness |
+| `Analysis.SquareRoot` | Square roots from suprema, nonnegativity/square/uniqueness, square-root distance bounds |
+| `Analysis.Estimates.Product` / `Analysis.Inverse` | Product/reciprocal distance bounds, reciprocal control on positive/negative regions |
+| `Analysis.FiniteSums.Convex` / `Exclusion` | Convex-combination distance bounds, finite-sum bounds excluding one vanishing term |
+| `Analysis.Geometric` | Powers of nonnegative coefficients below 1 become smaller than any positive value |
 
-`metric_spaces.RealMetric` が距離空間、`linear_algebra.Real` がベクトル空間への接続を提供する。
+`metric_spaces.RealMetric` connects to metric spaces; `linear_algebra.Real` connects to vector spaces.
 
 ```text
 \import real.Analysis[] \as R;
@@ -23,7 +23,7 @@
   Distance.distanceSelf;
 ```
 
-[利用例](../../analysis/scalar_compatibility/src/Compatibility.ref) は定数列の極限と他分野との演算の共有を検査する。
+[Examples](../../analysis/scalar_compatibility/src/Compatibility.ref) check constant-sequence limits and shared arithmetic across fields.
 
 
-`Analysis.FiniteSums.blocks` は連続する二つの有限添字ブロック上の和を分離し、直和座標の内積の公式に使う。
+`Analysis.FiniteSums.blocks` splits sums over consecutive finite-index blocks, for inner-product formulas on direct-sum coordinates.

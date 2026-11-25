@@ -1,14 +1,14 @@
-# 積測度と反復積分
+# Product measures and iterated integrals
 
-`product_integration` は σ 有限測度の積、Tonelli・Fubini と畳み込みの評価を提供する。
-測度と実積分には `functional_analysis.Measure`、Euclid 測度には [euclidean_measure](../euclidean_measure/README.md)、複素・有限次元の積分には [measure_convergence](../measure_convergence/README.md) を使う。
+`product_integration` provides σ-finite products, Tonelli/Fubini, and convolution estimates.
+Measure/real integration: `functional_analysis.Measure`; Euclidean measure: [euclidean_measure](../euclidean_measure/README.md); complex/finite-dimensional integration: [measure_convergence](../measure_convergence/README.md).
 
-`Finiteness[A, mu].Exhaustion` は有限測度の可測集合による可算被覆を表す。
-集合列を互いに素な増分へ分け、有限な制限測度の積を可算和にしたものが `Product[A, B, mu, nu, left, right].measure` である。
-`ProductSigma.sigma` は可測長方形の生成する σ 代数で、両方向の切断は可測となる。
-`Product.sigmaFinite` は構成した積測度自身の σ 有限性を示す。
-`Product.Rectangle.formula` は一般の可測長方形について拡張非負値の二重級数による公式を、`FiniteRectangle.theorem` は両辺の測度が有限な場合の積の公式を示す。
-`Symmetry.map` は左右交換が測度を保つことを表す。
+`Finiteness[A, mu].Exhaustion` expresses countable covers by finite-measure measurable sets.
+Split into disjoint increments; `Product[A, B, mu, nu, left, right].measure` sums products of finite restricted measures countably.
+`ProductSigma.sigma` is the rectangle-generated σ-algebra; slices are measurable both ways.
+`Product.sigmaFinite` proves the product itself σ-finite.
+`Product.Rectangle.formula` gives extended double-series formulas for measurable rectangles; `FiniteRectangle.theorem` gives product formulas when both measures are finite.
+`Symmetry.map` expresses measure-preserving factor swaps.
 
 ```ref
 \import product_integration.Integration[
@@ -22,33 +22,32 @@
 \definition example: \forall (f: I.Representatives) -> \exists F.AEFubini[f] := F.fubini;
 ```
 
-`Integration.tonelli` は非負可測実関数について、積測度の下積分と切断の下積分の反復積分を同一視する。
-内側の積分が無限となる点も扱い、外側の拡張非負値関数の積分は `ExtendedIntegral.lowerIntegral` で表す。
-`Integration.fubini` は絶対可積分実関数に対して `AEFubini` の存在を証明する。
-この構造は可測零集合、零集合の外で元の切断と一致する可積分代表、切断積分を値とする外側の可積分代表、積分交換の等式を含む。
-`Complex.fubini` と `Vector[n].fubini` は同じ結論を実部・虚部と有限個の成分へ拡張し、共通の例外零集合を返す。
-零次元のベクトルも含む。
+`Integration.tonelli` identifies product lower integrals of nonnegative measurable real functions with iterated slice lower integrals.
+Includes infinite inner integrals; `ExtendedIntegral.lowerIntegral` represents outer extended-nonnegative integration.
+`Integration.fubini` proves `AEFubini` exists for absolutely integrable real functions.
+This structure includes measurable exceptions, integrable slice representatives agreeing off them, outer integrable slice-integral representatives, and interchange equalities.
+`Complex.fubini` and `Vector[n].fubini` extend to real/imaginary and finite components, returning common null exceptions.
+Includes zero-dimensional vectors.
 
-`Euclidean[n].exhaustion` は Lebesgue 測度の有限な箱による被覆である。
-`EuclideanProduct[m, n].join` は二つの座標列を連結し、`split` はその逆写像である。
-`Volumes.theorem` は箱の体積との一致を、`Comparison.theorem` は連結写像で送った積測度と高次元 Lebesgue 測度が全 Borel 集合上で一致することを示す。
-`Comparison.domination` は積測度で可測な任意の集合について、送った測度が Euclid の外測度以下であることを示す。
-比較の等式の対象は Borel 集合であり、積の σ 代数を完備化したとする宣言は含めない。
+`Euclidean[n].exhaustion` covers Lebesgue spaces by finite boxes.
+`EuclideanProduct[m, n].join` concatenates coordinate lists; `split` is its inverse.
+`Volumes.theorem` identifies box volumes; `Comparison.theorem` proves concatenated products agree with higher-dimensional Lebesgue measure on all Borel sets.
+`Comparison.domination` bounds transported product measure by Euclidean outer measure on arbitrary product-measurable sets.
+Equality is on Borel sets; no assertion completes the product σ-algebra.
 
-`Convolution[A, mu, exhaustion].For[translations, f, g]` は測度を保つ移動の族と二つの実可積分関数を扱う。
-`kernel(x, y)` は \(f(x-y)g(y)\) に対応し、`exists` はその共同可測性から切断の a.e. 可積分性、外側の可積分代表、
+`Convolution[A, mu, exhaustion].For[translations, f, g]` handles families of measure-preserving translations and two real integrable functions.
+`kernel(x, y)` corresponds to \(f(x-y)g(y)\); `exists` derives a.e. integrable slices and outer integrable representatives from joint measurability, together with
 \[
 \int f*g=(\int f)(\int g),\qquad \|f*g\|_1\leq\|f\|_1\|g\|_1
 \]
-を導く。
-共同可測性は積の σ 代数に関する十分条件として明示する。
-`Support.theorem` は \(f,g\) がそれぞれ \(S,T\) の外で零なら、畳み込みが共通の例外零集合と \(S+T\) の外で零となることを示す。
-`Euclidean[n].translation` は \(x\mapsto x-a\) の測度保存写像を与え、`Euclidean[n].Convolution` が Euclid 空間の API となる。
+Joint measurability is an explicit sufficient product-σ-algebra condition.
+`Support.theorem` proves if \(f,g\) vanish off \(S,T\), convolution vanishes outside common null exceptions and \(S+T\).
+`Euclidean[n].translation` gives measure-preserving \(x\mapsto x-a\); `Euclidean[n].Convolution` is the Euclidean API.
 
-補助 API として、生成 σ 代数の π–λ 定理、有限測度の一意性、測度保存写像による実積分の移送、測度の可算和と下積分の交換、上限と非負級数の交換を公開する。
-`Examples[n]` には零関数の Fubini、零関数と任意の可積分関数の畳み込み、箱の比較の検査される利用例がある。
+Auxiliary APIs: π–λ for generated σ-algebras, finite-measure uniqueness, real-integral transport by measure-preserving maps, lower integrals of countable measure sums, suprema/nonnegative-series interchange.
+`Examples[n]` has checked zero Fubini, zero/arbitrary-integrable convolution, and box-comparison examples.
 
-通常検査はリポジトリのルートで次を実行する。
+Run these standard checks from the repository root:
 
 ```sh
 target/release/cli libs/analysis/product_integration --module product_integration --diagnostics compact --no-progress --memory-mib 6144

@@ -1,23 +1,22 @@
-# 特異余鎖の交換ホモトピー
+# Commutation homotopies of singular cochains
 
-`On[A, source].forward` は対角写像と Alexander–Whitney 写像の合成である。
-`backward` はその後に Koszul 符号付きのテンソル因子交換を施す。
-`On.Homotopy.homotopy` は両鎖写像の鎖ホモトピーを与える。
+`On[A, source].forward` composes diagonals with Alexander–Whitney.
+`backward` follows with Koszul tensor swaps.
+`On.Homotopy.homotopy` homotopes both chain maps.
 
-標準単体ごとの模型は \(C_*(\Delta^n)\otimes C_*(\Delta^n)\) である。
-両因子への同じ面写像を遷移とし、零次の差が零であることと、正次数の明示的な収縮から模型上の交換ホモトピーを帰納的に構成する。
-任意の特異単体への後合成でこれを評価し、自由加群の普遍性によって鎖全体へ延長する。
+Standard models: \(C_*(\Delta^n)\otimes C_*(\Delta^n)\).
+Equal-face transitions, zero degree-zero differences, explicit positive contractions inductively construct model homotopies.
+Evaluate by simplex postcomposition and extend by free universality.
 
-`Cochains.Pairing[p, q]` は可換環係数の二つの余鎖をテンソル鎖へ評価する。
-閉余鎖の評価が全微分を消すことを示し、`HomComplex.Homotopy` によって交換ホモトピーをコホモロジーへ渡す。
-`Cochains.GradedCommutativity[p, q].law` は任意のコホモロジー類 \(x,y\) に対して
+`Cochains.Pairing[p, q]` evaluates two commutative-ring cochains on tensor chains.
+Closed evaluations annihilate total differentials; `HomComplex.Homotopy` transfers homotopies to cohomology.
+`Cochains.GradedCommutativity[p, q].law` proves for arbitrary cohomology classes \(x,y\):
 
 \[
 x\smile y=(-1)^{pq}y\smile x
 \]
 
-を与える。
-次数 \(p+q\) と \(q+p\) の間の移送は公開される式に明示する。
+The public formula explicitly includes transport between degrees \(p+q\), \(q+p\).
 
-`Cochains.ExternalCup[p, q]` は積空間の特異鎖について、テンソル余鎖の Alexander–Whitney 写像による引き戻しを、二つの射影で引き戻した余鎖のカップ積と同定する。
-`Classes[alpha, beta]` は閉代表の同定とコホモロジー類上の式を与える。
+`Cochains.ExternalCup[p, q]` identifies tensor-cochain Alexander–Whitney pullbacks on products with cups of projection pullbacks.
+`Classes[alpha, beta]` identifies closed representatives and gives class formulas.

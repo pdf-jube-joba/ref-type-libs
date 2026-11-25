@@ -1,14 +1,14 @@
-# I11 Spin・Spin-c 構造とスピノル束
+# I11 Spin and Spin-c structures and spinor bundles
 
-## 要件
+## Requirements
 
-- 主な実装先は `spin_structures`。
-- 向き付き正規直交枠束の持ち上げとして Spin・Spin-c 構造を定義し、局所自明化と随伴スピノル束を構成する。
-- Spin-c の行列式線束、引き戻し・安定化・積、ほとんど複素構造から誘導される標準 Spin-c 構造を構成する。
-- 接束と行列式線束の接続からスピノル接続を構成し、Clifford 作用との Leibniz 則を証明する。
+- Primary implementation: `spin_structures`.
+- Define Spin/Spin-c structures as lifts of oriented orthonormal frame bundles; construct local trivializations and associated spinor bundles.
+- Construct Spin-c determinant lines, pullbacks, stabilization, products, and canonical Spin-c structures induced by almost-complex structures.
+- Construct spinor connections from tangent/determinant-line connections; prove the Leibniz rule with Clifford actions.
 
-## 依存するタスク
+## Dependencies
 
-- [滑らかな束・枠束・随伴束](../../libs/geometry/smooth_bundles/README.md)
-- [I10 複素スピノル表現](i10-spinor-representations.md)
-- [接続と共変微分](../../libs/geometry/bundle_connections/README.md)
+- [Smooth bundles, frame bundles, and associated bundles](../../libs/geometry/smooth_bundles/README.md)
+- [I10 Complex spinor representations](i10-spinor-representations.md)
+- [Connections and covariant derivatives](../../libs/geometry/bundle_connections/README.md)
