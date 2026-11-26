@@ -81,7 +81,7 @@ Checks share the fixed `libs/refcache/` directory and use the checker's defaults
 Cache validity and reuse are the checker's responsibility; the script supplies the shared directory and reports the checker's results.
 Rerun the same command after edits or interruptions to reuse valid artifacts and checkpoints.
 Runs execute sequentially under a lock and stop at the first failure.
-Whole-workspace checks start as one checker invocation; memory-limit results split packages and modules while retaining their own declarations and children.
+Checks run one package at a time in dependency order, including `--scope all`. Each checker invocation uses the same cache directory and can reuse matching results from earlier packages or runs. A memory-limit result within a package splits it into smaller module checks while retaining each module's own declarations and children.
 Execution stops when less than 1 GiB remains on the cache or report filesystem.
 
 Each attempt stores opaque CLI source snapshots, commands, raw reports and logs in `.checks/`; `latest.json` contains the latest run.

@@ -265,14 +265,11 @@ class Runner:
         return snapshot, targets
 
     def prepare(self):
-        all_packages = set(self.plan['packages']) == set(self.workspace.paths)
-        entries = [('workspace', self.workspace.library)] if all_packages and not self.plan['module'] else [(name, self.workspace.paths[name]) for name in self.plan['packages']]
-        for name, entry in entries:
-            job = {'name': name, 'entry': str(entry), 'outcome': 'pending', 'attempts': []}
+        for name in self.plan['packages']:
+            job = {'name': name, 'entry': str(self.workspace.paths[name]), 'outcome': 'pending', 'attempts': []}
             self.report['jobs'].append(job)
             snapshot, targets = self.enumerate(job, f'{name}-enumerate')
-            if name != 'workspace':
-                targets = [target for target in targets if target == name or target.startswith(name + '.')]
+            targets = [target for target in targets if target == name or target.startswith(name + '.')]
             requested = self.plan['module']
             if requested:
                 targets = [target for target in targets if target == requested or (not self.plan['module_only'] and target.startswith(requested + '.'))]
@@ -285,25 +282,23 @@ class Runner:
 
     def check_job(self, job):
         targets = set(job['targets'])
-        roots = sorted(target for target in targets if '.' not in target)
-        initial = self.plan['module'] or (None if job['name'] == 'workspace' else job['name'])
+        initial = self.plan['module'] or job['name']
         pending = deque([(initial, self.plan['module_only'])])
         verified, checked = set(), set()
         job['outcome'] = 'running'
         while pending:
             module, only = pending.popleft()
-            wanted = targets if module is None else {target for target in targets if target == module or (not only and target.startswith(module + '.'))}
+            wanted = {target for target in targets if target == module or (not only and target.startswith(module + '.'))}
             if wanted <= verified:
                 continue
-            label = f'{job["name"]}-{len(job["attempts"]):04d}-{module or "all"}'
+            label = f'{job["name"]}-{len(job["attempts"]):04d}-{module}'
             result_path = self.attempt / f'{label}.json'
             arguments = [
                 '--source-snapshot', job['snapshot'],
                 '--cache-dir', str(self.cache),
                 '--report-json', str(result_path), '--diagnostics', 'compact', '--no-progress',
             ]
-            if module is not None:
-                arguments.extend(['--module', module])
+            arguments.extend(['--module', module])
             if only:
                 arguments.append('--module-only')
             if snapshot_digest(Path(job['snapshot'])) != job['snapshot_sha256']:
@@ -324,11 +319,8 @@ class Runner:
                 verified.update(coverage & targets)
                 checked.update(module_names(result, 'checked_modules') & targets)
             elif outcome == 'memory-limit' and not only and len(wanted) > 1:
-                if module is None:
-                    pending.extend((root, False) for root in roots)
-                else:
-                    children = sorted({target[len(module) + 1:].split('.')[0] for target in wanted if target != module})
-                    pending.extendleft(reversed([(module, True), *[(module + '.' + child, False) for child in children]]))
+                children = sorted({target[len(module) + 1:].split('.')[0] for target in wanted if target != module})
+                pending.extendleft(reversed([(module, True), *[(module + '.' + child, False) for child in children]]))
             else:
                 raise CheckError(f'{module}: {outcome} (exit {code}); see {log}')
             job.update(verified=sorted(verified), newly_checked=sorted(checked), reused=sorted(verified - checked))

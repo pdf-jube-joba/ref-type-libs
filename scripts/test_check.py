@@ -219,12 +219,15 @@ class CheckTests(unittest.TestCase):
         self.assertEqual(result['outcome'], 'accepted')
         self.assertEqual(set(result['jobs'][0]['verified']), {'base', 'base.One', 'base.Two'})
 
-    def test_whole_workspace_completes_after_memory_limit(self):
-        self.configure(mode='memory')
-        result = self.run_check('--scope', 'all')
-        self.assertEqual(result['outcome'], 'accepted')
-        verified = {name for job in result['jobs'] for name in job['verified']}
-        self.assertEqual(verified, {'base', 'base.One', 'base.Two', 'client', 'other'})
+    def test_all_packages_are_checked_separately_in_dependency_order(self):
+        self.configure(mode='memory', module='base')
+        for selection in [('--scope', 'all'), ('--scope', 'changed', '--package', 'client', '--package', 'other', '--package', 'base')]:
+            with self.subTest(selection=selection):
+                code, result = self.invoke('run', *selection, fake_checker=True)
+                self.assertEqual(code, 0, result)
+                self.assertEqual([job['name'] for job in result['jobs']], result['packages'])
+                self.assertLess(result['packages'].index('base'), result['packages'].index('client'))
+                self.assertEqual({job['name']: job['verified'] for job in result['jobs']}, {'base': 3, 'client': 1, 'other': 1})
 
     def test_live_edits_make_result_fail_and_status_stale(self):
         self.assertEqual(self.run_check()['outcome'], 'accepted')
