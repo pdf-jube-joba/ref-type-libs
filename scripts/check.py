@@ -421,7 +421,7 @@ def arguments(argv):
     parser.add_argument('--since', default='HEAD')
     parser.add_argument('--module')
     parser.add_argument('--module-only', action='store_true')
-    parser.add_argument('--checker', default=os.environ.get('REF_TYPE_CHECKER', str(ROOT / 'ref-type/target/release/cli')))
+    parser.add_argument('--checker', default=os.environ.get('REF_TYPE_CHECKER', 'cli'))
     parser.add_argument('--time-limit-seconds', type=int)
     parser.add_argument('--json', action='store_true')
     args = parser.parse_args(argv)

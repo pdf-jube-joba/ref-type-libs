@@ -7,7 +7,7 @@ Existing implementations and their notes are linked from Requirements; the API m
 ## Repository layout and available foundations
 
 The [library index](../libs/README.md) covers the 112 packages in [libs/ref.toml](../libs/ref.toml).
-Use package READMEs for APIs, source files for exact assumptions, and [checking instructions](../libs/USAGE.md) for the compiler in `ref-type/`.
+Use package READMEs for APIs, source files for exact assumptions, and [checking instructions](../libs/USAGE.md) for the separately installed compiler.
 Detailed constructions, proof explanations and historical validation records are in the [package notes](package-notes/README.md).
 Notes separate Construction, Examples, and Historical validation, omitting empty sections.
 Retained raw reports and logs are in [records](records).

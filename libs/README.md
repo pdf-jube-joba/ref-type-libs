@@ -2,7 +2,7 @@
 
 Dependencies are in each `ref.toml`; public modules are in `src/root.ref`.
 The workspace [ref.toml](ref.toml) registers 112 packages, all linked below.
-Build and check them using the compiler in the `ref-type/` submodule; see [checking the libraries](USAGE.md).
+Build and check them using the separately installed compiler; see [checking the libraries](USAGE.md).
 Requirements and known gaps are tracked in the [mathematics roadmap](../math/_roadmap.md).
 Except for `std`, aim for roughly 5,000 lines per package, organized by dependencies from shared foundations to applications.
 

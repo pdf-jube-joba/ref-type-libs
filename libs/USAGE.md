@@ -1,35 +1,25 @@
 # Building and checking the libraries
 
-Run commands from the `ref-type-libs` root: libraries are in `libs/`, and the compiler is in the `ref-type/` Git submodule.
+Run commands from the `ref-type-libs` root: libraries are in `libs/`, and the compiler is installed separately.
 Use [scripts/check.py](../scripts/check.py) to automate selection, cached checks and reports through the compiler's public CLI.
-The submodule tracks `pdf-jube-joba/ref-type` at a pinned revision.
 See the [library index](README.md) for APIs, [ref.toml](ref.toml) for workspace packages, and [roadmap](../math/_roadmap.md) for requirements and gaps.
 
-## Build the checker
+## Install the checker
 
-Initialize the compiler submodule and build its CLI:
-
-```sh
-git submodule update --init --recursive
-cargo build --manifest-path ref-type/Cargo.toml -p cli --release --locked
-```
-
-Use a Rust toolchain supporting the compiler's Rust 2024 edition and locked dependencies.
-Binary paths assume Cargo's default `ref-type/target/`; adjust them for `CARGO_TARGET_DIR`.
-For debug builds, omit `--release` and use `ref-type/target/debug/cli`, or run through Cargo:
+Install the compiler CLI from its repository:
 
 ```sh
-cargo run --manifest-path ref-type/Cargo.toml -p cli --release -- libs/std --module std.Data.Nat
+cargo install --git https://github.com/pdf-jube-joba/ref-type.git --package cli --locked
 ```
 
-Run from this repository root so `libs/` selects these libraries rather than the copy inside `ref-type/`.
+Use a Rust toolchain supporting the compiler's Rust 2024 edition and locked dependencies. Ensure Cargo's bin directory is on `PATH`, or set `REF_TYPE_CHECKER` to the installed executable's path. Run checks from this repository root so `libs/` selects these libraries.
 
 ## Check a package or module
 
 ```sh
-ref-type/target/release/cli libs/geometry/morse_lemma --full-check-local --diagnostics compact --cache-stats --report-json /tmp/morse-lemma-check.json
-ref-type/target/release/cli libs/std --module std.Data.Nat --diagnostics compact
-ref-type/target/release/cli libs --list-modules
+cli libs/geometry/morse_lemma --full-check-local --diagnostics compact --cache-stats --report-json /tmp/morse-lemma-check.json
+cli libs/std --module std.Data.Nat --diagnostics compact
+cli libs --list-modules
 ```
 
 | Option | Scope |
@@ -44,13 +34,13 @@ ref-type/target/release/cli libs --list-modules
 ## Check the workspace
 
 ```sh
-ref-type/target/release/cli libs --diagnostics compact --cache-stats --report-json /tmp/ref-type-libs-check.json
+cli libs --diagnostics compact --cache-stats --report-json /tmp/ref-type-libs-check.json
 ```
 
 ## Automated checks
 
 Use Python 3.11+ and Git on Linux.
-The script defaults to `ref-type/target/release/cli`; use `--checker PATH` or `REF_TYPE_CHECKER` for a different executable.
+The script finds `cli` on `PATH` by default; use `--checker PATH` or `REF_TYPE_CHECKER` for a different executable.
 
 ```sh
 python3 scripts/check.py plan --json
@@ -111,8 +101,8 @@ The following options apply to direct checker CLI commands.
 To check fixed inputs:
 
 ```sh
-ref-type/target/release/cli libs/std --parse-only --save-source-snapshot /tmp/std.source.json
-ref-type/target/release/cli libs/std --source-snapshot /tmp/std.source.json --report-json /tmp/std.report.json
+cli libs/std --parse-only --save-source-snapshot /tmp/std.source.json
+cli libs/std --source-snapshot /tmp/std.source.json --report-json /tmp/std.report.json
 ```
 
 Save and load with the same input entry; regenerate snapshots after source changes.
