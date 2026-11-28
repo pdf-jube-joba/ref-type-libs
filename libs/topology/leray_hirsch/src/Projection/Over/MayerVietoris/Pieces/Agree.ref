@@ -1,0 +1,17 @@
+\import singular_cohomology.Relative[A := TotalMV.Left, source := TotalMV.leftTopology, subset := TotalMV.leftPart].Maps[B := E]
+  .Over[target := total, targetSubset := preimage U] \as LeftInclusion;
+\import singular_cohomology.Relative[A := TotalMV.Right, source := TotalMV.rightTopology, subset := TotalMV.rightPart].Maps[B := E]
+  .Over[target := total, targetSubset := preimage U] \as RightInclusion;
+\import singular_cohomology.Relative[A := TotalMV.Overlap, source := TotalMV.overlapTopology, subset := TotalMV.overlapPart].Maps[B := TotalMV.Left]
+  .Over[target := TotalMV.leftTopology, targetSubset := TotalMV.leftPart] \as IntoLeft;
+\import singular_cohomology.Relative[A := TotalMV.Overlap, source := TotalMV.overlapTopology, subset := TotalMV.overlapPart].Maps[B := TotalMV.Right]
+  .Over[target := TotalMV.rightTopology, targetSubset := TotalMV.rightPart] \as IntoRight;
+\import singular_cohomology.Maps[A := TotalMV.Overlap, B := TotalMV.Left, source := TotalMV.overlapTopology, target := TotalMV.leftTopology]
+  .Composition[C := E, final := total].Coefficients[M := TotalProduct.integerCoefficients] \as Left;
+\import singular_cohomology.Maps[A := TotalMV.Overlap, B := TotalMV.Right, source := TotalMV.overlapTopology, target := TotalMV.rightTopology]
+  .Composition[C := E, final := total].Coefficients[M := TotalProduct.integerCoefficients] \as Right;
+\definition law: \forall (u: TotalCohomology.Group q) -> OverlapRight.restricted q (rightLift q u) = overlapLift q u :=
+  \fun (u: TotalCohomology.Group q) => trans!{{OverlapClasses.Group q}} _ _ _
+    (sym!{{OverlapClasses.Group q}} _ _ (Right.onCohomology TotalMV.toRight (IntoRight.laws TotalMV.toRight).continuous
+      TotalMV.rightPairMap (RightInclusion.laws TotalMV.rightPairMap).continuous q u))
+    (Left.onCohomology TotalMV.toLeft (IntoLeft.laws TotalMV.toLeft).continuous TotalMV.leftPairMap (LeftInclusion.laws TotalMV.leftPairMap).continuous q u);

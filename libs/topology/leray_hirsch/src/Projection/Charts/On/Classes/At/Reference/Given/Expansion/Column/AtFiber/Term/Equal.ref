@@ -1,0 +1,22 @@
+\definition zero: N.Nat^ := N.Nat^::zero;
+\definition same: I.Int^::ofNat zero = rawDegree :=
+  sym!{I.Int^} _ _ (Shift.unshiftNatural (degree j) (degree i) zero
+    (trans!{N.Nat^} _ _ _ (N.Basic[].Prop[].addZeroLeft (degree j)) equal));
+\import \parent.Native[p := zero, same := same] \as Input;
+\import Restriction.Zero[].At[q := degree j] \as Result;
+\import \root.ZeroClasses[A := LocalBase.CarrierSet, source := LocalBase.topology base, K := K, ring := ring] \as Values;
+\import singular_cohomology.Simplices[A := F, source := fiber].CutLeftUnit[p := degree j] \as Degree;
+\definition coefficient: Values.Carrier := Input.coefficient;
+\definition scalar: K := Values.evaluate coefficient y;
+\definition value: H.Group (degree i) := NaturalCast.cast H.Group (degree j) (degree i) equal (Model.fiberClass j);
+\definition law: term j = (H.moduleSpace (degree i)).smul scalar value :=
+  eq_reason_in!{{H.Group (degree i)} _
+    "=" _ "by" { Input.law }
+    "=" _ "by" { congr!{{H.Group Input.sumDegree} {H.Group (degree i)}} (NaturalCast.cast H.Group Input.sumDegree (degree i) Input.degreeLaw)
+      _ _ (Result.law coefficient (Model.fiberClass j)) }
+    "=" _ "by" { NaturalCast.natural H.Group H.Group (\fun (n: N.Nat^)(a: H.Group n) => (H.moduleSpace n).smul scalar a)
+      Input.sumDegree (degree i) Input.degreeLaw
+      (NaturalCast.cast H.Group (degree j) Input.sumDegree Degree.same (Model.fiberClass j)) }
+    "=" _ "by" { congr!{{H.Group (degree i)} {H.Group (degree i)}} ((H.moduleSpace (degree i)).smul scalar) _ _
+      (NaturalCast.castComposition H.Group (degree j) Input.sumDegree (degree i) Degree.same Input.degreeLaw (Model.fiberClass j)) }
+  };

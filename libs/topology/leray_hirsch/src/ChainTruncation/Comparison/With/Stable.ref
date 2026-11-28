@@ -1,0 +1,78 @@
+\import \root.DegreeBound[] \as Bound;
+\import chain_complexes.Integer[] \as Degrees;
+\import \root.DegreeShift[] \as Shift;
+\import std.Logic[].Proposition[] \as Logic;
+\import \root.NativeDualWindow[K := K, ring := ring] \as Dual;
+\import \root.ProductExact[K := K, ring := ring, Index := Finite.Fin count] \as Products;
+\import Full.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Whole;
+\module At(z: I.Int^) {
+  \definition n: N.Nat^ := Bound.cap z;
+  \definition end: N.Nat^ := N.Nat^::succ n;
+  \definition countDegrees: N.Nat^ := N.Nat^::succ end;
+  \import \parent.\parent.\parent.\parent.Layer[C := C, cutoff := countDegrees] \as Layer;
+  \import \parent.\parent.\parent.\parent.Of[C := C, kept := (\fun (b: N.Nat^) => Bounds.Lt b countDegrees),
+    downward := Layer.Downward countDegrees] \as Part;
+  \import Maps.Of[P := Part.complex, Q := D] \as Truncated;
+  \import Truncated.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Cut;
+  \import Full.Along[B := Part.complex, f := Part.inclusion].Finite[count := count, degrees := degrees, cycles := cycles, closed := closed].At[z := z] \as Natural;
+  \import Whole.At[z := z] \as Original;
+  \import Cut.At[z := z] \as Window;
+  \import Original.Product[] \as OriginalProduct;
+  \import Window.Product[] \as WindowProduct;
+  \import Dual.Along[A := Part.complex, B := C, f := Part.inclusion] \as Base;
+  \import Part.TensorWindow[D := D] \as Tensor;
+  \import double_complexes.DoubleComplex[].Over[R := I.Int^, ring := Integers.ring] \as Double;
+  \import Double.Tensor[C := Part.complex, D := D] \as Small;
+  \import Double.Tensor[C := C, D := D] \as Big;
+  \import Dual.Along[A := Double.Total[C := Small.complex].complex, B := Double.Total[C := Big.complex].complex, f := Tensor.map] \as Total;
+  \definition ltEnd[p: N.Nat^][h: Bounds.Le p end]: Bounds.Lt p countDegrees :=
+    Bounds.ltOfSuccLe countDegrees p (Bounds.leSuccSucc p end h);
+  \definition allKept[m: N.Nat^][h: Bounds.Le m end]: Tensor.Kept m :=
+    \fun (j: N.Nat^)(below: Bounds.Le j m) => ltEnd j (Bounds.leTrans j m end below h);
+  \definition baseWindow: \forall (t: I.Int^) -> Bound.Within end t -> Base.NativeAvailable t :=
+    \induction (t: I.Int^) \return Bound.Within end t -> Base.NativeAvailable t \with {
+      | ofNat: \fun (b: N.Nat^)(kept: Bounds.Le b end) =>
+        Logic.existsIntro[Base.Term[n := b].Iso, { e: Base.Term[n := b].Iso \where Base.Term[n := b].Matches e }]
+          (Part.At[n := b].full (ltEnd b kept)) (\fun (x: Part.complex.family.Carrier b) => \refl(x))
+      | negSucc: \fun (b: N.Nat^)(kept: Logic.True) => kept
+    };
+  \definition totalWindow: \forall (t: I.Int^) -> Bound.Within end t -> Total.NativeAvailable t :=
+    \induction (t: I.Int^) \return Bound.Within end t -> Total.NativeAvailable t \with {
+      | ofNat: \fun (b: N.Nat^)(kept: Bounds.Le b end) =>
+        Logic.existsIntro[Total.Term[n := b].Iso, { e: Total.Term[n := b].Iso \where Total.Term[n := b].Matches e }]
+          (Tensor.At[n := b, support := allKept b kept].isomorphism) (\fun (x: Double.Total[C := Small.complex].Carrier b) => \refl(Tensor.map.apply b x))
+      | negSucc: \fun (b: N.Nat^)(kept: Logic.True) => kept
+    };
+  \definition earlier[t: I.Int^][h: Bound.Within n t]: Bound.Within end (Degrees.previous t) :=
+    Bound.grow n (Degrees.previous t) (Bound.previous n t h);
+  \definition center[t: I.Int^][h: Bound.Within n t]: Bound.Within end t := Bound.grow n t h;
+  \definition later[t: I.Int^][h: Bound.Within n t]: Bound.Within end (Degrees.next t) := Bound.next n t h;
+  \module BaseClass(i: Finite.Fin count) {
+    \definition k: I.Int^ := Original.sourceDegree i;
+    \definition lower: Bound.Within n k := Bound.shift n (degrees i) z (Bound.within z);
+    \import Base.In[z := k, before := baseWindow (Degrees.previous k) (earlier k lower),
+      here := baseWindow k (center k lower), after := baseWindow (Degrees.next k) (later k lower)] \as Stable;
+    \definition isomorphism: _ := Stable.isomorphism;
+  }
+  \import Total.In[z := z, before := totalWindow (Degrees.previous z) (earlier z (Bound.within z)),
+    here := totalWindow z (center z (Bound.within z)), after := totalWindow (Degrees.next z) (later z (Bound.within z))] \as TotalClass;
+  \import Products.Maps[source := Original.family, target := Window.family]
+    .Isomorphism[].With[isos := (\fun (i: Finite.Fin count) => BaseClass[i := i].isomorphism)] \as BaseClasses;
+  \import Scalars.IsomorphismSquare[A := WindowProduct.domain, B := Window.range, C := OriginalProduct.domain, D := Original.range] \as Compare;
+  \module With(layer: \forall (p: N.Nat^) -> \parent.\parent.\parent.Cutoff[p := p].GradedIso) {
+    \definition cutComparison: _ := WindowProduct.invert (realizations layer countDegrees z);
+    \import Compare.Incoming[a := BaseClasses.isomorphism, b := TotalClass.isomorphism, c := cutComparison, f := OriginalProduct.ProductComparison] \as Square;
+    \definition productIsomorphism: _ := Square.isomorphism Natural.law;
+    \definition bijective: OriginalProduct.Bijective := OriginalProduct.Bijective {
+      injective := \fun (a, b: OriginalProduct.domain.Carrier)(same: _) => trans!{{OriginalProduct.domain.Carrier}} _ _ _
+        (sym!{{OriginalProduct.domain.Carrier}} _ _ (productIsomorphism.leftInverse a))
+        (trans!{{OriginalProduct.domain.Carrier}} _ _ _
+          (congr!{{Original.range.Carrier} {OriginalProduct.domain.Carrier}} productIsomorphism.backward.apply _ _ same)
+          (productIsomorphism.leftInverse b)),
+      onto := \fun (y: Original.range.Carrier) => Logic.existsIntro[OriginalProduct.domain.Carrier,
+        { a: OriginalProduct.domain.Carrier \where OriginalProduct.ProductComparison.apply a = y }]
+        (productIsomorphism.backward.apply y) (productIsomorphism.rightInverse y),
+    };
+    \definition isomorphism: _ := OriginalProduct.DirectSum[].isomorphism bijective;
+  }
+}

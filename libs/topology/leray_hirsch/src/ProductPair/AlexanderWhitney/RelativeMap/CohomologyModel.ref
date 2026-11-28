@@ -1,0 +1,64 @@
+\import std.Logic[].Proposition[] \as Logic;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Scalars;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as C;
+\import chain_complexes.Integer[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as H;
+\import \root.ZeroExtendedDual[K := K, ring := ring] \as Duals;
+\import \root.DegreeShift[] \as Degree;
+\definition coefficients: Scalars.Bundle := Scalars.Bundle { Carrier := K, space := Scalars.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\import singular_cohomology.Relative[A := X, source := base, subset := subset] \as BasePair;
+\import cohomology_thom.RelativeMayerVietoris[].Pair[A := X, source := base, subset := subset] \as PairTools;
+\import \root.NonnegativePart[].Of[C := BasePair.complex] \as BasePart;
+\definition negative: BasePart.NegativesZero := \fun (n: N.Nat^) => PairTools.Negative[n := n].zero;
+\import BasePart.Extend[h := negative] \as Recover;
+\import Native.ZeroExtension[C := TensorComparison.relative] \as BaseExtension;
+\import Duals.On[C := TensorComparison.relative] \as BaseDual;
+\import Duals.Along[A := BaseExtension.complex, B := BasePair.complex, e := Recover.isomorphism] \as BaseActual;
+\import Duals.On[C := TensorComparison.tensorQuotient] \as TotalDual;
+\import Hom.Native[P := TensorComparison.relative] \as BaseChains;
+\import Hom.Native[P := TensorComparison.tensorQuotient] \as TensorChains;
+\import Hom.Native[P := FiberChains.complex] \as Fiber;
+\import C.ZeroExtension[C := BaseChains.complex] \as BaseModel;
+\import C.ZeroExtension[C := TensorChains.complex] \as TensorModel;
+\import Hom.On[P := BasePair.complex] \as BaseCochains;
+\import Hom.On[P := Actual.complex] \as ActualCochains;
+\import Hom.On[P := BaseExtension.complex] \as ExtendedBase;
+\import Hom.On[P := Target.complex] \as ExtendedTensor;
+\import \parent.CohomologyComparison[K := K, ring := ring] \as AlexanderWhitney;
+\import \parent.Cochains[K := K, ring := ring] \as AW;
+\import \root.TensorBasis[K := K, ring := ring].Of[P := TensorComparison.relative, Q := FiberChains.complex] \as Comparison;
+\import singular_cap.External[A := X, B := F, left := base, right := fiber, R := K, ring := ring] \as External;
+\import topology.Topology[Carrier := F] \as FiberSpace;
+\import External.Relative[leftSubset := subset, rightSubset := FiberSpace.Empty] \as Relative;
+\import singular_products.Cochains[A := F, source := fiber, R := K, ring := ring] \as FiberProduct;
+\import FiberProduct.Cohomology[] \as FiberClasses;
+\import \root.Trivial[X := X, F := F, base := base, fiber := fiber, K := K, ring := ring] \as Bundle;
+\import \root.Projection[X := X, E := Whole.CarrierSet, base := base, total := wholeTopology,
+  projection := External.leftProjection, continuous := External.leftContinuous]
+  .Over[U := subset, K := K, ring := ring] \as Project;
+\module At(z: I.Int^) {
+  \import H.At[C := BaseModel.complex, z := z] \as AbstractBase;
+  \import H.At[C := TensorModel.complex, z := z] \as AbstractTotal;
+  \import H.At[C := BaseCochains.complex, z := z] \as RealBase;
+  \import H.At[C := ActualCochains.complex, z := z] \as RealTotal;
+  \import H.At[C := ExtendedBase.complex, z := z] \as ExtendedBase;
+  \import H.At[C := ExtendedTensor.complex, z := z] \as ExtendedTensor;
+  \import Scalars.Isomorphism[V := RealBase.Cohomology, W := ExtendedBase.Cohomology, source := RealBase.cohomologySpace, target := ExtendedBase.cohomologySpace]
+    .Inverse[] \as ReverseBase;
+  \import Scalars.Isomorphism[V := AbstractBase.Cohomology, W := ExtendedBase.Cohomology, source := AbstractBase.cohomologySpace, target := ExtendedBase.cohomologySpace]
+    .Composition[U := RealBase.Cohomology, final := RealBase.cohomologySpace] \as BaseCompose;
+  \definition baseComparison: _ := BaseCompose.compose (ReverseBase.inverse BaseActual.At[z := z].comparison) BaseDual.Cohomology[z := z].comparison;
+  \import Scalars.Isomorphism[V := AbstractTotal.Cohomology, W := ExtendedTensor.Cohomology, source := AbstractTotal.cohomologySpace, target := ExtendedTensor.cohomologySpace]
+    .Composition[U := RealTotal.Cohomology, final := RealTotal.cohomologySpace] \as TotalCompose;
+  \definition totalComparison: _ := TotalCompose.compose AlexanderWhitney.At[z := z].isomorphism TotalDual.Cohomology[z := z].comparison;
+}
+\module Positive(p, q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero);
+
+\module Fixed(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero);
+
+\import std.Data[].FinSet[] \as Finite;
+\module With(count: N.Nat^, degrees: Finite.Fin count -> N.Nat^,
+  cycles: \forall (i: Finite.Fin count) -> Fiber.Carrier (degrees i),
+  closed: \forall (i: Finite.Fin count) -> Fiber.apply (degrees i) (cycles i) = (Fiber.space (N.Nat^::succ (degrees i))).zero);

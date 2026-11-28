@@ -1,0 +1,11 @@
+\import N.Basic[].Prop[] \as Bounds;
+\import N.Order[].Prop[] \as Order;
+\import std.Data[].FinSet[] \as Finite;
+\import \root.TensorBasis[K := K, ring := ring] \as Maps;
+\import Maps.Of[P := C, Q := D] \as Full;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Scalars;
+\definition coefficients: Scalars.Bundle := Scalars.Bundle { Carrier := K, space := Scalars.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients].Native[P := D] \as Fiber;
+\module With(count: N.Nat^, degrees: Finite.Fin count -> N.Nat^,
+  cycles: \forall (i: Finite.Fin count) -> Fiber.Carrier (degrees i),
+  closed: \forall (i: Finite.Fin count) -> Fiber.apply (degrees i) (cycles i) = (Fiber.space (N.Nat^::succ (degrees i))).zero);

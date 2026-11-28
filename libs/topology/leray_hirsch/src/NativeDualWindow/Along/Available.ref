@@ -1,0 +1,25 @@
+\module AtNatural(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \import \parent.\parent.At[z := z] \as At;
+  \import \parent.\parent.Term[n := n] \as Term;
+  \definition inj: NativeAvailable z -> At.Injective := \block {
+    \fun (available: NativeAvailable z) \then
+    \takefrom e: \Cast[Term.Iso] ({ e: Term.Iso \where Term.Matches e }) \by available \then
+    \return \parent.\parent.Positive[n := n, e := e, same := \bysub(Term.Iso, { e: Term.Iso \where Term.Matches e }, e)].injective
+  };
+  \definition onto: NativeAvailable z -> At.Onto := \block {
+    \fun (available: NativeAvailable z) \then
+    \takefrom e: \Cast[Term.Iso] ({ e: Term.Iso \where Term.Matches e }) \by available \then
+    \return \parent.\parent.Positive[n := n, e := e, same := \bysub(Term.Iso, { e: Term.Iso \where Term.Matches e }, e)].onto
+  };
+}
+\definition injective: \forall (z: I.Int^) -> NativeAvailable z -> \parent.At[z := z].Injective :=
+  \induction (z: I.Int^) \return NativeAvailable z -> \parent.At[z := z].Injective \with {
+    | ofNat: \fun (n: N.Nat^) => AtNatural[n := n].inj
+    | negSucc: \fun (n: N.Nat^)(h: Logic.True) => \parent.Negative[n := n].injective
+  };
+\definition onto: \forall (z: I.Int^) -> NativeAvailable z -> \parent.At[z := z].Onto :=
+  \induction (z: I.Int^) \return NativeAvailable z -> \parent.At[z := z].Onto \with {
+    | ofNat: \fun (n: N.Nat^) => AtNatural[n := n].onto
+    | negSucc: \fun (n: N.Nat^)(h: Logic.True) => \parent.Negative[n := n].onto
+  };

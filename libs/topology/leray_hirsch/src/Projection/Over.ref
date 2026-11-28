@@ -1,0 +1,51 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import singular_cohomology.Relative[A := E, source := total, subset := preimage U] \as TotalPair;
+\import TotalPair.Maps[B := X].Over[target := base, targetSubset := U] \as Pairs;
+\definition pairProjection: Pairs.Map := \into[E -> X](projection, Pairs.Map) \by {
+  Pairs.Laws[projection] {
+    continuous := continuous,
+    contained := \fun (e: TotalPair.SubspaceCarrier) => \bysub(E, preimage U, e),
+  }
+};
+\import \root.PairMap[A := E, B := X, source := total, target := base, part := preimage U, boundary := U, f := pairProjection, K := K, ring := ring] \as Pull;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import singular_products.Cochains[A := E, source := total, R := K, ring := ring] \as TotalProduct;
+\import singular_products.Cochains[A := X, source := base, R := K, ring := ring] \as BaseProduct;
+\import singular_cohomology.Relative[A := X, source := base, subset := U] \as BasePair;
+\import BasePair.OverRing[R := K, ring := ring].With[coefficients := BaseProduct.coefficients] \as BaseRelative;
+\import TotalPair.OverRing[R := K, ring := ring].With[coefficients := TotalProduct.coefficients] \as TotalRelative;
+\import singular_cap.CochainPair[A := E, source := total, subset := preimage U, R := K, ring := ring] \as Action;
+\import TotalProduct.Cohomology[] \as TotalCohomology;
+\module Component(p, q: N.Nat^);
+\definition baseFamily: Modules.Family[I.Int^] := Modules.Family[I.Int^] {
+  Carrier := \fun (z: I.Int^) => BaseRelative.At[z := z].Carrier,
+  space := \fun (z: I.Int^) => BaseRelative.At[z := z].space,
+};
+\definition totalFamily: Modules.Family[I.Int^] := Modules.Family[I.Int^] {
+  Carrier := \fun (z: I.Int^) => TotalRelative.At[z := z].Carrier,
+  space := \fun (z: I.Int^) => TotalRelative.At[z := z].space,
+};
+\import \root.DegreeShift[] \as Degrees;
+\import \root.Transport[K := K, ring := ring].For[Index := I.Int^, family := totalFamily] \as Reindex;
+\definition projectionPullback[z: I.Int^]: _ := Pull.At[z := z].linear;
+\module Shifted(q: N.Nat^, u: TotalCohomology.Group q);
+\module Comparison(count: N.Nat^);
+\module Change(L: \Set, targetRing: std.Alg[].Ring[].CommutativeRing[L],
+  morphism: cohomology_thom.CoefficientChange[].OnSpace[A := E, source := total, R := K, S := L, ring := ring, targetRing := targetRing].Morphism);
+\module MayerVietoris(cover: singular_excision.MayerVietoris[A := X].Over[source := base].Cover);
+
+\module Along(Y, Z: \Set, newBase: topology.Topology[Carrier := Y].Topology, newTotal: topology.Topology[Carrier := Z].Topology,
+  newPart: \Pow Y, newProjection: Z -> Y, newContinuous: topology.Continuity[A := Z, B := Y].Continuous newTotal newBase newProjection,
+  baseMap: singular_cohomology.Relative[A := Y, source := newBase, subset := newPart].Maps[B := X].Over[target := base, targetSubset := U].Map,
+  totalMap: singular_cohomology.Relative[A := Z, source := newTotal, subset := { e: Z \where \In[Y] newPart (newProjection e) }]
+    .Maps[B := E].Over[target := total, targetSubset := preimage U].Map,
+  square: \forall (e: Z) -> projection (totalMap e) = baseMap (newProjection e));
+
+\module Restriction(V: \Pow X);
+
+\module Whole;
+\module Union(L, R: \Pow X, leftOpen: Base.IsOpenIn base L, rightOpen: Base.IsOpenIn base R);
+
+\module RightFactor(q: N.Nat^, z: I.Int^, a: baseFamily.Carrier (Degrees.unshift q z));
+\module FactorDegree(z: I.Int^);

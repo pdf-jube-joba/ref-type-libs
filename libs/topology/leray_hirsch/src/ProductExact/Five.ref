@@ -1,0 +1,5 @@
+\module At(i: Index) {
+  \import Modules.ExactFive[A := at A i, B := at B i, C := at C i, D := at D i, E := at E i] \as Local;
+  \definition Sequence: \Set := Local.Sequence;
+}
+\module With(rows: \forall (i: Index) -> \parent.At[i := i].Sequence);

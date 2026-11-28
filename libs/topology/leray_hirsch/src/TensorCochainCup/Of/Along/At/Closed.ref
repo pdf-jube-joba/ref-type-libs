@@ -1,0 +1,44 @@
+\import N.Basic[].Prop[] \as Arithmetic;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Regrade;
+\import chain_complexes.Cochain[].Over[R := K, ring := baseRing] \as Theory;
+\definition grade: N.Nat^ := Nat.add q p;
+\definition same: n = grade := Arithmetic.addComm p q;
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := C, D := D].Fixed[q := q, beta := beta, closed := closed] \as TargetProduct;
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := B, D := D].Fixed[q := q, beta := beta, closed := closed] \as SourceProduct;
+\import Hom.Native[P := B] \as Base;
+\import Theory.At[C := Left.complex, k := p] \as BaseInput;
+\import Theory.At[C := Base.complex, k := p] \as BaseOutput;
+\import Theory.At[C := TotalHom.complex, k := grade] \as TotalInput;
+\import Theory.At[C := Source.complex, k := grade] \as TotalOutput;
+\import Theory.Map[C := Left.complex, D := Base.complex].At[k := p] \as BaseMap;
+\import Theory.Map[C := TotalHom.complex, D := Source.complex].At[k := grade] \as TotalMap;
+\import Theory.Map[C := Left.complex, D := TargetProduct.target].At[k := p] \as InputAction;
+\import Theory.Map[C := Base.complex, D := SourceProduct.target].At[k := p] \as OutputAction;
+\import TargetProduct.Cohomology[p := p] \as InputProduct;
+\import SourceProduct.Cohomology[p := p] \as OutputProduct;
+\definition cochainLaw: \forall (a: Left.Carrier p) ->
+  TotalPullback.map.apply grade (TargetProduct.map.apply p a) = SourceProduct.map.apply p (BasePullback.map.apply p a) :=
+  \fun (a: Left.Carrier p) => trans!{{Source.Carrier grade}} _ _ _
+    (sym!{{Source.Carrier grade}} _ _
+      (Regrade.natural TotalHom.Carrier Source.Carrier TotalPullback.map.apply n grade same (TargetCup.total a beta)))
+    (congr!{{Source.Carrier n} {Source.Carrier grade}} (Regrade.cast Source.Carrier n grade same) _ _ (law a beta));
+\definition onCycles: \forall (a: BaseInput.CycleCarrier) ->
+  (TotalMap.induced TotalPullback.map).apply (InputProduct.linear.apply (BaseInput.classOf a)) =
+  OutputProduct.linear.apply ((BaseMap.induced BasePullback.map).apply (BaseInput.classOf a)) :=
+  \fun (a: BaseInput.CycleCarrier) => eq_reason_in!{TotalOutput.Cohomology _
+    "=" _ "by" { congr!{TotalInput.Cohomology TotalOutput.Cohomology} (TotalMap.induced TotalPullback.map).apply _ _ (InputProduct.onClass a) }
+    "=" _ "by" { TotalMap.onClass TotalPullback.map ((InputAction.cyclesMap TargetProduct.map).apply a) }
+    "=" _ "by" { TotalOutput.equalClass
+      ((TotalMap.cyclesMap TotalPullback.map).apply ((InputAction.cyclesMap TargetProduct.map).apply a))
+      ((OutputAction.cyclesMap SourceProduct.map).apply ((BaseMap.cyclesMap BasePullback.map).apply a))
+      (cochainLaw a) }
+    "=" _ "by" { sym!{TotalOutput.Cohomology} _ _ (OutputProduct.onClass ((BaseMap.cyclesMap BasePullback.map).apply a)) }
+    "=" _ "by" { congr!{BaseOutput.Cohomology TotalOutput.Cohomology} OutputProduct.linear.apply _ _
+      (sym!{BaseOutput.Cohomology} _ _ (BaseMap.onClass BasePullback.map a)) }
+  };
+\definition naturality: \forall (a: BaseInput.Cohomology) ->
+  (TotalMap.induced TotalPullback.map).apply (InputProduct.linear.apply a) =
+  OutputProduct.linear.apply ((BaseMap.induced BasePullback.map).apply a) :=
+  BaseInput.classInduction (\fun (a: BaseInput.Cohomology) =>
+    (TotalMap.induced TotalPullback.map).apply (InputProduct.linear.apply a) =
+    OutputProduct.linear.apply ((BaseMap.induced BasePullback.map).apply a)) onCycles;

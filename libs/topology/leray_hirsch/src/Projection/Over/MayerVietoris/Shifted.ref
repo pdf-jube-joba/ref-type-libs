@@ -1,0 +1,74 @@
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as IntegerModules;
+\import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients] \as BaseSequence;
+\definition Index: \Set := Finite.Fin count;
+\import \root.ProductExact[K := I.Int^, ring := Integers.commutativeRing, Index := Index] \as Exact;
+\definition input[z: I.Int^][i: Index]: I.Int^ := Degrees.unshift (degree i) z;
+\definition next[z: I.Int^][i: Index]: I.Int^ := chain_complexes.Integer[].next (input z i);
+\module At(z: I.Int^) {
+  \module Component(i: Index) {
+    \definition lower: I.Int^ := input z i;
+    \definition upper: I.Int^ := next z i;
+    \import BaseSequence.Degree[z := lower] \as Here;
+    \import BaseSequence.Degree[z := upper] \as Upper;
+    \import BaseSequence.At[z := lower] \as ExactHere;
+    \import BaseSequence.At[z := upper] \as ExactUpper;
+    \definition whole: IntegerModules.Bundle := Here.whole;
+    \definition pieces: IntegerModules.Bundle := Here.directSum;
+    \definition overlap: IntegerModules.Bundle := Here.intersection;
+    \definition upperWhole: IntegerModules.Bundle := Upper.whole;
+    \definition upperPieces: IntegerModules.Bundle := Upper.directSum;
+    \definition upperOverlap: IntegerModules.Bundle := Upper.intersection;
+    \definition atPieces: _ := ExactHere.exactAtSum;
+    \definition atOverlap: _ := ExactHere.exactAtIntersection;
+    \definition atUpperWhole: _ := ExactHere.exactAtWhole;
+    \definition atUpperPieces: _ := ExactUpper.exactAtSum;
+  }
+  \definition whole: IntegerModules.Family[Index] := IntegerModules.Family[Index] {
+    Carrier := \fun (i: Index) => \parent.At[z := z].Component[i := i].whole.Carrier,
+    space := \fun (i: Index) => \parent.At[z := z].Component[i := i].whole.space,
+  };
+  \definition pieces: IntegerModules.Family[Index] := IntegerModules.Family[Index] {
+    Carrier := \fun (i: Index) => \parent.At[z := z].Component[i := i].pieces.Carrier,
+    space := \fun (i: Index) => \parent.At[z := z].Component[i := i].pieces.space,
+  };
+  \definition overlap: IntegerModules.Family[Index] := IntegerModules.Family[Index] {
+    Carrier := \fun (i: Index) => \parent.At[z := z].Component[i := i].overlap.Carrier,
+    space := \fun (i: Index) => \parent.At[z := z].Component[i := i].overlap.space,
+  };
+  \definition upperWhole: IntegerModules.Family[Index] := IntegerModules.Family[Index] {
+    Carrier := \fun (i: Index) => \parent.At[z := z].Component[i := i].upperWhole.Carrier,
+    space := \fun (i: Index) => \parent.At[z := z].Component[i := i].upperWhole.space,
+  };
+  \definition upperPieces: IntegerModules.Family[Index] := IntegerModules.Family[Index] {
+    Carrier := \fun (i: Index) => \parent.At[z := z].Component[i := i].upperPieces.Carrier,
+    space := \fun (i: Index) => \parent.At[z := z].Component[i := i].upperPieces.space,
+  };
+  \definition upperOverlap: IntegerModules.Family[Index] := IntegerModules.Family[Index] {
+    Carrier := \fun (i: Index) => \parent.At[z := z].Component[i := i].upperOverlap.Carrier,
+    space := \fun (i: Index) => \parent.At[z := z].Component[i := i].upperOverlap.space,
+  };
+  \definition atPieces: _ :=
+    Exact.Pair[A := whole, B := pieces, C := overlap].With[
+      sequences := (\fun (i: Index) => \parent.At[z := z].Component[i := i].atPieces)
+    ].sequence;
+  \definition atOverlap: _ :=
+    Exact.Pair[A := pieces, B := overlap, C := upperWhole].With[
+      sequences := (\fun (i: Index) => \parent.At[z := z].Component[i := i].atOverlap)
+    ].sequence;
+  \definition atUpperWhole: _ :=
+    Exact.Pair[A := overlap, B := upperWhole, C := upperPieces].With[
+      sequences := (\fun (i: Index) => \parent.At[z := z].Component[i := i].atUpperWhole)
+    ].sequence;
+  \definition atUpperPieces: _ :=
+    Exact.Pair[A := upperWhole, B := upperPieces, C := upperOverlap].With[
+      sequences := (\fun (i: Index) => \parent.At[z := z].Component[i := i].atUpperPieces)
+    ].sequence;
+  \import IntegerModules.ExactFive[A := Exact.bundle pieces, B := Exact.bundle overlap,
+    C := Exact.bundle upperWhole, D := Exact.bundle upperPieces, E := Exact.bundle upperOverlap] \as Five;
+  \definition sequence: Five.Sequence := Five.Sequence {
+    first := atOverlap.first, second := atOverlap.last, third := atUpperWhole.last, last := atUpperPieces.last,
+    zeroB := atOverlap.zero, zeroC := atUpperWhole.zero, zeroD := atUpperPieces.zero,
+    kernelB := atOverlap.kernelImage, kernelC := atUpperWhole.kernelImage, kernelD := atUpperPieces.kernelImage,
+  };
+}

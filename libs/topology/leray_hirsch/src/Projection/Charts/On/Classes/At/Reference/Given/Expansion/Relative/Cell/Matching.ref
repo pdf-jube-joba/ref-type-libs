@@ -1,0 +1,24 @@
+\import \root.ZeroClasses[A := LocalBase.CarrierSet, source := LocalBase.topology base, K := K, ring := ring] \as Zero;
+\definition rawZero: I.Int^::ofNat N.Nat^::zero = Atom.input :=
+  sym!{I.Int^} _ _ (Shift.unshiftNatural (degree j) (degree i) N.Nat^::zero
+    (trans!{N.Nat^} _ _ _ (Nat.addZeroLeft (degree j)) (sym!{N.Nat^} _ _ equal)));
+\import Atom.Native[p := N.Nat^::zero, same := rawZero] \as Coefficient;
+\import \root.Trivial[X := LocalBase.CarrierSet, F := F, base := LocalBase.topology base, fiber := fiber, K := K, ring := ring]
+  .Over[U := part].ZeroAssociation[r := degree j, z := z].Given[b := Coefficient.coefficient, c := Model.fiberClass j] \as Exterior;
+\definition coordinates: Output := NatCast.cast family.Carrier (degree i) (degree j) equal x;
+\definition matrixEntry: Block.matrix j i = Coefficient.coefficient :=
+  (Block.values j i).block (\refl(degree j)) equal;
+\definition rhs: Atoms.term j = NatCast.cast Groups.Group (degree j) (degree i) (sym!{N.Nat^} _ _ equal) Exterior.factor :=
+  trans!{{Groups.Group (degree i)}} _ _ _ Coefficient.law
+    (sym!{{Groups.Group (degree i)}} _ _ (NatCast.castComposition Groups.Group Coefficient.sumDegree (degree j) (degree i)
+      (Nat.addZeroLeft (degree j)) (sym!{N.Nat^} _ _ equal) Coefficient.exteriorClass));
+\definition imageLaw: image (expected equal) = total :=
+  eq_reason_in!{Range _
+    "=" _ "by" { congr!{Output Range} image _ _
+      (congr!{{Zero.Carrier} Output} (\fun (b: Zero.Carrier) => CupZero.act b coordinates) _ _ matrixEntry) }
+    "=" _ "by" { Exterior.law coordinates }
+    "=" _ "by" { sym!{Range} _ _ (Regrade.law (degree j) (degree i) Exterior.factor (sym!{N.Nat^} _ _ equal) x) }
+    "=" _ "by" { congr!{{Groups.Group (degree i)} Range} (\fun (b: Groups.Group (degree i)) => (Apply.shifted b).apply x) _ _
+      (sym!{{Groups.Group (degree i)}} _ _ rhs) }
+    "=" _ "by" { sym!{Range} _ _ (Apply.law (Atoms.term j)) }
+  };

@@ -1,0 +1,14 @@
+\import SecondSpace.Subspace[S := W] \as Third;
+\definition Canonical: \Set := \Cast[X] S;
+\definition Nested: \Set := Third.CarrierSet;
+\definition source: _ := CanonicalSpace.topology ambient;
+\definition top: First.SubspaceTopology := First.topology ambient;
+\definition middle: Inner.SubspaceTopology := Inner.topology top;
+\definition target: Third.SubspaceTopology := Third.topology middle;
+\definition underlyingNested[x: Nested]: X := x;
+\definition underlyingCanonical[x: Canonical]: X := x;
+\module On(forward: Canonical -> Nested, backward: Nested -> Canonical,
+  leftInverse: \forall (x: Canonical) -> backward (forward x) = x,
+  rightInverse: \forall (x: Nested) -> forward (backward x) = x,
+  sourceLaw: \forall (x: Canonical) -> underlyingNested (forward x) = underlyingCanonical x,
+  targetLaw: \forall (x: Nested) -> underlyingCanonical (backward x) = underlyingNested x);

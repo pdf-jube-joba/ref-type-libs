@@ -1,0 +1,30 @@
+\definition n: N.Nat^ := Nat.add p q;
+\import Tensor.Term[p := p, q := q] \as Term;
+\import IntegerModules.Tensor[V := C.family.Carrier p, W := D.family.Carrier q, left := C.family.space p, right := D.family.space q] \as Pure;
+\import Pure.Universal[U := K, target := integerCoefficients.space] \as Universal;
+\definition value[alpha: Left.Carrier p][beta: Right.Carrier q][x: C.family.Carrier p][y: D.family.Carrier q]: K := baseRing.mul (beta.apply y) (alpha.apply x);
+\definition commuted[alpha: Left.Carrier p][beta: Right.Carrier q][x: C.family.Carrier p][y: D.family.Carrier q]: value alpha beta x y = baseRing.mul (alpha.apply x) (beta.apply y) := ring.mulCommutative (beta.apply y) (alpha.apply x);
+\module Laws(alpha: Left.Carrier p, beta: Right.Carrier q);
+\definition map[alpha: Left.Carrier p][beta: Right.Carrier q]: IntegerModules.Hom[V := Term.Carrier, W := K, source := Term.space, target := integerCoefficients.space].Map := Universal.map (value alpha beta) Laws[alpha := alpha, beta := beta].laws;
+\definition onTensor[alpha: Left.Carrier p][beta: Right.Carrier q][x: C.family.Carrier p][y: D.family.Carrier q]: (map alpha beta).apply (Term.tensor x y) = baseRing.mul (alpha.apply x) (beta.apply y) :=
+  trans!{K} _ _ _ (Universal.onTensor (value alpha beta) Laws[alpha := alpha, beta := beta].laws x y) (commuted alpha beta x y);
+\import Coordinates.Step[p := p, q := q] \as Position;
+\definition index: Double.Index n := Position.targetIndex;
+\import Coordinates.Degree[n := n] \as Current;
+\import IntegerModules.Hom[V := Term.Carrier, W := K, source := Term.space, target := integerCoefficients.space].Composition[U := Total.Carrier n, domain := Total.space n] \as Compose;
+\definition total[alpha: Left.Carrier p][beta: Right.Carrier q]: TotalHom.Carrier n := Compose.compose (map alpha beta) Current.At[i := index].map;
+
+\module LinearLeft(beta: Right.Carrier q);
+
+\module In(k: N.Nat^, equal: n = k);
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Regrade;
+\definition onDegree: \forall (k: N.Nat^)(equal: n = k)(alpha: Left.Carrier p)(beta: Right.Carrier q) ->
+  Regrade.cast TotalHom.Carrier n k equal (total alpha beta) = In[k := k, equal := equal].evaluation alpha beta :=
+  \fun (k: N.Nat^)(equal: n = k)(alpha: Left.Carrier p)(beta: Right.Carrier q) =>
+    (\idelim n = k \with j: N.Nat^ => \forall (same: n = j) ->
+      Regrade.cast TotalHom.Carrier n j same (total alpha beta) = In[k := j, equal := same].evaluation alpha beta \by {
+        base: \fun (same: n = n) => Regrade.castRefl TotalHom.Carrier n (total alpha beta),
+        equality: equal
+      }) equal;
+
+\module Differential(alpha: Left.Carrier p, beta: Right.Carrier q);

@@ -1,0 +1,36 @@
+\import Scalars.AbelianHom[N := coefficients] \as Coefficients;
+\import Modules.Hom[V := BasePair.Carrier b, W := K, source := BasePair.space b, target := Coefficients.coefficients.space] \as BaseMaps;
+\import singular_cellular_algebra.Algebra[].Refinement[A := ActualCochains.Carrier z, S := TotalH.cycles.carrier] \as Cycles;
+\definition baseSame: \forall (a: Model.Cycle) -> baseCycle a = a :=
+  \fun (a: Model.Cycle) => BaseMaps.ext (baseCycle a) a (baseValue a);
+\definition betaPull: _ := FiberPullClasses.At[n := q].cycle External.rightProjection External.rightContinuous fiberCycle;
+\definition alphaPull[a: Model.Cycle]: _ :=
+  (RelativePullClasses.cyclesMap RelativePull.map).apply (baseCycle a);
+\definition output[a: Model.Cycle]: TotalH.Closed := RightCup.cycle (alphaPull a) betaPull;
+\definition expanded: \forall (a: Model.Cycle) -> image a = Formula.tensorCochain a beta :=
+  \fun (a: Model.Cycle) => ActualCochains.At[z := z].ext (image a) (Formula.tensorCochain a beta)
+    (\fun (x: Actual.Carrier z) => congr!{{TensorChains.Carrier n} K}
+      (\fun (h: TensorChains.Carrier n) => h.apply (Target.Positive[n := n].backward.apply (comparisonMap.apply z x))) _ _
+      (Model.underlying a));
+\definition onCycle: \forall (a: Model.Cycle) -> image a = output a :=
+  \fun (a: Model.Cycle) => Cycles.ext (image a) (output a)
+    (eq_reason_in!{{ActualCochains.Carrier z} _
+      "=" _ "by" { expanded a }
+      "=" _ "by" { Formula.law a beta }
+      "=" _ "by" { congr!{{BaseCochains.Carrier b} {ActualCochains.Carrier z}} (\fun (h: BaseCochains.Carrier b) => Cups.left h beta) _ _
+        (sym!{{BaseCochains.Carrier b}} _ _ (baseSame a)) }
+    });
+\definition fromCups: \forall (a: Model.Cycle) -> Cup.left (BaseH.classOf (baseCycle a)) fiberClass = TotalH.classOf (output a) :=
+  \fun (a: Model.Cycle) => eq_reason_in!{TotalH.Cohomology _
+    "=" _ "by" { congr!{{Project.totalFamily.Carrier b} TotalH.Cohomology}
+      (\fun (u: Project.totalFamily.Carrier b) => RightCup.apply u lift) _ _
+      (RelativePullClasses.onClass RelativePull.map (baseCycle a)) }
+    "=" _ "by" { congr!{{WholeProduct.Cohomology[].Group q} TotalH.Cohomology}
+      (RightCup.apply (H.At[C := ActualCochains.complex, z := b].classOf (alphaPull a))) _ _
+      (FiberPullClasses.At[n := q].onClass External.rightProjection External.rightContinuous fiberCycle) }
+    "=" _ "by" { RightCup.onClasses (alphaPull a) betaPull }
+  };
+\definition law: \forall (a: Model.Cycle) -> TotalH.classOf (image a) = Cup.left (BaseH.classOf (baseCycle a)) fiberClass :=
+  \fun (a: Model.Cycle) => trans!{TotalH.Cohomology} _ _ _
+    (congr!{TotalH.Closed TotalH.Cohomology} TotalH.classOf _ _ (onCycle a))
+    (sym!{TotalH.Cohomology} _ _ (fromCups a));

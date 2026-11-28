@@ -1,0 +1,53 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\definition totalPart: \Pow Z := { e: Z \where \In[Y] newPart (newProjection e) };
+\import singular_cohomology.Relative[A := Y, source := newBase, subset := newPart] \as NewBase;
+\import singular_cohomology.Relative[A := Z, source := newTotal, subset := totalPart] \as NewTotal;
+\import NewTotal.Maps[B := E].Over[target := total, targetSubset := preimage U] \as TotalMaps;
+\import NewTotal.Maps[B := Y].Over[target := newBase, targetSubset := newPart] \as OverProjection;
+\import NewTotal.Maps[B := X].Over[target := base, targetSubset := U] \as Direct;
+\import \root.Projection[X := Y, E := Z, base := newBase, total := newTotal, projection := newProjection, continuous := newContinuous]
+  .Over[U := newPart, K := K, ring := ring] \as New;
+\import \root.Projection[X := X, E := E, base := base, total := total, projection := projection, continuous := continuous]
+  .Over[U := U, K := K, ring := ring] \as Old;
+\import TotalMaps.Composition[C := X].Over[final := base, finalSubset := U] \as AlongTotal;
+\import OverProjection.Composition[C := X].Over[final := base, finalSubset := U] \as AlongBase;
+\definition composite: AlongTotal.compose totalMap Old.pairProjection = AlongBase.compose New.pairProjection baseMap :=
+  \axiom:funext((\fun (e: Z) => projection (totalMap e)), (\fun (e: Z) => baseMap (newProjection e)), square);
+\import \root.PairMap[A := Y, B := X, source := newBase, target := base, part := newPart, boundary := U, f := baseMap, K := K, ring := ring] \as BasePull;
+\import \root.PairMap[A := Z, B := E, source := newTotal, target := total, part := totalPart, boundary := preimage U, f := totalMap, K := K, ring := ring] \as TotalPull;
+\import singular_products.Cochains[A := Z, source := newTotal, R := K, ring := ring] \as NewProduct;
+\import NewProduct.Cohomology[].Pullback[B := E, target := total] \as Absolute;
+\definition restricted[q: N.Nat^]: TotalCohomology.Group q -> NewProduct.Cohomology[].Group q :=
+  Absolute.apply q totalMap (TotalMaps.laws totalMap).continuous;
+\definition baseRestriction[z: I.Int^]: _ := BasePull.At[z := z].linear;
+\definition totalRestriction[z: I.Int^]: _ := TotalPull.At[z := z].linear;
+\definition projectionLaw: \forall (z: I.Int^)(a: baseFamily.Carrier z) ->
+  (totalRestriction z).apply ((projectionPullback z).apply a) =
+  (New.projectionPullback z).apply ((baseRestriction z).apply a) :=
+  \fun (z: I.Int^)(a: baseFamily.Carrier z) => trans!{{New.totalFamily.Carrier z}} _ _ _
+    (sym!{{New.totalFamily.Carrier z}} _ _ (AlongTotal.On[f := totalMap, g := pairProjection].With[coefficients := TotalProduct.integerCoefficients].law z a))
+    (trans!{{New.totalFamily.Carrier z}} _ _ _
+      (congr!{Direct.Map {New.totalFamily.Carrier z}}
+        (\fun (h: Direct.Map) => \root.PairMap[A := Z, B := X, source := newTotal, target := base, part := totalPart, boundary := U,
+          f := h, K := K, ring := ring].At[z := z].linear.apply a) _ _ composite)
+      (AlongBase.On[f := New.pairProjection, g := baseMap].With[coefficients := TotalProduct.integerCoefficients].law z a));
+\module Degree(p, q: N.Nat^) {
+  \import Old.Component[p := p, q := q] \as Input;
+  \import New.Component[p := p, q := q] \as Output;
+  \definition law: \forall (u: Input.Factor)(a: Input.Domain) ->
+    (totalRestriction (I.Int^::ofNat Input.degree)).apply (Input.apply u a) =
+    Output.apply (restricted q u) ((baseRestriction (I.Int^::ofNat p)).apply a) :=
+    \fun (u: Input.Factor)(a: Input.Domain) => trans!{Output.Range} _ _ _
+      (TotalPull.Cup[p := p, q := q].Cohomology[].law ((projectionPullback (I.Int^::ofNat p)).apply a) u)
+      (congr!{{New.totalFamily.Carrier (I.Int^::ofNat p)} Output.Range}
+        (\fun (b: New.totalFamily.Carrier (I.Int^::ofNat p)) => Output.cup b (restricted q u))
+        _ _ (projectionLaw (I.Int^::ofNat p) a));
+}
+\module Shift(q: N.Nat^, u: TotalCohomology.Group q);
+
+\import std.Data[].FinSet[] \as Finite;
+\module FiniteComparison(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

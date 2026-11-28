@@ -1,0 +1,66 @@
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\definition bundle[family: Modules.Family[Index]]: Modules.Bundle :=
+  Modules.Bundle { Carrier := Modules.Product[Index := Index, family := family].Carrier,
+    space := Modules.Product[Index := Index, family := family].space };
+\definition at[family: Modules.Family[Index]][i: Index]: Modules.Bundle :=
+  Modules.Bundle { Carrier := family.Carrier i, space := family.space i };
+\module Maps(source, target: Modules.Family[Index]) {
+  \definition Data: \Set := \forall (i: Index) -> Modules.MapBetween (at source i) (at target i);
+  \import Modules.Product[Index := Index, family := target] \as Target;
+  \import Modules.Hom[V := (bundle source).Carrier, W := (bundle target).Carrier, source := (bundle source).space, target := (bundle target).space] \as Linear;
+  \import Modules.Product[Index := Index, family := source] \as Source;
+  \definition apply[f: Data][v: Source.Carrier]: Target.Carrier := \fun (i: Index) => (f i).apply (v i);
+  \definition map[f: Data]: Linear.Map := Linear.Map {
+    apply := apply f,
+    addition := \fun (v, w: Source.Carrier) => Target.ext (apply f (Source.add v w)) (Target.add (apply f v) (apply f w))
+      (\fun (i: Index) => (f i).addition (v i) (w i)),
+    scalar := \fun (r: K)(v: Source.Carrier) => Target.ext (apply f (Source.scale r v)) (Target.scale r (apply f v))
+      (\fun (i: Index) => (f i).scalar r (v i)),
+  };
+  \module Isomorphism;
+}
+\module Pair(A, B, C: Modules.Family[Index]) {
+  \import \parent.Maps[source := A, target := B] \as First;
+  \import \parent.Maps[source := B, target := C] \as Last;
+  \import Modules.ExactPair[A := bundle A, B := bundle B, C := bundle C] \as Product;
+  \import Modules.Product[Index := Index, family := B] \as Middle;
+  \import Modules.Product[Index := Index, family := C] \as Target;
+  \module At(i: Index) {
+    \import Modules.ExactPair[A := at A i, B := at B i, C := at C i] \as Local;
+    \definition Sequence: \Set := Local.Sequence;
+    \definition laws[s: Sequence]: Local.Laws[s] := \bysub(Local.Data, { d: Local.Data \where Local.Laws[d] }, s);
+  }
+  \module With(sequences: \forall (i: Index) -> \parent.At[i := i].Sequence) {
+    \definition first: First.Data := \fun (i: Index) => (sequences i).first;
+    \definition last: Last.Data := \fun (i: Index) => (sequences i).last;
+    \definition data: Product.Data := Product.Data { first := First.map first, last := Last.map last };
+    \definition zero: \forall (x: (bundle A).Carrier) -> data.last.apply (data.first.apply x) = (bundle C).space.zero :=
+      \fun (x: (bundle A).Carrier) => Target.ext (data.last.apply (data.first.apply x)) Target.zero
+        (\fun (i: Index) => (\parent.At[i := i].laws (sequences i)).zero (x i));
+    \definition Preimage[x: (bundle B).Carrier][i: Index]: \Set :=
+      \Cast[A.Carrier i] ({ a: A.Carrier i \where (first i).apply a = x i });
+    \definition kernelImage: \forall (x: (bundle B).Carrier) -> data.last.apply x = (bundle C).space.zero ->
+      \exists (a: (bundle A).Carrier \where data.first.apply a = x) := \block {
+      \fun (x: (bundle B).Carrier)(kernel: data.last.apply x = (bundle C).space.zero) \then
+      \takefrom choices: \forall (i: Index) -> Preimage x i \by
+        \axiom:classicalIndefiniteChoice(Index, Preimage x, \fun (i: Index) =>
+          (\parent.At[i := i].laws (sequences i)).kernelImage (x i)
+            (congr!{{(bundle C).Carrier} {C.Carrier i}} (\fun (v: (bundle C).Carrier) => v i) _ _ kernel)) \then
+      \let a: (bundle A).Carrier := \fun (i: Index) => choices i \then
+      \return Logic.existsIntro[(bundle A).Carrier, { a: (bundle A).Carrier \where data.first.apply a = x }] a
+        (Middle.ext (data.first.apply a) x (\fun (i: Index) => \bysub(A.Carrier i, { a: A.Carrier i \where (first i).apply a = x i }, choices i)))
+    };
+    \definition sequence: Product.Sequence := \into[Product.Data](data, Product.Sequence) \by {
+      Product.Laws[data] { zero := zero, kernelImage := kernelImage }
+    };
+  }
+}
+
+\import std.Data[].List[] \as Lists;
+
+\module SumMaps(indices: Lists.List[Index]);
+
+\module Five(A, B, C, D, E: Modules.Family[Index]);

@@ -1,0 +1,47 @@
+\import std.Arithmetic[].Int[] \as I;
+\import topology.Topology[Carrier := LocalBase.CarrierSet] \as B;
+\import topological_constructions.Product[A := LocalBase.CarrierSet, B := F] \as Geometry;
+\definition ProductCarrier: \Set := Geometry.CarrierSet;
+\definition baseZero: \Pow LocalBase.CarrierSet := B.Empty;
+\definition totalZero: \Pow ProductCarrier := { p: ProductCarrier \where B.Member baseZero (Pair.first LocalBase.CarrierSet F p) };
+\import \root.ProductPair[X := LocalBase.CarrierSet, F := F, base := LocalBase.topology base, fiber := fiber, subset := baseZero]
+  .AlexanderWhitney[].RelativeMap[].CohomologyModel[K := K, ring := ring] \as PairModel;
+\definition value[i: Index]: Ordinary.Carrier (degree i) := cocycle i;
+\definition closed[i: Index]: Ordinary.complex.differential.apply (degree i) (value i) = (Ordinary.space (N.Nat^::succ (degree i))).zero :=
+  \bysub(Ordinary.Carrier (degree i), Native.At[C := Ordinary.complex, k := degree i].cycles.carrier, cocycle i);
+\import PairModel.With[count := count, degrees := degree, cycles := value, closed := closed] \as Model;
+\definition basis: Model.NativeBasis := \fun (q: N.Nat^) => \parent.Degree[q := q].basis (based x q);
+\import singular_cap.External[A := LocalBase.CarrierSet, B := F, left := LocalBase.topology base, right := fiber, R := K, ring := ring] \as External;
+\import \root.Projection[X := LocalBase.CarrierSet, E := ProductCarrier, base := LocalBase.topology base, total := chartTarget,
+  projection := External.leftProjection, continuous := External.leftContinuous].Over[U := baseZero, K := K, ring := ring] \as Projection;
+\import cohomology_thom.RelativeMayerVietoris[].Pair[A := ProductCarrier, source := chartTarget, subset := totalZero] \as Pair;
+\import topology.Topology[Carrier := ProductCarrier].Subspace[S := totalZero] \as Subspace;
+\import std.Logic[].Proposition[] \as Logic;
+\definition empty: \forall (p: Subspace.CarrierSet) -> Logic.False := \fun (p: Subspace.CarrierSet) => \bysub(ProductCarrier, totalZero, p);
+\import Pair.Empty[empty := empty].Ring[R := K, ring := ring] \as Absolute;
+\import \root.Trivial[X := LocalBase.CarrierSet, F := F, base := LocalBase.topology base, fiber := fiber, K := K, ring := ring]
+  .Over[U := baseZero] \as Trivial;
+\definition reference[i: Index]: ProductCochains.Cohomology[].Group (degree i) := Model.lift i;
+\import Projection.Comparison[count := count].With[degree := degree, classes := reference] \as Compare;
+\module Column(i: Index) {
+  \definition z: I.Int^ := I.Int^::ofNat (degree i);
+  \definition representative: Projection.totalFamily.Carrier z := Absolute.Degree[n := degree i].isomorphism.backward.apply (lift i);
+  \import Compare.At[z := z] \as Direct;
+  \import Direct.ProductCoordinates[] \as Product;
+  \definition iso: _ := Model.At[z := z].ProvedNative[h := basis].isomorphism;
+  \definition coordinates: Product.domain.Carrier := Direct.coordinates.apply (iso.backward.apply representative);
+  \definition expands: Product.finite.apply coordinates = representative :=
+    trans!{{Projection.totalFamily.Carrier z}} _ _ _
+      (sym!{{Projection.totalFamily.Carrier z}} _ _ (Product.onCoordinates (iso.backward.apply representative)))
+      (iso.rightInverse representative);
+  \definition absolute: Absolute.Degree[n := degree i].isomorphism.forward.apply (Product.finite.apply coordinates) = lift i :=
+    trans!{{ProductCochains.Cohomology[].Group (degree i)}} _ _ _
+      (congr!{{Projection.totalFamily.Carrier z} {ProductCochains.Cohomology[].Group (degree i)}} Absolute.Degree[n := degree i].isomorphism.forward.apply _ _ expands)
+      (Absolute.Degree[n := degree i].isomorphism.rightInverse (lift i));
+  \module AtFiber(y: LocalBase.CarrierSet);
+  \module Atoms;
+}
+
+\module Blocks(q: N.Nat^);
+
+\module Relative(part: \Pow LocalBase.CarrierSet, z: I.Int^);

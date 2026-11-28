@@ -1,0 +1,10 @@
+\definition Index: \Set := Finite.Fin count;
+\import \parent.\parent.Restriction[V := L].Comparison[count := count, degree := degree, classes := classes] \as OriginalLeft;
+\import \parent.\parent.Restriction[V := R].Comparison[count := count, degree := degree, classes := classes] \as OriginalRight;
+\import \parent.\parent.Restriction[V := overlap].Comparison[count := count, degree := degree, classes := classes] \as OriginalOverlap;
+\import Whole.Comparison[count := count, degree := degree, classes := classes] \as OriginalWhole;
+\import Left.With[count := count, degree := degree, classes := classes] \as LeftTransition;
+\import Right.With[count := count, degree := degree, classes := classes] \as RightTransition;
+\import \parent.Overlap[].With[count := count, degree := degree, classes := classes] \as OverlapTransition;
+\import MayerVietoris.Pieces[].FiniteGluing[count := count, degree := degree, classes := OriginalWhole.localClasses] \as Argument;
+\module Given(onLeft: OriginalLeft.Isomorphisms, onRight: OriginalRight.Isomorphisms, onOverlap: OriginalOverlap.Isomorphisms);

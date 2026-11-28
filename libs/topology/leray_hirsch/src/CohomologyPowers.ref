@@ -1,0 +1,11 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import chain_complexes.Integer[] \as Indices;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import Indices.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Cochains;
+\import \root.ProductExact[K := K, ring := ring, Index := Index] \as Products;
+\module On(C: Cochains.Complex);

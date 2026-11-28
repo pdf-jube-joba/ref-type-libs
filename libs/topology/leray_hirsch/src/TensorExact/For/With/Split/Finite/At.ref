@@ -1,0 +1,54 @@
+\import std.Logic[].Equality[] \as Equality;
+\import Equality.Transport[A := I.Int^] \as Transport;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\definition next: I.Int^ := Degrees.next z;
+\definition last: I.Int^ := Degrees.next next;
+\definition input[i: Index]: I.Int^ := Degree.unshift (degrees i) z;
+\import TensorRows.Row[s := Tensor.sequence, k := z] \as Target;
+\module Term(i: Index);
+\definition first: Modules.Family[Index] := Modules.Family[Index] {
+  Carrier := \fun (i: Index) => (OnA.source (input i)).Carrier,
+  space := \fun (i: Index) => (OnA.source (input i)).space,
+};
+\definition second: Modules.Family[Index] := Modules.Family[Index] {
+  Carrier := \fun (i: Index) => (OnC.source (Degrees.next (input i))).Carrier,
+  space := \fun (i: Index) => (OnC.source (Degrees.next (input i))).space,
+};
+\definition third: Modules.Family[Index] := Modules.Family[Index] {
+  Carrier := \fun (i: Index) => (OnB.source (Degrees.next (input i))).Carrier,
+  space := \fun (i: Index) => (OnB.source (Degrees.next (input i))).space,
+};
+\definition fourth: Modules.Family[Index] := Modules.Family[Index] {
+  Carrier := \fun (i: Index) => (OnA.source (Degrees.next (input i))).Carrier,
+  space := \fun (i: Index) => (OnA.source (Degrees.next (input i))).space,
+};
+\definition fifth: Modules.Family[Index] := Modules.Family[Index] {
+  Carrier := \fun (i: Index) => (OnC.source (Degrees.next (Degrees.next (input i)))).Carrier,
+  space := \fun (i: Index) => (OnC.source (Degrees.next (Degrees.next (input i)))).space,
+};
+\import Direct.Five[A := first, B := second, C := third, D := fourth, E := fifth] \as Source;
+\import Source.With[rows := (\fun (i: Index) => BaseRows.Row[s := Base.sequence, k := input i].sequence)] \as Rows;
+\import Rows.To[A1 := Target.first, B1 := Target.second, C1 := Target.third, D1 := Target.fourth, E1 := Target.last,
+  t := Target.sequence, indices := Finite.elements count] \as Compare;
+\definition maps: Compare.Maps := Compare.Maps {
+  a := \fun (i: Index) => Term[i := i].first,
+  b := \fun (i: Index) => Term[i := i].second,
+  c := \fun (i: Index) => Term[i := i].third,
+  d := \fun (i: Index) => Term[i := i].fourth,
+  e := \fun (i: Index) => Term[i := i].fifth,
+};
+\import Compare.WithMaps[m := maps] \as Gluing;
+\definition commutative: Gluing.Commutative := Gluing.Commutative {
+  first := \fun (i: Index) => Term[i := i].firstLaw,
+  second := \fun (i: Index) => Term[i := i].secondLaw,
+  third := \fun (i: Index) => Term[i := i].thirdLaw,
+  last := \fun (i: Index) => Term[i := i].lastLaw,
+};
+\definition comparison: _ := Gluing.middleMap;
+\definition fiveLemma[left: Gluing.LeftOnto][beforeInj: Gluing.BeforeInjective][beforeOnto: Gluing.BeforeOnto]
+  [afterInj: Gluing.AfterInjective][afterOnto: Gluing.AfterOnto][lastInj: Gluing.LastInjective]: _ :=
+  Gluing.isomorphism commutative left beforeInj beforeOnto afterInj afterOnto lastInj;
+
+\module GluingStep;

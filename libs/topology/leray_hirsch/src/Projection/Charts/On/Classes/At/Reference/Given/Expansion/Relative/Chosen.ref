@@ -1,0 +1,60 @@
+\module At(q: N.Nat^) {
+  \import \parent.\parent.\parent.Blocks[q := q] \as Coefficients;
+  \import RightAction.Signed[z := Shift.unshift q z].Matrices[count := count] \as Matrices;
+  \import Matrices.On[a := Coefficients.matrix, chosen := Coefficients.certificate (inverses q)] \as Equation;
+  \definition isomorphism: Blocks.Degree[q := q].Isomorphism := Equation.isomorphism;
+  \import Matrices.Support[a := Coefficients.matrix, included := Coefficients.degreeSet] \as Forward;
+  \import Matrices.Support[a := (Coefficients.certificate (inverses q)).inverse, included := Coefficients.degreeSet] \as Backward;
+  \definition forwardSupported: \forall (v: Index -> family.Carrier q) -> Blocks.Degree[q := q].Supported v ->
+    Blocks.Degree[q := q].Supported (isomorphism.forward.apply v) :=
+    Forward.preserves Coefficients.forwardSupport;
+  \definition backwardSupported: \forall (v: Index -> family.Carrier q) -> Blocks.Degree[q := q].Supported v ->
+    Blocks.Degree[q := q].Supported (isomorphism.backward.apply v) :=
+    Backward.preserves (Coefficients.inverseSupport (inverses q));
+}
+\definition isos: \forall (q: N.Nat^) -> Blocks.Degree[q := q].Isomorphism :=
+  \fun (q: N.Nat^) => At[q := q].isomorphism;
+\definition forward: \forall (q: N.Nat^)(v: Index -> family.Carrier q) -> Blocks.Degree[q := q].Supported v ->
+  Blocks.Degree[q := q].Supported ((isos q).forward.apply v) :=
+  \fun (q: N.Nat^) => At[q := q].forwardSupported;
+\definition backward: \forall (q: N.Nat^)(v: Index -> family.Carrier q) -> Blocks.Degree[q := q].Supported v ->
+  Blocks.Degree[q := q].Supported ((isos q).backward.apply v) :=
+  \fun (q: N.Nat^) => At[q := q].backwardSupported;
+\import Blocks.With[isos := isos] \as Graded;
+\definition diagonal: _ := Graded.Proved[forwardSupported := forward, backwardSupported := backward].isomorphism;
+\import \root.WeightedNilpotence[K := K, ring := ring, count := count, degree := degree] \as Filtration;
+\definition filteredFamily: Modules.Family[Finite.Fin count] := Modules.Family[Finite.Fin count] {
+  Carrier := \fun (i: Finite.Fin count) => ActualDirect.family.Carrier i,
+  space := \fun (i: Finite.Fin count) => ActualDirect.family.space i,
+};
+\import Modules.Product[Index := Finite.Fin count, family := filteredFamily] \as Filtered;
+\import Modules.Hom[V := Filtered.Carrier, W := Filtered.Carrier, source := Filtered.space, target := Filtered.space] \as FilteredMaps;
+\import Modules.Isomorphism[V := Filtered.Carrier, W := Filtered.Carrier, source := Filtered.space, target := Filtered.space] \as FilteredIso;
+\definition filteredMap: FilteredMaps.Map := normalized;
+\definition filteredDiagonal: FilteredIso.Isomorphism := diagonal;
+\import Filtration.On[family := filteredFamily]
+  .Comparison[actual := filteredMap, diagonal := filteredDiagonal] \as Triangular;
+\definition inverseDepends: Triangular.DiagonalInverse := Graded.inverseDepends;
+
+\module AtInput(x: Actual.domain.Carrier,
+  cells: \forall (i, j: Index) -> \parent.\parent.Cell[i := i, j := j, x := x i].Candidate);
+\definition choices[x: Actual.domain.Carrier]: \exists (\forall (i, j: Index) -> \parent.Cell[i := i, j := j, x := x i].Candidate) :=
+  \axiom:classicalIndefiniteChoice(Index, (\fun (i: Index) => \forall (j: Index) -> \parent.Cell[i := i, j := j, x := x i].Candidate),
+    \fun (i: Index) => \axiom:classicalIndefiniteChoice(Index,
+      (\fun (j: Index) => \parent.Cell[i := i, j := j, x := x i].Candidate),
+      \fun (j: Index) => \parent.Cell[i := i, j := j, x := x i].existsCandidate));
+\definition leading: Triangular.LeadingTerms := \block {
+  \fun (j: Index)(x: Actual.domain.Carrier)(higher: \forall (i: Index) ->
+    N.Basic[].Prop[].Lt (degree j) (degree i) -> x i = (ActualDirect.family.space i).zero) \then
+  \takefrom cells: \forall (i, k: Index) -> \parent.Cell[i := i, j := k, x := x i].Candidate \by choices x \then
+  \return AtInput[x := x, cells := cells].Leading[j := j].law higher
+};
+\definition corrected: _ := Triangular.Proved[diagonalInverse := inverseDepends, upper := leading].isomorphism;
+\import Modules.Isomorphism[V := Actual.domain.Carrier, W := Standard.domain.Carrier, source := Actual.domain.space, target := Standard.domain.space]
+  .Composition[U := Standard.range.Carrier, final := Standard.range.space] \as Multiply;
+\definition product: _ := Multiply.compose comparison corrected;
+\definition productLaw: \forall (x: Actual.domain.Carrier) -> product.forward.apply x = Actual.finite.apply x :=
+  \fun (x: Actual.domain.Carrier) => comparison.rightInverse (Actual.finite.apply x);
+\import Actual.Verified[iso := product, law := productLaw] \as Proof;
+\definition injective: _ := Proof.injective;
+\definition onto: _ := Proof.onto;

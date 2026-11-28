@@ -1,0 +1,57 @@
+\module At(z: I.Int^) {
+  \import Modules.Hom[V := Ext.Carrier z, W := C.family.Carrier z, source := Ext.space z, target := C.family.space z] \as Maps;
+  \definition Map: \Set := Maps.Map;
+  \definition zero: Map := Maps.zeroMap;
+}
+\definition term: \forall (z: I.Int^) -> At[z := z].Map :=
+  \induction (z: I.Int^) \return At[z := z].Map \with {
+    | ofNat: \fun (n: N.Nat^) => Ext.Positive[n := n].backward
+    | negSucc: \fun (n: N.Nat^) => At[z := I.Int^::negSucc n].zero
+  };
+\definition Commutes[z: I.Int^]: \Prop := \forall (x: Ext.Carrier z) ->
+  C.differential.apply z ((term z).apply x) = (term (Degrees.previous z)).apply (Ext.apply z x);
+\definition commutes: \forall (z: I.Int^) -> Commutes z :=
+  \induction (z: I.Int^) \return Commutes z \with {
+    | ofNat: \induction (n: N.Nat^) \return Commutes (I.Int^::ofNat n) \with {
+      | zero: \fun (x: Ext.Carrier (I.Int^::ofNat N.Nat^::zero)) =>
+        h N.Nat^::zero (C.differential.apply (I.Int^::ofNat N.Nat^::zero) x)
+      | succ: \fun (n: N.Nat^)(prior: _)(x: Ext.Carrier (I.Int^::ofNat (N.Nat^::succ n))) =>
+        \refl(C.differential.apply (I.Int^::ofNat (N.Nat^::succ n)) x)
+    }
+    | negSucc: \fun (n: N.Nat^)(x: Ext.Carrier (I.Int^::negSucc n)) =>
+      h (N.Nat^::succ n) (C.differential.apply (I.Int^::negSucc n) ((term (I.Int^::negSucc n)).apply x))
+  };
+\import Signed.Map[C := Ext.complex, D := C] \as Maps;
+\definition map: Maps.Map := Maps.Map {
+  apply := \fun (z: I.Int^) => (term z).apply,
+  addition := \fun (z: I.Int^) => (term z).addition,
+  scalar := \fun (z: I.Int^) => (term z).scalar,
+  commutes := commutes,
+};
+\import Maps.Invert[f := map] \as Iso;
+\definition Injective[z: I.Int^]: \Prop := \forall (x, y: Ext.Carrier z) -> map.apply z x = map.apply z y -> x = y;
+\definition Onto[z: I.Int^]: \Prop := \forall (y: C.family.Carrier z) -> \exists (x: Ext.Carrier z \where map.apply z x = y);
+\definition injective: \forall (z: I.Int^) -> Injective z :=
+  \induction (z: I.Int^) \return Injective z \with {
+    | ofNat: \fun (n: N.Nat^)(x, y: Ext.Carrier (I.Int^::ofNat n))(same: _) => same
+    | negSucc: \fun (n: N.Nat^)(x, y: Ext.Carrier (I.Int^::negSucc n))(unused: _) => trans!{{Ext.Carrier (I.Int^::negSucc n)}} _ _ _
+        (Ext.Negative[n := n].zero x) (sym!{{Ext.Carrier (I.Int^::negSucc n)}} _ _ (Ext.Negative[n := n].zero y))
+  };
+\module Degree(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \definition onto: Onto z :=
+    \fun (y: C.family.Carrier z) => Logic.existsIntro[Ext.Carrier z, { x: Ext.Carrier z \where map.apply z x = y }]
+      (Ext.Positive[n := n].intro y) (\refl(y));
+}
+\module Negative(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::negSucc n;
+  \definition onto: Onto z :=
+    \fun (y: C.family.Carrier z) => Logic.existsIntro[Ext.Carrier z, { x: Ext.Carrier z \where map.apply z x = y }]
+      (Ext.space z).zero (sym!{{C.family.Carrier z}} _ _ (h n y));
+}
+\definition onto: \forall (z: I.Int^) -> Onto z :=
+  \induction (z: I.Int^) \return Onto z \with {
+    | ofNat: \fun (n: N.Nat^) => Degree[n := n].onto
+    | negSucc: \fun (n: N.Nat^) => Negative[n := n].onto
+  };
+\definition isomorphism: _ := Iso.isomorphism (Iso.Bijective { injective := injective, onto := onto });

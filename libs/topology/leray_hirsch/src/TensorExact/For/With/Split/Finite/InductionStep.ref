@@ -1,0 +1,24 @@
+\import std.Logic[].Equality[] \as Equality;
+\import OnA.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as BasisA;
+\import OnB.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as BasisB;
+\import OnC.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as BasisC;
+\definition Left: \Prop := \forall (k: I.Int^) -> BasisA.At[z := k].Product[].Bijective;
+\definition Middle: \Prop := \forall (k: I.Int^) -> BasisB.At[z := k].Product[].Bijective;
+\definition Right: \Prop := \forall (k: I.Int^) -> BasisC.At[z := k].Product[].Bijective;
+\module At(k: I.Int^) {
+  \definition previous: I.Int^ := Degrees.previous k;
+  \definition center: I.Int^ := Degrees.next previous;
+  \definition next: I.Int^ := Degrees.next center;
+  \import \parent.\parent.At[z := previous].GluingStep[] \as Step;
+  \definition prove[l: Left][r: Right]: BasisB.At[z := k].Product[].Bijective :=
+    \idelim center = k \with j: I.Int^ => BasisB.At[z := j].Product[].Bijective \by {
+      base: Step.bijective (Step.Local {
+        left := (l previous).onto,
+        before := r center,
+        after := l center,
+        last := (r next).injective,
+      }),
+      equality: Degrees.nextPrevious k
+    };
+}
+\definition glue[l: Left][r: Right]: Middle := \fun (k: I.Int^) => At[k := k].prove l r;

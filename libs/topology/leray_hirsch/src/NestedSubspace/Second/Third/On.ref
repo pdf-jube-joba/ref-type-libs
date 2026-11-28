@@ -1,0 +1,44 @@
+\use std.Logic[].Equality[].sym;
+\definition first[x: Canonical]: First.CarrierSet := forward x;
+\definition second[x: Canonical]: Inner.CarrierSet := forward x;
+\import topology.Continuity[A := Canonical, B := X].Corestriction[S := S] \as Inclusion;
+\import topology.Continuity[A := Canonical, B := X].Corestriction[S := T] \as EnterFirst;
+\import topology.Continuity[A := Canonical, B := First.CarrierSet].Corestriction[S := U] \as EnterSecond;
+\import topology.Continuity[A := Canonical, B := Inner.CarrierSet].Corestriction[S := W] \as EnterThird;
+\import topology.Continuity[A := Canonical, B := X] \as SourceMaps;
+\definition inclusion: Canonical -> X := \fun (x: Canonical) => x;
+\definition rawForward: Canonical -> X := \fun (x: Canonical) => forward x;
+\definition rawForwardContinuous: SourceMaps.Continuous source ambient rawForward :=
+  \idelim inclusion = rawForward \with h: (Canonical -> X) => SourceMaps.Continuous source ambient h \by {
+    base: Inclusion.inclusionContinuous ambient,
+    equality: \axiom:funext(inclusion, rawForward, \fun (x: Canonical) => sym!{X} _ _ (sourceLaw x))
+  };
+\definition forwardContinuous: _ := EnterThird.corestrictContinuous source middle forward
+  (EnterSecond.corestrictContinuous source top second
+    (EnterFirst.corestrictContinuous source ambient first rawForwardContinuous));
+\import topology.Continuity[A := First.CarrierSet, B := X].Corestriction[S := T] \as FirstInclusion;
+\import topology.Continuity[A := Inner.CarrierSet, B := First.CarrierSet].Corestriction[S := U] \as SecondInclusion;
+\import topology.Continuity[A := Nested, B := Inner.CarrierSet].Corestriction[S := W] \as ThirdInclusion;
+\definition skipFirst[x: First.CarrierSet]: X := x;
+\definition skipSecond[x: Inner.CarrierSet]: First.CarrierSet := x;
+\definition skipThird[x: Nested]: Inner.CarrierSet := x;
+\import topology.Composition[A := Nested, B := Inner.CarrierSet, C := First.CarrierSet] \as FirstTwo;
+\import topology.Composition[A := Nested, B := First.CarrierSet, C := X] \as All;
+\import topology.Continuity[A := Nested, B := X].Corestriction[S := S] \as Back;
+\import topology.Continuity[A := Nested, B := X] \as TargetMaps;
+\definition inclusionNested[x: Nested]: X := x;
+\definition rawBackward[x: Nested]: X := backward x;
+\definition nestedContinuous: TargetMaps.Continuous target ambient inclusionNested :=
+  All.composeContinuous target top ambient (\fun (x: Nested) => skipSecond (skipThird x)) skipFirst
+    (FirstTwo.composeContinuous target middle top skipThird skipSecond (ThirdInclusion.inclusionContinuous middle)
+      (SecondInclusion.inclusionContinuous top)) (FirstInclusion.inclusionContinuous ambient);
+\definition backwardContinuous: _ := Back.corestrictContinuous target ambient backward
+  (\idelim inclusionNested = rawBackward \with h: (Nested -> X) => TargetMaps.Continuous target ambient h \by {
+    base: nestedContinuous,
+    equality: \axiom:funext(inclusionNested, rawBackward, \fun (x: Nested) => sym!{X} _ _ (targetLaw x))
+  });
+\import topology.Homeomorphism[A := Canonical, B := Nested] \as Iso;
+\definition homeomorphism: Iso.Homeomorphism[source, target] := Iso.Homeomorphism[source, target] {
+  forward := forward, backward := backward, leftInverse := leftInverse, rightInverse := rightInverse,
+  forwardContinuous := forwardContinuous, backwardContinuous := backwardContinuous,
+};

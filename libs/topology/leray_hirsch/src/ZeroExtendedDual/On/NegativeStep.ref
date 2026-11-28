@@ -1,0 +1,9 @@
+\definition z: I.Int^ := I.Int^::negSucc n;
+\definition next: I.Int^ := Degrees.next z;
+\import Signed.At[C := Target.complex, z := z] \as H;
+\import Modules.Hom[V := Target.Carrier z, W := Target.Carrier next, source := Target.space z, target := Target.space next] \as Differential;
+\import Modules.Hom[V := Source.Carrier next, W := Target.Carrier next, source := Source.space next, target := Target.space next] \as Upper;
+\definition law: \forall (h: Source.Carrier z) -> Target.apply z ((terms z).forward.apply h) = (terms next).forward.apply (Source.apply z h) :=
+  \fun (h: Source.Carrier z) => trans!{{Target.Carrier next}} _ _ _
+    (Differential.zeroPreserved H.differential)
+    (sym!{{Target.Carrier next}} _ _ (Upper.zeroPreserved (terms next).forward));

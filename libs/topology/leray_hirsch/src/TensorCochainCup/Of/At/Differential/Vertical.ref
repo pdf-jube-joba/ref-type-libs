@@ -1,0 +1,19 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import Tensor.Term[p := p, q := N.Nat^::succ q] \as Before;
+\import IntegerModules.Tensor[V := C.family.Carrier p, W := D.family.Carrier (N.Nat^::succ q), left := C.family.space p, right := D.family.space (N.Nat^::succ q)].Universal[U := K, target := integerCoefficients.space] \as Universal;
+\import IntegerModules.Hom[V := Before.Carrier, W := K, source := Before.space, target := integerCoefficients.space] \as Output;
+\import Linear.Composition[U := Before.Carrier, domain := Before.space] \as Composition;
+\definition composed: Output.Map := Composition.compose (map alpha beta) Boundary.vertical;
+\definition cycle: \Prop := Right.apply q beta = (Right.space (N.Nat^::succ q)).zero;
+\definition closedValue[closed: cycle][y: D.family.Carrier (N.Nat^::succ q)]: (beta).apply (D.differential.apply q y) = (integerCoefficients.space).zero :=
+  congr!{{Right.Carrier (N.Nat^::succ q)} K} (\fun (f: Right.Carrier (N.Nat^::succ q)) => (f).apply y) _ _ closed;
+\definition pure[closed: cycle][x: C.family.Carrier p][y: D.family.Carrier (N.Nat^::succ q)]: (composed).apply (Before.tensor x y) = (integerCoefficients.space).zero :=
+  eq_reason_in!{K _
+    "=" _ "by" { congr!{Term.Carrier K} ((map alpha beta).apply) _ _ (Boundary.verticalOnTensor x y) }
+    "=" _ "by" { onTensor alpha beta x (D.differential.apply q y) }
+    "=" _ "by" { congr!{K K} ((baseRing).mul ((alpha).apply x)) _ _ (closedValue closed y) }
+    "=" _ "by" { Scalars.scaleZero ((alpha).apply x) }
+  };
+\definition equation[closed: cycle]: composed = Output.zeroMap := Universal.ext composed Output.zeroMap (pure closed);
+\definition law[closed: cycle][x: Before.Carrier]: (map alpha beta).apply ((Boundary.vertical).apply x) = (integerCoefficients.space).zero :=
+  congr!{Output.Map K} (\fun (f: Output.Map) => (f).apply x) _ _ (equation closed);

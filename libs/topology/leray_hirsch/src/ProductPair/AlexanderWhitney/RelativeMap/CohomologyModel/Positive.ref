@@ -1,0 +1,84 @@
+\import N.Basic[].Def[] \as Nat;
+\definition n: N.Nat^ := Nat.add p q;
+\definition b: I.Int^ := I.Int^::ofNat p;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\import \parent.At[z := b] \as Base;
+\import \parent.At[z := z] \as Total;
+\import Comparison.Fixed[q := q, beta := beta, closed := closed].Representative[p := p] \as Model;
+\import \parent.\parent.ExternalFormula[K := K, ring := ring, p := p, q := q].Cochains[] \as Formula;
+\import Relative.Cohomology[p := p, q := q] \as Cup;
+\import Relative.Cup[p := p, q := q] \as Cups;
+\import Comparison.Fixed[q := q, beta := beta, closed := closed].To[input := b, output := z, same := Degree.natural q p] \as TensorProduct;
+\import H.At[C := BaseCochains.complex, z := b] \as BaseH;
+\import H.At[C := BaseModel.complex, z := b] \as ModelBaseH;
+\import H.At[C := ActualCochains.complex, z := z] \as TotalH;
+\import H.At[C := TensorModel.complex, z := z] \as ModelH;
+\import H.At[C := ExtendedBase.complex, z := b] \as BaseExtendedH;
+\import H.At[C := ExtendedTensor.complex, z := z] \as TensorExtendedH;
+\import C.At[C := Fiber.complex, k := q] \as FiberH;
+\import C.At[C := BaseChains.complex, k := p] \as BaseNative;
+\import C.At[C := TensorChains.complex, k := n] \as NativeTotal;
+\definition fiberCycle: FiberH.CycleCarrier := \into[Fiber.Carrier q](beta, FiberH.cycles.carrier) \by { closed };
+\definition fiberClass: FiberClasses.Group q := FiberH.classOf fiberCycle;
+\definition lift: _ := Bundle.lift q fiberClass;
+\import BaseDual.Cohomology[z := b] \as BaseExtend;
+\import BaseActual.At[z := b] \as BaseUnextend;
+\import H.Map[C := ExtendedBase.complex, D := BaseCochains.complex].At[k := b] \as BaseMap;
+\import H.Map[C := ExtendedTensor.complex, D := ActualCochains.complex].At[k := z] \as AWMap;
+\import BaseExtension.Positive[n := p] \as BaseTerm;
+\definition reverseBase: \forall (x: BasePair.Carrier b) ->
+  Recover.isomorphism.backward.apply b x = BaseTerm.intro x :=
+  \fun (x: BasePair.Carrier b) => Recover.injective b
+    (Recover.isomorphism.backward.apply b x) (BaseTerm.intro x) (Recover.isomorphism.rightInverse b x);
+\definition sourceCycle[a: Model.Cycle]: ModelBaseH.Closed := BaseModel.PositiveCohomology[n := p].toInteger a;
+\definition baseCycle[a: Model.Cycle]: BaseH.Closed :=
+  (BaseMap.cyclesMap BaseActual.isomorphism.backward).apply (BaseExtend.transport (sourceCycle a));
+\definition baseValue: \forall (a: Model.Cycle)(x: BasePair.Carrier b) -> (baseCycle a).apply x = a.apply x :=
+  \fun (a: Model.Cycle)(x: BasePair.Carrier b) => congr!{{BaseExtension.Carrier b} K}
+    (BaseExtend.transport (sourceCycle a)).apply _ _ (reverseBase x);
+\definition baseOnClass: \forall (a: Model.Cycle) -> Base.baseComparison.forward.apply (Model.toSigned a) = BaseH.classOf (baseCycle a) :=
+  \fun (a: Model.Cycle) => eq_reason_in!{BaseH.Cohomology _
+    "=" _ "by" { congr!{ModelBaseH.Cohomology BaseH.Cohomology} Base.baseComparison.forward.apply _ _
+      (BaseModel.PositiveCohomology[n := p].onNaturalClass a) }
+    "=" _ "by" { congr!{BaseExtendedH.Cohomology BaseH.Cohomology} BaseUnextend.comparison.backward.apply _ _
+      (BaseExtend.onClass (sourceCycle a)) }
+    "=" _ "by" { BaseMap.onClass BaseActual.isomorphism.backward (BaseExtend.transport (sourceCycle a)) }
+  };
+\import TotalDual.Cohomology[z := z] \as TotalExtend;
+\definition targetCycle[a: Model.Cycle]: ModelH.Closed := TensorModel.PositiveCohomology[n := n].toInteger (Model.lifted a);
+\definition image[a: Model.Cycle]: TotalH.Closed :=
+  (AWMap.cyclesMap AW.pullback).apply (TotalExtend.transport (targetCycle a));
+\definition onModel: \forall (a: Model.Cycle) -> Total.totalComparison.forward.apply (Model.result a) = TotalH.classOf (image a) :=
+  \fun (a: Model.Cycle) => trans!{TotalH.Cohomology} _ _ _
+    (congr!{TensorExtendedH.Cohomology TotalH.Cohomology} AlexanderWhitney.At[z := z].linear.apply _ _ (TotalExtend.onClass (targetCycle a)))
+    (AWMap.onClass AW.pullback (TotalExtend.transport (targetCycle a)));
+\import singular_cap.CochainPair[A := Whole.CarrierSet, source := wholeTopology, subset := part, R := K, ring := ring] \as RelativeCup;
+\import RelativeCup.Cohomology[p := p, q := q].Left[] \as RightCup;
+\import singular_products.Cochains[A := Whole.CarrierSet, source := wholeTopology, R := K, ring := ring] \as WholeProduct;
+\import WholeProduct.Cohomology[].Pullback[B := F, target := fiber] \as FiberPullClasses;
+\import WholeProduct.Pullback[B := F, target := fiber] \as FiberPullCochains;
+\import \root.PairMap[A := Whole.CarrierSet, B := X, source := wholeTopology, target := base, part := part, boundary := subset,
+  f := Relative.leftPair, K := K, ring := ring] \as RelativePull;
+\import H.Map[C := BaseCochains.complex, D := ActualCochains.complex].At[k := b] \as RelativePullClasses;
+\module CupCycles;
+\definition bidegree: \forall (a: Model.Cycle) ->
+  Total.totalComparison.forward.apply (Model.result a) = Cup.left (Base.baseComparison.forward.apply (Model.toSigned a)) fiberClass :=
+  \fun (a: Model.Cycle) => trans!{TotalH.Cohomology} _ _ _ (onModel a)
+    (trans!{TotalH.Cohomology} _ _ _ (CupCycles[].law a)
+      (congr!{BaseH.Cohomology TotalH.Cohomology} (\fun (u: BaseH.Cohomology) => Cup.left u fiberClass) _ _ (sym!{BaseH.Cohomology} _ _ (baseOnClass a))));
+\definition Proposition[a: ModelBaseH.Cohomology]: \Prop :=
+  Total.totalComparison.forward.apply (TensorProduct.linear.apply a) = Cup.left (Base.baseComparison.forward.apply a) fiberClass;
+\definition onClass: \forall (a: Model.Cycle) -> Proposition (Model.toSigned a) :=
+  \fun (a: Model.Cycle) => trans!{TotalH.Cohomology} _ _ _
+    (congr!{ModelH.Cohomology TotalH.Cohomology} Total.totalComparison.forward.apply _ _ (Model.adjustedOnClass a))
+    (bidegree a);
+\definition fromNative: \forall (a: BaseNative.Cohomology) ->
+  Proposition (BaseModel.PositiveCohomology[n := p].backward.apply a) :=
+  BaseNative.classInduction (\fun (a: BaseNative.Cohomology) => Proposition (BaseModel.PositiveCohomology[n := p].backward.apply a)) onClass;
+\definition law: \forall (a: ModelBaseH.Cohomology) -> Proposition a :=
+  \fun (a: ModelBaseH.Cohomology) =>
+    \idelim BaseModel.PositiveCohomology[n := p].backward.apply (BaseModel.PositiveCohomology[n := p].forward.apply a) = a
+      \with v: ModelBaseH.Cohomology => Proposition v \by {
+        base: fromNative (BaseModel.PositiveCohomology[n := p].forward.apply a),
+        equality: BaseModel.PositiveCohomology[n := p].leftInverse a
+      };

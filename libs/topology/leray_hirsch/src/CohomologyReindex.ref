@@ -1,0 +1,35 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\import Equality.Transport[A := N.Nat^] \as Natural;
+\import Equality.Transport[A := I.Int^] \as Integer;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\import chain_complexes.Cochain[].Over[R := K, ring := ring] \as Native;
+\import chain_complexes.Integer[].Over[R := K, ring := ring] \as Signed;
+\module On(C: Native.Complex) {
+  \import Native.ZeroExtension[C := C] \as Ext;
+  \definition cycles[n: N.Nat^]: \Set := Native.At[C := C, k := n].CycleCarrier;
+  \definition classes[z: I.Int^]: \Set := Signed.At[C := Ext.complex, z := z].Cohomology;
+  \definition signed[n: N.Nat^][x: cycles n]: classes (I.Int^::ofNat n) :=
+    Signed.At[C := Ext.complex, z := I.Int^::ofNat n].classOf (Ext.PositiveCohomology[n := n].toInteger x);
+  \definition cycleLaw: \forall (m, n: N.Nat^)(same: m = n)(x: cycles m) ->
+    Natural.cast cycles m n same x = Natural.cast C.family.Carrier m n same x :=
+    \fun (m, n: N.Nat^)(same: m = n)(x: cycles m) =>
+      sym!{{C.family.Carrier n}} _ _ (Natural.natural cycles C.family.Carrier
+        (\fun (j: N.Nat^)(v: cycles j) => v) m n same x);
+  \definition classesLaw: \forall (m, n: N.Nat^)(same: m = n)(x: cycles m) ->
+    Integer.cast classes (I.Int^::ofNat m) (I.Int^::ofNat n) (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ same) (signed m x) =
+    signed n (Natural.cast cycles m n same x) :=
+    \fun (m, n: N.Nat^)(same: m = n)(x: cycles m) =>
+      (\idelim m = n \with j: N.Nat^ => \forall (e: m = j) ->
+        Integer.cast classes (I.Int^::ofNat m) (I.Int^::ofNat j) (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ e) (signed m x) =
+        signed j (Natural.cast cycles m j e x) \by {
+          base: \fun (e: m = m) => trans!{{classes (I.Int^::ofNat m)}} _ _ _
+            (Integer.castRefl classes (I.Int^::ofNat m) (signed m x))
+            (sym!{{classes (I.Int^::ofNat m)}} _ _
+              (congr!{{cycles m} {classes (I.Int^::ofNat m)}} (signed m) _ _ (Natural.castRefl cycles m x))),
+          equality: same
+        }) same;
+}

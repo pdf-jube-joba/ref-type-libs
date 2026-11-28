@@ -1,0 +1,9 @@
+\import Cochains.At[C := complex, k := q] \as Source;
+\import Cochains.At[C := C, k := grade q] \as Target;
+\import Modules.Of[V := Source.CycleCarrier, space := Source.cycleSpace].Submodule[] \as Cycles;
+\import Cycles.Quotient[S := Source.boundariesInside].To[W := Target.Cohomology, target := Target.cohomologySpace] \as To;
+\definition vanishes: To.Vanishes Target.classLinear :=
+  \fun (x: Source.CycleCarrier)(boundary: _) => Target.boundaryClassZero x (toBoundary q x boundary);
+\definition forward: _ := To.descend Target.classLinear vanishes;
+\definition forwardOnClass: \forall (x: Source.CycleCarrier) -> forward.apply (Source.classOf x) = Target.classOf x :=
+  To.onClass Target.classLinear vanishes;

@@ -1,0 +1,40 @@
+\import Tensor.At[p := p, q := q] \as Boundary;
+\import \parent.\parent.At[p := N.Nat^::succ p, q := q] \as Upper;
+\import IntegerModules.Hom[V := Term.Carrier, W := K, source := Term.space, target := integerCoefficients.space] \as Linear;
+\import Modules.Laws[V := K, space := Modules.scalarModule] \as Scalars;
+\import Double.Sign[V := Term.Carrier, space := Term.space].Mapping[W := K, target := integerCoefficients.space] \as SignMapping;
+\import Double.Sign[V := K, space := integerCoefficients.space] \as Sign;
+\import IntegerModules.Hom[V := K, W := K, source := integerCoefficients.space, target := integerCoefficients.space] \as CoefficientLinear;
+\import Coordinates.Degree[n := N.Nat^::succ n] \as NextCoordinates;
+\module Horizontal;
+\module Vertical;
+\definition law[closed: Vertical[].cycle][x: Total.Carrier (N.Nat^::succ n)]:
+  (total alpha beta).apply (Total.differential.apply n x) =
+    (Upper.map (Left.apply p alpha) beta).apply (NextCoordinates.coordinate Position.horizontalIndex x) :=
+  eq_reason_in!{K _
+    "=" _ "by" { congr!{Term.Carrier K} ((map alpha beta).apply) _ _ (Position.differential x) }
+    "=" _ "by" { (map alpha beta).addition
+        (Boundary.horizontal.apply (NextCoordinates.coordinate Position.horizontalIndex x))
+        ((Double.Sign[V := Term.Carrier, space := Term.space].map p).apply (Boundary.vertical.apply (NextCoordinates.coordinate Position.verticalIndex x))) }
+    "=" _ "by" { congr!{K K K} (integerCoefficients.space.add) _ _ _ _
+          (Horizontal[].law (NextCoordinates.coordinate Position.horizontalIndex x))
+          (eq_reason_in!{K _
+            "=" _ "by" { SignMapping.naturality (map alpha beta) p (Boundary.vertical.apply (NextCoordinates.coordinate Position.verticalIndex x)) }
+            "=" _ "by" { congr!{K K} ((Sign.map p).apply) _ _ (Vertical[].law closed (NextCoordinates.coordinate Position.verticalIndex x)) }
+            "=" _ "by" { CoefficientLinear.zeroPreserved (Sign.map p) }
+          }) }
+    "=" _ "by" { Scalars.zeroRight ((Upper.map (Left.apply p alpha) beta).apply (NextCoordinates.coordinate Position.horizontalIndex x)) }
+  };
+
+\import N.Basic[].Prop[] \as Arithmetic;
+\definition upperDegree: N.Nat^ := N.Nat^::succ n;
+\definition degreeLaw: Upper.n = upperDegree := Arithmetic.addSuccLeft p q;
+\import Upper.In[k := upperDegree, equal := degreeLaw] \as Regraded;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Regrade;
+\definition rightClosed[closed: Vertical[].cycle]:
+  TotalHom.apply n (total alpha beta) = Regrade.cast TotalHom.Carrier Upper.n upperDegree degreeLaw (Upper.total (Left.apply p alpha) beta) :=
+  trans!{{TotalHom.Carrier upperDegree}} _ _ _
+    (TotalHom.At[n := upperDegree].ext (TotalHom.apply n (total alpha beta)) (Regraded.evaluation (Left.apply p alpha) beta)
+      (\fun (x: Total.Carrier upperDegree) => law closed x))
+    (sym!{{TotalHom.Carrier upperDegree}} _ _
+      (Upper.onDegree upperDegree degreeLaw (Left.apply p alpha) beta));

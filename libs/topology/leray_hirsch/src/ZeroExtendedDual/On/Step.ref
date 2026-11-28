@@ -1,0 +1,12 @@
+\definition z: I.Int^ := I.Int^::ofNat n;
+\definition next: I.Int^ := Degrees.next z;
+\import \parent.Positive[n := n] \as Current;
+\import \parent.Positive[n := N.Nat^::succ n] \as Upper;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring].Prior[C := Chain.complex] \as Prior;
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+\definition atBoundary: \forall (x: Chain.Carrier next) ->
+  Prior.value z x = Chain.complex.differential.apply next x :=
+  \fun (x: Chain.Carrier next) => Transport.castRefl Chain.Carrier z (Chain.complex.differential.apply next x);
+\definition law: \forall (h: Source.Carrier z) -> Target.apply z (Current.forward.apply h) = Upper.forward.apply (Source.apply z h) :=
+  \fun (h: Source.Carrier z) => Target.At[z := next].ext (Target.apply z (Current.forward.apply h)) (Upper.forward.apply (Source.apply z h))
+    (\fun (x: Chain.Carrier next) => congr!{{Chain.Carrier z} K} (Current.forward.apply h).apply _ _ (atBoundary x));

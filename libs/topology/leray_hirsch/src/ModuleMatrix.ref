@@ -1,0 +1,43 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Finite;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\definition scalars: std.Alg[].Ring[].Ring[R] := std.Alg[].Ring[].commutativeRingAsRing R ring;
+\import module_theory.Module[].Over[R := R, ring := scalars] \as Modules;
+\import commutative_algebra.Modules[R := R, ring := ring].Matrix[m := count, n := count] \as Square;
+\import Square.Composition[k := count] \as Matrices;
+\import Square.End[] \as MatrixIdentity;
+\definition Index: \Set := Finite.Fin count;
+\module On(V: \Set, space: Modules.Space V) {
+  \import Modules.Functions[X := Index, V := V, target := space] \as Vectors;
+  \import Modules.Sums[I := Index].Vector[V := V, space := space] \as Values;
+  \definition apply[a: Square.Matrix][x: Vectors.Carrier][i: Index]: V :=
+    Values.sum (Finite.elements count) (\fun (j: Index) => space.smul (a i j) (x j));
+  \import Modules.Hom[V := Vectors.Carrier, W := Vectors.Carrier, source := Vectors.space, target := Vectors.space] \as Maps;
+  \definition linear[a: Square.Matrix]: Maps.Map := Maps.Map {
+    apply := apply a,
+    addition := \fun (u, v: Vectors.Carrier) => Vectors.ext _ _ (\fun (i: Index) => trans!{V} _ _ _
+      (Values.congruent (Finite.elements count) (\fun (j: Index) => space.smul (a i j) (space.add (u j) (v j)))
+        (\fun (j: Index) => space.add (space.smul (a i j) (u j)) (space.smul (a i j) (v j)))
+        (\fun (j: Index) => space.vectorAdd (a i j) (u j) (v j)))
+      (Values.addition (Finite.elements count) (\fun (j: Index) => space.smul (a i j) (u j))
+        (\fun (j: Index) => space.smul (a i j) (v j)))),
+    scalar := \fun (r: R)(u: Vectors.Carrier) => Vectors.ext _ _ (\fun (i: Index) => trans!{V} _ _ _
+      (Values.congruent (Finite.elements count) (\fun (j: Index) => space.smul (a i j) (space.smul r (u j)))
+        (\fun (j: Index) => space.smul r (space.smul (a i j) (u j)))
+        (\fun (j: Index) => trans!{V} _ _ _
+          (sym!{V} _ _ (space.scalarAssoc (a i j) r (u j)))
+          (trans!{V} _ _ _ (congr!{R V} (\fun (b: R) => space.smul b (u j)) _ _ (ring.mulCommutative (a i j) r))
+            (space.scalarAssoc r (a i j) (u j)))))
+      (Values.scalar (Finite.elements count) r (\fun (j: Index) => space.smul (a i j) (u j)))),
+  };
+  \import Finite.Enumeration[] \as Enumeration;
+  \definition identity: \forall (x: Vectors.Carrier) -> apply MatrixIdentity.identity x = x :=
+    \fun (x: Vectors.Carrier) => Vectors.ext _ _ (\fun (i: Index) =>
+      Values.Single[].extract (Finite.elements count) (Enumeration.distinct count) i (Finite.exhaustive count i) x);
+  \module With(a, b: Square.Matrix);
+  \module Isomorphism(a, b: Square.Matrix);
+}

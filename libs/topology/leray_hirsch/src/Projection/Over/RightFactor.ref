@@ -1,0 +1,30 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\definition Factor: \Set := TotalCohomology.Group q;
+\definition input: I.Int^ := Degrees.unshift q z;
+\definition shifted[u: Factor]: Modules.MapBetween
+  (Modules.Bundle { Carrier := baseFamily.Carrier input, space := baseFamily.space input })
+  (Modules.Bundle { Carrier := totalFamily.Carrier z, space := totalFamily.space z }) :=
+  \parent.Shifted[q := q, u := u].To[z := z].linear;
+\import Modules.Hom[V := Factor, W := totalFamily.Carrier z, source := TotalCohomology.moduleSpace q, target := totalFamily.space z] \as Maps;
+\import std.Logic[].Proposition[] \as Logic;
+\use Equality.trans;
+\definition Laws[f: Maps.Map]: \Prop := \forall (u: Factor) -> f.apply u = (shifted u).apply a;
+\definition Model: \Set := \Cast[Maps.Map] ({ f: Maps.Map \where Laws f });
+\definition lawOf[f: Model]: Laws f := \bysub(Maps.Map, { f: Maps.Map \where Laws f }, f);
+\module Native(p: N.Nat^, equal: I.Int^::ofNat p = input);
+\definition negative[p: N.Nat^][equal: I.Int^::negSucc p = input]: Model :=
+  \into[Maps.Map](Maps.zeroMap, Model) \by {
+    \fun (u: Factor) => sym!{{totalFamily.Carrier z}} _ _ (\parent.Shifted[q := q, u := u].To[z := z].Below[p := p, same := equal].zero a)
+  };
+\definition existence: \forall (d: I.Int^) -> d = input -> \exists Model :=
+  \induction (d: I.Int^) \return d = input -> \exists Model \with {
+    | ofNat: \fun (p: N.Nat^)(equal: I.Int^::ofNat p = input) => \exact(Native[p := p, equal := equal].result, Model)
+    | negSucc: \fun (p: N.Nat^)(equal: I.Int^::negSucc p = input) => \exact(negative p equal, Model)
+  };
+\definition uniqueness: \forall (f, g: Model) -> f = g :=
+  \fun (f, g: Model) => Maps.ext f g (\fun (u: Factor) => trans!{{totalFamily.Carrier z}} _ _ _
+    (lawOf f u) (sym!{{totalFamily.Carrier z}} _ _ (lawOf g u)));
+\definition model: Model := \choice Model \by { existence: existence input (\refl(input)), uniqueness: uniqueness };
+\definition map: Maps.Map := model;
+\definition law: Laws map := lawOf model;

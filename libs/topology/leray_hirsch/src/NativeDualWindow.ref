@@ -1,0 +1,48 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as ZModules;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\import chain_complexes.Integer[] \as Degrees;
+\import Degrees.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\definition coefficients: Modules.Bundle := Modules.Bundle { Carrier := K, space := Modules.scalarModule };
+\import Modules.AbelianHom[N := coefficients] \as Restricted;
+\import Modules.End[V := K, space := Modules.scalarModule] \as Identity;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\module Along(A, B: Chains.Complex, f: Chains.Map[C := A, D := B].Map) {
+  \import Hom.NativeMapping[P := A, Q := B, L := coefficients].On[f := f, u := Identity.identity] \as Pull;
+  \import Hom.Native[P := B] \as Input;
+  \import Hom.Native[P := A] \as Output;
+  \import Native.Map[C := Input.complex, D := Output.complex].ZeroExtension[f := Pull.map] \as Extended;
+  \import Native.ZeroExtension[C := Input.complex] \as From;
+  \import Native.ZeroExtension[C := Output.complex] \as To;
+  \import Signed.Map[C := From.complex, D := To.complex] \as Maps;
+  \import \root.CohomologyWindow[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].Of[C := From.complex, D := To.complex] \as Neighborhood;
+  \module Term(n: N.Nat^) {
+    \import ZModules.Isomorphism[V := A.family.Carrier n, W := B.family.Carrier n, source := A.family.space n, target := B.family.space n] \as Inverse;
+    \definition Iso: \Set := Inverse.Isomorphism;
+    \definition Matches[e: Iso]: \Prop := \forall (x: A.family.Carrier n) -> e.forward.apply x = f.apply n x;
+  }
+  \module At(z: I.Int^) {
+    \import Modules.Isomorphism[V := From.Carrier z, W := To.Carrier z, source := From.space z, target := To.space z]
+      .OfBijective[f := Maps.At[k := z].linear Extended.map] \as Inverse;
+    \definition Injective: \Prop := Inverse.Injective;
+    \definition Onto: \Prop := Inverse.Onto;
+    \definition inverse[inj: Injective][onto: Onto]: _ := Inverse.isomorphism inj onto;
+  }
+  \module Positive(n: N.Nat^, e: \parent.Term[n := n].Iso, same: \parent.Term[n := n].Matches e);
+  \module Negative(n: N.Nat^);
+  \definition NativeAvailable[z: I.Int^]: \Prop := (\induction (k: I.Int^) \return \Prop \with {
+    | ofNat: \fun (n: N.Nat^) => \exists (e: Term[n := n].Iso \where Term[n := n].Matches e)
+    | negSucc: \fun (n: N.Nat^) => Logic.True
+  }) z;
+  \module In(z: I.Int^, before: NativeAvailable (Degrees.previous z), here: NativeAvailable z, after: NativeAvailable (Degrees.next z));
+  \module Available;
+}

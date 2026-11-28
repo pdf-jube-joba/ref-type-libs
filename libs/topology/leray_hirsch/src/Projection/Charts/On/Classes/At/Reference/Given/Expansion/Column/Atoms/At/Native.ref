@@ -1,0 +1,20 @@
+\import Component.Native[p := p, same := same] \as Shifted;
+\import Trivial.Forget[p := p, q := degree j] \as Ordinary;
+\import External.Cohomology[p := p, q := degree j] \as Product;
+\definition sumDegree: N.Nat^ := Product.total;
+\definition degreeLaw: sumDegree = degree i := Shift.matchNatural (degree j) (degree i) p (sym!{I.Int^} _ _ same);
+\definition coefficient: BaseClasses.Group p := (BaseForget.map p).apply (Shifted.raw (coordinates j));
+\definition exteriorClass: Classes.Group sumDegree := Product.apply coefficient (Model.fiberClass j);
+\definition law: term j = NatCast.cast Classes.Group sumDegree (degree i) degreeLaw exteriorClass :=
+  eq_reason_in!{{Classes.Group (degree i)} _
+    "=" _ "by" { congr!{{Projection.totalFamily.Carrier z} {Classes.Group (degree i)}} (Forget.map (degree i)).apply _ _ (Shifted.law (coordinates j)) }
+    "=" _ "by" { congr!{{Projection.totalFamily.Carrier z} {Classes.Group (degree i)}} (Forget.map (degree i)).apply _ _
+      (sym!{{Projection.totalFamily.Carrier z}} _ _ (Shift.nativeCast Projection.totalFamily.Carrier sumDegree (degree i) degreeLaw
+        (Projection.Component[p := p, q := degree j].apply (reference j) (Shifted.raw (coordinates j))))) }
+    "=" _ "by" { sym!{{Classes.Group (degree i)}} _ _
+      (NatCast.natural (\fun (n: N.Nat^) => Projection.totalFamily.Carrier (I.Int^::ofNat n)) Classes.Group
+        (\fun (n: N.Nat^) => (Forget.map n).apply) sumDegree (degree i) degreeLaw
+        (Projection.Component[p := p, q := degree j].apply (reference j) (Shifted.raw (coordinates j)))) }
+    "=" _ "by" { congr!{{Classes.Group sumDegree} {Classes.Group (degree i)}} (NatCast.cast Classes.Group sumDegree (degree i) degreeLaw) _ _
+      (Ordinary.law (Shifted.raw (coordinates j)) (Model.fiberClass j)) }
+  };

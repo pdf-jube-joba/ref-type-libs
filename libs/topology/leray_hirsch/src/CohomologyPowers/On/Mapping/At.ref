@@ -1,0 +1,65 @@
+\import \parent.\parent.Degree[z := z] \as Source;
+\import Target.Degree[z := z] \as Output;
+\import Initial.At[k := z] \as Original;
+\import Maps.At[k := z] \as Induced;
+\import Cochains.At[C := complex, z := z] \as SourceClasses;
+\import Cochains.At[C := Target.complex, z := z] \as TargetClasses;
+\import Cochains.At[C := C, z := z] \as H;
+\import Cochains.At[C := D, z := z] \as J;
+\import Modules.Product[Index := Index, family := power Source.Cohomology] \as SourceProduct;
+\import Modules.Product[Index := Index, family := Target.power Output.Cohomology] \as TargetProduct;
+\import Products.Maps[source := power Source.Cohomology, target := Target.power Output.Cohomology] \as Power;
+\definition comparison: _ := Power.map (\fun (i: Index) => Original.induced f);
+\definition onClass: \forall (x: SourceClasses.Closed) ->
+  Output.map.apply ((Induced.induced map).apply (SourceClasses.classOf x)) =
+  comparison.apply (Source.map.apply (SourceClasses.classOf x)) :=
+  \fun (x: SourceClasses.Closed) => trans!{TargetProduct.Carrier} _ _ _
+    (congr!{TargetClasses.Cohomology TargetProduct.Carrier} Output.map.apply _ _ (Induced.onClass map x))
+    (trans!{TargetProduct.Carrier} _ _ _
+      (Output.onClass ((Induced.cyclesMap map).apply x))
+      (trans!{TargetProduct.Carrier} _ _ _
+        (TargetProduct.ext
+          (Output.evaluate ((Induced.cyclesMap map).apply x)) (comparison.apply (Source.evaluate x))
+          (\fun (i: Index) => sym!{J.Cohomology} _ _ (Original.onClass f (Source.cycle x i))))
+        (congr!{SourceProduct.Carrier TargetProduct.Carrier} comparison.apply _ _ (sym!{SourceProduct.Carrier} _ _ (Source.onClass x)))));
+\definition law: \forall (a: SourceClasses.Cohomology) ->
+  Output.map.apply ((Induced.induced map).apply a) = comparison.apply (Source.map.apply a) :=
+  SourceClasses.classInduction
+    (\fun (a: SourceClasses.Cohomology) => Output.map.apply ((Induced.induced map).apply a) = comparison.apply (Source.map.apply a))
+    onClass;
+\import Original.Invert[f := f] \as OriginalInverse;
+\import Modules.Isomorphism[V := SourceClasses.Cohomology, W := TargetClasses.Cohomology,
+  source := SourceClasses.cohomologySpace, target := TargetClasses.cohomologySpace].OfBijective[f := Induced.induced map] \as Inverse;
+\module From(bijective: Original.Bijective[f]) {
+  \definition local: _ := OriginalInverse.isomorphism bijective;
+  \definition apply[b: TargetClasses.Cohomology]: SourceClasses.Cohomology :=
+    Source.isomorphism.backward.apply (\fun (i: Index) => local.backward.apply (Output.map.apply b i));
+  \definition leftInverse: \forall (a: SourceClasses.Cohomology) -> apply ((Induced.induced map).apply a) = a :=
+    \fun (a: SourceClasses.Cohomology) => trans!{SourceClasses.Cohomology} _ _ _
+      (congr!{SourceProduct.Carrier SourceClasses.Cohomology} Source.isomorphism.backward.apply _ _
+        (SourceProduct.ext
+          (\fun (i: Index) => local.backward.apply (Output.map.apply ((Induced.induced map).apply a) i))
+          (Source.map.apply a)
+          (\fun (i: Index) => trans!{H.Cohomology} _ _ _
+            (congr!{TargetProduct.Carrier H.Cohomology} (\fun (v: TargetProduct.Carrier) => local.backward.apply (v i)) _ _ (law a))
+            (local.leftInverse (Source.map.apply a i)))))
+      (Source.isomorphism.leftInverse a);
+  \definition rightInverse: \forall (b: TargetClasses.Cohomology) -> (Induced.induced map).apply (apply b) = b :=
+    \fun (b: TargetClasses.Cohomology) => Output.injective _ _
+      (trans!{TargetProduct.Carrier} _ _ _ (law (apply b))
+        (trans!{TargetProduct.Carrier} _ _ _
+          (congr!{SourceProduct.Carrier TargetProduct.Carrier} comparison.apply _ _
+            (Source.isomorphism.rightInverse (\fun (i: Index) => local.backward.apply (Output.map.apply b i))))
+          (TargetProduct.ext
+            (comparison.apply (\fun (i: Index) => local.backward.apply (Output.map.apply b i))) (Output.map.apply b)
+            (\fun (i: Index) => local.rightInverse (Output.map.apply b i)))));
+  \definition injective: Inverse.Injective :=
+    \fun (a, b: SourceClasses.Cohomology)(same: _) => trans!{SourceClasses.Cohomology} _ _ _
+      (sym!{SourceClasses.Cohomology} _ _ (leftInverse a))
+      (trans!{SourceClasses.Cohomology} _ _ _
+        (congr!{TargetClasses.Cohomology SourceClasses.Cohomology} apply _ _ same) (leftInverse b));
+  \definition onto: Inverse.Onto :=
+    \fun (b: TargetClasses.Cohomology) => Logic.existsIntro[SourceClasses.Cohomology,
+      { a: SourceClasses.Cohomology \where (Induced.induced map).apply a = b }] (apply b) (rightInverse b);
+  \definition isomorphism: _ := Inverse.isomorphism injective onto;
+}

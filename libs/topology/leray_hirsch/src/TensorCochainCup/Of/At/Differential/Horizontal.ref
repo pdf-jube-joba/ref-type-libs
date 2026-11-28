@@ -1,0 +1,14 @@
+\import Tensor.Term[p := N.Nat^::succ p, q := q] \as Before;
+\import IntegerModules.Tensor[V := C.family.Carrier (N.Nat^::succ p), W := D.family.Carrier q, left := C.family.space (N.Nat^::succ p), right := D.family.space q].Universal[U := K, target := integerCoefficients.space] \as Universal;
+\import IntegerModules.Hom[V := Before.Carrier, W := K, source := Before.space, target := integerCoefficients.space] \as Output;
+\import Linear.Composition[U := Before.Carrier, domain := Before.space] \as Composition;
+\definition composed: Output.Map := Composition.compose (map alpha beta) Boundary.horizontal;
+\definition pure[x: C.family.Carrier (N.Nat^::succ p)][y: D.family.Carrier q]: composed.apply (Before.tensor x y) = (Upper.map (Left.apply p alpha) beta).apply (Before.tensor x y) :=
+  eq_reason_in!{K _
+    "=" _ "by" { congr!{Term.Carrier K} ((map alpha beta).apply) _ _ (Boundary.horizontalOnTensor x y) }
+    "=" _ "by" { onTensor alpha beta (C.differential.apply p x) y }
+    "=" _ "by" { sym!{K} _ _ (Upper.onTensor (Left.apply p alpha) beta x y) }
+  };
+\definition equation: composed = Upper.map (Left.apply p alpha) beta := Universal.ext composed (Upper.map (Left.apply p alpha) beta) pure;
+\definition law[x: Before.Carrier]: (map alpha beta).apply (Boundary.horizontal.apply x) = (Upper.map (Left.apply p alpha) beta).apply x :=
+  congr!{Output.Map K} (\fun (f: Output.Map) => f.apply x) _ _ equation;

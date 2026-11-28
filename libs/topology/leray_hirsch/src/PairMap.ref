@@ -1,0 +1,24 @@
+\import std.Alg[].Ring[] \as Rings;
+\import std.Arithmetic[].Int[] \as I;
+\import module_theory.Module[].Over[R := K, ring := Rings.commutativeRingAsRing K ring] \as Modules;
+\import chain_complexes.Integer[].Over[R := K, ring := Rings.commutativeRingAsRing K ring] \as Complexes;
+\import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Source;
+\import singular_products.Cochains[A := B, source := target, R := K, ring := ring] \as Target;
+\import singular_cohomology.Relative[A := A, source := source, subset := part] \as SourcePair;
+\import singular_cohomology.Relative[A := B, source := target, subset := boundary] \as TargetPair;
+\import SourcePair.OverRing[R := K, ring := ring].With[coefficients := Source.coefficients] \as SourceRelative;
+\import TargetPair.OverRing[R := K, ring := ring].With[coefficients := Target.coefficients] \as TargetRelative;
+\import SourcePair.Maps[B := B].Over[target := target, targetSubset := boundary] \as Pairs;
+\import Pairs.On[f := f].Integer[] \as ChainMap;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := Source.coefficients] \as Hom;
+\import Hom.Mapping[P := SourcePair.complex, Q := TargetPair.complex, L := Target.coefficients] \as Pull;
+\import Modules.End[V := K, space := Source.coefficients.space] \as Scalars;
+\definition map: Complexes.Map[C := TargetRelative.complex, D := SourceRelative.complex].Map :=
+  Pull.On[f := ChainMap.map, u := Scalars.identity].map;
+\module At(z: I.Int^) {
+  \import Complexes.Map[C := TargetRelative.complex, D := SourceRelative.complex].At[k := z] \as Induced;
+  \definition linear: _ := Induced.induced map;
+}
+\module Cup(p, q: std.Data[].Nat[].Nat^);
+
+\module Forget(n: std.Data[].Nat[].Nat^);

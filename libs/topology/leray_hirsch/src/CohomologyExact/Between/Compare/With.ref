@@ -1,0 +1,33 @@
+\import Exact.Morphism[A1 := A1, B1 := B1, C1 := C1].Diagram[s := s, t := t, a := a, b := b, c := c] \as Natural;
+\module At(k: I.Int^) {
+  \definition next: I.Int^ := Degrees.next k;
+  \import \parent.\parent.\parent.Row[s := s, k := k] \as Input;
+  \import \root.CohomologyExact[K := K, ring := ring].Between[A := A1, B := B1, C := C1].Row[s := t, k := k] \as Output;
+  \import Right.At[k := k] \as First;
+  \import Left.At[k := next] \as Second;
+  \import Middle.At[k := next] \as Third;
+  \import Right.At[k := next] \as Fourth;
+  \import Left.At[k := Degrees.next next] \as Last;
+  \import Modules.FiveLemma[A := Input.first, B := Input.second, C := Input.third, D := Input.fourth, E := Input.last,
+    A1 := Output.first, B1 := Output.second, C1 := Output.third, D1 := Output.fourth, E1 := Output.last]
+    .Diagram[s := Input.sequence, t := Output.sequence, a := First.induced c, b := Second.induced a,
+      c := Third.induced b, d := Fourth.induced c, e := Last.induced a] \as Five;
+  \definition commuting[h: Natural.Commutative]: Five.Commutative := Five.Commutative {
+    first := \fun (x: Input.first.Carrier) => sym!{Output.second.Carrier} _ _ (Natural.At[k := k].naturality h x),
+    second := Natural.Inclusion[k := next].naturality h,
+    third := \fun (x: Input.third.Carrier) => sym!{Output.fourth.Carrier} _ _ (Natural.At[k := next].projectionNaturality h x),
+    last := \fun (x: Input.fourth.Carrier) => sym!{Output.last.Carrier} _ _ (Natural.At[k := next].naturality h x),
+  };
+  \definition bijective[h: Natural.Commutative][first: First.Bijective[c]][second: Second.Bijective[a]]
+    [fourth: Fourth.Bijective[c]][last: Last.Bijective[a]]: Third.Bijective[b] := Third.Bijective[b] {
+    injective := Five.injective (commuting h) first.onto second.injective fourth.injective,
+    onto := Five.surjective (commuting h) second.onto fourth.onto last.injective,
+  };
+}
+\definition middleQuasiIsomorphism: Natural.Commutative -> Left.QuasiIsomorphism a -> Right.QuasiIsomorphism c -> Middle.QuasiIsomorphism b :=
+  \fun (h: Natural.Commutative)(left: Left.QuasiIsomorphism a)(right: Right.QuasiIsomorphism c)(z: I.Int^) =>
+    \idelim Degrees.next (Degrees.previous z) = z \with k: I.Int^ => Middle.At[k := k].Bijective[b] \by {
+      base: At[k := Degrees.previous z].bijective h (right (Degrees.previous z)) (left (Degrees.next (Degrees.previous z)))
+        (right (Degrees.next (Degrees.previous z))) (left (Degrees.next (Degrees.next (Degrees.previous z)))),
+      equality: Degrees.nextPrevious z
+    };

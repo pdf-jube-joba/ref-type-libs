@@ -1,0 +1,24 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\import Equality.Transport[A := N.Nat^] \as Transport;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.eq_reason_in;
+\import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Absolute;
+\import Absolute.Cohomology[] \as AbsoluteClasses;
+\import singular_cap.CochainPair[A := A, source := source, subset := subset, R := K, ring := ring] \as Relative;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset].OverRing[R := K, ring := ring]
+  .With[coefficients := Absolute.coefficients] \as Pair;
+\import singular_cohomology.Cochains[A := A, source := source].OverRing[R := K, ring := ring]
+  .With[coefficients := Absolute.coefficients] \as Whole;
+\import chain_complexes.Integer[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\definition cochains[n: N.Nat^]: \Set := Pair.Carrier (I.Int^::ofNat n);
+\definition cycles[n: N.Nat^]: \Set := Signed.At[C := Pair.complex, z := I.Int^::ofNat n].Closed;
+\definition classes[n: N.Nat^]: \Set := Pair.cohomology n;
+\definition class[n: N.Nat^][x: cycles n]: classes n := Signed.At[C := Pair.complex, z := I.Int^::ofNat n].classOf x;
+\definition restrict[n: N.Nat^][x: cochains n]: Absolute.Carrier n := Relative.Comparison[n := n].from x;
+\module Associativity(p, q, r: N.Nat^);
+\module Unit(p: N.Nat^);

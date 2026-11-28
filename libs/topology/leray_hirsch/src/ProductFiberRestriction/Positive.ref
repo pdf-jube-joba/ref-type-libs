@@ -1,0 +1,39 @@
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\definition n: N.Nat^ := N.Nat^::succ p;
+\definition toPoint[y: F]: Point.Carrier := Point.point;
+\definition fromPoint[y: Point.Carrier]: X := x;
+\definition toPointContinuous: _ := topology.Maps[A := F, B := Point.Carrier].constantContinuous fiber Point.topology Point.point;
+\definition fromPointContinuous: _ := topology.Maps[A := Point.Carrier, B := X].constantContinuous Point.topology base x;
+\import singular_products.Cochains[A := Point.Carrier, source := Point.topology, R := K, ring := ring] \as Product;
+\import Product.Cohomology[].Pullback[B := X, target := base] \as PullA;
+\import H.Pullback[B := Point.Carrier, target := Point.topology] \as PullB;
+\import singular_cohomology.Maps[A := F, B := Point.Carrier, source := fiber, target := Point.topology]
+  .Composition[C := X, final := base].Coefficients[M := Fiber.integerCoefficients] \as Composition;
+\import singular_cohomology.Calculations[A := Point.Carrier, source := Point.topology].With[coefficients := Product.integerCoefficients]
+  .Singleton[a := Point.point].Positive[n := p] \as Calculation;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import Modules.Hom[V := Product.Cohomology[].Group n, W := H.Group n,
+  source := Product.Cohomology[].moduleSpace n, target := H.moduleSpace n] \as Maps;
+\definition constantIsZero: \forall (a: B.Group n) -> ToConstant.apply n constant constantContinuous a = (H.moduleSpace n).zero :=
+  \fun (a: B.Group n) => eq_reason_in!{{H.Group n} _
+    "=" _ "by" { Composition.onCohomology toPoint toPointContinuous fromPoint fromPointContinuous n a }
+    "=" _ "by" { congr!{{Product.Cohomology[].Group n} {H.Group n}} (PullB.apply n toPoint toPointContinuous) _ _
+      (Calculation.zero Point.unique (PullA.apply n fromPoint fromPointContinuous a)) }
+    "=" _ "by" { Maps.zeroPreserved (PullB.At[n := n].linear toPoint toPointContinuous) }
+  };
+\module At(q: N.Nat^) {
+  \import \parent.\parent.Degree[p := n, q := q] \as Restriction;
+  \import External.Cohomology[p := n, q := q] \as Product;
+  \import H.Cup[p := n, q := q] \as Cup;
+  \import Modules.Hom[V := H.Group n, W := H.Group Product.total, source := H.moduleSpace n, target := H.moduleSpace Product.total] \as Maps;
+  \definition multiplication[b: H.Group q]: Maps.Map := Maps.Map {
+    apply := \fun (a: H.Group n) => Cup.apply a b,
+    addition := \fun (a, c: H.Group n) => Cup.bilinear.addLeft a c b,
+    scalar := \fun (r: K)(a: H.Group n) => Cup.bilinear.scaleLeft r a b,
+  };
+  \definition law: \forall (a: B.Group n)(b: H.Group q) -> restrict Product.total (Product.apply a b) = (H.moduleSpace Product.total).zero :=
+    \fun (a: B.Group n)(b: H.Group q) => trans!{{H.Group Product.total}} _ _ _ (Restriction.law a b)
+      (trans!{{H.Group Product.total}} _ _ _
+        (congr!{{H.Group n} {H.Group Product.total}} (multiplication b).apply _ _ (constantIsZero a))
+        (Maps.zeroPreserved (multiplication b)));
+}

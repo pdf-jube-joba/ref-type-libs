@@ -1,0 +1,7 @@
+\import \parent.Rebased[d := I.Int^::negSucc p, same := same] \as Rebased;
+\import Equality.Transport[A := I.Int^] \as Cast;
+\use Equality.trans;
+\definition zero: \forall (x: baseFamily.Carrier input) -> linear.apply x = (totalFamily.space z).zero :=
+  \fun (x: baseFamily.Carrier input) => trans!{{totalFamily.Carrier z}} _ _ _ (Rebased.law x)
+    (Cast.pointNatural totalFamily.Carrier (\fun (k: I.Int^) => (totalFamily.space k).zero) Rebased.rangeDegree z Rebased.rangeSame
+    );

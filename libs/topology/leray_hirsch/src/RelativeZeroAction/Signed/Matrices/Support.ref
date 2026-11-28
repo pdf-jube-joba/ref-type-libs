@@ -1,0 +1,19 @@
+\definition HasSupport: \Prop := \forall (i, j: Index) ->
+  Logic.Not (\In[Index] included i) -> \In[Index] included j -> a i j = Ring.ordinary.base.zero;
+\definition Supported[x: Vectors.Carrier]: \Prop := \forall (i: Index) ->
+  Logic.Not (\In[Index] included i) -> x i = original.zero;
+\import Modules.Laws[V := Carrier, space := space] \as Laws;
+\definition termZero[entries: HasSupport][x: Vectors.Carrier][supports: Supported x][i, j: Index][row: Logic.Not (\In[Index] included i)]:
+  act (a i j) (x j) = original.zero :=
+  either!{{Classical.excludedMiddle (\In[Index] included j)} {act (a i j) (x j) = original.zero}
+    {\fun (column: \In[Index] included j) => trans!{Carrier} _ _ _
+      (congr!{{Scalars.Carrier} Carrier} (\fun (b: Scalars.Carrier) => act b (x j)) _ _ (entries i j row column))
+      (Laws.zeroScale (x j))}
+    {\fun (column: Logic.Not (\In[Index] included j)) => trans!{Carrier} _ _ _
+      (congr!{Carrier Carrier} (act (a i j)) _ _ (supports j column)) (Laws.scaleZero (a i j))}
+  };
+\definition preserves[entries: HasSupport]: \forall (x: Vectors.Carrier) -> Supported x -> Supported (Action.apply a x) :=
+  \fun (x: Vectors.Carrier)(supports: Supported x)(i: Index)(row: Logic.Not (\In[Index] included i)) => trans!{Carrier} _ _ _
+    (Sum.congruent (Finite.elements count) (\fun (j: Index) => act (a i j) (x j)) (\fun (j: Index) => original.zero)
+      (\fun (j: Index) => termZero entries x supports i j row))
+    (Sum.zero (Finite.elements count));

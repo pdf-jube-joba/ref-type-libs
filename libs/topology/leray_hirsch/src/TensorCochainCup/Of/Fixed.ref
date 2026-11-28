@@ -1,0 +1,47 @@
+\import N.Basic[].Prop[] \as Arithmetic;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Regrade;
+\import chain_complexes.Cochain[].Over[R := K, ring := baseRing] \as Cochains;
+\import \root.CochainTail[K := K, ring := baseRing].Of[C := TotalHom.complex].Drop[cutoff := q] \as Tail;
+\definition target: Cochains.Complex := Tail.complex;
+\definition family: Modules.Family[N.Nat^] := Modules.Family[N.Nat^] { Carrier := TotalHom.Carrier, space := TotalHom.space };
+\import \root.Transport[K := K, ring := ring].For[Index := N.Nat^, family := family] \as Transport;
+\module At(p: N.Nat^) {
+  \import \parent.\parent.At[p := p, q := q] \as Product;
+  \definition degree: N.Nat^ := Tail.grade p;
+  \definition same: Product.n = degree := Arithmetic.addComm p q;
+  \import Modules.Hom[V := TotalHom.Carrier Product.n, W := TotalHom.Carrier degree, source := TotalHom.space Product.n, target := TotalHom.space degree]
+    .Composition[U := Left.Carrier p, domain := Left.space p] \as Compose;
+  \definition linear: _ := Compose.compose Transport.At[m := Product.n, n := degree, same := same].map Product.LinearLeft[beta := beta].linear;
+}
+\module Boundary(p: N.Nat^) {
+  \import \parent.At[p := p] \as Lower;
+  \import \parent.At[p := N.Nat^::succ p] \as Upper;
+  \import \parent.\parent.At[p := p, q := q] \as Product;
+  \import \parent.\parent.At[p := N.Nat^::succ p, q := q] \as NextProduct;
+  \definition next: N.Nat^ := N.Nat^::succ Lower.degree;
+  \definition succSame: N.Nat^::succ Product.n = next := congr!{N.Nat^ N.Nat^} N.Nat^::succ _ _ Lower.same;
+  \definition raw[a: Left.Carrier p]: TotalHom.Carrier Product.n := Product.total a beta;
+  \definition nextRaw[a: Left.Carrier p]: TotalHom.Carrier NextProduct.n := NextProduct.total (Left.apply p a) beta;
+  \import Product.Differential[alpha := (Left.space p).zero, beta := beta] \as DegreeInfo;
+  \definition degreeLaw: NextProduct.n = N.Nat^::succ Product.n := DegreeInfo.degreeLaw;
+  \definition commutes: \forall (a: Left.Carrier p) -> target.differential.apply p (Lower.linear.apply a) = Upper.linear.apply (Left.apply p a) :=
+    \fun (a: Left.Carrier p) => eq_reason_in!{{TotalHom.Carrier next} _
+      "=" _ "by" { sym!{{TotalHom.Carrier next}} _ _
+        (Regrade.natural TotalHom.Carrier (\fun (n: N.Nat^) => TotalHom.Carrier (N.Nat^::succ n))
+          (\fun (n: N.Nat^) => TotalHom.apply n) Product.n Lower.degree Lower.same (raw a)) }
+      "=" _ "by" { Regrade.reindex TotalHom.Carrier N.Nat^::succ Product.n Lower.degree Lower.same (TotalHom.apply Product.n (raw a)) }
+      "=" _ "by" { congr!{{TotalHom.Carrier (N.Nat^::succ Product.n)} {TotalHom.Carrier next}}
+        (Regrade.cast TotalHom.Carrier (N.Nat^::succ Product.n) next succSame) _ _
+        (Product.Differential[alpha := a, beta := beta].rightClosed closed) }
+      "=" _ "by" { Regrade.castComposition TotalHom.Carrier NextProduct.n (N.Nat^::succ Product.n) next degreeLaw succSame (nextRaw a) }
+    };
+}
+\import Cochains.Map[C := Left.complex, D := target] \as Maps;
+\definition map: Maps.Map := Maps.Map {
+  apply := \fun (p: N.Nat^) => At[p := p].linear.apply,
+  addition := \fun (p: N.Nat^) => At[p := p].linear.addition,
+  scalar := \fun (p: N.Nat^) => At[p := p].linear.scalar,
+  commutes := \fun (p: N.Nat^) => Boundary[p := p].commutes,
+};
+
+\module Cohomology(p: N.Nat^);

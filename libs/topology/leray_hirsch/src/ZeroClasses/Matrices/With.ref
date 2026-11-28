@@ -1,0 +1,32 @@
+\definition Pointwise: \Prop := \forall (x: A) -> \exists (PointInverse.Inverse (evaluateMatrix a x));
+\definition componentInverses[h: Pointwise]: \exists (\forall (c: PathComponents) -> PointInverse.Inverse (components a c)) :=
+  \axiom:classicalIndefiniteChoice(PathComponents, (\fun (c: PathComponents) => PointInverse.Inverse (components a c)),
+    Path.induction (\fun (c: PathComponents) => \exists (PointInverse.Inverse (components a c))) h);
+\module Chosen(b: \forall (c: PathComponents) -> PointInverse.Inverse (components a c)) {
+  \definition inverseMatrix: ClassesMatrix.Matrix := assemble (\fun (c: PathComponents) => (b c).inverse);
+  \definition pointLaw: \forall (x: A) -> evaluateMatrix inverseMatrix x = (b (componentOf x)).inverse :=
+    onAssembled (\fun (c: PathComponents) => (b c).inverse);
+  \definition left: ClassesProduct.product inverseMatrix a = ClassesUnit.identity := detectedMatrix _ _
+    (\fun (x: A) => eq_reason_in!{PointMatrix.Matrix _
+      "=" _ "by" { product inverseMatrix a x }
+      "=" _ "by" { congr!{PointMatrix.Matrix PointMatrix.Matrix} (\fun (m: PointMatrix.Matrix) => PointProduct.product m (evaluateMatrix a x)) _ _ (pointLaw x) }
+      "=" _ "by" { (\bysub(PointInverse.Data, { m: PointInverse.Data \where PointInverse.Laws[evaluateMatrix a x, m] }, b (componentOf x))).leftInverse }
+      "=" _ "by" { sym!{PointMatrix.Matrix} _ _ (unit x) }
+    });
+  \definition right: ClassesProduct.product a inverseMatrix = ClassesUnit.identity := detectedMatrix _ _
+    (\fun (x: A) => eq_reason_in!{PointMatrix.Matrix _
+      "=" _ "by" { product a inverseMatrix x }
+      "=" _ "by" { congr!{PointMatrix.Matrix PointMatrix.Matrix} (PointProduct.product (evaluateMatrix a x)) _ _ (pointLaw x) }
+      "=" _ "by" { (\bysub(PointInverse.Data, { m: PointInverse.Data \where PointInverse.Laws[evaluateMatrix a x, m] }, b (componentOf x))).rightInverse }
+      "=" _ "by" { sym!{PointMatrix.Matrix} _ _ (unit x) }
+    });
+  \definition inverseData: ClassesInverse.Inverse a := \into[ClassesInverse.Data](ClassesInverse.Data { inverse := inverseMatrix }, ClassesInverse.Inverse a) \by {
+    ClassesInverse.Laws[a, ClassesInverse.Data { inverse := inverseMatrix }] { leftInverse := left, rightInverse := right }
+  };
+}
+\definition inverse[h: Pointwise]: \exists (ClassesInverse.Inverse a) := \block {
+  \takefrom b: \forall (c: PathComponents) -> PointInverse.Inverse (components a c) \by componentInverses h \then
+  \return \exact(Chosen[b := b].inverseData, ClassesInverse.Inverse a)
+};
+
+\module Supported(included: \Pow Index);

@@ -1,0 +1,14 @@
+\definition Indices: \Set := \Cast[Index] ({ i: Index \where degree i = q });
+\import Modules.Free[Generators := Indices] \as Free;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Transport;
+\definition generator[i: Indices]: Cohomology.Group q :=
+  Transport.cast Cohomology.Group (degree i) q
+    (\bysub(Index, { j: Index \where degree j = q }, i))
+    (restrict (degree i) (classes i));
+\import Free.To[W := Cohomology.Group q, target := Cohomology.moduleSpace q] \as Universal;
+\definition linear: _ := Universal.extension generator;
+\definition onGenerator: \forall (i: Indices) -> linear.apply (Free.generator i) = generator i :=
+  Universal.onGenerator generator;
+\import Modules.Isomorphism[V := Free.Carrier, W := Cohomology.Group q, source := Free.space, target := Cohomology.moduleSpace q].OfBijective[f := linear] \as Comparison;
+\definition IsBasis: \Prop := std.Logic[].Proposition[].And[Comparison.Injective, Comparison.Onto];
+\definition isomorphism[basis: IsBasis]: _ := Comparison.isomorphism basis.left basis.right;

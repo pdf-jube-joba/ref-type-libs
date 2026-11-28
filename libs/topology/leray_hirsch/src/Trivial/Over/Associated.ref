@@ -1,0 +1,20 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import Equality.Transport[A := I.Int^] \as Cast;
+\import \root.DegreeShift[] \as Shift;
+\import N.Basic[].Def[] \as Nat;
+\definition degree: N.Nat^ := Nat.add q r;
+\import External.Cohomology[p := q, q := r] \as ExternalClass;
+\import singular_products.Cochains[A := X, source := base, R := K, ring := ring].Cohomology[] \as B;
+\definition baseClass: \Set := B.Group q;
+\module Given(b: baseClass, c: FiberCohomology.Group r) {
+  \import Comparison.Shifted[q := degree, u := ExternalClass.apply b c].To[z := z] \as Nested;
+  \import Comparison.Shifted[q := r, u := lift r c].To[z := z] \as External;
+  \definition input: I.Int^ := Shift.unshift degree z;
+  \definition output: I.Int^ := Shift.unshift r z;
+  \module From(p: N.Nat^, same: I.Int^::ofNat p = input);
+}

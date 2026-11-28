@@ -1,0 +1,35 @@
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Complexes;
+\import SourcePair.Cohomology[p := p, q := q].Left[] \as Left;
+\import TargetPair.Cohomology[p := p, q := q].Left[] \as Right;
+\import Complexes.At[C := SourceRelative.complex, z := I.Int^::ofNat p] \as Input;
+\import Complexes.At[C := TargetRelative.complex, z := I.Int^::ofNat p] \as TargetInput;
+\import Complexes.At[C := TargetRelative.complex, z := I.Int^::ofNat degree] \as Output;
+\import singular_cohomology.Cochains[A := A, source := source].OverRing[R := K, ring := ring].With[coefficients := Source.coefficients] \as SourceOrdinary;
+\import singular_cohomology.Cochains[A := A, source := source].OverRing[R := L, ring := targetRing].With[coefficients := Target.coefficients] \as TargetOrdinary;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].At[C := SourceOrdinary.complex, k := q] \as SourceU;
+\import chain_complexes.Cochain[].Over[R := L, ring := std.Alg[].Ring[].commutativeRingAsRing L targetRing].At[C := TargetOrdinary.complex, k := q] \as TargetU;
+\import Change.Degree[n := q] \as FactorChange;
+\import Relative.Degree[n := p] \as InputChange;
+\import Relative.Degree[n := degree] \as OutputChange;
+\import singular_cellular_algebra.Algebra[].Refinement[A := TargetRelative.Carrier (I.Int^::ofNat degree), S := Output.cycles.carrier] \as Closed;
+\definition onClasses: \forall (a: Input.Closed)(u: SourceU.CycleCarrier) ->
+  OutputChange.map.apply (Left.apply (Input.classOf a) (SourceU.classOf u)) =
+  Right.apply (InputChange.map.apply (Input.classOf a)) (FactorChange.map.apply (SourceU.classOf u)) :=
+  \fun (a: Input.Closed)(u: SourceU.CycleCarrier) => eq_reason_in!{Output.Cohomology _
+    "=" _ "by" { congr!{{SourceRelative.cohomology degree} Output.Cohomology} OutputChange.map.apply _ _ (Left.onClasses a u) }
+    "=" _ "by" { OutputChange.onClass (Left.cycle a u) }
+    "=" _ "by" { congr!{Output.Closed Output.Cohomology} Output.classOf _ _ (Closed.ext (OutputChange.cycles.apply (Left.cycle a u)) (Right.cycle (InputChange.cycles.apply a) (FactorChange.cycles.apply u)) (cochainLaw a u)) }
+    "=" _ "by" { sym!{Output.Cohomology} _ _ (Right.onClasses (InputChange.cycles.apply a) (FactorChange.cycles.apply u)) }
+    "=" _ "by" { congr!{TargetInput.Cohomology TargetU.Cohomology Output.Cohomology} Right.apply _ _ _ _
+      (sym!{TargetInput.Cohomology} _ _ (InputChange.onClass a))
+      (sym!{TargetU.Cohomology} _ _ (FactorChange.onClass u)) }
+  };
+\definition law: \forall (a: Input.Cohomology)(u: SourceU.Cohomology) ->
+  OutputChange.map.apply (Left.apply a u) = Right.apply (InputChange.map.apply a) (FactorChange.map.apply u) :=
+  Input.classInduction
+    (\fun (a: Input.Cohomology) => \forall (u: SourceU.Cohomology) -> OutputChange.map.apply (Left.apply a u) =
+      Right.apply (InputChange.map.apply a) (FactorChange.map.apply u))
+    (\fun (a: Input.Closed) => SourceU.classInduction
+      (\fun (u: SourceU.Cohomology) => OutputChange.map.apply (Left.apply (Input.classOf a) u) =
+        Right.apply (InputChange.map.apply (Input.classOf a)) (FactorChange.map.apply u))
+      (onClasses a));

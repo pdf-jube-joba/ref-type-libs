@@ -1,0 +1,54 @@
+\module Term(W: IntegerModules.Bundle) {
+  \import \parent.\parent.With[W := W] \as Standard;
+  \import IntegerModules.Tensor[V := A.Carrier, W := W.Carrier, left := A.space, right := W.space] \as Actual;
+  \import IntegerModules.Tensor[V := Free.Carrier, W := W.Carrier, left := Free.space, right := W.space]
+    .Mapping[U := A.Carrier, Z := W.Carrier, targetLeft := A.space, targetRight := W.space] \as Mapping;
+  \import IntegerModules.Isomorphism[V := W.Carrier, W := W.Carrier, source := W.space, target := W.space] \as Right;
+  \import IntegerModules.End[V := W.Carrier, space := W.space] \as Identity;
+  \definition identity: Right.Isomorphism := Right.Isomorphism {
+    forward := Identity.identity, backward := Identity.identity,
+    leftInverse := \fun (w: W.Carrier) => \refl(w), rightInverse := \fun (w: W.Carrier) => \refl(w),
+  };
+  \import Mapping.Isomorphism[leftIso := basis, rightIso := identity] \as Change;
+  \import Hom.From[V := Actual.Carrier, domain := Actual.space] \as Source;
+  \import Hom.From[V := Standard.tensorCarrier, domain := Standard.tensorSpace] \as Target;
+  \import Hom.From[V := W.Carrier, domain := W.space] \as Fiber;
+  \import Modules.Functions[X := Generators, V := Fiber.Carrier, target := Fiber.space] \as Values;
+  \import IntegerModules.Hom[V := Actual.Carrier, W := K, source := Actual.space, target := Hom.coefficients.space]
+    .Composition[U := Standard.tensorCarrier, domain := Standard.tensorSpace] \as IntoFree;
+  \import IntegerModules.Hom[V := Standard.tensorCarrier, W := K, source := Standard.tensorSpace, target := Hom.coefficients.space]
+    .Composition[U := Actual.Carrier, domain := Actual.space] \as OutOfFree;
+  \import Modules.Hom[V := Source.Carrier, W := Target.Carrier, source := Source.space, target := Target.space] \as Forward;
+  \import Modules.Hom[V := Target.Carrier, W := Source.Carrier, source := Target.space, target := Source.space] \as Backward;
+  \definition pullValue[h: Source.Carrier]: Target.Carrier := IntoFree.compose h Change.forward;
+  \definition pushValue[h: Target.Carrier]: Source.Carrier := OutOfFree.compose h Change.backward;
+  \definition pull: Forward.Map := Forward.Map {
+    apply := pullValue,
+    addition := \fun (h, g: Source.Carrier) => Target.ext (pullValue (Source.space.add h g)) (Target.space.add (pullValue h) (pullValue g))
+      (\fun (x: Standard.tensorCarrier) => \refl(coefficients.space.add (h.apply (Change.forward.apply x)) (g.apply (Change.forward.apply x)))),
+    scalar := \fun (a: K)(h: Source.Carrier) => Target.ext (pullValue (Source.space.smul a h)) (Target.space.smul a (pullValue h))
+      (\fun (x: Standard.tensorCarrier) => \refl(coefficients.space.smul a (h.apply (Change.forward.apply x)))),
+  };
+  \definition push: Backward.Map := Backward.Map {
+    apply := pushValue,
+    addition := \fun (h, g: Target.Carrier) => Source.ext (pushValue (Target.space.add h g)) (Source.space.add (pushValue h) (pushValue g))
+      (\fun (x: Actual.Carrier) => \refl(coefficients.space.add (h.apply (Change.backward.apply x)) (g.apply (Change.backward.apply x)))),
+    scalar := \fun (a: K)(h: Target.Carrier) => Source.ext (pushValue (Target.space.smul a h)) (Source.space.smul a (pushValue h))
+      (\fun (x: Actual.Carrier) => \refl(coefficients.space.smul a (h.apply (Change.backward.apply x)))),
+  };
+  \import Modules.Isomorphism[V := Source.Carrier, W := Target.Carrier, source := Source.space, target := Target.space] \as Dual;
+  \definition dual: Dual.Isomorphism := Dual.Isomorphism {
+    forward := pull,
+    backward := push,
+    leftInverse := \fun (h: Source.Carrier) => Source.ext (push.apply (pull.apply h)) h
+      (\fun (x: Actual.Carrier) => congr!{Actual.Carrier K} h.apply _ _ (Change.rightInverse x)),
+    rightInverse := \fun (h: Target.Carrier) => Target.ext (pull.apply (push.apply h)) h
+      (\fun (x: Standard.tensorCarrier) => congr!{Standard.tensorCarrier K} h.apply _ _ (Change.leftInverse x)),
+  };
+  \import Dual.Composition[U := Values.Carrier, final := Values.space] \as Compose;
+  \definition comparison: _ := Compose.compose Standard.isomorphism dual;
+  \definition onTensor[h: Source.Carrier][g: Generators][w: W.Carrier]:
+    (comparison.forward.apply h g).apply w = h.apply (Actual.tensor (basis.forward.apply (Free.generator g)) w) :=
+      trans!{K} _ _ _ (Standard.evaluateOnTensor (pull.apply h) g w)
+        (congr!{Actual.Carrier K} h.apply _ _ (Mapping.onTensor basis.forward identity.forward (Free.generator g) w));
+}

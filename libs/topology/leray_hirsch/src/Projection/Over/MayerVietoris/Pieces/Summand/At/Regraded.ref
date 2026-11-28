@@ -1,0 +1,46 @@
+\import \parent.Integer[] \as Term;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Z;
+\import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients] \as Source;
+\import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients] \as Target;
+\definition wholeFamily: Z.Family[I.Int^] := Z.Family[I.Int^] {
+  Carrier := \fun (k: I.Int^) => Source.Degree[z := k].whole.Carrier,
+  space := \fun (k: I.Int^) => Source.Degree[z := k].whole.space,
+};
+\definition pairFamily: Z.Family[I.Int^] := Z.Family[I.Int^] {
+  Carrier := \fun (k: I.Int^) => Source.Degree[z := k].directSum.Carrier,
+  space := \fun (k: I.Int^) => Source.Degree[z := k].directSum.space,
+};
+\definition overlapFamily: Z.Family[I.Int^] := Z.Family[I.Int^] {
+  Carrier := \fun (k: I.Int^) => Source.Degree[z := k].intersection.Carrier,
+  space := \fun (k: I.Int^) => Source.Degree[z := k].intersection.space,
+};
+\import Source.Degree[z := d] \as S;
+\import Source.Degree[z := input] \as R;
+\import Source.At[z := d] \as SMaps;
+\import Source.At[z := input] \as RMaps;
+\import Target.Degree[z := z] \as T;
+\import Target.At[z := z] \as TMaps;
+\import \root.Transport[K := I.Int^, ring := Integers.commutativeRing].For[Index := I.Int^, family := wholeFamily].At[m := d, n := input, same := same] \as Whole;
+\import \root.Transport[K := I.Int^, ring := Integers.commutativeRing].For[Index := I.Int^, family := pairFamily].At[m := d, n := input, same := same] \as Pair;
+\import \root.Transport[K := I.Int^, ring := Integers.commutativeRing].For[Index := I.Int^, family := overlapFamily].At[m := d, n := input, same := same] \as Overlap;
+\import Z.Hom[V := R.whole.Carrier, W := T.whole.Carrier, source := R.whole.space, target := T.whole.space]
+  .Composition[U := S.whole.Carrier, domain := S.whole.space] \as WholeCompose;
+\import Z.Hom[V := R.directSum.Carrier, W := T.directSum.Carrier, source := R.directSum.space, target := T.directSum.space]
+  .Composition[U := S.directSum.Carrier, domain := S.directSum.space] \as PairCompose;
+\import Z.Hom[V := R.intersection.Carrier, W := T.intersection.Carrier, source := R.intersection.space, target := T.intersection.space]
+  .Composition[U := S.intersection.Carrier, domain := S.intersection.space] \as OverlapCompose;
+\definition whole: _ := WholeCompose.compose Term.wholeMap Whole.map;
+\definition pair: _ := PairCompose.compose Term.pair Pair.map;
+\definition overlap: _ := OverlapCompose.compose Term.overlapMap Overlap.map;
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+\definition restriction: \forall (a: S.whole.Carrier) -> pair.apply (SMaps.restriction.apply a) = TMaps.restriction.apply (whole.apply a) :=
+  \fun (a: S.whole.Carrier) => trans!{{T.directSum.Carrier}} _ _ _
+    (congr!{{R.directSum.Carrier} {T.directSum.Carrier}} Term.pair.apply _ _
+      (Transport.natural wholeFamily.Carrier pairFamily.Carrier (\fun (k: I.Int^) => Source.At[z := k].restriction.apply) d input same a))
+    (Term.restriction (Whole.map.apply a));
+\definition difference: \forall (a: S.directSum.Carrier) -> overlap.apply (SMaps.difference.apply a) = TMaps.difference.apply (pair.apply a) :=
+  \fun (a: S.directSum.Carrier) => trans!{{T.intersection.Carrier}} _ _ _
+    (congr!{{R.intersection.Carrier} {T.intersection.Carrier}} Term.overlapMap.apply _ _
+      (Transport.natural pairFamily.Carrier overlapFamily.Carrier (\fun (k: I.Int^) => Source.At[z := k].difference.apply) d input same a))
+    (Term.difference (Pair.map.apply a));

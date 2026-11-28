@@ -1,0 +1,19 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\use Equality.sym;
+\import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Source;
+\import singular_products.Cochains[A := A, source := source, R := L, ring := targetRing] \as Target;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset] \as Pair;
+\import Pair.With[coefficients := Source.integerCoefficients] \as SourceRelative;
+\import Pair.With[coefficients := Target.integerCoefficients] \as TargetRelative;
+\import cohomology_thom.CoefficientChange[].OnSpace[A := A, source := source, R := K, S := L, ring := ring, targetRing := targetRing]
+  .With[morphism := morphism] \as Change;
+\import Change.Relative[subset := subset] \as Relative;
+\import cohomology_thom.CoefficientChange[].On[C := Pair.complex, M := Source.integerCoefficients, N := Target.integerCoefficients, u := morphism.linear] \as Native;
+\definition relative[z: I.Int^]: _ := Native.At[z := z].map;
+\definition absolute[n: N.Nat^]: _ := Change.Degree[n := n].map;
+\module Cup(p, q: N.Nat^);

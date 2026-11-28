@@ -1,0 +1,25 @@
+\definition pz: I.Int^ := I.Int^::ofNat p;
+\definition before: pz = input := trans!{I.Int^} _ _ _ same inputLaw;
+\import Associated.From[p := p, same := before] \as Algebra;
+\definition reduce[x: Comparison.baseFamily.Carrier domain]: Comparison.baseFamily.Carrier pz :=
+  Cast.cast Comparison.baseFamily.Carrier domain pz (sym!{I.Int^} _ _ same) x;
+\definition rawLaw[x: Comparison.baseFamily.Carrier domain]:
+  Cast.cast Comparison.baseFamily.Carrier input pz (sym!{I.Int^} _ _ before) (regrade x) = reduce x :=
+  trans!{{Comparison.baseFamily.Carrier pz}} _ _ _
+    (Cast.castComposition Comparison.baseFamily.Carrier domain input pz inputLaw (sym!{I.Int^} _ _ before) x)
+    (\refl(reduce x));
+\definition candidate[x: Comparison.baseFamily.Carrier domain]: Algebra.term (regrade x) = act x :=
+  eq_reason_in!{{Comparison.baseFamily.Carrier domain} _
+    "=" _ "by" { congr!{{Comparison.baseFamily.Carrier pz} {Comparison.baseFamily.Carrier domain}}
+      (\fun (a: Comparison.baseFamily.Carrier pz) => Cast.cast Comparison.baseFamily.Carrier pz domain same (actionAt pz a)) _ _ (rawLaw x) }
+    "=" _ "by" { Cast.natural Comparison.baseFamily.Carrier Comparison.baseFamily.Carrier actionAt pz domain same (reduce x) }
+    "=" _ "by" { congr!{{Comparison.baseFamily.Carrier domain} {Comparison.baseFamily.Carrier domain}} act _ _
+      (Cast.castInverse Comparison.baseFamily.Carrier domain pz (sym!{I.Int^} _ _ same) x) }
+  };
+\definition law: \forall (x: Comparison.baseFamily.Carrier domain) -> lawFor x :=
+  \fun (x: Comparison.baseFamily.Carrier domain) => eq_reason_in!{{Comparison.totalFamily.Carrier z} _
+    "=" _ "by" { congr!{{Comparison.baseFamily.Carrier domain} {Comparison.totalFamily.Carrier z}} Exterior.linear.apply _ _
+      (sym!{{Comparison.baseFamily.Carrier domain}} _ _ (candidate x)) }
+    "=" _ "by" { Algebra.law (regrade x) }
+    "=" _ "by" { sym!{{Comparison.totalFamily.Carrier z}} _ _ (sourceLaw x) }
+  };

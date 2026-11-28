@@ -1,0 +1,22 @@
+\import singular_products.Cochains[A := LocalBase.CarrierSet, source := LocalBase.topology base, R := K, ring := ring].Cohomology[] \as BaseClasses;
+\import Component.Native[p := p, same := same] \as Shifted;
+\import Trivial.Forget[p := p, q := degree j] \as Ordinary;
+\import External.Cohomology[p := p, q := degree j] \as Product;
+\definition sumDegree: N.Nat^ := Product.total;
+\definition degreeLaw: sumDegree = degree i := Shift.matchNatural (degree j) (degree i) p (sym!{I.Int^} _ _ same);
+\definition coefficient: BaseClasses.Group p := (BaseForget.map p).apply (Shifted.raw (coordinates j));
+\definition fiberValue: H.Group sumDegree :=
+  Restriction.restrict sumDegree (Product.apply coefficient (Model.fiberClass j));
+\definition law: term j = NaturalCast.cast H.Group sumDegree (degree i) degreeLaw fiberValue :=
+  eq_reason_in!{{H.Group (degree i)} _
+    "=" _ "by" { congr!{{Projection.totalFamily.Carrier z} {H.Group (degree i)}} (observe (degree i)) _ _ (Shifted.law (coordinates j)) }
+    "=" _ "by" { congr!{{Projection.totalFamily.Carrier z} {H.Group (degree i)}} (observe (degree i)) _ _
+      (sym!{{Projection.totalFamily.Carrier z}} _ _ (Shift.nativeCast Projection.totalFamily.Carrier sumDegree (degree i) degreeLaw
+        (Projection.Component[p := p, q := degree j].apply (reference j) (Shifted.raw (coordinates j))))) }
+    "=" _ "by" { sym!{{H.Group (degree i)}} _ _
+      (NaturalCast.natural (\fun (n: N.Nat^) => Projection.totalFamily.Carrier (I.Int^::ofNat n)) H.Group observe sumDegree (degree i) degreeLaw
+        (Projection.Component[p := p, q := degree j].apply (reference j) (Shifted.raw (coordinates j)))) }
+    "=" _ "by" { congr!{{H.Group sumDegree} {H.Group (degree i)}} (NaturalCast.cast H.Group sumDegree (degree i) degreeLaw) _ _
+      (congr!{{ProductCochains.Cohomology[].Group sumDegree} {H.Group sumDegree}} (Restriction.restrict sumDegree) _ _
+        (Ordinary.law (Shifted.raw (coordinates j)) (Model.fiberClass j))) }
+  };

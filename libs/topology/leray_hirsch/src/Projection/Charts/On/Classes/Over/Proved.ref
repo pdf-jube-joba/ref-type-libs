@@ -1,0 +1,10 @@
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\import AmbientProjection.Comparison[count := count].With[degree := degree, classes := Original.localClasses] \as Goal;
+\module At(z: I.Int^);
+\definition comparison: Original.Isomorphisms := Original.Isomorphisms {
+  injective := \fun (z: I.Int^) => At[z := z].injective,
+  onto := \fun (z: I.Int^) => At[z := z].onto,
+};

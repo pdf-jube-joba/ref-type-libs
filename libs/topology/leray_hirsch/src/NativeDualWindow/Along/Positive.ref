@@ -1,0 +1,28 @@
+\definition z: I.Int^ := I.Int^::ofNat n;
+\import \parent.At[z := z] \as At;
+\import ZModules.Hom[V := A.family.Carrier n, W := K, source := A.family.space n, target := Restricted.coefficients.space]
+  .Composition[U := B.family.Carrier n, domain := B.family.space n] \as Compose;
+\definition extend[h: To.Carrier z]: From.Carrier z := From.Positive[n := n].intro (Compose.compose h e.backward);
+\definition onLeft: \forall (x: A.family.Carrier n) -> e.backward.apply (f.apply n x) = x :=
+  \fun (x: A.family.Carrier n) => trans!{{A.family.Carrier n}} _ _ _
+    (congr!{{B.family.Carrier n} {A.family.Carrier n}} e.backward.apply _ _ (sym!{{B.family.Carrier n}} _ _ (same x))) (e.leftInverse x);
+\definition onRight: \forall (y: B.family.Carrier n) -> f.apply n (e.backward.apply y) = y :=
+  \fun (y: B.family.Carrier n) => trans!{{B.family.Carrier n}} _ _ _
+    (sym!{{B.family.Carrier n}} _ _ (same (e.backward.apply y))) (e.rightInverse y);
+\import From.Index[z := z] \as DomainRefinement;
+\import To.Index[z := z] \as RangeRefinement;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Input.Carrier n, S := DomainRefinement.submodule.carrier] \as D;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Output.Carrier n, S := RangeRefinement.submodule.carrier] \as R;
+\definition left: \forall (h: From.Carrier z) -> extend (Extended.map.apply z h) = h :=
+  \fun (h: From.Carrier z) => D.ext (extend (Extended.map.apply z h)) h
+    (Input.At[n := n].ext (extend (Extended.map.apply z h)) h
+      (\fun (x: B.family.Carrier n) => congr!{{B.family.Carrier n} K} h.apply _ _ (onRight x)));
+\definition right: \forall (h: To.Carrier z) -> Extended.map.apply z (extend h) = h :=
+  \fun (h: To.Carrier z) => R.ext (Extended.map.apply z (extend h)) h
+    (Output.At[n := n].ext (Extended.map.apply z (extend h)) h
+      (\fun (x: A.family.Carrier n) => congr!{{A.family.Carrier n} K} h.apply _ _ (onLeft x)));
+\definition injective: At.Injective := \fun (a, b: From.Carrier z)(eq: _) =>
+  trans!{{From.Carrier z}} _ _ _ (sym!{{From.Carrier z}} _ _ (left a))
+    (trans!{{From.Carrier z}} _ _ _ (congr!{{To.Carrier z} {From.Carrier z}} extend _ _ eq) (left b));
+\definition onto: At.Onto := \fun (b: To.Carrier z) =>
+  Logic.existsIntro[From.Carrier z, { a: From.Carrier z \where Extended.map.apply z a = b }] (extend b) (right b);

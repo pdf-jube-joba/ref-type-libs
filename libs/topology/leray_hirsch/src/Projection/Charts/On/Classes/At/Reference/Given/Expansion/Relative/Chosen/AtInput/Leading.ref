@@ -1,0 +1,46 @@
+\import Modules.Sums[I := Index].Vector[V := StandardDirect.family.Carrier j, space := StandardDirect.family.space j] \as Values;
+\import Blocks.Degree[q := degree j] \as Grade;
+\import \parent.\parent.\parent.\parent.Blocks[q := degree j] \as Coefficients;
+\import RightAction.Signed[z := ActualDirect.inputDegree j] \as CupZero;
+\import \root.ZeroClasses[A := LocalBase.CarrierSet, source := LocalBase.topology base, K := K, ring := ring] \as Scalars;
+\import Scalars.Ring[] \as Ring;
+\import module_theory.Module[].Over[R := Scalars.Carrier, ring := std.Alg[].Ring[].commutativeRingAsRing Scalars.Carrier Ring.ordinary]
+  .Laws[V := StandardDirect.family.Carrier j, space := CupZero.space] \as Action;
+\definition diagonalTerm[i: Index]: StandardDirect.family.Carrier j := CupZero.act (Coefficients.matrix j i) (Grade.mask x i);
+\definition HigherVanish: \Prop := \forall (i: Index) -> Nat.Lt (degree j) (degree i) -> x i = (ActualDirect.family.space i).zero;
+\module At(i: Index) {
+  \import \parent.\parent.\parent.\parent.Cell[i := i, j := j, x := x i] \as Cell;
+  \definition zeroDiagonal[off: Logic.Not (degree i = degree j)]: diagonalTerm i = (StandardDirect.family.space j).zero :=
+    trans!{{StandardDirect.family.Carrier j}} _ _ _
+      (congr!{{StandardDirect.family.Carrier j} {StandardDirect.family.Carrier j}} (CupZero.act (Coefficients.matrix j i)) _ _
+        (Grade.outside x i off))
+      (Action.scaleZero (Coefficients.matrix j i));
+  \definition vanishLeft[h: Nat.Lt (degree i) (degree j)]: coefficient i j = (StandardDirect.family.space j).zero :=
+    (Cell.laws (cells i j)).above h;
+  \definition vanishRight[h: Nat.Lt (degree j) (degree i)][higher: HigherVanish]:
+    coefficient i j = (StandardDirect.family.space j).zero :=
+    (Cell.laws (cells i j)).zeroInput (higher i h);
+  \definition offLeft[h: Nat.Lt (degree i) (degree j)][same: degree i = degree j]: Logic.False :=
+    Nat.ltIrrefl (degree i) (\idelim degree j = degree i \with d: N.Nat^ => Nat.Lt (degree i) d \by {
+      base: h, equality: sym!{N.Nat^} _ _ same
+    });
+  \definition offRight[h: Nat.Lt (degree j) (degree i)][same: degree i = degree j]: Logic.False :=
+    Nat.ltIrrefl (degree j) (\idelim degree i = degree j \with d: N.Nat^ => Nat.Lt (degree j) d \by {
+      base: h, equality: same
+    });
+  \definition law[higher: HigherVanish]: coefficient i j = diagonalTerm i :=
+    \match Order.trichotomy (degree i) (degree j) \in O.Trichotomy \return (\fun (_: Order.Trichotomy (degree i) (degree j)) => coefficient i j = diagonalTerm i) \with {
+      | less less: trans!{{StandardDirect.family.Carrier j}} _ _ _ (vanishLeft less)
+          (sym!{{StandardDirect.family.Carrier j}} _ _ (zeroDiagonal (offLeft less)))
+      | equal equal: trans!{{StandardDirect.family.Carrier j}} _ _ _ ((Cell.laws (cells i j)).sameGrade equal)
+          (congr!{{StandardDirect.family.Carrier j} {StandardDirect.family.Carrier j}} (CupZero.act (Coefficients.matrix j i)) _ _
+            (sym!{{StandardDirect.family.Carrier j}} _ _ (Grade.inside x i equal)))
+      | greater more: trans!{{StandardDirect.family.Carrier j}} _ _ _ (vanishRight more higher)
+          (sym!{{StandardDirect.family.Carrier j}} _ _ (zeroDiagonal (offRight more)))
+    };
+}
+\definition law[higher: HigherVanish]: normalized.apply x j = diagonal.forward.apply x j :=
+  trans!{{StandardDirect.family.Carrier j}} _ _ _
+    (congr!{{Standard.domain.Carrier} {StandardDirect.family.Carrier j}} (\fun (v: Standard.domain.Carrier) => v j) _ _ normalize)
+    (Values.congruent (Finite.elements count) (\fun (i: Index) => coefficient i j) diagonalTerm
+      (\fun (i: Index) => At[i := i].law higher));

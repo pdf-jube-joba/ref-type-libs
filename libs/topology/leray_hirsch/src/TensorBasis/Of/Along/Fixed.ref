@@ -1,0 +1,61 @@
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+\use std.Logic[].Equality[].eq_reason_in;
+\import \parent.\parent.Fixed[q := q, beta := beta, closed := closed] \as WholeCup;
+\import Restricted.Fixed[q := q, beta := beta, closed := closed] \as RestrictedCup;
+\import Pairing.Along[B := B, f := f] \as Nature;
+\definition inputFamily[z: I.Int^]: \Set := (target z).Carrier;
+\definition outputFamily[z: I.Int^]: \Set := (Restricted.target z).Carrier;
+\definition AtDegree[z: I.Int^]: \Prop := \forall (a: (source z).Carrier) ->
+  (tensorPull (Degree.shift q z)).apply ((WholeCup.map z).apply a) = (RestrictedCup.map z).apply ((basePull z).apply a);
+\module Positive(p: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat p;
+  \definition m: N.Nat^ := Nat.add q p;
+  \definition raw: I.Int^ := I.Int^::ofNat m;
+  \definition shifted: I.Int^ := Degree.shift q z;
+  \import WholeCup.Positive[p := p] \as Whole;
+  \import RestrictedCup.Positive[p := p] \as Part;
+  \import Pairing.Fixed[q := q, beta := beta, closed := closed].Cohomology[p := p] \as WholeNative;
+  \import \root.TensorCochainCup[K := K, ring := ring].Of[C := B, D := Q].Fixed[q := q, beta := beta, closed := closed].Cohomology[p := p] \as SourceNative;
+  \import Nature.At[p := p, q := q].Closed[beta := beta, closed := closed] \as CupNaturality;
+  \import Native.Map[C := Base.complex, D := BaseSource.complex].At[k := p] \as BasePull;
+  \import Native.Map[C := Product.complex, D := ProductSource.complex].At[k := m] \as ProductPull;
+  \import Native.At[C := Product.complex, k := m] \as WholeH;
+  \import Native.At[C := ProductSource.complex, k := m] \as SourceH;
+  \import Native.At[C := BaseSource.complex, k := p] \as BaseH;
+  \definition native[a: (source z).Carrier]: WholeH.Cohomology := WholeNative.linear.apply (Input.PositiveCohomology[n := p].forward.apply a);
+  \definition cast: outputFamily raw -> outputFamily shifted := Transport.cast outputFamily raw shifted Whole.same;
+  \definition law: AtDegree z := \fun (a: (source z).Carrier) => eq_reason_in!{{outputFamily shifted} _
+    "=" _ "by" { sym!{{outputFamily shifted}} _ _
+      (Transport.natural inputFamily outputFamily (\fun (k: I.Int^) => (tensorPull k).apply) raw shifted Whole.same (Whole.native.apply a)) }
+    "=" _ "by" { congr!{{outputFamily raw} {outputFamily shifted}} cast _ _ (ProductSigned.Naturality[n := m].inverseCommutes (native a)) }
+    "=" _ "by" { congr!{SourceH.Cohomology {outputFamily shifted}}
+      (\fun (u: SourceH.Cohomology) => cast (SourceOutput.PositiveCohomology[n := m].backward.apply u)) _ _
+      (CupNaturality.naturality (Input.PositiveCohomology[n := p].forward.apply a)) }
+    "=" _ "by" { congr!{BaseH.Cohomology {outputFamily shifted}}
+      (\fun (v: BaseH.Cohomology) => cast (SourceOutput.PositiveCohomology[n := m].backward.apply (SourceNative.linear.apply v))) _ _
+      (sym!{BaseH.Cohomology} _ _ (BaseSigned.Naturality[n := p].commutes a)) }
+  };
+}
+\module Negative(p: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::negSucc p;
+  \definition shifted: I.Int^ := Degree.shift q z;
+  \import Modules.Hom[V := inputFamily shifted, W := outputFamily shifted,
+    source := (target shifted).space, target := (Restricted.target shifted).space] \as Maps;
+  \definition law: AtDegree z := \fun (a: (source z).Carrier) => Maps.zeroPreserved (tensorPull shifted);
+}
+\definition law: \forall (z: I.Int^) -> AtDegree z := \induction (z: I.Int^) \return AtDegree z \with {
+  | ofNat: \fun (p: N.Nat^) => Positive[p := p].law
+  | negSucc: \fun (p: N.Nat^) => Negative[p := p].law
+};
+\module At(z: I.Int^) {
+  \definition x: I.Int^ := Degree.unshift q z;
+  \definition y: I.Int^ := Degree.shift q x;
+  \definition same: y = z := Degree.shiftUnshift q z;
+  \definition naturality: \forall (a: (source x).Carrier) ->
+    (tensorPull z).apply (WholeCup.At[z := z].linear.apply a) =
+    RestrictedCup.At[z := z].linear.apply ((basePull x).apply a) :=
+    \fun (a: (source x).Carrier) => trans!{{outputFamily z}} _ _ _
+      (sym!{{outputFamily z}} _ _
+        (Transport.natural inputFamily outputFamily (\fun (k: I.Int^) => (tensorPull k).apply) y z same ((WholeCup.map x).apply a)))
+      (congr!{{outputFamily y} {outputFamily z}} (Transport.cast outputFamily y z same) _ _ (law x a));
+}

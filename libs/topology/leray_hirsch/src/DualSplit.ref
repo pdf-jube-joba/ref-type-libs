@@ -1,0 +1,20 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as ZModules;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Cochains;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\definition coefficients: Modules.Bundle := Modules.Bundle { Carrier := K, space := Modules.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\import Modules.AbelianHom[N := coefficients] \as Scalars;
+\import Modules.End[V := K, space := Modules.scalarModule] \as Identity;
+\module On(A, B, C: Chains.Complex) {
+  \import Chains.ShortExact[A := A, B := B, C := C] \as Exact;
+  \module With(s: Exact.Sequence);
+}

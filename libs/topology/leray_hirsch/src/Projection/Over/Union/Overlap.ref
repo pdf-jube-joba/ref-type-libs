@@ -1,0 +1,93 @@
+\import \parent.\parent.Restriction[V := overlap] \as Canonical;
+\import singular_excision.MayerVietoris[A := Whole.BaseCarrier].Over[source := Whole.baseTopology].On[cover := cover].Chains[] \as Base;
+\import singular_excision.MayerVietoris[A := Whole.TotalCarrier].Over[source := Whole.totalTopology].On[cover := MayerVietoris.totalCover].Chains[] \as Total;
+\import cohomology_thom.RelativeMayerVietoris[].OpenCover[A := Whole.BaseCarrier, source := Whole.baseTopology, subset := Whole.basePart]
+  .On[cover := cover] \as BaseMV;
+\import cohomology_thom.RelativeMayerVietoris[].OpenCover[A := Whole.TotalCarrier, source := Whole.totalTopology, subset := Whole.totalPart]
+  .On[cover := MayerVietoris.totalCover] \as TotalMV;
+\definition leftTotal: \Pow Whole.TotalCarrier := { e: Whole.TotalCarrier \where \In[Whole.BaseCarrier] leftPart (Whole.project e) };
+\definition baseFirst[x: Canonical.BaseCarrier]: Whole.BaseCarrier := \into[X](x, union) \by {
+  overlapContained x (\bysub(X, overlap, x))
+};
+\definition baseSecond[x: Canonical.BaseCarrier]: Base.Left := \into[Whole.BaseCarrier](baseFirst x, leftPart) \by {
+  (\bysub(X, overlap, x)).left
+};
+\definition baseForward[x: Canonical.BaseCarrier]: BaseMV.Overlap := \into[Base.Left](baseSecond x, Base.intersection) \by {
+  (\bysub(X, overlap, x)).right
+};
+\definition baseBackward[x: BaseMV.Overlap]: Canonical.BaseCarrier := \into[X](x, overlap) \by {
+  Logic.And[_, _]::# (\bysub(Whole.BaseCarrier, leftPart, x)) (\bysub(Base.Left, Base.intersection, x))
+};
+\definition totalFirst[x: Canonical.TotalCarrier]: Whole.TotalCarrier := \into[E](x, preimage union) \by {
+  overlapContained (projection x) (\bysub(E, preimage overlap, x))
+};
+\definition totalSecond[x: Canonical.TotalCarrier]: Total.Left := \into[Whole.TotalCarrier](totalFirst x, leftTotal) \by {
+  (\bysub(E, preimage overlap, x)).left
+};
+\definition totalForward[x: Canonical.TotalCarrier]: TotalMV.Overlap := \into[Total.Left](totalSecond x, Total.intersection) \by {
+  (\bysub(E, preimage overlap, x)).right
+};
+\definition totalBackward[x: TotalMV.Overlap]: Canonical.TotalCarrier := \into[E](x, preimage overlap) \by {
+  Logic.And[_, _]::# (\bysub(Whole.TotalCarrier, leftTotal, x)) (\bysub(Total.Left, Total.intersection, x))
+};
+\definition leftBase: \forall (x: Canonical.BaseCarrier) -> baseBackward (baseForward x) = x := \fun (x: Canonical.BaseCarrier) => \refl(x);
+\definition rightBase: \forall (x: BaseMV.Overlap) -> baseForward (baseBackward x) = x := \fun (x: BaseMV.Overlap) => \refl(x);
+\definition leftTotalLaw: \forall (x: Canonical.TotalCarrier) -> totalBackward (totalForward x) = x := \fun (x: Canonical.TotalCarrier) => \refl(x);
+\definition rightTotalLaw: \forall (x: TotalMV.Overlap) -> totalForward (totalBackward x) = x := \fun (x: TotalMV.Overlap) => \refl(x);
+\definition eraseBaseSource[x: Canonical.BaseCarrier]: X := x;
+\definition eraseBaseTarget[x: BaseMV.Overlap]: X := x;
+\definition eraseTotalSource[x: Canonical.TotalCarrier]: E := x;
+\definition eraseTotalTarget[x: TotalMV.Overlap]: E := x;
+\definition baseUnderlyingForward: \forall (x: Canonical.BaseCarrier) -> eraseBaseTarget (baseForward x) = eraseBaseSource x :=
+  \fun (x: Canonical.BaseCarrier) => \refl(eraseBaseSource x);
+\definition baseUnderlyingBackward: \forall (x: BaseMV.Overlap) -> eraseBaseSource (baseBackward x) = eraseBaseTarget x :=
+  \fun (x: BaseMV.Overlap) => \refl(eraseBaseTarget x);
+\definition totalUnderlyingForward: \forall (x: Canonical.TotalCarrier) -> eraseTotalTarget (totalForward x) = eraseTotalSource x :=
+  \fun (x: Canonical.TotalCarrier) => \refl(eraseTotalSource x);
+\definition totalUnderlyingBackward: \forall (x: TotalMV.Overlap) -> eraseTotalSource (totalBackward x) = eraseTotalTarget x :=
+  \fun (x: TotalMV.Overlap) => \refl(eraseTotalTarget x);
+\import \root.NestedSubspace[X := X, ambient := base, S := overlap, T := union]
+  .Second[U := leftPart].Third[W := Base.intersection].On[forward := baseForward, backward := baseBackward,
+  leftInverse := leftBase, rightInverse := rightBase, sourceLaw := baseUnderlyingForward, targetLaw := baseUnderlyingBackward] \as BaseGeometry;
+\import \root.NestedSubspace[X := E, ambient := total, S := preimage overlap, T := preimage union]
+  .Second[U := leftTotal].Third[W := Total.intersection].On[forward := totalForward, backward := totalBackward,
+  leftInverse := leftTotalLaw, rightInverse := rightTotalLaw, sourceLaw := totalUnderlyingForward, targetLaw := totalUnderlyingBackward] \as TotalGeometry;
+\definition baseHomeomorphism: _ := BaseGeometry.homeomorphism;
+\definition totalHomeomorphism: _ := TotalGeometry.homeomorphism;
+\import topology.Homeomorphism[A := Canonical.BaseCarrier, B := BaseMV.Overlap].Inverse[] \as BaseInverse;
+\import topology.Homeomorphism[A := Canonical.TotalCarrier, B := TotalMV.Overlap].Inverse[] \as TotalInverse;
+\import singular_cohomology.Relative[A := BaseMV.Overlap, source := BaseMV.overlapTopology, subset := BaseMV.overlapPart] \as BaseSource;
+\import singular_cohomology.Relative[A := TotalMV.Overlap, source := TotalMV.overlapTopology, subset := TotalMV.overlapPart] \as TotalSource;
+\import singular_cohomology.Relative[A := Canonical.BaseCarrier, source := Canonical.baseTopology, subset := Canonical.basePart] \as BaseTarget;
+\import singular_cohomology.Relative[A := Canonical.TotalCarrier, source := Canonical.totalTopology, subset := Canonical.totalPart] \as TotalTarget;
+\import BaseSource.Homeomorphism[B := Canonical.BaseCarrier].Over[target := Canonical.baseTopology, targetSubset := Canonical.basePart] \as BasePair;
+\import TotalSource.Homeomorphism[B := Canonical.TotalCarrier].Over[target := Canonical.totalTopology, targetSubset := Canonical.totalPart] \as TotalPair;
+\definition baseData: BasePair.Data := BasePair.Data {
+  homeomorphism := BaseInverse.inverse Canonical.baseTopology BaseMV.overlapTopology baseHomeomorphism,
+  forwardPreserves := \fun (x: BaseSource.SubspaceCarrier) => \bysub(BaseMV.Overlap, BaseMV.overlapPart, x),
+  backwardPreserves := \fun (x: BaseTarget.SubspaceCarrier) => \bysub(Canonical.BaseCarrier, Canonical.basePart, x),
+};
+\definition totalData: TotalPair.Data := TotalPair.Data {
+  homeomorphism := TotalInverse.inverse Canonical.totalTopology TotalMV.overlapTopology totalHomeomorphism,
+  forwardPreserves := \fun (x: TotalSource.SubspaceCarrier) => \bysub(TotalMV.Overlap, TotalMV.overlapPart, x),
+  backwardPreserves := \fun (x: TotalTarget.SubspaceCarrier) => \bysub(Canonical.TotalCarrier, Canonical.totalPart, x),
+};
+\import TotalSource.Maps[B := BaseMV.Overlap].Over[target := BaseMV.overlapTopology, targetSubset := BaseMV.overlapPart] \as NewProjection;
+\definition project: TotalMV.Overlap -> BaseMV.Overlap := MayerVietoris.overlapProjection;
+\definition projectContinuous: _ := (NewProjection.laws MayerVietoris.overlapProjection).continuous;
+\definition baseMap: _ := BasePair.forwardMap baseData;
+\definition totalMap: _ := TotalPair.forwardMap totalData;
+\definition square: \forall (x: TotalMV.Overlap) -> Canonical.project (totalMap x) = baseMap (project x) :=
+  \fun (x: TotalMV.Overlap) => \refl(Canonical.project (totalMap x));
+\import \root.Projection[X := Canonical.BaseCarrier, E := Canonical.TotalCarrier, base := Canonical.baseTopology, total := Canonical.totalTopology,
+  projection := Canonical.project, continuous := Canonical.regular].Over[U := Canonical.basePart, K := K, ring := ring] \as Domain;
+\import Domain.Along[Y := BaseMV.Overlap, Z := TotalMV.Overlap, newBase := BaseMV.overlapTopology, newTotal := TotalMV.overlapTopology,
+  newPart := BaseMV.overlapPart, newProjection := project, newContinuous := projectContinuous,
+  baseMap := baseMap, totalMap := totalMap, square := square] \as Along;
+\import \root.PairHomeomorphism[A := BaseMV.Overlap, B := Canonical.BaseCarrier, source := BaseMV.overlapTopology, target := Canonical.baseTopology,
+  part := BaseMV.overlapPart, boundary := Canonical.basePart, K := K, ring := ring, data := baseData] \as BaseIso;
+\import \root.PairHomeomorphism[A := TotalMV.Overlap, B := Canonical.TotalCarrier, source := TotalMV.overlapTopology, target := Canonical.totalTopology,
+  part := TotalMV.overlapPart, boundary := Canonical.totalPart, K := K, ring := ring, data := totalData] \as TotalIso;
+\import std.Data[].FinSet[] \as Finite;
+\module With(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

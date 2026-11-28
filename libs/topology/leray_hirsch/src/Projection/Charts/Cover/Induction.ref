@@ -1,0 +1,70 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Logic.either;
+\definition Local: \Prop := \forall (U: \Pow X) -> IsChart U ->
+  \forall (V: \Pow X) -> Base.IsOpenIn base V -> Base.Subset V U -> P V;
+\definition Gluing: \Prop := \forall (U, V: \Pow X) ->
+  Base.IsOpenIn base U -> Base.IsOpenIn base V ->
+  P U -> P V -> P (Base.Intersection U V) -> P (Base.Finite[].Join U V);
+\definition Good[Y: \Pow (\Pow X)]: \Prop := \forall (U: \Pow X) -> Base.FamilyMember Y U -> IsChart U;
+\definition Property[Y: \Pow (\Pow X)]: \Prop := Good Y -> P (Base.Union Y);
+\definition emptyUnion: Base.Union Finite.Empty = Base.Empty := \axiom:setext(Base.Union Finite.Empty, Base.Empty,
+  (\fun (x: X)(member: Base.Member (Base.Union Finite.Empty) x) =>
+    Base.unionMemberElim Finite.Empty x Logic.False
+      (\fun (U: \Pow X)(inside: Base.FamilyMember Finite.Empty U)(point: Base.Member U x) => inside) member),
+  (\fun (x: X)(member: Base.Member Base.Empty x) => Logic.falseElim _ member));
+\definition inserted[U: \Pow X][Y: \Pow (\Pow X)]: Base.Union (Finite.Insert U Y) = Base.Finite[].Join U (Base.Union Y) :=
+  \axiom:setext(Base.Union (Finite.Insert U Y), Base.Finite[].Join U (Base.Union Y),
+    (\fun (x: X)(member: Base.Member (Base.Union (Finite.Insert U Y)) x) =>
+      Base.unionMemberElim (Finite.Insert U Y) x (Base.Member (Base.Finite[].Join U (Base.Union Y)) x)
+        (\fun (W: \Pow X)(inside: Base.FamilyMember (Finite.Insert U Y) W)(point: Base.Member W x) =>
+          either!{inside {Base.Member (Base.Finite[].Join U (Base.Union Y)) x}
+            {\fun (same: W = U) => Logic.Or[_, _]::left
+              (\idelim W = U \with V: \Pow X => Base.Member V x \by { base: point, equality: same })}
+            {\fun (old: Base.FamilyMember Y W) => Logic.Or[_, _]::right (Base.unionMemberOf Y W x old point)}
+          }) member),
+    (\fun (x: X)(member: Base.Member (Base.Finite[].Join U (Base.Union Y)) x) =>
+      either!{member {Base.Member (Base.Union (Finite.Insert U Y)) x}
+        {\fun (inside: Base.Member U x) => Base.unionMemberOf (Finite.Insert U Y) U x (Finite.inInsertNew U Y) inside}
+        {\fun (inside: Base.Member (Base.Union Y) x) =>
+          Base.unionMemberElim Y x (Base.Member (Base.Union (Finite.Insert U Y)) x)
+            (\fun (W: \Pow X)(old: Base.FamilyMember Y W)(point: Base.Member W x) =>
+              Base.unionMemberOf (Finite.Insert U Y) W x (Finite.inInsertOld U Y W old) point) inside}
+      }));
+\definition empty: P Base.Empty -> Property Finite.Empty :=
+  \fun (start: P Base.Empty)(good: Good Finite.Empty) =>
+    \idelim Base.Empty = Base.Union Finite.Empty \with U: \Pow X => P U \by {
+      base: start, equality: sym!{{\Pow X}} _ _ emptyUnion
+    };
+\definition step: Local -> Gluing -> \forall (Y: \Pow (\Pow X)) -> Property Y -> \forall (U: \Pow X) -> Property (Finite.Insert U Y) := \block {
+  \fun (local: Local)(glue: Gluing)(Y: \Pow (\Pow X))(previous: Property Y)(U: \Pow X)(good: Good (Finite.Insert U Y)) \then
+  \let oldGood: Good Y := \fun (W: \Pow X)(member: Base.FamilyMember Y W) => good W (Finite.inInsertOld U Y W member) \then
+  \let chart: IsChart U := good U (Finite.inInsertNew U Y) \then
+  \let openOld: Base.IsOpenIn base (Base.Union Y) :=
+    (Base.topologyLaws base).unionOpen Y (\fun (W: \Pow X)(member: Base.FamilyMember Y W) => (oldGood W member).left) \then
+  \let meet: \Pow X := Base.Intersection U (Base.Union Y) \then
+  \let openMeet: Base.IsOpenIn base meet := (Base.topologyLaws base).intersectionOpen U (Base.Union Y) chart.left openOld \then
+  \let result: P (Base.Finite[].Join U (Base.Union Y)) :=
+    glue U (Base.Union Y) chart.left openOld
+      (local U chart U chart.left (\fun (x: X)(inside: Base.Member U x) => inside))
+      (previous oldGood)
+      (local U chart meet openMeet (\fun (x: X)(inside: Base.Member meet x) => inside.left)) \then
+  \return \idelim Base.Finite[].Join U (Base.Union Y) = Base.Union (Finite.Insert U Y) \with W: \Pow X => P W \by {
+    base: result, equality: sym!{{\Pow X}} _ _ (inserted U Y)
+  }
+};
+\definition finiteUnion[start: P Base.Empty][local: Local][glue: Gluing]:
+  \forall (domains: Finite.FiniteSubset) -> Property (Finite.underlying domains) :=
+  Finite.induction ({ Y: \Pow (\Pow X) \where Property Y }) (empty start) (step local glue);
+\definition whole[complex: algebraic_topology.CW[A := X].FiniteComplex[base]][start: P Base.Empty][local: Local][glue: Gluing]:
+  P Base.Whole := \block {
+    \takefrom domains: \Cast[Finite.FiniteSubset] ({ domains: Finite.FiniteSubset \where Base.FiniteSubcover[family, Base.Whole, domains] }) \by finite complex \then
+    \let selected: Base.FiniteSubcover[family, Base.Whole, domains] :=
+      \bysub(Finite.FiniteSubset, { domains: Finite.FiniteSubset \where Base.FiniteSubcover[family, Base.Whole, domains] }, domains) \then
+    \let same: Base.Union (Finite.underlying domains) = Base.Whole :=
+      \axiom:setext(Base.Union (Finite.underlying domains), Base.Whole,
+        (\fun (x: X)(member: Base.Member (Base.Union (Finite.underlying domains)) x) => \refl(x)), selected.covers) \then
+    \return \idelim Base.Union (Finite.underlying domains) = Base.Whole \with U: \Pow X => P U \by {
+      base: finiteUnion start local glue domains selected.included, equality: same
+    }
+  };

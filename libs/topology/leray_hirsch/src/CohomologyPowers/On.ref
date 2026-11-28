@@ -1,0 +1,36 @@
+\definition power[A: Modules.Bundle]: Modules.Family[Index] := Modules.Family[Index] {
+  Carrier := \fun (i: Index) => A.Carrier,
+  space := \fun (i: Index) => A.space,
+};
+\definition term[z: I.Int^]: Modules.Bundle :=
+  Modules.Bundle { Carrier := C.family.Carrier z, space := C.family.space z };
+\definition terms[z: I.Int^]: Modules.Bundle := Products.bundle (power (term z));
+\definition family: Cochains.Family := Cochains.Family {
+  Carrier := \fun (z: I.Int^) => (terms z).Carrier,
+  space := \fun (z: I.Int^) => (terms z).space,
+};
+\module Differential(z: I.Int^) {
+  \import Cochains.At[C := C, z := z] \as H;
+  \import Products.Maps[source := power (term z), target := power (term (Indices.next z))] \as Maps;
+  \definition linear: _ := Maps.map (\fun (i: Index) => H.differential);
+}
+\definition differential: Cochains.DifferentialData[family] := Cochains.DifferentialData[family] {
+  apply := \fun (z: I.Int^) => \parent.On[C := C].Differential[z := z].linear.apply,
+};
+\module Square(z: I.Int^) {
+  \import Modules.Product[Index := Index, family := power (term (Indices.next (Indices.next z)))] \as Output;
+  \definition zero: \forall (x: family.Carrier z) -> differential.apply (Indices.next z) (differential.apply z x) = Output.zero :=
+    \fun (x: family.Carrier z) => Output.ext (differential.apply (Indices.next z) (differential.apply z x)) Output.zero
+      (\fun (i: Index) => C.laws.squareZero z (x i));
+}
+\definition complex: Cochains.Complex := Cochains.Complex {
+  family := family,
+  differential := differential,
+  laws := Cochains.DifferentialLaws[family, differential] {
+    addition := \fun (z: I.Int^) => \parent.On[C := C].Differential[z := z].linear.addition,
+    scalar := \fun (z: I.Int^) => \parent.On[C := C].Differential[z := z].linear.scalar,
+    squareZero := \fun (z: I.Int^) => \parent.On[C := C].Square[z := z].zero,
+  },
+};
+\module Degree(z: I.Int^);
+\module Mapping(D: Cochains.Complex, f: Cochains.Map[C := C, D := D].Map);

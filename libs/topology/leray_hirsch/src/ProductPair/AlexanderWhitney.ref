@@ -1,0 +1,59 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Native;
+\import double_complexes.DoubleComplex[].Over[R := I.Int^, ring := Integers.ring] \as Double;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.congr;
+\import singular_products.ProductMapping[A := BasePart.CarrierSet, B := F, C := X, D := F,
+  leftSource := basePartTopology, rightSource := fiber, leftTarget := base, rightTarget := fiber] \as Mapping;
+\definition identity[f: F]: F := f;
+\definition maps: Mapping.Map := Mapping.Map {
+  leftFunction := baseInclusion,
+  rightFunction := identity,
+  leftContinuous := baseContinuous,
+  rightContinuous := topology.Maps[A := F, B := F].Identity[].continuous fiber,
+};
+\import singular_eilenberg_zilber.On[A := BasePart.CarrierSet, B := F, left := basePartTopology, right := fiber]
+  .Naturality[C := X, D := F, leftTarget := base, rightTarget := fiber].With[f := maps] \as Naturality;
+\definition productInclusion: _ := Naturality.product;
+\definition tensorInclusion: _ := Naturality.tensor;
+\import singular_cohomology.Chains[A := Product.CarrierSet, source := productTopology] \as PartChains;
+\import singular_cohomology.Chains[A := Whole.CarrierSet, source := wholeTopology] \as WholeChains;
+\import singular_cohomology.Chains[A := BasePart.CarrierSet, source := basePartTopology] \as SubChains;
+\import singular_cohomology.Chains[A := X, source := base] \as BaseChains;
+\import singular_cohomology.Chains[A := F, source := fiber] \as FiberChains;
+\import Double.Tensor[C := SubChains.complex, D := FiberChains.complex] \as PartPair;
+\import Double.Tensor[C := BaseChains.complex, D := FiberChains.complex] \as WholePair;
+\import Double.Total[C := PartPair.complex] \as PartTotal;
+\import Double.Total[C := WholePair.complex] \as WholeTotal;
+\import Native.ZeroExtension[C := PartChains.complex] \as SignedPart;
+\import Native.ZeroExtension[C := WholeChains.complex] \as SignedWhole;
+\import Native.ZeroExtension[C := PartTotal.complex] \as SignedPartTotal;
+\import Native.ZeroExtension[C := WholeTotal.complex] \as SignedWholeTotal;
+\import singular_eilenberg_zilber.On[A := BasePart.CarrierSet, B := F, left := basePartTopology, right := fiber] \as SubspaceAW;
+\import singular_eilenberg_zilber.On[A := X, B := F, left := base, right := fiber] \as WholeAW;
+\definition signedProductInclusion: _ := Native.Map[C := PartChains.complex, D := WholeChains.complex].ZeroExtension[f := productInclusion].map;
+\definition signedTensorInclusion: _ := Native.Map[C := PartTotal.complex, D := WholeTotal.complex].ZeroExtension[f := tensorInclusion].map;
+\definition signedPartAW: _ := Native.Map[C := PartChains.complex, D := PartTotal.complex].ZeroExtension[f := SubspaceAW.forward].map;
+\definition signedWholeAW: _ := Native.Map[C := WholeChains.complex, D := WholeTotal.complex].ZeroExtension[f := WholeAW.forward].map;
+\import Chains.QuotientMapping[C := SignedPart.complex, D := SignedWhole.complex, C1 := SignedPartTotal.complex, D1 := SignedWholeTotal.complex]
+  .On[f := signedProductInclusion, g := signedTensorInclusion, a := signedPartAW, b := signedWholeAW] \as Quotient;
+\import std.Data[].Nat[] \as N;
+\definition commutes: Quotient.Compatible :=
+  \induction (z: I.Int^) \return \forall (x: SignedPart.Carrier z) ->
+    signedWholeAW.apply z (signedProductInclusion.apply z x) =
+    signedTensorInclusion.apply z (signedPartAW.apply z x) \with {
+    | ofNat: \fun (n: N.Nat^)(x: SignedPart.Carrier (I.Int^::ofNat n)) =>
+      congr!{{WholeTotal.Carrier n} {SignedWholeTotal.Carrier (I.Int^::ofNat n)}} SignedWholeTotal.Positive[n := n].intro _ _
+        (sym!{{WholeTotal.Carrier n}} _ _ (Naturality.AlexanderWhitney[n := n].law x))
+    | negSucc: \fun (n: N.Nat^)(x: SignedPart.Carrier (I.Int^::negSucc n)) =>
+      \refl((SignedWholeTotal.space (I.Int^::negSucc n)).zero)
+  };
+\definition quotientMap: _ := Quotient.map commutes;
+
+\module RelativeComparison;
+\module BaseTensor;
+\module RelativeMap;

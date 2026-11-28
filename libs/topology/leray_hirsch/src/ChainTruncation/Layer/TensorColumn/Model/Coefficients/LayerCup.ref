@@ -1,0 +1,105 @@
+\import chain_complexes.Integer[] \as Degrees;
+\import Degrees.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\import \root.DegreeShift[] \as Degree;
+\import Cochains.ZeroExtension[C := TotalCochains.complex] \as SignedTotal;
+\import Cochains.ZeroExtension[C := Unsigned.complex] \as SignedRow;
+\import Hom.Native[P := concentrated] \as Base;
+\import Cochains.ZeroExtension[C := Base.complex] \as SignedBase;
+\import Hom.Native[P := D] \as Fiber;
+\import Cochains.ZeroExtension[C := Fiber.complex] \as SignedFiber;
+\import \root.TensorBasis[K := K, ring := ring].Of[P := concentrated, Q := D] \as Basis;
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := concentrated, D := D] \as Cups;
+\import \root.CohomologyReindex[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].On[C := TotalCochains.complex] \as Reindex;
+\module At(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero) {
+  \definition z: I.Int^ := I.Int^::ofNat (grade q);
+  \definition b: I.Int^ := I.Int^::ofNat cutoff;
+  \definition isoDegree: Degree.shift q b = z := Degree.natural q cutoff;
+  \import Cochains.At[C := Base.complex, k := cutoff] \as BaseClasses;
+  \import Cochains.At[C := TotalCochains.complex, k := grade q] \as TotalClasses;
+  \import Cochains.At[C := Unsigned.complex, k := q] \as RowClasses;
+  \import Signed.At[C := SignedTotal.complex, z := z] \as TotalSignedClasses;
+  \import Signed.At[C := SignedRow.complex, z := I.Int^::ofNat q] \as RowSignedClasses;
+  \import \parent.\parent.At[q := q] \as Gauge;
+  \import \parent.\parent.\parent.At[q := q] \as ModelGauge;
+  \import \parent.\parent.\parent.\parent.Degree[q := q] \as Diagonal;
+  \import Basis.Fixed[q := q, beta := beta, closed := closed] \as BasisCup;
+  \import Cups.Fixed[q := q, beta := beta, closed := closed] \as Fixed;
+  \import Cups.At[p := cutoff, q := q] \as Raw;
+  \import Fixed.Cohomology[p := cutoff] \as NativeCup;
+  \import Fixed.At[p := cutoff] \as Cup;
+  \definition rawTarget: N.Nat^ := Nat.add q cutoff;
+  \import Cochains.Map[C := Base.complex, D := Fixed.target].At[k := cutoff] \as Induced;
+  \import std.Logic[].Equality[].Transport[A := N.Nat^] \as Natural;
+  \import std.Logic[].Equality[].Transport[A := I.Int^] \as Integer;
+  \definition swap: rawTarget = grade q := Arithmetic.addComm q cutoff;
+  \definition rawCycle[a: BaseClasses.CycleCarrier]: Reindex.cycles rawTarget :=
+    (Induced.cyclesMap Fixed.map).apply a;
+  \definition lifted[a: BaseClasses.CycleCarrier]: Reindex.cycles (grade q) :=
+    Natural.cast Reindex.cycles rawTarget (grade q) swap (rawCycle a);
+  \definition underlying: \forall (a: BaseClasses.CycleCarrier) -> lifted a = Raw.total a beta :=
+    \fun (a: BaseClasses.CycleCarrier) => eq_reason_in!{{TotalCochains.Carrier (grade q)} _
+      "=" _ "by" { Reindex.cycleLaw rawTarget (grade q) swap (rawCycle a) }
+      "=" _ "by" { Natural.castComposition TotalCochains.Carrier (grade q) rawTarget (grade q) Cup.same swap (Raw.total a beta) }
+      "=" _ "by" { Natural.castRefl TotalCochains.Carrier (grade q) (Raw.total a beta) }
+    };
+  \definition rawSigned: I.Int^ := I.Int^::ofNat rawTarget;
+  \definition shiftDegree: I.Int^ := Degree.shift q b;
+  \definition rawShift: rawSigned = shiftDegree := BasisCup.Positive[p := cutoff].same;
+  \definition BaseCycle: \Set := BaseClasses.CycleCarrier;
+  \definition RowCohomology: \Set := RowSignedClasses.Cohomology;
+  \definition toSigned[a: BaseClasses.CycleCarrier]: (Basis.source b).Carrier :=
+    SignedBase.PositiveCohomology[n := cutoff].backward.apply (BaseClasses.classOf a);
+  \definition adjusted: _ := BasisCup.To[input := b, output := z, same := isoDegree].linear;
+  \definition cupOnClass: \forall (a: BaseClasses.CycleCarrier) -> adjusted.apply (toSigned a) = Reindex.signed (grade q) (lifted a) :=
+    \fun (a: BaseClasses.CycleCarrier) => eq_reason_in!{TotalSignedClasses.Cohomology _
+      "=" _ "by" { Integer.castComposition Reindex.classes rawSigned shiftDegree z rawShift isoDegree
+        (SignedTotal.PositiveCohomology[n := rawTarget].backward.apply
+          (NativeCup.linear.apply (SignedBase.PositiveCohomology[n := cutoff].forward.apply (toSigned a)))) }
+      "=" _ "by" { congr!{BaseClasses.Cohomology TotalSignedClasses.Cohomology}
+        (\fun (u: BaseClasses.Cohomology) => Integer.cast Reindex.classes rawSigned z
+          (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ swap)
+          (SignedTotal.PositiveCohomology[n := rawTarget].backward.apply (NativeCup.linear.apply u))) _ _
+        (SignedBase.PositiveCohomology[n := cutoff].rightInverse (BaseClasses.classOf a)) }
+      "=" _ "by" { congr!{{Reindex.classes rawSigned} TotalSignedClasses.Cohomology}
+        (Integer.cast Reindex.classes rawSigned z (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ swap)) _ _
+        (trans!{{Reindex.classes rawSigned}} _ _ _
+          (congr!{{Cochains.At[C := TotalCochains.complex, k := rawTarget].Cohomology} {Reindex.classes rawSigned}}
+            SignedTotal.PositiveCohomology[n := rawTarget].backward.apply _ _ (NativeCup.onClass a))
+          (SignedTotal.PositiveCohomology[n := rawTarget].onNaturalClass (rawCycle a))) }
+      "=" _ "by" { Reindex.classesLaw rawTarget (grade q) swap (rawCycle a) }
+    };
+  \definition unsigned[a: BaseClasses.CycleCarrier]: RowSignedClasses.Closed :=
+    SignedRow.PositiveCohomology[n := q].toInteger (Gauge.rowCycle (lifted a));
+  \definition rowOutput[u: TotalSignedClasses.Cohomology]: RowSignedClasses.Cohomology :=
+    SignedRow.PositiveCohomology[n := q].backward.apply
+      (Gauge.isomorphism.backward.apply (SignedTotal.PositiveCohomology[n := grade q].forward.apply u));
+  \definition rowOnClass: \forall (a: BaseClasses.CycleCarrier) ->
+    rowOutput (adjusted.apply (toSigned a)) = RowSignedClasses.classOf (unsigned a) :=
+    \fun (a: BaseClasses.CycleCarrier) => eq_reason_in!{RowSignedClasses.Cohomology _
+      "=" _ "by" { congr!{TotalSignedClasses.Cohomology RowSignedClasses.Cohomology} rowOutput _ _ (cupOnClass a) }
+      "=" _ "by" { congr!{TotalClasses.Cohomology RowSignedClasses.Cohomology}
+        (\fun (u: TotalClasses.Cohomology) => SignedRow.PositiveCohomology[n := q].backward.apply (Gauge.isomorphism.backward.apply u)) _ _
+        (SignedTotal.PositiveCohomology[n := grade q].onIntegerClass (SignedTotal.PositiveCohomology[n := grade q].toInteger (lifted a))) }
+      "=" _ "by" { congr!{RowClasses.Cohomology RowSignedClasses.Cohomology}
+        SignedRow.PositiveCohomology[n := q].backward.apply _ _ (Gauge.backwardOnClass (lifted a)) }
+      "=" _ "by" { SignedRow.PositiveCohomology[n := q].onNaturalClass (Gauge.rowCycle (lifted a)) }
+    };
+  \import Tensor.Term[p := cutoff, q := q] \as Term;
+  \import Coordinates.Degree[n := grade q] \as Coords;
+  \import Total.Degree[n := grade q] \as TotalDegree;
+  \import Scalars.AbelianHom[N := coefficients] \as Abelian;
+  \import Double.Sign[V := Term.Carrier, space := Term.space].Mapping[W := K, target := Abelian.coefficients.space] \as ValueSign;
+  \import Double.Sign[V := K, space := Abelian.coefficients.space] \as Sign;
+  \definition numericSign[n: N.Nat^]: _ := Sign.map n;
+  \definition sign: _ := numericSign (Nat.mul cutoff q);
+  \definition onTensor: \forall (a: BaseClasses.CycleCarrier)(x: concentrated.family.Carrier cutoff)(y: D.family.Carrier q) ->
+    (unsigned a).apply (Term.tensor x y) = sign.apply (coefficients.space.smul (a.apply x) (beta.apply y)) :=
+    \fun (a: BaseClasses.CycleCarrier)(x: concentrated.family.Carrier cutoff)(y: D.family.Carrier q) => eq_reason_in!{K _
+      "=" _ "by" { congr!{{TotalCochains.Carrier (grade q)} K}
+        (\fun (h: TotalCochains.Carrier (grade q)) => h.apply (ModelGauge.isomorphism.backward.apply (Term.tensor x y))) _ _ (underlying a) }
+      "=" _ "by" { congr!{Term.Carrier K} (Raw.map a beta).apply _ _
+        (Diagonal.isomorphism.rightInverse (ModelGauge.gauge.apply (Term.tensor x y))) }
+      "=" _ "by" { ValueSign.naturality (Raw.map a beta) (Nat.mul cutoff q) (Term.tensor x y) }
+      "=" _ "by" { congr!{K K} sign.apply _ _ (Raw.onTensor a beta x y) }
+    };
+}

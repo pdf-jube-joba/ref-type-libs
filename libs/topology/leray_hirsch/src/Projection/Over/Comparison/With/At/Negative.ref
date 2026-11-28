@@ -1,0 +1,32 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.trans;
+\import cohomology_thom.RelativeMayerVietoris[].Pair[A := X, source := base, subset := U] \as B;
+\import cohomology_thom.RelativeMayerVietoris[].Pair[A := E, source := total, subset := preimage U] \as T;
+\import \parent.ProductCoordinates[] \as Coordinate;
+\definition sourceZero: \forall (a: Coordinate.domain.Carrier) -> a = Coordinate.domain.space.zero :=
+  \fun (a: Coordinate.domain.Carrier) => Product.ext a Coordinate.domain.space.zero
+    (\fun (i: Index) => (\idelim I.Int^::negSucc (N.Basic[].Def[].add n (degree i)) = inputDegree i
+      \with k: I.Int^ => \forall (x: baseFamily.Carrier k) -> x = (baseFamily.space k).zero \by {
+      base: B.Negative[n := N.Basic[].Def[].add n (degree i)].With[coefficients := BaseProduct.integerCoefficients].zero,
+      equality: trans!{I.Int^} _ _ _ (sym!{I.Int^} _ _ (Degrees.unshiftNegative (degree i) n))
+        (congr!{I.Int^ I.Int^} (Degrees.unshift (degree i)) _ _ (sym!{I.Int^} _ _ same))
+    }) (a i));
+\definition targetZero: \forall (a: Coordinate.range.Carrier) -> a = Coordinate.range.space.zero :=
+  \idelim I.Int^::negSucc n = z \with k: I.Int^ => \forall (x: totalFamily.Carrier k) -> x = (totalFamily.space k).zero \by {
+    base: T.Negative[n := n].With[coefficients := TotalProduct.integerCoefficients].zero,
+    equality: sym!{I.Int^} _ _ same
+  };
+\import Modules.Hom[V := Coordinate.domain.Carrier, W := Coordinate.range.Carrier, source := Coordinate.domain.space, target := Coordinate.range.space]
+  \as Maps;
+\import Modules.Isomorphism[V := Coordinate.domain.Carrier, W := Coordinate.range.Carrier, source := Coordinate.domain.space, target := Coordinate.range.space]
+  .OfBijective[f := Coordinate.finite] \as Iso;
+\definition injective: Iso.Injective :=
+  \fun (a, b: Coordinate.domain.Carrier)(same: Coordinate.finite.apply a = Coordinate.finite.apply b) =>
+    trans!{{Coordinate.domain.Carrier}} _ _ _ (sourceZero a) (sym!{{Coordinate.domain.Carrier}} _ _ (sourceZero b));
+\definition onto: Iso.Onto := \fun (a: Coordinate.range.Carrier) => Logic.existsIntro[Coordinate.domain.Carrier,
+  { x: Coordinate.domain.Carrier \where Coordinate.finite.apply x = a }] Coordinate.domain.space.zero
+    (trans!{{Coordinate.range.Carrier}} _ _ _ (Maps.zeroPreserved Coordinate.finite) (sym!{{Coordinate.range.Carrier}} _ _ (targetZero a)));
+\definition isomorphism: _ := Iso.isomorphism injective onto;

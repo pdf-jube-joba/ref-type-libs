@@ -1,0 +1,28 @@
+\import \root.DualSplit[K := K, ring := ring].On[A := below, B := through, C := concentrated].With[s := sequence] \as Base;
+\import \root.TensorExact[K := K, ring := ring].For[A := below, B := through, C := concentrated, D := D].With[s := sequence] \as Tensor;
+\definition retraction: Base.Retraction := Base.Retraction {
+  apply := \fun (n: N.Nat^) => \parent.\parent.At[n := n].retraction,
+  law := \fun (n: N.Nat^) => \parent.\parent.At[n := n].retracts,
+};
+\import Tensor.Split[r := retraction] \as Compare;
+\definition baseSequence: _ := Compare.baseSequence;
+\definition tensorSequence: _ := Compare.tensorSequence;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Scalars;
+\definition coefficients: Scalars.Bundle := Scalars.Bundle { Carrier := K, space := Scalars.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients].Native[P := D] \as Fiber;
+\module Cup(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero) {
+  \import Compare.Cup[q := q, beta := beta, closed := closed] \as Action;
+  \definition commutative: _ := Action.commutative;
+  \definition connectingLaw[p: N.Nat^]: _ := Action.At[p := p].connectingLaw;
+}
+
+\import std.Data[].FinSet[] \as Finite;
+\module Step(count: N.Nat^, degrees: Finite.Fin count -> N.Nat^,
+  cycles: \forall (i: Finite.Fin count) -> Fiber.Carrier (degrees i),
+  closed: \forall (i: Finite.Fin count) -> Fiber.apply (degrees i) (cycles i) = (Fiber.space (N.Nat^::succ (degrees i))).zero) {
+  \import Compare.Finite[count := count, degrees := degrees, cycles := cycles, closed := closed].InductionStep[] \as Comparison;
+  \definition FromBelow: \Prop := Comparison.Left;
+  \definition Through: \Prop := Comparison.Middle;
+  \definition OnLayer: \Prop := Comparison.Right;
+  \definition glue: FromBelow -> OnLayer -> Through := Comparison.glue;
+}

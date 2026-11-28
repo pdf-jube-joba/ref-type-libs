@@ -1,0 +1,9 @@
+\import topology.Topology[Carrier := X] \as Ambient;
+\import Ambient.Subspace[S := S] \as CanonicalSpace;
+\import Ambient.Subspace[S := T] \as First;
+\import topology.Topology[Carrier := First.CarrierSet] \as FirstSpace;
+\module Second(U: \Pow First.CarrierSet) {
+  \import FirstSpace.Subspace[S := U] \as Inner;
+  \import topology.Topology[Carrier := Inner.CarrierSet] \as SecondSpace;
+  \module Third(W: \Pow Inner.CarrierSet);
+}

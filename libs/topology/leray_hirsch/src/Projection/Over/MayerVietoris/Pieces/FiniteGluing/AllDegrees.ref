@@ -1,0 +1,64 @@
+\import LeftComparison.At[z := z].ProductCoordinates[] \as L;
+\import RightComparison.At[z := z].ProductCoordinates[] \as R;
+\import OverlapComparison.At[z := z].ProductCoordinates[] \as O;
+\import WholeComparison.At[z := z].ProductCoordinates[] \as W;
+\import Modules.Isomorphism[V := L.domain.Carrier, W := L.range.Carrier, source := L.domain.space, target := L.range.space]
+  .OfBijective[f := L.finite] \as Left;
+\import Modules.Isomorphism[V := R.domain.Carrier, W := R.range.Carrier, source := R.domain.space, target := R.range.space]
+  .OfBijective[f := R.finite] \as Right;
+\import Modules.Isomorphism[V := O.domain.Carrier, W := O.range.Carrier, source := O.domain.space, target := O.range.space]
+  .OfBijective[f := O.finite] \as Overlap;
+\import Modules.Isomorphism[V := W.domain.Carrier, W := W.range.Carrier, source := W.domain.space, target := W.range.space]
+  .OfBijective[f := W.finite] \as Whole;
+\structure Pieces: \Prop := {
+  leftInjective: Left.Injective,
+  leftOnto: Left.Onto,
+  rightInjective: Right.Injective,
+  rightOnto: Right.Onto,
+  overlapInjective: Overlap.Injective,
+  overlapOnto: Overlap.Onto,
+};
+\structure WholeBijective: \Prop := { injective: Whole.Injective, onto: Whole.Onto };
+\definition isomorphism[h: WholeBijective]: _ := Whole.isomorphism h.injective h.onto;
+\definition fromPieces[h: \forall (d: I.Int^) -> \parent.AllDegrees[z := d].Pieces]: WholeBijective := \block {
+  \let p: I.Int^ := Indices.previous z \then
+  \let n: I.Int^ := Indices.next p \then
+  \let l: \parent.AllDegrees[z := p].Pieces := h p \then
+  \let u: \parent.AllDegrees[z := n].Pieces := h n \then
+  \let low: \parent.At[z := p].Glued[].LocalLower := \parent.At[z := p].Glued[].LocalLower {
+    leftInjective := l.leftInjective, leftOnto := l.leftOnto, rightInjective := l.rightInjective, rightOnto := l.rightOnto,
+    overlapInjective := l.overlapInjective, overlapOnto := l.overlapOnto,
+  } \then
+  \let high: \parent.At[z := p].Glued[].LocalUpper := \parent.At[z := p].Glued[].LocalUpper {
+    leftInjective := u.leftInjective, leftOnto := u.leftOnto, rightInjective := u.rightInjective, rightOnto := u.rightOnto,
+    overlapInjective := u.overlapInjective, overlapOnto := u.overlapOnto,
+  } \then
+  \let glued: \parent.At[z := p].Glued[].UpperBijective := \parent.At[z := p].Glued[].bijective low high \then
+  \return \idelim n = z \with d: I.Int^ => \parent.AllDegrees[z := d].WholeBijective \by {
+    base: \parent.AllDegrees[z := n].WholeBijective { injective := glued.injective, onto := glued.onto },
+    equality: Indices.nextPrevious z
+  }
+};
+
+\definition leftSource: Modules.Bundle := L.domain;
+\definition leftFinite: Modules.MapBetween L.domain L.range := L.finite;
+\definition rightSource: Modules.Bundle := R.domain;
+\definition rightFinite: Modules.MapBetween R.domain R.range := R.finite;
+\definition overlapSource: Modules.Bundle := O.domain;
+\definition overlapFinite: Modules.MapBetween O.domain O.range := O.finite;
+\import Modules.Isomorphism[V := L.domain.Carrier, W := L.range.Carrier, source := L.domain.space, target := L.range.space] \as LeftIso;
+\import Modules.Isomorphism[V := R.domain.Carrier, W := R.range.Carrier, source := R.domain.space, target := R.range.space] \as RightIso;
+\import Modules.Isomorphism[V := O.domain.Carrier, W := O.range.Carrier, source := O.domain.space, target := O.range.space] \as OverlapIso;
+\module FromIsomorphisms(l: LeftIso.Isomorphism, r: RightIso.Isomorphism, o: OverlapIso.Isomorphism,
+  lLaw: \forall (v: L.domain.Carrier) -> l.forward.apply v = L.finite.apply v,
+  rLaw: \forall (v: R.domain.Carrier) -> r.forward.apply v = R.finite.apply v,
+  oLaw: \forall (v: O.domain.Carrier) -> o.forward.apply v = O.finite.apply v) {
+  \import L.Verified[iso := l, law := lLaw] \as LeftProof;
+  \import R.Verified[iso := r, law := rLaw] \as RightProof;
+  \import O.Verified[iso := o, law := oLaw] \as OverlapProof;
+  \definition pieces: Pieces := Pieces {
+    leftInjective := LeftProof.injective, leftOnto := LeftProof.onto,
+    rightInjective := RightProof.injective, rightOnto := RightProof.onto,
+    overlapInjective := OverlapProof.injective, overlapOnto := OverlapProof.onto,
+  };
+}

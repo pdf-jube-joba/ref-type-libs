@@ -1,0 +1,79 @@
+\import N.Basic[].Prop[] \as Arithmetic;
+\definition z: I.Int^ := deg q;
+\import Row.TotalCohomology[q := q] \as Total;
+\import Signed.At[C := Native.ZeroExtension[C := Fiber.complex].complex, z := I.Int^::ofNat q] \as H;
+\import double_complexes.DoubleComplex[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Double;
+\import Double.Sign[V := H.Cohomology, space := H.cohomologySpace] \as Sign;
+\definition sign: _ := Sign.map (Nat.mul cutoff q);
+\definition signInverse: \forall (x: H.Cohomology) -> sign.apply (sign.apply x) = x :=
+  Sign.involutive (Nat.mul cutoff q);
+\definition classSpace: Scalars.Space H.Cohomology := H.cohomologySpace;
+\definition Range: \Set := Total.range.Carrier;
+\definition view: _ := Total.isomorphism;
+\definition level[d: N.Nat^][same: d = q]: active = Degree.unshift d z :=
+  \idelim q = d \with t: N.Nat^ => active = Degree.unshift t z \by {
+    base: matches q, equality: sym!{N.Nat^} _ _ same
+  };
+\definition represented: \forall (a: family active) ->
+  BaseLayer.class (BaseLayer.comparison.backward.apply a) = a :=
+  \fun (a: family active) => BaseLayer.comparison.rightInverse a;
+\definition reflection[a: family active]: _ := BaseLayer.cycle (BaseLayer.comparison.backward.apply a);
+\module Fixed(beta: FiberCycle q) {
+  \definition closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero :=
+    \bysub(Fiber.Carrier q, Native.At[C := Fiber.complex, k := q].cycles.carrier, beta);
+  \import Row.Cup[q := q, beta := beta, closed := closed] \as Law;
+  \import TensorLayer.LayerCup[].At[q := q, beta := beta, closed := closed] \as Cup;
+  \import LayerMap.Fixed[q := q, beta := beta, closed := closed] \as Multiply;
+  \definition map: _ := Multiply.At[z := z].linear;
+  \definition classOf: H.Cohomology := FiberDegree.signed q beta;
+  \definition lawOnCocycle: \forall (h: BaseLayer.Cochain)(g: Generators) ->
+    view.forward.apply (map.apply (Transport.cast family active (Degree.unshift q z) (matches q) (BaseLayer.class h))) g =
+    sign.apply (H.cohomologySpace.smul (Evaluation.onGenerator h g) classOf) :=
+    \fun (h: BaseLayer.Cochain)(g: Generators) => eq_reason_in!{H.Cohomology _
+      "=" _ "by" { congr!{{(LayerMap.target z).Carrier} H.Cohomology}
+        (\fun (u: (LayerMap.target z).Carrier) => view.forward.apply u g) _ _
+        (Multiply.At[z := z].fromDegree active (matches q) (Degree.natural q cutoff) (BaseLayer.class h)) }
+      "=" _ "by" { congr!{{family active} H.Cohomology}
+        (\fun (u: family active) => view.forward.apply (Cup.adjusted.apply u) g) _ _
+        (sym!{{family active}} _ _ (BaseLayer.onClass h)) }
+      "=" _ "by" { Law.law (BaseLayer.cycle h) g }
+    };
+  \definition law: \forall (a: family active)(g: Generators) ->
+    view.forward.apply (map.apply (Transport.cast family active (Degree.unshift q z) (matches q) a)) g =
+    sign.apply (H.cohomologySpace.smul (Evaluation.evaluation a g) classOf) :=
+    \fun (a: family active)(g: Generators) => trans!{H.Cohomology} _ _ _
+      (congr!{{family active} H.Cohomology}
+        (\fun (x: family active) => view.forward.apply (map.apply (Transport.cast family active (Degree.unshift q z) (matches q) x)) g) _ _
+        (sym!{{family active}} _ _ (represented a)))
+      (lawOnCocycle (BaseLayer.comparison.backward.apply a) g);
+}
+\module DegreeMatch(d: N.Nat^, beta: FiberCycle d) {
+  \definition closed: Fiber.apply d beta = (Fiber.space (N.Nat^::succ d)).zero :=
+    \bysub(Fiber.Carrier d, Native.At[C := Fiber.complex, k := d].cycles.carrier, beta);
+  \import LayerMap.Fixed[q := d, beta := beta, closed := closed].At[z := z] \as Default;
+  \definition component: _ := Default.linear;
+  \definition value[a: family (Degree.unshift d z)][same: d = q][g: Generators]: K :=
+    Evaluation.evaluation (Transport.cast family (Degree.unshift d z) active (sym!{I.Int^} _ _ (level d same)) a) g;
+}
+\definition matched: \forall (d: N.Nat^)(same: d = q)(beta: FiberCycle d)(a: family (Degree.unshift d z))(g: Generators) ->
+  view.forward.apply ((DegreeMatch[d := d, beta := beta].component).apply a) g =
+  sign.apply (H.cohomologySpace.smul (DegreeMatch[d := d, beta := beta].value a same g)
+    (FiberDegree.signed q (NatTransport.cast FiberCycle d q same beta))) :=
+  \fun (d: N.Nat^)(same: d = q) =>
+    (\idelim q = d \with t: N.Nat^ => \forall (e: t = q)(b: FiberCycle t)(a: family (Degree.unshift t z))(g: Generators) ->
+      view.forward.apply ((DegreeMatch[d := t, beta := b].component).apply a) g =
+      sign.apply (H.cohomologySpace.smul (DegreeMatch[d := t, beta := b].value a e g)
+        (FiberDegree.signed q (NatTransport.cast FiberCycle t q e b))) \by {
+      base: \fun (e: q = q)(b: FiberCycle q)(a: family (Degree.unshift q z))(g: Generators) => eq_reason_in!{H.Cohomology _
+        "=" _ "by" { congr!{{family (Degree.unshift q z)} H.Cohomology}
+          (\fun (v: family (Degree.unshift q z)) => view.forward.apply (Fixed[beta := b].map.apply v) g) _ _
+          (sym!{{family (Degree.unshift q z)}} _ _ (Transport.castInverse family (Degree.unshift q z) active (sym!{I.Int^} _ _ (matches q)) a)) }
+        "=" _ "by" { Fixed[beta := b].law (Transport.cast family (Degree.unshift q z) active (sym!{I.Int^} _ _ (matches q)) a) g }
+        "=" _ "by" { congr!{{FiberCycle q} H.Cohomology}
+          (\fun (b1: FiberCycle q) => sign.apply (H.cohomologySpace.smul (DegreeMatch[d := q, beta := b].value a e g) (FiberDegree.signed q b1))) _ _
+          (sym!{{FiberCycle q}} _ _ (NatTransport.castRefl FiberCycle q b)) }
+      },
+      equality: sym!{N.Nat^} _ _ same
+    }) same;
+\definition different[d: N.Nat^][ne: Logic.Not (d = q)]: Logic.Not (Degree.unshift d z = active) :=
+  \fun (same: Degree.unshift d z = active) => ne (Arithmetic.addCancelLeft cutoff d q (ofNatInjective (Nat.add cutoff d) (Nat.add cutoff q) (fromActive d z same)));

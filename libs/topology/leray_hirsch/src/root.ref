@@ -1,0 +1,105 @@
+\module Projection(X, E: \Set, base: topology.Topology[Carrier := X].Topology,
+  total: topology.Topology[Carrier := E].Topology, projection: E -> X,
+  continuous: topology.Continuity[A := E, B := X].Continuous total base projection);
+
+\module PairMap(A, B: \Set, source: topology.Topology[Carrier := A].Topology,
+  target: topology.Topology[Carrier := B].Topology, part: \Pow A, boundary: \Pow B,
+  f: singular_cohomology.Relative[A := A, source := source, subset := part].Maps[B := B].Over[target := target, targetSubset := boundary].Map,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module DegreeShift;
+\module Transport(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module Trivial(X, F: \Set, base: topology.Topology[Carrier := X].Topology,
+  fiber: topology.Topology[Carrier := F].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module PairCoefficients(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  K, L: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], targetRing: std.Alg[].Ring[].CommutativeRing[L],
+  morphism: cohomology_thom.CoefficientChange[].OnSpace[A := A, source := source, R := K, S := L, ring := ring, targetRing := targetRing].Morphism);
+
+\module ProductExact(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Index: \Set);
+
+\module CocycleModel(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module RightCup(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  cover: singular_excision.MayerVietoris[A := A].Over[source := source].Cover,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ProductPair(X, F: \Set, base: topology.Topology[Carrier := X].Topology,
+  fiber: topology.Topology[Carrier := F].Topology, subset: \Pow X);
+
+\module ChainTruncation;
+
+\module CohomologyPowers(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Index: \Set);
+\module FreeTensorCochains(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Generators: \Set);
+
+\module CohomologyExact(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module TensorCochainCup(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module CohomologySign(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module CohomologyWindow(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module EmptyPair(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module CochainTail(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module DualSplit(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module TensorExact(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module TensorBasis(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module CohomologyZero(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module CohomologyReindex(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module NativeDualWindow(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module DegreeBound;
+
+\module FiniteBasisSubset(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], count: std.Data[].Nat[].Nat^, S: \Pow (std.Data[].FinSet[].Fin count));
+
+\module CohomologyBasis(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ZeroExtendedDual(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module NonnegativePart;
+
+\module NilpotentComparison(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module RelativeCupLaws(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ZeroClasses(A: \Set, source: topology.Topology[Carrier := A].Topology,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ProductFiberRestriction(X, F: \Set, base: topology.Topology[Carrier := X].Topology,
+  fiber: topology.Topology[Carrier := F].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], x: X);
+
+\module WeightedNilpotence(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
+  count: std.Data[].Nat[].Nat^, degree: std.Data[].FinSet[].Fin count -> std.Data[].Nat[].Nat^);
+
+\module ForgetPair(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module AbsoluteHomeomorphism(A, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], homeomorphism: topology.Homeomorphism[A := A, B := B].Homeomorphism[source, target]);
+
+\module PairHomeomorphism(A, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology,
+  part: \Pow A, boundary: \Pow B, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
+  data: singular_cohomology.Relative[A := A, source := source, subset := part].Homeomorphism[B := B]
+    .Over[target := target, targetSubset := boundary].Data);
+
+\module RelativeZeroAction(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ModuleMatrix(R: \Set, ring: std.Alg[].Ring[].CommutativeRing[R], count: std.Data[].Nat[].Nat^);
+
+\module GradedBlocks(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
+  count: std.Data[].Nat[].Nat^, degree: std.Data[].FinSet[].Fin count -> std.Data[].Nat[].Nat^);
+
+\module NestedSubspace(X: \Set, ambient: topology.Topology[Carrier := X].Topology, S, T: \Pow X);

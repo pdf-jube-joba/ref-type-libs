@@ -1,0 +1,92 @@
+\import Double.Row[C := Tensor.complex, p := cutoff] \as Row;
+\definition grade[q: N.Nat^]: N.Nat^ := Nat.add cutoff q;
+\definition family: Chains.Family := Chains.Family {
+  Carrier := \fun (q: N.Nat^) => Total.Carrier (grade q),
+  space := \fun (q: N.Nat^) => Total.space (grade q),
+};
+\definition differential: Chains.DifferentialData[family] := Chains.DifferentialData[family] {
+  apply := \fun (q: N.Nat^) => Total.differential.apply (grade q),
+};
+\definition recentered: Chains.Complex := Chains.Complex {
+  family := family, differential := differential,
+  laws := Chains.DifferentialLaws[family, differential] {
+    addition := \fun (q: N.Nat^) => Total.complex.laws.addition (grade q),
+    scalar := \fun (q: N.Nat^) => Total.complex.laws.scalar (grade q),
+    squareZero := \fun (q: N.Nat^) => Total.complex.laws.squareZero (grade q),
+  }
+};
+\module At(q: N.Nat^) {
+  \import \parent.\parent.Degree[q := q] \as Diagonal;
+  \definition exponent: N.Nat^ := Nat.mul cutoff q;
+  \import Double.Sign[V := Row.family.Carrier q, space := Row.family.space q] \as Sign;
+  \definition gauge: _ := Sign.map exponent;
+  \import Modules.Isomorphism[V := Row.family.Carrier q, W := Row.family.Carrier q, source := Row.family.space q, target := Row.family.space q] \as Signs;
+  \definition sign: Signs.Isomorphism := Signs.Isomorphism {
+    forward := gauge, backward := gauge,
+    leftInverse := Sign.involutive exponent, rightInverse := Sign.involutive exponent,
+  };
+  \import Modules.Isomorphism[V := family.Carrier q, W := Row.family.Carrier q, source := family.space q, target := Row.family.space q]
+    .Composition[U := Row.family.Carrier q, final := Row.family.space q] \as Combine;
+  \definition isomorphism: _ := Combine.compose sign Diagonal.isomorphism;
+  \definition injective: \forall (x, y: family.Carrier q) -> isomorphism.forward.apply x = isomorphism.forward.apply y -> x = y :=
+    \fun (x, y: family.Carrier q)(same: _) => trans!{{family.Carrier q}} _ _ _
+      (sym!{{family.Carrier q}} _ _ (isomorphism.leftInverse x))
+      (trans!{{family.Carrier q}} _ _ _
+        (congr!{{Row.family.Carrier q} {family.Carrier q}} isomorphism.backward.apply _ _ same) (isomorphism.leftInverse y));
+}
+\module Boundary(q: N.Nat^) {
+  \definition next: N.Nat^ := N.Nat^::succ q;
+  \import \parent.At[q := q] \as Current;
+  \import \parent.At[q := next] \as Next;
+  \import \parent.\parent.Degree[q := q] \as Low;
+  \import \parent.\parent.Degree[q := next] \as High;
+  \import \parent.\parent.Boundary[q := q] \as TotalBoundary;
+  \import Double.Sign[V := Row.family.Carrier q, space := Row.family.space q] \as LowSign;
+  \import Double.Sign[V := Row.family.Carrier next, space := Row.family.space next].Mapping[W := Row.family.Carrier q, target := Row.family.space q] \as SignMap;
+  \import Tensor.At[p := cutoff, q := q] \as Edge;
+  \definition signLaw: \forall (x: Row.family.Carrier q) ->
+    (LowSign.map Next.exponent).apply x = Current.gauge.apply ((LowSign.map cutoff).apply x) :=
+    \fun (x: Row.family.Carrier q) => trans!{{Row.family.Carrier q}} _ _ _
+      (congr!{N.Nat^ {Row.family.Carrier q}} (\fun (e: N.Nat^) => (LowSign.map e).apply x) _ _
+        (trans!{N.Nat^} _ _ _ (Arithmetic.mulSuccRight cutoff q) (Arithmetic.addComm cutoff Current.exponent)))
+      (LowSign.addition Current.exponent cutoff x);
+  \definition forward: \forall (x: family.Carrier next) ->
+    Row.complex.differential.apply q (Next.isomorphism.forward.apply x) = Current.isomorphism.forward.apply (differential.apply q x) :=
+    \fun (x: family.Carrier next) => eq_reason_in!{{Row.family.Carrier q} _
+      "=" _ "by" { SignMap.naturality Edge.vertical Next.exponent (High.isomorphism.forward.apply x) }
+      "=" _ "by" { signLaw (Edge.vertical.apply (High.isomorphism.forward.apply x)) }
+      "=" _ "by" { congr!{{Row.family.Carrier q} {Row.family.Carrier q}} Current.gauge.apply _ _ (sym!{{Row.family.Carrier q}} _ _ (TotalBoundary.law x)) }
+    };
+  \definition backward: \forall (y: Row.family.Carrier next) ->
+    differential.apply q (Next.isomorphism.backward.apply y) = Current.isomorphism.backward.apply (Row.complex.differential.apply q y) :=
+    \fun (y: Row.family.Carrier next) => Current.injective _ _ (eq_reason_in!{{Row.family.Carrier q} _
+      "=" _ "by" { sym!{{Row.family.Carrier q}} _ _ (forward (Next.isomorphism.backward.apply y)) }
+      "=" _ "by" { congr!{{Row.family.Carrier next} {Row.family.Carrier q}} (Row.complex.differential.apply q) _ _ (Next.isomorphism.rightInverse y) }
+      "=" _ "by" { sym!{{Row.family.Carrier q}} _ _ (Current.isomorphism.rightInverse (Row.complex.differential.apply q y)) }
+    });
+}
+\import Chains.Map[C := recentered, D := Row.complex] \as Forward;
+\import Chains.Map[C := Row.complex, D := recentered] \as Backward;
+\definition forward: Forward.Map := Forward.Map {
+  apply := \fun (q: N.Nat^) => At[q := q].isomorphism.forward.apply,
+  addition := \fun (q: N.Nat^) => At[q := q].isomorphism.forward.addition,
+  scalar := \fun (q: N.Nat^) => At[q := q].isomorphism.forward.scalar,
+  commutes := \fun (q: N.Nat^) => Boundary[q := q].forward,
+};
+\definition backward: Backward.Map := Backward.Map {
+  apply := \fun (q: N.Nat^) => At[q := q].isomorphism.backward.apply,
+  addition := \fun (q: N.Nat^) => At[q := q].isomorphism.backward.addition,
+  scalar := \fun (q: N.Nat^) => At[q := q].isomorphism.backward.scalar,
+  commutes := \fun (q: N.Nat^) => Boundary[q := q].backward,
+};
+\import Chains.Isomorphism[C := recentered, D := Row.complex] \as Compare;
+\definition isomorphism: Compare.Isomorphism := \into[Compare.Data](Compare.Data {
+  forward := forward, backward := backward,
+}, Compare.Isomorphism) \by {
+  Compare.Laws[_] {
+    leftInverse := \fun (q: N.Nat^) => At[q := q].isomorphism.leftInverse,
+    rightInverse := \fun (q: N.Nat^) => At[q := q].isomorphism.rightInverse,
+  }
+};
+
+\module Coefficients(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

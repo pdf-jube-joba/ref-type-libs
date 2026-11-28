@@ -1,0 +1,46 @@
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := B, D := D].At[p := p, q := q] \as SourceCup;
+\import \parent.\parent.At[p := p, q := q] \as TargetCup;
+\definition n: N.Nat^ := Nat.add p q;
+\import Double.Tensor[C := B, D := D] \as SourceTensor;
+\import Double.Total[C := SourceTensor.complex] \as SourceTotal;
+\import Double.Coordinates[C := SourceTensor.complex] \as SourceCoordinates;
+\import Double.TensorMapping[C := B, D := C, E := D, F := D].With[f := f, g := Chains.End[C := D].identity] \as TensorMap;
+\import Double.Map[C := SourceTensor.complex, D := Tensor.complex].Total[f := TensorMap.map].Coordinates[n := n] \as Natural;
+\import Modules.End[V := K, space := Modules.scalarModule] \as Identity;
+\import Hom.NativeMapping[P := B, Q := C, L := coefficients].On[f := f, u := Identity.identity] \as BasePullback;
+\import Hom.NativeMapping[P := SourceTotal.complex, Q := Total.complex, L := coefficients].On[f := TensorMap.total, u := Identity.identity] \as TotalPullback;
+\import Hom.Native[P := SourceTotal.complex] \as Source;
+\import SourceTensor.Term[p := p, q := q] \as Input;
+\import Tensor.Term[p := p, q := q] \as Output;
+\import IntegerModules.Hom[V := Output.Carrier, W := K, source := Output.space, target := integerCoefficients.space]
+  .Composition[U := Input.Carrier, domain := Input.space] \as Compose;
+\import IntegerModules.Tensor[V := B.family.Carrier p, W := D.family.Carrier q,
+  left := B.family.space p, right := D.family.space q].Universal[U := K, target := integerCoefficients.space] \as Ext;
+\import TensorMap.Degree[p := p, q := q] \as Component;
+\definition lifted[alpha: Left.Carrier p][beta: Right.Carrier q]: _ := Compose.compose (TargetCup.map alpha beta) Component.map;
+\definition atTensor: \forall (alpha: Left.Carrier p)(beta: Right.Carrier q)(x: B.family.Carrier p)(y: D.family.Carrier q) ->
+  (lifted alpha beta).apply (Input.tensor x y) = (SourceCup.map (BasePullback.map.apply p alpha) beta).apply (Input.tensor x y) :=
+  \fun (alpha: Left.Carrier p)(beta: Right.Carrier q)(x: B.family.Carrier p)(y: D.family.Carrier q) => eq_reason_in!{K _
+    "=" _ "by" { congr!{Output.Carrier K} (TargetCup.map alpha beta).apply _ _ (Component.onTensor x y) }
+    "=" _ "by" { TargetCup.onTensor alpha beta (f.apply p x) y }
+    "=" _ "by" { sym!{K} _ _ (SourceCup.onTensor (BasePullback.map.apply p alpha) beta x y) }
+  };
+\definition componentLaw: \forall (alpha: Left.Carrier p)(beta: Right.Carrier q) ->
+  lifted alpha beta = SourceCup.map (BasePullback.map.apply p alpha) beta :=
+  \fun (alpha: Left.Carrier p)(beta: Right.Carrier q) => Ext.ext (lifted alpha beta)
+    (SourceCup.map (BasePullback.map.apply p alpha) beta) (atTensor alpha beta);
+\import SourceCoordinates.Degree[n := n] \as Coordinates;
+\import IntegerModules.Hom[V := Input.Carrier, W := K, source := Input.space, target := integerCoefficients.space] \as ComponentMaps;
+\definition onChains: \forall (alpha: Left.Carrier p)(beta: Right.Carrier q)(x: SourceTotal.Carrier n) ->
+  (TotalPullback.map.apply n (TargetCup.total alpha beta)).apply x =
+  (SourceCup.total (BasePullback.map.apply p alpha) beta).apply x :=
+  \fun (alpha: Left.Carrier p)(beta: Right.Carrier q)(x: SourceTotal.Carrier n) => trans!{K} _ _ _
+    (congr!{Output.Carrier K} (TargetCup.map alpha beta).apply _ _ (Natural.law TargetCup.index x))
+    (congr!{ComponentMaps.Map K} (\fun (g: ComponentMaps.Map) => g.apply (Coordinates.coordinate TargetCup.index x)) _ _
+      (componentLaw alpha beta));
+\definition law: \forall (alpha: Left.Carrier p)(beta: Right.Carrier q) ->
+  TotalPullback.map.apply n (TargetCup.total alpha beta) = SourceCup.total (BasePullback.map.apply p alpha) beta :=
+  \fun (alpha: Left.Carrier p)(beta: Right.Carrier q) => Source.At[n := n].ext
+    (TotalPullback.map.apply n (TargetCup.total alpha beta)) (SourceCup.total (BasePullback.map.apply p alpha) beta) (onChains alpha beta);
+
+\module Closed(beta: Right.Carrier q, closed: Right.apply q beta = (Right.space (N.Nat^::succ q)).zero);

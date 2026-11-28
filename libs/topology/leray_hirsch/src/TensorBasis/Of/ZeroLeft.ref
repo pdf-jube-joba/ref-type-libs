@@ -1,0 +1,42 @@
+\import \root.CohomologyZero[K := K, ring := baseRing] \as Vanish;
+\import Modules.AbelianHom[N := coefficients] \as ZCoefficients;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as ZModules;
+\import Double.Coordinates[C := Tensor.complex] \as Coordinates;
+\module TensorDegree(p, q: N.Nat^) {
+  \import Tensor.Term[p := p, q := q] \as Term;
+  \import ZModules.Tensor[V := P.family.Carrier p, W := Q.family.Carrier q, left := P.family.space p, right := Q.family.space q] \as Raw;
+  \import Raw.Universal[U := Term.Carrier, target := Term.space] \as Universal;
+  \import ZModules.Hom[V := Term.Carrier, W := Term.Carrier, source := Term.space, target := Term.space] \as Maps;
+  \import ZModules.End[V := Term.Carrier, space := Term.space] \as End;
+  \definition zero: \forall (x: Term.Carrier) -> x = Term.space.zero :=
+    \fun (x: Term.Carrier) => congr!{Maps.Map Term.Carrier} (\fun (f: Maps.Map) => f.apply x) _ _
+      (Universal.ext End.identity Maps.zeroMap (\fun (a: P.family.Carrier p)(b: Q.family.Carrier q) => trans!{Term.Carrier} _ _ _
+        (congr!{{P.family.Carrier p} Term.Carrier} (\fun (u: P.family.Carrier p) => Term.tensor u b) _ _ (zeroLeft p a))
+        (Term.zeroLeft b)));
+}
+\module NativeDegree(n: N.Nat^) {
+  \import Coordinates.Degree[n := n] \as Values;
+  \import ZModules.Hom[V := P.family.Carrier n, W := K, source := P.family.space n, target := ZCoefficients.coefficients.space] \as InputMaps;
+  \import ZModules.Hom[V := Total.Carrier n, W := K, source := Total.space n, target := ZCoefficients.coefficients.space] \as OutputMaps;
+  \definition totalZero: \forall (x: Total.Carrier n) -> x = (Total.space n).zero :=
+    \fun (x: Total.Carrier n) => Values.zero x (\fun (i: Double.Index n) =>
+      \parent.TensorDegree[p := i.first, q := i.second].zero (Values.coordinate i x));
+  \definition inputZero: \forall (h: Input.Carrier (I.Int^::ofNat n)) -> h = (Input.space (I.Int^::ofNat n)).zero :=
+    \fun (h: Input.Carrier (I.Int^::ofNat n)) => Base.At[n := n].ext h (Base.space n).zero
+      (\fun (x: P.family.Carrier n) => trans!{K} _ _ _
+        (congr!{{P.family.Carrier n} K} h.apply _ _ (zeroLeft n x)) (InputMaps.zeroPreserved h));
+  \definition outputZero: \forall (h: Output.Carrier (I.Int^::ofNat n)) -> h = (Output.space (I.Int^::ofNat n)).zero :=
+    \fun (h: Output.Carrier (I.Int^::ofNat n)) => Product.At[n := n].ext h (Product.space n).zero
+      (\fun (x: Total.Carrier n) => trans!{K} _ _ _
+        (congr!{{Total.Carrier n} K} h.apply _ _ (totalZero x)) (OutputMaps.zeroPreserved h));
+}
+\definition sourceZero: \forall (z: I.Int^)(h: (source z).Carrier) -> h = (source z).space.zero :=
+  \induction (z: I.Int^) \return \forall (h: (source z).Carrier) -> h = (source z).space.zero \with {
+    | ofNat: \fun (n: N.Nat^) => Vanish.On[C := Input.complex, z := I.Int^::ofNat n].zero NativeDegree[n := n].inputZero
+    | negSucc: \fun (n: N.Nat^) => Input.NegativeCohomology[n := n].zero
+  };
+\definition targetZero: \forall (z: I.Int^)(h: (target z).Carrier) -> h = (target z).space.zero :=
+  \induction (z: I.Int^) \return \forall (h: (target z).Carrier) -> h = (target z).space.zero \with {
+    | ofNat: \fun (n: N.Nat^) => Vanish.On[C := Output.complex, z := I.Int^::ofNat n].zero NativeDegree[n := n].outputZero
+    | negSucc: \fun (n: N.Nat^) => Output.NegativeCohomology[n := n].zero
+  };

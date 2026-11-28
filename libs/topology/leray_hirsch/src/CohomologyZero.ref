@@ -1,0 +1,16 @@
+\import std.Arithmetic[].Int[] \as I;
+\import chain_complexes.Integer[].Over[R := K, ring := ring] \as Signed;
+\import module_theory.Module[].Over[R := K, ring := ring] \as Modules;
+\use std.Logic[].Equality[].congr;
+\use std.Logic[].Equality[].trans;
+\module On(C: Signed.Complex, z: I.Int^) {
+  \import Signed.At[C := C, z := z] \as H;
+  \import Modules.Hom[V := H.Closed, W := H.Cohomology, source := H.cycleSpace, target := H.cohomologySpace] \as Projection;
+  \import singular_cellular_algebra.Algebra[].Refinement[A := C.family.Carrier z, S := H.cycles.carrier] \as Equality;
+  \definition zero[h: \forall (x: C.family.Carrier z) -> x = (C.family.space z).zero]: \forall (u: H.Cohomology) -> u = H.zeroClass :=
+    H.classInduction (\fun (u: H.Cohomology) => u = H.zeroClass)
+      (\fun (x: H.Closed) => trans!{{H.Cohomology}} _ _ _
+        (congr!{{H.Closed} {H.Cohomology}} H.classOf _ _
+          (Equality.ext x (H.cycleSpace.zero) (h x)))
+        (Projection.zeroPreserved H.classLinear));
+}

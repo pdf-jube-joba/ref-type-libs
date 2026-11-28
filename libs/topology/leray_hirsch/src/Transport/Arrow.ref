@@ -1,0 +1,16 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\import std.Logic[].Equality[].Transport[A := Index] \as Casting;
+\definition compare[a, b, c: Index][same: a = b][nextSame: c = advance a][x: F a][y: G c]
+  [law: apply a x = Casting.cast G c (advance a) nextSame y]:
+  apply b (Casting.cast F a b same x) = Casting.cast G c (advance b)
+    (trans!{Index} c (advance a) (advance b) nextSame (congr!{Index Index} advance a b same)) y :=
+  eq_reason_in!{{G (advance b)} _
+    "=" _ "by" { sym!{{G (advance b)}} _ _ (Casting.natural F (\fun (i: Index) => G (advance i)) apply a b same x) }
+    "=" _ "by" { Casting.reindex G advance a b same (apply a x) }
+    "=" _ "by" { congr!{{G (advance a)} {G (advance b)}}
+      (Casting.cast G (advance a) (advance b) (congr!{Index Index} advance a b same)) _ _ law }
+    "=" _ "by" { Casting.castComposition G c (advance a) (advance b) nextSame (congr!{Index Index} advance a b same) y }
+  };

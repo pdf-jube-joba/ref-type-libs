@@ -1,0 +1,6 @@
+\import \parent.Available[] \as Terms;
+\import Neighborhood.At[f := Extended.map, z := z] \as Glue;
+\import Maps.At[k := z] \as Comparison;
+\definition isomorphism: _ := Comparison.Invert[f := Extended.map].isomorphism
+  (Glue.bijective (Terms.onto (Degrees.previous z) before) (Terms.injective z here) (Terms.onto z here)
+    (Terms.injective (Degrees.next z) after));

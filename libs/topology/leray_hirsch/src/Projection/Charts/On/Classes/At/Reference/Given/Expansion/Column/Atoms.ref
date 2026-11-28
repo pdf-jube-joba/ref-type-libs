@@ -1,0 +1,27 @@
+\import \root.ForgetPair[A := ProductCarrier, source := chartTarget, subset := totalZero, K := K, ring := ring] \as Forget;
+\import \root.ForgetPair[A := LocalBase.CarrierSet, source := LocalBase.topology base, subset := baseZero, K := K, ring := ring] \as BaseForget;
+\import singular_products.Cochains[A := LocalBase.CarrierSet, source := LocalBase.topology base, R := K, ring := ring].Cohomology[] \as BaseClasses;
+\import ProductCochains.Cohomology[] \as Classes;
+\import \root.DegreeShift[] \as Shift;
+\import Equality.Transport[A := N.Nat^] \as NatCast;
+\definition term[j: Index]: Classes.Group (degree i) := (Forget.map (degree i)).apply ((Direct.components j).apply (coordinates j));
+\import Modules.Sums[I := Index].Vector[V := Projection.totalFamily.Carrier z, space := Projection.totalFamily.space z]
+  .Mapping[W := Classes.Group (degree i), target := Classes.moduleSpace (degree i)] \as MoveSum;
+\import Modules.Sums[I := Index].Vector[V := Classes.Group (degree i), space := Classes.moduleSpace (degree i)] \as Sum;
+\definition formula: lift i = Sum.sum (Finite.elements count) term :=
+  trans!{{Classes.Group (degree i)}} _ _ _ (sym!{{Classes.Group (degree i)}} _ _ absolute)
+    (MoveSum.law (Forget.map (degree i)) (Finite.elements count) (\fun (j: Index) => (Direct.components j).apply (coordinates j)));
+\module At(j: Index) {
+  \import Projection.Shifted[q := degree j, u := reference j].To[z := z] \as Component;
+  \definition input: I.Int^ := Component.input;
+  \module Negative(p: N.Nat^, same: I.Int^::negSucc p = input) {
+    \import Component.Below[p := p, same := same] \as Drop;
+    \import Modules.Hom[V := Projection.totalFamily.Carrier z, W := Classes.Group (degree i),
+      source := Projection.totalFamily.space z, target := Classes.moduleSpace (degree i)] \as Maps;
+    \definition law: term j = (Classes.moduleSpace (degree i)).zero :=
+      trans!{{Classes.Group (degree i)}} _ _ _
+        (congr!{{Projection.totalFamily.Carrier z} {Classes.Group (degree i)}} (Forget.map (degree i)).apply _ _ (Drop.zero (coordinates j)))
+        (Maps.zeroPreserved (Forget.map (degree i)));
+  }
+  \module Native(p: N.Nat^, same: I.Int^::ofNat p = input);
+}

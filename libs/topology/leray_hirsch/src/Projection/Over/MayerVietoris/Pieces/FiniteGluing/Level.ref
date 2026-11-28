@@ -1,0 +1,77 @@
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Casting;
+\use Equality.eq_reason_in;
+\import Target.Degree[z := z] \as Result;
+\import \parent.\parent.Groups[z := z] \as Output;
+\import LeftComparison.At[z := z] \as L;
+\import RightComparison.At[z := z] \as R;
+\import OverlapComparison.At[z := z] \as O;
+\import WholeComparison.At[z := z] \as W;
+\import L.ProductCoordinates[] \as LProduct;
+\import R.ProductCoordinates[] \as RProduct;
+\import O.ProductCoordinates[] \as OProduct;
+\import W.ProductCoordinates[] \as WProduct;
+\import Z.Biproduct[V := Output.totalLeft.Carrier, W := Output.totalRight.Carrier, left := Output.totalLeft.space, right := Output.totalRight.space] \as TargetPair;
+\import std.Data[].Pair[].Prop[A := Output.totalLeft.Carrier, B := Output.totalRight.Carrier] \as TargetEquality;
+\module Term(i: Index);
+\definition overlapFamily: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].overlapBundle.Carrier,
+  space := \fun (i: Index) => Term[i := i].overlapBundle.space,
+};
+\definition wholeFamily: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].wholeBundle.Carrier,
+  space := \fun (i: Index) => Term[i := i].wholeBundle.space,
+};
+\definition pairFamily: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].pairBundle.Carrier,
+  space := \fun (i: Index) => Term[i := i].pairBundle.space,
+};
+\definition overlapDomain: Z.Bundle := Exact.bundle overlapFamily;
+\definition wholeDomain: Z.Bundle := Exact.bundle wholeFamily;
+\definition pairDomain: Z.Bundle := Exact.bundle pairFamily;
+\import Exact.SumMaps[indices := Finite.elements count].From[source := pairFamily, target := Result.directSum] \as SumPairs;
+\import Exact.SumMaps[indices := Finite.elements count].From[source := overlapFamily, target := Result.intersection] \as SumOverlaps;
+\import Exact.SumMaps[indices := Finite.elements count].From[source := wholeFamily, target := Result.whole] \as SumWholes;
+\definition pairMap: _ := SumPairs.map (\fun (i: Index) => Term[i := i].pair);
+\definition overlapMap: _ := SumOverlaps.map (\fun (i: Index) => Term[i := i].overlap);
+\definition wholeMap: _ := SumWholes.map (\fun (i: Index) => Term[i := i].whole);
+\definition leftValues[x: pairDomain.Carrier][i: Index]: L.family.Carrier i := Term[i := i].leftValue (x i);
+\definition rightValues[x: pairDomain.Carrier][i: Index]: R.family.Carrier i := Term[i := i].rightValue (x i);
+\definition overlapValues[x: overlapDomain.Carrier][i: Index]: O.family.Carrier i := Term[i := i].overlapValue (x i);
+\definition wholeValues[x: wholeDomain.Carrier][i: Index]: W.family.Carrier i := Term[i := i].wholeValue (x i);
+\definition assemblePair[a: LProduct.domain.Carrier][b: RProduct.domain.Carrier][i: Index]: pairFamily.Carrier i :=
+  Term[i := i].pairFrom (a i) (b i);
+\definition assembleOverlap[a: OProduct.domain.Carrier][i: Index]: overlapFamily.Carrier i := Term[i := i].overlapFrom (a i);
+\definition assembleWhole[a: WProduct.domain.Carrier][i: Index]: wholeFamily.Carrier i := Term[i := i].wholeFrom (a i);
+\import Z.Product[Index := Index, family := pairFamily] \as Pairs;
+\import Z.Product[Index := Index, family := overlapFamily] \as Overlaps;
+\import Z.Product[Index := Index, family := wholeFamily] \as Wholes;
+\definition pairInverse: \forall (x: pairDomain.Carrier) -> assemblePair (leftValues x) (rightValues x) = x :=
+  \fun (x: pairDomain.Carrier) => Pairs.ext _ _ (\fun (i: Index) => Term[i := i].pairInverse (x i));
+\definition overlapInverse: \forall (x: overlapDomain.Carrier) -> assembleOverlap (overlapValues x) = x :=
+  \fun (x: overlapDomain.Carrier) => Overlaps.ext _ _ (\fun (i: Index) => Term[i := i].leftOverlap (x i));
+\definition wholeInverse: \forall (x: wholeDomain.Carrier) -> assembleWhole (wholeValues x) = x :=
+  \fun (x: wholeDomain.Carrier) => Wholes.ext _ _ (\fun (i: Index) => Term[i := i].leftWhole (x i));
+\import Modules.Product[Index := Index, family := L.family] \as LT;
+\import Modules.Product[Index := Index, family := R.family] \as RT;
+\import Modules.Product[Index := Index, family := O.family] \as OT;
+\import Modules.Product[Index := Index, family := W.family] \as WT;
+\definition pairLeft: \forall (a: LProduct.domain.Carrier)(b: RProduct.domain.Carrier) -> leftValues (assemblePair a b) = a :=
+  \fun (a: LProduct.domain.Carrier)(b: RProduct.domain.Carrier) => LT.ext _ _ (\fun (i: Index) => Term[i := i].pairLeft (a i) (b i));
+\definition pairRight: \forall (a: LProduct.domain.Carrier)(b: RProduct.domain.Carrier) -> rightValues (assemblePair a b) = b :=
+  \fun (a: LProduct.domain.Carrier)(b: RProduct.domain.Carrier) => RT.ext _ _ (\fun (i: Index) => Term[i := i].pairRight (a i) (b i));
+\definition overlapRight: \forall (a: OProduct.domain.Carrier) -> overlapValues (assembleOverlap a) = a :=
+  \fun (a: OProduct.domain.Carrier) => OT.ext _ _ (\fun (i: Index) => Term[i := i].rightOverlap (a i));
+\definition wholeRight: \forall (a: WProduct.domain.Carrier) -> wholeValues (assembleWhole a) = a :=
+  \fun (a: WProduct.domain.Carrier) => WT.ext _ _ (\fun (i: Index) => Term[i := i].rightWhole (a i));
+\import Z.Sums[I := Index].Vector[V := Result.directSum.Carrier, space := Result.directSum.space] \as Sums;
+\import Sums.Mapping[W := Output.totalLeft.Carrier, target := Output.totalLeft.space] \as LeftSum;
+\import Sums.Mapping[W := Output.totalRight.Carrier, target := Output.totalRight.space] \as RightSum;
+\definition leftLaw: \forall (x: pairDomain.Carrier) -> TargetPair.first (pairMap.apply x) = LProduct.finite.apply (leftValues x) :=
+  \fun (x: pairDomain.Carrier) => LeftSum.law TargetPair.firstProjection (Finite.elements count) (\fun (i: Index) => Term[i := i].pair.apply (x i));
+\definition rightLaw: \forall (x: pairDomain.Carrier) -> TargetPair.second (pairMap.apply x) = RProduct.finite.apply (rightValues x) :=
+  \fun (x: pairDomain.Carrier) => RightSum.law TargetPair.secondProjection (Finite.elements count) (\fun (i: Index) => Term[i := i].pair.apply (x i));
+\definition overlapLaw: \forall (x: overlapDomain.Carrier) -> overlapMap.apply x = OProduct.finite.apply (overlapValues x) :=
+  \fun (x: overlapDomain.Carrier) => \refl(OProduct.finite.apply (overlapValues x));
+\definition wholeLaw: \forall (x: wholeDomain.Carrier) -> wholeMap.apply x = WProduct.finite.apply (wholeValues x) :=
+  \fun (x: wholeDomain.Carrier) => \refl(WProduct.finite.apply (wholeValues x));
+\module Known;

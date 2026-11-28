@@ -1,0 +1,42 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.congr;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as IntegerModules;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\definition coefficients: Modules.Bundle := Modules.Bundle { Carrier := K, space := Modules.scalarModule };
+\import Modules.AbelianHom[N := coefficients] \as Scalars;
+\import singular_cohomology.Calculations[A := A, source := source].ChainEmpty[] \as Empty;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset] \as Relative;
+\import Relative.OverRing[R := K, ring := ring].With[coefficients := coefficients] \as Theory;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Native;
+\import singular_cohomology.Chains[A := A, source := source] \as Whole;
+\import singular_cohomology.Chains[A := Relative.SubspaceCarrier, source := topology.Topology[Carrier := A].Subspace[S := subset].topology source] \as Boundary;
+\import Native.ZeroExtension[C := Whole.complex] \as WholeChains;
+\import Native.ZeroExtension[C := Boundary.complex] \as BoundaryChains;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import Chains.Quotient[C := BoundaryChains.complex, D := WholeChains.complex].On[f := Relative.inclusionMap] \as Quotient;
+\import chain_complexes.Integer[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Cohomology;
+\module At(z: I.Int^) {
+  \import Quotient.At[k := z] \as Q;
+  \import IntegerModules.Hom[V := WholeChains.Carrier z, W := Relative.Carrier z, source := WholeChains.space z, target := Relative.space z] \as Projections;
+  \definition chainZero[h: Empty.IsEmpty]: \forall (x: Relative.Carrier z) -> x = (Relative.space z).zero :=
+    Q.induction (\fun (x: Relative.Carrier z) => x = (Relative.space z).zero)
+      (\fun (x: WholeChains.Carrier z) => trans!{{Relative.Carrier z}} _ _ _
+        (congr!{{WholeChains.Carrier z} {Relative.Carrier z}} (Relative.class z) _ _ (Empty.integerZero z h x))
+        (Projections.zeroPreserved Q.projection));
+  \import IntegerModules.Hom[V := Relative.Carrier z, W := K, source := Relative.space z, target := Scalars.coefficients.space] \as Cochains;
+  \definition cochainZero[h: Empty.IsEmpty]: \forall (a: Theory.Carrier z) -> a = (Theory.space z).zero :=
+    \fun (a: Theory.Carrier z) => Cochains.ext a (Theory.space z).zero
+      (\fun (x: Relative.Carrier z) => trans!{K} _ _ _
+        (congr!{{Relative.Carrier z} K} a.apply _ _ (chainZero h x)) (Cochains.zeroPreserved a));
+  \import Cohomology.At[C := Theory.complex, z := z] \as Group;
+  \import Modules.Hom[V := Group.Closed, W := Group.Cohomology, source := Group.cycleSpace, target := Group.cohomologySpace] \as Classes;
+  \definition zero[h: Empty.IsEmpty]: \forall (a: Theory.At[z := z].Carrier) -> a = Theory.At[z := z].space.zero :=
+    Group.classInduction (\fun (a: Group.Cohomology) => a = Group.zeroClass)
+      (\fun (a: Group.Closed) => trans!{Group.Cohomology} _ _ _
+        (congr!{Group.Closed Group.Cohomology} Group.classOf a Group.cycleSpace.zero (cochainZero h a))
+        (Classes.zeroPreserved Group.classLinear));
+}

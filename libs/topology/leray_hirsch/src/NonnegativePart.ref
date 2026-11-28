@@ -1,0 +1,32 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\import chain_complexes.Integer[] \as Degrees;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Native;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Signed;
+\module Of(C: Signed.Complex) {
+  \definition family: Native.Family := Native.Family {
+    Carrier := \fun (n: N.Nat^) => C.family.Carrier (I.Int^::ofNat n),
+    space := \fun (n: N.Nat^) => C.family.space (I.Int^::ofNat n),
+  };
+  \definition differential: Native.DifferentialData[family] := Native.DifferentialData[family] {
+    apply := \fun (n: N.Nat^) => C.differential.apply (I.Int^::ofNat (N.Nat^::succ n)),
+  };
+  \definition complex: Native.Complex := Native.Complex {
+    family := family, differential := differential,
+    laws := Native.DifferentialLaws[family, differential] {
+      addition := \fun (n: N.Nat^) => C.laws.addition (I.Int^::ofNat (N.Nat^::succ n)),
+      scalar := \fun (n: N.Nat^) => C.laws.scalar (I.Int^::ofNat (N.Nat^::succ n)),
+      squareZero := \fun (n: N.Nat^) => C.laws.squareZero (I.Int^::ofNat (N.Nat^::succ (N.Nat^::succ n))),
+    },
+  };
+  \import Native.ZeroExtension[C := complex] \as Ext;
+  \definition NegativesZero: \Prop := \forall (n: N.Nat^)(x: C.family.Carrier (I.Int^::negSucc n)) -> x = (C.family.space (I.Int^::negSucc n)).zero;
+  \module Extend(h: NegativesZero);
+}

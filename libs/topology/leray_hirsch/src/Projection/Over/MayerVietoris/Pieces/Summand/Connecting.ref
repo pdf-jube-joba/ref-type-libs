@@ -1,0 +1,52 @@
+\import \parent.\parent.\parent.SignedCup[q := q, u := u] \as Cup;
+\import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients] \as Total;
+\import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients] \as Source;
+\definition Base[z: I.Int^]: \Set := Source.Degree[z := z].intersection.Carrier;
+\definition Range[z: I.Int^]: \Set := Total.Degree[z := z].intersection.Carrier;
+\definition RawLaw[p: I.Int^]: \Prop := \forall (a: Base p) ->
+  Cup.overlap p a = (OverlapAction.map p).apply a;
+\definition raw: \forall (p: I.Int^) -> RawLaw p :=
+  \induction (p: I.Int^) \return RawLaw p \with {
+    | ofNat: \fun (p: N.Nat^)(a: Base (I.Int^::ofNat p)) => \refl(Cup.overlap (I.Int^::ofNat p) a)
+    | negSucc: \fun (p: N.Nat^)(a: Base (I.Int^::negSucc p)) => \refl(Cup.overlap (I.Int^::negSucc p) a)
+  };
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+\import chain_complexes.Integer[] \as Indices;
+\use Equality.eq_reason_in;
+\definition totalDelta[d: I.Int^]: _ := Total.At[z := d].connecting;
+\definition baseDelta[d: I.Int^]: _ := Source.At[z := d].connecting;
+\definition delta[d: I.Int^]: Range d -> totalFamily.Carrier (Indices.next d) := (totalDelta d).apply;
+\import \root.Transport[K := K, ring := ring].Arrow[Index := I.Int^, F := Range, G := totalFamily.Carrier,
+  advance := Indices.next, apply := delta] \as Naturality;
+\module At(z: I.Int^) {
+  \import \parent.\parent.At[z := z] \as Lower;
+  \import \parent.\parent.At[z := Indices.next z] \as Upper;
+  \definition p: I.Int^ := Lower.input;
+  \definition p1: I.Int^ := Indices.next p;
+  \definition p2: I.Int^ := Upper.input;
+  \definition lower: I.Int^ := Degrees.shift q p;
+  \definition upper: I.Int^ := Degrees.shift q p1;
+  \definition next: I.Int^ := Indices.next z;
+  \definition mid: I.Int^ := Degrees.shift q p2;
+  \definition lowerSame: lower = z := Degrees.shiftUnshift q z;
+  \definition upperSame: upper = Indices.next lower := cohomology_thom.LocalDisk[].shiftNext q p;
+  \definition baseSame: p1 = p2 := sym!{I.Int^} _ _ (Degrees.unshiftNext q z);
+  \definition nextSame: mid = next := Degrees.shiftUnshift q next;
+  \definition boundary[a: Base p]: baseFamily.Carrier p1 := (baseDelta p).apply a;
+  \definition regraded[a: Base p]: baseFamily.Carrier p2 := Transport.cast baseFamily.Carrier p1 p2 baseSame (boundary a);
+  \definition nextValue[a: Base p]: totalFamily.Carrier upper := (WholeAction.map p1).apply (boundary a);
+  \definition law: \forall (a: Base p) -> (totalDelta z).apply (Lower.overlap.apply a) = Upper.whole.apply (regraded a) :=
+    \fun (a: Base p) => eq_reason_in!{{totalFamily.Carrier next} _
+      "=" _ "by" { congr!{{Range z} {totalFamily.Carrier next}} (totalDelta z).apply _ _
+        (congr!{{Range lower} {Range z}} (Transport.cast Range lower z lowerSame) _ _ (sym!{{Range lower}} _ _ (raw p a))) }
+      "=" _ "by" { Naturality.compare lower z upper lowerSame upperSame (Cup.overlap p a) (nextValue a) (Cup.connectingLaw p a) }
+      "=" _ "by" { sym!{{totalFamily.Carrier next}} _ _
+        (Transport.castComposition totalFamily.Carrier upper mid next
+          (congr!{I.Int^ I.Int^} (Degrees.shift q) _ _ baseSame) nextSame (nextValue a)) }
+      "=" _ "by" { congr!{{totalFamily.Carrier mid} {totalFamily.Carrier next}} (Transport.cast totalFamily.Carrier mid next nextSame) _ _
+        (trans!{{totalFamily.Carrier mid}} _ _ _
+          (sym!{{totalFamily.Carrier mid}} _ _ (Transport.reindex totalFamily.Carrier (Degrees.shift q) p1 p2 baseSame (nextValue a)))
+          (Transport.natural baseFamily.Carrier (\fun (k: I.Int^) => totalFamily.Carrier (Degrees.shift q k))
+            (\fun (k: I.Int^) => (WholeAction.map k).apply) p1 p2 baseSame (boundary a))) }
+    };
+}

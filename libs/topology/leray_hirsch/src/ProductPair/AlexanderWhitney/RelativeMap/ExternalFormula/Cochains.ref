@@ -1,0 +1,37 @@
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Coefficients;
+\definition scalar: Coefficients.Bundle := Coefficients.Bundle { Carrier := K, space := Coefficients.scalarModule };
+\import Coefficients.AbelianHom[N := scalar] \as IntegerCoefficients;
+\import Modules.Hom[V := Target.Carrier z, W := Components.carrier, source := Target.space z, target := Components.space]
+  .Composition[U := Actual.Carrier z, domain := Actual.space z] \as Assemble;
+\import Chains.Map[C := Actual.complex, D := Target.complex].At[k := z] \as Compared;
+\import Modules.Hom[V := Components.carrier, W := K, source := Components.space, target := IntegerCoefficients.coefficients.space]
+  .Composition[U := Actual.Carrier z, domain := Actual.space z] \as Evaluate;
+\definition tensorCochain[alpha: BaseRelative.Carrier baseDegree][beta: FiberCochains.Carrier q]: OutputRelative.Carrier z :=
+  Evaluate.compose (TensorCup.map alpha beta) (Assemble.compose Components.componentLinear (Compared.linear comparisonMap));
+\import Modules.Hom[V := SignedWhole.Carrier z, W := Actual.Carrier z, source := SignedWhole.space z, target := Actual.space z]
+  .Composition[U := WholeChains.Carrier n, domain := WholeChains.space n] \as AfterExtension;
+\import Chains.Map[C := SignedWhole.complex, D := Actual.complex].At[k := z] \as Quotient;
+\definition chainProjection: _ := AfterExtension.compose (Quotient.linear Actual.sequence.projection) SignedWhole.Positive[n := n].forward;
+\import Modules.Hom[V := Actual.Carrier z, W := K, source := Actual.space z, target := IntegerCoefficients.coefficients.space]
+  .Composition[U := WholeChains.Carrier n, domain := WholeChains.space n] \as Precompose;
+\import Modules.Free[Generators := Simplices.Carrier n].To[W := K, target := IntegerCoefficients.coefficients.space] \as Ext;
+\import Modules.Hom[V := WholeChains.Carrier n, W := K, source := WholeChains.space n, target := IntegerCoefficients.coefficients.space] \as Ambient;
+\definition onChains[alpha: BaseRelative.Carrier baseDegree][beta: FiberCochains.Carrier q]:
+  Precompose.compose (tensorCochain alpha beta) chainProjection = Precompose.compose (ProductCup.left alpha beta) chainProjection :=
+  Ext.ext (Precompose.compose (tensorCochain alpha beta) chainProjection) (Precompose.compose (ProductCup.left alpha beta) chainProjection)
+    (onSimplex alpha beta);
+\import Modules.Hom[V := Actual.Carrier z, W := K, source := Actual.space z, target := IntegerCoefficients.coefficients.space] \as RelativeMaps;
+\definition valueLaw: \forall (alpha: BaseRelative.Carrier baseDegree)(beta: FiberCochains.Carrier q)(x: Actual.Carrier z) ->
+  tensorValue alpha beta x = externalValue alpha beta x := \block {
+  \fun (alpha: BaseRelative.Carrier baseDegree)(beta: FiberCochains.Carrier q)(x: Actual.Carrier z) \then
+  \takefrom y: \Cast[SignedWhole.Carrier z] ({ a: SignedWhole.Carrier z \where Actual.sequence.projection.apply z a = x })
+    \by Actual.sequence.onto z x \then
+  \let same: Actual.sequence.projection.apply z y = x :=
+    \bysub(SignedWhole.Carrier z, { a: SignedWhole.Carrier z \where Actual.sequence.projection.apply z a = x }, y) \then
+  \return \idelim Actual.sequence.projection.apply z y = x \with a: Actual.Carrier z => tensorValue alpha beta a = externalValue alpha beta a \by {
+    base: congr!{Ambient.Map K} (\fun (h: Ambient.Map) => h.apply y) _ _ (onChains alpha beta), equality: same
+  }
+};
+\definition law: \forall (alpha: BaseRelative.Carrier baseDegree)(beta: FiberCochains.Carrier q) -> tensorCochain alpha beta = ProductCup.left alpha beta :=
+  \fun (alpha: BaseRelative.Carrier baseDegree)(beta: FiberCochains.Carrier q) =>
+    RelativeMaps.ext (tensorCochain alpha beta) (ProductCup.left alpha beta) (valueLaw alpha beta);

@@ -1,0 +1,35 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.eq_reason_in;
+\import singular_cap.CochainPair[A := A, source := source, subset := part, R := K, ring := ring] \as SourceCup;
+\import singular_cap.CochainPair[A := B, source := target, subset := boundary, R := K, ring := ring] \as TargetCup;
+\import cohomology_thom.RelativePullback[].On[A := A, source := source, subset := part, R := K, ring := ring]
+  .To[B := B, target := target, part := boundary].Along[f := f] \as Relative;
+\import TargetCup.Comparison[n := n].Cohomology[] \as From;
+\import SourceCup.Comparison[n := n].Cohomology[] \as To;
+\import Source.Cohomology[] \as New;
+\import Target.Cohomology[] \as Old;
+\import New.Pullback[B := B, target := target] \as Absolute;
+\definition regular: _ := (Pairs.laws f).continuous;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\import Complexes.At[C := TargetRelative.complex, z := z] \as Input;
+\import Complexes.Map[C := TargetRelative.complex, D := SourceRelative.complex].At[k := z] \as Pull;
+\import chain_complexes.Cochain[].Over[R := K, ring := Rings.commutativeRingAsRing K ring] \as Native;
+\import singular_cohomology.Cochains[A := A, source := source].OverRing[R := K, ring := ring].With[coefficients := Source.coefficients] \as Whole;
+\import Native.At[C := Whole.complex, k := n] \as H;
+\definition onClasses: \forall (a: Input.Closed) ->
+  To.map.apply (\parent.At[z := z].linear.apply (Input.classOf a)) =
+  Absolute.apply n f regular (From.map.apply (Input.classOf a)) :=
+  \fun (a: Input.Closed) => eq_reason_in!{{New.Group n} _
+    "=" _ "by" { congr!{{SourceRelative.cohomology n} {New.Group n}} To.map.apply _ _ (Pull.onClass map a) }
+    "=" _ "by" { To.onClass ((Pull.cyclesMap map).apply a) }
+    "=" _ "by" { H.equalClass (To.cycle ((Pull.cyclesMap map).apply a)) (Absolute.At[n := n].cycle f regular (From.cycle a)) (Relative.Compare[n := n].law a) }
+    "=" _ "by" { sym!{{New.Group n}} _ _ (Absolute.At[n := n].onClass f regular (From.cycle a)) }
+    "=" _ "by" { congr!{{Old.Group n} {New.Group n}} (Absolute.apply n f regular) _ _ (sym!{{Old.Group n}} _ _ (From.onClass a)) }
+  };
+\definition law: \forall (a: Input.Cohomology) ->
+  To.map.apply (\parent.At[z := z].linear.apply a) = Absolute.apply n f regular (From.map.apply a) :=
+  Input.classInduction (\fun (a: Input.Cohomology) => To.map.apply (\parent.At[z := z].linear.apply a) = Absolute.apply n f regular (From.map.apply a))
+    onClasses;

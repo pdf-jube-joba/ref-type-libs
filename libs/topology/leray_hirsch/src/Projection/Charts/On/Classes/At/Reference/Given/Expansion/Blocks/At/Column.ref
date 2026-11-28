@@ -1,0 +1,67 @@
+\definition same: degree j = q := \bysub(Index, degreeSet, j);
+\import \parent.\parent.\parent.Column[i := j].AtFiber[y := y] \as Evaluation;
+\import Transport.At[m := degree j, n := q, same := same] \as Regrade;
+\import Modules.Sums[I := Index].Vector[V := H.Group (degree j), space := H.moduleSpace (degree j)]
+  .Mapping[W := H.Group q, target := H.moduleSpace q] \as MoveSum;
+\import Modules.Laws[V := H.Group q, space := H.moduleSpace q] \as HGroup;
+\import Modules.Hom[V := H.Group (degree j), W := H.Group q, source := H.moduleSpace (degree j), target := H.moduleSpace q] \as Regraded;
+\definition vector: Coordinates.Carrier := \fun (i: Index) => evaluated i j;
+\definition support: FreeBlock.Stable vector :=
+  \fun (i: Index)(off: Logic.Not (InGrade i)) => trans!{K} _ _ _
+    (congr!{Values.Carrier K} (\fun (b: Values.Carrier) => Values.evaluate b y) _ _ ((values i j).outsideRow off same))
+    (Values.onZero y);
+\module Selected(i: Index, row: InGrade i) {
+  \definition at: Indices := \into[Index](i, degreeSet) \by { row };
+  \definition equal: degree i = degree j := trans!{N.Nat^} _ _ _ row (sym!{N.Nat^} _ _ same);
+  \import Evaluation.Term[j := i].Equal[equal := equal] \as Fiber;
+  \definition scalar: Fiber.scalar = vector i := sym!{K} _ _ (congr!{Values.Carrier K}
+    (\fun (a: Values.Carrier) => Values.evaluate a y) _ _ ((values i j).block row same));
+  \definition coincide: Regrade.map.apply Fiber.value = Reference.nativeGenerators at :=
+    NatCast.castComposition H.Group (degree i) (degree j) q equal same (Model.fiberClass i);
+  \definition law: Regrade.map.apply (Evaluation.term i) = (H.moduleSpace q).smul (vector i) (Expand.term i) :=
+    eq_reason_in!{{H.Group q} _
+      "=" _ "by" { congr!{{H.Group (degree j)} {H.Group q}} Regrade.map.apply _ _ Fiber.law }
+      "=" _ "by" { Regrade.map.scalar Fiber.scalar Fiber.value }
+      "=" _ "by" { congr!{K {H.Group q} {H.Group q}} (H.moduleSpace q).smul _ _ _ _ scalar coincide }
+      "=" _ "by" { congr!{{H.Group q} {H.Group q}} ((H.moduleSpace q).smul (vector i)) _ _
+        (sym!{{H.Group q}} _ _ (trans!{{H.Group q}} _ _ _ (Expand.onPresent at) (Reference.onNativeGenerator at))) }
+    };
+}
+\module Unselected(i: Index, off: Logic.Not (InGrade i)) {
+  \definition apart: Logic.Not (degree i = degree j) :=
+    \fun (sameAt: degree i = degree j) => off (trans!{N.Nat^} _ _ _ sameAt same);
+  \import Evaluation.Term[j := i].Different[outside := apart] \as Fiber;
+  \definition law: Regrade.map.apply (Evaluation.term i) = (H.moduleSpace q).smul (vector i) (Expand.term i) :=
+    eq_reason_in!{{H.Group q} _
+      "=" _ "by" { congr!{{H.Group (degree j)} {H.Group q}} Regrade.map.apply _ _ Fiber.law }
+      "=" _ "by" { Regraded.zeroPreserved Regrade.map }
+      "=" _ "by" { sym!{{H.Group q}} _ _ (HGroup.zeroScale (Expand.term i)) }
+      "=" _ "by" { congr!{K {H.Group q}} (\fun (r: K) => (H.moduleSpace q).smul r (Expand.term i)) _ _
+        (sym!{K} _ _ (support i off)) }
+    };
+}
+\definition termLaw: \forall (i: Index) ->
+  Regrade.map.apply (Evaluation.term i) = (H.moduleSpace q).smul (vector i) (Expand.term i) :=
+  \fun (i: Index) => either!{{Classical.excludedMiddle (InGrade i)}
+    {Regrade.map.apply (Evaluation.term i) = (H.moduleSpace q).smul (vector i) (Expand.term i)}
+    {\fun (row: InGrade i) => Selected[i := i, row := row].law}
+    {\fun (off: Logic.Not (InGrade i)) => Unselected[i := i, off := off].law}
+  };
+\definition law: Actual.map.apply (Free.generator j) = Reference.linear.apply (FreeBlock.assemble vector) :=
+  eq_reason_in!{{H.Group q} _
+    "=" _ "by" { Actual.onGenerator j }
+    "=" _ "by" { congr!{{H.Group (degree j)} {H.Group q}} Regrade.map.apply _ _ Evaluation.fiberExpansion }
+    "=" _ "by" { MoveSum.law Regrade.map (Finite.elements count) Evaluation.term }
+    "=" _ "by" { Sum.congruent (Finite.elements count)
+      (\fun (i: Index) => Regrade.map.apply (Evaluation.term i))
+      (\fun (i: Index) => (H.moduleSpace q).smul (vector i) (Expand.term i)) termLaw }
+    "=" _ "by" { sym!{{H.Group q}} _ _ (Expand.sum vector) }
+  };
+\definition onFree: changeBasis.forward.apply (Free.generator j) = FreeBlock.assemble vector :=
+  trans!{Free.Carrier} _ _ _
+    (congr!{{H.Group q} Free.Carrier} standard.backward.apply _ _ law)
+    (standard.leftInverse (FreeBlock.assemble vector));
+\definition onCoordinates: \forall (i: Index) -> FreeBlock.coordinates (changeBasis.forward.apply (Free.generator j)) i = vector i :=
+  \fun (i: Index) => trans!{K} _ _ _
+    (congr!{Free.Carrier K} (\fun (v: Free.Carrier) => FreeBlock.coordinates v i) _ _ onFree)
+    (FreeBlock.coordinatesAssemble vector support i);

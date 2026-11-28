@@ -1,0 +1,22 @@
+\definition z: I.Int^ := I.Int^::ofNat q;
+\definition next: I.Int^ := Degrees.next z;
+\import \parent.Positive[q := q] \as Current;
+\import \parent.Positive[q := N.Nat^::succ q] \as Upper;
+\import Scalars.Product[Index := Generators, family := Powers.power (Powers.term next)] \as Values;
+\import Target.Index[z := next] \as Refinement;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Fiber.Carrier (N.Nat^::succ q), S := Refinement.submodule.carrier] \as Equality;
+\import Tensor.At[p := cutoff, q := q] \as Boundary;
+\definition onTensor: \forall (h: Source.Carrier z)(g: Generators)(w: D.family.Carrier (N.Nat^::succ q)) ->
+  ((Powers.differential.apply z (Current.evaluate h)) g).apply w = (Upper.evaluate (Source.apply z h) g).apply w :=
+  \fun (h: Source.Carrier z)(g: Generators)(w: D.family.Carrier (N.Nat^::succ q)) => eq_reason_in!{K _
+    "=" _ "by" { Current.onTensor h g (D.differential.apply q w) }
+    "=" _ "by" { congr!{{Row.family.Carrier q} K} h.apply _ _
+      (sym!{{Row.family.Carrier q}} _ _ (Boundary.verticalOnTensor (basis.forward.apply (Free.generator g)) w)) }
+    "=" _ "by" { sym!{K} _ _ (Upper.onTensor (Source.apply z h) g w) }
+  };
+\definition law: \forall (h: Source.Carrier z) ->
+  Powers.differential.apply z ((term z).forward.apply h) = (term next).forward.apply (Source.apply z h) :=
+  \fun (h: Source.Carrier z) => Values.ext (Powers.differential.apply z (Current.evaluate h)) (Upper.evaluate (Source.apply z h))
+    (\fun (g: Generators) => Equality.ext ((Powers.differential.apply z (Current.evaluate h)) g) (Upper.evaluate (Source.apply z h) g)
+      (Fiber.At[n := N.Nat^::succ q].ext ((Powers.differential.apply z (Current.evaluate h)) g)
+        (Upper.evaluate (Source.apply z h) g) (onTensor h g)));

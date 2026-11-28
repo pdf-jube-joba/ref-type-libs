@@ -1,0 +1,57 @@
+\definition next: I.Int^ := Degrees.next z;
+\definition previous: I.Int^ := Degrees.previous z;
+\import Cochains.At[C := C, z := z] \as Source;
+\import Cochains.At[C := D, z := z] \as Target;
+\import singular_cellular_algebra.Algebra[].Refinement[A := D.family.Carrier z, S := Target.cycles.carrier] \as Refined;
+\import Maps.At[k := z] \as Comparison;
+\import Modules.Hom[V := Source.Cohomology, W := Target.Cohomology, source := Source.cohomologySpace, target := Target.cohomologySpace] \as Induced;
+\definition BelowOnto: \Prop := \forall (y: D.family.Carrier previous) -> \exists (x: C.family.Carrier previous \where f.apply previous x = y);
+\definition HereInjective: \Prop := \forall (x, y: C.family.Carrier z) -> f.apply z x = f.apply z y -> x = y;
+\definition HereOnto: \Prop := \forall (y: D.family.Carrier z) -> \exists (x: C.family.Carrier z \where f.apply z x = y);
+\definition AboveInjective: \Prop := \forall (x, y: C.family.Carrier next) -> f.apply next x = f.apply next y -> x = y;
+\definition zeroKernelOnCycles: BelowOnto -> HereInjective -> \forall (x: Source.Closed) ->
+  (Comparison.induced f).apply (Source.classOf x) = Target.zeroClass -> Source.classOf x = Source.zeroClass := \block {
+  \fun (below: BelowOnto)(here: HereInjective)(x: Source.Closed)(zero: _) \then
+  \let fx: Target.Closed := (Comparison.cyclesMap f).apply x \then
+  \let killed: Target.classOf fx = Target.zeroClass := trans!{Target.Cohomology} _ _ _
+    (sym!{Target.Cohomology} _ _ (Comparison.onClass f x)) zero \then
+  \takefrom y: \Cast[D.family.Carrier previous] ({ y: D.family.Carrier previous \where Target.prior.apply y = fx })
+    \by Target.zeroClassBoundary fx killed \then
+  \takefrom w: \Cast[C.family.Carrier previous] ({ w: C.family.Carrier previous \where f.apply previous w = y }) \by below y \then
+  \let boundary: Source.prior.apply w = x := here _ _ (eq_reason_in!{{D.family.Carrier z} _
+    "=" _ "by" { sym!{{D.family.Carrier z}} _ _ (Maps.priorCommutes z f w) }
+    "=" _ "by" { congr!{{D.family.Carrier previous} {D.family.Carrier z}} Target.prior.apply _ _
+      (\bysub(C.family.Carrier previous, { w: C.family.Carrier previous \where f.apply previous w = y }, w)) }
+    "=" _ "by" { \bysub(D.family.Carrier previous, { y: D.family.Carrier previous \where Target.prior.apply y = fx }, y) }
+  }) \then
+  \return Source.boundaryClassZero x (Logic.existsIntro[C.family.Carrier previous,
+    { w: C.family.Carrier previous \where Source.prior.apply w = x }] w boundary)
+};
+\definition injective[below: BelowOnto][here: HereInjective]:
+  \forall (a, b: Source.Cohomology) -> (Comparison.induced f).apply a = (Comparison.induced f).apply b -> a = b :=
+  Induced.injectiveOfZeroKernel (Comparison.induced f)
+    (Source.classInduction (\fun (a: Source.Cohomology) => (Comparison.induced f).apply a = Target.zeroClass -> a = Source.zeroClass)
+      (zeroKernelOnCycles below here));
+\definition ontoOnCycles: HereOnto -> AboveInjective -> \forall (y: Target.Closed) ->
+  \exists (x: Source.Cohomology \where (Comparison.induced f).apply x = Target.classOf y) := \block {
+  \fun (here: HereOnto)(above: AboveInjective)(y: Target.Closed) \then
+  \takefrom x: \Cast[C.family.Carrier z] ({ x: C.family.Carrier z \where f.apply z x = y }) \by here y \then
+  \let same: f.apply z x = y := \bysub(C.family.Carrier z, { x: C.family.Carrier z \where f.apply z x = y }, x) \then
+  \let closed: Source.differential.apply x = (C.family.space next).zero := above _ _ (eq_reason_in!{{D.family.Carrier next} _
+    "=" _ "by" { sym!{{D.family.Carrier next}} _ _ (f.commutes z x) }
+    "=" _ "by" { congr!{{D.family.Carrier z} {D.family.Carrier next}} Target.differential.apply _ _ same }
+    "=" _ "by" { \bysub(D.family.Carrier z, Target.cycles.carrier, y) }
+    "=" _ "by" { sym!{{D.family.Carrier next}} _ _ (Maps.At[k := next].zeroPreserved f) }
+  }) \then
+  \let representative: Source.Closed := Source.cycle x closed \then
+  \return Logic.existsIntro[Source.Cohomology, { a: Source.Cohomology \where (Comparison.induced f).apply a = Target.classOf y }]
+    (Source.classOf representative) (trans!{Target.Cohomology} _ _ _ (Comparison.onClass f representative)
+      (congr!{Target.Closed Target.Cohomology} Target.classOf _ _
+        (Refined.ext ((Comparison.cyclesMap f).apply representative) y same)))
+};
+\definition onto[here: HereOnto][above: AboveInjective]: \forall (y: Target.Cohomology) ->
+  \exists (x: Source.Cohomology \where (Comparison.induced f).apply x = y) :=
+  Target.classInduction (\fun (y: Target.Cohomology) => \exists (x: Source.Cohomology \where (Comparison.induced f).apply x = y))
+    (ontoOnCycles here above);
+\definition bijective[below: BelowOnto][hereInjective: HereInjective][hereOnto: HereOnto][above: AboveInjective]: Comparison.Bijective[f] :=
+  Comparison.Bijective[f] { injective := injective below hereInjective, onto := onto hereOnto above };

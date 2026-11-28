@@ -1,0 +1,14 @@
+\import Absolute.Unit[] \as Unit;
+\import AbsoluteClasses.Unit[] \as ClassUnit;
+\import Relative.RelativeCup[p := p, q := N.Nat^::zero] \as Product;
+\import Relative.Cohomology[p := p, q := N.Nat^::zero].Left[] \as Cup;
+\import Relative.Comparison[n := p] \as Compare;
+\import Signed.At[C := Pair.complex, z := I.Int^::ofNat p] \as H;
+\import singular_cellular_algebra.Algebra[].Refinement[A := cochains p, S := H.cycles.carrier] \as Eq;
+\definition cochain: \forall (a: cochains p) -> Product.left a Unit.cochain = a :=
+  \fun (a: cochains p) => Compare.injective _ _ (trans!{{Absolute.Carrier p}} _ _ _
+    (Product.leftRestriction a Unit.cochain) (Unit.At[p := p].right (restrict p a)));
+\definition law: \forall (a: classes p) -> Cup.apply a ClassUnit.class = a :=
+  H.classInduction (\fun (a: classes p) => Cup.apply a ClassUnit.class = a)
+    (\fun (r: cycles p) => trans!{{classes p}} _ _ _ (Cup.onClasses r ClassUnit.cycle)
+      (congr!{{cycles p} {classes p}} (class p) _ _ (Eq.ext (Cup.cycle r ClassUnit.cycle) r (cochain r))));

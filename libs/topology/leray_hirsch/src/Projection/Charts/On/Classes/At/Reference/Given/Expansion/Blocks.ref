@@ -1,0 +1,90 @@
+\import \root.ZeroClasses[A := LocalBase.CarrierSet, source := LocalBase.topology base, K := K, ring := ring] \as Values;
+\import Values.Matrices[count := count] \as Matrices;
+\import Values.Ring[] \as ClassRing;
+\import module_theory.Module[].Over[R := Values.Carrier, ring := std.Alg[].Ring[].commutativeRingAsRing Values.Carrier ClassRing.ordinary] \as Coefficients;
+\import Coefficients.Coordinates[I := Index].Kronecker[] \as Delta;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\import \root.DegreeShift[] \as Shift;
+\import Equality.Transport[A := N.Nat^] \as NatCast;
+\import \root.ForgetPair[A := LocalBase.CarrierSet, source := LocalBase.topology base, subset := baseZero, K := K, ring := ring] \as Forget;
+\definition degreeSet: \Pow Index := { i: Index \where degree i = q };
+\definition InGrade[i: Index]: \Prop := degree i = q;
+\definition Indices: \Set := \Cast[Index] degreeSet;
+\import \root.FiniteBasisSubset[K := K, ring := ring, count := count, S := degreeSet] \as FreeBlock;
+\import Modules.Free[Generators := Indices] \as Free;
+\module Coefficient(j, i: Index, equal: degree i = degree j) {
+  \import \parent.\parent.Column[i := j] \as Column;
+  \import Projection.Shifted[q := degree i, u := reference i].To[z := Column.z] \as Component;
+  \definition regrade: I.Int^::ofNat N.Nat^::zero = Component.input :=
+    sym!{I.Int^} _ _ (Shift.unshiftNatural (degree i) (degree j) N.Nat^::zero
+      (trans!{N.Nat^} _ _ _ (N.Basic[].Prop[].addZeroLeft (degree i)) equal));
+  \definition value: Values.Carrier := (Forget.map N.Nat^::zero).apply
+    (Component.Native[p := N.Nat^::zero, same := regrade].raw (Column.coordinates i));
+}
+\definition inside[i, j: Index][row: InGrade i][column: InGrade j]: Values.Carrier :=
+  Coefficient[j := j, i := i, equal := trans!{N.Nat^} (degree i) q (degree j) row (sym!{N.Nat^} (degree j) q column)].value;
+\definition zero: Values.Carrier := ClassRing.ordinary.base.zero;
+\structure EntryLaws[i, j: Index, a: Values.Carrier]: \Prop := {
+  block: \forall (row: InGrade i)(column: InGrade j) -> a = inside i j row column,
+  outsideRow: Logic.Not (InGrade i) -> InGrade j -> a = zero,
+  outsideColumn: Logic.Not (InGrade j) -> a = Delta.delta i j,
+};
+\definition Entry[i, j: Index]: \Set := \Cast[Values.Carrier] ({ a: Values.Carrier \where EntryLaws[i, j, a] });
+\definition entryLaws[i, j: Index][a: Entry i j]: EntryLaws[i, j, a] :=
+  \bysub(Values.Carrier, { a: Values.Carrier \where EntryLaws[i, j, a] }, a);
+\definition existsSelected[i, j: Index][column: InGrade j]: \exists Entry i j :=
+  either!{{Classical.excludedMiddle (InGrade i)} {\exists Entry i j}
+    {\fun (row: InGrade i) => Logic.existsIntro[Values.Carrier, { a: Values.Carrier \where EntryLaws[i, j, a] }] (inside i j row column)
+      (EntryLaws[i, j, inside i j row column] {
+        block := \fun (r: InGrade i)(c: InGrade j) => \refl(inside i j row column),
+        outsideRow := \fun (bad: Logic.Not (InGrade i))(c: InGrade j) => Logic.falseElim _ (bad row),
+        outsideColumn := \fun (bad: Logic.Not (InGrade j)) => Logic.falseElim _ (bad column),
+      })}
+    {\fun (off: Logic.Not (InGrade i)) => Logic.existsIntro[Values.Carrier, { a: Values.Carrier \where EntryLaws[i, j, a] }] zero
+      (EntryLaws[i, j, zero] {
+        block := \fun (r: InGrade i)(c: InGrade j) => Logic.falseElim _ (off r),
+        outsideRow := \fun (bad: Logic.Not (InGrade i))(c: InGrade j) => \refl(zero),
+        outsideColumn := \fun (bad: Logic.Not (InGrade j)) => Logic.falseElim _ (bad column),
+      })}
+  };
+\definition existence[i, j: Index]: \exists Entry i j :=
+  either!{{Classical.excludedMiddle (InGrade j)} {\exists Entry i j}
+    {\fun (column: InGrade j) => existsSelected i j column}
+    {\fun (off: Logic.Not (InGrade j)) => Logic.existsIntro[Values.Carrier, { a: Values.Carrier \where EntryLaws[i, j, a] }] (Delta.delta i j)
+      (EntryLaws[i, j, Delta.delta i j] {
+        block := \fun (r: InGrade i)(c: InGrade j) => Logic.falseElim _ (off c),
+        outsideRow := \fun (bad: Logic.Not (InGrade i))(c: InGrade j) => Logic.falseElim _ (off c),
+        outsideColumn := \fun (bad: Logic.Not (InGrade j)) => \refl(Delta.delta i j),
+      })}
+  };
+\definition agreeInside[i, j: Index][a, b: Entry i j][column: InGrade j]: a = b :=
+  either!{{Classical.excludedMiddle (InGrade i)} {a = b}
+    {\fun (row: InGrade i) => trans!{Values.Carrier} _ _ _ ((entryLaws i j a).block row column)
+      (sym!{Values.Carrier} _ _ ((entryLaws i j b).block row column))}
+    {\fun (off: Logic.Not (InGrade i)) => trans!{Values.Carrier} _ _ _ ((entryLaws i j a).outsideRow off column)
+      (sym!{Values.Carrier} _ _ ((entryLaws i j b).outsideRow off column))}
+  };
+\definition uniqueness[i, j: Index]: \forall (a, b: Entry i j) -> a = b :=
+  \fun (a, b: Entry i j) =>
+    either!{{Classical.excludedMiddle (InGrade j)} {a = b}
+      {\fun (column: InGrade j) => agreeInside i j a b column}
+      {\fun (off: Logic.Not (InGrade j)) => trans!{Values.Carrier} _ _ _ ((entryLaws i j a).outsideColumn off)
+        (sym!{Values.Carrier} _ _ ((entryLaws i j b).outsideColumn off))}
+    };
+\definition entry[i, j: Index]: Entry i j := \choice Entry i j \by { existence: existence i j, uniqueness: uniqueness i j };
+\import commutative_algebra.Modules[R := Values.Carrier, ring := ClassRing.ordinary].Matrix[m := count, n := count] \as ClassMatrix;
+\definition matrix: ClassMatrix.Matrix := \fun (i, j: Index) => entry i j;
+\definition values[i, j: Index]: EntryLaws[i, j, matrix i j] := entryLaws i j (entry i j);
+\module At(y: LocalBase.CarrierSet);
+
+\import Matrices.With[a := matrix].Supported[included := degreeSet] \as Supported;
+\definition pointwise: Supported.AllPoints :=
+  \fun (y: LocalBase.CarrierSet) => \exact(At[y := y].Entries[].certificate, Supported.PointCertificate (Values.componentOf y));
+\definition invertible: \exists Supported.Result := Supported.existsResult pointwise;
+\definition forwardSupport: Supported.HasSupport matrix :=
+  \fun (i, j: Index)(off: Logic.Not (InGrade i))(on: InGrade j) => (values i j).outsideRow off on;
+\definition Inverse: \Set := Supported.Result;
+\import ClassMatrix.Invertible[] \as Invertible;
+\definition certificate[x: Inverse]: Invertible.Inverse matrix := x.certificate;
+\definition inverseSupport[x: Inverse]: Supported.HasSupport ((certificate x).inverse) := x.supported;

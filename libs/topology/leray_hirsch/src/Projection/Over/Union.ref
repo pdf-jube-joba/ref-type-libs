@@ -1,0 +1,33 @@
+\import std.Logic[].Proposition[] \as Logic;
+\definition union: \Pow X := Base.Finite[].Join L R;
+\definition overlap: \Pow X := Base.Intersection L R;
+\import \parent.Restriction[V := union] \as Whole;
+\import Base.Subspace[S := union] \as WholeSpace;
+\definition leftPart: \Pow Whole.BaseCarrier := WholeSpace.Trace L;
+\definition rightPart: \Pow Whole.BaseCarrier := WholeSpace.Trace R;
+\import singular_excision.MayerVietoris[A := Whole.BaseCarrier].Over[source := Whole.baseTopology] \as Covers;
+\definition domains: Covers.Data := Covers.Data { left := leftPart, right := rightPart };
+\definition cover: Covers.Cover := \into[Covers.Data](domains, Covers.Cover) \by {
+  Covers.Laws[domains] {
+    leftOpen := WholeSpace.traceOpen base L leftOpen,
+    rightOpen := WholeSpace.traceOpen base R rightOpen,
+    covered := \fun (p: Whole.BaseCarrier) => \bysub(X, union, p),
+  }
+};
+\definition leftContained: Base.Subset L union :=
+  \fun (x: X)(h: Base.Member L x) => Logic.Or[Base.Member L x, Base.Member R x]::left h;
+\definition rightContained: Base.Subset R union :=
+  \fun (x: X)(h: Base.Member R x) => Logic.Or[Base.Member L x, Base.Member R x]::right h;
+\definition overlapContained: Base.Subset overlap union :=
+  \fun (x: X)(h: Base.Member overlap x) => leftContained x h.left;
+\import Whole.Inside[S := L, contained := leftContained] \as Left;
+\import Whole.Inside[S := R, contained := rightContained] \as Right;
+\import Whole.Inside[S := overlap, contained := overlapContained] \as Intersection;
+\import \root.Projection[X := Whole.BaseCarrier, E := Whole.TotalCarrier, base := Whole.baseTopology, total := Whole.totalTopology,
+  projection := Whole.project, continuous := Whole.regular].Over[U := Whole.basePart, K := K, ring := ring] \as Projection;
+\import Projection.MayerVietoris[cover := cover] \as MayerVietoris;
+
+\module Overlap;
+\import std.Data[].FinSet[] \as Finite;
+\module Glue(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

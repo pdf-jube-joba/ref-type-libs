@@ -1,0 +1,68 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as IntegerModules;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import commutative_algebra.Modules[R := I.Int^, ring := Integers.commutativeRing] \as Algebra;
+\definition coefficients: Modules.Bundle := Modules.Bundle { Carrier := K, space := Modules.scalarModule };
+\import Modules.AbelianHom[N := coefficients] \as Hom;
+\import IntegerModules.Free[Generators := Generators] \as Free;
+\module With(W: IntegerModules.Bundle) {
+  \import Algebra.Tensor[V := Free.Carrier, W := W.Carrier, left := Free.space, right := W.space] \as Tensor;
+  \import Tensor.Adjunction[U := K, target := Hom.coefficients.space] \as Adjunction;
+  \import Hom.From[V := W.Carrier, domain := W.space] \as Fiber;
+  \import Hom.From[V := Tensor.Carrier, domain := Tensor.space] \as Total;
+  \import Algebra.HomSpace[V := W.Carrier, W := K, source := W.space, target := Hom.coefficients.space] \as AdditiveFiber;
+  \import Free.To[W := Fiber.Carrier, target := AdditiveFiber.space] \as Extension;
+  \import Modules.Functions[X := Generators, V := Fiber.Carrier, target := Fiber.space] \as Values;
+  \import Modules.Hom[V := Total.Carrier, W := Values.Carrier, source := Total.space, target := Values.space] \as Maps;
+  \definition tensorCarrier: \Set := Tensor.Carrier;
+  \definition tensorSpace: IntegerModules.Space tensorCarrier := Tensor.space;
+  \definition tensor: Free.Carrier -> W.Carrier -> tensorCarrier := Tensor.tensor;
+  \definition fiberCarrier: \Set := Fiber.Carrier;
+  \definition valueExt: \forall (f, g: Values.Carrier) ->
+    (\forall (x: Generators)(y: W.Carrier) -> (f x).apply y = (g x).apply y) -> f = g :=
+    \fun (f, g: Values.Carrier)(same: _) => Values.ext f g (\fun (x: Generators) => Fiber.ext (f x) (g x) (same x));
+  \definition evaluate[h: Total.Carrier][g: Generators]: Fiber.Carrier := Adjunction.curryValue h (Free.generator g);
+  \definition evaluateOnTensor[h: Total.Carrier][g: Generators][w: W.Carrier]:
+    (evaluate h g).apply w = h.apply (Tensor.tensor (Free.generator g) w) :=
+    \refl(h.apply (Tensor.tensor (Free.generator g) w));
+  \definition forward: Maps.Map := Maps.Map {
+    apply := evaluate,
+    addition := \fun (f, g: Total.Carrier) => valueExt (evaluate (Total.space.add f g)) (Values.add (evaluate f) (evaluate g))
+      (\fun (x: Generators)(w: W.Carrier) => \refl((coefficients.space).add
+        (f.apply (tensor (Free.generator x) w)) (g.apply (tensor (Free.generator x) w)))),
+    scalar := \fun (a: K)(f: Total.Carrier) => valueExt (evaluate (Total.space.smul a f)) (Values.scale a (evaluate f))
+      (\fun (x: Generators)(w: W.Carrier) => \refl((coefficients.space).smul a (f.apply (tensor (Free.generator x) w)))),
+  };
+  \import IntegerModules.Hom[V := Free.Carrier, W := Fiber.Carrier, source := Free.space, target := AdditiveFiber.space] \as CurriedMaps;
+  \definition extend[f: Values.Carrier]: Total.Carrier := Adjunction.uncurry (Extension.extension f);
+  \definition evaluateExtend: \forall (f: Values.Carrier) -> evaluate (extend f) = f :=
+    \fun (f: Values.Carrier) => Values.ext _ _ (\fun (x: Generators) => trans!{Fiber.Carrier} _ _ _
+      (congr!{{CurriedMaps.Map} Fiber.Carrier}
+        (\fun (h: CurriedMaps.Map) => h.apply (Free.generator x)) _ _
+        (Adjunction.curryUncurry (Extension.extension f)))
+      (Extension.onGenerator f x));
+  \definition extendEvaluate: \forall (h: Total.Carrier) -> extend (evaluate h) = h :=
+    \fun (h: Total.Carrier) => trans!{Total.Carrier} _ _ _
+      (congr!{{CurriedMaps.Map} Total.Carrier} Adjunction.uncurry _ _
+        (Extension.ext (Extension.extension (evaluate h)) (Adjunction.curry h)
+          (\fun (x: Generators) => Extension.onGenerator (evaluate h) x)))
+      (Adjunction.uncurryCurry h);
+  \import Modules.Isomorphism[V := Total.Carrier, W := Values.Carrier, source := Total.space, target := Values.space]
+    .OfBijective[f := forward] \as Iso;
+  \definition injective: Iso.Injective := \fun (f, g: Total.Carrier)(same: _) => trans!{Total.Carrier} _ _ _
+    (sym!{Total.Carrier} _ _ (extendEvaluate f))
+    (trans!{Total.Carrier} _ _ _ (congr!{{Values.Carrier} Total.Carrier} extend _ _ same) (extendEvaluate g));
+  \definition onto: Iso.Onto := \fun (f: Values.Carrier) =>
+    Logic.existsIntro[Total.Carrier, { h: Total.Carrier \where evaluate h = f }] (extend f) (evaluateExtend f);
+  \definition isomorphism: _ := Iso.isomorphism injective onto;
+}
+
+\module OneColumn;
+
+\module Rebased(A: IntegerModules.Bundle, basis: IntegerModules.Isomorphism[V := Free.Carrier, W := A.Carrier, source := Free.space, target := A.space].Isomorphism);

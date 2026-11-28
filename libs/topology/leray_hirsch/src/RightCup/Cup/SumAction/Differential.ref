@@ -1,0 +1,37 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Transport;
+\definition upperTotal: N.Nat^ := N.Basic[].Def[].add (N.Nat^::succ p) q;
+\definition higher: N.Nat^ := N.Nat^::succ total;
+\definition same: upperTotal = higher := N.Basic[].Prop[].addSuccLeft p q;
+\definition higherZ: I.Int^ := I.Int^::ofNat higher;
+\definition upperZ: I.Int^ := I.Int^::ofNat upperTotal;
+\import \parent.\parent.\parent.Cup[p := N.Nat^::succ p, q := q] \as Upper;
+\import \parent.\parent.SumAction[] \as Components;
+\definition SumRaw[k: N.Nat^]: \Set := SumHom.Carrier (I.Int^::ofNat k);
+\definition LeftRaw[k: N.Nat^]: \Set := LeftHom.Carrier (I.Int^::ofNat k);
+\definition RightRaw[k: N.Nat^]: \Set := RightHom.Carrier (I.Int^::ofNat k);
+\definition first[k: N.Nat^]: SumRaw k -> LeftRaw k := Coordinates.firstProjection.apply (I.Int^::ofNat k);
+\definition second[k: N.Nat^]: SumRaw k -> RightRaw k := Coordinates.secondProjection.apply (I.Int^::ofNat k);
+\definition cast[u: Factor][h: SumHom.Carrier (I.Int^::ofNat (N.Nat^::succ p))]: SumHom.Carrier higherZ := Transport.cast SumRaw upperTotal higher same (Upper.sumAction u h);
+\definition left: \forall (u: Restriction.Cycle)(h: SumHom.Carrier inputDegree) ->
+  Coordinates.firstProjection.apply higherZ (SumHom.complex.differential.apply outputDegree (sumAction u h)) = Coordinates.firstProjection.apply higherZ (cast u (SumHom.complex.differential.apply inputDegree h)) :=
+  \fun (u: Restriction.Cycle)(h: SumHom.Carrier inputDegree) => eq_reason_in!{{LeftHom.Carrier higherZ} _
+    "=" _ "by" { sym!{{LeftHom.Carrier higherZ}} _ _ (Coordinates.firstProjection.commutes outputDegree (sumAction u h)) }
+    "=" _ "by" { congr!{{LeftHom.Carrier outputDegree} {LeftHom.Carrier higherZ}} (LeftHom.complex.differential.apply outputDegree) _ _ (Components.left u h) }
+    "=" _ "by" { LP.Closed[].leftRightClosed (Coordinates.firstProjection.apply inputDegree h) (Restriction.left u) (Restriction.leftClosed u) }
+    "=" _ "by" { congr!{{LeftHom.Carrier (I.Int^::ofNat (N.Nat^::succ p))} {LeftHom.Carrier higherZ}} (\fun (a: LeftHom.Carrier (I.Int^::ofNat (N.Nat^::succ p))) => LeftCup.Degree[].apply upperTotal higher same (LeftCup.RelativeCup[p := N.Nat^::succ p, q := q].left (a) (Restriction.left u))) _ _ (Coordinates.firstProjection.commutes inputDegree h) }
+    "=" _ "by" { congr!{{LeftHom.Carrier upperZ} {LeftHom.Carrier higherZ}} (Transport.cast LeftRaw upperTotal higher same) _ _ (sym!{{LeftHom.Carrier upperZ}} _ _ (Upper.SumAction[].left u (SumHom.complex.differential.apply inputDegree h))) }
+    "=" _ "by" { Transport.natural SumRaw LeftRaw first upperTotal higher same (Upper.sumAction u (SumHom.complex.differential.apply inputDegree h)) }
+  };
+\definition right: \forall (u: Restriction.Cycle)(h: SumHom.Carrier inputDegree) ->
+  Coordinates.secondProjection.apply higherZ (SumHom.complex.differential.apply outputDegree (sumAction u h)) = Coordinates.secondProjection.apply higherZ (cast u (SumHom.complex.differential.apply inputDegree h)) :=
+  \fun (u: Restriction.Cycle)(h: SumHom.Carrier inputDegree) => eq_reason_in!{{RightHom.Carrier higherZ} _
+    "=" _ "by" { sym!{{RightHom.Carrier higherZ}} _ _ (Coordinates.secondProjection.commutes outputDegree (sumAction u h)) }
+    "=" _ "by" { congr!{{RightHom.Carrier outputDegree} {RightHom.Carrier higherZ}} (RightHom.complex.differential.apply outputDegree) _ _ (Components.right u h) }
+    "=" _ "by" { RP.Closed[].leftRightClosed (Coordinates.secondProjection.apply inputDegree h) (Restriction.right u) (Restriction.rightClosed u) }
+    "=" _ "by" { congr!{{RightHom.Carrier (I.Int^::ofNat (N.Nat^::succ p))} {RightHom.Carrier higherZ}} (\fun (a: RightHom.Carrier (I.Int^::ofNat (N.Nat^::succ p))) => RightCup.Degree[].apply upperTotal higher same (RightCup.RelativeCup[p := N.Nat^::succ p, q := q].left (a) (Restriction.right u))) _ _ (Coordinates.secondProjection.commutes inputDegree h) }
+    "=" _ "by" { congr!{{RightHom.Carrier upperZ} {RightHom.Carrier higherZ}} (Transport.cast RightRaw upperTotal higher same) _ _ (sym!{{RightHom.Carrier upperZ}} _ _ (Upper.SumAction[].right u (SumHom.complex.differential.apply inputDegree h))) }
+    "=" _ "by" { Transport.natural SumRaw RightRaw second upperTotal higher same (Upper.sumAction u (SumHom.complex.differential.apply inputDegree h)) }
+  };
+\definition law: \forall (u: Restriction.Cycle)(h: SumHom.Carrier inputDegree) -> SumHom.complex.differential.apply outputDegree (sumAction u h) = cast u (SumHom.complex.differential.apply inputDegree h) :=
+  \fun (u: Restriction.Cycle)(h: SumHom.Carrier inputDegree) => Coordinates.ext higherZ _ _ (left u h) (right u h);

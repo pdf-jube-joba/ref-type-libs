@@ -1,0 +1,65 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import topology.Homeomorphism[A := A, B := B] \as Geometry;
+\definition laws: _ := Geometry.laws source target homeomorphism;
+\import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Source;
+\import singular_products.Cochains[A := B, source := target, R := K, ring := ring] \as Target;
+\import Source.Cohomology[] \as S;
+\import Target.Cohomology[] \as T;
+\import S.Pullback[B := B, target := target] \as Pull;
+\import T.Pullback[B := A, target := source] \as Push;
+\import singular_cohomology.Maps[A := B, B := A, source := target, target := source]
+  .Composition[C := B, final := target].Coefficients[M := Source.integerCoefficients] \as Left;
+\import singular_cohomology.Maps[A := A, B := B, source := source, target := target]
+  .Composition[C := A, final := source].Coefficients[M := Source.integerCoefficients] \as Right;
+\import singular_cohomology.Identity[A := B, source := target].Coefficients[M := Source.integerCoefficients] \as IdentityLeft;
+\import singular_cohomology.Identity[A := A, source := source].Coefficients[M := Source.integerCoefficients] \as IdentityRight;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\module At(n: N.Nat^) {
+  \definition forward: _ := Pull.At[n := n].linear homeomorphism.forward laws.forwardContinuous;
+  \definition backward: _ := Push.At[n := n].linear homeomorphism.backward laws.backwardContinuous;
+  \import T.Pullback[B := B, target := target] \as LeftAction;
+  \import S.Pullback[B := A, target := source] \as RightAction;
+  \import topology.Continuity[A := B, B := B] \as LeftContinuity;
+  \import topology.Continuity[A := A, B := A] \as RightContinuity;
+  \definition leftAction[f, g: B -> B][same: f = g][fc: LeftContinuity.Continuous target target f]
+    [gc: LeftContinuity.Continuous target target g][a: T.Group n]: LeftAction.apply n f fc a = LeftAction.apply n g gc a :=
+    (\idelim f = g \with h: (B -> B) => \forall (hc: LeftContinuity.Continuous target target h) ->
+      LeftAction.apply n f fc a = LeftAction.apply n h hc a \by {
+      base: \fun (hc: LeftContinuity.Continuous target target f) => \refl(LeftAction.apply n f fc a), equality: same
+    }) gc;
+  \definition rightAction[f, g: A -> A][same: f = g][fc: RightContinuity.Continuous source source f]
+    [gc: RightContinuity.Continuous source source g][a: S.Group n]: RightAction.apply n f fc a = RightAction.apply n g gc a :=
+    (\idelim f = g \with h: (A -> A) => \forall (hc: RightContinuity.Continuous source source h) ->
+      RightAction.apply n f fc a = RightAction.apply n h hc a \by {
+      base: \fun (hc: RightContinuity.Continuous source source f) => \refl(RightAction.apply n f fc a), equality: same
+    }) gc;
+  \import topology.Composition[A := B, B := A, C := B] \as LeftCompose;
+  \import topology.Composition[A := A, B := B, C := A] \as RightCompose;
+  \definition leftInverse: \forall (a: T.Group n) -> backward.apply (forward.apply a) = a :=
+    \fun (a: T.Group n) => eq_reason_in!{{T.Group n} _
+      "=" _ "by" { sym!{{T.Group n}} _ _ (Left.onCohomology homeomorphism.backward laws.backwardContinuous homeomorphism.forward laws.forwardContinuous n a) }
+      "=" _ "by" { leftAction (\fun (y: B) => homeomorphism.forward (homeomorphism.backward y)) (\fun (y: B) => y)
+        (\axiom:funext((\fun (y: B) => homeomorphism.forward (homeomorphism.backward y)), (\fun (y: B) => y), laws.rightInverse))
+        (LeftCompose.composeContinuous target source target homeomorphism.backward homeomorphism.forward laws.backwardContinuous laws.forwardContinuous)
+        (topology.Maps[A := B, B := B].Identity[].continuous target) a }
+      "=" _ "by" { IdentityLeft.At[n := n].cohomologyIdentity a }
+    };
+  \definition rightInverse: \forall (a: S.Group n) -> forward.apply (backward.apply a) = a :=
+    \fun (a: S.Group n) => eq_reason_in!{{S.Group n} _
+      "=" _ "by" { sym!{{S.Group n}} _ _ (Right.onCohomology homeomorphism.forward laws.forwardContinuous homeomorphism.backward laws.backwardContinuous n a) }
+      "=" _ "by" { rightAction (\fun (y: A) => homeomorphism.backward (homeomorphism.forward y)) (\fun (y: A) => y)
+        (\axiom:funext((\fun (y: A) => homeomorphism.backward (homeomorphism.forward y)), (\fun (y: A) => y), laws.leftInverse))
+        (RightCompose.composeContinuous source target source homeomorphism.forward homeomorphism.backward laws.forwardContinuous laws.backwardContinuous)
+        (topology.Maps[A := A, B := A].Identity[].continuous source) a }
+      "=" _ "by" { IdentityRight.At[n := n].cohomologyIdentity a }
+    };
+  \import Modules.Isomorphism[V := T.Group n, W := S.Group n, source := T.moduleSpace n, target := S.moduleSpace n] \as Iso;
+  \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+    forward := forward, backward := backward, leftInverse := leftInverse, rightInverse := rightInverse,
+  };
+}

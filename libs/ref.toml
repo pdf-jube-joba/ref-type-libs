@@ -90,6 +90,7 @@ packages = [
     "topology/puppe_sequences",
     "topology/thom_spaces",
     "topology/cohomology_thom",
+    "topology/leray_hirsch",
     "topology/metric",
     "topology/k_theory",
     "topology/relative_k_theory",

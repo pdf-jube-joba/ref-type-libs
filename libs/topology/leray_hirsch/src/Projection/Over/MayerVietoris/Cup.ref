@@ -1,0 +1,29 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.congr;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Transport;
+\import \root.RightCup[A := E, source := total, subset := preimage U, cover := totalCover, K := K, ring := ring] \as Multiplication;
+\import Multiplication.Connecting[p := p, q := q].Whole[] \as Action;
+\import \parent.At[z := I.Int^::ofNat p] \as Below;
+\import \parent.\parent.Component[p := N.Nat^::succ p, q := q] \as Above;
+\definition lower: N.Nat^ := N.Basic[].Def[].add p q;
+\definition upper: N.Nat^ := N.Nat^::succ lower;
+\definition same: Above.degree = upper := N.Basic[].Prop[].addSuccLeft p q;
+\import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients].At[z := I.Int^::ofNat lower] \as Connecting;
+\import singular_cohomology.Relative[A := BaseMV.Overlap, source := BaseMV.overlapTopology, subset := BaseMV.overlapPart]
+  .With[coefficients := BaseProduct.integerCoefficients].At[z := I.Int^::ofNat p] \as Input;
+\import singular_cap.CochainPair[A := TotalMV.Overlap, source := TotalMV.overlapTopology, subset := TotalMV.overlapPart, R := K, ring := ring]
+  .Cohomology[p := p, q := q].Left[] \as OverlapCup;
+\definition classes[k: N.Nat^]: \Set := totalFamily.Carrier (I.Int^::ofNat k);
+\definition restricted: TotalCohomology.Group q -> _ := Action.restricted;
+\definition onOverlap[u: TotalCohomology.Group q][a: Input.Carrier]: _ :=
+  OverlapCup.apply (Below.overlapPullback.apply a) (restricted u);
+\definition connectingLaw: \forall (u: TotalCohomology.Group q)(a: Input.Carrier) ->
+  Connecting.connecting.apply (onOverlap u a) =
+  Transport.cast classes Above.degree upper same (Above.apply u (Below.baseConnecting.apply a)) :=
+  \fun (u: TotalCohomology.Group q)(a: Input.Carrier) => trans!{{classes upper}} _ _ _
+    (Action.lawOnCohomology u (Below.overlapPullback.apply a))
+    (congr!{{totalFamily.Carrier (I.Int^::ofNat (N.Nat^::succ p))} {classes upper}}
+      (\fun (v: totalFamily.Carrier (I.Int^::ofNat (N.Nat^::succ p))) =>
+        Transport.cast classes Above.degree upper same (Above.cup v u)) _ _
+      (Below.connectingLaw a));

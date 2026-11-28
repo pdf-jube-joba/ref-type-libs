@@ -1,0 +1,48 @@
+\import Modules.Laws[V := V, space := space] \as Laws;
+\import algebra.Group[].Of[Carrier := V, group := Laws.additive] \as Group;
+\definition power: N.Nat^ -> V -> V :=
+  \induction (n: N.Nat^) \return V -> V \with {
+    | zero: \fun (x: V) => x
+    | succ: \fun (n: N.Nat^)(prior: V -> V)(x: V) => t.apply (prior x)
+  };
+\definition perturbation: Maps.Map := Maps.plus Identity.identity (Maps.negative t);
+\definition iterate: N.Nat^ -> V -> V :=
+  \induction (n: N.Nat^) \return V -> V \with {
+    | zero: \fun (x: V) => space.zero
+    | succ: \fun (n: N.Nat^)(prior: V -> V)(x: V) => space.add x (t.apply (prior x))
+  };
+\definition commute: \forall (x: V) -> perturbation.apply (t.apply x) = t.apply (perturbation.apply x) :=
+  \fun (x: V) => sym!{V} _ _ (Maps.differencePreserved t x (t.apply x));
+\definition defect: \forall (n: N.Nat^)(x: V) -> perturbation.apply (iterate n x) = Group.difference x (power n x) :=
+  \induction (n: N.Nat^) \return \forall (x: V) -> perturbation.apply (iterate n x) = Group.difference x (power n x) \with {
+    | zero: \fun (x: V) => trans!{V} _ _ _ (Maps.zeroPreserved perturbation) (sym!{V} _ _ (Group.inverseRight x))
+    | succ: \fun (n: N.Nat^)(prior: \forall (x: V) -> perturbation.apply (iterate n x) = Group.difference x (power n x))(x: V) =>
+      eq_reason_in!{V _
+        "=" _ "by" { perturbation.addition x (t.apply (iterate n x)) }
+        "=" _ "by" { congr!{V V} (space.add (perturbation.apply x)) _ _ (commute (iterate n x)) }
+        "=" _ "by" { congr!{V V} (\fun (v: V) => space.add (perturbation.apply x) (t.apply v)) _ _ (prior x) }
+        "=" _ "by" { congr!{V V} (space.add (perturbation.apply x)) _ _ (Maps.differencePreserved t x (power n x)) }
+        "=" _ "by" { Group.composeDifferences x (t.apply x) (t.apply (power n x)) }
+      }
+  };
+\definition fixed[x: V][zero: perturbation.apply x = space.zero]: t.apply x = x :=
+  trans!{V} _ _ _ (sym!{V} _ _ (Group.zeroLeft (t.apply x)))
+    (trans!{V} _ _ _
+      (congr!{V V} (\fun (v: V) => space.add v (t.apply x)) _ _ (sym!{V} _ _ zero))
+      (Group.addDifference x (t.apply x)));
+\definition fixedPower[x: V][same: t.apply x = x]: \forall (n: N.Nat^) -> power n x = x :=
+  \induction (n: N.Nat^) \return power n x = x \with {
+    | zero: \refl(x)
+    | succ: \fun (n: N.Nat^)(prior: power n x = x) => trans!{V} _ _ _ (congr!{V V} t.apply _ _ prior) same
+  };
+\definition Nilpotent[n: N.Nat^]: \Prop := \forall (x: V) -> power n x = space.zero;
+\import Modules.Isomorphism[V := V, W := V, source := space, target := space].OfBijective[f := perturbation] \as Iso;
+\definition injective[n: N.Nat^][vanishes: Nilpotent n]: Iso.Injective :=
+  Maps.injectiveOfZeroKernel perturbation (\fun (x: V)(zero: perturbation.apply x = space.zero) =>
+    trans!{V} _ _ _ (sym!{V} _ _ (fixedPower x (fixed x zero) n)) (vanishes x));
+\definition onto[n: N.Nat^][vanishes: Nilpotent n]: Iso.Onto :=
+  \fun (x: V) => Logic.existsIntro[V, { y: V \where perturbation.apply y = x }] (iterate n x)
+    (trans!{V} _ _ _ (defect n x) (trans!{V} _ _ _
+      (congr!{V V} (Group.difference x) _ _ (vanishes x))
+      (trans!{V} _ _ _ (congr!{V V} (space.add x) _ _ Group.negZero) (Group.zeroRight x))));
+\definition isomorphism[n: N.Nat^][vanishes: Nilpotent n]: _ := Iso.isomorphism (injective n vanishes) (onto n vanishes);

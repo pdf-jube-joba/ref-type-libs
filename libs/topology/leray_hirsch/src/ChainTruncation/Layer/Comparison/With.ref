@@ -1,0 +1,72 @@
+\definition Index: \Set := Finite.Fin count;
+\definition representatives[i: Index]: FiberCycle (degrees i) :=
+  \into[Fiber.Carrier (degrees i)](cycles i, Native.At[C := Fiber.complex, k := degrees i].cycles.carrier) \by { closed i };
+\import LayerMap.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as FiniteComparison;
+\import Basis.For[C := Fiber.complex, count := count, degrees := degrees, cycles := representatives] \as FiberBasis;
+\definition GradedBasis: \Prop := \forall (q: N.Nat^) -> FiberBasis.At[q := q].IsBasis;
+\module Positive(q: N.Nat^, basis: FiberBasis.At[q := q].IsBasis);
+\import N.Basic[].Prop[] \as Arithmetic;
+\import N.Order[].Prop[] \as Order;
+\import std.Logic[].Order[] \as Ordering;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Scalars;
+\import double_complexes.DoubleComplex[].Over[R := I.Int^, ring := Integers.ring] \as Double;
+\import Double.Tensor[C := concentrated, D := D] \as Tensor;
+\import Double.Total[C := Tensor.complex] \as Total;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients].Native[P := Total.complex] \as Target;
+\import Native.ZeroExtension[C := Target.complex] \as Extended;
+\import \root.CohomologyZero[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Vanish;
+\definition positive[z: I.Int^]: \Prop := (\induction (k: I.Int^) \return \Prop \with {
+  | ofNat: \fun (n: N.Nat^) => Logic.True
+  | negSucc: \fun (n: N.Nat^) => Logic.False
+}) z;
+\definition opposite[p, n: N.Nat^]: Logic.Not (I.Int^::ofNat p = I.Int^::negSucc n) :=
+  \fun (e: I.Int^::ofNat p = I.Int^::negSucc n) =>
+    \idelim I.Int^::ofNat p = I.Int^::negSucc n \with z: I.Int^ => positive z \by { base: Logic.True::intro, equality: e };
+\module Negative(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::negSucc n;
+  \import FiniteComparison.At[z := z] \as Input;
+  \import Input.Product[] \as Product;
+  \definition onTerm[i: Index]: \forall (a: Input.family.Carrier i) -> a = (Input.family.space i).zero :=
+    BaseLayer.outside (Input.sourceDegree i) (\fun (same: Input.sourceDegree i = active) =>
+      opposite (Nat.add cutoff (degrees i)) n (fromActive (degrees i) z same));
+  \definition bijective: Product.Bijective := Product.Vanishing[].vanishing (\fun (i: Index) => onTerm i) (Extended.NegativeCohomology[n := n].zero);
+}
+\module Low(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \import FiniteComparison.At[z := z] \as Input;
+  \import Input.Product[] \as Product;
+  \import Extended.Index[z := z] \as Part;
+  \import singular_cellular_algebra.Algebra[].Refinement[A := Target.Carrier n, S := Part.submodule.carrier] \as Eq;
+  \definition onTerm[bound: Arithmetic.Lt n cutoff][i: Index]: \forall (a: Input.family.Carrier i) -> a = (Input.family.space i).zero :=
+    BaseLayer.outside (Input.sourceDegree i) (\fun (same: Input.sourceDegree i = active) =>
+      Arithmetic.ltIrrefl cutoff (Arithmetic.leLtTrans cutoff n cutoff
+        (\idelim Nat.add cutoff (degrees i) = n \with b: N.Nat^ => Arithmetic.Le cutoff b \by {
+          base: Arithmetic.leAddRight cutoff (degrees i),
+          equality: ofNatInjective (Nat.add cutoff (degrees i)) n (fromActive (degrees i) z same)
+        }) bound));
+  \definition onOutput[bound: Arithmetic.Lt n cutoff]: \forall (a: Input.range.Carrier) -> a = Input.range.space.zero :=
+    Vanish.On[C := Extended.complex, z := z].zero (\fun (h: Extended.Carrier z) =>
+      Eq.ext h (Extended.space z).zero (TensorLayer.Low[n := n].zero bound h));
+  \definition bijective[bound: Arithmetic.Lt n cutoff]: Product.Bijective :=
+    Product.Vanishing[].vanishing (onTerm bound) (onOutput bound);
+}
+\module Natural(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \import FiniteComparison.At[z := z].Product[] \as Product;
+  \definition atLeast[basis: GradedBasis][bound: Arithmetic.Le cutoff n]: Product.Bijective :=
+    \idelim deg (Nat.sub n cutoff) = z \with k: I.Int^ => FiniteComparison.At[z := k].Product[].Bijective \by {
+      base: \parent.Positive[q := Nat.sub n cutoff, basis := basis (Nat.sub n cutoff)].bijective,
+      equality: congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ (Arithmetic.addSubOfLe cutoff n bound)
+    };
+  \definition prove[basis: GradedBasis]: Product.Bijective :=
+    \match (Order.trichotomy n cutoff) \in Ordering.Trichotomy \return (\fun (_: Order.Trichotomy n cutoff) => Product.Bijective) \with {
+      | less h: \parent.Low[n := n].bijective h
+      | equal h: atLeast basis (\idelim n = cutoff \with m: N.Nat^ => Arithmetic.Le m n \by { base: Arithmetic.leRefl n, equality: h })
+      | greater h: atLeast basis (Arithmetic.leTrans cutoff (N.Nat^::succ cutoff) n (Arithmetic.leStep cutoff cutoff (Arithmetic.leRefl cutoff)) (Arithmetic.succLeOfLt n cutoff h))
+    };
+}
+\definition bijective[basis: GradedBasis]: \forall (z: I.Int^) -> FiniteComparison.At[z := z].Product[].Bijective :=
+  \induction (z: I.Int^) \return FiniteComparison.At[z := z].Product[].Bijective \with {
+    | ofNat: \fun (n: N.Nat^) => Natural[n := n].prove basis
+    | negSucc: \fun (n: N.Nat^) => Negative[n := n].bijective
+  };

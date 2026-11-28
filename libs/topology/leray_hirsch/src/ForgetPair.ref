@@ -1,0 +1,48 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Product;
+\import Product.Cohomology[] \as Classes;
+\import singular_cap.CochainPair[A := A, source := source, subset := subset, R := K, ring := ring] \as Cup;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset]
+  .OverRing[R := K, ring := ring].With[coefficients := Product.coefficients] \as Relative;
+\import singular_cohomology.Cochains[A := A, source := source].OverRing[R := K, ring := ring]
+  .With[coefficients := Product.coefficients] \as Absolute;
+\import chain_complexes.Integer[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\definition map[n: N.Nat^]: _ := Cup.Comparison[n := n].Cohomology[].map;
+\module Right(p, q: N.Nat^) {
+  \definition n: N.Nat^ := N.Basic[].Def[].add p q;
+  \import Signed.At[C := Relative.complex, z := I.Int^::ofNat p] \as Input;
+  \import Native.At[C := Absolute.complex, k := q] \as Factor;
+  \import Native.At[C := Absolute.complex, k := n] \as Output;
+  \import Cup.RelativeCup[p := p, q := q] \as CochainCup;
+  \import Cup.Cohomology[p := p, q := q].Left[] \as RelativeCup;
+  \import Classes.Cup[p := p, q := q] \as AbsoluteCup;
+  \import Cup.Comparison[n := p].Cohomology[] \as From;
+  \import Cup.Comparison[n := n].Cohomology[] \as To;
+  \import singular_cellular_algebra.Algebra[].Refinement[A := Product.Carrier n, S := Output.cycles.carrier] \as Closed;
+  \definition onClasses: \forall (a: Input.Closed)(b: Factor.CycleCarrier) ->
+    (map n).apply (RelativeCup.apply (Input.classOf a) (Factor.classOf b)) =
+    AbsoluteCup.apply ((map p).apply (Input.classOf a)) (Factor.classOf b) :=
+    \fun (a: Input.Closed)(b: Factor.CycleCarrier) => eq_reason_in!{{Classes.Group n} _
+      "=" _ "by" { congr!{{Relative.cohomology n} {Classes.Group n}} (map n).apply _ _ (RelativeCup.onClasses a b) }
+      "=" _ "by" { To.onClass (RelativeCup.cycle a b) }
+      "=" _ "by" { congr!{{Output.CycleCarrier} {Classes.Group n}} Output.classOf _ _
+        (Closed.ext (To.cycle (RelativeCup.cycle a b)) (AbsoluteCup.cycle (From.cycle a) b) (CochainCup.leftRestriction a b)) }
+      "=" _ "by" { sym!{{Classes.Group n}} _ _ (AbsoluteCup.onClasses (From.cycle a) b) }
+      "=" _ "by" { congr!{{Classes.Group p} {Classes.Group n}} (\fun (c: Classes.Group p) => AbsoluteCup.apply c (Factor.classOf b)) _ _
+        (sym!{{Classes.Group p}} _ _ (From.onClass a)) }
+    };
+  \definition law: \forall (a: Input.Cohomology)(b: Factor.Cohomology) ->
+    (map n).apply (RelativeCup.apply a b) = AbsoluteCup.apply ((map p).apply a) b :=
+    Input.classInduction (\fun (a: Input.Cohomology) => \forall (b: Factor.Cohomology) ->
+       (map n).apply (RelativeCup.apply a b) = AbsoluteCup.apply ((map p).apply a) b)
+      (\fun (a: Input.Closed) => Factor.classInduction (\fun (b: Factor.Cohomology) =>
+        (map n).apply (RelativeCup.apply (Input.classOf a) b) = AbsoluteCup.apply ((map p).apply (Input.classOf a)) b)
+        (onClasses a));
+}

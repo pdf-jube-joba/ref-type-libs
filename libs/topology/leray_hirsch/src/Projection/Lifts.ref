@@ -1,0 +1,10 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Finite;
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := K, ring := Rings.commutativeRingAsRing K ring] \as Modules;
+\import singular_products.Cochains[A := E, source := total, R := K, ring := ring] \as TotalProduct;
+\import TotalProduct.Cohomology[] \as TotalCohomology;
+\definition Index: \Set := Finite.Fin count;
+\definition Classes[degree: Index -> N.Nat^]: \Set := \forall (i: Index) -> TotalCohomology.Group (degree i);
+\module Fiber(x: X);
+\module Given(degree: Index -> N.Nat^, classes: Classes degree);

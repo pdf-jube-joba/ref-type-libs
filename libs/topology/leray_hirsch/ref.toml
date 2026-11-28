@@ -1,0 +1,23 @@
+[package]
+name = "leray_hirsch"
+
+[dependencies]
+chain_complexes = { path = "../../algebra/homological/chain_complexes" }
+algebraic_topology = { path = "../homotopy" }
+cohomology_thom = { path = "../cohomology_thom" }
+module_theory = { path = "../../algebra/module_theory" }
+resolutions = { path = "../../algebra/homological/resolutions" }
+singular_cellular_algebra = { path = "../singular/cellular_algebra" }
+singular_cap = { path = "../singular/cap" }
+singular_cohomology = { path = "../singular/cohomology" }
+singular_excision = { path = "../singular/excision" }
+singular_products = { path = "../singular/products" }
+std = { path = "../../std" }
+topological_constructions = { path = "../constructions" }
+topology = { path = "../basic" }
+thom_spaces = { path = "../thom_spaces" }
+singular_subdivision = { path = "../singular/subdivision" }
+algebra = { path = "../../algebra/basic" }
+double_complexes = { path = "../../algebra/homological/double_complexes" }
+singular_eilenberg_zilber = { path = "../singular/eilenberg_zilber" }
+commutative_algebra = { path = "../../algebra/commutative_algebra" }

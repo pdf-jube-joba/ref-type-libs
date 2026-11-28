@@ -1,0 +1,61 @@
+\import \root.ZeroClasses[A := LocalBase.CarrierSet, source := LocalBase.topology base, K := K, ring := ring] \as Scalars;
+\import Scalars.Ring[] \as Ring;
+\import module_theory.Module[].Over[R := Scalars.Carrier, ring := std.Alg[].Ring[].commutativeRingAsRing Scalars.Carrier Ring.ordinary]
+  .Laws[V := Output, space := CupZero.space] \as Action;
+\definition zeroCell: Output := (StandardDirect.family.space j).zero;
+\definition zeroExpected[h: x = (ActualDirect.family.space i).zero][e: degree i = degree j]: expected e = zeroCell :=
+  eq_reason_in!{Output _
+    "=" _ "by" { congr!{Input Output}
+      (\fun (a: Input) => CupZero.act (Block.matrix j i) (NatCast.cast family.Carrier (degree i) (degree j) e a)) _ _ h }
+    "=" _ "by" { congr!{Output Output} (CupZero.act (Block.matrix j i)) _ _
+      (NatCast.pointNatural family.Carrier (\fun (q: N.Nat^) => (family.space q).zero) (degree i) (degree j) e) }
+    "=" _ "by" { Action.scaleZero (Block.matrix j i) }
+  };
+\definition impossible[e: degree i = degree j][greater: Nat.Lt (degree i) (degree j)]: Logic.False :=
+  Nat.ltIrrefl (degree i) (\idelim degree j = degree i \with n: N.Nat^ => Nat.Lt (degree i) n \by {
+    base: greater, equality: sym!{N.Nat^} _ _ e
+  });
+\definition inZero[h: x = (ActualDirect.family.space i).zero]: \exists Candidate :=
+  Logic.existsIntro[Output, { a: Output \where Laws[a] }] zeroCell (Laws[zeroCell] {
+    imageLaw := zeroImage (zeroInputResult h),
+    above := \fun (large: Nat.Lt (degree i) (degree j)) => \refl(zeroCell),
+    zeroInput := \fun (zero: x = (ActualDirect.family.space i).zero) => \refl(zeroCell),
+    sameGrade := \fun (e: degree i = degree j) => sym!{Output} _ _ (zeroExpected h e),
+  });
+\definition inGrade[nonzero: Logic.Not (x = (ActualDirect.family.space i).zero)][e: degree i = degree j]: \exists Candidate :=
+  Logic.existsIntro[Output, { a: Output \where Laws[a] }] (expected e) (Laws[expected e] {
+    imageLaw := \parent.Matching[equal := e].imageLaw,
+    above := \fun (large: Nat.Lt (degree i) (degree j)) => Logic.falseElim _ (impossible e large),
+    zeroInput := \fun (zero: x = (ActualDirect.family.space i).zero) => Logic.falseElim _ (nonzero zero),
+    sameGrade := \fun (same: degree i = degree j) => \refl(expected e),
+  });
+\definition inHigher[off: Logic.Not (degree i = degree j)][large: Nat.Lt (degree i) (degree j)]: \exists Candidate :=
+  Logic.existsIntro[Output, { a: Output \where Laws[a] }] zeroCell (Laws[zeroCell] {
+    imageLaw := zeroImage (zeroResult (absoluteZero Atom.input (\refl(Atom.input)) large)),
+    above := \fun (h: Nat.Lt (degree i) (degree j)) => \refl(zeroCell),
+    zeroInput := \fun (zero: x = (ActualDirect.family.space i).zero) => \refl(zeroCell),
+    sameGrade := \fun (e: degree i = degree j) => Logic.falseElim _ (off e),
+  });
+\definition inLower[nonzero: Logic.Not (x = (ActualDirect.family.space i).zero)][off: Logic.Not (degree i = degree j)]
+  [lower: Logic.Not (Nat.Lt (degree i) (degree j))]: \exists Candidate := \block {
+  \takefrom a: \Cast[Output] ({ a: Output \where image a = total }) \by realizeTerm \then
+  \return Logic.existsIntro[Output, { a: Output \where Laws[a] }] a (Laws[a] {
+    imageLaw := \bysub(Output, { a: Output \where image a = total }, a),
+    above := \fun (h: Nat.Lt (degree i) (degree j)) => Logic.falseElim _ (lower h),
+    zeroInput := \fun (zero: x = (ActualDirect.family.space i).zero) => Logic.falseElim _ (nonzero zero),
+    sameGrade := \fun (e: degree i = degree j) => Logic.falseElim _ (off e),
+  })
+};
+\definition proof: \exists Candidate :=
+  either!{{Classical.excludedMiddle (x = (ActualDirect.family.space i).zero)} {\exists Candidate}
+    {\fun (zero: x = (ActualDirect.family.space i).zero) => inZero zero}
+    {\fun (nonzero: Logic.Not (x = (ActualDirect.family.space i).zero)) =>
+      either!{{Classical.excludedMiddle (degree i = degree j)} {\exists Candidate}
+        {\fun (same: degree i = degree j) => inGrade nonzero same}
+        {\fun (off: Logic.Not (degree i = degree j)) =>
+          either!{{Classical.excludedMiddle (Nat.Lt (degree i) (degree j))} {\exists Candidate}
+            {\fun (large: Nat.Lt (degree i) (degree j)) => inHigher off large}
+            {\fun (lower: Logic.Not (Nat.Lt (degree i) (degree j))) => inLower nonzero off lower}
+          }}
+      }}
+  };

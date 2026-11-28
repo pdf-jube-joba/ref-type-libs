@@ -1,0 +1,53 @@
+\definition Index: \Set := Finite.Fin count;
+\import \root.ChainTruncation[].Comparison[C := TensorComparison.relative, D := FiberChains.complex, K := K, ring := ring]
+  .With[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Tensor;
+\definition Generators[n: N.Nat^]: \Set := TensorComparison.Free[n := n].Generators;
+\definition baseBasis[n: N.Nat^]: _ := TensorComparison.Free[n := n].isomorphism;
+\import Tensor.Free[Generators := Generators, baseBasis := baseBasis] \as Algebra;
+\definition Basis: \Prop := Algebra.GradedBasis;
+\definition fiberClass[i: Index]: FiberClasses.Group (degrees i) :=
+  C.At[C := Fiber.complex, k := degrees i].classOf
+    (\into[Fiber.Carrier (degrees i)](cycles i, C.At[C := Fiber.complex, k := degrees i].cycles.carrier) \by { closed i });
+\definition lift[i: Index]: _ := Bundle.lift (degrees i) (fiberClass i);
+\import Comparison.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Model;
+\import Project.Comparison[count := count].With[degree := degrees, classes := lift] \as Actual;
+\import \root.ProductExact[K := K, ring := ring, Index := Index] \as Products;
+\import \root.CohomologyBasis[K := K, ring := ring].For[C := Fiber.complex, count := count, degrees := degrees,
+  cycles := (\fun (i: Index) => \into[Fiber.Carrier (degrees i)](cycles i, C.At[C := Fiber.complex, k := degrees i].cycles.carrier) \by { closed i })] \as Graded;
+\definition NativeBasis: \Prop := \forall (q: N.Nat^) -> Graded.At[q := q].NativeBasis[].IsBasis;
+\definition signedBasis[h: NativeBasis]: Basis :=
+  \fun (q: N.Nat^) => Graded.At[q := q].NativeBasis[].signedBasis (h q);
+\module At(z: I.Int^) {
+  \import \parent.\parent.At[z := z] \as Comparison;
+  \import Model.At[z := z] \as Domain;
+  \import Domain.Product[] \as Input;
+  \import Actual.At[z := z] \as Range;
+  \import Range.ProductCoordinates[] \as Output;
+  \import Products.Maps[source := Domain.family, target := Range.family]
+    .Isomorphism[].With[isos := (\fun (i: Index) => \parent.\parent.At[z := Domain.sourceDegree i].baseComparison)] \as Base;
+  \import Scalars.Sums[I := Index].Vector[V := Domain.range.Carrier, space := Domain.range.space].Mapping[W := Output.range.Carrier, target := Output.range.space] \as Apply;
+  \import Scalars.Sums[I := Index].Vector[V := Output.range.Carrier, space := Output.range.space] \as Values;
+  \definition iso: _ := Base.isomorphism;
+  \definition onTerm: \forall (i: Index)(a: Domain.family.Carrier i) ->
+    Comparison.totalComparison.forward.apply ((Domain.components i).apply a) =
+      (Range.components i).apply (\parent.\parent.At[z := Domain.sourceDegree i].baseComparison.forward.apply a) :=
+    \fun (i: Index) => \parent.\parent.Fixed[q := degrees i, beta := cycles i, closed := closed i].At[z := z].law;
+  \definition agreement: \forall (v: Input.domain.Carrier) ->
+    Comparison.totalComparison.forward.apply (Input.ProductComparison.apply v) = Output.finite.apply (iso.forward.apply v) :=
+    \fun (v: Input.domain.Carrier) => trans!{{Output.range.Carrier}} _ _ _
+      (Apply.law Comparison.totalComparison.forward (Finite.elements count) (\fun (i: Index) => (Domain.components i).apply (v i)))
+      (Values.congruent (Finite.elements count)
+        (\fun (i: Index) => Comparison.totalComparison.forward.apply ((Domain.components i).apply (v i)))
+        (\fun (i: Index) => (Range.components i).apply (iso.forward.apply v i))
+        (\fun (i: Index) => onTerm i (v i)));
+  \import Scalars.IsomorphismSquare[A := Input.domain, B := Domain.range, C := Output.domain, D := Output.range] \as Square;
+  \module Proved(h: Basis) {
+    \import Square.On[a := iso, b := Comparison.totalComparison, c := Algebra.At[z := z].productIsomorphism h, f := Output.finite] \as Proof;
+    \definition product: _ := Proof.isomorphism (\fun (v: Input.domain.Carrier) => sym!{{Output.range.Carrier}} _ _ (agreement v));
+    \import Output.With[iso := product, law := (\fun (v: Output.domain.Carrier) => \refl(Output.finite.apply v))] \as Direct;
+    \definition isomorphism: _ := Direct.isomorphism;
+  }
+  \module ProvedNative(h: NativeBasis) {
+    \definition isomorphism: _ := \parent.Proved[h := signedBasis h].isomorphism;
+  }
+}

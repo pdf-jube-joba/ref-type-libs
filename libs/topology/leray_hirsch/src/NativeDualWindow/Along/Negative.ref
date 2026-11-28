@@ -1,0 +1,7 @@
+\definition z: I.Int^ := I.Int^::negSucc n;
+\import \parent.At[z := z] \as At;
+\definition injective: At.Injective := \fun (x, y: From.Carrier z)(same: _) => trans!{{From.Carrier z}} _ _ _
+  (From.Negative[n := n].zero x) (sym!{{From.Carrier z}} _ _ (From.Negative[n := n].zero y));
+\definition onto: At.Onto := \fun (y: To.Carrier z) =>
+  Logic.existsIntro[From.Carrier z, { x: From.Carrier z \where Extended.map.apply z x = y }] (From.space z).zero
+    (sym!{{To.Carrier z}} _ _ (To.Negative[n := n].zero y));

@@ -1,0 +1,18 @@
+\module Component(i: Index) {
+  \import Modules.Isomorphism[V := source.Carrier i, W := target.Carrier i, source := source.space i, target := target.space i] \as Iso;
+  \definition Isomorphism: \Set := Iso.Isomorphism;
+}
+\module With(isos: \forall (i: Index) -> \parent.Component[i := i].Isomorphism) {
+  \import \parent.\parent.\parent.Maps[source := target, target := source] \as Back;
+  \definition inverse: Back.Data := \fun (i: Index) => (isos i).backward;
+  \definition forward: Data := \fun (i: Index) => (isos i).forward;
+  \import Modules.Isomorphism[V := Source.Carrier, W := Target.Carrier, source := Source.space, target := Target.space] \as Iso;
+  \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+    forward := map forward,
+    backward := Back.map inverse,
+    leftInverse := \fun (x: Source.Carrier) => Source.ext ((Back.map inverse).apply ((map forward).apply x)) x
+      (\fun (i: Index) => (isos i).leftInverse (x i)),
+    rightInverse := \fun (y: Target.Carrier) => Target.ext ((map forward).apply ((Back.map inverse).apply y)) y
+      (\fun (i: Index) => (isos i).rightInverse (y i)),
+  };
+}

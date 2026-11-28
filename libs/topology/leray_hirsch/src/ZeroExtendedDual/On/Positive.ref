@@ -1,0 +1,39 @@
+\definition z: I.Int^ := I.Int^::ofNat n;
+\import Chain.Positive[n := n] \as Chains;
+\import Source.Positive[n := n] \as Cochain;
+\import ZModules.Hom[V := C.family.Carrier n, W := K, source := C.family.space n, target := Restricted.coefficients.space]
+  .Composition[U := Chain.Carrier z, domain := Chain.space z] \as Extend;
+\import ZModules.Hom[V := Chain.Carrier z, W := K, source := Chain.space z, target := Restricted.coefficients.space]
+  .Composition[U := C.family.Carrier n, domain := C.family.space n] \as Restrict;
+\definition forwardValue[a: Source.Carrier z]: Target.Carrier z := Extend.compose a Chains.backward;
+\definition backwardValue[a: Target.Carrier z]: Source.Carrier z := Cochain.intro (Restrict.compose a Chains.forward);
+\import Modules.Hom[V := Source.Carrier z, W := Target.Carrier z, source := Source.space z, target := Target.space z] \as Forward;
+\import Modules.Hom[V := Target.Carrier z, W := Source.Carrier z, source := Target.space z, target := Source.space z] \as Backward;
+\definition forward: Forward.Map := Forward.Map {
+  apply := forwardValue,
+  addition := \fun (a, b: Source.Carrier z) => Target.At[z := z].ext (forwardValue ((Source.space z).add a b))
+    ((Target.space z).add (forwardValue a) (forwardValue b))
+    (\fun (x: Chain.Carrier z) => \refl(coefficients.space.add (a.apply x) (b.apply x))),
+  scalar := \fun (r: K)(a: Source.Carrier z) => Target.At[z := z].ext (forwardValue ((Source.space z).smul r a))
+    ((Target.space z).smul r (forwardValue a))
+    (\fun (x: Chain.Carrier z) => \refl(coefficients.space.smul r (a.apply x))),
+};
+\import Source.Index[z := z] \as Index;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Ordinary.Carrier n, S := Index.submodule.carrier] \as Equality;
+\definition backward: Backward.Map := Backward.Map {
+  apply := backwardValue,
+  addition := \fun (a, b: Target.Carrier z) => Equality.ext (backwardValue ((Target.space z).add a b))
+    ((Source.space z).add (backwardValue a) (backwardValue b))
+    (Ordinary.At[n := n].ext (backwardValue ((Target.space z).add a b)) ((Source.space z).add (backwardValue a) (backwardValue b))
+      (\fun (x: C.family.Carrier n) => \refl(coefficients.space.add (a.apply (Chains.intro x)) (b.apply (Chains.intro x))))),
+  scalar := \fun (r: K)(a: Target.Carrier z) => Equality.ext (backwardValue ((Target.space z).smul r a)) ((Source.space z).smul r (backwardValue a))
+    (Ordinary.At[n := n].ext (backwardValue ((Target.space z).smul r a)) ((Source.space z).smul r (backwardValue a))
+      (\fun (x: C.family.Carrier n) => \refl(coefficients.space.smul r (a.apply (Chains.intro x))))),
+};
+\definition isomorphism: \parent.At[z := z].Isomorphism := \parent.At[z := z].Isomorphism {
+  forward := forward, backward := backward,
+  leftInverse := \fun (a: Source.Carrier z) => Equality.ext (backwardValue (forwardValue a)) a
+    (Ordinary.At[n := n].ext (backwardValue (forwardValue a)) a (\fun (x: C.family.Carrier n) => \refl(a.apply x))),
+  rightInverse := \fun (a: Target.Carrier z) => Target.At[z := z].ext (forwardValue (backwardValue a)) a
+    (\fun (x: Chain.Carrier z) => \refl(a.apply x)),
+};

@@ -1,0 +1,121 @@
+\import std.Logic[].Equality[] \as Equality;
+\import Equality.Transport[A := I.Int^] \as Transport;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import chain_complexes.Integer[] \as Degrees;
+\import Degrees.Over[R := K, ring := baseRing] \as Signed;
+\import \root.DegreeShift[] \as Degree;
+\import N.Basic[].Def[] \as Nat;
+\import \root.TensorBasis[K := K, ring := ring].Of[P := A, Q := D] \as Origin;
+\import \root.TensorBasis[K := K, ring := ring].Of[P := C, Q := D] \as Destination;
+\import Origin.Fixed[q := q, beta := beta, closed := closed] \as SourceCup;
+\import Destination.Fixed[q := q, beta := beta, closed := closed] \as TargetCup;
+\import \parent.Cup[q := q, beta := beta, closed := closed] \as Cup;
+\import Hom.Native[P := A] \as BA;
+\import Hom.Native[P := B] \as BB;
+\import Hom.Native[P := C] \as BC;
+\import Hom.Native[P := LeftTotal.complex] \as TA;
+\import Hom.Native[P := MiddleTotal.complex] \as TB;
+\import Hom.Native[P := RightTotal.complex] \as TC;
+\import Cochains.ZeroExtension[C := BA.complex] \as LeftBase;
+\import Cochains.ZeroExtension[C := BB.complex] \as MiddleBase;
+\import Cochains.ZeroExtension[C := BC.complex] \as RightBase;
+\import Cochains.ZeroExtension[C := TA.complex] \as LeftTensor;
+\import Cochains.ZeroExtension[C := TB.complex] \as MiddleTensor;
+\import Cochains.ZeroExtension[C := TC.complex] \as RightTensor;
+\import Cochains.ShortExact[A := BC.complex, B := BB.complex, C := BA.complex].With[s := baseSequence] \as Base;
+\import Cochains.ShortExact[A := TC.complex, B := TB.complex, C := TA.complex].With[s := tensorSequence] \as Tensor;
+\import Signed.ShortExact[A := RightBase.complex, B := MiddleBase.complex, C := LeftBase.complex] \as SignedBase;
+\import Signed.ShortExact[A := RightTensor.complex, B := MiddleTensor.complex, C := LeftTensor.complex] \as SignedTensor;
+\definition next: I.Int^ -> I.Int^ := Degrees.next;
+\definition shift: I.Int^ -> I.Int^ := Degree.shift q;
+\definition shiftNext: \forall (z: I.Int^) -> shift (next z) = next (shift z) := cohomology_thom.LocalDisk[].shiftNext q;
+\definition input[z: I.Int^]: \Set := (Origin.source z).Carrier;
+\definition tensorInput[z: I.Int^]: \Set := (Origin.target z).Carrier;
+\definition tensorOutput[z: I.Int^]: \Set := (Destination.target z).Carrier;
+\definition baseDelta[z: I.Int^]: _ := SignedBase.At[s := Base.sequence, k := z].connecting;
+\definition tensorDelta[z: I.Int^]: _ := SignedTensor.At[s := Tensor.sequence, k := z].connecting;
+\definition Law[z: I.Int^]: \Prop := \forall (a: input z) ->
+  (tensorDelta (shift z)).apply ((SourceCup.map z).apply a) =
+  Transport.cast tensorOutput (shift (next z)) (next (shift z)) (shiftNext z) ((TargetCup.map (next z)).apply ((baseDelta z).apply a));
+\module Positive(p: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat p;
+  \definition m: N.Nat^ := Nat.add q p;
+  \definition raw: I.Int^ := I.Int^::ofNat m;
+  \definition rawNext: I.Int^ := next raw;
+  \import SourceCup.Positive[p := p] \as Lower;
+  \import TargetCup.Positive[p := N.Nat^::succ p] \as Upper;
+  \import \root.TensorCochainCup[K := K, ring := ring].Of[C := A, D := D].Fixed[q := q, beta := beta, closed := closed].Cohomology[p := p] \as LeftAction;
+  \import \root.TensorCochainCup[K := K, ring := ring].Of[C := C, D := D].Fixed[q := q, beta := beta, closed := closed].Cohomology[p := N.Nat^::succ p] \as RightAction;
+  \import Base.At[n := p] \as BaseDelta;
+  \import Tensor.At[n := m] \as TensorDelta;
+  \import Cochains.At[C := TA.complex, k := m] \as H;
+  \import Cochains.At[C := TC.complex, k := N.Nat^::succ m] \as J;
+  \import Cochains.At[C := BC.complex, k := N.Nat^::succ p] \as BaseOutput;
+  \import RightTensor.PositiveCohomology[n := N.Nat^::succ m] \as Final;
+  \import LeftTensor.PositiveCohomology[n := m] \as Initial;
+  \definition tensorCommutes: \forall (x: H.Cohomology) -> (tensorDelta raw).apply (Initial.backward.apply x) =
+    Final.backward.apply (TensorDelta.connecting.apply x) :=
+    \fun (x: H.Cohomology) => trans!{{tensorOutput rawNext}} _ _ _
+      (sym!{{tensorOutput rawNext}} _ _ (Final.leftInverse ((tensorDelta raw).apply (Initial.backward.apply x))))
+      (congr!{J.Cohomology {tensorOutput rawNext}} Final.backward.apply _ _
+        (trans!{J.Cohomology} _ _ _ (TensorDelta.connectingCommutes (Initial.backward.apply x))
+          (congr!{H.Cohomology J.Cohomology} TensorDelta.connecting.apply _ _ (Initial.rightInverse x))));
+  \definition regrade: rawNext = next (shift z) := congr!{I.Int^ I.Int^} next _ _ Lower.same;
+  \definition rawLaw: \forall (a: input z) -> (tensorDelta raw).apply (Lower.native.apply a) = Upper.native.apply ((baseDelta z).apply a) :=
+    \fun (a: input z) => eq_reason_in!{{tensorOutput rawNext} _
+      "=" _ "by" { tensorCommutes (LeftAction.linear.apply (LeftBase.PositiveCohomology[n := p].forward.apply a)) }
+      "=" _ "by" { congr!{J.Cohomology {tensorOutput rawNext}} Final.backward.apply _ _
+        (Cup.At[p := p].connectingLaw (LeftBase.PositiveCohomology[n := p].forward.apply a)) }
+      "=" _ "by" { congr!{BaseOutput.Cohomology {tensorOutput rawNext}}
+        (\fun (u: BaseOutput.Cohomology) => Final.backward.apply (RightAction.linear.apply u)) _ _
+        (sym!{BaseOutput.Cohomology} _ _ (BaseDelta.connectingCommutes a)) }
+    };
+  \definition law: Law z := \fun (a: input z) => eq_reason_in!{{tensorOutput (next (shift z))} _
+    "=" _ "by" { sym!{{tensorOutput (next (shift z))}} _ _
+      (Transport.natural tensorInput (\fun (k: I.Int^) => tensorOutput (next k)) (\fun (k: I.Int^) => (tensorDelta k).apply)
+        raw (shift z) Lower.same (Lower.native.apply a)) }
+    "=" _ "by" { Transport.reindex tensorOutput next raw (shift z) Lower.same ((tensorDelta raw).apply (Lower.native.apply a)) }
+    "=" _ "by" { congr!{{tensorOutput rawNext} {tensorOutput (next (shift z))}}
+      (Transport.cast tensorOutput rawNext (next (shift z)) regrade) _ _ (rawLaw a) }
+    "=" _ "by" { sym!{{tensorOutput (next (shift z))}} _ _
+      (Transport.castComposition tensorOutput rawNext (shift (next z)) (next (shift z)) Upper.same (shiftNext z)
+        (Upper.native.apply ((baseDelta z).apply a))) }
+  };
+}
+\module Negative(p: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::negSucc p;
+  \definition upper: I.Int^ := next z;
+  \definition shiftUpper: I.Int^ := shift upper;
+  \definition upperShift: I.Int^ := next (shift z);
+  \import Signed.At[C := LeftBase.complex, z := z] \as H;
+  \import Modules.Hom[V := H.Closed, W := H.Cohomology, source := H.cycleSpace, target := H.cohomologySpace] \as Classes;
+  \import singular_cellular_algebra.Algebra[].Refinement[A := LeftBase.Carrier z, S := H.cycles.carrier] \as ClosedRefinement;
+  \definition inputZero: \forall (a: input z) -> a = (Origin.source z).space.zero := H.classInduction
+    (\fun (a: input z) => a = (Origin.source z).space.zero)
+    (\fun (x: H.Closed) => trans!{H.Cohomology} _ _ _
+      (congr!{H.Closed H.Cohomology} H.classOf _ _ (ClosedRefinement.ext x H.cycleSpace.zero (LeftBase.Negative[n := p].zero x))) (Classes.zeroPreserved H.classLinear));
+  \import Modules.Hom[V := input z, W := (Destination.source upper).Carrier,
+    source := (Origin.source z).space, target := (Destination.source upper).space] \as BaseMaps;
+  \import Modules.Hom[V := tensorInput (shift z), W := tensorOutput upperShift,
+    source := (Origin.target (shift z)).space, target := (Destination.target upperShift).space] \as TensorMaps;
+  \import Modules.Hom[V := (Destination.source upper).Carrier, W := tensorOutput shiftUpper,
+    source := (Destination.source upper).space, target := (Destination.target shiftUpper).space] \as CupMaps;
+  \definition zero[k: I.Int^]: tensorOutput k := (Destination.target k).space.zero;
+  \definition law: Law z := \fun (a: input z) => eq_reason_in!{{tensorOutput upperShift} _
+    "=" _ "by" { TensorMaps.zeroPreserved (tensorDelta (shift z)) }
+    "=" _ "by" { sym!{{tensorOutput upperShift}} _ _ (Transport.pointNatural tensorOutput zero shiftUpper upperShift (shiftNext z)) }
+    "=" _ "by" { congr!{{tensorOutput shiftUpper} {tensorOutput upperShift}} (Transport.cast tensorOutput shiftUpper upperShift (shiftNext z)) _ _
+      (sym!{{tensorOutput shiftUpper}} _ _ (trans!{{tensorOutput shiftUpper}} _ _ _
+        (congr!{{(Destination.source upper).Carrier} {tensorOutput shiftUpper}} (TargetCup.map upper).apply _ _
+          (trans!{{(Destination.source upper).Carrier}} _ _ _
+            (congr!{{input z} {(Destination.source upper).Carrier}} (baseDelta z).apply _ _ (inputZero a)) (BaseMaps.zeroPreserved (baseDelta z))))
+        (CupMaps.zeroPreserved (TargetCup.map upper)))) }
+  };
+}
+\definition connectingLaw: \forall (z: I.Int^) -> Law z := \induction (z: I.Int^) \return Law z \with {
+  | ofNat: \fun (p: N.Nat^) => Positive[p := p].law
+  | negSucc: \fun (p: N.Nat^) => Negative[p := p].law
+};

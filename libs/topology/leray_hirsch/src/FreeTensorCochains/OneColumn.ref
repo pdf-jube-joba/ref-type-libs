@@ -1,0 +1,112 @@
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import chain_complexes.Integer[] \as Degrees;
+\import Degrees.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Cochains;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as ComplexHom;
+\module On(Q: Chains.Complex) {
+  \definition term[z: I.Int^]: IntegerModules.Bundle := IntegerModules.Bundle { Carrier := Q.family.Carrier z, space := Q.family.space z };
+  \module At(z: I.Int^) {
+    \import \root.FreeTensorCochains[K := K, ring := ring, Generators := Generators].With[W := term z] \as Evaluation;
+    \definition Carrier: \Set := Evaluation.tensorCarrier;
+    \definition space: IntegerModules.Space Carrier := Evaluation.tensorSpace;
+    \definition tensor: Free.Carrier -> Q.family.Carrier z -> Carrier := Evaluation.tensor;
+    \definition evaluation: _ := Evaluation.isomorphism;
+    \definition valueExt: _ := Evaluation.valueExt;
+  }
+  \definition family: Chains.Family := Chains.Family {
+    Carrier := \fun (z: I.Int^) => \parent.On[Q := Q].At[z := z].Carrier,
+    space := \fun (z: I.Int^) => \parent.On[Q := Q].At[z := z].space,
+  };
+  \module Step(z: I.Int^) {
+    \definition previous: I.Int^ := Degrees.previous z;
+    \import \parent.At[z := z] \as Current;
+    \import \parent.At[z := previous] \as Previous;
+    \import IntegerModules.End[V := Free.Carrier, space := Free.space] \as Identity;
+    \import IntegerModules.Hom[V := Q.family.Carrier z, W := Q.family.Carrier previous,
+      source := Q.family.space z, target := Q.family.space previous] \as Fiber;
+    \definition fiber: Fiber.Map := Fiber.Map { apply := Q.differential.apply z, addition := Q.laws.addition z, scalar := Q.laws.scalar z };
+    \import IntegerModules.Tensor[V := Free.Carrier, W := Q.family.Carrier z, left := Free.space, right := Q.family.space z]
+      .Mapping[U := Free.Carrier, Z := Q.family.Carrier previous, targetLeft := Free.space, targetRight := Q.family.space previous] \as Map;
+    \definition linear: _ := Map.map Identity.identity fiber;
+    \definition onTensor: \forall (x: Free.Carrier)(y: Q.family.Carrier z) ->
+      linear.apply (Current.tensor x y) = Previous.tensor x (fiber.apply y) :=
+      Map.onTensor Identity.identity fiber;
+  }
+  \definition differential: Chains.DifferentialData[family] := Chains.DifferentialData[family] {
+    apply := \fun (z: I.Int^) => \parent.On[Q := Q].Step[z := z].linear.apply,
+  };
+  \module Square(z: I.Int^) {
+    \import \parent.Step[z := z] \as First;
+    \import \parent.Step[z := Degrees.previous z] \as Second;
+    \import \parent.At[z := z] \as Source;
+    \import \parent.At[z := Degrees.previous (Degrees.previous z)] \as Target;
+    \import IntegerModules.Hom[V := family.Carrier (Degrees.previous z), W := Target.Carrier, source := (family.space (Degrees.previous z)), target := Target.space]
+      .Composition[U := Source.Carrier, domain := Source.space] \as Composition;
+    \import IntegerModules.Hom[V := Source.Carrier, W := Target.Carrier, source := Source.space, target := Target.space] \as Maps;
+    \import IntegerModules.Tensor[V := Free.Carrier, W := Q.family.Carrier z, left := Free.space, right := Q.family.space z]
+      .Universal[U := Target.Carrier, target := Target.space] \as Universal;
+    \import IntegerModules.Tensor[V := Free.Carrier, W := Q.family.Carrier (Degrees.previous (Degrees.previous z)),
+      left := Free.space, right := Q.family.space (Degrees.previous (Degrees.previous z))] \as Tensor;
+    \definition onTensor: \forall (x: Free.Carrier)(y: Q.family.Carrier z) ->
+      (Composition.compose Second.linear First.linear).apply (Source.tensor x y) = Target.space.zero :=
+      \fun (x: Free.Carrier)(y: Q.family.Carrier z) => trans!{Target.Carrier} _ _ _
+        (congr!{{family.Carrier (Degrees.previous z)} Target.Carrier} Second.linear.apply _ _ (First.onTensor x y))
+        (trans!{Target.Carrier} _ _ _ (Second.onTensor x (First.fiber.apply y))
+          (trans!{Target.Carrier} _ _ _
+            (congr!{{Q.family.Carrier (Degrees.previous (Degrees.previous z))} Target.Carrier} (Tensor.tensor x) _ _ (Q.laws.squareZero z y))
+            (Tensor.tensorZeroRight x)));
+    \definition law: \forall (x: Source.Carrier) -> Second.linear.apply (First.linear.apply x) = Target.space.zero :=
+      \fun (x: Source.Carrier) => congr!{Maps.Map Target.Carrier} (\fun (f: Maps.Map) => f.apply x) _ _
+        (Universal.ext (Composition.compose Second.linear First.linear) Maps.zeroMap onTensor);
+  }
+  \definition tensorComplex: Chains.Complex := Chains.Complex {
+    family := family, differential := differential,
+    laws := Chains.DifferentialLaws[family, differential] {
+      addition := \fun (z: I.Int^) => \parent.On[Q := Q].Step[z := z].linear.addition,
+      scalar := \fun (z: I.Int^) => \parent.On[Q := Q].Step[z := z].linear.scalar,
+      squareZero := \fun (z: I.Int^) => \parent.On[Q := Q].Square[z := z].law,
+    },
+  };
+  \import ComplexHom.On[P := tensorComplex] \as TensorCochains;
+  \import ComplexHom.On[P := Q] \as FiberCochains;
+  \import \root.CohomologyPowers[K := K, ring := ring, Index := Generators].On[C := FiberCochains.complex] \as Powers;
+  \module Commutes(z: I.Int^) {
+    \definition next: I.Int^ := Degrees.next z;
+    \import \parent.At[z := z] \as Current;
+    \import \parent.At[z := next] \as Upper;
+    \import \parent.Step[z := next] \as UpperStep;
+    \import Chains.Prior[C := tensorComplex] \as TensorPrior;
+    \import Chains.Prior[C := Q] \as FiberPrior;
+    \import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+    \definition tensorValue[k: I.Int^][g: Generators][y: Q.family.Carrier k]: family.Carrier k :=
+      \parent.\parent.On[Q := Q].At[z := k].tensor (Free.generator g) y;
+    \definition onTensor: \forall (g: Generators)(y: Q.family.Carrier next) ->
+      TensorPrior.value z (tensorValue next g y) = tensorValue z g (FiberPrior.value z y) :=
+      \fun (g: Generators)(y: Q.family.Carrier next) => trans!{{Current.Carrier}} _ _ _
+        (congr!{{family.Carrier (Degrees.previous next)} {Current.Carrier}}
+          (Transport.cast family.Carrier (Degrees.previous next) z (Degrees.previousNext z)) _ _
+          (UpperStep.onTensor (Free.generator g) y))
+        (Transport.natural Q.family.Carrier family.Carrier (\fun (k: I.Int^) => tensorValue k g)
+          (Degrees.previous next) z (Degrees.previousNext z) (Q.differential.apply next y));
+    \definition law: \forall (h: TensorCochains.Carrier z) ->
+      Powers.complex.differential.apply z (Current.evaluation.forward.apply h) =
+      Upper.evaluation.forward.apply (TensorCochains.apply z h) :=
+      \fun (h: TensorCochains.Carrier z) => Upper.valueExt
+        (Powers.complex.differential.apply z (Current.evaluation.forward.apply h))
+        (Upper.evaluation.forward.apply (TensorCochains.apply z h))
+        (\fun (g: Generators)(y: Q.family.Carrier next) => congr!{{Current.Carrier} K} h.apply _ _
+          (sym!{{Current.Carrier}} _ _ (onTensor g y)));
+  }
+  \import Cochains.Isomorphism[C := TensorCochains.complex, D := Powers.complex]
+    .Degreewise[isomorphisms := (\fun (z: I.Int^) => \parent.On[Q := Q].At[z := z].evaluation)] \as Compare;
+  \definition isomorphism: _ := Compare.isomorphism (\fun (z: I.Int^) => \parent.On[Q := Q].Commutes[z := z].law);
+  \module Cohomology(z: I.Int^) {
+    \import Cochains.Isomorphism[C := TensorCochains.complex, D := Powers.complex].On[e := isomorphism].At[z := z] \as First;
+    \import Cochains.At[C := TensorCochains.complex, z := z] \as Source;
+    \import Cochains.At[C := Powers.complex, z := z] \as Model;
+    \import Powers.Degree[z := z] \as Second;
+    \import Modules.Isomorphism[V := Source.Cohomology, W := Model.Cohomology, source := Source.cohomologySpace, target := Model.cohomologySpace]
+      .Composition[U := Second.classes.Carrier, final := Second.classes.space] \as Composition;
+    \definition comparison: _ := Composition.compose Second.isomorphism First.isomorphism;
+  }
+  \module Mapping(V: Cochains.Complex, j: Cochains.Map[C := V, D := FiberCochains.complex].Map);
+}

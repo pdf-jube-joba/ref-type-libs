@@ -1,0 +1,25 @@
+\import Abelian.From[V := Term.Carrier, domain := Term.space] \as Cochains;
+\definition add: \forall (a, b: Left.Carrier p) -> map ((Left.space p).add a b) beta = Cochains.space.add (map a beta) (map b beta) :=
+  \fun (a, b: Left.Carrier p) => Universal.ext (map ((Left.space p).add a b) beta) (Cochains.space.add (map a beta) (map b beta))
+    (\fun (x: C.family.Carrier p)(y: D.family.Carrier q) => eq_reason_in!{K _
+      "=" _ "by" { onTensor ((Left.space p).add a b) beta x y }
+      "=" _ "by" { baseRing.semiring.rightDistributive (a.apply x) (b.apply x) (beta.apply y) }
+      "=" _ "by" { sym!{K} _ _ (congr!{K K K} baseRing.add _ _ _ _ (onTensor a beta x y) (onTensor b beta x y)) }
+    });
+\definition scale: \forall (r: K)(a: Left.Carrier p) -> map ((Left.space p).smul r a) beta = Cochains.space.smul r (map a beta) :=
+  \fun (r: K)(a: Left.Carrier p) => Universal.ext (map ((Left.space p).smul r a) beta) (Cochains.space.smul r (map a beta))
+    (\fun (x: C.family.Carrier p)(y: D.family.Carrier q) => eq_reason_in!{K _
+      "=" _ "by" { onTensor ((Left.space p).smul r a) beta x y }
+      "=" _ "by" { baseRing.semiring.multiplicative.associative r (a.apply x) (beta.apply y) }
+      "=" _ "by" { sym!{K} _ _ (congr!{K K} (baseRing.mul r) _ _ (onTensor a beta x y)) }
+    });
+\import Modules.Hom[V := Left.Carrier p, W := TotalHom.Carrier n, source := Left.space p, target := TotalHom.space n] \as Linear;
+\definition linear: Linear.Map := Linear.Map {
+  apply := \fun (a: Left.Carrier p) => total a beta,
+  addition := \fun (a, b: Left.Carrier p) => TotalHom.At[n := n].ext
+    (total ((Left.space p).add a b) beta) ((TotalHom.space n).add (total a beta) (total b beta))
+    (\fun (x: Total.Carrier n) => congr!{Cochains.Carrier K} (\fun (h: Cochains.Carrier) => h.apply (Current.coordinate index x)) _ _ (add a b)),
+  scalar := \fun (r: K)(a: Left.Carrier p) => TotalHom.At[n := n].ext
+    (total ((Left.space p).smul r a) beta) ((TotalHom.space n).smul r (total a beta))
+    (\fun (x: Total.Carrier n) => congr!{Cochains.Carrier K} (\fun (h: Cochains.Carrier) => h.apply (Current.coordinate index x)) _ _ (scale r a)),
+};

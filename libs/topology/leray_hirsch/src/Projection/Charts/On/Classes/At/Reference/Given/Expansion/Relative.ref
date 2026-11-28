@@ -1,0 +1,42 @@
+\import \root.ProductPair[X := LocalBase.CarrierSet, F := F, base := LocalBase.topology base, fiber := fiber, subset := part]
+  .AlexanderWhitney[].RelativeMap[].CohomologyModel[K := K, ring := ring] \as PairModel;
+\import PairModel.With[count := count, degrees := degree, cycles := value, closed := closed] \as RelativeModel;
+\import \root.Projection[X := LocalBase.CarrierSet, E := ProductCarrier, base := LocalBase.topology base, total := chartTarget,
+  projection := External.leftProjection, continuous := External.leftContinuous].Over[U := part, K := K, ring := ring] \as RelativeProjection;
+\import RelativeProjection.Comparison[count := count].With[degree := degree, classes := reference].At[z := z] \as StandardDirect;
+\import RelativeProjection.Comparison[count := count].With[degree := degree, classes := lift].At[z := z] \as ActualDirect;
+\import StandardDirect.ProductCoordinates[] \as Standard;
+\import ActualDirect.ProductCoordinates[] \as Actual;
+\definition referenceIso: _ := RelativeModel.At[z := z].ProvedNative[h := basis].isomorphism;
+\import Modules.DirectSum[Index := Index, family := StandardDirect.family] \as DirectSum;
+\definition referenceLaw: \forall (a: DirectSum.Carrier) -> referenceIso.forward.apply a = StandardDirect.linear.apply a :=
+  \fun (a: DirectSum.Carrier) => \refl(StandardDirect.linear.apply a);
+\import Standard.FromDirect[iso := referenceIso, law := referenceLaw] \as StandardProduct;
+\definition comparison: _ := StandardProduct.isomorphism;
+\import Modules.Hom[V := Standard.range.Carrier, W := Standard.domain.Carrier, source := Standard.range.space, target := Standard.domain.space]
+  .Composition[U := Actual.domain.Carrier, domain := Actual.domain.space] \as Normalize;
+\definition normalized: _ := Normalize.compose comparison.backward Actual.finite;
+\import \root.DegreeShift[] \as Shift;
+\definition family: Modules.Family[N.Nat^] := Modules.Family[N.Nat^] {
+  Carrier := \fun (q: N.Nat^) => RelativeProjection.baseFamily.Carrier (Shift.unshift q z),
+  space := \fun (q: N.Nat^) => RelativeProjection.baseFamily.space (Shift.unshift q z),
+};
+\import \root.GradedBlocks[K := K, ring := ring, count := count, degree := degree].On[V := family] \as Blocks;
+\import \root.RelativeZeroAction[A := LocalBase.CarrierSet, source := LocalBase.topology base, subset := part, K := K, ring := ring] \as RightAction;
+\definition Choices: \Set := \forall (q: N.Nat^) -> \parent.Blocks[q := q].Inverse;
+\definition existsChoices: \exists Choices :=
+  \axiom:classicalIndefiniteChoice(N.Nat^, (\fun (q: N.Nat^) => \parent.Blocks[q := q].Inverse), (\fun (q: N.Nat^) => \parent.Blocks[q := q].invertible));
+\module Cell(i, j: Index, x: ActualDirect.family.Carrier i);
+\module Chosen(inverses: Choices);
+
+\import Modules.Isomorphism[V := Actual.domain.Carrier, W := Actual.range.Carrier, source := Actual.domain.space, target := Actual.range.space]
+  .OfBijective[f := Actual.finite] \as Result;
+\definition injective: Result.Injective := \block {
+  \takefrom inverses: Choices \by existsChoices \then
+  \return Chosen[inverses := inverses].injective
+};
+\definition onto: Result.Onto := \block {
+  \takefrom inverses: Choices \by existsChoices \then
+  \return Chosen[inverses := inverses].onto
+};
+\definition isomorphism: _ := Result.isomorphism injective onto;

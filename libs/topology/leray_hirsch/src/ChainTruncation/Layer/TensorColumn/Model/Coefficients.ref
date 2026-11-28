@@ -1,0 +1,79 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Scalars;
+\definition coefficients: Scalars.Bundle := Scalars.Bundle { Carrier := K, space := Scalars.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\import Scalars.End[V := K, space := Scalars.scalarModule] \as Identity;
+\import Hom.Native[P := Total.complex] \as TotalCochains;
+\import Hom.Native[P := recentered] \as Recentered;
+\import Hom.Native[P := Row.complex] \as Unsigned;
+\import Hom.NativeMapping[P := recentered, Q := Row.complex, L := coefficients].On[f := forward, u := Identity.identity] \as Pull;
+\import Hom.NativeMapping[P := Row.complex, Q := recentered, L := coefficients].On[f := backward, u := Identity.identity] \as Push;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Cochains;
+\import Cochains.Map[C := Unsigned.complex, D := Recentered.complex] \as Forward;
+\import Cochains.Map[C := Recentered.complex, D := Unsigned.complex] \as Backward;
+\import Backward.Composition[B := Unsigned.complex] \as Left;
+\import Forward.Composition[B := Recentered.complex] \as Right;
+\import Cochains.End[C := Unsigned.complex] \as SourceEnd;
+\import Cochains.End[C := Recentered.complex] \as TargetEnd;
+\definition left: Left.compose Push.map Pull.map = SourceEnd.identity :=
+  Cochains.Map[C := Unsigned.complex, D := Unsigned.complex].ext (Left.compose Push.map Pull.map) SourceEnd.identity
+    (\fun (q: N.Nat^)(h: Unsigned.Carrier q) => Unsigned.At[n := q].ext ((Left.compose Push.map Pull.map).apply q h) h
+      (\fun (x: Row.family.Carrier q) => congr!{{Row.family.Carrier q} K} h.apply _ _ (isomorphism.rightInverse q x)));
+\definition right: Right.compose Pull.map Push.map = TargetEnd.identity :=
+  Cochains.Map[C := Recentered.complex, D := Recentered.complex].ext (Right.compose Pull.map Push.map) TargetEnd.identity
+    (\fun (q: N.Nat^)(h: Recentered.Carrier q) => Recentered.At[n := q].ext ((Right.compose Pull.map Push.map).apply q h) h
+      (\fun (x: recentered.family.Carrier q) => congr!{{recentered.family.Carrier q} K} h.apply _ _ (isomorphism.leftInverse q x)));
+\import \root.CochainTail[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].Of[C := TotalCochains.complex] \as Tail;
+\import Scalars.AbelianHom[N := coefficients] \as IntegerCoefficients;
+\module Low(n: N.Nat^) {
+  \import Modules.Hom[V := Total.Carrier n, W := K, source := Total.space n, target := IntegerCoefficients.coefficients.space] \as Maps;
+  \definition zero[earlier: Bounds.Lt n cutoff]: \forall (h: TotalCochains.Carrier n) -> h = (TotalCochains.space n).zero :=
+    \fun (h: TotalCochains.Carrier n) => TotalCochains.At[n := n].ext h (TotalCochains.space n).zero
+      (\fun (x: Total.Carrier n) => trans!{K} _ _ _
+        (congr!{{Total.Carrier n} K} h.apply _ _ (\parent.\parent.\parent.Below[n := n].zero earlier x))
+        (Maps.zeroPreserved h));
+}
+\definition below: Tail.LowerZero cutoff := \fun (n: N.Nat^)(earlier: Bounds.Lt n cutoff) => Low[n := n].zero earlier;
+\import Tail.Drop[cutoff := cutoff].Compare[zeros := below] \as ChangeDegree;
+\module At(q: N.Nat^) {
+  \import Cochains.At[C := Unsigned.complex, k := q] \as Source;
+  \import Cochains.At[C := Recentered.complex, k := q] \as Middle;
+  \import Cochains.At[C := TotalCochains.complex, k := grade q] \as Target;
+  \import Cochains.Map[C := Unsigned.complex, D := Unsigned.complex].At[k := q] \as RowMaps;
+  \import Cochains.Map[C := Recentered.complex, D := Recentered.complex].At[k := q] \as RecenteredMaps;
+  \import Forward.At[k := q] \as Forward;
+  \import Backward.At[k := q] \as Backward;
+  \definition leftInverse: \forall (x: Source.Cohomology) -> (Backward.induced Push.map).apply ((Forward.induced Pull.map).apply x) = x :=
+    \fun (x: Source.Cohomology) => eq_reason_in!{Source.Cohomology _
+      "=" _ "by" { sym!{Source.Cohomology} _ _ (Left.At[k := q].compositionOnCohomology Push.map Pull.map x) }
+      "=" _ "by" { congr!{{Cochains.Map[C := Unsigned.complex, D := Unsigned.complex].Map} Source.Cohomology}
+        (\fun (f: Cochains.Map[C := Unsigned.complex, D := Unsigned.complex].Map) => (RowMaps.induced f).apply x) _ _ left }
+      "=" _ "by" { SourceEnd.At[k := q].identityOnCohomology x }
+    };
+  \definition rightInverse: \forall (x: Middle.Cohomology) -> (Forward.induced Pull.map).apply ((Backward.induced Push.map).apply x) = x :=
+    \fun (x: Middle.Cohomology) => eq_reason_in!{Middle.Cohomology _
+      "=" _ "by" { sym!{Middle.Cohomology} _ _ (Right.At[k := q].compositionOnCohomology Pull.map Push.map x) }
+      "=" _ "by" { congr!{{Cochains.Map[C := Recentered.complex, D := Recentered.complex].Map} Middle.Cohomology}
+        (\fun (f: Cochains.Map[C := Recentered.complex, D := Recentered.complex].Map) => (RecenteredMaps.induced f).apply x) _ _ right }
+      "=" _ "by" { TargetEnd.At[k := q].identityOnCohomology x }
+    };
+  \import Scalars.Isomorphism[V := Source.Cohomology, W := Middle.Cohomology, source := Source.cohomologySpace, target := Middle.cohomologySpace] \as Iso;
+  \definition gauge: Iso.Isomorphism := Iso.Isomorphism {
+    forward := Forward.induced Pull.map, backward := Backward.induced Push.map, leftInverse := leftInverse, rightInverse := rightInverse,
+  };
+  \import Iso.Composition[U := Target.Cohomology, final := Target.cohomologySpace] \as Final;
+  \definition isomorphism: _ := Final.compose ChangeDegree.At[q := q].isomorphism gauge;
+  \definition rowCycle[x: Target.CycleCarrier]: Source.CycleCarrier := (Backward.cyclesMap Push.map).apply x;
+  \definition backwardOnClass: \forall (x: Target.CycleCarrier) ->
+    isomorphism.backward.apply (Target.classOf x) = Source.classOf (rowCycle x) :=
+    \fun (x: Target.CycleCarrier) => trans!{Source.Cohomology} _ _ _
+      (congr!{Middle.Cohomology Source.Cohomology} (Backward.induced Push.map).apply _ _
+        (ChangeDegree.At[q := q].backwardOnClass x))
+      (Backward.onClass Push.map x);
+}
+
+\module LayerCup;
+
+\module FreeRow(Generators: \Set,
+  basis: Modules.Isomorphism[V := Modules.Free[Generators := Generators].Carrier, W := concentrated.family.Carrier cutoff,
+    source := Modules.Free[Generators := Generators].space, target := concentrated.family.space cutoff].Isomorphism);

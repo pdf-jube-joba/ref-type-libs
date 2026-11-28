@@ -1,0 +1,64 @@
+\import Base.Subspace[S := V] \as LocalBase;
+\import Total.Subspace[S := preimage V] \as LocalTotal;
+\definition BaseCarrier: \Set := LocalBase.CarrierSet;
+\definition TotalCarrier: \Set := LocalTotal.CarrierSet;
+\definition baseTopology: LocalBase.SubspaceTopology := LocalBase.topology base;
+\definition totalTopology: LocalTotal.SubspaceTopology := LocalTotal.topology total;
+\definition basePart: \Pow BaseCarrier := LocalBase.Trace U;
+\definition totalPart: \Pow TotalCarrier := LocalTotal.Trace (preimage U);
+\definition project[e: TotalCarrier]: BaseCarrier :=
+  \into[X](projection e, V) \by { \bysub(E, preimage V, e) };
+\import topology.Continuity[A := E, B := X].Restriction[S := preimage V] \as Restrict;
+\import topology.Continuity[A := TotalCarrier, B := X].Corestriction[S := V] \as Corestrict;
+\definition regular: _ := Corestrict.corestrictContinuous totalTopology base project
+  (Restrict.restrictContinuous total base projection continuous);
+\import topology.Continuity[A := BaseCarrier, B := X].Corestriction[S := V] \as BaseInclusion;
+\import topology.Continuity[A := TotalCarrier, B := E].Corestriction[S := preimage V] \as TotalInclusion;
+\definition baseInclude: BaseCarrier -> X := \fun (b: BaseCarrier) => b;
+\definition totalInclude: TotalCarrier -> E := \fun (e: TotalCarrier) => e;
+\definition baseContinuous: _ := BaseInclusion.inclusionContinuous base;
+\definition totalContinuous: _ := TotalInclusion.inclusionContinuous total;
+\import singular_cohomology.Relative[A := BaseCarrier, source := baseTopology, subset := basePart] \as BasePair;
+\import singular_cohomology.Relative[A := TotalCarrier, source := totalTopology, subset := totalPart] \as TotalPair;
+\import BasePair.Maps[B := X].Over[target := base, targetSubset := U] \as BaseMaps;
+\import TotalPair.Maps[B := E].Over[target := total, targetSubset := preimage U] \as TotalMaps;
+\definition baseMap: BaseMaps.Map := \into[BaseCarrier -> X](baseInclude, BaseMaps.Map) \by {
+  BaseMaps.Laws[baseInclude] {
+    continuous := baseContinuous, contained := \fun (b: BasePair.SubspaceCarrier) => \bysub(BaseCarrier, basePart, b),
+  }
+};
+\definition totalMap: TotalMaps.Map := \into[TotalCarrier -> E](totalInclude, TotalMaps.Map) \by {
+  TotalMaps.Laws[totalInclude] {
+    continuous := totalContinuous, contained := \fun (e: TotalPair.SubspaceCarrier) => \bysub(TotalCarrier, totalPart, e),
+  }
+};
+\import \parent.Along[Y := BaseCarrier, Z := TotalCarrier, newBase := baseTopology, newTotal := totalTopology,
+  newPart := basePart, newProjection := project, newContinuous := regular,
+  baseMap := baseMap, totalMap := totalMap, square := (\fun (e: TotalCarrier) => \refl(projection e))] \as Inclusion;
+\import singular_products.Cochains[A := TotalCarrier, source := totalTopology, R := K, ring := ring].Cohomology[] \as LocalClasses;
+\definition lift[q: N.Nat^][u: TotalCohomology.Group q]: LocalClasses.Group q := Inclusion.restricted q u;
+\import \root.Projection[X := BaseCarrier, E := TotalCarrier, base := baseTopology, total := totalTopology, projection := project, continuous := regular]
+  .Over[U := basePart, K := K, ring := ring] \as Local;
+\import std.Data[].FinSet[] \as Finite;
+\module Comparison(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i)) {
+  \definition localClasses[i: Finite.Fin count]: LocalClasses.Group (degree i) := lift (degree i) (classes i);
+  \import Local.Comparison[count := count].With[degree := degree, classes := localClasses] \as Test;
+  \module At(z: I.Int^) {
+    \import Test.At[z := z].ProductCoordinates[] \as Compare;
+    \definition domain: Modules.Bundle := Compare.domain;
+    \definition range: Modules.Bundle := Compare.range;
+    \definition linear: Modules.MapBetween domain range := Compare.finite;
+    \import Modules.Isomorphism[V := domain.Carrier, W := range.Carrier, source := domain.space, target := range.space].OfBijective[f := linear]
+      \as Thm;
+    \definition Injective: \Prop := Thm.Injective;
+    \definition Onto: \Prop := Thm.Onto;
+    \definition isomorphism[injective: Injective][onto: Onto]: _ := Thm.isomorphism injective onto;
+  }
+  \structure Isomorphisms: \Prop := {
+    injective: \forall (z: I.Int^) -> At[z := z].Injective,
+    onto: \forall (z: I.Int^) -> At[z := z].Onto,
+  };
+}
+
+\module Inside(S: \Pow X, contained: Base.Subset S V);

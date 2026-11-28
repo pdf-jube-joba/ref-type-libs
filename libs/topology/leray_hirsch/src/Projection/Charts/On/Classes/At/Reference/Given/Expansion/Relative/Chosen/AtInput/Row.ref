@@ -1,0 +1,6 @@
+\import Modules.Sums[I := Index].Vector[V := StandardDirect.family.Carrier j, space := StandardDirect.family.space j] \as Values;
+\import Values.Mapping[W := Standard.range.Carrier, target := Standard.range.space] \as Move;
+\definition value: StandardDirect.family.Carrier j := Values.sum (Finite.elements count) (\fun (i: Index) => coefficient i j);
+\definition onImage: (StandardDirect.components j).apply value =
+  Sums.sum (Finite.elements count) (\fun (i: Index) => (StandardDirect.components j).apply (coefficient i j)) :=
+  Move.law (StandardDirect.components j) (Finite.elements count) (\fun (i: Index) => coefficient i j);

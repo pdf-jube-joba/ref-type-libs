@@ -1,0 +1,46 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Finite;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\definition Index: \Set := Finite.Fin count;
+\import \root.Projection[X := X, E := E, base := base, total := total, projection := projection, continuous := continuous].Lifts[K := K, ring := ring, count := count]
+  \as Lifts;
+\import topology.Homeomorphism[A := LocalTotal.CarrierSet, B := Product.CarrierSet] \as Geometry;
+\definition chartLaws: _ := Geometry.laws (LocalTotal.topology total) chartTarget chart.coordinates;
+\import topology.Continuity[A := LocalTotal.CarrierSet, B := E].Corestriction[S := preimage U] \as Ambient;
+\definition ambient[e: LocalTotal.CarrierSet]: E := e;
+\definition ambientContinuous: _ := Ambient.inclusionContinuous total;
+\definition toAmbient[y: Product.CarrierSet]: E := chart.coordinates.backward y;
+\import topology.Composition[A := Product.CarrierSet, B := LocalTotal.CarrierSet, C := E] \as Compose;
+\definition toAmbientContinuous: _ := Compose.composeContinuous chartTarget (LocalTotal.topology total) total
+  chart.coordinates.backward ambient chartLaws.backwardContinuous ambientContinuous;
+\import singular_products.Cochains[A := Product.CarrierSet, source := chartTarget, R := K, ring := ring] \as ProductCochains;
+\import ProductCochains.Cohomology[] \as H;
+\import H.Pullback[B := E, target := total] \as Classes;
+\definition lift[i: Index]: H.Group (degree i) := Classes.apply (degree i) toAmbient toAmbientContinuous (classes i);
+\module At(x: LocalBase.CarrierSet) {
+  \import \parent.\parent.Fiber[x := x, belongs := (\bysub(X, U, x)), chart := chart] \as PointFiber;
+  \import Lifts.Fiber[x := x] \as Actual;
+  \import singular_products.Cochains[A := F, source := fiber, R := K, ring := ring].Cohomology[] \as FiberGroups;
+  \import \root.AbsoluteHomeomorphism[A := Actual.Carrier, B := F, source := Actual.topology, target := fiber, K := K, ring := ring,
+    homeomorphism := PointFiber.homeomorphism] \as Identification;
+  \import \root.ProductFiberRestriction[X := LocalBase.CarrierSet, F := F, base := LocalBase.topology base, fiber := fiber,
+    K := K, ring := ring, x := x] \as Slice;
+  \import singular_cohomology.Maps[A := F, B := Product.CarrierSet, source := fiber, target := chartTarget]
+    .Composition[C := E, final := total].Coefficients[M := ProductCochains.integerCoefficients] \as FromProduct;
+  \import singular_cohomology.Maps[A := F, B := Actual.Carrier, source := fiber, target := Actual.topology]
+    .Composition[C := E, final := total].Coefficients[M := ProductCochains.integerCoefficients] \as FromFiber;
+  \definition fiberClass[i: Index]: FiberGroups.Group (degree i) := (Identification.At[n := degree i].backward).apply (Actual.restrict (degree i) (classes i));
+  \definition compatibility: \forall (i: Index) -> Slice.restrict (degree i) (lift i) = fiberClass i :=
+    \fun (i: Index) => trans!{{FiberGroups.Group (degree i)}} _ _ _
+      (sym!{{FiberGroups.Group (degree i)}} _ _
+        (FromProduct.onCohomology Slice.slice Slice.continuous toAmbient toAmbientContinuous (degree i) (classes i)))
+      (FromFiber.onCohomology PointFiber.backward PointFiber.backwardContinuous Actual.inclusion Actual.continuous (degree i) (classes i));
+  \module Basis(q: N.Nat^);
+  \module Reference;
+}
+
+\module Over(subset: \Pow X);

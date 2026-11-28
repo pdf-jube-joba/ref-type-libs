@@ -1,0 +1,22 @@
+\import Projection.Restriction[V := Base.Empty] \as Domain;
+\import Domain.Comparison[count := count, degree := degree, classes := classes] \as Known;
+\import \root.Projection[X := Domain.BaseCarrier, E := Domain.TotalCarrier, base := Domain.baseTopology, total := Domain.totalTopology,
+  projection := Domain.project, continuous := Domain.regular].Over[U := Domain.basePart, K := K, ring := ring] \as Restricted;
+\import Restricted.Comparison[count := count].With[degree := degree, classes := Known.localClasses] \as Compare;
+\definition empty[x: Domain.BaseCarrier]: Logic.False := \bysub(X, Base.Empty, x);
+\module At(z: I.Int^) {
+  \import Compare.At[z := z] \as Direct;
+  \import Direct.Empty[empty := empty] \as Zero;
+  \import Direct.ProductCoordinates[] \as Coordinates;
+  \import Modules.DirectSum[Index := Index, family := Direct.family] \as Sum;
+  \definition law: \forall (x: Sum.Carrier) -> Zero.isomorphism.forward.apply x = Direct.linear.apply x :=
+    \fun (x: Sum.Carrier) => \refl(Direct.linear.apply x);
+  \import Coordinates.FromDirect[iso := Zero.isomorphism, law := law] \as Product;
+  \import Coordinates.Verified[iso := Product.isomorphism, law := (\fun (v: Coordinates.domain.Carrier) => \refl(Coordinates.finite.apply v))] \as Proof;
+  \definition injective: Known.At[z := z].Injective := Proof.injective;
+  \definition onto: Known.At[z := z].Onto := Proof.onto;
+}
+\definition result: Property Base.Empty := Known.Isomorphisms {
+  injective := \fun (z: I.Int^) => At[z := z].injective,
+  onto := \fun (z: I.Int^) => At[z := z].onto,
+};

@@ -1,0 +1,17 @@
+\import \parent.\parent.\parent.\parent.Column[i := i].Atoms[] \as Atoms;
+\import RelativeProjection.RightFactor[q := degree i, z := z, a := x i] \as Apply;
+\import ProductCochains.Cohomology[] \as H;
+\import Modules.Sums[I := Index].Vector[V := H.Group (degree i), space := H.moduleSpace (degree i)]
+  .Mapping[W := Standard.range.Carrier, target := Standard.range.space] \as Move;
+\definition fromAtom: \forall (j: Index) -> (StandardDirect.components j).apply (coefficient i j) = Apply.map.apply (Atoms.term j) :=
+  \fun (j: Index) => (\parent.\parent.\parent.Cell[i := i, j := j, x := x i].laws (cells i j)).imageLaw;
+\definition law: Sums.sum (Finite.elements count) (\fun (j: Index) => (StandardDirect.components j).apply (coefficient i j)) =
+  (ActualDirect.components i).apply (x i) :=
+  eq_reason_in!{{Standard.range.Carrier} _
+    "=" _ "by" { Sums.congruent (Finite.elements count)
+      (\fun (j: Index) => (StandardDirect.components j).apply (coefficient i j))
+      (\fun (j: Index) => Apply.map.apply (Atoms.term j)) fromAtom }
+    "=" _ "by" { sym!{{Standard.range.Carrier}} _ _ (Move.law Apply.map (Finite.elements count) Atoms.term) }
+    "=" _ "by" { congr!{{H.Group (degree i)} {Standard.range.Carrier}} Apply.map.apply _ _ (sym!{{H.Group (degree i)}} _ _ Atoms.formula) }
+    "=" _ "by" { Apply.law (lift i) }
+  };

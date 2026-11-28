@@ -1,0 +1,91 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import Modules.Isomorphism[V := LProduct.domain.Carrier, W := LProduct.range.Carrier, source := LProduct.domain.space, target := LProduct.range.space]
+  .OfBijective[f := LProduct.finite] \as Left;
+\import Modules.Isomorphism[V := RProduct.domain.Carrier, W := RProduct.range.Carrier, source := RProduct.domain.space, target := RProduct.range.space]
+  .OfBijective[f := RProduct.finite] \as Right;
+\import Modules.Isomorphism[V := OProduct.domain.Carrier, W := OProduct.range.Carrier, source := OProduct.domain.space, target := OProduct.range.space]
+  .OfBijective[f := OProduct.finite] \as Overlap;
+\import Modules.Isomorphism[V := WProduct.domain.Carrier, W := WProduct.range.Carrier, source := WProduct.domain.space, target := WProduct.range.space]
+  .OfBijective[f := WProduct.finite] \as Whole;
+\structure Here: \Prop := {
+  leftInjective: Left.Injective,
+  leftOnto: Left.Onto,
+  rightInjective: Right.Injective,
+  rightOnto: Right.Onto,
+  overlapInjective: Overlap.Injective,
+  overlapOnto: Overlap.Onto,
+};
+\definition pairInjective[h: Here]: Z.Injective pairDomain Result.directSum pairMap :=
+  \fun (x, y: pairDomain.Carrier)(eq: pairMap.apply x = pairMap.apply y) => eq_reason_in!{{pairDomain.Carrier} x
+    "=" _ "by" { sym!{{pairDomain.Carrier}} _ _ (pairInverse x) }
+    "=" _ "by" { congr!{{LProduct.domain.Carrier} {RProduct.domain.Carrier} {pairDomain.Carrier}} assemblePair _ _ _ _
+      (h.leftInjective (leftValues x) (leftValues y) (trans!{{LProduct.range.Carrier}} _ _ _
+        (sym!{{LProduct.range.Carrier}} _ _ (leftLaw x)) (trans!{{LProduct.range.Carrier}} _ _ _
+          (congr!{{Result.directSum.Carrier} {LProduct.range.Carrier}} TargetPair.first _ _ eq) (leftLaw y))))
+      (h.rightInjective (rightValues x) (rightValues y) (trans!{{RProduct.range.Carrier}} _ _ _
+        (sym!{{RProduct.range.Carrier}} _ _ (rightLaw x)) (trans!{{RProduct.range.Carrier}} _ _ _
+          (congr!{{Result.directSum.Carrier} {RProduct.range.Carrier}} TargetPair.second _ _ eq) (rightLaw y)))) }
+    "=" _ "by" { pairInverse y }
+  };
+\definition pairOnto[h: Here]: Z.Surjective pairDomain Result.directSum pairMap := \block {
+  \fun (y: Result.directSum.Carrier) \then
+  \takefrom a: \Cast[LProduct.domain.Carrier] ({ a: LProduct.domain.Carrier \where LProduct.finite.apply a = TargetPair.first y })
+    \by h.leftOnto (TargetPair.first y) \then
+  \takefrom b: \Cast[RProduct.domain.Carrier] ({ b: RProduct.domain.Carrier \where RProduct.finite.apply b = TargetPair.second y })
+    \by h.rightOnto (TargetPair.second y) \then
+  \let x: pairDomain.Carrier := assemblePair a b \then
+  \return Logic.existsIntro[pairDomain.Carrier, { x: pairDomain.Carrier \where pairMap.apply x = y }] x
+    (TargetEquality.ext (pairMap.apply x) y
+      (trans!{{LProduct.range.Carrier}} _ _ _ (leftLaw x)
+        (trans!{{LProduct.range.Carrier}} _ _ _
+          (congr!{{LProduct.domain.Carrier} {LProduct.range.Carrier}} LProduct.finite.apply _ _ (pairLeft a b))
+          (\bysub(LProduct.domain.Carrier, { a: LProduct.domain.Carrier \where LProduct.finite.apply a = TargetPair.first y }, a))))
+      (trans!{{RProduct.range.Carrier}} _ _ _ (rightLaw x)
+        (trans!{{RProduct.range.Carrier}} _ _ _
+          (congr!{{RProduct.domain.Carrier} {RProduct.range.Carrier}} RProduct.finite.apply _ _ (pairRight a b))
+          (\bysub(RProduct.domain.Carrier, { b: RProduct.domain.Carrier \where RProduct.finite.apply b = TargetPair.second y }, b)))))
+};
+\definition overlapInjective[h: Here]: Z.Injective overlapDomain Result.intersection overlapMap :=
+  \fun (x, y: overlapDomain.Carrier)(eq: overlapMap.apply x = overlapMap.apply y) => eq_reason_in!{{overlapDomain.Carrier} x
+    "=" _ "by" { sym!{{overlapDomain.Carrier}} _ _ (overlapInverse x) }
+    "=" _ "by" { congr!{{OProduct.domain.Carrier} {overlapDomain.Carrier}} assembleOverlap _ _
+      (h.overlapInjective (overlapValues x) (overlapValues y) (trans!{{OProduct.range.Carrier}} _ _ _
+        (sym!{{OProduct.range.Carrier}} _ _ (overlapLaw x)) (trans!{{OProduct.range.Carrier}} _ _ _ eq (overlapLaw y)))) }
+    "=" _ "by" { overlapInverse y }
+  };
+\definition overlapOnto[h: Here]: Z.Surjective overlapDomain Result.intersection overlapMap := \block {
+  \fun (y: Result.intersection.Carrier) \then
+  \takefrom a: \Cast[OProduct.domain.Carrier] ({ a: OProduct.domain.Carrier \where OProduct.finite.apply a = y }) \by h.overlapOnto y \then
+  \return Logic.existsIntro[overlapDomain.Carrier, { x: overlapDomain.Carrier \where overlapMap.apply x = y }] (assembleOverlap a)
+    (trans!{{OProduct.range.Carrier}} _ _ _ (overlapLaw (assembleOverlap a))
+      (trans!{{OProduct.range.Carrier}} _ _ _
+        (congr!{{OProduct.domain.Carrier} {OProduct.range.Carrier}} OProduct.finite.apply _ _ (overlapRight a))
+        (\bysub(OProduct.domain.Carrier, { a: OProduct.domain.Carrier \where OProduct.finite.apply a = y }, a))))
+};
+\definition wholeFromCoordinates: \forall (a: WProduct.domain.Carrier) -> wholeMap.apply (assembleWhole a) = WProduct.finite.apply a :=
+  \fun (a: WProduct.domain.Carrier) => trans!{{WProduct.range.Carrier}} _ _ _ (wholeLaw (assembleWhole a))
+    (congr!{{WProduct.domain.Carrier} {WProduct.range.Carrier}} WProduct.finite.apply _ _ (wholeRight a));
+\structure WholeBijective: \Prop := { injective: Whole.Injective, onto: Whole.Onto };
+\definition wholeInjective[h: Z.Injective wholeDomain Result.whole wholeMap]: Whole.Injective :=
+  \fun (x, y: WProduct.domain.Carrier)(eq: WProduct.finite.apply x = WProduct.finite.apply y) => eq_reason_in!{{WProduct.domain.Carrier} x
+    "=" _ "by" { sym!{{WProduct.domain.Carrier}} _ _ (wholeRight x) }
+    "=" _ "by" { congr!{{wholeDomain.Carrier} {WProduct.domain.Carrier}} wholeValues _ _
+      (h (assembleWhole x) (assembleWhole y) (trans!{{WProduct.range.Carrier}} _ _ _ (wholeFromCoordinates x)
+        (trans!{{WProduct.range.Carrier}} _ _ _ eq (sym!{{WProduct.range.Carrier}} _ _ (wholeFromCoordinates y))))) }
+    "=" _ "by" { wholeRight y }
+  };
+\definition wholeOnto[h: Z.Surjective wholeDomain Result.whole wholeMap]: Whole.Onto := \block {
+  \fun (y: WProduct.range.Carrier) \then
+  \takefrom a: \Cast[wholeDomain.Carrier] ({ a: wholeDomain.Carrier \where wholeMap.apply a = y }) \by h y \then
+  \return Logic.existsIntro[WProduct.domain.Carrier, { x: WProduct.domain.Carrier \where WProduct.finite.apply x = y }] (wholeValues a)
+    (trans!{{WProduct.range.Carrier}} _ _ _ (sym!{{WProduct.range.Carrier}} _ _ (wholeLaw a))
+      (\bysub(wholeDomain.Carrier, { a: wholeDomain.Carrier \where wholeMap.apply a = y }, a)))
+};
+\definition invert[h: WholeBijective]: _ := Whole.isomorphism h.injective h.onto;
+
+\module With(h: WholeBijective) {
+  \definition product: _ := invert h;
+  \import WProduct.With[iso := product, law := (\fun (x: WProduct.domain.Carrier) => \refl(WProduct.finite.apply x))] \as Sum;
+  \definition isomorphism: _ := Sum.isomorphism;
+}
+\definition directIsomorphism[h: WholeBijective]: _ := With[h := h].isomorphism;

@@ -1,0 +1,42 @@
+\definition q: N.Nat^ := degrees i;
+\definition u: I.Int^ := input i;
+\definition v: I.Int^ := Degrees.next u;
+\definition w: I.Int^ := Degrees.next v;
+\definition f: I.Int^ := Degree.shift q u;
+\definition g: I.Int^ := Degree.shift q v;
+\definition h: I.Int^ := Degree.shift q w;
+\definition e0: f = z := Degree.shiftUnshift q z;
+\definition shiftNext[x: I.Int^]: Degree.shift q (Degrees.next x) = Degrees.next (Degree.shift q x) := cohomology_thom.LocalDisk[].shiftNext q x;
+\definition e1: g = next := trans!{I.Int^} _ _ _ (shiftNext u) (congr!{I.Int^ I.Int^} Degrees.next _ _ e0);
+\definition e2: h = last := trans!{I.Int^} _ _ _ (shiftNext v) (congr!{I.Int^ I.Int^} Degrees.next _ _ e1);
+\import OnA.Fixed[q := q, beta := cycles i, closed := closed i] \as CupA;
+\import OnB.Fixed[q := q, beta := cycles i, closed := closed i] \as CupB;
+\import OnC.Fixed[q := q, beta := cycles i, closed := closed i] \as CupC;
+\import AlongProjection.Fixed[q := q, beta := cycles i, closed := closed i] \as Projection;
+\import AlongInclusion.Fixed[q := q, beta := cycles i, closed := closed i] \as Inclusion;
+\import \parent.\parent.\parent.Shifted[q := q, beta := cycles i, closed := closed i] \as Connecting;
+\import BaseRows.Row[s := Base.sequence, k := u] \as Row;
+\definition first: _ := CupA.To[input := u, output := z, same := e0].linear;
+\definition second: _ := CupC.To[input := v, output := next, same := e1].linear;
+\definition third: _ := CupB.To[input := v, output := next, same := e1].linear;
+\definition fourth: _ := CupA.To[input := v, output := next, same := e1].linear;
+\definition fifth: _ := CupC.To[input := w, output := last, same := e2].linear;
+\definition left[k: I.Int^]: \Set := (OnA.target k).Carrier;
+\definition middle[k: I.Int^]: \Set := (OnB.target k).Carrier;
+\definition right[k: I.Int^]: \Set := (OnC.target k).Carrier;
+\import \root.Transport[K := K, ring := ring].Arrow[Index := I.Int^, F := left, G := right, advance := Degrees.next,
+  apply := (\fun (k: I.Int^) => (Connecting.tensorDelta k).apply)] \as Delta;
+\definition firstLaw: \forall (x: Row.first.Carrier) -> second.apply (Row.sequence.first.apply x) = Target.sequence.first.apply (first.apply x) :=
+  \fun (x: Row.first.Carrier) => sym!{Target.second.Carrier} _ _ (Delta.compare f z g e0 (shiftNext u)
+    ((CupA.map u).apply x) ((CupC.map v).apply (Row.sequence.first.apply x)) (Connecting.connectingLaw u x));
+\definition secondLaw: \forall (x: Row.second.Carrier) -> third.apply (Row.sequence.second.apply x) = Target.sequence.second.apply (second.apply x) :=
+  \fun (x: Row.second.Carrier) => trans!{Target.third.Carrier} _ _ _
+    (congr!{{middle g} Target.third.Carrier} (Transport.cast middle g next e1) _ _ (sym!{{middle g}} _ _ (Projection.law v x)))
+    (Transport.natural right middle (\fun (k: I.Int^) => (AlongProjection.tensorPull k).apply) g next e1 ((CupC.map v).apply x));
+\definition thirdLaw: \forall (x: Row.third.Carrier) -> fourth.apply (Row.sequence.third.apply x) = Target.sequence.third.apply (third.apply x) :=
+  \fun (x: Row.third.Carrier) => trans!{Target.fourth.Carrier} _ _ _
+    (congr!{{left g} Target.fourth.Carrier} (Transport.cast left g next e1) _ _ (sym!{{left g}} _ _ (Inclusion.law v x)))
+    (Transport.natural middle left (\fun (k: I.Int^) => (AlongInclusion.tensorPull k).apply) g next e1 ((CupB.map v).apply x));
+\definition lastLaw: \forall (x: Row.fourth.Carrier) -> fifth.apply (Row.sequence.last.apply x) = Target.sequence.last.apply (fourth.apply x) :=
+  \fun (x: Row.fourth.Carrier) => sym!{Target.last.Carrier} _ _ (Delta.compare g next h e1 (shiftNext v)
+    ((CupA.map v).apply x) ((CupC.map w).apply (Row.sequence.last.apply x)) (Connecting.connectingLaw v x));

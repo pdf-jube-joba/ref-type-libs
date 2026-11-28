@@ -1,0 +1,158 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import singular_cohomology.Relative[A := X, source := base, subset := subset] \as Relative;
+\import singular_cohomology.Maps[A := BasePart.CarrierSet, B := X, source := basePartTopology, target := base] \as BaseInclusion;
+\import Native.ZeroExtension[C := BaseChains.complex] \as SignedBase;
+\import Native.ZeroExtension[C := SubChains.complex] \as SignedSub;
+\definition family: Native.Family := Native.Family {
+  Carrier := \fun (n: N.Nat^) => Relative.Carrier (I.Int^::ofNat n),
+  space := \fun (n: N.Nat^) => Relative.space (I.Int^::ofNat n),
+};
+\definition differential: Native.DifferentialData[family] := Native.DifferentialData[family] {
+  apply := \fun (n: N.Nat^) => Relative.complex.differential.apply (I.Int^::ofNat (N.Nat^::succ n)),
+};
+\definition relative: Native.Complex := Native.Complex {
+  family := family, differential := differential,
+  laws := Native.DifferentialLaws[family, differential] {
+    addition := \fun (n: N.Nat^) => Relative.complex.laws.addition (I.Int^::ofNat (N.Nat^::succ n)),
+    scalar := \fun (n: N.Nat^) => Relative.complex.laws.scalar (I.Int^::ofNat (N.Nat^::succ n)),
+    squareZero := \fun (n: N.Nat^) => Relative.complex.laws.squareZero (I.Int^::ofNat (N.Nat^::succ (N.Nat^::succ n))),
+  },
+};
+\definition inclusion: _ := BaseInclusion.push baseInclusion baseContinuous;
+\import Native.Map[C := BaseChains.complex, D := relative] \as Projections;
+\definition projection: Projections.Map := Projections.Map {
+  apply := \fun (n: N.Nat^)(x: BaseChains.Carrier n) =>
+    Relative.sequence.projection.apply (I.Int^::ofNat n) (SignedBase.Positive[n := n].intro x),
+  addition := \fun (n: N.Nat^)(x, y: BaseChains.Carrier n) =>
+    Relative.sequence.projection.addition (I.Int^::ofNat n) (SignedBase.Positive[n := n].intro x) (SignedBase.Positive[n := n].intro y),
+  scalar := \fun (n: N.Nat^)(r: I.Int^)(x: BaseChains.Carrier n) =>
+    Relative.sequence.projection.scalar (I.Int^::ofNat n) r (SignedBase.Positive[n := n].intro x),
+  commutes := \fun (n: N.Nat^)(x: BaseChains.Carrier (N.Nat^::succ n)) =>
+    Relative.sequence.projection.commutes (I.Int^::ofNat (N.Nat^::succ n)) (SignedBase.Positive[n := N.Nat^::succ n].intro x),
+};
+\import Native.ShortExact[A := SubChains.complex, B := BaseChains.complex, C := relative] \as Exact;
+\definition sequence: Exact.Sequence := Exact.Sequence {
+  inclusion := inclusion,
+  projection := projection,
+  injective := \fun (n: N.Nat^)(x, y: SubChains.Carrier n)(same: inclusion.apply n x = inclusion.apply n y) =>
+    Relative.injective (I.Int^::ofNat n) (SignedSub.Positive[n := n].intro x) (SignedSub.Positive[n := n].intro y)
+      (congr!{{BaseChains.Carrier n} {SignedBase.Carrier (I.Int^::ofNat n)}} SignedBase.Positive[n := n].intro _ _ same),
+  onto := \fun (n: N.Nat^)(q: Relative.Carrier (I.Int^::ofNat n)) => \block {
+    \takefrom x: \Cast[SignedBase.Carrier (I.Int^::ofNat n)] ({ v: SignedBase.Carrier (I.Int^::ofNat n) \where Relative.sequence.projection.apply (I.Int^::ofNat n) v = q })
+      \by Relative.sequence.onto (I.Int^::ofNat n) q \then
+    \return Logic.existsIntro[BaseChains.Carrier n, { v: BaseChains.Carrier n \where projection.apply n v = q }] x
+      (\bysub(SignedBase.Carrier (I.Int^::ofNat n), { v: SignedBase.Carrier (I.Int^::ofNat n) \where Relative.sequence.projection.apply (I.Int^::ofNat n) v = q }, x))
+  },
+  zero := \fun (n: N.Nat^)(x: SubChains.Carrier n) =>
+    Relative.sequence.zero (I.Int^::ofNat n) (SignedSub.Positive[n := n].intro x),
+  kernelImage := \fun (n: N.Nat^)(x: BaseChains.Carrier n)(zero: projection.apply n x = (family.space n).zero) => \block {
+    \let original: SignedBase.Carrier (I.Int^::ofNat n) := SignedBase.Positive[n := n].intro x \then
+    \takefrom y: \Cast[SignedSub.Carrier (I.Int^::ofNat n)] ({ v: SignedSub.Carrier (I.Int^::ofNat n) \where Relative.sequence.inclusion.apply (I.Int^::ofNat n) v = original })
+      \by Relative.sequence.kernelImage (I.Int^::ofNat n) original zero \then
+    \return Logic.existsIntro[SubChains.Carrier n, { v: SubChains.Carrier n \where inclusion.apply n v = x }] y
+      (\bysub(SignedSub.Carrier (I.Int^::ofNat n), { v: SignedSub.Carrier (I.Int^::ofNat n) \where Relative.sequence.inclusion.apply (I.Int^::ofNat n) v = original }, y))
+  },
+};
+\import Double.TensorSplitSequence[C := SubChains.complex, E := BaseChains.complex, F := relative, D := FiberChains.complex].With[sequence := sequence] \as Tensor;
+\definition retraction: Tensor.Retraction := Tensor.Retraction {
+  apply := \fun (n: N.Nat^) => Relative.Split[n := n].retraction,
+  retracts := \fun (n: N.Nat^)(x: SubChains.Carrier n) =>
+    Relative.Split[n := n].leftInverse (SignedSub.Positive[n := n].intro x),
+};
+\import Tensor.Split[r := retraction] \as Split;
+\definition tensorSequence: _ := Split.sequence;
+\definition tensorQuotient: Native.Complex := Tensor.right;
+
+\import Native.ShortExact[A := PartTotal.complex, B := WholeTotal.complex, C := tensorQuotient].With[s := tensorSequence] \as SignedTensor;
+\import Native.ZeroExtension[C := tensorQuotient] \as SignedQuotient;
+\import singular_cohomology.Identity[A := F, source := fiber] \as FiberIdentity;
+\import Native.Map[C := FiberChains.complex, D := FiberChains.complex] \as FiberEnd;
+\module IdentityOnFiber {
+  \definition tensor[h: FiberEnd.Map]: Native.Map[C := PartTotal.complex, D := WholeTotal.complex].Map :=
+    Double.TensorMapping[C := SubChains.complex, D := BaseChains.complex, E := FiberChains.complex, F := FiberChains.complex]
+      .With[f := inclusion, g := h].total;
+  \definition law: tensorInclusion = tensorSequence.inclusion :=
+    congr!{FiberEnd.Map {Native.Map[C := PartTotal.complex, D := WholeTotal.complex].Map}} tensor _ _ FiberIdentity.chainIdentity;
+}
+\import Native.Map[C := PartTotal.complex, D := WholeTotal.complex] \as NativeInclusions;
+\import Chains.Map[C := SignedPartTotal.complex, D := SignedWholeTotal.complex] \as SignedInclusions;
+\definition extend[f: NativeInclusions.Map]: SignedInclusions.Map := NativeInclusions.ZeroExtension[f := f].map;
+\definition inclusionLaw: signedTensorInclusion = SignedTensor.sequence.inclusion :=
+  congr!{NativeInclusions.Map SignedInclusions.Map} extend _ _ IdentityOnFiber[].law;
+\import Chains.ShortExact[A := SignedPartTotal.complex, B := SignedWholeTotal.complex, C := SignedQuotient.complex] \as ExactTensor;
+\use std.Logic[].Equality[].trans;
+\definition signedExact: ExactTensor.Sequence := ExactTensor.Sequence {
+  inclusion := signedTensorInclusion,
+  projection := SignedTensor.sequence.projection,
+  injective := \fun (z: I.Int^)(x, y: SignedPartTotal.Carrier z)(same: signedTensorInclusion.apply z x = signedTensorInclusion.apply z y) =>
+    SignedTensor.sequence.injective z x y
+      (\idelim signedTensorInclusion = SignedTensor.sequence.inclusion \with f: SignedInclusions.Map => f.apply z x = f.apply z y \by {
+        base: same, equality: inclusionLaw
+      }),
+  onto := SignedTensor.sequence.onto,
+  zero := \fun (z: I.Int^)(x: SignedPartTotal.Carrier z) =>
+    \idelim SignedTensor.sequence.inclusion = signedTensorInclusion \with f: SignedInclusions.Map =>
+      SignedTensor.sequence.projection.apply z (f.apply z x) = (SignedQuotient.space z).zero \by {
+        base: SignedTensor.sequence.zero z x, equality: sym!{SignedInclusions.Map} _ _ inclusionLaw
+      },
+  kernelImage := \fun (z: I.Int^)(x: SignedWholeTotal.Carrier z)(zero: SignedTensor.sequence.projection.apply z x = (SignedQuotient.space z).zero) =>
+    \idelim SignedTensor.sequence.inclusion = signedTensorInclusion \with f: SignedInclusions.Map =>
+      \exists (y: SignedPartTotal.Carrier z \where f.apply z y = x) \by {
+        base: SignedTensor.sequence.kernelImage z x zero, equality: sym!{SignedInclusions.Map} _ _ inclusionLaw
+      },
+};
+\import Chains.Quotient[C := SignedPartTotal.complex, D := SignedWholeTotal.complex].On[f := signedTensorInclusion] \as TensorCokernel;
+\import ExactTensor.Cokernel[s := signedExact] \as QuotientComparison;
+\definition comparison: _ := QuotientComparison.map;
+\definition comparisonIsomorphism: _ := QuotientComparison.isomorphism;
+\definition onClass: \forall (z: I.Int^)(x: SignedWholeTotal.Carrier z) ->
+  comparison.apply z (TensorCokernel.At[k := z].class x) = signedExact.projection.apply z x :=
+  \fun (z: I.Int^) => QuotientComparison.At[k := z].onClass;
+
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing]
+  .IntegerRelative[subcomplex := SignedPartTotal.complex, wholecomplex := SignedWholeTotal.complex] \as HomSplit;
+\module SignedRetraction(z: I.Int^) {
+  \import Modules.Hom[V := SignedWholeTotal.Carrier z, W := SignedPartTotal.Carrier z, source := SignedWholeTotal.space z, target := SignedPartTotal.space z] \as Maps;
+  \definition Map: \Set := Maps.Map;
+  \definition zero: Map := Maps.zeroMap;
+}
+\module TensorRetraction(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \import Double.Tensor[C := relative, D := FiberChains.complex] \as RightTensor;
+  \import Double.Total[C := RightTensor.complex].Degree[n := n] \as Right;
+  \import PartTotal.Degree[n := n] \as Left;
+  \import WholeTotal.Degree[n := n] \as Middle;
+  \import Split.At[n := n] \as Components;
+  \import Double.SplitDiagonal[Index := Double.Index n, left := Left.family, middle := Middle.family, right := Right.family]
+    .With[i := Components.inclusions, p := Components.projections, r := Components.retractions, s := Components.sections] \as Diagonal;
+  \import Modules.Hom[V := WholeTotal.Carrier n, W := PartTotal.Carrier n, source := WholeTotal.space n, target := PartTotal.space n]
+    .Composition[U := SignedWholeTotal.Carrier z, domain := SignedWholeTotal.space z] \as FromSigned;
+  \import Modules.Hom[V := PartTotal.Carrier n, W := SignedPartTotal.Carrier z, source := PartTotal.space n, target := SignedPartTotal.space z]
+    .Composition[U := SignedWholeTotal.Carrier z, domain := SignedWholeTotal.space z] \as ToSigned;
+  \definition map: \parent.SignedRetraction[z := z].Map := ToSigned.compose SignedPartTotal.Positive[n := n].forward
+    (FromSigned.compose Diagonal.retraction SignedWholeTotal.Positive[n := n].backward);
+  \definition leftInverse: \forall (x: SignedPartTotal.Carrier z) -> map.apply (signedTensorInclusion.apply z x) = x :=
+    \fun (x: SignedPartTotal.Carrier z) => trans!{{SignedPartTotal.Carrier z}} _ _ _
+      (congr!{SignedInclusions.Map {SignedPartTotal.Carrier z}} (\fun (f: SignedInclusions.Map) => map.apply (f.apply z x)) _ _ inclusionLaw)
+      (congr!{{PartTotal.Carrier n} {SignedPartTotal.Carrier z}} SignedPartTotal.Positive[n := n].intro _ _ (Diagonal.retracts Components.splitting x));
+}
+\definition degreeRetraction: \forall (z: I.Int^) -> \parent.BaseTensor[].SignedRetraction[z := z].Map :=
+  \induction (z: I.Int^) \return \parent.BaseTensor[].SignedRetraction[z := z].Map \with {
+    | ofNat: \fun (n: N.Nat^) => \parent.BaseTensor[].TensorRetraction[n := n].map
+    | negSucc: \fun (n: N.Nat^) => \parent.BaseTensor[].SignedRetraction[z := I.Int^::negSucc n].zero
+  };
+\definition degreeRetractionLaw: \forall (z: I.Int^)(x: SignedPartTotal.Carrier z) ->
+  (degreeRetraction z).apply (signedTensorInclusion.apply z x) = x :=
+  \induction (z: I.Int^) \return \forall (x: SignedPartTotal.Carrier z) ->
+    (degreeRetraction z).apply (signedTensorInclusion.apply z x) = x \with {
+    | ofNat: \fun (n: N.Nat^) => \parent.BaseTensor[].TensorRetraction[n := n].leftInverse
+    | negSucc: \fun (n: N.Nat^)(x: SignedPartTotal.Carrier (I.Int^::negSucc n)) =>
+      sym!{{SignedPartTotal.Carrier (I.Int^::negSucc n)}} _ _ (SignedPartTotal.Negative[n := n].zero x)
+  };
+\definition splitInclusion: HomSplit.SplitInjection := \into[HomSplit.Data](HomSplit.Data {
+  inclusion := signedTensorInclusion, retraction := degreeRetraction,
+}, HomSplit.SplitInjection) \by {
+  HomSplit.Laws[_] { leftInverse := degreeRetractionLaw }
+};
+
+\module Free(n: N.Nat^);

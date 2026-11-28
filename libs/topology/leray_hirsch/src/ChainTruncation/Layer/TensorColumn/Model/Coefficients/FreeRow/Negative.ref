@@ -1,0 +1,11 @@
+\definition z: I.Int^ := I.Int^::negSucc q;
+\import Scalars.Product[Index := Generators, family := Powers.power (Powers.term z)] \as Product;
+\import Scalars.Hom[V := Source.Carrier z, W := Product.Carrier, source := Source.space z, target := Product.space] \as Forward;
+\import Scalars.Hom[V := Product.Carrier, W := Source.Carrier z, source := Product.space, target := Source.space z] \as Backward;
+\definition isomorphism: \parent.At[z := z].Isomorphism := \parent.At[z := z].Isomorphism {
+  forward := Forward.zeroMap,
+  backward := Backward.zeroMap,
+  leftInverse := \fun (h: Source.Carrier z) => sym!{{Source.Carrier z}} _ _ (Source.Negative[n := q].zero h),
+  rightInverse := \fun (f: Product.Carrier) => Product.ext Product.zero f
+    (\fun (g: Generators) => sym!{{Target.Carrier z}} _ _ (Target.Negative[n := q].zero (f g))),
+};

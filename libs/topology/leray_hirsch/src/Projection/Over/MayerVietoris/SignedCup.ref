@@ -1,0 +1,114 @@
+\import chain_complexes.Integer[] \as Indices;
+\import std.Logic[].Equality[] \as Equality;
+\import Equality.Transport[A := I.Int^] \as Transport;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as IntegerModules;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients] \as BaseSequence;
+\import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients] \as TotalSequence;
+\import \parent.\parent.Shifted[q := q, u := u] \as Whole;
+\definition next: I.Int^ -> I.Int^ := Indices.next;
+\definition shift: I.Int^ -> I.Int^ := Degrees.shift q;
+\definition shiftNext: \forall (z: I.Int^) -> shift (next z) = next (shift z) := cohomology_thom.LocalDisk[].shiftNext q;
+\definition baseOverlap[z: I.Int^]: IntegerModules.Bundle := BaseSequence.Degree[z := z].intersection;
+\definition totalOverlap[z: I.Int^]: IntegerModules.Bundle := TotalSequence.Degree[z := z].intersection;
+\definition overlapFamily[z: I.Int^]: \Set := (totalOverlap z).Carrier;
+\definition outputFamily[z: I.Int^]: \Set := totalFamily.Carrier z;
+\definition zero[z: I.Int^]: outputFamily z := (totalFamily.space z).zero;
+\definition baseDelta[z: I.Int^]: _ := BaseSequence.At[z := z].connecting;
+\definition totalDelta[z: I.Int^]: _ := TotalSequence.At[z := z].connecting;
+\import Equality.Transport[A := N.Nat^] \as TransportNat;
+\definition castNatural: \forall (m, n: N.Nat^)(same: m = n)(x: outputFamily (I.Int^::ofNat m)) ->
+  TransportNat.cast (\fun (j: N.Nat^) => outputFamily (I.Int^::ofNat j)) m n same x =
+  Transport.cast outputFamily (I.Int^::ofNat m) (I.Int^::ofNat n) (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ same) x :=
+  \fun (m, n: N.Nat^)(same: m = n)(x: outputFamily (I.Int^::ofNat m)) =>
+    (\idelim m = n \with k: N.Nat^ => \forall (e: m = k) ->
+      TransportNat.cast (\fun (j: N.Nat^) => outputFamily (I.Int^::ofNat j)) m k e x =
+      Transport.cast outputFamily (I.Int^::ofNat m) (I.Int^::ofNat k) (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ e) x \by {
+      base: \fun (e: m = m) => trans!{{outputFamily (I.Int^::ofNat m)}} _ _ _
+        (TransportNat.castRefl (\fun (j: N.Nat^) => outputFamily (I.Int^::ofNat j)) m x)
+        (sym!{{outputFamily (I.Int^::ofNat m)}} _ _ (Transport.castRefl outputFamily (I.Int^::ofNat m) x)),
+      equality: same
+    }) same;
+\module Positive(p: N.Nat^) {
+  \import \parent.\parent.Cup[p := p, q := q] \as Product;
+  \definition index: I.Int^ := I.Int^::ofNat p;
+  \definition raw: I.Int^ := I.Int^::ofNat Product.lower;
+  \definition inputSame: raw = shift index := sym!{I.Int^} _ _ (Degrees.natural q p);
+  \definition overlap[a: (baseOverlap index).Carrier]: overlapFamily (shift index) :=
+    Transport.cast overlapFamily raw (shift index) inputSame (Product.onOverlap u a);
+  \definition upper: I.Int^ := I.Int^::ofNat Product.upper;
+  \definition componentDegree: I.Int^ := I.Int^::ofNat (N.Basic[].Def[].add (N.Nat^::succ p) q);
+  \definition upperSame: componentDegree = upper := congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ Product.same;
+  \definition nextSame: upper = next (shift index) := congr!{I.Int^ I.Int^} next _ _ inputSame;
+  \definition componentSame: componentDegree = shift (next index) := sym!{I.Int^} _ _ (Degrees.natural q (N.Nat^::succ p));
+  \import \parent.\parent.\parent.Component[p := N.Nat^::succ p, q := q] \as Upper;
+  \definition componentValue[a: (baseOverlap index).Carrier]: outputFamily componentDegree := Upper.apply u ((baseDelta index).apply a);
+  \definition law: \forall (a: (baseOverlap index).Carrier) ->
+    (totalDelta (shift index)).apply (overlap a) = Transport.cast outputFamily (shift (next index)) (next (shift index)) (shiftNext index)
+      ((Whole.map (next index)).apply ((baseDelta index).apply a)) :=
+    \fun (a: (baseOverlap index).Carrier) => eq_reason_in!{{outputFamily (next (shift index))} _
+      "=" _ "by" { sym!{{outputFamily (next (shift index))}} _ _
+        (Transport.natural overlapFamily (\fun (z: I.Int^) => outputFamily (next z))
+          (\fun (z: I.Int^) => (totalDelta z).apply) raw (shift index) inputSame (Product.onOverlap u a)) }
+      "=" _ "by" { Transport.reindex outputFamily next raw (shift index) inputSame ((totalDelta raw).apply (Product.onOverlap u a)) }
+      "=" _ "by" { congr!{{outputFamily upper} {outputFamily (next (shift index))}}
+        (Transport.cast outputFamily upper (next (shift index)) nextSame) _ _ (Product.connectingLaw u a) }
+      "=" _ "by" { congr!{{outputFamily upper} {outputFamily (next (shift index))}}
+        (Transport.cast outputFamily upper (next (shift index)) nextSame) _ _
+        (castNatural Upper.degree Product.upper Product.same (componentValue a)) }
+      "=" _ "by" { Transport.castComposition outputFamily componentDegree upper (next (shift index)) upperSame nextSame (componentValue a) }
+      "=" _ "by" { sym!{{outputFamily (next (shift index))}} _ _
+        (Transport.castComposition outputFamily componentDegree (shift (next index)) (next (shift index)) componentSame (shiftNext index) (componentValue a)) }
+    };
+}
+\module Negative(k: N.Nat^) {
+  \definition index: I.Int^ := I.Int^::negSucc k;
+  \definition overlap[a: (baseOverlap index).Carrier]: overlapFamily (shift index) := (totalOverlap (shift index)).space.zero;
+  \import cohomology_thom.RelativeMayerVietoris[].Pair[A := BaseMV.Overlap, source := BaseMV.overlapTopology, subset := BaseMV.overlapPart]
+    .Negative[n := k].With[coefficients := BaseProduct.integerCoefficients] \as ZeroInput;
+  \import IntegerModules.Hom[V := (baseOverlap index).Carrier, W := baseFamily.Carrier (next index),
+    source := (baseOverlap index).space, target := BaseSequence.Degree[z := next index].whole.space] \as BaseMaps;
+  \import IntegerModules.Hom[V := overlapFamily (shift index), W := outputFamily (next (shift index)),
+    source := (totalOverlap (shift index)).space, target := TotalSequence.Degree[z := next (shift index)].whole.space] \as TotalMaps;
+  \import Modules.Hom[V := baseFamily.Carrier (next index), W := outputFamily (shift (next index)),
+    source := baseFamily.space (next index), target := totalFamily.space (shift (next index))] \as Multiplication;
+  \definition leftZero: (totalDelta (shift index)).apply ((totalOverlap (shift index)).space.zero) = zero (next (shift index)) :=
+    TotalMaps.zeroPreserved (totalDelta (shift index));
+  \definition rightZero: \forall (a: (baseOverlap index).Carrier) ->
+    (Whole.map (next index)).apply ((baseDelta index).apply a) = zero (shift (next index)) :=
+    \fun (a: (baseOverlap index).Carrier) => trans!{{outputFamily (shift (next index))}} _ _ _
+      (congr!{{baseFamily.Carrier (next index)} {outputFamily (shift (next index))}} (Whole.map (next index)).apply _ _
+        (trans!{{baseFamily.Carrier (next index)}} _ _ _
+          (congr!{{(baseOverlap index).Carrier} {baseFamily.Carrier (next index)}} (baseDelta index).apply _ _ (ZeroInput.zero a))
+          (BaseMaps.zeroPreserved (baseDelta index))))
+      (Multiplication.zeroPreserved (Whole.map (next index)));
+  \definition law: \forall (a: (baseOverlap index).Carrier) ->
+    (totalDelta (shift index)).apply (overlap a) = Transport.cast outputFamily (shift (next index)) (next (shift index)) (shiftNext index)
+      ((Whole.map (next index)).apply ((baseDelta index).apply a)) :=
+    \fun (a: (baseOverlap index).Carrier) => eq_reason_in!{{outputFamily (next (shift index))} _
+      "=" _ "by" { leftZero }
+      "=" _ "by" { sym!{{outputFamily (next (shift index))}} _ _
+        (Transport.pointNatural outputFamily zero (shift (next index)) (next (shift index)) (shiftNext index)) }
+      "=" _ "by" { congr!{{outputFamily (shift (next index))} {outputFamily (next (shift index))}}
+        (Transport.cast outputFamily (shift (next index)) (next (shift index)) (shiftNext index)) _ _
+        (sym!{{outputFamily (shift (next index))}} _ _ (rightZero a)) }
+    };
+}
+\definition overlap: \forall (z: I.Int^) -> (baseOverlap z).Carrier -> overlapFamily (shift z) :=
+  \induction (z: I.Int^) \return (baseOverlap z).Carrier -> overlapFamily (shift z) \with {
+    | ofNat: \fun (p: N.Nat^) => Positive[p := p].overlap
+    | negSucc: \fun (k: N.Nat^) => Negative[k := k].overlap
+  };
+\definition connectingLaw: \forall (z: I.Int^)(a: (baseOverlap z).Carrier) ->
+  (totalDelta (shift z)).apply (overlap z a) = Transport.cast outputFamily (shift (next z)) (next (shift z)) (shiftNext z)
+    ((Whole.map (next z)).apply ((baseDelta z).apply a)) :=
+  \induction (z: I.Int^) \return \forall (a: (baseOverlap z).Carrier) ->
+    (totalDelta (shift z)).apply (overlap z a) = Transport.cast outputFamily (shift (next z)) (next (shift z)) (shiftNext z)
+      ((Whole.map (next z)).apply ((baseDelta z).apply a)) \with {
+    | ofNat: \fun (p: N.Nat^) => Positive[p := p].law
+    | negSucc: \fun (k: N.Nat^) => Negative[k := k].law
+  };

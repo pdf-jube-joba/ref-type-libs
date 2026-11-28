@@ -1,0 +1,23 @@
+\import topological_constructions.Product[A := Y, B := E] \as Product;
+\import std.Data[].Pair[] \as Pair;
+\definition productTopology: Product.ProductTopology := Product.topology source total;
+\definition compatible: \Pow Product.CarrierSet := { p: Product.CarrierSet \where
+  f (Pair.first Y E p) = projection (Pair.second Y E p) };
+\import topology.Topology[Carrier := Product.CarrierSet].Subspace[S := compatible] \as Subspace;
+\definition Carrier: \Set := Subspace.CarrierSet;
+\definition topology: topology.Topology[Carrier := Carrier].Topology := Subspace.topology productTopology;
+\import topology.Continuity[A := Carrier, B := Product.CarrierSet].Corestriction[S := compatible] \as Include;
+\definition inclusion[p: Carrier]: Product.CarrierSet := p;
+\definition inclusionContinuous: _ := Include.inclusionContinuous productTopology;
+\definition baseMap[p: Carrier]: Y := Pair.first Y E p;
+\definition totalMap[p: Carrier]: E := Pair.second Y E p;
+\definition square: \forall (p: Carrier) -> f (baseMap p) = projection (totalMap p) :=
+  \fun (p: Carrier) => \bysub(Product.CarrierSet, compatible, p);
+\import Product.Maps[] \as Projections;
+\import topology.Composition[A := Carrier, B := Product.CarrierSet, C := Y] \as First;
+\import topology.Composition[A := Carrier, B := Product.CarrierSet, C := E] \as Second;
+\definition baseContinuous: _ := First.composeContinuous topology productTopology source inclusion (Pair.first Y E)
+  inclusionContinuous (Projections.firstContinuous source total);
+\definition totalContinuous: _ := Second.composeContinuous topology productTopology total inclusion (Pair.second Y E)
+  inclusionContinuous (Projections.secondContinuous source total);
+\module Over(U: \Pow X, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

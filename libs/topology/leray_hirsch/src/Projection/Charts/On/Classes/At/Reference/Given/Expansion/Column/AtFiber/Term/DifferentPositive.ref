@@ -1,0 +1,8 @@
+\import \parent.Native[p := N.Nat^::succ p, same := same] \as Input;
+\import Restriction.Positive[p := p].At[q := degree j] \as Result;
+\definition law: term j = (H.moduleSpace (degree i)).zero :=
+  trans!{{H.Group (degree i)}} _ _ _ Input.law
+    (trans!{{H.Group (degree i)}} _ _ _
+      (congr!{{H.Group Input.sumDegree} {H.Group (degree i)}} (NaturalCast.cast H.Group Input.sumDegree (degree i) Input.degreeLaw)
+        _ _ (Result.law Input.coefficient (Model.fiberClass j)))
+      (NaturalCast.pointNatural H.Group (\fun (n: N.Nat^) => (H.moduleSpace n).zero) Input.sumDegree (degree i) Input.degreeLaw));

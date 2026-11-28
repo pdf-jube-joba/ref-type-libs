@@ -1,0 +1,25 @@
+\definition z: I.Int^ := I.Int^::ofNat (grade q);
+\definition k: I.Int^ := I.Int^::ofNat q;
+\import Cochains.ZeroExtension[C := TotalCochains.complex] \as Extend;
+\import Signed.At[C := Extend.complex, z := z] \as TotalH;
+\import Signed.At[C := Source.complex, z := k] \as RowH;
+\import Cochains.At[C := TotalCochains.complex, k := grade q] \as NativeTotal;
+\import Cochains.At[C := Unsigned.complex, k := q] \as NativeRow;
+\import \parent.\parent.At[q := q] \as Degree;
+\import \parent.Cohomology[q := q] \as Row;
+\import Powers.Degree[z := k] \as Output;
+\import Scalars.Isomorphism[V := NativeRow.Cohomology, W := NativeTotal.Cohomology,
+  source := NativeRow.cohomologySpace, target := NativeTotal.cohomologySpace].Inverse[] \as ReverseGauge;
+\import Scalars.Isomorphism[V := RowH.Cohomology, W := NativeRow.Cohomology,
+  source := RowH.cohomologySpace, target := NativeRow.cohomologySpace].Inverse[] \as ReverseDegree;
+\import Scalars.Isomorphism[V := TotalH.Cohomology, W := NativeTotal.Cohomology, source := TotalH.cohomologySpace, target := NativeTotal.cohomologySpace]
+  .Composition[U := NativeRow.Cohomology, final := NativeRow.cohomologySpace] \as First;
+\import Scalars.Isomorphism[V := TotalH.Cohomology, W := NativeRow.Cohomology, source := TotalH.cohomologySpace, target := NativeRow.cohomologySpace]
+  .Composition[U := RowH.Cohomology, final := RowH.cohomologySpace] \as Second;
+\import Scalars.Isomorphism[V := TotalH.Cohomology, W := RowH.Cohomology, source := TotalH.cohomologySpace, target := RowH.cohomologySpace]
+  .Composition[U := Output.classes.Carrier, final := Output.classes.space] \as Third;
+\definition row: _ := Second.compose (ReverseDegree.inverse Source.PositiveCohomology[n := q].isomorphism)
+  (First.compose (ReverseGauge.inverse Degree.isomorphism) Extend.PositiveCohomology[n := grade q].isomorphism);
+\definition isomorphism: _ := Third.compose Row.isomorphism row;
+\definition domain: Scalars.Bundle := Scalars.Bundle { Carrier := TotalH.Cohomology, space := TotalH.cohomologySpace };
+\definition range: Scalars.Bundle := Output.classes;

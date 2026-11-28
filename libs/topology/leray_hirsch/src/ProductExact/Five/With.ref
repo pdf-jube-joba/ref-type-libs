@@ -1,0 +1,29 @@
+\import \parent.\parent.Pair[A := A, B := B, C := C] \as First;
+\import \parent.\parent.Pair[A := B, B := C, C := D] \as Middle;
+\import \parent.\parent.Pair[A := C, B := D, C := E] \as Last;
+\module At(i: Index) {
+  \import Modules.ExactPair[A := at A i, B := at B i, C := at C i] \as F;
+  \import Modules.ExactPair[A := at B i, B := at C i, C := at D i] \as M;
+  \import Modules.ExactPair[A := at C i, B := at D i, C := at E i] \as L;
+  \definition first: First.At[i := i].Sequence := F.Sequence {
+    first := (rows i).first, last := (rows i).second, zero := (rows i).zeroB, kernelImage := (rows i).kernelB,
+  };
+  \definition middle: Middle.At[i := i].Sequence := M.Sequence {
+    first := (rows i).second, last := (rows i).third, zero := (rows i).zeroC, kernelImage := (rows i).kernelC,
+  };
+  \definition last: Last.At[i := i].Sequence := L.Sequence {
+    first := (rows i).third, last := (rows i).last, zero := (rows i).zeroD, kernelImage := (rows i).kernelD,
+  };
+}
+\import First.With[sequences := (\fun (i: Index) => At[i := i].first)] \as LeftExact;
+\import Middle.With[sequences := (\fun (i: Index) => At[i := i].middle)] \as MiddleExact;
+\import Last.With[sequences := (\fun (i: Index) => At[i := i].last)] \as RightExact;
+\import Modules.ExactFive[A := bundle A, B := bundle B, C := bundle C, D := bundle D, E := bundle E] \as Source;
+\definition sequence: Source.Sequence := Source.Sequence {
+  first := LeftExact.sequence.first, second := LeftExact.sequence.last, third := MiddleExact.sequence.last, last := RightExact.sequence.last,
+  zeroB := LeftExact.sequence.zero, zeroC := MiddleExact.sequence.zero, zeroD := RightExact.sequence.zero,
+  kernelB := LeftExact.sequence.kernelImage, kernelC := MiddleExact.sequence.kernelImage, kernelD := RightExact.sequence.kernelImage,
+};
+\import std.Data[].List[] \as Lists;
+\module To(A1, B1, C1, D1, E1: Modules.Bundle, t: Modules.ExactFive[A := A1, B := B1, C := C1, D := D1, E := E1].Sequence,
+  indices: Lists.List[Index]);

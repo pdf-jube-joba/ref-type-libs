@@ -1,0 +1,116 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Finite;
+\import Finite.Enumeration[] \as Enumeration;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\import std.Logic[].Equality[] \as Equality;
+\use Logic.either;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\definition baseRing: std.Alg[].Ring[].Ring[K] := std.Alg[].Ring[].commutativeRingAsRing K ring;
+\import module_theory.Module[].Over[R := K, ring := baseRing] \as Modules;
+\definition Index: \Set := Finite.Fin count;
+\import Modules.Free[Generators := Index] \as Ambient;
+\import Ambient.Subset[S := S] \as Subset;
+\import Subset.Projection[] \as Project;
+\import Modules.Free[Generators := Subset.Selected] \as Selected;
+\import Ambient.Coefficients[] \as Coefficients;
+\import Coefficients.NormalForm[] \as Normal;
+\import Ambient.Finite[] \as Representation;
+\import Modules.Coordinates[I := Index] \as Vectors;
+\import Vectors.Kronecker[] \as Delta;
+\import Modules.FinitelySupported[Index := Index, family := Representation.scalarFamily] \as Supported;
+\definition full[v: Vectors.Vector]: Supported.Supports (Finite.elements count) v :=
+  \fun (i: Index)(missing: _) => Logic.falseElim _ (missing (Finite.exhaustive count i));
+\definition coefficientOnCombination: \forall (v: Vectors.Vector)(i: Index) ->
+  Coefficients.coefficient (Coefficients.combination (Finite.elements count) v) i = v i :=
+  \fun (v: Vectors.Vector)(i: Index) => Representation.sameCoefficients (Finite.elements count)
+    (Enumeration.distinct count) v (full v) i;
+\definition reconstruct: \forall (x: Ambient.Carrier) ->
+  Coefficients.combination (Finite.elements count) (Coefficients.coefficient x) = x :=
+  \fun (x: Ambient.Carrier) => Normal.injective _ x (coefficientOnCombination (Coefficients.coefficient x));
+\definition Carrier: \Set := Selected.Carrier;
+\definition space: Modules.Space Carrier := Selected.space;
+\definition generator: Subset.Selected -> Carrier := Selected.generator;
+\definition Stable[v: Vectors.Vector]: \Prop := \forall (i: Index) -> Logic.Not (\In[Index] S i) -> v i = baseRing.zero;
+\definition assemble[v: Vectors.Vector]: Carrier := Project.map.apply (Coefficients.combination (Finite.elements count) v);
+\definition coordinates[x: Carrier]: Vectors.Vector := Coefficients.coefficient (Subset.inclusion.apply x);
+\definition assembleCoordinates: \forall (x: Carrier) -> assemble (coordinates x) = x :=
+  \fun (x: Carrier) => trans!{Carrier} _ _ _
+    (congr!{Ambient.Carrier Carrier} Project.map.apply _ _ (reconstruct (Subset.inclusion.apply x))) (Project.leftInverse x);
+\import Modules.Hom[V := Carrier, W := K, source := space, target := Modules.scalarModule] \as ScalarMaps;
+\import Modules.Hom[V := Ambient.Carrier, W := Vectors.Vector, source := Ambient.space, target := Vectors.space]
+  .Composition[U := Carrier, domain := space] \as CoefficientMap;
+\import Modules.Hom[V := Vectors.Vector, W := K, source := Vectors.space, target := Modules.scalarModule]
+  .Composition[U := Carrier, domain := space] \as Eval;
+\import Selected.To[W := K, target := Modules.scalarModule] \as Unique;
+\module Off(i: Index, outside: Logic.Not (\In[Index] S i)) {
+  \definition value: ScalarMaps.Map := Eval.compose (Modules.Functions[X := Index, V := K, target := Modules.scalarModule].evaluation i)
+    (CoefficientMap.compose Coefficients.map Subset.inclusion);
+  \definition zero: \forall (s: Subset.Selected) -> value.apply (generator s) = baseRing.zero :=
+    \fun (s: Subset.Selected) => trans!{K} _ _ _
+      (congr!{Ambient.Carrier K} (\fun (x: Ambient.Carrier) => Coefficients.coefficient x i) _ _ (Subset.onGenerator s))
+      (trans!{K} _ _ _ (Coefficients.onGenerator s i) (Delta.different i s
+        (\fun (same: i = s) => outside (\idelim s = i \with j: Index => \In[Index] S j \by {
+          base: \bysub(Index, S, s), equality: sym!{Index} _ _ same
+        }))));
+  \definition law: \forall (x: Carrier) -> coordinates x i = baseRing.zero :=
+    \fun (x: Carrier) => congr!{ScalarMaps.Map K} (\fun (f: ScalarMaps.Map) => f.apply x) _ _
+      (Unique.ext value ScalarMaps.zeroMap zero);
+}
+\definition coordinateSupport: \forall (x: Carrier) -> Stable (coordinates x) :=
+  \fun (x: Carrier)(i: Index)(outside: Logic.Not (\In[Index] S i)) => Off[i := i, outside := outside].law x;
+\import Modules.Hom[V := Carrier, W := Ambient.Carrier, source := space, target := Ambient.space]
+  .Composition[U := Ambient.Carrier, domain := Ambient.space] \as InAndOut;
+\definition mask: _ := InAndOut.compose Subset.inclusion Project.map;
+\import Modules.Sums[I := Index].Vector[V := Ambient.Carrier, space := Ambient.space] \as Sum;
+\import Sum.Mapping[W := Ambient.Carrier, target := Ambient.space] \as MapSum;
+\import Modules.Laws[V := Ambient.Carrier, space := Ambient.space] \as AmbientLaws;
+\import Modules.Hom[V := Carrier, W := Ambient.Carrier, source := space, target := Ambient.space] \as Inclusion;
+\definition onPresent[i: Index][h: \In[Index] S i]: mask.apply (Ambient.generator i) = Ambient.generator i :=
+  trans!{Ambient.Carrier} _ _ _
+    (congr!{Carrier Ambient.Carrier} Subset.inclusion.apply _ _ (Project.onSelected (\into[Index](i, S) \by { h })))
+    (Subset.onGenerator (\into[Index](i, S) \by { h }));
+\definition term[v: Vectors.Vector][h: Stable v][i: Index]:
+  mask.apply (Ambient.space.smul (v i) (Ambient.generator i)) = Ambient.space.smul (v i) (Ambient.generator i) :=
+  trans!{Ambient.Carrier} _ _ _ (mask.scalar (v i) (Ambient.generator i))
+    (either!{{Classical.excludedMiddle (\In[Index] S i)} {_}
+      {\fun (present: \In[Index] S i) => congr!{Ambient.Carrier Ambient.Carrier} (Ambient.space.smul (v i)) _ _ (onPresent i present)}
+      {\fun (absent: Logic.Not (\In[Index] S i)) => trans!{Ambient.Carrier} _ _ _
+        (congr!{K Ambient.Carrier} (\fun (a: K) => Ambient.space.smul a (mask.apply (Ambient.generator i))) _ _ (h i absent))
+        (trans!{Ambient.Carrier} _ _ _ (AmbientLaws.zeroScale (mask.apply (Ambient.generator i)))
+          (sym!{Ambient.Carrier} _ _ (trans!{Ambient.Carrier} _ _ _
+            (congr!{K Ambient.Carrier} (\fun (a: K) => Ambient.space.smul a (Ambient.generator i)) _ _ (h i absent))
+            (AmbientLaws.zeroScale (Ambient.generator i)))))}
+    });
+\definition assembleAmbient[v: Vectors.Vector][h: Stable v]:
+  Subset.inclusion.apply (assemble v) = Coefficients.combination (Finite.elements count) v :=
+  trans!{Ambient.Carrier} _ _ _
+    (MapSum.law mask (Finite.elements count) (\fun (i: Index) => Ambient.space.smul (v i) (Ambient.generator i)))
+    (Sum.congruent (Finite.elements count)
+      (\fun (i: Index) => mask.apply (Ambient.space.smul (v i) (Ambient.generator i)))
+      (\fun (i: Index) => Ambient.space.smul (v i) (Ambient.generator i)) (\fun (i: Index) => term v h i));
+\definition coordinatesAssemble[v: Vectors.Vector][h: Stable v]: \forall (i: Index) -> coordinates (assemble v) i = v i :=
+  \fun (i: Index) => trans!{K} _ _ _
+    (congr!{Ambient.Carrier K} (\fun (x: Ambient.Carrier) => Coefficients.coefficient x i) _ _ (assembleAmbient v h))
+    (coefficientOnCombination v i);
+\module To(W: \Set, target: Modules.Space W, f: Modules.Hom[V := Carrier, W := W, source := space, target := target].Map) {
+  \import Modules.Hom[V := Carrier, W := W, source := space, target := target]
+    .Composition[U := Ambient.Carrier, domain := Ambient.space] \as Compose;
+  \definition map: _ := Compose.compose f Project.map;
+  \import Modules.Sums[I := Index].Vector[V := Ambient.Carrier, space := Ambient.space].Mapping[W := W, target := target] \as Apply;
+  \import Modules.Sums[I := Index].Vector[V := W, space := target] \as Values;
+  \definition term[i: Index]: W := map.apply (Ambient.generator i);
+  \definition onPresent[s: \Cast[Index] S]: term s = f.apply (generator s) :=
+    congr!{Carrier W} f.apply _ _ (Project.onSelected s);
+  \definition sum: \forall (v: Vectors.Vector) -> f.apply (assemble v) =
+    Values.sum (Finite.elements count) (\fun (i: Index) => target.smul (v i) (map.apply (Ambient.generator i))) :=
+    \fun (v: Vectors.Vector) => trans!{W} _ _ _
+      (Apply.law map (Finite.elements count) (\fun (i: Index) => Ambient.space.smul (v i) (Ambient.generator i)))
+      (Values.congruent (Finite.elements count)
+        (\fun (i: Index) => map.apply (Ambient.space.smul (v i) (Ambient.generator i)))
+        (\fun (i: Index) => target.smul (v i) (map.apply (Ambient.generator i)))
+        (\fun (i: Index) => map.scalar (v i) (Ambient.generator i)));
+}
+\module Extend;

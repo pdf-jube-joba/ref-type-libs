@@ -1,0 +1,10 @@
+\definition z: I.Int^ := I.Int^::negSucc q;
+\definition next: I.Int^ := Degrees.next z;
+\import Scalars.Product[Index := Generators, family := Powers.power (Powers.term next)] \as Values;
+\import Scalars.Hom[V := Source.Carrier next, W := Powers.family.Carrier next, source := Source.space next, target := Powers.family.space next] \as Map;
+\definition law: \forall (h: Source.Carrier z) ->
+  Powers.differential.apply z ((term z).forward.apply h) = (term next).forward.apply (Source.apply z h) :=
+  \fun (h: Source.Carrier z) => trans!{{Values.Carrier}} _ _ _
+    (Values.ext (Powers.differential.apply z ((term z).forward.apply h)) Values.zero
+      (\fun (g: Generators) => \refl((Target.space next).zero)))
+    (sym!{{Values.Carrier}} _ _ (Map.zeroPreserved ((term next).forward)));

@@ -1,0 +1,33 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\definition sourceBoundary: \Pow LocalTotal.CarrierSet := { e: LocalTotal.CarrierSet \where Base.Member subset (projection e) };
+\definition targetBoundary: \Pow Product.CarrierSet := { x: Product.CarrierSet \where Base.Member subset (basePoint x) };
+\import singular_cohomology.Relative[A := LocalTotal.CarrierSet, source := LocalTotal.topology total, subset := sourceBoundary] \as Source;
+\import singular_cohomology.Relative[A := Product.CarrierSet, source := chartTarget, subset := targetBoundary] \as Target;
+\import topology.Homeomorphism[A := LocalTotal.CarrierSet, B := Product.CarrierSet] \as Geometry;
+\import Source.Homeomorphism[B := Product.CarrierSet].Over[target := chartTarget, targetSubset := targetBoundary] \as Pair;
+\definition inverseOverBase: \forall (x: Product.CarrierSet) -> projection (chart.coordinates.backward x) = basePoint x :=
+  \fun (x: Product.CarrierSet) => trans!{X} _ _ _
+    (sym!{X} _ _ (chart.overBase (chart.coordinates.backward x)))
+    (congr!{Product.CarrierSet X} basePoint _ _
+      ((Geometry.laws (LocalTotal.topology total) chartTarget chart.coordinates).rightInverse x));
+\definition chartPair: Pair.Data := Pair.Data {
+  homeomorphism := chart.coordinates,
+  forwardPreserves := \fun (e: Source.SubspaceCarrier) =>
+    \idelim projection e = basePoint (chart.coordinates.forward e) \with x: X => Base.Member subset x \by {
+      base: \bysub(LocalTotal.CarrierSet, sourceBoundary, e), equality: sym!{X} _ _ (chart.overBase e)
+    },
+  backwardPreserves := \fun (x: Target.SubspaceCarrier) =>
+    \idelim basePoint x = projection (chart.coordinates.backward x) \with y: X => Base.Member subset y \by {
+      base: \bysub(Product.CarrierSet, targetBoundary, x), equality: sym!{X} _ _ (inverseOverBase x)
+    },
+};
+\definition chains: _ := Pair.chainIsomorphism chartPair;
+\module Cohomology(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], z: std.Arithmetic[].Int[].Int^) {
+  \import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+  \definition coefficients: Modules.Bundle := Modules.Bundle { Carrier := K, space := Modules.scalarModule };
+  \import Modules.AbelianHom[N := coefficients] \as Scalars;
+  \definition isomorphism: _ := Pair.With[coefficients := Scalars.coefficients].At[z := z].isomorphism chartPair;
+}

@@ -1,0 +1,21 @@
+\structure Retraction: \Set := {
+  apply: \forall (n: N.Nat^) -> ZModules.Hom[V := B.family.Carrier n, W := A.family.Carrier n,
+    source := B.family.space n, target := A.family.space n].Map,
+  law: \forall (n: N.Nat^)(x: A.family.Carrier n) -> (apply n).apply (s.inclusion.apply n x) = x,
+};
+\import Hom.Native[P := A] \as HA;
+\import Hom.Native[P := B] \as HB;
+\import Hom.Native[P := C] \as HC;
+\import Hom.NativeMapping[P := A, Q := B, L := coefficients].On[f := s.inclusion, u := Identity.identity] \as Inclusion;
+\import Hom.NativeMapping[P := B, Q := C, L := coefficients].On[f := s.projection, u := Identity.identity] \as Projection;
+\definition inclusion: _ := Projection.map;
+\definition projection: _ := Inclusion.map;
+\import Cochains.ShortExact[A := HC.complex, B := HB.complex, C := HA.complex] \as Dual;
+\module At(n: N.Nat^);
+\definition sequence[r: Retraction]: Dual.Sequence := Dual.Sequence {
+  inclusion := inclusion, projection := projection,
+  injective := \fun (n: N.Nat^) => At[n := n].injective,
+  onto := \fun (n: N.Nat^) => At[n := n].onto r,
+  zero := \fun (n: N.Nat^) => At[n := n].zero,
+  kernelImage := \fun (n: N.Nat^) => At[n := n].kernelImage,
+};

@@ -1,0 +1,83 @@
+\import Modules.Functions[X := Index, V := V.Carrier q, target := V.space q] \as Vectors;
+\import Modules.Isomorphism[V := Vectors.Carrier, W := Vectors.Carrier, source := Vectors.space, target := Vectors.space] \as Iso;
+\definition Isomorphism: \Set := Iso.Isomorphism;
+\definition selected[x: Product.Carrier][i: Index][same: degree i = q]: V.Carrier q :=
+  Cast.cast V.Carrier (degree i) q same (x i);
+\structure ValueLaws[x: Product.Carrier, i: Index, v: V.Carrier q]: \Prop := {
+  inside: \forall (same: degree i = q) -> v = selected x i same,
+  outside: Logic.Not (degree i = q) -> v = (V.space q).zero,
+};
+\definition Value[x: Product.Carrier][i: Index]: \Set :=
+  \Cast[V.Carrier q] ({ v: V.Carrier q \where ValueLaws[x, i, v] });
+\definition existsValue[x: Product.Carrier][i: Index]: \exists Value x i :=
+  either!{{Classical.excludedMiddle (degree i = q)} {\exists Value x i}
+    {\fun (same: degree i = q) => Logic.existsIntro[V.Carrier q, { v: V.Carrier q \where ValueLaws[x, i, v] }] (selected x i same)
+      (ValueLaws[x, i, selected x i same] {
+        inside := \fun (also: degree i = q) => \refl(selected x i same),
+        outside := \fun (bad: Logic.Not (degree i = q)) => Logic.falseElim _ (bad same),
+      })}
+    {\fun (outside: Logic.Not (degree i = q)) => Logic.existsIntro[V.Carrier q, { v: V.Carrier q \where ValueLaws[x, i, v] }] (V.space q).zero
+      (ValueLaws[x, i, (V.space q).zero] {
+        inside := \fun (same: degree i = q) => Logic.falseElim _ (outside same),
+        outside := \fun (notEqual: Logic.Not (degree i = q)) => \refl((V.space q).zero),
+      })}
+  };
+\definition rules[x: Product.Carrier][i: Index][v: Value x i]: ValueLaws[x, i, v] :=
+  \bysub(V.Carrier q, Value x i, v);
+\definition unique[x: Product.Carrier][i: Index]: \forall (a, b: Value x i) -> a = b :=
+  \fun (a, b: Value x i) => either!{{Classical.excludedMiddle (degree i = q)} {a = b}
+    {\fun (same: degree i = q) => trans!{{V.Carrier q}} _ _ _ ((rules x i a).inside same)
+      (sym!{{V.Carrier q}} _ _ ((rules x i b).inside same))}
+    {\fun (outside: Logic.Not (degree i = q)) => trans!{{V.Carrier q}} _ _ _ ((rules x i a).outside outside)
+      (sym!{{V.Carrier q}} _ _ ((rules x i b).outside outside))}
+  };
+\definition value[x: Product.Carrier][i: Index]: Value x i :=
+  \choice Value x i \by { existence: existsValue x i, uniqueness: unique x i };
+\definition mask[x: Product.Carrier]: Vectors.Carrier := \fun (i: Index) => value x i;
+\definition inside[x: Product.Carrier][i: Index][same: degree i = q]: mask x i = selected x i same :=
+  (rules x i (value x i)).inside same;
+\definition outside[x: Product.Carrier][i: Index][different: Logic.Not (degree i = q)]: mask x i = (V.space q).zero :=
+  (rules x i (value x i)).outside different;
+\definition Supported[u: Vectors.Carrier]: \Prop :=
+  \forall (i: Index) -> Logic.Not (degree i = q) -> u i = (V.space q).zero;
+\definition support[x: Product.Carrier]: Supported (mask x) := \fun (i: Index)(different: Logic.Not (degree i = q)) => outside x i different;
+\definition depends: \forall (a, b: Product.Carrier) -> (\forall (i: Index) -> degree i = q -> a i = b i) -> mask a = mask b :=
+  \fun (a, b: Product.Carrier)(same: \forall (i: Index) -> degree i = q -> a i = b i) => Vectors.ext _ _
+    (\fun (i: Index) => either!{{Classical.excludedMiddle (degree i = q)} {mask a i = mask b i}
+      {\fun (equal: degree i = q) => trans!{{V.Carrier q}} _ _ _ (inside a i equal) (trans!{{V.Carrier q}} _ _ _
+        (congr!{{V.Carrier (degree i)} {V.Carrier q}} (Cast.cast V.Carrier (degree i) q equal) _ _ (same i equal))
+        (sym!{{V.Carrier q}} _ _ (inside b i equal)))}
+      {\fun (different: Logic.Not (degree i = q)) => trans!{{V.Carrier q}} _ _ _
+        (outside a i different) (sym!{{V.Carrier q}} _ _ (outside b i different))}
+    });
+\import Modules.Laws[V := V.Carrier q, space := V.space q] \as Laws;
+\definition add[x, y: Product.Carrier]: mask (Product.add x y) = Vectors.add (mask x) (mask y) :=
+  Vectors.ext _ _ (\fun (i: Index) =>
+    either!{{Classical.excludedMiddle (degree i = q)} {_}
+      {\fun (same: degree i = q) => eq_reason_in!{{V.Carrier q} _
+        "=" _ "by" { inside (Product.add x y) i same }
+        "=" _ "by" { Cast.binaryNatural V.Carrier V.Carrier V.Carrier (\fun (k: N.Nat^) => (V.space k).add) (degree i) q same (x i) (y i) }
+        "=" _ "by" { congr!{{V.Carrier q} {V.Carrier q} {V.Carrier q}} (V.space q).add _ _ _ _
+          (sym!{{V.Carrier q}} _ _ (inside x i same)) (sym!{{V.Carrier q}} _ _ (inside y i same)) }
+      }}
+      {\fun (different: Logic.Not (degree i = q)) => eq_reason_in!{{V.Carrier q} _
+        "=" _ "by" { outside (Product.add x y) i different }
+        "=" _ "by" { sym!{{V.Carrier q}} _ _ (Laws.zeroLeft (V.space q).zero) }
+        "=" _ "by" { congr!{{V.Carrier q} {V.Carrier q} {V.Carrier q}} (V.space q).add _ _ _ _
+          (sym!{{V.Carrier q}} _ _ (outside x i different)) (sym!{{V.Carrier q}} _ _ (outside y i different)) }
+      }}
+    });
+\definition scale[r: K][x: Product.Carrier]: mask (Product.scale r x) = Vectors.scale r (mask x) :=
+  Vectors.ext _ _ (\fun (i: Index) =>
+    either!{{Classical.excludedMiddle (degree i = q)} {_}
+      {\fun (same: degree i = q) => eq_reason_in!{{V.Carrier q} _
+        "=" _ "by" { inside (Product.scale r x) i same }
+        "=" _ "by" { Cast.natural V.Carrier V.Carrier (\fun (k: N.Nat^) => (V.space k).smul r) (degree i) q same (x i) }
+        "=" _ "by" { congr!{{V.Carrier q} {V.Carrier q}} ((V.space q).smul r) _ _ (sym!{{V.Carrier q}} _ _ (inside x i same)) }
+      }}
+      {\fun (different: Logic.Not (degree i = q)) => eq_reason_in!{{V.Carrier q} _
+        "=" _ "by" { outside (Product.scale r x) i different }
+        "=" _ "by" { sym!{{V.Carrier q}} _ _ (Laws.scaleZero r) }
+        "=" _ "by" { congr!{{V.Carrier q} {V.Carrier q}} ((V.space q).smul r) _ _ (sym!{{V.Carrier q}} _ _ (outside x i different)) }
+      }}
+    });

@@ -1,0 +1,98 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import chain_complexes.Integer[] \as Integer;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\definition shift: N.Nat^ -> I.Int^ -> I.Int^ := cohomology_thom.LocalDisk[].shift;
+\definition unshift: N.Nat^ -> I.Int^ -> I.Int^ :=
+  \induction (q: N.Nat^) \return I.Int^ -> I.Int^ \with {
+    | zero: \fun (z: I.Int^) => z
+    | succ: \fun (q: N.Nat^)(prior: I.Int^ -> I.Int^)(z: I.Int^) => prior (Integer.previous z)
+  };
+\definition shiftUnshift: \forall (q: N.Nat^)(z: I.Int^) -> shift q (unshift q z) = z :=
+  \induction (q: N.Nat^) \return \forall (z: I.Int^) -> shift q (unshift q z) = z \with {
+    | zero: \fun (z: I.Int^) => \refl(z)
+    | succ: \fun (q: N.Nat^)(prior: \forall (z: I.Int^) -> shift q (unshift q z) = z)(z: I.Int^) =>
+      trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} Integer.next _ _ (prior (Integer.previous z))) (Integer.nextPrevious z)
+  };
+\definition unshiftShift: \forall (q: N.Nat^)(z: I.Int^) -> unshift q (shift q z) = z :=
+  \induction (q: N.Nat^) \return \forall (z: I.Int^) -> unshift q (shift q z) = z \with {
+    | zero: \fun (z: I.Int^) => \refl(z)
+    | succ: \fun (q: N.Nat^)(prior: \forall (z: I.Int^) -> unshift q (shift q z) = z)(z: I.Int^) =>
+      trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} (unshift q) _ _ (Integer.previousNext (shift q z))) (prior z)
+  };
+\definition natural: \forall (q, p: N.Nat^) -> shift q (I.Int^::ofNat p) = I.Int^::ofNat (N.Basic[].Def[].add p q) :=
+  cohomology_thom.LocalDisk[].shiftNatural;
+\definition unshiftNext: \forall (q: N.Nat^)(z: I.Int^) -> unshift q (Integer.next z) = Integer.next (unshift q z) :=
+  \induction (q: N.Nat^) \return \forall (z: I.Int^) -> unshift q (Integer.next z) = Integer.next (unshift q z) \with {
+    | zero: \fun (z: I.Int^) => \refl(Integer.next z)
+    | succ: \fun (q: N.Nat^)(prior: \forall (z: I.Int^) -> unshift q (Integer.next z) = Integer.next (unshift q z))(z: I.Int^) =>
+      trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} (unshift q) _ _ (Integer.previousNext z))
+        (trans!{I.Int^} _ _ _
+          (congr!{I.Int^ I.Int^} (unshift q) _ _ (sym!{I.Int^} _ _ (Integer.nextPrevious z)))
+          (prior (Integer.previous z)))
+  };
+
+\import N.Basic[].Def[] \as Nat;
+\import N.Basic[].Prop[] \as NatLaws;
+\import std.Logic[].Proposition[] \as Logic;
+\definition naturalPart: I.Int^ -> N.Nat^ := \induction (z: I.Int^) \return N.Nat^ \with {
+  | ofNat: \fun (n: N.Nat^) => n
+  | negSucc: \fun (n: N.Nat^) => N.Nat^::zero
+};
+\definition matchNatural[q, n, p: N.Nat^][eq: unshift q (I.Int^::ofNat n) = I.Int^::ofNat p]:
+  Nat.add p q = n :=
+  congr!{I.Int^ N.Nat^} naturalPart _ _
+    (trans!{I.Int^} _ _ _ (sym!{I.Int^} _ _ (natural q p))
+      (trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} (shift q) _ _ (sym!{I.Int^} _ _ eq))
+        (shiftUnshift q (I.Int^::ofNat n))));
+\definition unshiftNatural[q, n, p: N.Nat^][sum: Nat.add p q = n]:
+  unshift q (I.Int^::ofNat n) = I.Int^::ofNat p :=
+  trans!{I.Int^} _ _ _
+    (congr!{I.Int^ I.Int^} (unshift q) _ _
+      (trans!{I.Int^} _ _ _ (congr!{N.Nat^ I.Int^} (\fun (k: N.Nat^) => I.Int^::ofNat k) _ _ (sym!{N.Nat^} _ _ sum))
+        (sym!{I.Int^} _ _ (natural q p))))
+    (unshiftShift q (I.Int^::ofNat p));
+\definition unshiftAtDegree[q: N.Nat^]: unshift q (I.Int^::ofNat q) = I.Int^::ofNat N.Nat^::zero :=
+  unshiftNatural q q N.Nat^::zero (NatLaws.addZeroLeft q);
+\definition shiftCompose: \forall (r, q: N.Nat^)(z: I.Int^) -> shift r (shift q z) = shift (Nat.add q r) z :=
+  \induction (r: N.Nat^) \return \forall (q: N.Nat^)(z: I.Int^) -> shift r (shift q z) = shift (Nat.add q r) z \with {
+    | zero: \fun (q: N.Nat^)(z: I.Int^) => \refl(shift q z)
+    | succ: \fun (r: N.Nat^)(previous: \forall (q: N.Nat^)(z: I.Int^) -> shift r (shift q z) = shift (Nat.add q r) z)(q: N.Nat^)(z: I.Int^) =>
+      trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} Integer.next _ _ (previous q z))
+        (congr!{N.Nat^ I.Int^} (\fun (n: N.Nat^) => shift n z) _ _ (sym!{N.Nat^} _ _ (NatLaws.addSuccRight q r)))
+  };
+\definition coordinateShift[i, j, q: N.Nat^][z: I.Int^][degree: Nat.add q j = i]:
+  shift q (unshift i z) = unshift j z :=
+  trans!{I.Int^} _ _ _ (sym!{I.Int^} _ _ (unshiftShift j (shift q (unshift i z))))
+    (congr!{I.Int^ I.Int^} (unshift j) _ _
+      (trans!{I.Int^} _ _ _ (shiftCompose j q (unshift i z))
+        (trans!{I.Int^} _ _ _ (congr!{N.Nat^ I.Int^} (\fun (n: N.Nat^) => shift n (unshift i z)) _ _ degree)
+          (shiftUnshift i z))));
+\import Equality.Transport[A := N.Nat^] \as NaturalCast;
+\import Equality.Transport[A := I.Int^] \as IntegerCast;
+\definition nativeCast[F: I.Int^ -> \Set][n, m: N.Nat^][eq: n = m][x: F (I.Int^::ofNat n)]:
+  NaturalCast.cast (\fun (k: N.Nat^) => F (I.Int^::ofNat k)) n m eq x =
+  IntegerCast.cast F (I.Int^::ofNat n) (I.Int^::ofNat m)
+    (congr!{N.Nat^ I.Int^} (\fun (k: N.Nat^) => I.Int^::ofNat k) n m eq) x :=
+  (\idelim n = m \with k: N.Nat^ => \forall (same: n = k) ->
+      NaturalCast.cast (\fun (a: N.Nat^) => F (I.Int^::ofNat a)) n k same x =
+      IntegerCast.cast F (I.Int^::ofNat n) (I.Int^::ofNat k)
+        (congr!{N.Nat^ I.Int^} (\fun (a: N.Nat^) => I.Int^::ofNat a) n k same) x
+    \by {
+      base: \fun (same: n = n) => trans!{{F (I.Int^::ofNat n)}} _ _ _
+        (NaturalCast.castRefl (\fun (a: N.Nat^) => F (I.Int^::ofNat a)) n x)
+        (sym!{{F (I.Int^::ofNat n)}} _ _ (IntegerCast.castRefl F (I.Int^::ofNat n) x)),
+      equality: eq
+    }) eq;
+\definition unshiftNegative: \forall (q, n: N.Nat^) ->
+  unshift q (I.Int^::negSucc n) = I.Int^::negSucc (Nat.add n q) :=
+  \induction (q: N.Nat^) \return \forall (n: N.Nat^) -> unshift q (I.Int^::negSucc n) = I.Int^::negSucc (Nat.add n q) \with {
+    | zero: \fun (n: N.Nat^) => \refl(I.Int^::negSucc n)
+    | succ: \fun (q: N.Nat^)(previous: \forall (n: N.Nat^) -> unshift q (I.Int^::negSucc n) = I.Int^::negSucc (Nat.add n q))(n: N.Nat^) =>
+      trans!{I.Int^} _ _ _ (previous (N.Nat^::succ n))
+        (congr!{N.Nat^ I.Int^} (\fun (k: N.Nat^) => I.Int^::negSucc k) _ _
+          (trans!{N.Nat^} _ _ _ (NatLaws.addSuccLeft n q) (sym!{N.Nat^} _ _ (NatLaws.addSuccRight n q))))
+  };

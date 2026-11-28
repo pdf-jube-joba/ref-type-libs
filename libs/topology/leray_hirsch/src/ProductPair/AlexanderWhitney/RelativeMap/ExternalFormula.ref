@@ -1,0 +1,56 @@
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].eq_reason_in;
+\import \parent.Components[p := p, q := q] \as Components;
+\definition n: N.Nat^ := Components.n;
+\definition z: I.Int^ := Components.z;
+\definition baseDegree: I.Int^ := I.Int^::ofNat p;
+\import singular_cohomology.Simplices[A := Whole.CarrierSet, source := wholeTopology] \as Simplices;
+\import Simplices.Cut[p := p, q := q] \as Faces;
+\import singular_products.AlexanderWhitney[A := X, B := F, left := base, right := fiber].At[p := p, q := q] \as Cuts;
+\import singular_cap.External[A := X, B := F, left := base, right := fiber, R := K, ring := ring] \as External;
+\import topology.Topology[Carrier := F] \as FiberSpace;
+\import External.Relative[leftSubset := subset, rightSubset := FiberSpace.Empty] \as PairProduct;
+\import PairProduct.Cup[p := p, q := q] \as ProductCup;
+\import singular_products.Cochains[A := Whole.CarrierSet, source := wholeTopology, R := K, ring := ring] \as ProductCochains;
+\import singular_products.Cochains[A := F, source := fiber, R := K, ring := ring] \as FiberCochains;
+\import ProductCochains.Cup[p := p, q := q] \as AbsoluteCup;
+\import ProductCochains.Pullback[B := F, target := fiber] \as FiberPull;
+\import singular_cohomology.Relative[A := X, source := base, subset := subset] \as BaseRelativeChains;
+\import BaseRelativeChains.With[coefficients := ProductCochains.integerCoefficients] \as BaseRelative;
+\import Actual.With[coefficients := ProductCochains.integerCoefficients] \as OutputRelative;
+\import Actual.Maps[B := X].Over[target := base, targetSubset := subset].On[f := PairProduct.leftPair].Integer[] \as PairChains;
+\import PairChains.With[coefficients := ProductCochains.integerCoefficients] \as PairCochains;
+\import singular_cap.CochainPair[A := Whole.CarrierSet, source := wholeTopology, subset := part, R := K, ring := ring] \as CupPair;
+\import CupPair.Comparison[n := n] \as Output;
+\import CupPair.Comparison[n := p] \as Input;
+\import CupPair.RelativeCup[p := p, q := q] \as Cup;
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := TensorComparison.relative, D := FiberChains.complex].At[p := p, q := q] \as TensorCup;
+\import singular_cohomology.Maps[A := Whole.CarrierSet, B := X, source := wholeTopology, target := base] \as BaseMap;
+\definition pulled[alpha: BaseRelative.Carrier baseDegree]: OutputRelative.Carrier baseDegree := PairCochains.pullback.apply baseDegree alpha;
+\definition fiberPull[beta: FiberCochains.Carrier q]: ProductCochains.Carrier q := FiberPull.apply q External.rightProjection External.rightContinuous beta;
+\definition baseValue: \forall (alpha: BaseRelative.Carrier baseDegree)(sigma: Simplices.Carrier n) ->
+  (Input.whole (pulled alpha)).apply (WholeChains.generator p (Faces.front sigma)) =
+    alpha.apply (TensorComparison.projection.apply p (BaseChains.generator p (Cuts.front sigma))) :=
+  \fun (alpha: BaseRelative.Carrier baseDegree)(sigma: Simplices.Carrier n) => trans!{K} _ _ _
+    (congr!{{BaseRelativeChains.Carrier baseDegree} K} alpha.apply _ _
+      (PairChains.At[z := baseDegree].quotientOnClass (SignedWhole.Positive[n := p].intro (WholeChains.generator p (Faces.front sigma)))))
+    (congr!{{BaseChains.Carrier p} K} (\fun (x: BaseChains.Carrier p) => alpha.apply (TensorComparison.projection.apply p x)) _ _
+      (BaseMap.At[n := p].onGenerator External.leftProjection External.leftContinuous (Faces.front sigma)));
+\definition tensorValue[alpha: BaseRelative.Carrier baseDegree][beta: FiberCochains.Carrier q][x: Actual.Carrier z]: K :=
+  (TensorCup.map alpha beta).apply (Components.component (comparisonMap.apply z x));
+\definition externalValue[alpha: BaseRelative.Carrier baseDegree][beta: FiberCochains.Carrier q][x: Actual.Carrier z]: K :=
+  (ProductCup.left alpha beta).apply x;
+\definition onSimplex: \forall (alpha: BaseRelative.Carrier baseDegree)(beta: FiberCochains.Carrier q)(sigma: Simplices.Carrier n) ->
+  tensorValue alpha beta (Actual.class z (Components.lift (WholeChains.generator n sigma))) =
+    externalValue alpha beta (Actual.class z (Components.lift (WholeChains.generator n sigma))) :=
+  \fun (alpha: BaseRelative.Carrier baseDegree)(beta: FiberCochains.Carrier q)(sigma: Simplices.Carrier n) => eq_reason_in!{K _
+    "=" _ "by" { congr!{{Components.carrier} K} (TensorCup.map alpha beta).apply _ _ (Components.onSimplex sigma) }
+    "=" _ "by" { TensorCup.onTensor alpha beta (TensorComparison.projection.apply p (BaseChains.generator p (Cuts.front sigma))) (FiberChains.generator q (Cuts.back sigma)) }
+    "=" _ "by" { sym!{K} _ _ (congr!{K K K} (std.Alg[].Ring[].commutativeRingAsRing K ring).mul _ _ _ _
+      (baseValue alpha sigma) (FiberPull.onSimplex q External.rightProjection External.rightContinuous beta (Faces.back sigma))) }
+    "=" _ "by" { sym!{K} _ _ (AbsoluteCup.onSimplex (Input.whole (pulled alpha)) (fiberPull beta) sigma) }
+    "=" _ "by" { sym!{K} _ _ (congr!{{ProductCochains.Carrier n} K} (\fun (h: ProductCochains.Carrier n) => h.apply (WholeChains.generator n sigma)) _ _
+      (Cup.leftRestriction (pulled alpha) (fiberPull beta))) }
+  };
+
+\module Cochains;

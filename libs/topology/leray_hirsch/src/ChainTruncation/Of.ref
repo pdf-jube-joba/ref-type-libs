@@ -1,0 +1,80 @@
+\module At(n: N.Nat^) {
+  \import Modules.Of[V := C.family.Carrier n, space := C.family.space n].Submodule[] \as Subspaces;
+  \import Modules.Laws[V := C.family.Carrier n, space := C.family.space n] \as Laws;
+  \import algebra.Group[].Of[Carrier := C.family.Carrier n, group := Laws.additive] \as Group;
+  \definition Supported[x: C.family.Carrier n]: \Prop := Logic.Not (kept n) -> x = (C.family.space n).zero;
+  \definition submodule: Subspaces.Submodule := Subspaces.Submodule {
+    carrier := { x: C.family.Carrier n \where Supported x },
+    zero := \fun (outside: Logic.Not (kept n)) => \refl((C.family.space n).zero),
+    addition := \fun (x, y: C.family.Carrier n)(sx: Supported x)(sy: Supported y)(outside: Logic.Not (kept n)) => trans!{{C.family.Carrier n}} _ _ _
+      (congr!{{C.family.Carrier n} {C.family.Carrier n} {C.family.Carrier n}} Group.add _ _ _ _ (sx outside) (sy outside))
+      (Group.zeroLeft Group.zero),
+    scalar := \fun (r: I.Int^)(x: C.family.Carrier n)(sx: Supported x)(outside: Logic.Not (kept n)) => trans!{{C.family.Carrier n}} _ _ _
+      (congr!{{C.family.Carrier n} {C.family.Carrier n}} ((C.family.space n).smul r) _ _ (sx outside))
+      (Laws.scaleZero r),
+  };
+  \import Subspaces.Of[S := submodule] \as Subspace;
+  \definition Carrier: \Set := Subspace.Carrier;
+  \definition space: Modules.Space Carrier := Subspace.moduleSpace;
+  \definition include[x: Carrier]: C.family.Carrier n := x;
+  \definition zero: \forall (outside: Logic.Not (kept n))(x: Carrier) -> x = space.zero :=
+    \fun (outside: Logic.Not (kept n))(x: Carrier) => (\bysub(C.family.Carrier n, submodule.carrier, x)) outside;
+  \definition restrict[present: kept n][x: C.family.Carrier n]: Carrier :=
+    \into[C.family.Carrier n](x, submodule.carrier) \by {
+      \fun (outside: Logic.Not (kept n)) => Logic.falseElim _ (outside present)
+    };
+  \import Modules.Isomorphism[V := Carrier, W := C.family.Carrier n, source := space, target := C.family.space n] \as Iso;
+  \import Modules.Hom[V := C.family.Carrier n, W := Carrier, source := C.family.space n, target := space] \as Backward;
+  \definition full[present: kept n]: Iso.Isomorphism := Iso.Isomorphism {
+    forward := Subspace.inclusion,
+    backward := Backward.Map {
+      apply := restrict present,
+      addition := \fun (x, y: C.family.Carrier n) => \refl(restrict present ((C.family.space n).add x y)),
+      scalar := \fun (r: I.Int^)(x: C.family.Carrier n) => \refl(restrict present ((C.family.space n).smul r x)),
+    },
+    leftInverse := \fun (x: Carrier) => \refl(x),
+    rightInverse := \fun (x: C.family.Carrier n) => \refl(x),
+  };
+}
+\definition family: Chains.Family := Chains.Family {
+  Carrier := \fun (n: N.Nat^) => \parent.Of[C := C, kept := kept, downward := downward].At[n := n].Carrier,
+  space := \fun (n: N.Nat^) => \parent.Of[C := C, kept := kept, downward := downward].At[n := n].space,
+};
+\module Boundary(n: N.Nat^) {
+  \import \parent.At[n := N.Nat^::succ n] \as Source;
+  \import \parent.At[n := n] \as Target;
+  \import Modules.Hom[V := C.family.Carrier (N.Nat^::succ n), W := C.family.Carrier n,
+    source := C.family.space (N.Nat^::succ n), target := C.family.space n] \as Maps;
+  \definition differential: Maps.Map := Maps.Map {
+    apply := C.differential.apply n,
+    addition := C.laws.addition n,
+    scalar := C.laws.scalar n,
+  };
+  \definition supported: \forall (x: Source.Carrier) -> Target.Supported (differential.apply x) :=
+    \fun (x: Source.Carrier)(outside: Logic.Not (kept n)) => trans!{{C.family.Carrier n}} _ _ _
+      (congr!{{C.family.Carrier (N.Nat^::succ n)} {C.family.Carrier n}} differential.apply _ _
+        (Source.zero (\fun (present: kept (N.Nat^::succ n)) => outside (downward n present)) x))
+      (Maps.zeroPreserved differential);
+  \definition apply[x: Source.Carrier]: Target.Carrier :=
+    \into[C.family.Carrier n](differential.apply x, Target.submodule.carrier) \by { supported x };
+}
+\definition differential: Chains.DifferentialData[family] := Chains.DifferentialData[family] {
+  apply := \fun (n: N.Nat^) => \parent.Of[C := C, kept := kept, downward := downward].Boundary[n := n].apply,
+};
+\definition complex: Chains.Complex := Chains.Complex {
+  family := family, differential := differential,
+  laws := Chains.DifferentialLaws[family, differential] {
+    addition := \fun (n: N.Nat^)(x, y: family.Carrier (N.Nat^::succ n)) => C.laws.addition n x y,
+    scalar := \fun (n: N.Nat^)(r: I.Int^)(x: family.Carrier (N.Nat^::succ n)) => C.laws.scalar n r x,
+    squareZero := \fun (n: N.Nat^)(x: family.Carrier (N.Nat^::succ (N.Nat^::succ n))) => C.laws.squareZero n x,
+  },
+};
+\import Chains.Map[C := complex, D := C] \as Inclusions;
+\definition inclusion: Inclusions.Map := Inclusions.Map {
+  apply := \fun (n: N.Nat^)(x: family.Carrier n) => x,
+  addition := \fun (n: N.Nat^)(x, y: family.Carrier n) => \refl((C.family.space n).add x y),
+  scalar := \fun (n: N.Nat^)(r: I.Int^)(x: family.Carrier n) => \refl((C.family.space n).smul r x),
+  commutes := \fun (n: N.Nat^)(x: family.Carrier (N.Nat^::succ n)) => \refl(C.differential.apply n x),
+};
+
+\module TensorWindow(D: Chains.Complex);
