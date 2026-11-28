@@ -1,0 +1,37 @@
+\import std.Data[].Pair[] \as Pair;
+\import topological_constructions.Product[A := Sphere, B := Numbers.Complex] \as Parameters;
+\definition Carrier: \Set := Parameters.CarrierSet;
+\definition topology: topology.Topology[Carrier := Carrier].Topology := Parameters.topology sphereTopology Hermitian.Complex[].topological.space;
+\definition frame[p: Carrier]: Sphere := Pair.first Sphere Numbers.Complex p;
+\definition scalar[p: Carrier]: Numbers.Complex := Pair.second Sphere Numbers.Complex p;
+\definition frameContinuous: topology.Continuity[A := Carrier, B := Sphere].Continuous topology sphereTopology frame :=
+  Parameters.Maps[].firstContinuous sphereTopology Hermitian.Complex[].topological.space;
+\definition scalarContinuous: topology.Continuity[A := Carrier, B := Numbers.Complex].Continuous topology Hermitian.Complex[].topological.space scalar :=
+  Parameters.Maps[].secondContinuous sphereTopology Hermitian.Complex[].topological.space;
+\definition evaluate[p: Carrier]: Family.Point := tautological (frame p) (scalar p);
+\definition project[p: Carrier]: Space := projection (frame p);
+\definition projectContinuous: topology.Continuity[A := Carrier, B := Space].Continuous topology lineBundle.baseSpace project :=
+  topology.Composition[A := Carrier, B := Sphere, C := Space].composeContinuous
+    topology sphereTopology lineBundle.baseSpace frame projection frameContinuous projectionContinuous;
+\definition native[p: Carrier]: E.Vector := frame p;
+\definition nativeContinuous: topology.Continuity[A := Carrier, B := E.Vector].Continuous topology (Bundles.coordinateTopology ambient) native :=
+  topology.Composition[A := Carrier, B := Sphere, C := E.Vector].composeContinuous
+    topology sphereTopology (Bundles.coordinateTopology ambient) frame vector frameContinuous vectorContinuous;
+\import Ambient.Families[X := Carrier] \as Operations;
+\definition components: Operations.Continuous topology native :=
+  \fun (i: Fin.Fin ambient) => topology.Composition[A := Carrier, B := E.Vector, C := Numbers.Complex].composeContinuous
+    topology (Bundles.coordinateTopology ambient) Hermitian.Complex[].topological.space native (\fun (v: E.Vector) => v i) nativeContinuous
+    (topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].evaluationContinuous Hermitian.Complex[].topological.space i);
+\definition vectorEvaluationContinuous: topology.Continuity[A := Carrier, B := E.Vector].Continuous topology (Bundles.coordinateTopology ambient) (\fun (p: Carrier) => (evaluate p).vector) :=
+  topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].Universal[A := Carrier].continuous
+    topology Hermitian.Complex[].topological.space (\fun (p: Carrier) => (evaluate p).vector)
+    (Operations.scale topology scalar native scalarContinuous components);
+\definition continuous: topology.Continuity[A := Carrier, B := Family.Point].Continuous topology lineBundle.totalSpace evaluate :=
+  Universal.Universal[Y := Carrier, source := topology].continuous evaluate projectContinuous vectorEvaluationContinuous;
+\definition lift[v: Sphere][a: Numbers.Complex]: Carrier := Pair.pair Sphere Numbers.Complex v a;
+\definition surjective[p: Family.Point]: \exists (q: Carrier \where evaluate q = p) := \block {
+  \takefrom v: \Cast[Sphere] ({ v: Sphere \where tautological v (coefficient v p) = p }) \by onto p \then
+  \return std.Logic[].Proposition[].existsIntro[Carrier, { q: Carrier \where evaluate q = p }] (lift v (coefficient v p))
+    (\bysub(Sphere, { w: Sphere \where tautological w (coefficient w p) = p }, v))
+};
+\module Orbit;

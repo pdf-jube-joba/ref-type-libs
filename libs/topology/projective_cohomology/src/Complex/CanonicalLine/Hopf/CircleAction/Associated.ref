@@ -19,3 +19,4 @@
   \return std.Logic[].Proposition[].existsIntro[Sphere, { v: Sphere \where tautological v (coefficient v p) = p }] v
     (Family.ext _ _ same (trans!{{E.Vector}} _ _ _ (castVector _ _ same (value v (coefficient v p))) (reconstructValue v p same)))
 };
+\module Product;
