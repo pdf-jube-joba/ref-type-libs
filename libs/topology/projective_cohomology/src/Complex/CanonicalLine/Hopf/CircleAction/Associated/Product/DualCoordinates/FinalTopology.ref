@@ -1,0 +1,48 @@
+\import topology.Topology[Carrier := Carrier] \as Domain;
+\import topology.Topology[Carrier := Family.Point] \as Tautological;
+\import topology.Topology[Carrier := DualFamily.Point] \as Target;
+\import topology.Maps[A := Family.Point, B := DualFamily.Point] \as ToDual;
+\import topology.Maps[A := DualFamily.Point, B := Family.Point] \as FromDual;
+\import topology.Maps[A := Carrier, B := Family.Point] \as UnderTautological;
+\import topology.Maps[A := Carrier, B := DualFamily.Point] \as UnderDual;
+\import topology.Maps[A := Carrier, B := Carrier] \as End;
+\import \parent.\parent.LocalQuotient[] \as Original;
+\definition reflected[U: \Pow DualFamily.Point]: UnderTautological.Preimage evaluate (ToDual.Preimage Dual.Riesz[].forward U) =
+  End.Preimage conjugate (UnderDual.Preimage evaluateDual U) :=
+  \axiom:setext((UnderTautological.Preimage evaluate (ToDual.Preimage Dual.Riesz[].forward U)),
+    (End.Preimage conjugate (UnderDual.Preimage evaluateDual U)),
+    (\fun (p: Carrier)(member: \In[DualFamily.Point] U (Dual.Riesz[].forward (evaluate p))) =>
+      \idelim Dual.Riesz[].forward (evaluate p) = evaluateDual (conjugate p) \with q: DualFamily.Point => \In[DualFamily.Point] U q \by {
+        base: member, equality: sym!{{DualFamily.Point}} _ _ (comparisonBack p)
+      }),
+    (\fun (p: Carrier)(member: \In[DualFamily.Point] U (evaluateDual (conjugate p))) =>
+      \idelim evaluateDual (conjugate p) = Dual.Riesz[].forward (evaluate p) \with q: DualFamily.Point => \In[DualFamily.Point] U q \by {
+        base: member, equality: comparisonBack p
+      }));
+\definition backRule[U: \Pow DualFamily.Point]:
+  FromDual.Preimage Dual.Riesz[].backward (ToDual.Preimage Dual.Riesz[].forward U) = U :=
+  \axiom:setext((FromDual.Preimage Dual.Riesz[].backward (ToDual.Preimage Dual.Riesz[].forward U)), U,
+    (\fun (p: DualFamily.Point)(member: \In[DualFamily.Point] U (Dual.Riesz[].forward (Dual.Riesz[].backward p))) =>
+      \idelim Dual.Riesz[].forward (Dual.Riesz[].backward p) = p \with q: DualFamily.Point => \In[DualFamily.Point] U q \by {
+        base: member, equality: Dual.Riesz[].rightInverse p
+      }),
+    (\fun (p: DualFamily.Point)(member: \In[DualFamily.Point] U p) =>
+      \idelim p = Dual.Riesz[].forward (Dual.Riesz[].backward p) \with q: DualFamily.Point => \In[DualFamily.Point] U q \by {
+        base: member, equality: sym!{{DualFamily.Point}} _ _ (Dual.Riesz[].rightInverse p)
+      }));
+\definition reflectsOpen[U: \Pow DualFamily.Point][open: Domain.IsOpenIn topology (UnderDual.Preimage evaluateDual U)]: Target.IsOpenIn Dual.bundle.totalSpace U := \block {
+  \let before: Domain.IsOpenIn topology (UnderTautological.Preimage evaluate (ToDual.Preimage Dual.Riesz[].forward U)) :=
+    \idelim End.Preimage conjugate (UnderDual.Preimage evaluateDual U) = UnderTautological.Preimage evaluate (ToDual.Preimage Dual.Riesz[].forward U)
+      \with V: (\Pow Carrier) => Domain.IsOpenIn topology V \by {
+        base: conjugateContinuous (UnderDual.Preimage evaluateDual U) open, equality: sym!{{\Pow Carrier}} _ _ (reflected U)
+      } \then
+  \let first: Tautological.IsOpenIn lineBundle.totalSpace (ToDual.Preimage Dual.Riesz[].forward U) :=
+    Original.quotient.reflectsOpen (ToDual.Preimage Dual.Riesz[].forward U) before \then
+  \return \idelim FromDual.Preimage Dual.Riesz[].backward (ToDual.Preimage Dual.Riesz[].forward U) = U \with V: (\Pow DualFamily.Point) =>
+    Target.IsOpenIn Dual.bundle.totalSpace V \by {
+      base: Dual.Riesz[].Inverse[].continuous (ToDual.Preimage Dual.Riesz[].forward U) first, equality: backRule U
+    }
+};
+\import topological_constructions.Quotient[A := Carrier, B := DualFamily.Point] \as Quotients;
+\definition quotient: Quotients.IsQuotientMap[topology, Dual.bundle.totalSpace, evaluateDual] :=
+  Quotients.IsQuotientMap[topology, Dual.bundle.totalSpace, evaluateDual] { onto := onto, continuous := regular, reflectsOpen := reflectsOpen };
