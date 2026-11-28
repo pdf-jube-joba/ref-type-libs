@@ -29,3 +29,4 @@
 \module Linear(x: Point);
 \module Trivialization;
 \module Thom;
+\module EquatorProjection(w: Spheres.Carrier Degrees.one);

@@ -41,6 +41,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `ComplexLineSphere.Equator` | In the standard two-sphere model, the second complex frame coordinate on the equator is the first multiplied by the inverse unit-circle coordinate |
 | `ComplexLineSphere.Section.Relative.Forgetting` | The projected coordinate section on the standard two-sphere pulls the punctured-bundle Thom class back to a relative class whose absolute image is the tautological Euler class |
 | `ComplexLineSphere.Section.Frame.Thom` | The projected north frame defines a continuous complex trivialization, and its standard local disk class equals the restriction of the canonical Thom class |
+| `ComplexLineSphere.Section.Frame.EquatorProjection` | The projected coordinate section has complex coordinate \(x+iy\) in the northern frame on the equator |
 | `ComplexLineSphere.Orientation` | The chosen integral generator of the standard two-sphere is obtained from its northern relative generator by the excision comparison and forgetting |
 | `ComplexLineSphere.Orientation.PositiveConnecting` | The positive-degree comparison from ordinary to reduced cohomology commutes with the connecting map of a pair |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
