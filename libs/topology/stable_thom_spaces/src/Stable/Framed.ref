@@ -1,0 +1,17 @@
+\import std.Arithmetic[].Int[] \as I;
+\definition level[n: N.Nat^]: \Set := \root.Stable[].Sphere[].Disk[n := n].Carrier;
+\definition space[n: N.Nat^]: algebraic_topology.Pointed[A := level n].Space := \root.Stable[].Sphere[].Disk[n := n].pointed;
+\definition structureMap: _ := \fun (n: N.Nat^) => \root.Stable[].Sphere[].Disk[n := n].Successor[].backward;
+\import \root.Stable[].Spectrum[T := level, spaces := space, structureMap := structureMap] \as Spectrum;
+
+\module Degree(z: I.Int^) {
+  \import Spectrum.Degree[z := z] \as Classes;
+  \definition Carrier: \Set := Classes.Carrier;
+  \definition maps: N.Nat^ -> \Set := Classes.maps;
+  \definition ofMap: _ := Classes.ofMap;
+  \definition zero: Carrier := Classes.zero;
+  \definition induction: _ := Classes.induction;
+}
+\import puppe_sequences.Puppe[].Identity[A := level N.Nat^::zero, source := space N.Nat^::zero] \as Identity;
+\definition identityClass: Degree[z := I.Int^::ofNat N.Nat^::zero].Carrier :=
+  Degree[z := I.Int^::ofNat N.Nat^::zero].ofMap N.Nat^::zero Identity.map;

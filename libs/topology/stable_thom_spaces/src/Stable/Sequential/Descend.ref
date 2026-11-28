@@ -1,0 +1,20 @@
+\definition onWalk[i: N.Nat^][x: Stage i][d: N.Nat^]: stageMap i x = stageMap (Nat.add i d) (walk i d x) :=
+  (\induction (d: N.Nat^) \return stageMap i x = stageMap (Nat.add i d) (walk i d x) \with {
+    | zero: \refl(stageMap i x)
+    | succ: \fun (d: N.Nat^)(previous: _) => trans!{Target} _ _ _ previous (agreesNext (Nat.add i d) (walk i d x))
+  }) d;
+\definition onAdvance[i, j: N.Nat^][ij: Order.Le i j][x: Stage i]: stageMap i x = stageMap j (advance i j ij x) :=
+  (\idelim Nat.add i (Nat.sub j i) = j \with k: N.Nat^ =>
+    \forall (same: Nat.add i (Nat.sub j i) = k) ->
+      stageMap i x = stageMap k (arrive i k (Nat.sub j i) same x)
+    \by { base: \fun (same: Nat.add i (Nat.sub j i) = Nat.add i (Nat.sub j i)) =>
+      trans!{Target} _ _ _ (onWalk i x (Nat.sub j i))
+        (congr!{{Stage (Nat.add i (Nat.sub j i))} Target} (stageMap (Nat.add i (Nat.sub j i))) _ _
+          (sym!{{Stage (Nat.add i (Nat.sub j i))}} _ _
+            (Transport.castRefl Stage (Nat.add i (Nat.sub j i)) (walk i (Nat.sub j i) x)))),
+
+      equality: Order.addSubOfLe i j ij }) (Order.addSubOfLe i j ij);
+\import Limit.Into[Target := Target, stageMap := stageMap, compatibleMap := onAdvance] \as Into;
+\definition map: Carrier -> Target := Into.map;
+\definition onStage: _ := Into.onStage;
+\definition unique: _ := Into.unique;

@@ -1,0 +1,7 @@
+\import puppe_sequences.Puppe[].Suspension[A := A, source := target] \as Suspended;
+\import puppe_sequences.Puppe[].Identity[A := Suspended.Carrier, source := Suspended.pointed] \as Identity;
+\import \parent.Step[B := Suspended.Carrier, range := Suspended.pointed, structureMap := Identity.map] \as Transition;
+\definition map: _ := Transition.map;
+\definition apply: _ := Transition.apply;
+\definition onClass: _ := Transition.onClass;
+\definition zeroLaw: _ := Transition.zeroLaw;

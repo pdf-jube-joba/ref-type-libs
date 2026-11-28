@@ -1,0 +1,25 @@
+\import \root.Stable[].Sequential[
+  Stage := (\fun (n: N.Nat^) => Stage (N.Nat^::succ n)),
+  step := (\fun (n: N.Nat^) => step (N.Nat^::succ n))] \as Tail;
+\definition forwardStage[n: N.Nat^][x: Stage (N.Nat^::succ n)]: Carrier := ofStage (N.Nat^::succ n) x;
+\definition backwardStage[n: N.Nat^][x: Stage n]: Tail.Carrier := Tail.ofStage n (step n x);
+\import Tail.Descend[Target := Carrier, stageMap := forwardStage, agreesNext := (\fun (n: N.Nat^) => next (N.Nat^::succ n))] \as Forward;
+\import \parent.Descend[Target := Tail.Carrier, stageMap := backwardStage, agreesNext := (\fun (n: N.Nat^)(x: Stage n) => Tail.next n (step n x))] \as Backward;
+\definition forward: Tail.Carrier -> Carrier := Forward.map;
+\definition backward: Carrier -> Tail.Carrier := Backward.map;
+\definition forwardOnStage: _ := Forward.onStage;
+\definition backwardOnStage: _ := Backward.onStage;
+\definition leftInverse: \forall (a: Tail.Carrier) -> backward (forward a) = a :=
+  Tail.induction (\fun (a: Tail.Carrier) => backward (forward a) = a)
+    (\fun (n: N.Nat^)(x: Stage (N.Nat^::succ n)) => eq_reason_in!{Tail.Carrier _
+      "=" _ "by" { congr!{Carrier Tail.Carrier} backward _ _ (forwardOnStage n x) }
+      "=" _ "by" { backwardOnStage (N.Nat^::succ n) x }
+      "=" _ "by" { sym!{Tail.Carrier} _ _ (Tail.next n x) }
+    });
+\definition rightInverse: \forall (a: Carrier) -> forward (backward a) = a :=
+  induction (\fun (a: Carrier) => forward (backward a) = a)
+    (\fun (n: N.Nat^)(x: Stage n) => eq_reason_in!{Carrier _
+      "=" _ "by" { congr!{Tail.Carrier Carrier} forward _ _ (backwardOnStage n x) }
+      "=" _ "by" { forwardOnStage n (step n x) }
+      "=" _ "by" { sym!{Carrier} _ _ (next n x) }
+    });

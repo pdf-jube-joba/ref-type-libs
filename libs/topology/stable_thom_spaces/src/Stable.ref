@@ -1,0 +1,25 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Logic.either;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+
+\module Sphere;
+\module Suspension(A, B: \Set, source: algebraic_topology.Pointed[A := A].Space,
+  target: algebraic_topology.Pointed[A := B].Space);
+\module Sequential(Stage: N.Nat^ -> \Set, step: \forall (n: N.Nat^) -> Stage n -> Stage (N.Nat^::succ n));
+\module Spectrum(T: N.Nat^ -> \Set,
+  spaces: \forall (n: N.Nat^) -> algebraic_topology.Pointed[A := T n].Space,
+  structureMap: \forall (n: N.Nat^) ->
+    algebraic_topology.Pointed[A := puppe_sequences.Puppe[].Suspension[A := T n, source := spaces n].Carrier]
+      .Maps[B := T (N.Nat^::succ n)].Map[
+        puppe_sequences.Puppe[].Suspension[A := T n, source := spaces n].pointed, spaces (N.Nat^::succ n)]);
+\module Framed;
+\module FiniteThom(n, k: N.Nat^, X: \Set, source: topology.Topology[Carrier := X].Topology,
+  classify: X -> grassmannians.Real[n := n, k := k].Model[].Carrier,
+  continuous: topology.Continuity[A := X, B := grassmannians.Real[n := n, k := k].Model[].Carrier].Continuous
+    source grassmannians.Real[n := n, k := k].Model[].topology classify);
+\module Grassmannian(n, k: N.Nat^);

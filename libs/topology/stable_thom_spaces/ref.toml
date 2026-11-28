@@ -1,0 +1,19 @@
+[package]
+name = "stable_thom_spaces"
+
+[dependencies]
+std = { path = "../../std" }
+topology = { path = "../basic" }
+topological_constructions = { path = "../constructions" }
+algebraic_topology = { path = "../homotopy" }
+puppe_sequences = { path = "../puppe_sequences" }
+thom_spaces = { path = "../thom_spaces" }
+compact_support_cohomology = { path = "../compact_support_cohomology" }
+real = { path = "../../real/basic" }
+dedekind_reals = { path = "../../real/dedekind" }
+hermitian_frames = { path = "../../algebra/hermitian_frames" }
+vector_bundles = { path = "../../geometry/vector_bundles" }
+bundle_complements = { path = "../../geometry/bundle_complements" }
+bundle_classification = { path = "../../geometry/bundle_classification" }
+grassmannians = { path = "../../geometry/grassmannians" }
+grassmannian_cells = { path = "../../geometry/grassmannian_cells" }

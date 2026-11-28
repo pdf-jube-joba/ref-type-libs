@@ -13,3 +13,9 @@
 - [C02 Disk bundles, sphere bundles, and Thom spaces](c02-thom-spaces.md)
 - [K02 CW cofibrations and Puppe sequences](../libs/topology/puppe_sequences/README.md)
 - [B08 Grassmannian cell decompositions](b08-grassmannian-cells.md)
+
+## Implementation
+
+[stable_thom_spaces](../libs/topology/stable_thom_spaces/README.md) provides the pointed-sphere class sets, their suspension maps, the sequential direct limit with its universal property, and the common-stage homotopy criterion for representatives. The sphere spectrum supplies concrete structure maps. The finite real and oriented Grassmannian Thom spaces use the tautological projection bundle.
+
+The abelian group laws on the stable class sets, finite ambient factorization, the MO and MSO structure maps, and direct-sum products and signs remain open.
