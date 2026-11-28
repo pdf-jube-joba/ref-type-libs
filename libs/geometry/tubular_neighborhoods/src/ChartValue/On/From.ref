@@ -9,3 +9,6 @@
 \definition map: boundary_manifolds.SmoothMap[n := n,m := n].Between[M := M,N := ambient].Map :=
   boundary_manifolds.MapComposition[n := n,m := n,l := n].Between[M := M,N := Quadrant.manifold,P := ambient]
     .Of[f := Local.forwardMap,g := Include.map].map;
+\module Differential(x: M.Point);
+\definition immersion: boundary_manifolds.Immersion[n := n,m := n].Between[M := M,N := ambient].IsImmersion map :=
+  \fun (x: M.Point)(v,w: boundary_manifolds.Tangent[n := n].On[M := M].Vector x)(same: _) => Differential[x := x].injective v w same;

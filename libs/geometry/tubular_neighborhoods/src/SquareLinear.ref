@@ -1,0 +1,9 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as R;
+\import linear_algebra.Euclidean[n := n] \as E;
+\import calculus.Vector[n := n,m := n] \as Vectors;
+\module Of(a: Vectors.LinearMap);

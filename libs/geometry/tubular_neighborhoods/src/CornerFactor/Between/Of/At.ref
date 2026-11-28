@@ -1,0 +1,11 @@
+\import boundary_manifolds.Tangent[n := n].On[M := M].At[x := x] \as Domain;
+\import boundary_manifolds.Tangent[n := n].On[M := N].At[x := f.apply x] \as Middle;
+\import boundary_manifolds.Differential[n := n,m := n].Between[M := M,N := N].At[f := f,x := x] \as Differential;
+\import Composite.At[x := x] \as Chain;
+\module In(a: Domain.Chart,b: Middle.Chart);
+\definition onto[first: Chain.FirstInjective][w: Middle.Vector]: \exists (v: Domain.Vector \where Differential.value.apply v = w) := \block {
+  \takefrom sourceChart: Domain.Chart \by Domain.chartExists \then
+  \takefrom targetChart: Middle.Chart \by Middle.chartExists \then
+  \return In[a := sourceChart,b := targetChart].onto first w
+};
+\definition injective[composite: Chain.CompositeInjective]: Chain.SecondInjective := Chain.second composite (onto (Chain.first composite));

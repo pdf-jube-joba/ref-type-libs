@@ -35,3 +35,6 @@
   }
 };
 \definition map: SmoothMaps.Map := Construct.value chartwise;
+\import manifolds.Tangent[n := r].On[M := source] \as Tangent;
+\import boundary_manifolds.Tangent[n := r].On[M := M] \as CornerTangent;
+\module Differential(x: source.Point,c: Interior.Chart,contains: OldCharts.Contains c x);

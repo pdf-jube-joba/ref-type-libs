@@ -1,0 +1,12 @@
+\import linear_algebra.Commutative[K := R.Real,scalarRing := std.Alg[].Field[].fieldAsCommutativeRing R.Real R.Algebra[].field].Laws[V := E.Vector,space := E.space] \as Laws;
+\import Gram.Of[A := a,factor := factor] \as Split;
+\definition zeroTrace: E.trace Split.normal = R.zero :=
+  trans!{{R.Real}} _ _ _ Split.normalTrace (dedekind_reals.DedekindReal[].Arithmetic[].Prop[].subSelf (E.naturalCount n));
+\definition zero[w: E.Vector]: Split.normal.map.apply w = E.space.zero :=
+  E.OnProjection[P := Split.normal].zeroTrace zeroTrace w;
+\definition rightInverse[w: E.Vector]: a.apply (Split.inverse.apply w) = w :=
+  trans!{{E.Vector}} _ _ _ (sym!{{E.Vector}} _ _
+    (Laws.zeroRight (a.apply (Split.inverse.apply w))))
+    (trans!{{E.Vector}} _ _ _
+      (congr!{{E.Vector} {E.Vector}} (E.space.add (a.apply (Split.inverse.apply w))) _ _ (sym!{{E.Vector}} _ _ (zero w)))
+      (Split.splitting w));

@@ -1,0 +1,2 @@
+\import normal_bundles.Dimension[n := dimension,k := k] \as NormalBundle;
+\module Of(size: Half.dimension = NormalBundle.ambientDimension);

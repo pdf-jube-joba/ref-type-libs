@@ -1,0 +1,63 @@
+\import Interior.In[c := c] \as Restricted;
+\import CornerTangent.At[x := x] \as CornerDomain;
+\import boundary_manifolds.Tangent[n := n].On[M := ambient].At[x := f.apply x] \as CornerTarget;
+\import Models.Chart[M := Free.Point,space := Free.topology] \as FreeCharts;
+\definition before: CornerDomain.Chart := \into[OldCharts.Chart](c,CornerDomain.Chart) \by {
+  CornerDomain.ChartLaws[c] { member := \bysub(OldCharts.Chart,M.atlas.charts,c),contains := contains }
+};
+\definition after: CornerTarget.Chart := \into[FreeCharts.Chart](Free.chart,CornerTarget.Chart) \by {
+  CornerTarget.ChartLaws[Free.chart] { member := \refl(Free.chart),contains := \refl(f.apply x) }
+};
+\import boundary_manifolds.Differential[n := r,m := n].Between[M := M,N := ambient].At[f := f,x := x] \as Corner;
+\import Corner.InCharts[left := before,right := after] \as OldMatrix;
+\import CornerMaps.At[function := CornerMaps.apply f,left := before,right := after,x := x,contains := CornerDomain.contains before] \as Local;
+\import Tangent.At[x := x] \as Domain;
+\import manifolds.Tangent[n := n].On[M := Euclidean.smoothManifold].At[x := map.apply x] \as Target;
+\definition origin: Domain.Chart := \into[SourceCharts.Chart](Restricted.chart,Domain.Chart) \by {
+  Domain.ChartLaws[Restricted.chart] {
+    member := SourceAtlas.includedInSaturation Build.atlas Restricted.chart
+      (Logic.existsIntro[Interior.Chart,{ d: Interior.Chart \where Restricted.chart = Interior.In[c := d].chart }] c (\refl(Restricted.chart))),
+    contains := contains,
+  }
+};
+\definition standard: Target.Chart := \into[TargetCharts.Chart](Euclidean.standard,Target.Chart) \by {
+  Target.ChartLaws[Euclidean.standard] {
+    member := TargetAtlas.includedInSaturation Euclidean.atlas Euclidean.standard (\refl(Euclidean.standard)),
+    contains := \refl(map.apply x),
+  }
+};
+\import manifolds.Differential[n := r,m := n].Between[M := source,N := Euclidean.smoothManifold].At[f := map,x := x] \as Derivative;
+\import Derivative.InCharts[left := origin,right := standard] \as Matrix;
+\import SmoothMaps.Coordinates[f := continuous,left := origin,right := standard] \as Coordinates;
+\import calculus.Maps[n := r,m := n] \as Calculus;
+\import calculus.Vector[n := r,m := n] \as Vectors;
+\module Of(extension: Local.Extension);
+\definition jacobian: Matrix.jacobian = OldMatrix.jacobian := \block {
+  \takefrom extension: Local.Extension \by OldMatrix.smooth \then
+  \return Of[extension := extension].jacobian
+};
+\import Domain.Coordinate[chart := origin] \as Decode;
+\import Target.Coordinate[chart := standard] \as Encode;
+\import CornerDomain.Coordinate[chart := before] \as OldDecode;
+\import CornerTarget.Coordinate[chart := after] \as OldEncode;
+\definition oldVector[v: Domain.Vector]: CornerDomain.Vector := OldDecode.encode (Decode.decode v);
+\definition vector[v: CornerDomain.Vector]: Domain.Vector := Decode.encode (OldDecode.decode v);
+\definition oldVectorLaw[v: Domain.Vector]: OldDecode.decode (oldVector v) = Decode.decode v := OldDecode.decodeEncode (Decode.decode v);
+\definition vectorLaw[v: CornerDomain.Vector]: Decode.decode (vector v) = OldDecode.decode v := Decode.decodeEncode (OldDecode.decode v);
+\definition coordinates[v: Domain.Vector]: Encode.decode (Derivative.value.apply v) = OldEncode.decode (Corner.value.apply (oldVector v)) :=
+  trans!{{Model.Point}} _ _ _ (Derivative.coordinates origin standard v)
+    (trans!{{Model.Point}} _ _ _
+      (congr!{{Vectors.LinearMap} {Model.Point}} (\fun (l: Vectors.LinearMap) => l.apply (Decode.decode v)) _ _ jacobian)
+      (sym!{{Model.Point}} _ _ (trans!{{Model.Point}} _ _ _ (Corner.coordinates before after (oldVector v))
+        (congr!{{SourceModel.Point} {Model.Point}} OldMatrix.jacobian.apply _ _ (oldVectorLaw v)))));
+\definition injective[immersion: boundary_manifolds.Immersion[n := r,m := n].Between[M := M,N := ambient].IsImmersion f]
+  [v,w: Domain.Vector][same: Derivative.value.apply v = Derivative.value.apply w]: v = w :=
+  Decode.injective v w (trans!{{SourceModel.Point}} _ _ _ (sym!{{SourceModel.Point}} _ _ (oldVectorLaw v))
+    (trans!{{SourceModel.Point}} _ _ _
+      (congr!{{CornerDomain.Vector} {SourceModel.Point}} OldDecode.decode _ _
+        (immersion x (oldVector v) (oldVector w)
+          (OldEncode.injective _ _ (trans!{{Model.Point}} _ _ _ (sym!{{Model.Point}} _ _ (coordinates v))
+            (trans!{{Model.Point}} _ _ _ (congr!{{Target.Vector} {Model.Point}} Encode.decode _ _ same) (coordinates w))))))
+      (oldVectorLaw w)));
+\definition inverseOld[v: CornerDomain.Vector]: oldVector (vector v) = v :=
+  OldDecode.injective _ _ (trans!{{SourceModel.Point}} _ _ _ (oldVectorLaw (vector v)) (vectorLaw v));

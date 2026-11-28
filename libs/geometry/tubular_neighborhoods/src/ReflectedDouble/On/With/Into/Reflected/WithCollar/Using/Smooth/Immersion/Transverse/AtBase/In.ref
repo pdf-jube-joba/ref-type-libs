@@ -1,0 +1,26 @@
+\import boundary_manifolds.Model[n := dimension] \as SourceModel;
+\import Neat.Coordinates[c := chart,d := Raw.input] \as Normal;
+\import Source.Coordinate[chart := chart] \as SourceCoordinates;
+\definition wanted: Model.Point := \fun (i: Model.Coordinate) => R.one;
+\definition exists: \parent.\parent.SideAt[h := Positive.map,x := x].Exists := \block {
+  \takefrom u: \Cast[SourceModel.Point] ({ v: SourceModel.Point \where \forall (i: Model.Coordinate) ->
+    Model.Active Raw.input.constraints (HalfTarget.coordinate Raw.input) i -> Normal.matrix.apply v i = wanted i })
+    \by Normal.forward (laws.transverse x) wanted \then
+  \let match: \forall (i: Model.Coordinate) -> Model.Active Raw.input.constraints (HalfTarget.coordinate Raw.input) i -> Normal.matrix.apply u i = wanted i :=
+    \bysub(SourceModel.Point,{ v: SourceModel.Point \where \forall (i: Model.Coordinate) ->
+      Model.Active Raw.input.constraints (HalfTarget.coordinate Raw.input) i -> Normal.matrix.apply v i = wanted i },u) \then
+  \let v: Source.Vector := SourceCoordinates.encode u \then
+  \let coords: HalfDecode.decode (Embedded.value.apply v) = Normal.matrix.apply u :=
+    trans!{{Model.Point}} _ _ _ (Embedded.coordinates chart Raw.input v)
+      (congr!{{SourceModel.Point} {Model.Point}} Normal.matrix.apply _ _ (SourceCoordinates.decodeEncode u)) \then
+  \let correct: \parent.\parent.SideAt[h := Positive.map,x := x].value v = R.one := eq_reason_in!{{R.Real} _
+    "=" _ "by" { congr!{{FreeTangent.Vector (Positive.map.apply x)} {R.Real}}
+      (\fun (w: FreeTangent.Vector (Positive.map.apply x)) => \parent.\parent.FreeAt[y := Positive.map.apply x].decode w Half.normal)
+      _ _ (Composition.At[x := x].pointwise v) }
+    "=" _ "by" { congr!{{Model.Point} {R.Real}} (\fun (w: Model.Point) => w Half.normal) _ _
+      (Raw.coordinates (Embedded.value.apply v)) }
+    "=" _ "by" { congr!{{Model.Point} {R.Real}} (\fun (w: Model.Point) => w Half.normal) _ _ coords }
+    "=" _ "by" { match Half.normal active }
+  } \then
+  \return Logic.existsIntro[Source.Vector,{ v: Source.Vector \where \parent.\parent.SideAt[h := Positive.map,x := x].value v = R.one }] v correct
+};

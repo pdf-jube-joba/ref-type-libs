@@ -2,3 +2,12 @@
 \import \root.ChartValue[n := Half.dimension] \as Values;
 \definition map: boundary_manifolds.SmoothMap[n := Half.dimension,m := Half.dimension].Between[M := Half.manifold,N := Values.ambient].Map := Product.map;
 \definition formula[x: Half.manifold.Point]: (map.apply x \of Model.Point) = Half.value x := Product.formula x;
+\definition immersion: boundary_manifolds.Immersion[n := Half.dimension,m := Half.dimension].Between[M := Half.manifold,N := Values.ambient].IsImmersion map := Product.immersion;
+\import boundary_manifolds.Dimension[n := Half.dimension].Chart[M := Half.manifold.Point,space := Half.manifold.space] \as Charts;
+\definition chart: Charts.Chart := Product.chart;
+\definition member: \In[Charts.Chart] Half.manifold.atlas.charts chart := Product.member;
+\definition covers[x: Half.manifold.Point]: Charts.Contains chart x := Product.covers x;
+\import boundary_manifolds.Model[n := p] \as LeftModel;
+\import boundary_manifolds.Product[n := p,m := One.dimension] \as ProductModel;
+\definition selected: \In[Model.Coordinate] chart.constraints Half.normal :=
+  ProductModel.selectedRight LeftModel.unconstrained Height.constraints One.index (\refl(One.index));

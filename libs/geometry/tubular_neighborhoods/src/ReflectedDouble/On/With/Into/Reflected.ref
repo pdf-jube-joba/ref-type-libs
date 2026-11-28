@@ -99,7 +99,8 @@
     (\fun (y: B.Point)(same: value (right x) = value (left y)) =>
       sym!{{Seam.Point}} (left y) (right x) (cross y x (sym!{{Target.AmbientPoint}} (value (right x)) (value (left y)) same)))
     (\fun (y: B.Point)(same: value (right x) = value (right y)) => sameRight x y same);
-\definition injective: \forall (x,y: Seam.Point) -> value x = value y -> x = y :=
+\definition valueInjective: \forall (x,y: Seam.Point) -> value x = value y -> x = y :=
   Pushout.induction (\fun (x: Seam.Point) => \forall (y: Seam.Point) -> value x = value y -> x = y)
     fromLeft fromRight;
+\definition injective: \forall (x,y: Seam.Point) -> value x = value y -> x = y := valueInjective;
 \module WithCollar(compact: topology.Topology[Carrier := B.Point].IsCompact B.space);

@@ -1,0 +1,3 @@
+\import \root.CornerComposition[n := n,m := n,l := m].Between[M := M,N := N,P := P].Of[f := f,g := g] \as Composite;
+\definition map: boundary_manifolds.SmoothMap[n := n,m := m].Between[M := M,N := P].Map := Composite.map;
+\module At(x: M.Point);

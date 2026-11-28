@@ -1,0 +1,29 @@
+\import manifold_gluing.BoundaryInclusion[n := n].On[M := B].With[cover := cover] \as BoundaryModel;
+\import manifold_gluing.Parameter[] \as Time;
+\import boundary_manifolds.Product[n := n,m := One.dimension].Of[M := BoundaryModel.manifold,N := Time.manifold] \as Parameters;
+\import manifold_gluing.CollarEmbedding[n := n].On[M := B].With[cover := cover].From[deformation := collar.collar.deformation] \as Collar;
+\import manifold_gluing.InwardNeighborhood[n := n].On[M := B].With[cover := cover].From[h := collar.collar.deformation.homotopy,
+  active := collar.collar.deformation.active] \as Inward;
+\import boundary_manifolds.MapComposition[n := dimension,m := dimension,l := Half.dimension].Between[M := Parameters.manifold,N := B,P := Half.manifold]
+  .Of[f := Collar.map,g := f] \as Collared;
+\import \root.HalfSpaceCoordinates[p := p].Standard[] \as Standard;
+\import \root.ChartValue[n := Half.dimension] \as Values;
+\import boundary_manifolds.Dimension[n := Half.dimension].Quadrant[C := Model.unconstrained,U := Open.whole] \as Free;
+\import boundary_manifolds.MapComposition[n := dimension,m := Half.dimension,l := Half.dimension].Between[M := Parameters.manifold,N := Half.manifold,P := Values.ambient]
+  .Of[f := Collared.map,g := Standard.map] \as Coordinates;
+\import boundary_manifolds.Dimension[n := n].Chart[M := BoundaryModel.manifold.Point,space := BoundaryModel.manifold.space] \as BaseCharts;
+\import boundary_manifolds.Dimension[n := One.dimension].Chart[M := Time.Point,space := Time.manifold.space] \as TimeCharts;
+\import boundary_manifolds.Dimension[n := dimension].Chart[M := Parameters.Point,space := Parameters.topology] \as Charts;
+\import boundary_manifolds.SmoothMap[n := dimension,m := Half.dimension].Between[M := Parameters.manifold,N := Values.ambient] \as SmoothMaps;
+\import calculus.Real[].Multivariable[n := dimension].Open[] \as SourceOpen;
+\import boundary_manifolds.Model[n := dimension] \as SourceModel;
+\import std.Data[].Pair[] \as Pair;
+\import std.Data[].FinSet[] \as Fin;
+\import Fin.Sum[m := n,n := One.dimension] \as Indices;
+\definition index: Fin.Fin dimension := Indices.right One.index;
+\definition lateral[b: BoundaryModel.manifold.Point]: Parameters.Point :=
+  Pair.pair BoundaryModel.manifold.Point Time.Point b Time.zero;
+\definition map: SmoothMaps.Map := Coordinates.map;
+\definition atZero[b: BoundaryModel.manifold.Point]: (map.apply (lateral b) \of Model.Point) = Half.value (f.apply (BoundaryModel.apply b)) :=
+  congr!{{B.Point} {Model.Point}} (\fun (x: B.Point) => Half.value (f.apply x)) _ _ (Inward.neighborhood.initial b);
+\module At(b: BoundaryModel.manifold.Point);

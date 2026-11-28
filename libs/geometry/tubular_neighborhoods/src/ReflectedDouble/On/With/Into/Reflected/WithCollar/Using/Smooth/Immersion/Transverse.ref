@@ -1,0 +1,62 @@
+\import boundary_manifolds.Tangent[n := dimension].On[M := B] \as SourceTangent;
+\import boundary_manifolds.Tangent[n := Half.dimension].On[M := Values.ambient] \as FreeTangent;
+\import boundary_manifolds.Dimension[n := Half.dimension].Chart[M := Free.Point,space := Free.topology] \as FreeCharts;
+\module FreeAt(y: Free.Point) {
+  \import FreeTangent.At[x := y] \as Tangent;
+  \definition chart: Tangent.Chart := \into[FreeCharts.Chart](Free.chart,Tangent.Chart) \by {
+    Tangent.ChartLaws[Free.chart] { member := \refl(Free.chart),contains := \refl(y) }
+  };
+  \definition decode[v: Tangent.Vector]: Model.Point := Tangent.Coordinate[chart := chart].decode v;
+}
+\module SideAt(h: SideMaps.Map,x: B.Point) {
+  \import boundary_manifolds.Differential[n := dimension,m := Half.dimension].Between[M := B,N := Values.ambient].At[f := h,x := x] \as Derivative;
+  \definition value[v: SourceTangent.Vector x]: R.Real := \parent.FreeAt[y := h.apply x].decode (Derivative.value.apply v) Half.normal;
+  \definition Exists: \Prop := \exists (v: SourceTangent.Vector x \where value v = R.one);
+}
+\import Values.On[M := Half.manifold].From[chart := Standard.chart,member := Standard.member,covers := Standard.covers] \as ChartCoordinates;
+\import manifolds.Dimension[n := Half.dimension].Chart[M := Euclidean.smoothManifold.Point,space := Euclidean.smoothManifold.space] \as TargetCharts;
+\import manifolds.Dimension[n := Half.dimension].Atlas[M := Euclidean.smoothManifold.Point,space := Euclidean.smoothManifold.space] \as TargetAtlas;
+\import manifolds.Tangent[n := Half.dimension].On[M := Euclidean.smoothManifold] \as OrdinaryTarget;
+\module OrdinaryAt(x: ordinary.Point) {
+  \import OrdinaryTarget.At[x := ordinaryMap.apply x] \as Target;
+  \definition standard: Target.Chart := \into[TargetCharts.Chart](Euclidean.standard,Target.Chart) \by {
+    Target.ChartLaws[Euclidean.standard] {
+      member := TargetAtlas.includedInSaturation Euclidean.atlas Euclidean.standard (\refl(Euclidean.standard)),
+      contains := \refl(ordinaryMap.apply x),
+    }
+  };
+  \import manifolds.Differential[n := dimension,m := Half.dimension].Between[M := ordinary,N := Euclidean.smoothManifold].At[f := ordinaryMap,x := x] \as Derivative;
+  \definition value[v: OrdinaryTangent.Vector x]: R.Real := Target.Coordinate[chart := standard].decode (Derivative.value.apply v) Half.normal;
+  \definition Exists: \Prop := \exists (v: OrdinaryTangent.Vector x \where value v = R.one);
+}
+\module AtBase(x: B.Point,zero: Half.value (f.apply x) Half.normal = R.zero);
+\definition exists[y: ordinary.Point][zero: ordinaryValue y Half.normal = R.zero]: OrdinaryAt[x := y].Exists := \block {
+  \takefrom x: \Cast[B.Point] ({ x: B.Point \where ordinaryBase x = y }) \by ordinaryCovers y
+    (O.leReplaceRight R.zero R.zero (ordinaryValue y Half.normal) (sym!{{R.Real}} _ _ zero) (O.leRefl R.zero)) \then
+  \let same: ordinaryBase x = y := \bysub(B.Point,{ x: B.Point \where ordinaryBase x = y },x) \then
+  \let atBase: ordinaryValue (ordinaryBase x) Half.normal = R.zero :=
+    trans!{{R.Real}} _ _ _
+      (congr!{{ordinary.Point} {R.Real}} (\fun (z: ordinary.Point) => ordinaryValue z Half.normal) _ _ same) zero \then
+  \let target: Half.value (f.apply x) Half.normal = R.zero := trans!{{R.Real}} _ _ _
+    (sym!{{R.Real}} _ _ (congr!{{Target.AmbientPoint} {R.Real}} (\fun (v: Target.AmbientPoint) => v Half.normal) _ _ (onLeft x))) atBase \then
+  \return \idelim ordinaryBase x = y \with z: ordinary.Point => OrdinaryAt[x := z].Exists \by {
+    base: AtBase[x := x,zero := target].exists,equality: same
+  }
+};
+\module Ambient(d: Nat.Nat^);
+\import Ambient[d := Half.dimension] \as Native;
+\definition agrees[x: B.Point]: embedding.apply (ordinaryBase x) = Half.value (f.apply x) :=
+  trans!{{Model.Point}} _ _ _ (ordinaryFormula (ordinaryBase x))
+    (inCoordinates (ordinaryValue (ordinaryBase x)) (positive x) (onLeft x));
+\definition native: Native.Certified := \into[Native.Embedding](embedding,Native.Certified) \by {
+  Native.Laws[embedding] {
+    agrees := \fun (size: Half.dimension = Half.dimension)(x: B.Point) => agrees x,
+    covers := \fun (size: Half.dimension = Half.dimension)(x: ordinary.Point)(nonnegative: _) => ordinaryCovers x nonnegative,
+    transverse := \fun (size: Half.dimension = Half.dimension)(x: ordinary.Point)(zero: _) => exists x zero,
+  }
+};
+\definition certified[d: Nat.Nat^][size: Half.dimension = d]: Ambient[d := d].Certified :=
+  \idelim Half.dimension = d \with m: Nat.Nat^ => Ambient[d := m].Certified \by {
+    base: native,equality: size
+  };
+\module InCodimension(k: Nat.Nat^);

@@ -32,3 +32,4 @@
 \import Values.On[M := manifold].From[chart := chart,member := member,covers := covers] \as Coordinates;
 \definition map: boundary_manifolds.SmoothMap[n := Half.dimension,m := Half.dimension].Between[M := manifold,N := Values.ambient].Map := Coordinates.map;
 \definition formula[x: manifold.Point]: (map.apply x \of Model.Point) = Blocks.join (Product.first x) (Product.second x) := \refl(Blocks.join (Product.first x) (Product.second x));
+\definition immersion: boundary_manifolds.Immersion[n := Half.dimension,m := Half.dimension].Between[M := manifold,N := Values.ambient].IsImmersion map := Coordinates.immersion;

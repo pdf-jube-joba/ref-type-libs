@@ -46,3 +46,4 @@
 \import manifolds.Dimension[n := Half.dimension].Examples[].Euclidean[] \as Euclidean;
 \definition ordinaryMap: manifolds.SmoothMap[n := dimension,m := Half.dimension].Between[M := ordinary,N := Euclidean.smoothManifold].Map := OrdinaryMap.map;
 \definition ordinaryFormula[x: ordinary.Point]: ordinaryMap.apply x = (ordinaryValue x \of Model.Point) := formula x;
+\module Immersion;

@@ -1,0 +1,31 @@
+\definition domain: SourceOpen.OpenSet := SourceOpen.intersection Matrix.domain extension.neighborhood;
+\definition inMap: SourceOpen.Included domain Matrix.domain := SourceOpen.intersectionLeft Matrix.domain extension.neighborhood;
+\definition inExtension: SourceOpen.Included domain extension.neighborhood := SourceOpen.intersectionRight Matrix.domain extension.neighborhood;
+\definition center: SourceOpen.Carrier domain := \into[SourceModel.Point](Matrix.point,domain.points) \by {
+  Logic.And[_, _]::# (\bysub(SourceModel.Point,Matrix.domain.points,Matrix.point)) extension.contains
+};
+\definition restrictMap: Calculus.Map domain Open.whole :=
+  Calculus.Restriction[U := domain,V := Matrix.domain,W := Open.whole].input inMap Matrix.coordinateMap;
+\definition restrictExtension: Calculus.Map domain Open.whole :=
+  Calculus.Restriction[U := domain,V := extension.neighborhood,W := Open.whole].input inExtension extension.map;
+\definition parameter[u: SourceOpen.Carrier domain]: SourceModel.Carrier before.constraints extension.neighborhood :=
+  \into[SourceOpen.Carrier extension.neighborhood](SourceOpen.inclusion domain extension.neighborhood inExtension u,
+    SourceModel.region before.constraints extension.neighborhood) \by {
+    \bysub(SourceOpen.Carrier before.image,SourceModel.region before.constraints before.image,
+      Restricted.coordinateInput (Coordinates.leftCoordinate (SourceOpen.inclusion domain Matrix.domain inMap u)))
+  };
+\definition equal: (\fun (u: SourceOpen.Carrier domain) => (Calculus.apply domain Open.whole restrictMap u \of Model.Point)) =
+  (\fun (u: SourceOpen.Carrier domain) => (Calculus.apply domain Open.whole restrictExtension u \of Model.Point)) :=
+  \axiom:funext(
+    (\fun (u: SourceOpen.Carrier domain) => (Calculus.apply domain Open.whole restrictMap u \of Model.Point)),
+    (\fun (u: SourceOpen.Carrier domain) => (Calculus.apply domain Open.whole restrictExtension u \of Model.Point)),
+    \fun (u: SourceOpen.Carrier domain) => sym!{{Model.Point}} _ _ (extension.agrees (parameter u)));
+\import Calculus.Differential[U := domain,V := Open.whole,f := restrictMap,a := center] \as AtMap;
+\import Calculus.Differential[U := domain,V := Open.whole,f := restrictExtension,a := center] \as AtExtension;
+\definition jacobian: Matrix.jacobian = OldMatrix.jacobian :=
+  trans!{{Vectors.LinearMap}} _ _ _
+    (sym!{{Vectors.LinearMap}} _ _ (Calculus.Restriction[U := domain,V := Matrix.domain,W := Open.whole].differential inMap Matrix.coordinateMap center))
+    (trans!{{Vectors.LinearMap}} _ _ _ (AtMap.Compare[W := Open.whole,g := restrictExtension].equal equal)
+      (trans!{{Vectors.LinearMap}} _ _ _
+        (Calculus.Restriction[U := domain,V := extension.neighborhood,W := Open.whole].differential inExtension extension.map center)
+        (sym!{{Vectors.LinearMap}} _ _ (Local.ofExtension OldMatrix.smooth extension))));

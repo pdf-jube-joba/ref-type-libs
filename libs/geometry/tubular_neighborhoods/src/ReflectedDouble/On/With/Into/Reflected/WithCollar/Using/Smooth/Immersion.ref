@@ -1,0 +1,73 @@
+\import \root.CornerComposition[n := dimension,m := Half.dimension,l := Half.dimension].Between[M := B,N := Half.manifold,P := Values.ambient]
+  .Of[f := f,g := Standard.map] \as Positive;
+\import \root.CornerComposition[n := dimension,m := Half.dimension,l := Half.dimension].Between[M := B,N := Values.ambient,P := Values.ambient]
+  .Of[f := Positive.map,g := Flip.map] \as Negative;
+\import boundary_manifolds.Immersion[n := dimension,m := Half.dimension].Between[M := B,N := Values.ambient] \as SideImmersions;
+\definition positiveImmersion: SideImmersions.IsImmersion Positive.map := Positive.immersion laws.embedding.immersion Standard.immersion;
+\import manifold_gluing.Diffeomorphism[n := Half.dimension,m := Half.dimension].Between[M := Values.ambient,N := Values.ambient] \as Diffeomorphisms;
+\definition flipsBack[x: Free.Point]: Flip.map.apply (Flip.map.apply x) = x :=
+  Model.equality Model.unconstrained Open.whole (Flip.map.apply (Flip.map.apply x)) x (Reflection.involution x);
+\definition flip: Diffeomorphisms.Diffeomorphism := Diffeomorphisms.Diffeomorphism {
+  forward := Flip.map,backward := Flip.map,leftInverse := flipsBack,rightInverse := flipsBack,
+};
+\import compact_embeddings.DiffeomorphismDifferential[n := Half.dimension,m := Half.dimension].Between[M := Values.ambient,N := Values.ambient].Of[d := flip] \as FlipDifferential;
+\definition negativeImmersion: SideImmersions.IsImmersion Negative.map :=
+  Negative.immersion positiveImmersion
+    (\fun (x: Free.Point)(u,v: boundary_manifolds.Tangent[n := Half.dimension].On[M := Values.ambient].Vector x)(same: _) =>
+      FlipDifferential.At[x := x].injective u v same);
+\import \root.CornerFactor[n := dimension,m := Half.dimension].Between[M := B,N := Gluing.manifold double,P := Values.ambient] \as Transfer;
+\import Transfer.Of[f := double.left,g := map] \as LeftFactor;
+\import Transfer.Of[f := double.right,g := map] \as RightFactor;
+\import manifold_gluing.SmoothMapExt[n := dimension,m := Half.dimension].Between[M := B,N := Values.ambient] \as Equal;
+\definition leftValue[x: B.Point]: LeftFactor.map.apply x = Positive.map.apply x :=
+  trans!{{Free.Point}} _ _ _ (congr!{{Seam.Point} {Free.Point}} function _ _ (double.leftValue x))
+    (Model.equality Model.unconstrained Open.whole (function (left x)) (Positive.map.apply x)
+      (inCoordinates (value (left x)) (positive x) (onLeft x)));
+\definition rightValue[x: B.Point]: RightFactor.map.apply x = Negative.map.apply x :=
+  trans!{{Free.Point}} _ _ _ (congr!{{Seam.Point} {Free.Point}} function _ _ (double.rightValue x))
+    (Model.equality Model.unconstrained Open.whole (function (right x)) (Negative.map.apply x)
+      (inCoordinates (value (right x)) (negative x) (onRight x)));
+\import boundary_manifolds.SmoothMap[n := dimension,m := Half.dimension].Between[M := B,N := Values.ambient] \as SideMaps;
+\definition leftImmersion: SideImmersions.IsImmersion LeftFactor.map :=
+  \idelim Positive.map = LeftFactor.map \with h: SideMaps.Map => SideImmersions.IsImmersion h \by {
+    base: positiveImmersion,equality: Equal.ext Positive.map LeftFactor.map (\fun (x: B.Point) => sym!{{Free.Point}} _ _ (leftValue x))
+  };
+\definition rightImmersion: SideImmersions.IsImmersion RightFactor.map :=
+  \idelim Negative.map = RightFactor.map \with h: SideMaps.Map => SideImmersions.IsImmersion h \by {
+    base: negativeImmersion,equality: Equal.ext Negative.map RightFactor.map (\fun (x: B.Point) => sym!{{Free.Point}} _ _ (rightValue x))
+  };
+\import boundary_manifolds.Tangent[n := dimension].On[M := Gluing.manifold double] \as Domain;
+\definition At[y: Seam.Point]: \Prop := \forall (u,v: Domain.Vector y) ->
+  boundary_manifolds.Differential[n := dimension,m := Half.dimension].Between[M := Gluing.manifold double,N := Values.ambient]
+    .At[f := map,x := y].value.apply u =
+  boundary_manifolds.Differential[n := dimension,m := Half.dimension].Between[M := Gluing.manifold double,N := Values.ambient]
+    .At[f := map,x := y].value.apply v -> u = v;
+\definition leftAt[x: B.Point]: At (left x) :=
+  \idelim double.left.apply x = left x \with y: Seam.Point => At y \by {
+    base: LeftFactor.At[x := x].injective (leftImmersion x),equality: double.leftValue x
+  };
+\definition rightAt[x: B.Point]: At (right x) :=
+  \idelim double.right.apply x = right x \with y: Seam.Point => At y \by {
+    base: RightFactor.At[x := x].injective (rightImmersion x),equality: double.rightValue x
+  };
+\definition corner: boundary_manifolds.Immersion[n := dimension,m := Half.dimension].Between[M := Gluing.manifold double,N := Values.ambient].IsImmersion map :=
+  Pushout.induction At leftAt rightAt;
+\import boundary_manifolds.Dimension[n := dimension].Chart[M := Seam.Point,space := Seam.topology] \as Charts;
+\import manifolds.Tangent[n := dimension].On[M := ordinary] \as OrdinaryTangent;
+\definition immersion: manifolds.Immersion[n := dimension,m := Half.dimension].Between[M := ordinary,N := Euclidean.smoothManifold].IsImmersion ordinaryMap := \block {
+  \fun (x: ordinary.Point)(u,v: OrdinaryTangent.Vector x)(same: _) \then
+  \takefrom c: \Cast[Charts.Chart] ({ c: Charts.Chart \where Logic.And[\In[Charts.Chart] (Gluing.manifold double).atlas.charts c,Charts.Contains c x] })
+    \by (Gluing.manifold double).atlas.covers x \then
+  \let member: Logic.And[\In[Charts.Chart] (Gluing.manifold double).atlas.charts c,Charts.Contains c x] :=
+    \bysub(Charts.Chart,{ c: Charts.Chart \where Logic.And[\In[Charts.Chart] (Gluing.manifold double).atlas.charts c,Charts.Contains c x] },c) \then
+  \let chart: OrdinaryInterior.Chart := \into[Charts.Chart](c,(Gluing.manifold double).atlas.charts) \by { member.left } \then
+  \return OrdinaryMap.Differential[x := x,c := chart,contains := member.right].injective corner u v same
+};
+\definition ordinaryInjective[x,y: ordinary.Point][same: ordinaryMap.apply x = ordinaryMap.apply y]: x = y :=
+  boundary_manifolds.Refinement[A := Seam.Point].equality OrdinaryInterior.points x y
+    (valueInjective x y
+      (boundary_manifolds.Refinement[A := Model.Point].equality Open.whole.points (value x) (value y) same));
+\definition embedding: manifolds.Immersion[n := dimension,m := Half.dimension].Between[M := ordinary,N := Euclidean.smoothManifold].Embedding :=
+  compact_embeddings.CompactCriterion[n := dimension,m := Half.dimension].Between[M := ordinary,N := Euclidean.smoothManifold]
+    .Of[f := ordinaryMap,compact := ordinaryCompact,injective := ordinaryInjective].embedding immersion;
+\module Transverse;
