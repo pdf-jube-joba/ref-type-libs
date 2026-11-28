@@ -48,3 +48,4 @@
 \import cohomology_thom.Thom[].Real[].For[X := Space, F := Line, bundle := Canonical.bundle].With[metric := Canonical.metric] \as OldGeometry;
 \import cohomology_thom.Thom[].Real[].For[X := Space, F := Fiber, bundle := underlying].With[metric := metric] \as NewGeometry;
 \import singular_products.Cochains[A := Space, source := topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\module Fiber(x: Space);

@@ -73,3 +73,4 @@
   (sym!{Space} _ _ (sameLine z v)) (congr!{Sphere Space} projection _ _ equal)) :=
   trans!{Numbers.Complex} _ _ _ (sym!{Numbers.Complex} _ _ (scaledDot v z)) (congr!{{E.Vector} {Numbers.Complex}} (E.dot v) _ _ equal);
 \module Continuity;
+\module Associated;
