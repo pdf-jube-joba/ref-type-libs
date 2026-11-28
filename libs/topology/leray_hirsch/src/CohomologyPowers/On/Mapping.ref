@@ -1,0 +1,26 @@
+\import \parent.\parent.On[C := D] \as Target;
+\import Cochains.Map[C := C, D := D] \as Initial;
+\import Cochains.Map[C := complex, D := Target.complex] \as Maps;
+\module Term(z: I.Int^) {
+  \import Initial.At[k := z] \as Action;
+  \import Products.Maps[source := power (term z), target := Target.power (Target.term z)] \as Power;
+  \definition linear: _ := Power.map (\fun (i: Index) => Action.linear f);
+}
+\module Commutes(z: I.Int^) {
+  \import \parent.Term[z := z] \as Lower;
+  \import \parent.Term[z := Indices.next z] \as Upper;
+  \import Modules.Product[Index := Index, family := Target.power (Target.term (Indices.next z))] \as Output;
+  \definition law: \forall (x: family.Carrier z) ->
+    Target.complex.differential.apply z (Lower.linear.apply x) =
+    Upper.linear.apply (complex.differential.apply z x) :=
+    \fun (x: family.Carrier z) => Output.ext
+      (Target.complex.differential.apply z (Lower.linear.apply x)) (Upper.linear.apply (complex.differential.apply z x))
+      (\fun (i: Index) => f.commutes z (x i));
+}
+\definition map: Maps.Map := Maps.Map {
+  apply := \fun (z: I.Int^) => \parent.Mapping[D := D, f := f].Term[z := z].linear.apply,
+  addition := \fun (z: I.Int^) => \parent.Mapping[D := D, f := f].Term[z := z].linear.addition,
+  scalar := \fun (z: I.Int^) => \parent.Mapping[D := D, f := f].Term[z := z].linear.scalar,
+  commutes := \fun (z: I.Int^) => \parent.Mapping[D := D, f := f].Commutes[z := z].law,
+};
+\module At(z: I.Int^);

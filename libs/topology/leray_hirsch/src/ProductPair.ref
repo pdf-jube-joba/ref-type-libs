@@ -1,0 +1,65 @@
+\import std.Data[].Pair[] \as Pair;
+\import topological_constructions.Product[A := X, B := F] \as Whole;
+\import Whole.Maps[] \as WholeProjections;
+\import topology.Topology[Carrier := X].Subspace[S := subset] \as BasePart;
+\definition basePartTopology: _ := BasePart.topology base;
+\definition wholeTopology: _ := Whole.topology base fiber;
+\definition part: \Pow Whole.CarrierSet := { p: Whole.CarrierSet \where \In[X] subset (Pair.first X F p) };
+\import topology.Topology[Carrier := Whole.CarrierSet].Subspace[S := part] \as TotalPart;
+\definition partTopology: _ := TotalPart.topology wholeTopology;
+\import topological_constructions.Product[A := BasePart.CarrierSet, B := F] \as Product;
+\import Product.Maps[] \as Projections;
+\definition productTopology: _ := Product.topology basePartTopology fiber;
+\definition baseInclusion[x: BasePart.CarrierSet]: X := x;
+\definition totalInclusion[x: TotalPart.CarrierSet]: Whole.CarrierSet := x;
+\import topology.Continuity[A := BasePart.CarrierSet, B := X].Corestriction[S := subset] \as BaseInclusion;
+\import topology.Continuity[A := TotalPart.CarrierSet, B := Whole.CarrierSet].Corestriction[S := part] \as TotalInclusion;
+\definition baseContinuous: _ := BaseInclusion.inclusionContinuous base;
+\definition totalContinuous: _ := TotalInclusion.inclusionContinuous wholeTopology;
+\definition ambient[p: Product.CarrierSet]: Whole.CarrierSet :=
+  Pair.pair X F (baseInclusion (Pair.first BasePart.CarrierSet F p)) (Pair.second BasePart.CarrierSet F p);
+\definition forward[p: Product.CarrierSet]: TotalPart.CarrierSet := \into[Whole.CarrierSet](ambient p, part) \by {
+  \bysub(X, subset, Pair.first BasePart.CarrierSet F p)
+};
+\definition projected[p: TotalPart.CarrierSet]: BasePart.CarrierSet :=
+  \into[X](Pair.first X F p, subset) \by { \bysub(Whole.CarrierSet, part, p) };
+\definition fiberPoint[p: TotalPart.CarrierSet]: F := Pair.second X F p;
+\definition backward[p: TotalPart.CarrierSet]: Product.CarrierSet :=
+  Pair.pair BasePart.CarrierSet F (projected p) (fiberPoint p);
+\import Whole.Universal[X := Product.CarrierSet] \as IntoWhole;
+\import Product.Universal[X := TotalPart.CarrierSet] \as IntoProduct;
+\import topology.Composition[A := Product.CarrierSet, B := BasePart.CarrierSet, C := X] \as FromBase;
+\import topology.Composition[A := TotalPart.CarrierSet, B := Whole.CarrierSet, C := X] \as ToBase;
+\import topology.Composition[A := TotalPart.CarrierSet, B := Whole.CarrierSet, C := F] \as ToFiber;
+\definition ambientContinuous: _ := IntoWhole.pairContinuous productTopology base fiber
+  (\fun (p: Product.CarrierSet) => baseInclusion (Pair.first BasePart.CarrierSet F p))
+  (Pair.second BasePart.CarrierSet F)
+  (FromBase.composeContinuous productTopology basePartTopology base (Pair.first BasePart.CarrierSet F) baseInclusion
+    (Projections.firstContinuous basePartTopology fiber) baseContinuous)
+  (Projections.secondContinuous basePartTopology fiber);
+\import topology.Continuity[A := Product.CarrierSet, B := Whole.CarrierSet].Corestriction[S := part] \as IntoPart;
+\definition forwardContinuous: _ := IntoPart.corestrictContinuous productTopology wholeTopology forward ambientContinuous;
+\import topology.Continuity[A := TotalPart.CarrierSet, B := X].Corestriction[S := subset] \as IntoBasePart;
+\definition projectedContinuous: _ := IntoBasePart.corestrictContinuous partTopology base projected
+  (ToBase.composeContinuous partTopology wholeTopology base totalInclusion (Pair.first X F)
+    totalContinuous (WholeProjections.firstContinuous base fiber));
+\definition fiberContinuous: _ := ToFiber.composeContinuous partTopology wholeTopology fiber totalInclusion (Pair.second X F)
+  totalContinuous (WholeProjections.secondContinuous base fiber);
+\definition backwardContinuous: _ := IntoProduct.pairContinuous partTopology basePartTopology fiber projected fiberPoint projectedContinuous fiberContinuous;
+\import Pair.Prop[A := BasePart.CarrierSet, B := F] \as SmallPairs;
+\import Pair.Prop[A := X, B := F] \as WholePairs;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Whole.CarrierSet, S := part] \as Refined;
+\definition leftInverse: \forall (p: Product.CarrierSet) -> backward (forward p) = p :=
+  \fun (p: Product.CarrierSet) => SmallPairs.ext (backward (forward p)) p (\refl(Pair.first BasePart.CarrierSet F p)) (\refl(Pair.second BasePart.CarrierSet F p));
+\definition rightInverse: \forall (p: TotalPart.CarrierSet) -> forward (backward p) = p :=
+  \fun (p: TotalPart.CarrierSet) => Refined.ext (forward (backward p)) p
+    (WholePairs.ext (forward (backward p)) p (\refl(Pair.first X F p)) (\refl(Pair.second X F p)));
+\import topology.Homeomorphism[A := Product.CarrierSet, B := TotalPart.CarrierSet] \as Homeomorphisms;
+\definition homeomorphism: Homeomorphisms.Homeomorphism[productTopology, partTopology] :=
+  Homeomorphisms.Homeomorphism[productTopology, partTopology] {
+    forward := forward, backward := backward,
+    leftInverse := leftInverse, rightInverse := rightInverse,
+    forwardContinuous := forwardContinuous, backwardContinuous := backwardContinuous,
+  };
+
+\module AlexanderWhitney;

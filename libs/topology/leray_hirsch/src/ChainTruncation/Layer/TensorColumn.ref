@@ -1,0 +1,68 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import double_complexes.DoubleComplex[].Over[R := I.Int^, ring := Integers.ring] \as Double;
+\import Double.Tensor[C := concentrated, D := D] \as Tensor;
+\import Double.Total[C := Tensor.complex] \as Total;
+\import Double.Coordinates[C := Tensor.complex] \as Coordinates;
+\import N.Basic[].Prop[] \as Arithmetic;
+\module Off(p, q: N.Nat^) {
+  \import \parent.\parent.At[n := p] \as Base;
+  \import Tensor.Term[p := p, q := q] \as Term;
+  \import Modules.Tensor[V := concentrated.family.Carrier p, W := D.family.Carrier q,
+    left := concentrated.family.space p, right := D.family.space q] \as Raw;
+  \import Raw.Universal[U := Term.Carrier, target := Term.space] \as Universal;
+  \import Modules.End[V := Term.Carrier, space := Term.space] \as End;
+  \import Modules.Hom[V := Term.Carrier, W := Term.Carrier, source := Term.space, target := Term.space] \as Maps;
+  \definition zero: Logic.Not (p = cutoff) -> \forall (x: Term.Carrier) -> x = Term.space.zero :=
+    \fun (different: Logic.Not (p = cutoff))(x: Term.Carrier) => congr!{Maps.Map Term.Carrier}
+      (\fun (f: Maps.Map) => f.apply x) _ _ (Universal.ext End.identity Maps.zeroMap
+        (\fun (a: concentrated.family.Carrier p)(b: D.family.Carrier q) => trans!{Term.Carrier} _ _ _
+          (congr!{{concentrated.family.Carrier p} Term.Carrier} (\fun (u: concentrated.family.Carrier p) => Term.tensor u b) _ _ (Base.zero different a))
+          (Term.zeroLeft b)));
+}
+\module Degree(q: N.Nat^) {
+  \definition n: N.Nat^ := Nat.add cutoff q;
+  \import Coordinates.Step[p := cutoff, q := q] \as Position;
+  \definition point: Double.Index n := Position.targetIndex;
+  \import Total.Degree[n := n] \as Sum;
+  \import Modules.DirectSum[Index := Double.Index n, family := Sum.family].Single[point := point] \as Single;
+  \definition matching: \forall (i: Double.Index n) -> i.first = cutoff -> i = point :=
+    \fun (i: Double.Index n)(same: i.first = cutoff) => trans!{Double.Pair} _ _ _
+      (sym!{Double.Pair} _ _ (Double.pairRebuild i))
+      (congr!{N.Nat^ N.Nat^ Double.Pair} (\fun (a, b: N.Nat^) => Double.Pair { first := a, second := b }) _ _ _ _ same
+        (Arithmetic.addCancelLeft cutoff i.second q (trans!{N.Nat^} _ _ _
+          (congr!{N.Nat^ N.Nat^} (\fun (a: N.Nat^) => Nat.add a i.second) _ _ (sym!{N.Nat^} _ _ same))
+          (Double.degree n i))));
+  \definition trivial: Single.OtherTrivial := \fun (i: Double.Index n)(different: Logic.Not (i = point)) =>
+    \parent.Off[p := i.first, q := i.second].zero (\fun (same: i.first = cutoff) => different (matching i same));
+  \definition isomorphism: _ := Single.isomorphism trivial;
+}
+\definition cutoffDifferent: Logic.Not (N.Nat^::succ cutoff = cutoff) :=
+  \fun (same: N.Nat^::succ cutoff = cutoff) => Bounds.ltIrrefl cutoff
+    (\idelim N.Nat^::succ cutoff = cutoff \with n: N.Nat^ => Bounds.Lt cutoff n \by {
+      base: Order.ltSelfSucc cutoff, equality: same
+    });
+\module Boundary(q: N.Nat^) {
+  \import \parent.Degree[q := q] \as Current;
+  \import \parent.Degree[q := N.Nat^::succ q] \as Next;
+  \import Coordinates.Step[p := cutoff, q := q] \as Position;
+  \import Coordinates.Degree[n := N.Nat^::succ Current.n] \as NextCoordinates;
+  \import Tensor.At[p := cutoff, q := q] \as Maps;
+  \import Tensor.Term[p := cutoff, q := q] \as Term;
+  \import Tensor.Term[p := N.Nat^::succ cutoff, q := q] \as OffTerm;
+  \import Modules.Hom[V := OffTerm.Carrier, W := Term.Carrier, source := OffTerm.space, target := Term.space] \as Horizontal;
+  \import Modules.Laws[V := Term.Carrier, space := Term.space] \as Laws;
+  \import Double.Sign[V := Term.Carrier, space := Term.space] \as Sign;
+  \definition horizontalZero[x: OffTerm.Carrier]: Maps.horizontal.apply x = Term.space.zero := trans!{Term.Carrier} _ _ _
+    (congr!{OffTerm.Carrier Term.Carrier} Maps.horizontal.apply _ _ (\parent.Off[p := N.Nat^::succ cutoff, q := q].zero cutoffDifferent x))
+    (Horizontal.zeroPreserved Maps.horizontal);
+  \definition law: \forall (x: Total.Carrier (N.Nat^::succ Current.n)) ->
+    Current.isomorphism.forward.apply (Total.differential.apply Current.n x) =
+    (Sign.map cutoff).apply (Maps.vertical.apply (Next.isomorphism.forward.apply x)) :=
+    \fun (x: Total.Carrier (N.Nat^::succ Current.n)) => eq_reason_in!{Term.Carrier _
+      "=" _ "by" { Position.differential x }
+      "=" _ "by" { congr!{Term.Carrier Term.Carrier}
+        (\fun (a: Term.Carrier) => Term.space.add a ((Sign.map cutoff).apply (Maps.vertical.apply (Next.isomorphism.forward.apply x)))) _ _
+        (horizontalZero (NextCoordinates.coordinate Position.horizontalIndex x)) }
+      "=" _ "by" { Laws.zeroLeft ((Sign.map cutoff).apply (Maps.vertical.apply (Next.isomorphism.forward.apply x))) }
+    };
+}

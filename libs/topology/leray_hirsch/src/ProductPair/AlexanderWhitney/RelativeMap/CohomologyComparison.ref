@@ -1,0 +1,95 @@
+\use std.Logic[].Equality[].trans;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as CoefficientModules;
+\definition coefficientBundle: CoefficientModules.Bundle := CoefficientModules.Bundle { Carrier := K, space := CoefficientModules.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficientBundle] \as RestrictedScalars;
+\definition coefficients: Modules.Bundle := RestrictedScalars.coefficients;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Modules.End[V := coefficients.Carrier, space := coefficients.space] \as Identity;
+\import Hom.IntegerRelative[subcomplex := SignedPartTotal.complex, wholecomplex := SignedWholeTotal.complex]
+  .On[pair := TensorComparison.splitInclusion, coefficients := coefficients] \as Left;
+\import Hom.IntegerRelative[subcomplex := SignedPart.complex, wholecomplex := SignedWhole.complex]
+  .On[pair := \parent.ProductSplit[].pair, coefficients := coefficients] \as Right;
+\import Left.PairSequence[] \as TensorSequence;
+\import Right.PairSequence[] \as ProductSequence;
+\import Hom.Integer[P := SignedPartTotal.complex, N := coefficients] \as LeftPart;
+\import Hom.Integer[P := SignedWholeTotal.complex, N := coefficients] \as LeftWhole;
+\import Hom.Integer[P := SignedPart.complex, N := coefficients] \as RightPart;
+\import Hom.Integer[P := SignedWhole.complex, N := coefficients] \as RightWhole;
+\import Hom.Integer[P := ProductQuotient.complex, N := coefficients] \as RightRelative;
+\import Hom.Integer[P := TensorQuotient.complex, N := coefficients] \as LeftRelative;
+\import Hom.IntegerMapping[P := SignedPart.complex, Q := SignedPartTotal.complex, N := coefficients, L := coefficients]
+  .On[f := signedPartAW, u := Identity.identity] \as Part;
+\import Hom.IntegerMapping[P := SignedWhole.complex, Q := SignedWholeTotal.complex, N := coefficients, L := coefficients]
+  .On[f := signedWholeAW, u := Identity.identity] \as WholePullback;
+\import Hom.IntegerMapping[P := ProductQuotient.complex, Q := TensorQuotient.complex, N := coefficients, L := coefficients]
+  .On[f := quotientMap, u := Identity.identity] \as RelativePullback;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Cochains;
+\import Cochains.ShortExact[A := Left.complex, B := LeftWhole.complex, C := LeftPart.complex]
+  .Morphism[A1 := Right.complex, B1 := RightWhole.complex, C1 := RightPart.complex]
+  .Diagram[s := TensorSequence.sequence, t := ProductSequence.sequence, a := RelativePullback.map, b := WholePullback.map, c := Part.map] \as Diagram;
+\definition diagram: Diagram.Commutative := Diagram.Commutative {
+  left := \fun (z: I.Int^)(h: LeftRelative.Carrier z) => RightWhole.At[z := z].ext
+    (WholePullback.map.apply z (TensorSequence.inclusion.apply z h)) (ProductSequence.inclusion.apply z (RelativePullback.map.apply z h))
+    (\fun (x: SignedWhole.Carrier z) =>
+      congr!{{TensorQuotient.Carrier z} K} h.apply _ _ (sym!{{TensorQuotient.Carrier z}} _ _ (Quotient.At[k := z].onClass commutes x))),
+  right := \fun (z: I.Int^)(h: LeftWhole.Carrier z) => RightPart.At[z := z].ext
+    (ProductSequence.restriction.apply z (WholePullback.map.apply z h)) (Part.map.apply z (TensorSequence.restriction.apply z h))
+    (\fun (x: SignedPart.Carrier z) => congr!{{SignedWholeTotal.Carrier z} K} h.apply _ _ (commutes z x)),
+};
+\import Hom.IntegerEquivalence[P := SignedPart.complex, Q := SignedPartTotal.complex, N := coefficients] \as PartEquivalence;
+\import Hom.IntegerEquivalence[P := SignedWhole.complex, Q := SignedWholeTotal.complex, N := coefficients] \as WholeEquivalence;
+\import singular_eilenberg_zilber.Equivalence[A := BasePart.CarrierSet, B := F, left := basePartTopology, right := fiber].Signed[] \as PartAW;
+\import singular_eilenberg_zilber.Equivalence[A := X, B := F, left := base, right := fiber].Signed[] \as WholeAW;
+\definition quasiIsomorphism: _ := Diagram.leftQuasiIsomorphism diagram
+  (WholeEquivalence.quasiIsomorphism WholeAW.equivalence) (PartEquivalence.quasiIsomorphism PartAW.equivalence);
+\import Hom.Integer[P := Actual.complex, N := coefficients] \as ActualCochains;
+\import Hom.Integer[P := Target.complex, N := coefficients] \as TargetCochains;
+\import Hom.IntegerIsomorphism[P := TensorQuotient.complex, Q := Target.complex, N := coefficients].On[e := TensorComparison.comparisonIsomorphism] \as Upper;
+\import Hom.IntegerIsomorphism[P := ProductQuotient.complex, Q := Actual.complex, N := coefficients].On[e := GeometryComparison.isomorphism] \as Lower;
+\import Hom.IntegerComposition[P := ProductQuotient.complex, Q := TensorQuotient.complex, T := Target.complex, N := coefficients] \as First;
+\import Hom.IntegerComposition[P := Actual.complex, Q := ProductQuotient.complex, T := Target.complex, N := coefficients] \as Second;
+\import Cochains.Map[C := LeftRelative.complex, D := RightRelative.complex] \as Core;
+\import Cochains.Map[C := TargetCochains.complex, D := ActualCochains.complex] \as ActualMaps;
+\import \parent.Cochains[K := K, ring := ring] \as Ring;
+\import RestrictedScalars.On[P := Actual.complex] \as ActualRing;
+\import RestrictedScalars.On[P := Target.complex] \as TargetRing;
+\import chain_complexes.Integer[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as RingCochains;
+\module At(z: I.Int^) {
+  \import Cochains.At[C := LeftRelative.complex, z := z] \as C;
+  \import Cochains.At[C := RightRelative.complex, z := z] \as D;
+  \import Cochains.At[C := TargetCochains.complex, z := z] \as A;
+  \import Cochains.At[C := ActualCochains.complex, z := z] \as B;
+  \import Modules.Isomorphism[V := A.Cohomology, W := C.Cohomology, source := A.cohomologySpace, target := C.cohomologySpace]
+    .Composition[U := D.Cohomology, final := D.cohomologySpace] \as IntoModel;
+  \import Modules.Isomorphism[V := B.Cohomology, W := D.Cohomology, source := B.cohomologySpace, target := D.cohomologySpace].Inverse[] \as Reverse;
+  \import Modules.Isomorphism[V := A.Cohomology, W := D.Cohomology, source := A.cohomologySpace, target := D.cohomologySpace]
+    .Composition[U := B.Cohomology, final := B.cohomologySpace] \as OutOfModel;
+  \definition core: _ := Core.At[k := z].Invert[f := RelativePullback.map].isomorphism (quasiIsomorphism z);
+  \definition upper: _ := Upper.At[z := z].isomorphism;
+  \definition lower: _ := Reverse.inverse Lower.At[z := z].isomorphism;
+  \definition result: _ := OutOfModel.compose lower (IntoModel.compose core upper);
+  \definition formula: \forall (x: A.Cohomology) -> (ActualMaps.At[k := z].induced (Second.direct GeometryComparison.isomorphism.backward
+      overProductQuotient)).apply x = result.forward.apply x :=
+    \fun (x: A.Cohomology) => trans!{B.Cohomology} _ _ _
+      (Second.At[k := z].onCohomology GeometryComparison.isomorphism.backward
+        overProductQuotient x)
+      (congr!{D.Cohomology B.Cohomology} lower.forward.apply _ _
+        (First.At[k := z].onCohomology quotientMap TensorComparison.comparison x));
+  \import RingCochains.At[C := ActualRing.complex, z := z] \as Output;
+  \import RingCochains.At[C := TargetRing.complex, z := z] \as Input;
+  \import RingCochains.Map[C := TargetRing.complex, D := ActualRing.complex].At[k := z] \as Action;
+  \definition linear: _ := Action.induced Ring.pullback;
+  \import CoefficientModules.Isomorphism[V := Input.Cohomology, W := Output.Cohomology,
+    source := Input.cohomologySpace, target := Output.cohomologySpace].OfBijective[f := linear] \as Inverse;
+  \definition injective: Inverse.Injective := \fun (x, y: Input.Cohomology)(same: _) => trans!{Input.Cohomology} _ _ _
+    (sym!{Input.Cohomology} _ _ (result.leftInverse x))
+    (trans!{Input.Cohomology} _ _ _
+      (congr!{Output.Cohomology Input.Cohomology} result.backward.apply _ _
+        (trans!{Output.Cohomology} _ _ _ (sym!{Output.Cohomology} _ _ (formula x))
+          (trans!{Output.Cohomology} _ _ _ same (formula y))))
+      (result.leftInverse y));
+  \definition onto: Inverse.Onto := \fun (y: Output.Cohomology) => std.Logic[].Proposition[].existsIntro[Input.Cohomology,
+    { x: Input.Cohomology \where linear.apply x = y }] (result.backward.apply y)
+    (trans!{Output.Cohomology} _ _ _ (formula (result.backward.apply y)) (result.rightInverse y));
+  \definition isomorphism: _ := Inverse.isomorphism injective onto;
+}

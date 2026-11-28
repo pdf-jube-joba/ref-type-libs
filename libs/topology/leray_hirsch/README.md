@@ -22,6 +22,14 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `Projection.Pullback.Over.Degree.law` | Bidegree naturality for base change and inverse-image pairs |
 | `Projection.Over.Change.Degree.law` | Bidegree naturality for unital ring homomorphisms |
 | `Projection.Over.MayerVietoris.At.connectingLaw` | Naturality of the relative connecting map under projection |
+| `Projection.Over.MayerVietoris.SignedCup.connectingLaw` | Compatibility of the relative connecting map with a comparison summand in integer degrees |
+| `ProductPair.AlexanderWhitney.RelativeMap.CohomologyComparison.At.isomorphism` | Relative Alexander–Whitney cohomology isomorphism over the coefficient ring |
+| `ProductPair.AlexanderWhitney.RelativeMap.ExternalFormula.Cochains.law` | Relative external cup as the pullback of tensor cochains along Alexander–Whitney |
+| `ProductPair.AlexanderWhitney.BaseTensor.Free.isomorphism` | Free basis of the relative base chain module |
+| `FreeTensorCochains.OneColumn.On.Cohomology.comparison` | Cohomology of an unsigned tensor column with free base module |
+| `ChainTruncation.Layer.Sequence.Tensor.exact` | Split exact truncation layer after tensoring |
+| `ChainTruncation.Layer.TensorColumn.Boundary.law` | Differential on the one-column truncation quotient |
+| `TensorCochainCup.Of.At.Differential.law` | Tensor cochain differential with a closed right factor |
 | `Projection.Over.MayerVietoris.Shifted.At` | Exact products of the shifted base terms |
 | `Trivial.Over.Degree.law` | Agreement with relative external cup on a product bundle |
 

@@ -1,0 +1,45 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Transport;
+\import Upper.Compare[].Cohomology[] \as Multiplication;
+\import cohomology_thom.RelativeMayerVietoris[].OpenCover[A := A, source := source, subset := subset].On[cover := cover].Cohomology[coefficients := WholeProduct.integerCoefficients].At[z := Product.outputDegree] \as TargetMV;
+\import Geometry.Cohomology[coefficients := WholeProduct.integerCoefficients].At[z := Product.inputDegree] \as SourceMV;
+\definition SmallClasses[k: N.Nat^]: \Set := IntegerCochains.At[C := SmallHom.complex, z := I.Int^::ofNat k].Cohomology;
+\definition WholeClasses[k: N.Nat^]: \Set := IntegerCochains.At[C := WholeRelative.complex, z := I.Int^::ofNat k].Cohomology;
+\definition inverse[k: N.Nat^]: SmallClasses k -> WholeClasses k := WholeComparison.At[z := I.Int^::ofNat k].isomorphism.backward.apply;
+\import WholeComparison.At[z := Positive.outputDegree] \as TargetComparison;
+\definition apply[u: Restriction.Cycle][a: Multiplication.sourceClasses.Carrier]: WholeClasses Positive.total := Transport.cast WholeClasses Upper.total Positive.total Positive.same (Multiplication.whole u a);
+\definition law: \forall (u: Restriction.Cycle)(a: Input.Cohomology) -> TargetMV.connecting.apply (overlap u a) = apply u (SourceMV.connecting.apply a) :=
+  \fun (u: Restriction.Cycle)(a: Input.Cohomology) => eq_reason_in!{{WholeClasses Positive.total} _
+    "=" _ "by" { congr!{Output.Cohomology {WholeClasses Positive.total}} TargetComparison.isomorphism.backward.apply _ _ (\parent.\parent.Connecting[p := p, q := q].law u a) }
+    "=" _ "by" { congr!{Output.Cohomology {WholeClasses Positive.total}} TargetComparison.isomorphism.backward.apply _ _ (Positive.Compare[].law u (SourceConnecting.connecting.apply a)) }
+    "=" _ "by" { sym!{{WholeClasses Positive.total}} _ _ (Transport.natural SmallClasses WholeClasses inverse Upper.total Positive.total Positive.same ((Multiplication.smallMap u).apply (SourceConnecting.connecting.apply a))) }
+    "=" _ "by" { congr!{{WholeClasses Upper.total} {WholeClasses Positive.total}} (Transport.cast WholeClasses Upper.total Positive.total Positive.same) _ _ (Multiplication.inverseConjugation u (SourceConnecting.connecting.apply a)) }
+  };
+
+\import OrdinaryCochains.At[C := WholeOrdinary.complex, k := q] \as TotalFactor;
+\import LeftProduct.Cohomology[].Pullback[B := A, target := source] \as LeftFactor;
+\import OverlapProduct.Cohomology[].Pullback[B := Left, target := leftTopology] \as OverlapFactor;
+\import OrdinaryCochains.At[C := LeftOrdinary.complex, k := q] \as LeftFactorClasses;
+\import Upper.Compare[].Cohomology[] \as UpperComparison;
+\import WholeCup.Cohomology[p := N.Nat^::succ p, q := q].Left[] \as UpperCup;
+\definition restricted[u: TotalFactor.Cohomology]: Fixed.Cohomology :=
+  OverlapFactor.apply q Geometry.toLeft overlapLeftContinuous
+    (LeftFactor.apply q Geometry.leftPairMap leftContinuous u);
+\definition restrictedOnClass: \forall (u: TotalFactor.CycleCarrier) ->
+  restricted (TotalFactor.classOf u) = Fixed.classOf (Restriction.overlapCycle u) :=
+  \fun (u: TotalFactor.CycleCarrier) => trans!{Fixed.Cohomology} _ _ _
+    (congr!{LeftFactorClasses.Cohomology Fixed.Cohomology}
+      (OverlapFactor.apply q Geometry.toLeft overlapLeftContinuous) _ _
+      (LeftFactor.At[n := q].onClass Geometry.leftPairMap leftContinuous u))
+    (OverlapFactor.At[n := q].onClass Geometry.toLeft overlapLeftContinuous (Restriction.leftCycle u));
+\definition lawOnCohomology: \forall (u: TotalFactor.Cohomology)(a: Input.Cohomology) ->
+  TargetMV.connecting.apply (Cup.apply a (restricted u)) =
+  Transport.cast WholeClasses Upper.total Positive.total Positive.same (UpperCup.apply (SourceMV.connecting.apply a) u) :=
+  TotalFactor.classInduction
+    (\fun (u: TotalFactor.Cohomology) => \forall (a: Input.Cohomology) ->
+      TargetMV.connecting.apply (Cup.apply a (restricted u)) =
+      Transport.cast WholeClasses Upper.total Positive.total Positive.same (UpperCup.apply (SourceMV.connecting.apply a) u))
+    (\fun (u: TotalFactor.CycleCarrier)(a: Input.Cohomology) => trans!{{WholeClasses Positive.total}} _ _ _
+      (congr!{Fixed.Cohomology {WholeClasses Positive.total}}
+        (\fun (v: Fixed.Cohomology) => TargetMV.connecting.apply (Cup.apply a v)) _ _ (restrictedOnClass u))
+      (law u a));

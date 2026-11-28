@@ -20,3 +20,21 @@
 \module ProductExact(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Index: \Set);
 
 \module CocycleModel(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module RightCup(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  cover: singular_excision.MayerVietoris[A := A].Over[source := source].Cover,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ProductPair(X, F: \Set, base: topology.Topology[Carrier := X].Topology,
+  fiber: topology.Topology[Carrier := F].Topology, subset: \Pow X);
+
+\module ChainTruncation;
+
+\module CohomologyPowers(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Index: \Set);
+\module FreeTensorCochains(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Generators: \Set);
+
+\module CohomologyExact(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module TensorCochainCup(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module CohomologySign(K: \Set, ring: std.Alg[].Ring[].Ring[K]);

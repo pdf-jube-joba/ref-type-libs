@@ -1,0 +1,57 @@
+\import Chains.Map[C := below, D := through] \as Inclusions;
+\import Chains.Map[C := through, D := concentrated] \as Projections;
+\import Chains.ShortExact[A := below, B := through, C := concentrated] \as Exact;
+\module Differential(n: N.Nat^) {
+  \import \parent.\parent.At[n := n] \as Here;
+  \import \parent.\parent.At[n := N.Nat^::succ n] \as Next;
+  \import Upper.At[n := N.Nat^::succ n] \as UpperNext;
+  \import Modules.Hom[V := C.family.Carrier (N.Nat^::succ n), W := C.family.Carrier n,
+    source := C.family.space (N.Nat^::succ n), target := C.family.space n] \as Maps;
+  \import Upper.Boundary[n := n] \as Boundary;
+  \definition beyond[same: n = cutoff]: Logic.Not (Bounds.Lt (N.Nat^::succ n) (N.Nat^::succ cutoff)) :=
+    \fun (inside: Bounds.Lt (N.Nat^::succ n) (N.Nat^::succ cutoff)) =>
+      Bounds.ltIrrefl cutoff (\idelim n = cutoff \with k: N.Nat^ => Bounds.Lt k cutoff \by { base: inside, equality: same });
+  \definition zero: \forall (x: through.family.Carrier (N.Nat^::succ n)) ->
+    Here.project (through.differential.apply n x) = Here.space.zero :=
+    \fun (x: through.family.Carrier (N.Nat^::succ n)) => either!{{std.Logic[].Classical[].excludedMiddle (n = cutoff)}
+      {Here.project (through.differential.apply n x) = Here.space.zero}
+      {\fun (same: n = cutoff) => Here.refinedZero (through.differential.apply n x) (trans!{{C.family.Carrier n}} _ _ _
+        (congr!{{C.family.Carrier n} {C.family.Carrier n}} ((Here.select Here.active).apply) _ _
+          (trans!{{C.family.Carrier n}} _ _ _
+            (congr!{{C.family.Carrier (N.Nat^::succ n)} {C.family.Carrier n}} (C.differential.apply n) _ _ (UpperNext.zero (beyond same) x))
+            (Maps.zeroPreserved Boundary.differential)))
+        (Here.identityOn Here.active ((C.family.space n).zero) (Bounds.eqbTrueOfEq n cutoff same)))}
+      {\fun (different: Logic.Not (n = cutoff)) => Here.zeroOn Here.active (through.differential.apply n x) (Bounds.eqbFalseOfNe n cutoff different)}
+    };
+}
+\definition inclusion: Inclusions.Map := Inclusions.Map {
+  apply := \fun (n: N.Nat^) => \parent.At[n := n].inclusion.apply,
+  addition := \fun (n: N.Nat^) => \parent.At[n := n].inclusion.addition,
+  scalar := \fun (n: N.Nat^) => \parent.At[n := n].inclusion.scalar,
+  commutes := \fun (n: N.Nat^)(x: below.family.Carrier (N.Nat^::succ n)) => \refl(C.differential.apply n x),
+};
+\definition projection: Projections.Map := Projections.Map {
+  apply := \fun (n: N.Nat^) => \parent.At[n := n].projection.apply,
+  addition := \fun (n: N.Nat^) => \parent.At[n := n].projection.addition,
+  scalar := \fun (n: N.Nat^) => \parent.At[n := n].projection.scalar,
+  commutes := \fun (n: N.Nat^)(x: through.family.Carrier (N.Nat^::succ n)) =>
+    sym!{{concentrated.family.Carrier n}} _ _ (\parent.Sequence[].Differential[n := n].zero x),
+};
+\definition sequence: Exact.Sequence := Exact.Sequence {
+  inclusion := inclusion, projection := projection,
+  injective := \fun (n: N.Nat^) => \parent.At[n := n].injective,
+  onto := \fun (n: N.Nat^) => \parent.At[n := n].onto,
+  zero := \fun (n: N.Nat^) => \parent.At[n := n].compositeZero,
+  kernelImage := \fun (n: N.Nat^) => \parent.At[n := n].kernel,
+};
+
+\module Tensor(D: Chains.Complex) {
+  \import double_complexes.DoubleComplex[].Over[R := I.Int^, ring := Integers.ring] \as Double;
+  \import Double.TensorSplitSequence[C := below, E := through, F := concentrated, D := D].With[sequence := sequence] \as Tensor;
+  \definition retraction: Tensor.Retraction := Tensor.Retraction {
+    apply := \fun (n: N.Nat^) => \parent.\parent.At[n := n].retraction,
+    retracts := \fun (n: N.Nat^) => \parent.\parent.At[n := n].retracts,
+  };
+  \import Tensor.Split[r := retraction] \as TensorSequence;
+  \definition exact: _ := TensorSequence.sequence;
+}

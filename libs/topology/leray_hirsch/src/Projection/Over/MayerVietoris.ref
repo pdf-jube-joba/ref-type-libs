@@ -39,3 +39,7 @@
 
 \import std.Data[].FinSet[] \as Finite;
 \module Shifted(count: N.Nat^, degree: Finite.Fin count -> N.Nat^);
+
+\module Cup(p, q: N.Nat^);
+
+\module SignedCup(q: N.Nat^, u: TotalCohomology.Group q);

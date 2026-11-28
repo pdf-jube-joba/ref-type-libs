@@ -1,0 +1,47 @@
+\import Modules.Laws[V := LeftHom.Carrier outputDegree, space := LeftHom.space outputDegree] \as LeftLaws;
+\import algebra.Group[].Of[Carrier := LeftHom.Carrier outputDegree, group := LeftLaws.additive] \as LeftGroup;
+\import Modules.Laws[V := RightHom.Carrier outputDegree, space := RightHom.space outputDegree] \as RightLaws;
+\import algebra.Group[].Of[Carrier := RightHom.Carrier outputDegree, group := RightLaws.additive] \as RightGroup;
+\definition left: \forall (a: Factor)(h: SumHom.Carrier inputDegree) ->
+  Coordinates.firstProjection.apply outputDegree (sumAction a h) = sumLeft a h :=
+  \fun (a: Factor)(h: SumHom.Carrier inputDegree) => trans!{{LeftHom.Carrier outputDegree}} _ _ _
+    (Coordinates.firstProjection.addition outputDegree (Coordinates.firstInjection.apply outputDegree (sumLeft a h)) (Coordinates.secondInjection.apply outputDegree (sumRight a h)))
+    (trans!{{LeftHom.Carrier outputDegree}} _ _ _
+      (congr!{{LeftHom.Carrier outputDegree} {LeftHom.Carrier outputDegree} {LeftHom.Carrier outputDegree}} LeftGroup.add _ _ _ _
+        (Coordinates.firstRoundtrip outputDegree (sumLeft a h)) (Coordinates.firstCross outputDegree (sumRight a h)))
+      (LeftGroup.zeroRight (sumLeft a h)));
+\definition right: \forall (a: Factor)(h: SumHom.Carrier inputDegree) ->
+  Coordinates.secondProjection.apply outputDegree (sumAction a h) = sumRight a h :=
+  \fun (a: Factor)(h: SumHom.Carrier inputDegree) => trans!{{RightHom.Carrier outputDegree}} _ _ _
+    (Coordinates.secondProjection.addition outputDegree (Coordinates.firstInjection.apply outputDegree (sumLeft a h)) (Coordinates.secondInjection.apply outputDegree (sumRight a h)))
+    (trans!{{RightHom.Carrier outputDegree}} _ _ _
+      (congr!{{RightHom.Carrier outputDegree} {RightHom.Carrier outputDegree} {RightHom.Carrier outputDegree}} RightGroup.add _ _ _ _
+        (Coordinates.secondCross outputDegree (sumLeft a h)) (Coordinates.secondRoundtrip outputDegree (sumRight a h)))
+      (RightGroup.zeroLeft (sumRight a h)));
+
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as RingModules;
+\import OverlapCup.Degree[] \as SourceDegree;
+\import OverlapCup.Degree[] \as TargetDegree;
+\import RingModules.Hom[V := OverlapHom.Carrier inputDegree, W := OverlapHom.Carrier outputDegree, source := SourceDegree.space p, target := TargetDegree.space total] \as CupMaps;
+\definition linear[v: OverlapProduct.Carrier q]: CupMaps.Map := CupMaps.Map {
+  apply := \fun (a: OverlapHom.Carrier inputDegree) => OP.left a v,
+  addition := \fun (a, b: OverlapHom.Carrier inputDegree) => OP.Bilinear[].leftLeftAdd a b v,
+  scalar := \fun (r: K)(a: OverlapHom.Carrier inputDegree) => OP.Bilinear[].leftLeftScale r a v,
+};
+\definition projection: \forall (u: Factor)(h: SumHom.Carrier inputDegree) ->
+  MV.sequence.projection.apply outputDegree (sumAction u h) =
+  OP.left (MV.sequence.projection.apply inputDegree h) (Restriction.overlap u) :=
+  \fun (u: Factor)(h: SumHom.Carrier inputDegree) => eq_reason_in!{{OverlapHom.Carrier outputDegree} _
+    "=" _ "by" { MV.sequence.projection.addition outputDegree (Coordinates.firstInjection.apply outputDegree (sumLeft u h)) (Coordinates.secondInjection.apply outputDegree (sumRight u h)) }
+    "=" _ "by" { congr!{{OverlapHom.Carrier outputDegree} {OverlapHom.Carrier outputDegree} {OverlapHom.Carrier outputDegree}} OutputGroup.add _ _ _ _ (OutputDifference.left (sumLeft u h)) (OutputDifference.right (sumRight u h)) }
+    "=" _ "by" { congr!{{OverlapHom.Carrier outputDegree} {OverlapHom.Carrier outputDegree} {OverlapHom.Carrier outputDegree}} OutputGroup.difference _ _ _ _
+      (LeftPull.Cup[p := p, q := q].cochainLaw (Coordinates.firstProjection.apply inputDegree h) (Restriction.left u))
+      (trans!{{OverlapHom.Carrier outputDegree}} _ _ _
+        (RightPull.Cup[p := p, q := q].cochainLaw (Coordinates.secondProjection.apply inputDegree h) (Restriction.right u))
+        (congr!{{OverlapProduct.Carrier q} {OverlapHom.Carrier outputDegree}}
+          (OP.left (InputDifference.rightValue h)) _ _ (sym!{{OverlapProduct.Carrier q}} _ _ (Restriction.agree u)))) }
+    "=" _ "by" { sym!{{OverlapHom.Carrier outputDegree}} _ _ (CupMaps.differencePreserved (linear (Restriction.overlap u)) (InputDifference.leftValue h) (InputDifference.rightValue h)) }
+    "=" _ "by" { congr!{{OverlapHom.Carrier inputDegree} {OverlapHom.Carrier outputDegree}} (\fun (a: OverlapHom.Carrier inputDegree) => OP.left a (Restriction.overlap u)) _ _ (sym!{{OverlapHom.Carrier inputDegree}} _ _ (InputDifference.cochains h)) }
+  };
+
+\module Differential;

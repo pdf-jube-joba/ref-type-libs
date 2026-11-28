@@ -1,0 +1,23 @@
+\import singular_cohomology.Simplices[A := BasePart.CarrierSet, source := basePartTopology] \as PartSimplices;
+\import singular_cohomology.Simplices[A := X, source := base] \as WholeSimplices;
+\import Modules.Free[Generators := PartSimplices.Carrier n] \as PartFree;
+\import PartFree.Reindex[TargetGenerators := WholeSimplices.Carrier n] \as Reindex;
+\import Reindex.QuotientBasis[f := BaseInclusion.postcompose n baseInclusion baseContinuous] \as Basis;
+\definition Generators: \Set := \Cast[WholeSimplices.Carrier n] Basis.Complement;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\import Native.Map[C := SubChains.complex, D := BaseChains.complex].At[n := n] \as NativeMap;
+\import Chains.Map[C := SignedSub.complex, D := SignedBase.complex].At[k := z] \as SignedMap;
+\import Modules.KernelTransport[V := SubChains.Carrier n, W := BaseChains.Carrier n,
+  X := SignedSub.Carrier z, Y := SignedBase.Carrier z,
+  vSpace := SubChains.space n, wSpace := BaseChains.space n, xSpace := SignedSub.space z, ySpace := SignedBase.space z,
+  f := NativeMap.linear inclusion, g := SignedMap.linear Relative.inclusionMap,
+  domainIso := SignedSub.Positive[n := n].isomorphism, codomainIso := SignedBase.Positive[n := n].isomorphism].Cokernel[] \as Transport;
+\definition law: \forall (x: SubChains.Carrier n) ->
+  SignedBase.Positive[n := n].intro (inclusion.apply n x) = Relative.inclusionMap.apply z (SignedSub.Positive[n := n].intro x) :=
+  \fun (x: SubChains.Carrier n) => \refl(SignedBase.Positive[n := n].intro (inclusion.apply n x));
+\import Modules.Of[V := BaseChains.Carrier n, space := BaseChains.space n].Submodule[] \as Submodules;
+\import Submodules.Quotient[S := Basis.image] \as NativeQuotient;
+\import Modules.Isomorphism[V := Basis.Carrier, W := NativeQuotient.Carrier,
+  source := Basis.space, target := NativeQuotient.moduleSpace]
+  .Composition[U := relative.family.Carrier n, final := relative.family.space n] \as Compose;
+\definition isomorphism: _ := Compose.compose (Transport.isomorphism law) Basis.isomorphism;

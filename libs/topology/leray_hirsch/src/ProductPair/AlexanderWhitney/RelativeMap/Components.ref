@@ -1,0 +1,54 @@
+\import N.Basic[].Def[] \as Nat;
+\use std.Logic[].Equality[].eq_reason_in;
+\use std.Logic[].Equality[].trans;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Transport;
+\definition n: N.Nat^ := Nat.add p q;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\import singular_cohomology.Simplices[A := Whole.CarrierSet, source := wholeTopology] \as Simplices;
+\import singular_products.AlexanderWhitney[A := X, B := F, left := base, right := fiber] \as AW;
+\import AW.Total[].Degree[n := n] \as Degree;
+\import AW.At[p := p, q := q] \as Cut;
+\import Double.Tensor[C := TensorComparison.relative, D := FiberChains.complex] \as RelativeTensor;
+\import Double.TensorMapping[C := BaseChains.complex, D := TensorComparison.relative, E := FiberChains.complex, F := FiberChains.complex]
+  .With[f := TensorComparison.projection, g := Native.End[C := FiberChains.complex].identity] \as TensorProjection;
+\import Double.Map[C := WholePair.complex, D := RelativeTensor.complex].Total[f := TensorProjection.map].Coordinates[n := n] \as Mapping;
+\import Double.Coordinates[C := RelativeTensor.complex].Degree[n := n] \as TargetCoordinates;
+\import Double.Coordinates[C := WholePair.complex].Step[p := p, q := q] \as Position;
+\import Double.Coordinates[C := WholePair.complex].Degree[n := n] \as SourceCoordinates;
+\import RelativeTensor.Term[p := p, q := q] \as Output;
+\import WholePair.Term[p := p, q := q] \as Input;
+\import \parent.QuotientAction[z := z] \as RelativeAction;
+\definition i: Double.Index n := Position.targetIndex;
+\definition lift[x: WholeChains.Carrier n]: SignedWhole.Carrier z := SignedWhole.Positive[n := n].intro x;
+\definition component[x: Target.Carrier z]: Output.Carrier :=
+  TargetCoordinates.coordinate i (Target.Positive[n := n].backward.apply x);
+\definition carrier: \Set := Output.Carrier;
+\definition space: Modules.Space carrier := Output.space;
+\import Modules.Hom[V := TensorComparison.tensorQuotient.family.Carrier n, W := carrier, source := TensorComparison.tensorQuotient.family.space n, target := space]
+  .Composition[U := Target.Carrier z, domain := Target.space z] \as ComponentMaps;
+\definition componentLinear: _ := ComponentMaps.compose TargetCoordinates.At[i := i].map Target.Positive[n := n].backward;
+\definition signedProjection[x: WholeChains.Carrier n]: Target.Carrier z :=
+  TensorComparison.signedExact.projection.apply z (signedWholeAW.apply z (lift x));
+\definition descend[x: WholeChains.Carrier n]: Target.Carrier z := comparisonMap.apply z (Actual.class z (lift x));
+\definition projectionLaw: \forall (x: WholeChains.Carrier n) ->
+  component (descend x) = component (signedProjection x) :=
+  \fun (x: WholeChains.Carrier n) => congr!{{Target.Carrier z} carrier} component (descend x) (signedProjection x) (RelativeAction.law (lift x));
+\definition projectedCoordinate: \forall (x: WholeChains.Carrier n) -> component (signedProjection x) =
+  TensorProjection.Degree[p := p, q := q].map.apply (SourceCoordinates.coordinate i (Degree.map.apply x)) :=
+  \fun (x: WholeChains.Carrier n) => Mapping.law i (Degree.map.apply x);
+\definition absoluteCoordinate: \forall (x: WholeChains.Carrier n) -> SourceCoordinates.coordinate i (Degree.map.apply x) = Cut.map.apply x :=
+  \fun (x: WholeChains.Carrier n) => trans!{Input.Carrier} _ _ _ (Degree.coordinate i x)
+    (congr!{{WholeChains.Carrier n} Input.Carrier} Cut.map.apply _ _ (Transport.castRefl WholeChains.Carrier n x));
+\definition onChain: \forall (x: WholeChains.Carrier n) ->
+  component (descend x) = TensorProjection.Degree[p := p, q := q].map.apply (Cut.map.apply x) :=
+  \fun (x: WholeChains.Carrier n) => trans!{carrier} _ _ _ (projectionLaw x)
+    (trans!{carrier} _ _ _ (projectedCoordinate x)
+      (congr!{Input.Carrier carrier} TensorProjection.Degree[p := p, q := q].map.apply _ _ (absoluteCoordinate x)));
+\definition onSimplex: \forall (sigma: Simplices.Carrier n) ->
+  component (comparisonMap.apply z (Actual.class z (lift (WholeChains.generator n sigma)))) =
+    Output.tensor (TensorComparison.projection.apply p (BaseChains.generator p (Cut.front sigma))) (FiberChains.generator q (Cut.back sigma)) :=
+  \fun (sigma: Simplices.Carrier n) => eq_reason_in!{Output.Carrier _
+    "=" _ "by" { onChain (WholeChains.generator n sigma) }
+    "=" _ "by" { congr!{Input.Carrier Output.Carrier} TensorProjection.Degree[p := p, q := q].map.apply _ _ (Cut.onGenerator sigma) }
+    "=" _ "by" { TensorProjection.Degree[p := p, q := q].onTensor (BaseChains.generator p (Cut.front sigma)) (FiberChains.generator q (Cut.back sigma)) }
+  };

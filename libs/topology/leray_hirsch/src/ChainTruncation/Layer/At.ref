@@ -1,0 +1,122 @@
+\import Lower.At[n := n] \as Small;
+\import Upper.At[n := n] \as Large;
+\import Modules.Hom[V := C.family.Carrier n, W := C.family.Carrier n, source := C.family.space n, target := C.family.space n] \as Maps;
+\import Modules.End[V := C.family.Carrier n, space := C.family.space n] \as Identity;
+\definition select[b: Bool.Bool^]: Maps.Map := \induction (a: Bool.Bool^) \return Maps.Map \with {
+  | false: Maps.zeroMap
+  | true: Identity.identity
+} b;
+\definition active: Bool.Bool^ := Nat.eqb n cutoff;
+\definition identityOn[a: Bool.Bool^][x: C.family.Carrier n]: a = Bool.Bool^::true -> (select a).apply x = x :=
+  \fun (same: a = Bool.Bool^::true) =>
+    \idelim Bool.Bool^::true = a \with b: Bool.Bool^ => (select b).apply x = x \by {
+      base: \refl(x), equality: sym!{Bool.Bool^} _ _ same
+    };
+\definition zeroOn[a: Bool.Bool^][x: C.family.Carrier n]: a = Bool.Bool^::false -> (select a).apply x = (C.family.space n).zero :=
+  \fun (same: a = Bool.Bool^::false) =>
+    \idelim Bool.Bool^::false = a \with b: Bool.Bool^ => (select b).apply x = (C.family.space n).zero \by {
+      base: \refl((C.family.space n).zero), equality: sym!{Bool.Bool^} _ _ same
+    };
+\import Modules.Of[V := C.family.Carrier n, space := C.family.space n].Submodule[] \as Subspaces;
+\import Modules.Laws[V := C.family.Carrier n, space := C.family.space n] \as Laws;
+\import algebra.Group[].Of[Carrier := C.family.Carrier n, group := Laws.additive] \as Group;
+\definition Supported[x: C.family.Carrier n]: \Prop := Logic.Not (n = cutoff) -> x = (C.family.space n).zero;
+\definition submodule: Subspaces.Submodule := Subspaces.Submodule {
+  carrier := { x: C.family.Carrier n \where Supported x },
+  zero := \fun (outside: Logic.Not (n = cutoff)) => \refl((C.family.space n).zero),
+  addition := \fun (x, y: C.family.Carrier n)(sx: Supported x)(sy: Supported y)(outside: Logic.Not (n = cutoff)) => trans!{{C.family.Carrier n}} _ _ _
+    (congr!{{C.family.Carrier n} {C.family.Carrier n} {C.family.Carrier n}} Group.add _ _ _ _ (sx outside) (sy outside))
+    (Group.zeroLeft Group.zero),
+  scalar := \fun (r: I.Int^)(x: C.family.Carrier n)(sx: Supported x)(outside: Logic.Not (n = cutoff)) => trans!{{C.family.Carrier n}} _ _ _
+    (congr!{{C.family.Carrier n} {C.family.Carrier n}} ((C.family.space n).smul r) _ _ (sx outside))
+    (Laws.scaleZero r),
+};
+\import Subspaces.Of[S := submodule] \as Part;
+\definition Carrier: \Set := Part.Carrier;
+\definition space: Modules.Space Carrier := Part.moduleSpace;
+\definition zero: \forall (outside: Logic.Not (n = cutoff))(x: Carrier) -> x = space.zero :=
+  \fun (outside: Logic.Not (n = cutoff))(x: Carrier) => (\bysub(C.family.Carrier n, submodule.carrier, x)) outside;
+\definition retained[same: n = cutoff]: Bounds.Lt n (N.Nat^::succ cutoff) :=
+  \idelim cutoff = n \with k: N.Nat^ => Bounds.Lt k (N.Nat^::succ cutoff) \by {
+    base: Order.ltSelfSucc cutoff, equality: sym!{N.Nat^} _ _ same
+  };
+\definition excluded[same: n = cutoff]: Logic.Not (Bounds.Lt n cutoff) :=
+  \fun (inside: Bounds.Lt n cutoff) => Bounds.ltIrrefl cutoff
+    (\idelim n = cutoff \with k: N.Nat^ => Bounds.Lt k cutoff \by { base: inside, equality: same });
+\definition inclusionValue[x: Small.Carrier]: Large.Carrier := \into[C.family.Carrier n](x, Large.submodule.carrier) \by {
+  \fun (outside: Logic.Not (Bounds.Lt n (N.Nat^::succ cutoff))) => Small.zero
+    (\fun (inside: Bounds.Lt n cutoff) => outside (Order.ltStep n cutoff inside)) x
+};
+\import Modules.Hom[V := Small.Carrier, W := Large.Carrier, source := Small.space, target := Large.space] \as Inclusions;
+\definition inclusion: Inclusions.Map := Inclusions.Map {
+  apply := inclusionValue,
+  addition := \fun (x, y: Small.Carrier) => \refl((C.family.space n).add x y),
+  scalar := \fun (r: I.Int^)(x: Small.Carrier) => \refl((C.family.space n).smul r x),
+};
+\definition injective: \forall (x, y: Small.Carrier) -> inclusion.apply x = inclusion.apply y -> x = y :=
+  \fun (x, y: Small.Carrier)(same: _) => same;
+\definition project[x: Large.Carrier]: Carrier :=
+  \into[C.family.Carrier n]((select active).apply x, submodule.carrier) \by {
+    \fun (outside: Logic.Not (n = cutoff)) => zeroOn active x (Bounds.eqbFalseOfNe n cutoff outside)
+  };
+\import Modules.Hom[V := Large.Carrier, W := Carrier, source := Large.space, target := space] \as Projections;
+\definition projection: Projections.Map := Projections.Map {
+  apply := project,
+  addition := \fun (x, y: Large.Carrier) => (select active).addition x y,
+  scalar := \fun (r: I.Int^)(x: Large.Carrier) => (select active).scalar r x,
+};
+\import std.Logic[].Classical[] \as Classical;
+\definition onto: \forall (q: Carrier) -> \exists (x: Large.Carrier \where project x = q) :=
+  \fun (q: Carrier) => either!{{Classical.excludedMiddle (n = cutoff)} {\exists (x: Large.Carrier \where project x = q)}
+    {\fun (same: n = cutoff) => Logic.existsIntro[Large.Carrier, { x: Large.Carrier \where project x = q }]
+      (Large.restrict (retained same) q) (identityOn active q (Bounds.eqbTrueOfEq n cutoff same))}
+    {\fun (different: Logic.Not (n = cutoff)) => Logic.existsIntro[Large.Carrier, { x: Large.Carrier \where project x = q }]
+      Large.space.zero (trans!{Carrier} _ _ _ (Projections.zeroPreserved projection) (sym!{Carrier} _ _ (zero different q)))}
+  };
+\definition kernel: \forall (x: Large.Carrier) -> project x = space.zero -> \exists (a: Small.Carrier \where inclusion.apply a = x) :=
+  \fun (x: Large.Carrier)(killed: project x = space.zero) =>
+    Logic.existsIntro[Small.Carrier, { a: Small.Carrier \where inclusion.apply a = x }]
+      (\into[C.family.Carrier n](x, Small.submodule.carrier) \by {
+        \fun (outside: Logic.Not (Bounds.Lt n cutoff)) => either!{{Classical.excludedMiddle (n = cutoff)} {Large.include x = (C.family.space n).zero}
+          {\fun (same: n = cutoff) => trans!{{C.family.Carrier n}} _ _ _
+            (sym!{{C.family.Carrier n}} _ _ (identityOn active x (Bounds.eqbTrueOfEq n cutoff same))) killed}
+          {\fun (different: Logic.Not (n = cutoff)) => Large.zero (outsideNext n different outside) x}
+        }
+      }) (\refl(x));
+\import singular_cellular_algebra.Algebra[].Refinement[A := C.family.Carrier n, S := submodule.carrier] \as Refined;
+\definition compositeZero: \forall (x: Small.Carrier) -> project (inclusion.apply x) = space.zero :=
+  \fun (x: Small.Carrier) => either!{{Classical.excludedMiddle (n = cutoff)} {project (inclusion.apply x) = space.zero}
+    {\fun (same: n = cutoff) => Refined.ext (project (inclusion.apply x)) space.zero
+      (trans!{{C.family.Carrier n}} _ _ _
+        (congr!{{C.family.Carrier n} {C.family.Carrier n}} ((select active).apply) _ _ (Small.zero (excluded same) x))
+        (Maps.zeroPreserved (select active)))}
+    {\fun (different: Logic.Not (n = cutoff)) => zeroOn active x (Bounds.eqbFalseOfNe n cutoff different)}
+  };
+
+\definition lowerIndex: Bool.Bool^ := Nat.ltb n cutoff;
+\definition lowerFalse: Logic.Not (Bounds.Lt n cutoff) -> lowerIndex = Bool.Bool^::false :=
+  Bool.cases (\fun (a: Bool.Bool^) => Logic.Not (a = Bool.Bool^::true) -> a = Bool.Bool^::false)
+    (\fun (outside: Logic.Not (Bool.Bool^::false = Bool.Bool^::true)) => \refl(Bool.Bool^::false))
+    (\fun (outside: Logic.Not (Bool.Bool^::true = Bool.Bool^::true)) => Logic.falseElim _ (outside (\refl(Bool.Bool^::true))))
+    lowerIndex;
+\definition retract[x: Large.Carrier]: Small.Carrier :=
+  \into[C.family.Carrier n]((select lowerIndex).apply x, Small.submodule.carrier) \by {
+    \fun (outside: Logic.Not (Bounds.Lt n cutoff)) => zeroOn lowerIndex x (lowerFalse outside)
+  };
+\import Modules.Hom[V := Large.Carrier, W := Small.Carrier, source := Large.space, target := Small.space] \as Retractions;
+\definition retraction: Retractions.Map := Retractions.Map {
+  apply := retract,
+  addition := \fun (x, y: Large.Carrier) => (select lowerIndex).addition x y,
+  scalar := \fun (r: I.Int^)(x: Large.Carrier) => (select lowerIndex).scalar r x,
+};
+\import singular_cellular_algebra.Algebra[].Refinement[A := C.family.Carrier n, S := Small.submodule.carrier] \as LowerRefined;
+\definition retracts: \forall (x: Small.Carrier) -> retract (inclusion.apply x) = x :=
+  \fun (x: Small.Carrier) => LowerRefined.ext (retract (inclusion.apply x)) x
+    (either!{{Classical.excludedMiddle (Bounds.Lt n cutoff)} {Small.include (retract (inclusion.apply x)) = Small.include x}
+      {\fun (inside: Bounds.Lt n cutoff) => identityOn lowerIndex x inside}
+      {\fun (outside: Logic.Not (Bounds.Lt n cutoff)) => trans!{{C.family.Carrier n}} _ _ _
+        (zeroOn lowerIndex x (lowerFalse outside)) (sym!{{C.family.Carrier n}} _ _ (Small.zero outside x))}
+    });
+
+\definition refinedZero[x: Large.Carrier][same: (select active).apply x = (C.family.space n).zero]: project x = space.zero :=
+  Refined.ext (project x) space.zero same;

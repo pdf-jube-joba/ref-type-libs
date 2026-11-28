@@ -1,0 +1,39 @@
+\import \parent.RelativeComparison[] \as GeometryComparison;
+\import \parent.BaseTensor[] \as TensorComparison;
+\import singular_cohomology.Relative[A := Whole.CarrierSet, source := wholeTopology, subset := part] \as Actual;
+\import Chains.Quotient[C := SignedPart.complex, D := SignedWhole.complex].On[f := signedProductInclusion] \as ProductQuotient;
+\import Chains.Quotient[C := SignedPartTotal.complex, D := SignedWholeTotal.complex].On[f := signedTensorInclusion] \as TensorQuotient;
+\import Native.ZeroExtension[C := TensorComparison.tensorQuotient] \as Target;
+\import Chains.Map[C := TensorQuotient.complex, D := Target.complex].Composition[B := ProductQuotient.complex] \as IntoTensor;
+\import Chains.Map[C := ProductQuotient.complex, D := Target.complex].Composition[B := Actual.complex] \as FromGeometry;
+\import Chains.Map[C := Actual.complex, D := Target.complex] \as ComparisonMaps;
+\definition overProductQuotient: _ := IntoTensor.compose TensorComparison.comparison quotientMap;
+\definition comparisonMap: ComparisonMaps.Map := FromGeometry.compose overProductQuotient GeometryComparison.isomorphism.backward;
+\module Cochains(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]) {
+  \import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Coefficients;
+  \definition coefficients: Coefficients.Bundle := Coefficients.Bundle { Carrier := K, space := Coefficients.scalarModule };
+  \import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients].Mapping[P := Actual.complex, Q := Target.complex, L := coefficients] \as Hom;
+  \import Coefficients.End[V := K, space := Coefficients.scalarModule] \as Scalars;
+  \definition pullback: _ := Hom.On[f := comparisonMap, u := Scalars.identity].map;
+}
+
+\module ProductSplit;
+\module CohomologyComparison(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+\use std.Logic[].Equality[].eq_reason_in;
+\module QuotientAction(z: I.Int^) {
+  \import ProductQuotient.At[k := z] \as Input;
+  \import TensorQuotient.At[k := z] \as Middle;
+  \definition law: \forall (x: SignedWhole.Carrier z) ->
+    comparisonMap.apply z (Actual.class z x) = TensorComparison.signedExact.projection.apply z (signedWholeAW.apply z x) :=
+    \fun (x: SignedWhole.Carrier z) => eq_reason_in!{{Target.Carrier z} _
+      "=" _ "by" { congr!{Input.Carrier {Target.Carrier z}} (overProductQuotient.apply z) _ _
+        (GeometryComparison.onBackwardClass z x) }
+      "=" _ "by" { congr!{Middle.Carrier {Target.Carrier z}} (TensorComparison.comparison.apply z) _ _
+        (Quotient.At[k := z].onClass commutes x) }
+      "=" _ "by" { TensorComparison.onClass z (signedWholeAW.apply z x) }
+    };
+}
+
+\module Components(p, q: N.Nat^);
+
+\module ExternalFormula(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], p, q: N.Nat^);

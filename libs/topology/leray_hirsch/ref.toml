@@ -16,3 +16,8 @@ std = { path = "../../std" }
 topological_constructions = { path = "../constructions" }
 topology = { path = "../basic" }
 thom_spaces = { path = "../thom_spaces" }
+singular_subdivision = { path = "../singular/subdivision" }
+algebra = { path = "../../algebra/basic" }
+double_complexes = { path = "../../algebra/homological/double_complexes" }
+singular_eilenberg_zilber = { path = "../singular/eilenberg_zilber" }
+commutative_algebra = { path = "../../algebra/commutative_algebra" }

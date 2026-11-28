@@ -1,0 +1,42 @@
+\import N.Basic[].Prop[] \as Bounds;
+\import N.Basic[].Def[] \as Nat;
+\import N.Order[].Prop[] \as Order;
+\import std.Data[].Bool[] \as Bool;
+\import Bool.Prop[] \as Boolean;
+\use Logic.either;
+\definition Downward[bound: N.Nat^]: \forall (n: N.Nat^) -> Bounds.Lt (N.Nat^::succ n) bound -> Bounds.Lt n bound :=
+  \fun (n: N.Nat^)(below: Bounds.Lt (N.Nat^::succ n) bound) => Order.ltTrans n (N.Nat^::succ n) bound (Order.ltSelfSucc n) below;
+\import \parent.Of[C := C, kept := (\fun (n: N.Nat^) => Bounds.Lt n cutoff), downward := Downward cutoff] \as Lower;
+\import \parent.Of[C := C, kept := (\fun (n: N.Nat^) => Bounds.Lt n (N.Nat^::succ cutoff)), downward := Downward (N.Nat^::succ cutoff)] \as Upper;
+\definition below: Chains.Complex := Lower.complex;
+\definition through: Chains.Complex := Upper.complex;
+\definition outsideNext: \forall (n: N.Nat^) -> Logic.Not (n = cutoff) -> Logic.Not (Bounds.Lt n cutoff) -> Logic.Not (Bounds.Lt n (N.Nat^::succ cutoff)) :=
+  \fun (n: N.Nat^)(different: Logic.Not (n = cutoff))(outside: Logic.Not (Bounds.Lt n cutoff))(inside: Bounds.Lt n (N.Nat^::succ cutoff)) =>
+    outside (trans!{Bool.Bool^} _ _ _
+      (sym!{Bool.Bool^} _ _ (Bounds.ltbSuccOfDifferent cutoff n (Bounds.eqbFalseOfNe n cutoff different))) inside);
+\module At(n: N.Nat^);
+\definition family: Chains.Family := Chains.Family {
+  Carrier := \fun (n: N.Nat^) => \parent.Layer[C := C, cutoff := cutoff].At[n := n].Carrier,
+  space := \fun (n: N.Nat^) => \parent.Layer[C := C, cutoff := cutoff].At[n := n].space,
+};
+\module ZeroBoundary(n: N.Nat^) {
+  \import \parent.At[n := n] \as Output;
+  \import Modules.Hom[V := family.Carrier (N.Nat^::succ n), W := family.Carrier n,
+    source := family.space (N.Nat^::succ n), target := family.space n] \as Maps;
+  \definition map: Maps.Map := Maps.zeroMap;
+  \definition zero: map.apply (family.space (N.Nat^::succ n)).zero = Output.space.zero := \refl(Output.space.zero);
+}
+\definition differential: Chains.DifferentialData[family] := Chains.DifferentialData[family] {
+  apply := \fun (n: N.Nat^) => \parent.Layer[C := C, cutoff := cutoff].ZeroBoundary[n := n].map.apply,
+};
+\definition concentrated: Chains.Complex := Chains.Complex {
+  family := family, differential := differential,
+  laws := Chains.DifferentialLaws[family, differential] {
+    addition := \fun (n: N.Nat^) => \parent.Layer[C := C, cutoff := cutoff].ZeroBoundary[n := n].map.addition,
+    scalar := \fun (n: N.Nat^) => \parent.Layer[C := C, cutoff := cutoff].ZeroBoundary[n := n].map.scalar,
+    squareZero := \fun (n: N.Nat^)(x: family.Carrier (N.Nat^::succ (N.Nat^::succ n))) => \refl((family.space n).zero),
+  },
+};
+\module Sequence;
+
+\module TensorColumn(D: Chains.Complex);

@@ -1,0 +1,52 @@
+\use std.Logic[].Equality[].trans;
+\import singular_cohomology.Relative[A := Whole.CarrierSet, source := wholeTopology, subset := part] \as Actual;
+\import singular_cohomology.Chains[A := TotalPart.CarrierSet, source := partTopology] \as Boundary;
+\import Native.ZeroExtension[C := Boundary.complex] \as SignedBoundary;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.IntegerRelative[subcomplex := SignedPart.complex, wholecomplex := SignedWhole.complex] \as Split;
+\module At(z: I.Int^) {
+  \import Modules.Hom[V := SignedWhole.Carrier z, W := SignedPart.Carrier z, source := SignedWhole.space z, target := SignedPart.space z] \as Retractions;
+  \definition Map: \Set := Retractions.Map;
+  \definition zero: Map := Retractions.zeroMap;
+}
+\module Positive(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \import SignedBoundary.Positive[n := n] \as AtBoundary;
+  \import Chains.Map[C := SignedBoundary.complex, D := SignedPart.complex].At[k := z] \as Reverse;
+  \import Modules.Hom[V := SignedBoundary.Carrier z, W := SignedPart.Carrier z, source := SignedBoundary.space z, target := SignedPart.space z]
+    .Composition[U := Boundary.Carrier n, domain := Boundary.space n] \as ToSigned;
+  \import Modules.Hom[V := Boundary.Carrier n, W := SignedPart.Carrier z, source := Boundary.space n, target := SignedPart.space z]
+    .Composition[U := WholeChains.Carrier n, domain := WholeChains.space n] \as OnNative;
+  \import Modules.Hom[V := WholeChains.Carrier n, W := SignedPart.Carrier z, source := WholeChains.space n, target := SignedPart.space z]
+    .Composition[U := SignedWhole.Carrier z, domain := SignedWhole.space z] \as FromSigned;
+  \definition map: \parent.At[z := z].Map := FromSigned.compose
+    (OnNative.compose (ToSigned.compose (Reverse.linear GeometryComparison.reverseGeometry) AtBoundary.forward) Actual.Split[n := n].retraction)
+    SignedWhole.Positive[n := n].backward;
+  \import Chains.Map[C := SignedPart.complex, D := SignedWhole.complex] \as Ambient;
+  \definition leftInverse: \forall (x: SignedPart.Carrier z) -> map.apply (signedProductInclusion.apply z x) = x :=
+    \fun (x: SignedPart.Carrier z) => trans!{{SignedPart.Carrier z}} _ _ _
+      (congr!{Ambient.Map {SignedPart.Carrier z}} (\fun (f: Ambient.Map) => map.apply (f.apply z x)) _ _
+        (sym!{Ambient.Map} _ _ GeometryComparison.square))
+      (trans!{{SignedPart.Carrier z}} _ _ _
+        (congr!{{Boundary.Carrier n} {SignedPart.Carrier z}}
+          (\fun (y: Boundary.Carrier n) => GeometryComparison.reverseGeometry.apply z (AtBoundary.intro y)) _ _
+          (Actual.Split[n := n].leftInverse (GeometryComparison.geometry.apply z x)))
+        (GeometryComparison.partInverse z x));
+}
+\definition retraction: \forall (z: I.Int^) -> At[z := z].Map :=
+  \induction (z: I.Int^) \return At[z := z].Map \with {
+    | ofNat: \fun (n: N.Nat^) => Positive[n := n].map
+    | negSucc: \fun (n: N.Nat^) => At[z := I.Int^::negSucc n].zero
+  };
+\definition leftInverse: \forall (z: I.Int^)(x: SignedPart.Carrier z) ->
+  (retraction z).apply (signedProductInclusion.apply z x) = x :=
+  \induction (z: I.Int^) \return \forall (x: SignedPart.Carrier z) -> (retraction z).apply (signedProductInclusion.apply z x) = x \with {
+    | ofNat: \fun (n: N.Nat^) => Positive[n := n].leftInverse
+    | negSucc: \fun (n: N.Nat^)(x: SignedPart.Carrier (I.Int^::negSucc n)) =>
+      sym!{{SignedPart.Carrier (I.Int^::negSucc n)}} _ _ (SignedPart.Negative[n := n].zero x)
+  };
+\definition pair: Split.SplitInjection := \into[Split.Data](Split.Data {
+  inclusion := signedProductInclusion, retraction := retraction,
+}, Split.SplitInjection) \by {
+  Split.Laws[_] { leftInverse := leftInverse }
+};

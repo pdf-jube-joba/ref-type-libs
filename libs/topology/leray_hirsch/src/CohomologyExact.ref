@@ -1,0 +1,16 @@
+\import std.Arithmetic[].Int[] \as I;
+\import chain_complexes.Integer[] \as Degrees;
+\import module_theory.Module[].Over[R := K, ring := ring] \as Modules;
+\import Degrees.Over[R := K, ring := ring] \as Cochains;
+\use std.Logic[].Equality[].sym;
+\module Between(A, B, C: Cochains.Complex) {
+  \import Cochains.ShortExact[A := A, B := B, C := C] \as Exact;
+  \module Row(s: Exact.Sequence, k: I.Int^);
+  \module Compare(A1, B1, C1: Cochains.Complex) {
+    \import Cochains.ShortExact[A := A1, B := B1, C := C1] \as Target;
+    \import Cochains.Map[C := A, D := A1] \as Left;
+    \import Cochains.Map[C := B, D := B1] \as Middle;
+    \import Cochains.Map[C := C, D := C1] \as Right;
+    \module With(s: Exact.Sequence, t: Target.Sequence, a: Left.Map, b: Middle.Map, c: Right.Map);
+  }
+}

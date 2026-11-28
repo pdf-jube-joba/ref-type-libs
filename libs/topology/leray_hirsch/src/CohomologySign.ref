@@ -1,0 +1,99 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import N.Basic[].Prop[] \as Arithmetic;
+\import chain_complexes.Integer[] \as Degrees;
+\import module_theory.Module[].Over[R := K, ring := ring] \as Modules;
+\import Degrees.Over[R := K, ring := ring] \as Cochains;
+\import double_complexes.DoubleComplex[].Over[R := K, ring := ring] \as Double;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\definition absolute: I.Int^ -> N.Nat^ := \induction (z: I.Int^) \return N.Nat^ \with {
+  | ofNat: \fun (n: N.Nat^) => n
+  | negSucc: N.Nat^::succ
+};
+\module Signs(V: \Set, space: Modules.Space V, parity: N.Nat^) {
+  \import Double.Sign[V := V, space := space] \as Sign;
+  \definition exponent[z: I.Int^]: N.Nat^ := Nat.mul parity (absolute z);
+  \definition up[k: N.Nat^][x: V]: (Sign.map parity).apply ((Sign.map (Nat.mul parity k)).apply x) =
+    (Sign.map (Nat.mul parity (N.Nat^::succ k))).apply x :=
+    trans!{V} _ _ _
+      (sym!{V} _ _ (Sign.addition parity (Nat.mul parity k) x))
+      (congr!{N.Nat^ V} (\fun (e: N.Nat^) => (Sign.map e).apply x) _ _ (sym!{N.Nat^} _ _ (Arithmetic.mulSuccRight parity k)));
+  \definition down[k: N.Nat^][x: V]: (Sign.map parity).apply ((Sign.map (Nat.mul parity (N.Nat^::succ k))).apply x) =
+    (Sign.map (Nat.mul parity k)).apply x :=
+    trans!{V} _ _ _
+      (congr!{V V} (Sign.map parity).apply _ _ (sym!{V} _ _ (up k x)))
+      (Sign.involutive parity ((Sign.map (Nat.mul parity k)).apply x));
+  \definition step: \forall (z: I.Int^)(x: V) ->
+    (Sign.map parity).apply ((Sign.map (exponent z)).apply x) = (Sign.map (exponent (Degrees.next z))).apply x :=
+    \induction (z: I.Int^) \return \forall (x: V) ->
+      (Sign.map parity).apply ((Sign.map (exponent z)).apply x) = (Sign.map (exponent (Degrees.next z))).apply x \with {
+      | ofNat: \fun (n: N.Nat^)(x: V) => up n x
+      | negSucc: \induction (n: N.Nat^) \return \forall (x: V) ->
+          (Sign.map parity).apply ((Sign.map (exponent (I.Int^::negSucc n))).apply x) =
+          (Sign.map (exponent (Degrees.next (I.Int^::negSucc n)))).apply x \with {
+          | zero: \fun (x: V) => down N.Nat^::zero x
+          | succ: \fun (n: N.Nat^)(prior: _)(x: V) => down (N.Nat^::succ n) x
+        }
+    };
+}
+\module Of(C: Cochains.Complex, parity: N.Nat^) {
+  \module Degree(z: I.Int^) {
+    \definition Carrier: \Set := C.family.Carrier z;
+    \definition space: Modules.Space Carrier := C.family.space z;
+    \import Double.Sign[V := Carrier, space := space] \as Sign;
+    \definition twist: _ := Sign.map parity;
+    \definition involutive: \forall (x: Carrier) -> twist.apply (twist.apply x) = x := Sign.involutive parity;
+    \definition gauge: _ := Sign.map (Nat.mul parity (absolute z));
+    \import Modules.Isomorphism[V := Carrier, W := Carrier, source := space, target := space] \as Iso;
+    \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+      forward := gauge, backward := gauge,
+      leftInverse := Sign.involutive (Nat.mul parity (absolute z)), rightInverse := Sign.involutive (Nat.mul parity (absolute z)),
+    };
+  }
+  \module At(z: I.Int^) {
+    \definition next: I.Int^ := Degrees.next z;
+    \import \parent.Degree[z := z] \as Current;
+    \import \parent.Degree[z := next] \as Next;
+    \import Cochains.At[C := C, z := z] \as Native;
+    \import Cochains.At[C := C, z := next] \as Upper;
+    \import \parent.Degree[z := Degrees.next next] \as After;
+    \import Modules.Hom[V := Next.Carrier, W := Next.Carrier, source := Next.space, target := Next.space]
+      .Composition[U := Current.Carrier, domain := Current.space] \as Compose;
+    \definition differential: _ := Compose.compose Next.twist Native.differential;
+    \import Double.Sign[V := Next.Carrier, space := Next.space].Mapping[W := After.Carrier, target := After.space] \as NextSign;
+    \definition square: \forall (x: Current.Carrier) ->
+      After.twist.apply (Upper.differential.apply (differential.apply x)) = After.space.zero :=
+      \fun (x: Current.Carrier) => eq_reason_in!{After.Carrier _
+        "=" _ "by" { congr!{After.Carrier After.Carrier} After.twist.apply _ _
+          (NextSign.naturality Upper.differential parity (Native.differential.apply x)) }
+        "=" _ "by" { After.involutive (Upper.differential.apply (Native.differential.apply x)) }
+        "=" _ "by" { C.laws.squareZero z x }
+      };
+    \import Double.Sign[V := Current.Carrier, space := Current.space].Mapping[W := Next.Carrier, target := Next.space] \as NativeSign;
+    \import \parent.\parent.Signs[V := Next.Carrier, space := Next.space, parity := parity] \as SignLaw;
+    \definition commutes: \forall (x: Current.Carrier) -> differential.apply (Current.gauge.apply x) = Next.gauge.apply (Native.differential.apply x) :=
+      \fun (x: Current.Carrier) => trans!{Next.Carrier} _ _ _
+        (congr!{Next.Carrier Next.Carrier} Next.twist.apply _ _
+          (NativeSign.naturality Native.differential (Nat.mul parity (absolute z)) x))
+        (SignLaw.step z (Native.differential.apply x));
+  }
+  \definition differential: Cochains.DifferentialData[C.family] := Cochains.DifferentialData[C.family] {
+    apply := \fun (z: I.Int^) => \parent.Of[C := C, parity := parity].At[z := z].differential.apply,
+  };
+  \definition complex: Cochains.Complex := Cochains.Complex {
+    family := C.family, differential := differential,
+    laws := Cochains.DifferentialLaws[C.family, differential] {
+      addition := \fun (z: I.Int^) => \parent.Of[C := C, parity := parity].At[z := z].differential.addition,
+      scalar := \fun (z: I.Int^) => \parent.Of[C := C, parity := parity].At[z := z].differential.scalar,
+      squareZero := \fun (z: I.Int^) => \parent.Of[C := C, parity := parity].At[z := z].square,
+    },
+  };
+  \import Cochains.Isomorphism[C := C, D := complex]
+    .Degreewise[isomorphisms := (\fun (z: I.Int^) => \parent.Of[C := C, parity := parity].Degree[z := z].isomorphism)] \as Compare;
+  \definition isomorphism: _ := Compare.isomorphism (\fun (z: I.Int^) => \parent.Of[C := C, parity := parity].At[z := z].commutes);
+}

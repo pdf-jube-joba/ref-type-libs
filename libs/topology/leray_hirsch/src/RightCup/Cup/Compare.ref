@@ -1,0 +1,31 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import WholeCup.RelativeCup[p := p, q := q] \as WholeMultiplication;
+\import MV.Coordinates[].At[z := inputDegree] \as SourceCompare;
+\import MV.Coordinates[].At[z := outputDegree] \as TargetCompare;
+\import \parent.SumAction[] \as Components;
+\import \root.PairMap[A := Left, B := A, source := leftTopology, target := source, part := leftPart, boundary := subset, f := Geometry.leftPairMap, K := K, ring := ring] \as LeftGlobal;
+\definition left: \forall (u: Factor)(h: WholeRelative.Carrier inputDegree) ->
+  Coordinates.firstProjection.apply outputDegree (MV.sequence.inclusion.apply outputDegree (apply u (WholeComparison.restriction.apply inputDegree h))) =
+  Coordinates.firstProjection.apply outputDegree (MV.sequence.inclusion.apply outputDegree (WholeComparison.restriction.apply outputDegree (WholeMultiplication.left (h) u))) :=
+  \fun (u: Factor)(h: WholeRelative.Carrier inputDegree) => eq_reason_in!{{LeftHom.Carrier outputDegree} _
+    "=" _ "by" { congr!{{SumHom.Carrier outputDegree} {LeftHom.Carrier outputDegree}} (Coordinates.firstProjection.apply outputDegree) _ _ (inclusion u (WholeComparison.restriction.apply inputDegree h)) }
+    "=" _ "by" { Components.left u (MV.sequence.inclusion.apply inputDegree (WholeComparison.restriction.apply inputDegree h)) }
+    "=" _ "by" { congr!{{LeftHom.Carrier inputDegree} {LeftHom.Carrier outputDegree}} (\fun (a: LeftHom.Carrier inputDegree) => LP.left (a) (Restriction.left u)) _ _ (SourceCompare.left h) }
+    "=" _ "by" { sym!{{LeftHom.Carrier outputDegree}} _ _ (LeftGlobal.Cup[p := p, q := q].cochainLaw (h) u) }
+    "=" _ "by" { sym!{{LeftHom.Carrier outputDegree}} _ _ (TargetCompare.left (WholeMultiplication.left (h) u)) }
+  };
+\import \root.PairMap[A := Right, B := A, source := rightTopology, target := source, part := rightPart, boundary := subset, f := Geometry.rightPairMap, K := K, ring := ring] \as RightGlobal;
+\definition right: \forall (u: Factor)(h: WholeRelative.Carrier inputDegree) ->
+  Coordinates.secondProjection.apply outputDegree (MV.sequence.inclusion.apply outputDegree (apply u (WholeComparison.restriction.apply inputDegree h))) =
+  Coordinates.secondProjection.apply outputDegree (MV.sequence.inclusion.apply outputDegree (WholeComparison.restriction.apply outputDegree (WholeMultiplication.left (h) u))) :=
+  \fun (u: Factor)(h: WholeRelative.Carrier inputDegree) => eq_reason_in!{{RightHom.Carrier outputDegree} _
+    "=" _ "by" { congr!{{SumHom.Carrier outputDegree} {RightHom.Carrier outputDegree}} (Coordinates.secondProjection.apply outputDegree) _ _ (inclusion u (WholeComparison.restriction.apply inputDegree h)) }
+    "=" _ "by" { Components.right u (MV.sequence.inclusion.apply inputDegree (WholeComparison.restriction.apply inputDegree h)) }
+    "=" _ "by" { congr!{{RightHom.Carrier inputDegree} {RightHom.Carrier outputDegree}} (\fun (a: RightHom.Carrier inputDegree) => RP.left (a) (Restriction.right u)) _ _ (SourceCompare.right h) }
+    "=" _ "by" { sym!{{RightHom.Carrier outputDegree}} _ _ (RightGlobal.Cup[p := p, q := q].cochainLaw (h) u) }
+    "=" _ "by" { sym!{{RightHom.Carrier outputDegree}} _ _ (TargetCompare.right (WholeMultiplication.left (h) u)) }
+  };
+\definition law: \forall (u: Factor)(h: WholeRelative.Carrier inputDegree) -> apply u (WholeComparison.restriction.apply inputDegree h) = WholeComparison.restriction.apply outputDegree (WholeMultiplication.left (h) u) :=
+  \fun (u: Factor)(h: WholeRelative.Carrier inputDegree) => MV.sequence.injective outputDegree _ _ (Coordinates.ext outputDegree _ _ (left u h) (right u h));
+
+\module Cohomology;

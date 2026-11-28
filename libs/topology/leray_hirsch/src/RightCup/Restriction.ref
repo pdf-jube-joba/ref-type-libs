@@ -1,0 +1,36 @@
+\import LeftProduct.Cohomology[].Pullback[B := A, target := source] \as LeftClasses;
+\import RightProduct.Cohomology[].Pullback[B := A, target := source] \as RightClasses;
+\import OverlapProduct.Cohomology[].Pullback[B := Left, target := leftTopology] \as OverlapClasses;
+\import OrdinaryCochains.At[C := WholeOrdinary.complex, k := q] \as WholeH;
+\import OrdinaryCochains.At[C := LeftOrdinary.complex, k := q] \as LeftH;
+\import OrdinaryCochains.At[C := RightOrdinary.complex, k := q] \as RightH;
+\import OrdinaryCochains.At[C := OverlapOrdinary.complex, k := q] \as OverlapH;
+\definition Cycle: \Set := WholeH.CycleCarrier;
+\definition left[u: WholeProduct.Carrier q]: LeftProduct.Carrier q := WholeToLeft.apply q Geometry.leftPairMap leftContinuous u;
+\definition right[u: WholeProduct.Carrier q]: RightProduct.Carrier q := WholeToRight.apply q Geometry.rightPairMap rightContinuous u;
+\definition overlap[u: WholeProduct.Carrier q]: OverlapProduct.Carrier q := LeftToOverlap.apply q Geometry.toLeft overlapLeftContinuous (left u);
+\definition leftCycle[u: Cycle]: LeftH.CycleCarrier := LeftClasses.At[n := q].cycle Geometry.leftPairMap leftContinuous u;
+\definition rightCycle[u: Cycle]: RightH.CycleCarrier := RightClasses.At[n := q].cycle Geometry.rightPairMap rightContinuous u;
+\definition overlapCycle[u: Cycle]: OverlapH.CycleCarrier := OverlapClasses.At[n := q].cycle Geometry.toLeft overlapLeftContinuous (leftCycle u);
+\definition leftClosed[u: Cycle]: LeftOrdinary.complex.differential.apply q (left u) = (LeftProduct.space (N.Nat^::succ q)).zero :=
+  \bysub(LeftProduct.Carrier q, LeftH.cycles.carrier, leftCycle u);
+\definition rightClosed[u: Cycle]: RightOrdinary.complex.differential.apply q (right u) = (RightProduct.space (N.Nat^::succ q)).zero :=
+  \bysub(RightProduct.Carrier q, RightH.cycles.carrier, rightCycle u);
+\import singular_cohomology.Simplices[A := Overlap, source := overlapTopology] \as Simplices;
+\import singular_cohomology.Chains[A := Overlap, source := overlapTopology] \as Chains;
+\import singular_cohomology.Chains[A := A, source := source] \as AmbientChains;
+\import singular_cohomology.Maps[A := Overlap, B := Left, source := overlapTopology, target := leftTopology] \as ToLeft;
+\import singular_cohomology.Maps[A := Overlap, B := Right, source := overlapTopology, target := rightTopology] \as ToRight;
+\import singular_cohomology.Maps[A := Left, B := A, source := leftTopology, target := source] \as FromLeft;
+\import singular_cohomology.Maps[A := Right, B := A, source := rightTopology, target := source] \as FromRight;
+\import Modules.Free[Generators := Simplices.Carrier q].To[W := K, target := WholeProduct.integerCoefficients.space] \as Cochains;
+\definition agree: \forall (u: WholeProduct.Carrier q) ->
+  overlap u = RightToOverlap.apply q Geometry.toRight overlapRightContinuous (right u) :=
+  \fun (u: WholeProduct.Carrier q) => Cochains.ext _ _
+    (\fun (sigma: Simplices.Carrier q) => eq_reason_in!{K _
+      "=" _ "by" { LeftToOverlap.onSimplex q Geometry.toLeft overlapLeftContinuous (left u) sigma }
+      "=" _ "by" { WholeToLeft.onSimplex q Geometry.leftPairMap leftContinuous u (ToLeft.postcompose q Geometry.toLeft overlapLeftContinuous sigma) }
+      "=" _ "by" { \refl(u.apply (AmbientChains.generator q (FromRight.postcompose q Geometry.rightPairMap rightContinuous (ToRight.postcompose q Geometry.toRight overlapRightContinuous sigma)))) }
+      "=" _ "by" { sym!{K} _ _ (WholeToRight.onSimplex q Geometry.rightPairMap rightContinuous u (ToRight.postcompose q Geometry.toRight overlapRightContinuous sigma)) }
+      "=" _ "by" { sym!{K} _ _ (RightToOverlap.onSimplex q Geometry.toRight overlapRightContinuous (right u) sigma) }
+    });

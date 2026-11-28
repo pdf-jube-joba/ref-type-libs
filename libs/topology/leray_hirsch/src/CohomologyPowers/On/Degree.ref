@@ -1,0 +1,97 @@
+\import Cochains.At[C := C, z := z] \as H;
+\import Cochains.At[C := complex, z := z] \as G;
+\definition Cycles: Modules.Bundle := Modules.Bundle { Carrier := H.Closed, space := H.cycleSpace };
+\definition Cohomology: Modules.Bundle := Modules.Bundle { Carrier := H.Cohomology, space := H.cohomologySpace };
+\import Modules.Product[Index := Index, family := power Cycles] \as CycleProduct;
+\import Modules.Product[Index := Index, family := power Cohomology] \as ClassProduct;
+\import Modules.Product[Index := Index, family := power (term (Indices.next z))] \as UpperProduct;
+\definition cycle[x: G.Closed][i: Index]: H.Closed := H.cycle (x i)
+  (congr!{{UpperProduct.Carrier} {C.family.Carrier (Indices.next z)}}
+    (\fun (v: UpperProduct.Carrier) => v i) _ _ (\bysub(family.Carrier z, G.cycles.carrier, x)));
+\definition assemble[x: CycleProduct.Carrier]: G.Closed := G.cycle
+  (\fun (i: Index) => x i)
+  (UpperProduct.ext (complex.differential.apply z (\fun (i: Index) => x i)) UpperProduct.zero
+    (\fun (i: Index) => \bysub(C.family.Carrier z, H.cycles.carrier, x i)));
+\import Modules.Hom[V := G.Closed, W := ClassProduct.Carrier, source := G.cycleSpace, target := ClassProduct.space] \as Maps;
+\definition evaluate[x: G.Closed]: ClassProduct.Carrier := \fun (i: Index) => H.classOf (cycle x i);
+\definition cycles: Maps.Map := Maps.Map {
+  apply := evaluate,
+  addition := \fun (x, y: G.Closed) => ClassProduct.ext (evaluate (G.cycleSpace.add x y)) (ClassProduct.add (evaluate x) (evaluate y))
+    (\fun (i: Index) => H.classLinear.addition (cycle x i) (cycle y i)),
+  scalar := \fun (r: K)(x: G.Closed) => ClassProduct.ext (evaluate (G.cycleSpace.smul r x)) (ClassProduct.scale r (evaluate x))
+    (\fun (i: Index) => H.classLinear.scalar r (cycle x i)),
+};
+\import Modules.Of[V := G.Closed, space := G.cycleSpace].Submodule[].Quotient[S := G.boundariesInside]
+  .To[W := ClassProduct.Carrier, target := ClassProduct.space] \as Quotient;
+\import Cochains.Prior[C := C] \as SourcePrior;
+\import Cochains.Prior[C := complex] \as ProductPrior;
+\definition prior: \forall (k: I.Int^)(x: family.Carrier (Indices.previous k))(i: Index) ->
+  ProductPrior.value k x i = SourcePrior.value k (x i) :=
+  \induction (k: I.Int^) \return \forall (x: family.Carrier (Indices.previous k))(i: Index) ->
+    ProductPrior.value k x i = SourcePrior.value k (x i) \with {
+    | ofNat: \induction (n: std.Data[].Nat[].Nat^) \return
+        \forall (x: family.Carrier (Indices.previous (I.Int^::ofNat n)))(i: Index) ->
+        ProductPrior.value (I.Int^::ofNat n) x i = SourcePrior.value (I.Int^::ofNat n) (x i) \with {
+      | zero: \fun (x: family.Carrier (Indices.previous (I.Int^::ofNat std.Data[].Nat[].Nat^::zero)))(i: Index) => \refl(SourcePrior.value (I.Int^::ofNat std.Data[].Nat[].Nat^::zero) (x i))
+      | succ: \fun (n: std.Data[].Nat[].Nat^)(ih: _)(x: family.Carrier (Indices.previous (I.Int^::ofNat (std.Data[].Nat[].Nat^::succ n))))(i: Index) =>
+        \refl(SourcePrior.value (I.Int^::ofNat (std.Data[].Nat[].Nat^::succ n)) (x i))
+    }
+    | negSucc: \fun (n: std.Data[].Nat[].Nat^)(x: family.Carrier (Indices.previous (I.Int^::negSucc n)))(i: Index) =>
+      \refl(SourcePrior.value (I.Int^::negSucc n) (x i))
+  };
+\definition vanishes: Quotient.Vanishes cycles := \block {
+  \fun (x: G.Closed)(member: _) \then
+  \takefrom y: \Cast[family.Carrier (Indices.previous z)] ({ y: family.Carrier (Indices.previous z) \where ProductPrior.value z y = x }) \by member \then
+  \let law: ProductPrior.value z y = x := \bysub(family.Carrier (Indices.previous z), { y: family.Carrier (Indices.previous z) \where ProductPrior.value z y = x }, y) \then
+  \return ClassProduct.ext (evaluate x) ClassProduct.zero
+    (\fun (i: Index) => H.boundaryClassZero (cycle x i)
+      (Logic.existsIntro[C.family.Carrier (Indices.previous z), { t: C.family.Carrier (Indices.previous z) \where SourcePrior.value z t = x i }]
+        (y i) (trans!{{C.family.Carrier z}} _ _ _ (sym!{{C.family.Carrier z}} _ _ (prior z y i))
+          (congr!{{family.Carrier z} {C.family.Carrier z}} (\fun (v: family.Carrier z) => v i) _ _ law))))
+};
+\definition map: _ := Quotient.descend cycles vanishes;
+\definition onClass: \forall (x: G.Closed) -> map.apply (G.classOf x) = evaluate x := Quotient.onClass cycles vanishes;
+\import Modules.Hom[V := G.Cohomology, W := ClassProduct.Carrier, source := G.cohomologySpace, target := ClassProduct.space] \as Result;
+\import Modules.Isomorphism[V := G.Cohomology, W := ClassProduct.Carrier, source := G.cohomologySpace, target := ClassProduct.space]
+  .OfBijective[f := map] \as Inverse;
+\definition coordinateZero: \forall (x: G.Closed) -> map.apply (G.classOf x) = ClassProduct.zero ->
+  \forall (i: Index) -> H.classOf (cycle x i) = H.zeroClass :=
+  \fun (x: G.Closed)(zero: map.apply (G.classOf x) = ClassProduct.zero)(i: Index) =>
+    congr!{ClassProduct.Carrier H.Cohomology} (\fun (v: ClassProduct.Carrier) => v i) _ _
+      (trans!{ClassProduct.Carrier} _ _ _ (sym!{ClassProduct.Carrier} _ _ (onClass x)) zero);
+\definition Primitive[x: G.Closed][i: Index]: \Set :=
+  \Cast[C.family.Carrier (Indices.previous z)] ({ t: C.family.Carrier (Indices.previous z) \where SourcePrior.value z t = x i });
+\import Modules.Product[Index := Index, family := power (term z)] \as CurrentProduct;
+\definition exact: \forall (x: G.Closed) -> map.apply (G.classOf x) = ClassProduct.zero -> G.classOf x = G.zeroClass := \block {
+  \fun (x: G.Closed)(zero: map.apply (G.classOf x) = ClassProduct.zero) \then
+  \takefrom choices: \forall (i: Index) -> Primitive x i \by
+    \axiom:classicalIndefiniteChoice(Index, Primitive x,
+      (\fun (i: Index) => H.zeroClassBoundary (cycle x i) (coordinateZero x zero i))) \then
+  \let preimage: family.Carrier (Indices.previous z) := \fun (i: Index) => choices i \then
+  \let equation: ProductPrior.value z preimage = x :=
+    CurrentProduct.ext (ProductPrior.value z preimage) x (\fun (i: Index) => trans!{{C.family.Carrier z}} _ _ _
+      (prior z preimage i)
+      (\bysub(C.family.Carrier (Indices.previous z), { t: C.family.Carrier (Indices.previous z) \where SourcePrior.value z t = x i }, choices i))) \then
+  \return G.boundaryClassZero x
+    (Logic.existsIntro[family.Carrier (Indices.previous z), { t: family.Carrier (Indices.previous z) \where ProductPrior.value z t = x }] preimage equation)
+};
+\definition zeroKernel: \forall (a: G.Cohomology) -> map.apply a = ClassProduct.zero -> a = G.zeroClass :=
+  G.classInduction (\fun (a: G.Cohomology) => map.apply a = ClassProduct.zero -> a = G.zeroClass) exact;
+\definition injective: Inverse.Injective := Result.injectiveOfZeroKernel map zeroKernel;
+\definition Representative[a: ClassProduct.Carrier][i: Index]: \Set :=
+  \Cast[H.Closed] ({ x: H.Closed \where H.classOf x = a i });
+\definition hasRepresentative: \forall (a: H.Cohomology) -> \exists (x: H.Closed \where H.classOf x = a) :=
+  H.classInduction
+    (\fun (a: H.Cohomology) => \exists (x: H.Closed \where H.classOf x = a))
+    (\fun (x: H.Closed) => Logic.existsIntro[H.Closed, { y: H.Closed \where H.classOf y = H.classOf x }] x (\refl(H.classOf x)));
+\definition onto: Inverse.Onto := \block {
+  \fun (a: ClassProduct.Carrier) \then
+  \takefrom choices: \forall (i: Index) -> Representative a i \by
+    \axiom:classicalIndefiniteChoice(Index, Representative a, \fun (i: Index) => hasRepresentative (a i)) \then
+  \let x: G.Closed := assemble (\fun (i: Index) => choices i) \then
+  \return Logic.existsIntro[G.Cohomology, { b: G.Cohomology \where map.apply b = a }] (G.classOf x)
+    (trans!{ClassProduct.Carrier} _ _ _ (onClass x) (ClassProduct.ext (evaluate x) a
+      (\fun (i: Index) => \bysub(H.Closed, { x: H.Closed \where H.classOf x = a i }, choices i))))
+};
+\definition classes: Modules.Bundle := Modules.Bundle { Carrier := ClassProduct.Carrier, space := ClassProduct.space };
+\definition isomorphism: _ := Inverse.isomorphism injective onto;

@@ -1,0 +1,116 @@
+\import singular_cohomology.Relative[A := Whole.CarrierSet, source := wholeTopology, subset := part] \as Actual;
+\import singular_cohomology.Chains[A := TotalPart.CarrierSet, source := partTopology] \as Subspace;
+\import Native.ZeroExtension[C := Subspace.complex] \as SignedSubspace;
+\import singular_cohomology.Maps[A := Product.CarrierSet, B := TotalPart.CarrierSet, source := productTopology, target := partTopology] \as ToSubspace;
+\import ToSubspace.Composition[C := Whole.CarrierSet, final := wholeTopology].Integer[] \as Composition;
+\definition geometry: _ := ToSubspace.integerPush forward forwardContinuous;
+\import Chains.Map[C := SignedSubspace.complex, D := SignedWhole.complex].Composition[B := SignedPart.complex] \as Include;
+\definition square: Include.compose Actual.inclusionMap geometry = signedProductInclusion :=
+  Composition.law forward forwardContinuous totalInclusion totalContinuous;
+\import Chains.QuotientMapping[C := SignedPart.complex, D := SignedWhole.complex, C1 := SignedSubspace.complex, D1 := SignedWhole.complex]
+  .On[f := signedProductInclusion, g := Actual.inclusionMap, a := geometry, b := Chains.End[C := SignedWhole.complex].identity] \as Descent;
+\import Chains.Map[C := SignedPart.complex, D := SignedWhole.complex] \as AmbientMaps;
+\definition compatible: Descent.Compatible :=
+  \fun (z: I.Int^)(x: SignedPart.Carrier z) =>
+    congr!{AmbientMaps.Map {SignedWhole.Carrier z}} (\fun (m: AmbientMaps.Map) => m.apply z x) _ _ (sym!{AmbientMaps.Map} _ _ square);
+\definition pairComparison: _ := Descent.map compatible;
+\import singular_cohomology.Maps[A := TotalPart.CarrierSet, B := Product.CarrierSet, source := partTopology, target := productTopology] \as FromSubspace;
+\definition reverseGeometry: _ := FromSubspace.integerPush backward backwardContinuous;
+\import ToSubspace.Composition[C := Product.CarrierSet, final := productTopology].Integer[] \as BackThenForward;
+\import FromSubspace.Composition[C := TotalPart.CarrierSet, final := partTopology].Integer[] \as ForwardThenBack;
+\import singular_cohomology.Identity[A := Product.CarrierSet, source := productTopology].Integer[] \as PartIdentity;
+\import singular_cohomology.Identity[A := TotalPart.CarrierSet, source := partTopology].Integer[] \as SubspaceIdentity;
+\import Chains.Map[C := SignedPart.complex, D := SignedPart.complex] \as PartEnd;
+\import Chains.Map[C := SignedSubspace.complex, D := SignedSubspace.complex] \as SubspaceEnd;
+\import singular_cohomology.Maps[A := Product.CarrierSet, B := Product.CarrierSet, source := productTopology, target := productTopology] \as PartMaps;
+\import singular_cohomology.Maps[A := TotalPart.CarrierSet, B := TotalPart.CarrierSet, source := partTopology, target := partTopology] \as SubspaceMaps;
+\import topology.Composition[A := Product.CarrierSet, B := TotalPart.CarrierSet, C := Product.CarrierSet] \as PartTopology;
+\import topology.Composition[A := TotalPart.CarrierSet, B := Product.CarrierSet, C := TotalPart.CarrierSet] \as SubspaceTopology;
+\use std.Logic[].Equality[].trans;
+\definition partIdentityLaw: PartMaps.integerPush
+    (\fun (p: Product.CarrierSet) => backward (forward p))
+    (PartTopology.composeContinuous productTopology partTopology productTopology forward backward forwardContinuous backwardContinuous) =
+    Chains.End[C := SignedPart.complex].identity :=
+  (\idelim (\fun (p: Product.CarrierSet) => p) = (\fun (p: Product.CarrierSet) => backward (forward p))
+    \with f: (Product.CarrierSet -> Product.CarrierSet) => \forall (regular: PartMaps.Continuous f) ->
+      PartMaps.integerPush f regular = Chains.End[C := SignedPart.complex].identity \by {
+    base: \fun (regular: PartMaps.Continuous (\fun (p: Product.CarrierSet) => p)) => PartIdentity.law,
+    equality: \axiom:funext((\fun (p: Product.CarrierSet) => p), (\fun (p: Product.CarrierSet) => backward (forward p)),
+      (\fun (p: Product.CarrierSet) => sym!{Product.CarrierSet} _ _ (leftInverse p)))
+  }) (PartTopology.composeContinuous productTopology partTopology productTopology forward backward forwardContinuous backwardContinuous);
+\definition partInverse: \forall (z: I.Int^)(x: SignedPart.Carrier z) ->
+  reverseGeometry.apply z (geometry.apply z x) = x :=
+  \fun (z: I.Int^)(x: SignedPart.Carrier z) =>
+    congr!{PartEnd.Map {SignedPart.Carrier z}} (\fun (m: PartEnd.Map) => m.apply z x) _ _
+      (trans!{PartEnd.Map} _ _ _ (BackThenForward.law forward forwardContinuous backward backwardContinuous)
+        partIdentityLaw);
+\definition subspaceIdentityLaw: SubspaceMaps.integerPush
+    (\fun (p: TotalPart.CarrierSet) => forward (backward p))
+    (SubspaceTopology.composeContinuous partTopology productTopology partTopology backward forward backwardContinuous forwardContinuous) =
+    Chains.End[C := SignedSubspace.complex].identity :=
+  (\idelim (\fun (p: TotalPart.CarrierSet) => p) = (\fun (p: TotalPart.CarrierSet) => forward (backward p))
+    \with f: (TotalPart.CarrierSet -> TotalPart.CarrierSet) => \forall (regular: SubspaceMaps.Continuous f) ->
+      SubspaceMaps.integerPush f regular = Chains.End[C := SignedSubspace.complex].identity \by {
+    base: \fun (regular: SubspaceMaps.Continuous (\fun (p: TotalPart.CarrierSet) => p)) => SubspaceIdentity.law,
+    equality: \axiom:funext((\fun (p: TotalPart.CarrierSet) => p), (\fun (p: TotalPart.CarrierSet) => forward (backward p)),
+      (\fun (p: TotalPart.CarrierSet) => sym!{TotalPart.CarrierSet} _ _ (rightInverse p)))
+  }) (SubspaceTopology.composeContinuous partTopology productTopology partTopology backward forward backwardContinuous forwardContinuous);
+\definition subspaceInverse: \forall (z: I.Int^)(x: SignedSubspace.Carrier z) ->
+  geometry.apply z (reverseGeometry.apply z x) = x :=
+  \fun (z: I.Int^)(x: SignedSubspace.Carrier z) =>
+    congr!{SubspaceEnd.Map {SignedSubspace.Carrier z}} (\fun (m: SubspaceEnd.Map) => m.apply z x) _ _
+      (trans!{SubspaceEnd.Map} _ _ _ (ForwardThenBack.law backward backwardContinuous forward forwardContinuous)
+        subspaceIdentityLaw);
+\import Chains.Map[C := SignedPart.complex, D := SignedSubspace.complex] \as Forward;
+\import Chains.Map[C := SignedSubspace.complex, D := SignedPart.complex] \as Backward;
+\import Chains.Quotient[C := SignedPart.complex, D := SignedWhole.complex].On[f := signedProductInclusion] \as ProductQuotient;
+\import Chains.Quotient[C := SignedSubspace.complex, D := SignedWhole.complex].On[f := Actual.inclusionMap] \as ActualQuotient;
+\import Chains.Map[C := ProductQuotient.complex, D := ActualQuotient.complex].Invert[f := pairComparison] \as Inverse;
+\module At(z: I.Int^) {
+  \import Modules.Isomorphism[V := SignedPart.Carrier z, W := SignedSubspace.Carrier z, source := SignedPart.space z, target := SignedSubspace.space z] \as PairIso;
+  \definition boundary: PairIso.Isomorphism := PairIso.Isomorphism {
+    forward := Forward.At[k := z].linear geometry,
+    backward := Backward.At[k := z].linear reverseGeometry,
+    leftInverse := partInverse z,
+    rightInverse := subspaceInverse z,
+  };
+  \import Modules.KernelTransport[V := SignedPart.Carrier z, W := SignedWhole.Carrier z,
+    X := SignedSubspace.Carrier z, Y := SignedWhole.Carrier z,
+    vSpace := SignedPart.space z, wSpace := SignedWhole.space z, xSpace := SignedSubspace.space z, ySpace := SignedWhole.space z,
+    f := AmbientMaps.At[k := z].linear signedProductInclusion,
+    g := Chains.Map[C := SignedSubspace.complex, D := SignedWhole.complex].At[k := z].linear Actual.inclusionMap,
+    domainIso := boundary, codomainIso := Modules.Identity[V := SignedWhole.Carrier z, space := SignedWhole.space z].isomorphism] \as Quotients;
+  \import Quotients.Cokernel[] \as Quotient;
+  \import ProductQuotient.At[k := z] \as Input;
+  \import ActualQuotient.At[k := z] \as Output;
+  \definition induced: _ := Quotient.isomorphism (\fun (x: SignedPart.Carrier z) => sym!{{SignedWhole.Carrier z}} _ _ (compatible z x));
+  \definition formula: \forall (a: Input.Carrier) -> pairComparison.apply z a = induced.forward.apply a :=
+    Input.induction (\fun (a: Input.Carrier) => pairComparison.apply z a = induced.forward.apply a)
+      (\fun (x: SignedWhole.Carrier z) => trans!{Output.Carrier} _ _ _
+        (Descent.At[k := z].onClass compatible x)
+        (sym!{Output.Carrier} _ _ (Quotient.onClass (\fun (y: SignedPart.Carrier z) => sym!{{SignedWhole.Carrier z}} _ _ (compatible z y)) x)));
+  \definition injective: \forall (x, y: Input.Carrier) -> pairComparison.apply z x = pairComparison.apply z y -> x = y :=
+    \fun (x, y: Input.Carrier)(same: _) => trans!{Input.Carrier} _ _ _
+      (sym!{Input.Carrier} _ _ (induced.leftInverse x))
+      (trans!{Input.Carrier} _ _ _
+        (congr!{Output.Carrier Input.Carrier} induced.backward.apply _ _
+          (trans!{Output.Carrier} _ _ _ (sym!{Output.Carrier} _ _ (formula x))
+            (trans!{Output.Carrier} _ _ _ same (formula y))))
+        (induced.leftInverse y));
+  \definition onto: \forall (q: Output.Carrier) -> \exists (a: Input.Carrier \where pairComparison.apply z a = q) :=
+    \fun (q: Output.Carrier) => std.Logic[].Proposition[].existsIntro[Input.Carrier, { a: Input.Carrier \where pairComparison.apply z a = q }]
+      (induced.backward.apply q) (trans!{Output.Carrier} _ _ _ (formula (induced.backward.apply q)) (induced.rightInverse q));
+}
+\definition isomorphism: _ := Inverse.isomorphism (Inverse.Bijective {
+  injective := \fun (z: I.Int^) => \parent.RelativeComparison[].At[z := z].injective,
+  onto := \fun (z: I.Int^) => \parent.RelativeComparison[].At[z := z].onto,
+});
+\definition onClass: \forall (z: I.Int^)(x: SignedWhole.Carrier z) ->
+  isomorphism.forward.apply z (ProductQuotient.At[k := z].class x) = Actual.class z x :=
+  \fun (z: I.Int^)(x: SignedWhole.Carrier z) => Descent.At[k := z].onClass compatible x;
+\definition onBackwardClass: \forall (z: I.Int^)(x: SignedWhole.Carrier z) ->
+  isomorphism.backward.apply z (Actual.class z x) = ProductQuotient.At[k := z].class x :=
+  \fun (z: I.Int^)(x: SignedWhole.Carrier z) => trans!{{ProductQuotient.Carrier z}} _ _ _
+    (congr!{{Actual.Carrier z} {ProductQuotient.Carrier z}} (isomorphism.backward.apply z) _ _
+      (sym!{{Actual.Carrier z}} _ _ (onClass z x)))
+    (isomorphism.leftInverse z (ProductQuotient.At[k := z].class x));

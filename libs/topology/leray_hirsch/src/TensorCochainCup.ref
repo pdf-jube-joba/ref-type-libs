@@ -1,0 +1,27 @@
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as IntegerModules;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import double_complexes.DoubleComplex[].Over[R := I.Int^, ring := Integers.ring] \as Double;
+\definition baseRing: std.Alg[].Ring[].Ring[K] := std.Alg[].Ring[].commutativeRingAsRing K ring;
+\import module_theory.Module[].Over[R := K, ring := baseRing] \as Modules;
+\definition coefficients: Modules.Bundle := Modules.Bundle { Carrier := K, space := Modules.scalarModule };
+\import Modules.AbelianHom[N := coefficients] \as Abelian;
+\definition integerCoefficients: IntegerModules.Bundle := Abelian.coefficients;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\module Of(C, D: Chains.Complex) {
+  \import Hom.Native[P := C] \as Left;
+  \import Hom.Native[P := D] \as Right;
+  \import Double.Tensor[C := C, D := D] \as Tensor;
+  \import Double.Total[C := Tensor.complex] \as Total;
+  \import Hom.Native[P := Total.complex] \as TotalHom;
+  \import Double.Coordinates[C := Tensor.complex] \as Coordinates;
+  \module At(p, q: N.Nat^);
+}

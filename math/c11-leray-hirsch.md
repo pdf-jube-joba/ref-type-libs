@@ -95,11 +95,49 @@ external product just calculated.
 ## Ref implementation status
 
 The package constructs the fiberwise basis hypothesis, a cocycle model
-realizing that basis, the shifted finite direct-sum comparison map,
-and the positive bidegree identities
-for pullbacks, coefficients, and external cup products. The chart
-subcover and Mayer–Vietoris pullback constructions use C03's shared
-topology and relative-cohomology machinery. The product isomorphism
-and its identification with Alexander–Whitney, the change of lifted
-basis on chart pairs, and the cup compatibility and five-lemma
-argument for the finite CW comparison remain to be formalized.
+realizing that basis, the shifted finite direct-sum map, and the
+bidegree identities for pullbacks, coefficients, and external cup products.
+The chart subcover and Mayer–Vietoris pullback constructions use C03's
+relative-cohomology machinery.
+
+The relative Alexander–Whitney map descends to the two quotient
+complexes. The product boundary is identified with the product of the
+base subspace and the fiber. A split exact sequence identifies the
+tensor quotient with the total of relative base chains tensored with
+fiber chains. On dualizing these split exact sequences, the absolute
+Alexander–Whitney equivalences imply the relative cohomology
+isomorphism for every commutative coefficient ring. Pullback of the
+tensor cochain gives the relative external cup, by evaluation on the
+projected front and back faces of each simplex.
+The package also identifies the relative base chain modules as free
+modules on the complement of the subspace simplices.
+
+The cutoff construction gives degreewise split exact chains for each
+successive truncation of the base complex. On the layer at cutoff $p$,
+the horizontal term vanishes and the remaining differential is the
+vertical differential multiplied by $(-1)^p$. The cohomology of a product
+of cochain complexes is computed coordinatewise. Evaluation on a free
+basis identifies the cochain complex of one unsigned tensor column with
+a product of fiber cochain complexes. The tensor cup differential
+formula for a closed right factor has only the horizontal term, and the
+cohomology comparison at the middle of a short exact sequence follows
+from the five lemma. For a cochain complex in integer degrees, the
+differential twisted by $(-1)^p$ is identified with the untwisted
+differential by multiplication by $(-1)^{p|q|}$ in degree $q$.
+
+Relative right cup with a fixed absolute cocycle commutes with the
+Mayer–Vietoris connecting map. The projection comparison combines this
+identity with naturality of the connecting map. For a right factor of
+degree $q$ and base degree $p$, its degree reindexing uses
+$(p+1)+q=(p+q)+1$. The signed-degree formulation includes the negative
+base degrees, where relative cohomology vanishes. The Leibniz rule
+contributes no extra sign because the right factor is closed.
+
+The remaining steps are to identify the signed, shifted columns of
+the two filtered totals with their one-column models and prove the
+finite-cutoff comparison for the actual map induced by the chosen
+fiber cocycles. It then remains to prove the triangular change of
+lifts on a chart and assemble the shifted restrictions, differences,
+and connections into the five-term Mayer–Vietoris diagram for the
+actual comparison. Those steps would instantiate the existing
+finite-cover induction with the isomorphism predicate.

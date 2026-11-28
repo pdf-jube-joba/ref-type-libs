@@ -1,0 +1,24 @@
+\definition next: I.Int^ := Degrees.next k;
+\import Cochains.At[C := C, z := k] \as First;
+\import Cochains.At[C := A, z := next] \as Second;
+\import Cochains.At[C := B, z := next] \as Third;
+\import Cochains.At[C := C, z := next] \as Fourth;
+\import Cochains.At[C := A, z := Degrees.next next] \as Last;
+\definition first: Modules.Bundle := Modules.Bundle { Carrier := First.Cohomology, space := First.cohomologySpace };
+\definition second: Modules.Bundle := Modules.Bundle { Carrier := Second.Cohomology, space := Second.cohomologySpace };
+\definition third: Modules.Bundle := Modules.Bundle { Carrier := Third.Cohomology, space := Third.cohomologySpace };
+\definition fourth: Modules.Bundle := Modules.Bundle { Carrier := Fourth.Cohomology, space := Fourth.cohomologySpace };
+\definition last: Modules.Bundle := Modules.Bundle { Carrier := Last.Cohomology, space := Last.cohomologySpace };
+\import Modules.ExactFive[A := first, B := second, C := third, D := fourth, E := last] \as Five;
+\import Exact.At[s := s, k := k] \as Lower;
+\import Exact.At[s := s, k := next] \as Upper;
+\import Lower.Exactness[] \as E;
+\import Upper.Exactness[] \as F;
+\import Cochains.Map[C := A, D := B].At[k := next] \as Inclusion;
+\import Cochains.Map[C := B, D := C].At[k := next] \as Projection;
+\definition sequence: Five.Sequence := Five.Sequence {
+  first := Lower.connecting, second := Inclusion.induced s.inclusion,
+  third := Projection.induced s.projection, last := Upper.connecting,
+  zeroB := E.connectingInclusionZero, zeroC := F.inclusionProjectionZero, zeroD := F.projectionConnectingZero,
+  kernelB := E.exactAtALower, kernelC := F.exactAtB, kernelD := F.exactAtC,
+};
