@@ -1,0 +1,42 @@
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as RealBundles;
+\import RealBundles.Family[X := Space, F := Line] \as Family;
+\definition subset: \Pow Disk.DiskBundle := { p: Disk.DiskBundle \where D.Lt R.zero (Disk.norm p) };
+\import topology.Topology[Carrier := Disk.DiskBundle].Subspace[S := subset] \as Subspace;
+\definition Carrier: \Set := Subspace.CarrierSet;
+\definition topology: topology.Topology[Carrier := Carrier].Topology := Subspace.topology Disk.diskTopology;
+\definition positive[p: Carrier]: D.Lt R.zero (Disk.norm p) := \bysub(Disk.DiskBundle, subset, p);
+\definition include[p: Carrier]: Family.Point := p;
+\definition includeContinuous: topology.Continuity[A := Carrier, B := Family.Point].Continuous topology Realification.bundle.totalSpace include :=
+  topology.Composition[A := Carrier, B := Disk.DiskBundle, C := Family.Point].composeContinuous
+    topology Disk.diskTopology Realification.bundle.totalSpace (\fun (p: Carrier) => p) (\fun (p: Disk.DiskBundle) => p)
+    (topology.Continuity[A := Carrier, B := Disk.DiskBundle].Corestriction[S := subset].inclusionContinuous Disk.diskTopology)
+    (topology.Continuity[A := Disk.DiskBundle, B := Family.Point].Corestriction[S := Disk.ClosedBall].inclusionContinuous Realification.bundle.totalSpace);
+\definition base[p: Carrier]: Space := p.base;
+\definition baseContinuous: topology.Continuity[A := Carrier, B := Space].Continuous topology Realification.bundle.baseSpace base :=
+  topology.Composition[A := Carrier, B := Family.Point, C := Space].composeContinuous topology Realification.bundle.totalSpace Realification.bundle.baseSpace
+    include Family.projection includeContinuous Family.Of[bundle := Realification.bundle].projectionContinuous;
+\definition norm[p: Carrier]: R.Real := Disk.norm p;
+\definition normContinuous: metric_spaces.RealFunctions[A := Carrier].Continuous topology norm :=
+  topology.Composition[A := Carrier, B := Family.Point, C := R.Real].composeContinuous
+    topology Realification.bundle.totalSpace metric_spaces.RealLine[].topology include Disk.norm includeContinuous Disk.normContinuous;
+\definition reciprocal[p: Carrier]: R.Real := Laws.fieldInv (norm p);
+\definition reciprocalContinuous: metric_spaces.RealFunctions[A := Carrier].Continuous topology reciprocal :=
+  metric_spaces.RealFunctions[A := Carrier].Reciprocal[].continuousPositive topology norm normContinuous positive;
+\definition normalize[p: Carrier]: Disk.SphereBundle := Disk.normalize p (positive p);
+\import bundle_operations.Operations[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].Along[X := Space, F := Line, bundle := Realification.bundle,
+  Y := Carrier, source := topology, base := base] \as Operations;
+\definition vector[p: Carrier]: Line (base p) := p.vector;
+\definition total[p: Carrier]: Family.Point := Family.include p.base p.vector;
+\definition regular: Operations.Continuous vector :=
+  \idelim include = total \with f: (Carrier -> Family.Point) => topology.Continuity[A := Carrier, B := Family.Point].Continuous topology Realification.bundle.totalSpace f \by {
+    base: includeContinuous, equality: \axiom:funext(include, total, \fun (p: Carrier) => sym!{{Family.Point}} _ _ (Family.eta p))
+  };
+\definition continuous: topology.Continuity[A := Carrier, B := Disk.SphereBundle].Continuous topology Disk.sphereTopology normalize :=
+  topology.Continuity[A := Carrier, B := Family.Point].Corestriction[S := Disk.UnitSphere].corestrictContinuous
+    topology Realification.bundle.totalSpace normalize (Operations.scaling reciprocal vector baseContinuous reciprocalContinuous regular);
+\module Retraction;
+\module Relative;

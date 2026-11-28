@@ -1,0 +1,77 @@
+\import real.Analysis[] \as R;
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import complex.Complex[] \as C;
+\import hermitian_frames.Hermitian[] \as Hermitian;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import std.Data[].FinSet[] \as Fin;
+\import Projective.CanonicalLine[] \as LineBundle;
+\import LineBundle.Realification[] \as Realification;
+\import LineBundle.Realification[].Norm[] \as Norm;
+\import LineBundle.Hopf[] \as Hopf;
+\import LineBundle.Integral[].Punctured[] \as Punctured;
+\import vector_bundles.Bundles[].Over[K := C.Complex, field := C.Algebra[].field, conjugation := Hermitian.Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar] \as Bundles;
+\import Bundles.Family[X := Projective.Space, F := Projective.Line] \as Native;
+\import bundle_operations.Operations[].Scalars[].Realification[X := Projective.Space, F := Projective.Line, source := Projective.lineBundle] \as Underlying;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].Family[X := Projective.Space, F := Projective.Line] \as Family;
+\import grassmannians.Complex[n := Projective.ambient, k := Degrees.one].Model[] \as Model;
+\import bundle_complements.Complements[].Over[K := C.Complex, field := C.Algebra[].field, conjugation := Hermitian.Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar].Projection[X := Projective.Space, n := Projective.ambient, baseSpace := Projective.topology,
+    P := Model.projection, regular := Model.regular] \as Projection;
+\import linear_algebra.Hermitian[].Over[K := C.Complex, field := C.Algebra[].field, scalar := Hermitian.Complex[].scalar].Finite[n := Projective.ambient] \as Vector;
+\definition second: Fin.Fin Projective.ambient := Fin.succ Degrees.one (Fin.zero std.Data[].Nat[].Nat^::zero);
+\definition axis: Vector.Vector := Vector.basis second;
+\definition column[x: Projective.Space]: Projective.Line x := Projection.At[x := x].project.apply axis;
+\definition native[x: Projective.Space]: Native.Point := Native.include x (column x);
+\import topological_algebra.Coordinates[K := C.Complex, I := Fin.Fin Projective.ambient] \as Coordinates;
+\definition nativeContinuous: topology.Continuity[A := Projective.Space, B := Native.Point].Continuous Projective.topology Projective.lineBundle.totalSpace native :=
+  Projection.Universal[Y := Projective.Space, source := Projective.topology].continuous native
+    (topology.Maps[A := Projective.Space, B := Projective.Space].Identity[].continuous Projective.topology)
+    (Coordinates.Universal[A := Projective.Space].continuous Projective.topology Hermitian.Complex[].topological.space (\fun (x: Projective.Space) => column x)
+      (\fun (i: Fin.Fin Projective.ambient) => Model.regular axis i));
+\definition section[x: Projective.Space]: Family.Point := Underlying.forward (native x);
+\definition continuous: topology.Continuity[A := Projective.Space, B := Family.Point].Continuous Projective.topology Realification.bundle.totalSpace section :=
+  topology.Composition[A := Projective.Space, B := Native.Point, C := Family.Point].composeContinuous
+    Projective.topology Projective.lineBundle.totalSpace Realification.bundle.totalSpace native Underlying.forward nativeContinuous Underlying.forwardContinuous;
+\import thom_spaces.Thom[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].For[X := Projective.Space, F := Projective.Line, bundle := Realification.bundle].With[metric := Realification.metric] \as Disk;
+\import bott_product.Bott[].ProjectiveLine[].Coordinates[].SphereMap[].Matrix[] \as Matrix;
+\import Matrix.Projection[] \as Comparison;
+\definition projectionSquared[x: Projective.Space]: Vector.squared (column x) = C.re ((column x) second) :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (Vector.squaredFormula (column x)) }
+    "=" _ "by" { congr!{C.Complex R.Real} C.re _ _ ((Model.projection x).selfAdjoint axis (column x)) }
+    "=" _ "by" { congr!{Vector.Vector R.Real} (\fun (v: Vector.Vector) => C.re (Vector.dot axis v)) _ _
+      (\bysub(Vector.Vector, Projection.Image x, column x)) }
+    "=" _ "by" { congr!{C.Complex R.Real} C.re _ _ (Vector.dotBasis second (column x)) }
+  };
+\definition onSphere[s: Spheres.Carrier Degrees.two]: Projective.Space := homeomorphism.backward s;
+\definition height[s: Spheres.Carrier Degrees.two]: R.Real := Matrix.t s;
+\definition squaredOnSphere[s: Spheres.Carrier Degrees.two]: Disk.squared (section (onSphere s)) = R.mul R.half (R.sub R.one (height s)) :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { Norm.squared (section (onSphere s)) }
+    "=" _ "by" { Hopf.squared (native (onSphere s)) }
+    "=" _ "by" { projectionSquared (onSphere s) }
+    "=" _ "by" { congr!{C.Complex R.Real} C.re _ _ (trans!{C.Complex} _ _ _ (Comparison.entries s second second) (Matrix.at11 s)) }
+  };
+\import Spheres.Positive[n := Degrees.one] \as Base;
+\definition bound[s: Spheres.Carrier Degrees.two]: D.Le (Disk.squared (section (onSphere s))) R.one :=
+  D.leReplace (R.mul R.half (R.sub R.one (height s))) (Disk.squared (section (onSphere s))) (R.mul R.half (R.add R.one R.one)) R.one
+    (sym!{R.Real} _ _ (squaredOnSphere s))
+    (trans!{R.Real} _ _ _ (Laws.fieldMulAdd R.half R.one R.one) (R.Estimates[].halfTwice R.one))
+    (R.Estimates[].mulMonotone R.half (R.sub R.one (height s)) (R.add R.one R.one) (R.Estimates[].halfNonnegative)
+      (Laws.addMonotoneLeft _ _ R.one (D.leReplaceRight (R.neg (height s)) (R.neg (R.neg R.one)) R.one
+        (Laws.negInvolutive R.one) (Laws.negAntitone (R.neg R.one) (height s) (Base.heightBounds s).left))));
+\definition sphereSection[s: Spheres.Carrier Degrees.two]: Disk.DiskBundle := \into[Family.Point](section (onSphere s), Disk.ClosedBall) \by { bound s };
+\definition sphereContinuous: topology.Continuity[A := Spheres.Carrier Degrees.two, B := Disk.DiskBundle].Continuous (Spheres.topology Degrees.two) Disk.diskTopology sphereSection :=
+  topology.Continuity[A := Spheres.Carrier Degrees.two, B := Family.Point].Corestriction[S := Disk.ClosedBall].corestrictContinuous
+    (Spheres.topology Degrees.two) Realification.bundle.totalSpace sphereSection
+    (topology.Composition[A := Spheres.Carrier Degrees.two, B := Projective.Space, C := Family.Point].composeContinuous
+      (Spheres.topology Degrees.two) Projective.topology Realification.bundle.totalSpace onSphere section homeomorphism.backwardContinuous continuous);
+\module Relative;

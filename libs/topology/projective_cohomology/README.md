@@ -37,6 +37,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.CanonicalLine.Dual.Realification.Norm.Home.Integral.Euler` | Riesz pulls the dual Thom class back to the negative of the tautological Thom class. The dual Euler class is the negative of the canonical projective generator |
 | `RealPlane` and `ComplexLineSphere` | Homeomorphisms with the antipodal quotient model of the real projective plane and the standard two-sphere model of the complex projective line |
 | `ComplexLineSphere.Equator` | In the standard two-sphere model, the second complex frame coordinate on the equator is the first multiplied by the inverse unit-circle coordinate |
+| `ComplexLineSphere.Section.Relative.Forgetting` | The projected coordinate section on the standard two-sphere pulls the punctured-bundle Thom class back to a relative class whose absolute image is the tautological Euler class |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
 | `ZeroDegree` | Evaluation of constant classes and surjectivity of degree-zero pullback from a path-connected source |
 
