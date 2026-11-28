@@ -1,0 +1,24 @@
+\definition degree: N.Nat^ := N.Nat^::succ p;
+\definition z: I.Int^ := I.Int^::ofNat degree;
+\definition standard[bound: Basic.Lt degree Hopf.sphereDimension]:
+  \forall (a: Model.cohomology Hopf.sphereDimension degree) -> a = (Model.space Hopf.sphereDimension degree).zero :=
+  \idelim Nat.add (N.Nat^::succ (Nat.sub Hopf.sphereDimension (N.Nat^::succ degree))) degree = Hopf.sphereDimension
+    \with m: N.Nat^ => \forall (a: Model.cohomology m degree) -> a = (Model.space m degree).zero \by {
+      base: Model.Below[k := p, distance := Nat.sub Hopf.sphereDimension (N.Nat^::succ degree)].zero,
+      equality: trans!{N.Nat^} _ _ _ (Basic.addSuccLeft _ _)
+        (trans!{N.Nat^} _ _ _
+          (congr!{N.Nat^ N.Nat^} (\fun (q: N.Nat^) => N.Nat^::succ q) _ _ (Basic.addComm _ _))
+          (trans!{N.Nat^} _ _ _ (sym!{N.Nat^} _ _ (Basic.addSuccLeft _ _))
+            (Basic.addSubOfLe (N.Nat^::succ degree) Hopf.sphereDimension (Basic.succLeOfLt Hopf.sphereDimension degree bound))))
+    };
+\import Abelian.Isomorphism[V := Standard.cohomology z, W := Model.cohomology Hopf.sphereDimension degree,
+  source := Standard.cohomologySpace z, target := Model.space Hopf.sphereDimension degree].Vanishing[] \as CompareDegree;
+\import Abelian.Isomorphism[V := Standard.cohomology z, W := (Sphere.group z).Carrier,
+  source := Standard.cohomologySpace z, target := (Sphere.group z).space].Vanishing[] \as ToBundle;
+\import Abelian.Isomorphism[V := (Raw.boundary z).Carrier, W := (Sphere.group z).Carrier,
+  source := (Raw.boundary z).space, target := (Sphere.group z).space].Vanishing[] \as ToBoundary;
+\definition zero[bound: Basic.Lt degree Hopf.sphereDimension]:
+  \forall (a: (Raw.boundary z).Carrier) -> a = (Raw.boundary z).space.zero :=
+  ToBoundary.sourceZero (Sphere.isomorphism z)
+    (ToBundle.targetZero Comparison.At[z := z].isomorphism
+      (CompareDegree.sourceZero Standard.At[n := degree].isomorphism (standard bound)));

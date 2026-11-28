@@ -51,3 +51,4 @@
 
 \module Hopf;
 \module Realification;
+\module Integral;

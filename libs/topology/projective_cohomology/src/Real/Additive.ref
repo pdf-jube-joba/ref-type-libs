@@ -26,3 +26,4 @@
         .Additive[].At[i := index k bound].uniqueNonzero a b aNonzero bNonzero
     };
 }
+\module Ordinary(k: N.Nat^);

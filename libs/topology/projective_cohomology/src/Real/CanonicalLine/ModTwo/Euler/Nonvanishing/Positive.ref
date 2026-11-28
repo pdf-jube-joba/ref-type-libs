@@ -1,0 +1,11 @@
+\definition z: I.Int^ := I.Int^::ofNat (N.Nat^::succ p);
+\definition next: I.Int^ := I.Int^::ofNat (N.Nat^::succ (N.Nat^::succ p));
+\import PairSequence.LongExact[z := z] \as Sequence;
+\import Abelian.Hom[V := (Raw.boundary z).Carrier, W := (Raw.relative next).Carrier,
+  source := (Raw.boundary z).space, target := (Raw.relative next).space] \as Map;
+\definition connectingZero[bound: Order.Le (N.Nat^::succ (N.Nat^::succ p)) dimension]:
+  \forall (a: (Raw.boundary z).Carrier) -> Sequence.connecting.apply a = (Raw.relative next).space.zero :=
+  \fun (a: (Raw.boundary z).Carrier) => trans!{{(Raw.relative next).Carrier}} _ _ _
+    (congr!{{(Raw.boundary z).Carrier} {(Raw.relative next).Carrier}} Sequence.connecting.apply _ _
+      (Boundary.Positive[p := p].zero (Order.ltOfSuccLe dimension (N.Nat^::succ p) bound) a))
+    (Map.zeroPreserved Sequence.connecting);

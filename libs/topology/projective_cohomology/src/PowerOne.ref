@@ -1,0 +1,43 @@
+\import std.Data[].Nat[] \as N;
+\import \root.Degrees[] \as Degrees;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\import singular_products.Cochains[A := X, source := space, R := K, ring := ring].Cohomology[] \as H;
+\definition power: \forall (k: N.Nat^) -> H.Group k :=
+  \induction (k: N.Nat^) \return H.Group k \with {
+    | zero: H.Unit[].class
+    | succ: \fun (k: N.Nat^)(previous: H.Group k) => H.Cup[p := k, q := Degrees.one].apply previous generator
+  };
+\import N.Basic[].Def[] \as Nat;
+\import Equality.Transport[A := N.Nat^] \as DegreeCast;
+\definition firstPower: power Degrees.one = generator :=
+  trans!{{H.Group Degrees.one}} _ _ _ (H.Unit[].Left[p := Degrees.one].law generator)
+    (DegreeCast.castRefl H.Group Degrees.one generator);
+\definition multiplyPowers[p: N.Nat^]: \forall (q: N.Nat^) ->
+  H.Cup[p := p, q := q].apply (power p) (power q) = power (Nat.add p q) :=
+  \induction (q: N.Nat^) \return H.Cup[p := p, q := q].apply (power p) (power q) = power (Nat.add p q) \with {
+    | zero: H.Unit[].Right[p := p].law (power p)
+    | succ: \fun (q: N.Nat^)(previous: _) =>
+      trans!{{H.Group (N.Nat^::succ (Nat.add p q))}} _ _ _
+        (sym!{{H.Group (N.Nat^::succ (Nat.add p q))}} _ _ (trans!{{H.Group (N.Nat^::succ (Nat.add p q))}} _ _ _
+          (H.Associativity[p := p, q := q, r := Degrees.one].law (power p) (power q) generator)
+          (DegreeCast.castRefl H.Group (N.Nat^::succ (Nat.add p q)) (H.Cup[p := p, q := N.Nat^::succ q].apply (power p) (power (N.Nat^::succ q))))))
+        (congr!{{H.Group (Nat.add p q)} {H.Group (N.Nat^::succ (Nat.add p q))}}
+          (\fun (a: H.Group (Nat.add p q)) => H.Cup[p := Nat.add p q, q := Degrees.one].apply a generator) _ _ previous)
+  };
+\definition monomial[k: N.Nat^][a: K]: H.Group k := (H.moduleSpace k).smul a (power k);
+\module Product(p, q: N.Nat^) {
+  \definition total: N.Nat^ := Nat.add p q;
+  \import H.Cup[p := p, q := q] \as Cup;
+  \definition multiply[a, b: K]: Cup.apply (monomial p a) (monomial q b) = monomial total (ring.base.mul a b) :=
+    trans!{{H.Group total}} _ _ _
+      (Cup.laws.scaleLeft a (power p) (monomial q b))
+      (trans!{{H.Group total}} _ _ _
+        (congr!{{H.Group total} {H.Group total}} ((H.moduleSpace total).smul a) _ _
+          (Cup.laws.scaleRight b (power p) (power q)))
+        (trans!{{H.Group total}} _ _ _
+          (sym!{{H.Group total}} _ _ ((H.moduleSpace total).scalarAssoc a b (Cup.apply (power p) (power q))))
+          (congr!{{H.Group total} {H.Group total}} ((H.moduleSpace total).smul (ring.base.mul a b)) _ _ (multiplyPowers p q))));
+}

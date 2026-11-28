@@ -1,0 +1,23 @@
+\import \parent.\parent.\parent.Forget[p := p] \as Forget;
+\import Class.Cup[p := p] \as Thom;
+\import H.Cup[p := p, q := Degrees.one] \as Cup;
+\definition multiply[a: H.Group p]: H.Group (N.Nat^::succ p) := Cup.apply a generator;
+\definition law[a: H.Group p]:
+  Geometry.Coefficients[R := Two.Carrier, ring := Two.commutativeRing].Degree[n := N.Nat^::succ p].euler (Thom.isomorphism.forward.apply a) =
+  multiply a :=
+  trans!{{H.Group (N.Nat^::succ p)}} _ _ _ (Thom.law a)
+    (congr!{{H.Group Degrees.one} {H.Group (N.Nat^::succ p)}} (Cup.apply a) _ _
+      (sym!{{H.Group Degrees.one}} _ _ (agreesWithCW cw)));
+\definition injective[bound: Order.Le (N.Nat^::succ p) dimension]:
+  \forall (a, b: H.Group p) -> multiply a = multiply b -> a = b :=
+  \fun (a, b: H.Group p)(same: _) => trans!{{H.Group p}} _ _ _
+    (sym!{{H.Group p}} _ _ (Thom.isomorphism.leftInverse a))
+    (trans!{{H.Group p}} _ _ _
+      (congr!{{(Raw.relative Forget.next).Carrier} {H.Group p}} Thom.isomorphism.backward.apply _ _
+        (Forget.sectionInjective (connectingZero p bound) (Thom.isomorphism.forward.apply a) (Thom.isomorphism.forward.apply b)
+          (trans!{{H.Group (N.Nat^::succ p)}} _ _ _ (law a)
+            (trans!{{H.Group (N.Nat^::succ p)}} _ _ _ same (sym!{{H.Group (N.Nat^::succ p)}} _ _ (law b))))))
+      (Thom.isomorphism.leftInverse b));
+\import commutative_algebra.Modules[R := Two.Carrier, ring := Two.commutativeRing]
+  .Bilinear[A := H.bundle p, B := H.bundle Degrees.one, C := H.bundle (N.Nat^::succ p)].Properties[] \as Bilinear;
+\definition zero: multiply (H.moduleSpace p).zero = (H.moduleSpace (N.Nat^::succ p)).zero := Bilinear.leftZero Cup.bilinear generator;

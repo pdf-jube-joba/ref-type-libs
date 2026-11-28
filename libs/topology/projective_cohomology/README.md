@@ -11,8 +11,12 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `CanonicalLine.Hopf` | The unit sphere bundle is homeomorphic to the ambient unit sphere over the line-projection map |
 | `Real.CanonicalLine.Hopf.Standard` | Comparison with the standard real sphere and its intermediate-degree cohomology vanishing |
 | `Complex.CanonicalLine.Realification` | The underlying real bundle has rank two and carries a metric induced by its ambient embedding |
+| `Complex.CanonicalLine.Realification.Norm.Sphere.Standard` | The realified unit sphere bundle is homeomorphic to \(S^{2n+1}\) |
 | `Real.Additive` | Vanishing above the dimension and at most one nonzero mod-2 class in each cellular degree |
+| `Real.CanonicalLine.ModTwo` | Fiber-normalized Thom class and its Euler class, whose powers survive through degree \(n\) |
+| `Real.Ring` | \(H^*(\mathbb{RP}^n;\mathbb{F}_2)\cong\mathbb{F}_2[t]/(t^{n+1})\), with \(t\) the mod-2 Euler class of the universal line |
 | `Complex.Additive` | Integral groups are free of rank one in degrees \(0,2,\ldots,2n\) and vanish in odd degrees and above \(2n\) |
+| `Complex.CanonicalLine.Integral` | Even-degree zero-section isomorphisms in degrees \(2,\ldots,2n\), and the degree-zero basis given by the cup unit |
 | `RealPlane` and `ComplexLineSphere` | Homeomorphisms with the antipodal quotient model of the real projective plane and the standard two-sphere model of the complex projective line |
 | `ZeroDegree` | Evaluation of constant classes and surjectivity of degree-zero pullback from a path-connected source |
 

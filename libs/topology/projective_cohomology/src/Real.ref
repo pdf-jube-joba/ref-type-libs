@@ -42,3 +42,4 @@
 }
 \module CanonicalLine;
 \module Additive;
+\module Ring;

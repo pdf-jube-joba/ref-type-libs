@@ -13,3 +13,5 @@
 \module ZeroDegree(X: \Set, space: topology.Topology[Carrier := X].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
 \module RealPlane;
 \module ComplexLineSphere;
+\module PowerOne(X: \Set, space: topology.Topology[Carrier := X].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
+  generator: singular_products.Cochains[A := X, source := space, R := K, ring := ring].Cohomology[].Group (std.Data[].Nat[].Nat^::succ std.Data[].Nat[].Nat^::zero));

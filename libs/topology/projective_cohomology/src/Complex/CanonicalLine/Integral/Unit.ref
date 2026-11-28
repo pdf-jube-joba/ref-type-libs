@@ -1,0 +1,81 @@
+\import \parent.\parent.Hopf[] \as ComplexHopf;
+\import \parent.Boundary[] \as Boundary;
+\import algebraic_topology.Spheres[] \as Spheres;
+\import algebraic_topology.PathComponent[A := Spheres.Carrier Hopf.sphereDimension, source := Spheres.topology Hopf.sphereDimension] \as StandardPaths;
+\import algebraic_topology.PathComponent[A := Space, source := topology] \as BasePaths;
+\import topology.Homeomorphism[A := ComplexHopf.Sphere, B := Spheres.Carrier Hopf.sphereDimension] \as Compare;
+\definition standardConnected: StandardPaths.PathConnected :=
+  \idelim N.Nat^::succ (Degrees.double dimension) = Hopf.sphereDimension \with d: N.Nat^ =>
+    algebraic_topology.PathComponent[A := Spheres.Carrier d, source := Spheres.topology d].PathConnected \by {
+      base: Spheres.Positive[n := Degrees.double dimension].Connected[].connected,
+      equality: sym!{N.Nat^} _ _ Boundary.dimensionLaw
+    };
+\definition projection[v: Spheres.Carrier Hopf.sphereDimension]: Space := ComplexHopf.projection (Hopf.native.backward v);
+\definition continuous: topology.Continuity[A := Spheres.Carrier Hopf.sphereDimension, B := Space].Continuous
+  (Spheres.topology Hopf.sphereDimension) topology projection :=
+  topology.Composition[A := Spheres.Carrier Hopf.sphereDimension, B := ComplexHopf.Sphere, C := Space].composeContinuous
+    (Spheres.topology Hopf.sphereDimension) ComplexHopf.sphereTopology topology Hopf.native.backward ComplexHopf.projection
+    (Compare.laws ComplexHopf.sphereTopology (Spheres.topology Hopf.sphereDimension) Hopf.native).backwardContinuous
+    ComplexHopf.projectionContinuous;
+\import std.Logic[].Proposition[] \as Logic;
+\definition onto[x: Space]: \exists (v: Spheres.Carrier Hopf.sphereDimension \where projection v = x) := \block {
+  \takefrom p: \Cast[ComplexHopf.Sphere] ({ p: ComplexHopf.Sphere \where ComplexHopf.projection p = x }) \by ComplexHopf.surjective x \then
+  \return Logic.existsIntro[Spheres.Carrier Hopf.sphereDimension, { v: Spheres.Carrier Hopf.sphereDimension \where projection v = x }]
+    (Hopf.native.forward p) (trans!{Space} _ _ _
+      (congr!{{ComplexHopf.Sphere} Space} ComplexHopf.projection _ _
+        ((Compare.laws ComplexHopf.sphereTopology (Spheres.topology Hopf.sphereDimension) Hopf.native).leftInverse p))
+      (\bysub(ComplexHopf.Sphere, { w: ComplexHopf.Sphere \where ComplexHopf.projection w = x }, p)))
+};
+\definition connected: BasePaths.PathConnected := \block {
+  \fun (x, y: Space) \then
+  \takefrom u: \Cast[Spheres.Carrier Hopf.sphereDimension] ({ u: Spheres.Carrier Hopf.sphereDimension \where projection u = x }) \by onto x \then
+  \takefrom v: \Cast[Spheres.Carrier Hopf.sphereDimension] ({ v: Spheres.Carrier Hopf.sphereDimension \where projection v = y }) \by onto y \then
+  \return \idelim projection v = y \with b: Space => BasePaths.Related x b \by {
+    base: \idelim projection u = x \with a: Space => BasePaths.Related a (projection v) \by {
+      base: StandardPaths.Maps[B := Space, target := topology].preserves projection continuous u v (standardConnected u v),
+      equality: \bysub(Spheres.Carrier Hopf.sphereDimension, { u: Spheres.Carrier Hopf.sphereDimension \where projection u = x }, u)
+    },
+    equality: \bysub(Spheres.Carrier Hopf.sphereDimension, { v: Spheres.Carrier Hopf.sphereDimension \where projection v = y }, v)
+  }
+};
+\definition point: Space := projection (Spheres.point Hopf.sphereDimension);
+\import singular_cohomology.Zero[A := Space, source := topology].With[coefficients := Product.integerCoefficients] \as Zero;
+\import \root.ZeroDegree[X := Space, space := topology, K := I.Int^, ring := Integers.commutativeRing] \as Constants;
+\definition isomorphism: _ := Zero.Connected[point := point].isomorphism connected;
+\definition basis: isomorphism.forward.apply Integers.commutativeRing.base.one = H.Unit[].class := Constants.constantOne;
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := I.Int^, ring := Rings.commutativeRingAsRing I.Int^ Integers.commutativeRing] \as Modules;
+\import singular_cohomology.Cochains[A := Space, source := topology].OverRing[R := I.Int^, ring := Integers.commutativeRing].With[coefficients := Product.coefficients] \as Theory;
+\import chain_complexes.Cochain[].Over[R := I.Int^, ring := Rings.commutativeRingAsRing I.Int^ Integers.commutativeRing]
+  .At[C := Theory.complex, k := N.Nat^::zero] \as Degree;
+\import cohomology_thom.ZeroEvaluation[A := Space, source := topology, K := I.Int^, ring := Integers.commutativeRing] \as Evaluation;
+\definition scalarUnit[a: I.Int^]: H.Group N.Nat^::zero := (H.moduleSpace N.Nat^::zero).smul a H.Unit[].class;
+\definition value[a: I.Int^][x: Space]: Evaluation.value (scalarUnit a) x = a :=
+  trans!{I.Int^} _ _ _
+    (congr!{{H.Group N.Nat^::zero} {I.Int^}} (\fun (u: H.Group N.Nat^::zero) => Evaluation.value u x) _ _
+      (sym!{{H.Group N.Nat^::zero}} _ _ (Degree.classLinear.scalar a H.Unit[].cycle)))
+    (trans!{I.Int^} _ _ _ (Evaluation.onClasses (Degree.cycleSpace.smul a H.Unit[].cycle) x)
+      (trans!{I.Int^} _ _ _
+        (congr!{I.Int^ I.Int^} (Integers.commutativeRing.base.mul a) _ _ (Product.Unit[].onSimplex (Zero.constant x)))
+        (Product.Unit[].rightOne a)));
+\import Modules.Hom[V := I.Int^, W := H.Group N.Nat^::zero, source := Modules.scalarModule, target := H.moduleSpace N.Nat^::zero] \as Maps;
+\definition linear: Maps.Map := Maps.Map {
+  apply := scalarUnit,
+  addition := \fun (a, b: I.Int^) => (H.moduleSpace N.Nat^::zero).scalarAdd a b H.Unit[].class,
+  scalar := \fun (a, b: I.Int^) => (H.moduleSpace N.Nat^::zero).scalarAssoc a b H.Unit[].class
+};
+\import Modules.Isomorphism[V := I.Int^, W := H.Group N.Nat^::zero, source := Modules.scalarModule, target := H.moduleSpace N.Nat^::zero]
+  .OfBijective[f := linear] \as UnitBasis;
+\definition injective: UnitBasis.Injective :=
+  \fun (a, b: I.Int^)(same: scalarUnit a = scalarUnit b) => trans!{I.Int^} _ _ _
+    (sym!{I.Int^} _ _ (value a point))
+    (trans!{I.Int^} _ _ _
+      (congr!{{H.Group N.Nat^::zero} {I.Int^}} (\fun (u: H.Group N.Nat^::zero) => Evaluation.value u point) _ _ same)
+      (value b point));
+\definition surjective: UnitBasis.Onto :=
+  \fun (u: H.Group N.Nat^::zero) => Logic.existsIntro[I.Int^, { a: I.Int^ \where scalarUnit a = u }] (Evaluation.value u point)
+    (trans!{{H.Group N.Nat^::zero}} _ _ _
+      (Evaluation.detected _ _ (\fun (x: Space) => trans!{I.Int^} _ _ _ (value (Evaluation.value u point) x)
+        (sym!{I.Int^} _ _ (Constants.constantValue (Evaluation.value u point) x))))
+      (sym!{{H.Group N.Nat^::zero}} _ _ (Constants.connectedConstant connected point u)));
+\definition linearIsomorphism: _ := UnitBasis.isomorphism injective surjective;

@@ -1,0 +1,34 @@
+\definition z: I.Int^ := I.Int^::ofNat p;
+\definition next: I.Int^ := I.Int^::ofNat (N.Nat^::succ p);
+\import PairSequence.LongExact[z := z] \as Sequence;
+\definition forget: Abelian.MapBetween (Raw.relative next) (Raw.disk next) :=
+  Geometry.Additive[coefficients := Singular.integerCoefficients].Degree[z := next].forget;
+\import Abelian.Hom[V := (Raw.relative next).Carrier, W := (Raw.disk next).Carrier,
+  source := (Raw.relative next).space, target := (Raw.disk next).space] \as Map;
+\definition ConnectingZero: \Prop :=
+  \forall (b: (Raw.boundary z).Carrier) -> Sequence.connecting.apply b = (Raw.relative next).space.zero;
+\definition zeroKernel: ConnectingZero -> \forall (a: (Raw.relative next).Carrier) ->
+  forget.apply a = (Raw.disk next).space.zero -> a = (Raw.relative next).space.zero := \block {
+    \fun (zero: ConnectingZero)(a: (Raw.relative next).Carrier)(killed: _) \then
+    \takefrom b: \Cast[(Raw.boundary z).Carrier] ({ b: (Raw.boundary z).Carrier \where Sequence.connecting.apply b = a }) \by
+      Sequence.exactAtRelative a killed \then
+    \return trans!{{(Raw.relative next).Carrier}} _ _ _
+      (sym!{{(Raw.relative next).Carrier}} _ _
+        (\bysub((Raw.boundary z).Carrier, { b: (Raw.boundary z).Carrier \where Sequence.connecting.apply b = a }, b)))
+      (zero b)
+  };
+\definition injective[zero: ConnectingZero]: _ := Map.injectiveOfZeroKernel forget (zeroKernel zero);
+\import Raw.Natural[t := N.Nat^::succ p] \as ZeroSection;
+\definition fromSection[a: (Raw.relative next).Carrier]: _ := ZeroSection.law a;
+\module Recover;
+\definition sectionInjective[zero: ConnectingZero][a, b: (Raw.relative next).Carrier]:
+  Geometry.Coefficients[R := Two.Carrier, ring := Two.commutativeRing].Degree[n := N.Nat^::succ p].euler a =
+  Geometry.Coefficients[R := Two.Carrier, ring := Two.commutativeRing].Degree[n := N.Nat^::succ p].euler b -> a = b :=
+  \fun (same: _) => injective zero a b
+    (trans!{{(Raw.disk next).Carrier}} _ _ _
+      (sym!{{(Raw.disk next).Carrier}} _ _ (Recover[].law (forget.apply a)))
+      (trans!{{(Raw.disk next).Carrier}} _ _ _
+        (congr!{{H.Group (N.Nat^::succ p)} {(Raw.disk next).Carrier}} Recover[].backward _ _
+          (trans!{{H.Group (N.Nat^::succ p)}} _ _ _ (fromSection a)
+            (trans!{{H.Group (N.Nat^::succ p)}} _ _ _ same (sym!{{H.Group (N.Nat^::succ p)}} _ _ (fromSection b)))))
+        (Recover[].law (forget.apply b))));

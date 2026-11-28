@@ -1,0 +1,28 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\import Product.Cohomology[] \as H;
+\import Groups.At[n := k] \as Compare;
+\definition z: I.Int^ := I.Int^::ofNat k;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import singular_cohomology.Cochains[A := Space, source := topology].With[coefficients := Product.integerCoefficients] \as Unsigned;
+\import Abelian.Isomorphism[V := Groups.cohomology z, W := H.Group k,
+  source := Groups.cohomologySpace z, target := Unsigned.cohomologySpace k].Vanishing[] \as Transport;
+\definition vanishesAbove: Order.Lt dimension k -> \forall (a: H.Group k) -> a = (H.moduleSpace k).zero :=
+  \fun (bound: Order.Lt dimension k) => Transport.targetZero Compare.isomorphism (above k bound);
+\import Abelian.Hom[V := Groups.cohomology z, W := H.Group k,
+  source := Groups.cohomologySpace z, target := Unsigned.cohomologySpace k] \as CompareMap;
+\definition nonzeroSigned[a: H.Group k]: Logic.Not (a = (H.moduleSpace k).zero) ->
+  Logic.Not (Compare.isomorphism.backward.apply a = (Groups.cohomologySpace z).zero) :=
+  \fun (nonzero: _)(zero: _) => nonzero (trans!{{H.Group k}} _ _ _
+    (sym!{{H.Group k}} _ _ (Compare.isomorphism.rightInverse a))
+    (trans!{{H.Group k}} _ _ _ (congr!{{Groups.cohomology z} {H.Group k}} Compare.isomorphism.forward.apply _ _ zero)
+      (CompareMap.zeroPreserved Compare.isomorphism.forward)));
+\definition uniqueNonzero[bound: Order.Le k dimension][a, b: H.Group k]:
+  Logic.Not (a = (H.moduleSpace k).zero) -> Logic.Not (b = (H.moduleSpace k).zero) -> a = b :=
+  \fun (aNonzero: _)(bNonzero: _) => trans!{{H.Group k}} _ _ _
+    (sym!{{H.Group k}} _ _ (Compare.isomorphism.rightInverse a))
+    (trans!{{H.Group k}} _ _ _ (congr!{{Groups.cohomology z} {H.Group k}} Compare.isomorphism.forward.apply _ _
+      (\parent.Unique[k := k].uniqueNonzero bound _ _ (nonzeroSigned a aNonzero) (nonzeroSigned b bNonzero)))
+      (Compare.isomorphism.rightInverse b));

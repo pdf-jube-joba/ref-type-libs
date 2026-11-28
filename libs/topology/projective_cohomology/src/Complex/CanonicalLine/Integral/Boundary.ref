@@ -1,0 +1,19 @@
+\import algebraic_topology.Spheres[] \as Spheres;
+\definition dimensionLaw: Hopf.sphereDimension = N.Nat^::succ (Degrees.double dimension) :=
+  Basic.addSuccLeft dimension dimension;
+\definition belowTop[q: N.Nat^]: Basic.Le q (Degrees.double dimension) -> Basic.Lt q Hopf.sphereDimension :=
+  \fun (bound: _) => \idelim N.Nat^::succ (Degrees.double dimension) = Hopf.sphereDimension
+    \with d: N.Nat^ => Basic.Lt q d \by {
+      base: Basic.ltOfSuccLe _ _ (Basic.leSuccSucc _ _ bound),
+      equality: sym!{N.Nat^} _ _ dimensionLaw
+    };
+\import cohomology_models.Spheres[].With[coefficients := Product.integerCoefficients] \as Model;
+\import singular_cohomology.Cochains[A := Spheres.Carrier Hopf.sphereDimension, source := Spheres.topology Hopf.sphereDimension]
+  .With[coefficients := Product.integerCoefficients].Integer[] \as Standard;
+\import Raw.Sphere[] \as Sphere;
+\definition equivalence: _ :=
+  algebraic_topology.HomotopyEquivalence[A := Spheres.Carrier Hopf.sphereDimension, B := Disk.SphereBundle].fromHomeomorphism
+    (Spheres.topology Hopf.sphereDimension) Disk.sphereTopology Hopf.hopf;
+\import singular_cohomology.Equivalence[A := Spheres.Carrier Hopf.sphereDimension, B := Disk.SphereBundle,
+  source := Spheres.topology Hopf.sphereDimension, target := Disk.sphereTopology].Integer[e := equivalence].With[coefficients := Product.integerCoefficients] \as Comparison;
+\module Positive(p: N.Nat^);

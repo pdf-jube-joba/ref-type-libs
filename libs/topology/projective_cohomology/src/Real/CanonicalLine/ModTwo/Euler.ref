@@ -1,0 +1,8 @@
+\import \parent.Normalized[] \as Normalized;
+\definition generator: Singular.Cohomology[].Group Degrees.one := Relative.euler Normalized.thomClass;
+\definition agreesWithCW[cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]]: generator = \parent.Thom[cw := cw].euler :=
+  congr!{Relative.Class {Singular.Cohomology[].Group Degrees.one}} Relative.euler _ _ (Normalized.At[cw := cw].equalClass Normalized.thomClass);
+\import \root.PowerOne[X := Space, space := topology, K := Two.Carrier, ring := Two.commutativeRing, generator := generator] \as Powers;
+\definition power: \forall (k: N.Nat^) -> H.Group k := Powers.power;
+\definition multiplyPowers: _ := Powers.multiplyPowers;
+\module Nonvanishing(cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]);

@@ -1,0 +1,35 @@
+\import Geometry.Local[K := Two.Carrier, ring := Two.commutativeRing].Rank[n := Degrees.one] \as Local;
+\definition fiberRestriction[x: Space]: _ := Geometry.Fiber[x := x].Additive[coefficients := Singular.integerCoefficients, z := I.Int^::ofNat Degrees.one].restriction;
+\definition Normalized[u: Relative.Class]: \Prop :=
+  \forall (x: Space) -> Local.Fiber[x := x].Generator ((fiberRestriction x).apply u);
+\definition normalizedClasses: \Pow Relative.Class := { u: Relative.Class \where Normalized u };
+\definition NormalizedClass: \Set := \Cast[Relative.Class] normalizedClasses;
+\definition underlying[u: NormalizedClass]: Relative.Class := u;
+\module At(cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]) {
+  \import Geometry.ModTwo[n := Degrees.one, constantRank := rank, complex := cw] \as Chosen;
+  \definition normalized: Normalized Chosen.class :=
+    \fun (x: Space) => \idelim Chosen.fiber x = (fiberRestriction x).apply Chosen.class
+      \with u: Local.FiberClass x => Local.Fiber[x := x].Generator u \by {
+        base: \bysub(Local.FiberClass x, Chosen.Generators x, Chosen.generator x),
+        equality: sym!{{Local.FiberClass x}} _ _ (Chosen.normalized x)
+      };
+  \definition witness: NormalizedClass := \into[Relative.Class](Chosen.class, normalizedClasses) \by { normalized };
+  \definition equalClass[u: NormalizedClass]: underlying u = Chosen.class :=
+    Chosen.uniqueNormalized u (\fun (x: Space) => Chosen.Fiber[x := x].unique
+      (\into[Local.FiberClass x]((fiberRestriction x).apply u, Chosen.Generators x) \by {
+        (\bysub(Relative.Class, normalizedClasses, u)) x
+      }) (Chosen.generator x));
+}
+\definition normalizedClassExists: \exists NormalizedClass := \block {
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return \exact(At[cw := cw].witness, NormalizedClass)
+};
+\definition normalizedClassUnique: \forall (u, v: NormalizedClass) -> u = v := \block {
+  \fun (u, v: NormalizedClass) \then
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return trans!{Relative.Class} _ _ _ (At[cw := cw].equalClass u)
+    (sym!{Relative.Class} _ _ (At[cw := cw].equalClass v))
+};
+\definition thomClass: NormalizedClass := \choice NormalizedClass \by {
+  existence: normalizedClassExists, uniqueness: normalizedClassUnique
+};

@@ -49,3 +49,4 @@
   \return Bundle.rankFrame x Degrees.one At[x := x].With[basis := basis].frame
 };
 \module Hopf;
+\module ModTwo;

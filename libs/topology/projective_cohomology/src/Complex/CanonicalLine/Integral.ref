@@ -1,0 +1,22 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import N.Basic[].Def[] \as Nat;
+\import N.Basic[].Prop[] \as Basic;
+\import \parent.Realification[] \as Realification;
+\import \parent.Realification[].Norm[].Sphere[].Standard[] \as Hopf;
+\import real.Analysis[] \as R;
+\import thom_spaces.Thom[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].For[X := Space, F := Line, bundle := Realification.bundle].With[metric := Realification.metric] \as Disk;
+\import cohomology_thom.Thom[].Real[].For[X := Space, F := Line, bundle := Realification.bundle].With[metric := Realification.metric] \as Geometry;
+\import singular_products.Cochains[A := Space, source := topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\import Product.Cohomology[] \as H;
+\import Geometry.Coefficients[R := I.Int^, ring := Integers.commutativeRing].SphereSequence[] \as Raw;
+\import singular_cohomology.Relative[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary].With[coefficients := Product.integerCoefficients].PairSequence[] \as PairSequence;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\module Boundary;
+\module Exact(k: N.Nat^);
+\module Unit;

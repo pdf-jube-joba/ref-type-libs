@@ -1,0 +1,48 @@
+\import std.Logic[].Classical[] \as Classical;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Logic.either;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\import algebra.Two[] \as Two;
+\import singular_products.Cochains[A := Space, source := topology, R := Two.Carrier, ring := Two.commutativeRing].Cohomology[] \as H;
+\import \parent.CanonicalLine[].ModTwo[].Euler[] \as Euler;
+\import \parent.Additive[] \as Additive;
+\import N.Basic[].Prop[] \as Order;
+\definition generator: H.Group Degrees.one := Euler.generator;
+\definition power: \forall (k: N.Nat^) -> H.Group k := Euler.power;
+\definition nonzero: \forall (k: N.Nat^) -> Order.Le k dimension -> Logic.Not (power k = (H.moduleSpace k).zero) := \block {
+  \fun (k: N.Nat^)(bound: _)(zero: _) \then
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return Euler.Nonvanishing[cw := cw].nonzero k bound zero
+};
+\definition multiplyPowers: _ := Euler.multiplyPowers;
+\module Degree(k: N.Nat^) {
+  \import Additive.Ordinary[k := k] \as Ordinary;
+  \definition above: _ := Ordinary.vanishesAbove;
+  \definition powerAbove[bound: Order.Lt dimension k]: power k = (H.moduleSpace k).zero :=
+    above bound (power k);
+  \definition uniqueNonzero: _ := Ordinary.uniqueNonzero;
+  \definition classes[bound: Order.Le k dimension][a: H.Group k]:
+    Logic.Or[a = (H.moduleSpace k).zero, a = power k] :=
+    either!{{(Classical.excludedMiddle (a = (H.moduleSpace k).zero))}
+      {Logic.Or[a = (H.moduleSpace k).zero, a = power k]}
+      {\fun (same: _) => Logic.Or[_, _]::left same}
+      {\fun (different: _) => Logic.Or[_, _]::right (uniqueNonzero bound a (power k) different (nonzero k bound))}
+    };
+}
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := Two.Carrier, ring := Rings.commutativeRingAsRing Two.Carrier Two.commutativeRing] \as BinaryModules;
+\import N.Basic[].Def[] \as Nat;
+\import \root.PowerOne[X := Space, space := topology, K := Two.Carrier, ring := Two.commutativeRing, generator := generator] \as Power;
+\definition firstPower: power Degrees.one = generator := Power.firstPower;
+\definition monomial[k: N.Nat^][a: Two.Carrier]: H.Group k := Power.monomial k a;
+\module Basis(k: N.Nat^);
+\module Product(p, q: N.Nat^) {
+  \definition total: N.Nat^ := Nat.add p q;
+  \import H.Cup[p := p, q := q] \as Cup;
+  \definition multiply: _ := Power.Product[p := p, q := q].multiply;
+  \definition truncated[above: Order.Lt dimension total][a: H.Group p][b: H.Group q]:
+    Cup.apply a b = (H.moduleSpace total).zero := \parent.Degree[k := total].above above (Cup.apply a b);
+}

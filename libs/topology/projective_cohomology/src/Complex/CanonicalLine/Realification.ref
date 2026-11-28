@@ -74,3 +74,4 @@
         (Coordinates.frame.leftInverse w))
 };
 \definition metric: Metrics.Metric := Metrics.FromEmbedding[embedding := embedding].metric;
+\module Norm;
