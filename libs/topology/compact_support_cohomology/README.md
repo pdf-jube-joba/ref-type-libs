@@ -13,6 +13,7 @@ The construction uses all compact subsets and applies in particular to locally c
 | `Directed.System.With` | Common-stage equality of representatives, elimination on representatives, and compatibility with the structure maps |
 | `On.With.Degree.Descend` | Factor a compatible family of maps out of the stages through the direct limit |
 | `On.With.Degree.Compact` | Compare the direct limit with its terminal stage at the whole support |
+| `On.With.Degree.Module` | Abelian group operations on the direct limit and linear structure maps from the relative stages |
 | `Proper.With.WithCoefficients` | Pull back along a continuous map with compact inverse images of compact sets, with a representative formula |
 | `On.Excision.With` | Restriction to an open neighborhood of a compact support is an isomorphism |
 | `On.Open.With.AtSupport` | Excision for an open subspace at a chosen compact support |

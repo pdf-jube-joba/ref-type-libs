@@ -58,3 +58,23 @@
 \module Into(Target: \Set, stageMap: \forall (i: Index) -> Stage i -> Target,
   compatibleMap: \forall (i, j: Index)(ij: before i j)(x: Stage i) -> stageMap i x = stageMap j (advance i j ij x));
 \module Terminal(last: Index, above: \forall (i: Index) -> before i last);
+
+\module Together;
+\module Unary(operation: \forall (i: Index) -> Stage i -> Stage i,
+  naturality: \forall (i, j: Index)(ij: before i j)(x: Stage i) ->
+    advance i j ij (operation i x) = operation j (advance i j ij x));
+\module Binary(operation: \forall (i: Index) -> Stage i -> Stage i -> Stage i,
+  naturality: \forall (i, j: Index)(ij: before i j)(x, y: Stage i) ->
+    advance i j ij (operation i x y) = operation j (advance i j ij x) (advance i j ij y));
+
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\module Additive(spaces: \forall (i: Index) -> Modules.Space (Stage i), origin: Index,
+  preservesZero: \forall (i, j: Index)(ij: before i j) -> advance i j ij (spaces i).zero = (spaces j).zero,
+  preservesAdd: \forall (i, j: Index)(ij: before i j)(x, y: Stage i) ->
+    advance i j ij ((spaces i).add x y) = (spaces j).add (advance i j ij x) (advance i j ij y),
+  preservesNeg: \forall (i, j: Index)(ij: before i j)(x: Stage i) ->
+    advance i j ij ((spaces i).neg x) = (spaces j).neg (advance i j ij x),
+  preservesScale: \forall (i, j: Index)(ij: before i j)(a: I.Int^)(x: Stage i) ->
+    advance i j ij ((spaces i).smul a x) = (spaces j).smul a (advance i j ij x));

@@ -1,0 +1,78 @@
+\definition associative: \forall (x, y, z: Carrier) -> add (add x y) z = add x (add y z) :=
+  Together.three (\fun (x, y, z: Carrier) => add (add x y) z = add x (add y z))
+    (\fun (i: Index)(x, y, z: Stage i) => eq_reason_in!{Carrier { add (add (ofStage i x) (ofStage i y)) (ofStage i z) }
+      "=" {add (ofStage i ((spaces i).add x y)) (ofStage i z)} "by" { congr!{Carrier Carrier} (\fun (v: Carrier) => add v (ofStage i z)) _ _ (addOnStage i x y) }
+      "=" {ofStage i ((spaces i).add ((spaces i).add x y) z)} "by" { addOnStage i ((spaces i).add x y) z }
+      "=" {ofStage i ((spaces i).add x ((spaces i).add y z))} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ (((spaces i).additive.group.monoid).associative x y z) }
+      "=" {add (ofStage i x) (ofStage i ((spaces i).add y z))} "by" { sym!{Carrier} _ _ (addOnStage i x ((spaces i).add y z)) }
+      "=" {add (ofStage i x) (add (ofStage i y) (ofStage i z))} "by" { sym!{Carrier} _ _ (congr!{Carrier Carrier} (\fun (v: Carrier) => add (ofStage i x) v) _ _ (addOnStage i y z)) }});
+
+\definition leftIdentity: \forall (x: Carrier) -> add zero x = x :=
+  induction (\fun (x: Carrier) => add zero x = x)
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier { add zero (ofStage i x) }
+      "=" {add (ofStage i (spaces i).zero) (ofStage i x)} "by" { congr!{Carrier Carrier} (\fun (v: Carrier) => add v (ofStage i x)) _ _ (zeroOnStage i) }
+      "=" {ofStage i ((spaces i).add ((spaces i).zero) x)} "by" { addOnStage i ((spaces i).zero) x }
+      "=" {ofStage i x} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ (((spaces i).additive.group.monoid).leftIdentity x) }});
+
+\definition rightIdentity: \forall (x: Carrier) -> add x zero = x :=
+  induction (\fun (x: Carrier) => add x zero = x)
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier { add (ofStage i x) zero }
+      "=" {add (ofStage i x) (ofStage i (spaces i).zero)} "by" { congr!{Carrier Carrier} (\fun (v: Carrier) => add (ofStage i x) v) _ _ (zeroOnStage i) }
+      "=" {ofStage i ((spaces i).add x ((spaces i).zero))} "by" { addOnStage i x ((spaces i).zero) }
+      "=" {ofStage i x} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ (((spaces i).additive.group.monoid).rightIdentity x) }});
+
+\definition leftInverse: \forall (x: Carrier) -> add (neg x) x = zero :=
+  induction (\fun (x: Carrier) => add (neg x) x = zero)
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier { add (neg (ofStage i x)) (ofStage i x) }
+      "=" {add (ofStage i ((spaces i).neg x)) (ofStage i x)} "by" { congr!{Carrier Carrier} (\fun (v: Carrier) => add v (ofStage i x)) _ _ (negOnStage i x) }
+      "=" {ofStage i ((spaces i).add ((spaces i).neg x) x)} "by" { addOnStage i ((spaces i).neg x) x }
+      "=" {ofStage i ((spaces i).zero)} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ ((spaces i).additive.group.leftInverse x) }
+      "=" {zero} "by" { sym!{Carrier} _ _ (zeroOnStage i) }});
+
+\definition rightInverse: \forall (x: Carrier) -> add x (neg x) = zero :=
+  induction (\fun (x: Carrier) => add x (neg x) = zero)
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier { add (ofStage i x) (neg (ofStage i x)) }
+      "=" {add (ofStage i x) (ofStage i ((spaces i).neg x))} "by" { congr!{Carrier Carrier} (\fun (v: Carrier) => add (ofStage i x) v) _ _ (negOnStage i x) }
+      "=" {ofStage i ((spaces i).add x ((spaces i).neg x))} "by" { addOnStage i x ((spaces i).neg x) }
+      "=" {ofStage i ((spaces i).zero)} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ ((spaces i).additive.group.rightInverse x) }
+      "=" {zero} "by" { sym!{Carrier} _ _ (zeroOnStage i) }});
+
+\definition commutative: \forall (x, y: Carrier) -> add x y = add y x :=
+  Together.two (\fun (x, y: Carrier) => add x y = add y x)
+    (\fun (i: Index)(x, y: Stage i) => eq_reason_in!{Carrier { add (ofStage i x) (ofStage i y) }
+      "=" {ofStage i ((spaces i).add x y)} "by" { addOnStage i x y }
+      "=" {ofStage i ((spaces i).add y x)} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ ((spaces i).additive.commutative x y) }
+      "=" {add (ofStage i y) (ofStage i x)} "by" { sym!{Carrier} _ _ (addOnStage i y x) }});
+
+\definition scalarOne: \forall (x: Carrier) -> smul integerRing.one x = x :=
+  induction (\fun (x: Carrier) => smul integerRing.one x = x)
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier { smul integerRing.one (ofStage i x) }
+      "=" {ofStage i ((spaces i).smul integerRing.one x)} "by" { smulOnStage integerRing.one i x }
+      "=" {ofStage i x} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ ((spaces i).scalarOne x) }});
+
+\definition scalarAssoc[a, b: I.Int^]: \forall (x: Carrier) -> smul (integerRing.mul a b) x = smul a (smul b x) :=
+  induction (\fun (x: Carrier) => smul (integerRing.mul a b) x = smul a (smul b x))
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier { smul (integerRing.mul a b) (ofStage i x) }
+      "=" {ofStage i ((spaces i).smul (integerRing.mul a b) x)} "by" { smulOnStage (integerRing.mul a b) i x }
+      "=" {ofStage i ((spaces i).smul a ((spaces i).smul b x))} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ ((spaces i).scalarAssoc a b x) }
+      "=" {smul a (ofStage i ((spaces i).smul b x))} "by" { sym!{Carrier} _ _ (smulOnStage a i ((spaces i).smul b x)) }
+      "=" {smul a (smul b (ofStage i x))} "by" { sym!{Carrier} _ _ (congr!{Carrier Carrier} (\fun (v: Carrier) => smul a v) _ _ (smulOnStage b i x)) }});
+
+\definition scalarAdd[a, b: I.Int^]: \forall (x: Carrier) -> smul (integerRing.add a b) x = add (smul a x) (smul b x) :=
+  induction (\fun (x: Carrier) => smul (integerRing.add a b) x = add (smul a x) (smul b x))
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier { smul (integerRing.add a b) (ofStage i x) }
+      "=" {ofStage i ((spaces i).smul (integerRing.add a b) x)} "by" { smulOnStage (integerRing.add a b) i x }
+      "=" {ofStage i ((spaces i).add ((spaces i).smul a x) ((spaces i).smul b x))} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ ((spaces i).scalarAdd a b x) }
+      "=" {add (ofStage i ((spaces i).smul a x)) (ofStage i ((spaces i).smul b x))} "by" { sym!{Carrier} _ _ (addOnStage i ((spaces i).smul a x) ((spaces i).smul b x)) }
+      "=" {add (ofStage i ((spaces i).smul a x)) (smul b (ofStage i x))} "by" { sym!{Carrier} _ _ (congr!{Carrier Carrier} (\fun (v: Carrier) => add (ofStage i ((spaces i).smul a x)) v) _ _ (smulOnStage b i x)) }
+      "=" {add (smul a (ofStage i x)) (smul b (ofStage i x))} "by" { sym!{Carrier} _ _ (congr!{Carrier Carrier} (\fun (v: Carrier) => add v (smul b (ofStage i x))) _ _ (smulOnStage a i x)) }});
+
+\definition vectorAdd[a: I.Int^]: \forall (x, y: Carrier) -> smul a (add x y) = add (smul a x) (smul a y) :=
+  Together.two (\fun (x, y: Carrier) => smul a (add x y) = add (smul a x) (smul a y))
+    (\fun (i: Index)(x, y: Stage i) => eq_reason_in!{Carrier { smul a (add (ofStage i x) (ofStage i y)) }
+      "=" {smul a (ofStage i ((spaces i).add x y))} "by" { congr!{Carrier Carrier} (\fun (v: Carrier) => smul a v) _ _ (addOnStage i x y) }
+      "=" {ofStage i ((spaces i).smul a ((spaces i).add x y))} "by" { smulOnStage a i ((spaces i).add x y) }
+      "=" {ofStage i ((spaces i).add ((spaces i).smul a x) ((spaces i).smul a y))} "by" { congr!{{Stage i} Carrier} (ofStage i) _ _ ((spaces i).vectorAdd a x y) }
+      "=" {add (ofStage i ((spaces i).smul a x)) (ofStage i ((spaces i).smul a y))} "by" { sym!{Carrier} _ _ (addOnStage i ((spaces i).smul a x) ((spaces i).smul a y)) }
+      "=" {add (ofStage i ((spaces i).smul a x)) (smul a (ofStage i y))} "by" { sym!{Carrier} _ _ (congr!{Carrier Carrier} (\fun (v: Carrier) => add (ofStage i ((spaces i).smul a x)) v) _ _ (smulOnStage a i y)) }
+      "=" {add (smul a (ofStage i x)) (smul a (ofStage i y))} "by" { sym!{Carrier} _ _ (congr!{Carrier Carrier} (\fun (v: Carrier) => add v (smul a (ofStage i y))) _ _ (smulOnStage a i x)) }});

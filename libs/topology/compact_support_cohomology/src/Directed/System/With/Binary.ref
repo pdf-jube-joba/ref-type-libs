@@ -1,0 +1,48 @@
+\definition atCommon[i, j, k: Index][left: before i k][right: before j k][x: Stage i][y: Stage j]: Carrier :=
+  ofStage k (operation k (advance i k left x) (advance j k right y));
+
+\definition moveSum[i, j, k, l: Index][ik: before i k][jk: before j k][kl: before k l][x: Stage i][y: Stage j]:
+  atCommon i j k ik jk x y = atCommon i j l (order.transitive i k l ik kl) (order.transitive j k l jk kl) x y :=
+  eq_reason_in!{Carrier _
+    "=" _ "by" { compatible k l kl (operation k (advance i k ik x) (advance j k jk y)) }
+    "=" _ "by" { congr!{{Stage l} Carrier} (ofStage l) _ _
+      (eq_reason_in!{{Stage l} _
+        "=" _ "by" { naturality k l kl (advance i k ik x) (advance j k jk y) }
+        "=" _ "by" { congr!{{Stage l} {Stage l} {Stage l}} (operation l) _ _ _ _
+          (sym!{{Stage l}} _ _ (laws.compose i k l ik kl x))
+          (sym!{{Stage l}} _ _ (laws.compose j k l jk kl y)) }}) }};
+
+\definition compare[i, j, k, l: Index][ik: before i k][jk: before j k][il: before i l][jl: before j l][x: Stage i][y: Stage j]:
+  atCommon i j k ik jk x y = atCommon i j l il jl x y :=
+  eq_reason_in!{Carrier _
+    "=" _ "by" { moveSum i j k (join k l) ik jk (upper k l).left x y }
+    "=" _ "by" { sym!{Carrier} _ _ (moveSum i j l (join k l) il jl (upper k l).right x y) }};
+
+\definition raw[a, b: Representative]: Carrier :=
+  atCommon a.index b.index (join a.index b.index) (upper a.index b.index).left (upper a.index b.index).right a.value b.value;
+
+\import Quotient.Binary[C := Representative, B := Carrier, OtherEquivalent := Equivalent] \as Descent;
+\definition respects: Descent.Respects raw := \block {
+  \fun (a, c, b, d: Representative)(ac: Equivalent a c)(bd: Equivalent b d) \then
+  \takefrom first: Agreement[a, c] \by ac \then
+  \takefrom second: Agreement[b, d] \by bd \then
+  \let k: Index := join first.index second.index \then
+  \let both: Upper[first.index, second.index, k] := upper first.index second.index \then
+  \let ak: before a.index k := order.transitive a.index first.index k first.bounds.left both.left \then
+  \let ck: before c.index k := order.transitive c.index first.index k first.bounds.right both.left \then
+  \let bk: before b.index k := order.transitive b.index second.index k second.bounds.left both.right \then
+  \let dk: before d.index k := order.transitive d.index second.index k second.bounds.right both.right \then
+  \return eq_reason_in!{Carrier _
+    "=" _ "by" { compare a.index b.index (join a.index b.index) k (upper a.index b.index).left (upper a.index b.index).right ak bk a.value b.value }
+    "=" _ "by" { congr!{{Stage k} {Stage k} Carrier} (\fun (x, y: Stage k) => ofStage k (operation k x y))
+        _ _ _ _ (move a c first k both.left) (move b d second k both.right) }
+    "=" _ "by" { compare c.index d.index k (join c.index d.index) ck dk (upper c.index d.index).left (upper c.index d.index).right c.value d.value }}
+};
+
+\definition apply[x, y: Carrier]: Carrier := Descent.value equivalence equivalence raw respects x y;
+\definition onStage[i: Index][x, y: Stage i]: apply (ofStage i x) (ofStage i y) = ofStage i (operation i x y) :=
+  eq_reason_in!{Carrier _
+    "=" _ "by" { Descent.onClass equivalence equivalence raw respects (represent i x) (represent i y) }
+    "=" _ "by" { compare i i (join i i) i (upper i i).left (upper i i).right (order.reflexive i) (order.reflexive i) x y }
+    "=" _ "by" { congr!{{Stage i} {Stage i} Carrier} (\fun (u, v: Stage i) => ofStage i (operation i u v))
+        _ _ _ _ (laws.identity i x) (laws.identity i y) }};

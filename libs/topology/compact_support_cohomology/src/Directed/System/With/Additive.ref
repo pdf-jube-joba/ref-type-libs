@@ -1,0 +1,63 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Alg[].Ring[] \as Ring;
+\import std.Alg[].Alg[] \as Alg;
+\import std.Alg[].Monoid[] \as Monoid;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\import \parent.Together[] \as Together;
+
+\definition integerRing: Ring.Ring[I.Int^] := Integers.ring;
+\definition zero: Carrier := ofStage origin (spaces origin).zero;
+\definition zeroOnStage[i: Index]: zero = ofStage i (spaces i).zero :=
+  eq_reason_in!{Carrier _
+    "=" _ "by" { compatible origin (join origin i) (upper origin i).left (spaces origin).zero }
+    "=" _ "by" { congr!{{Stage (join origin i)} Carrier} (ofStage (join origin i)) _ _
+      (preservesZero origin (join origin i) (upper origin i).left) }
+    "=" _ "by" { congr!{{Stage (join origin i)} Carrier} (ofStage (join origin i)) _ _
+      (sym!{{Stage (join origin i)}} _ _ (preservesZero i (join origin i) (upper origin i).right)) }
+    "=" _ "by" { sym!{Carrier} _ _ (compatible i (join origin i) (upper origin i).right (spaces i).zero) }};
+
+\definition stageAdd[i: Index]: Stage i -> Stage i -> Stage i := (spaces i).add;
+\definition stageNeg[i: Index]: Stage i -> Stage i := (spaces i).neg;
+\definition stageScale[r: I.Int^][i: Index]: Stage i -> Stage i := (spaces i).smul r;
+\import \parent.Binary[operation := stageAdd, naturality := preservesAdd] \as Sum;
+\import \parent.Unary[operation := stageNeg, naturality := preservesNeg] \as Negation;
+
+\definition add: Carrier -> Carrier -> Carrier := Sum.apply;
+\definition addOnStage: _ := Sum.onStage;
+\definition neg: Carrier -> Carrier := Negation.apply;
+\definition negOnStage: _ := Negation.onStage;
+
+\module Scalar(a: I.Int^) {
+  \import \parent.\parent.Unary[operation := stageScale a,
+    naturality := (\fun (i, j: Index)(ij: before i j)(x: Stage i) => preservesScale i j ij a x)] \as Scale;
+  \definition apply: Carrier -> Carrier := Scale.apply;
+  \definition onStage: _ := Scale.onStage;
+}
+\definition smul[a: I.Int^]: Carrier -> Carrier := Scalar[a := a].apply;
+\definition smulOnStage[a: I.Int^]: _ := Scalar[a := a].onStage;
+
+\module Laws;
+\import Laws[] \as Proof;
+\definition moduleSpace: Modules.Space Carrier := Ring.RingModule[I.Int^, Carrier, Integers.ring] {
+  zero := zero, add := add, neg := neg, smul := smul,
+  additive := Alg.CommutativeGroupLaws[Carrier, Alg.CommutativeGroupData[Carrier]::# (Alg.GroupData[Carrier]::# zero add neg)] {
+    group := Alg.GroupLaws[Carrier, Alg.GroupData[Carrier]::# zero add neg] {
+      monoid := Monoid.MonoidLaws[Carrier, Monoid.MonoidData[Carrier]::# zero add] {
+        associative := Proof.associative, leftIdentity := Proof.leftIdentity, rightIdentity := Proof.rightIdentity,
+      },
+      leftInverse := Proof.leftInverse, rightInverse := Proof.rightInverse,
+    },
+    commutative := Proof.commutative,
+  },
+  scalarOne := Proof.scalarOne, scalarAssoc := Proof.scalarAssoc,
+  scalarAdd := Proof.scalarAdd, vectorAdd := Proof.vectorAdd,
+};
+\module OfStage(i: Index) {
+  \import Modules.Hom[V := Stage i, W := Carrier, source := spaces i, target := moduleSpace] \as Injection;
+  \definition linear: Injection.Map := Injection.Map {
+    apply := ofStage i,
+    addition := \fun (x, y: Stage i) => sym!{Carrier} _ _ (addOnStage i x y),
+    scalar := \fun (a: I.Int^)(x: Stage i) => sym!{Carrier} _ _ (smulOnStage a i x),
+  };
+}

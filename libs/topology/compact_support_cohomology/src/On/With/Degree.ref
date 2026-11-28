@@ -29,3 +29,4 @@
 }
 
 \module Compact(compactSpace: Top.IsCompact space);
+\module Module;
