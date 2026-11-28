@@ -66,3 +66,4 @@
 \import Rotate.Between[S := XDirection.domain, T := points, sourceCompact := XDirection.compactDomain, targetCompact := YDirection.compactDomain, within := membership] \as Transport;
 \module Of(p, q: Smooth.SmoothFunction Open.whole);
 \module Signs;
+\module Differential(omega: euclidean_forms.Euclidean[n := dimension].On[U := Open.whole].Form One.dimension);

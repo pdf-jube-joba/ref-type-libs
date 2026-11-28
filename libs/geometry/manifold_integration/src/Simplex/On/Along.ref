@@ -1,0 +1,3 @@
+\import euclidean_forms.Euclidean[n := m].On[U := V] \as Target;
+\import euclidean_forms.Euclidean[n := n].Pullback[m := m, U := U, V := V, f := sigma] \as Pullback;
+\definition cochain[omega: Target.Form n]: Real.Real := integral (Pullback.apply n omega);

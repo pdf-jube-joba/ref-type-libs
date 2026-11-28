@@ -1,0 +1,73 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\import algebraic_topology.Simplex[] \as Barycentric;
+\import Barycentric.At[n := n] \as Standard;
+\import Barycentric.Compactness[n := n] \as Compactness;
+\import boundary_manifolds.Refinement[A := Standard.CoordinateCarrier] \as Refined;
+\import real.Analysis[] \as Real;
+\import Real.FiniteSums[] \as Sums;
+\import Real.Distance[] \as Differences;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import Fin.Tuples[A := Real.Real] \as Tuples;
+\import euclidean_measure.Euclidean[n := n] \as E;
+\import topological_algebra.Euclidean[].Dimension[n := n].Topology[] \as Topology;
+\import topological_algebra.Coordinates[K := Real.Real, I := Fin.Fin n].Universal[A := Standard.CarrierSet] \as Coordinates;
+\import metric_spaces.RealLine[] \as Line;
+\import topology.Topology[Carrier := Standard.CarrierSet] \as Source;
+\import topology.Topology[Carrier := E.Point] \as Sets;
+\import topology.Maps[A := Standard.CarrierSet, B := E.Point] \as Maps;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\definition project[x: Standard.CarrierSet][i: Fin.Fin n]: Real.Real := x (Fin.succ n i);
+\definition continuous: topology.Continuity[A := Standard.CarrierSet, B := E.Point].Continuous Standard.topology Topology.topology project :=
+  \fun (U: \Pow E.Point)(opened: _) => Coordinates.continuous Standard.topology Line.topology project
+    (\fun (i: Fin.Fin n) => Standard.coordinateContinuous (Fin.succ n i)) U (Topology.metricOpen U opened);
+\definition points: \Pow E.Point := Maps.Image project Source.Whole;
+\definition compact: Sets.IsCompactIn Topology.topology points :=
+  topology.Compactness[A := Standard.CarrierSet, B := E.Point].continuousImage
+    Standard.topology Topology.topology project continuous Source.Whole Compactness.compact;
+\definition Nonnegative[x: E.Point]: \Prop := \forall (i: Fin.Fin n) -> R.Le Real.zero (x i);
+\definition slack[x: E.Point]: Real.Real := Real.sub Real.one (Sums.sum n x);
+\definition lift[x: E.Point][positive: Nonnegative x][bounded: R.Le (Sums.sum n x) Real.one]: Standard.CarrierSet :=
+  \into[Standard.CoordinateCarrier](Tuples.extend n (slack x) x, Barycentric.Points n) \by {
+    Barycentric.Barycentric[N.Nat^::succ n, Tuples.extend n (slack x) x] {
+      nonnegative := Barycentric.extendNonnegative n (slack x) x (Differences.subNonnegative Real.one (Sums.sum n x) bounded) positive,
+      total := trans!{Real.Real} _ _ _ (Barycentric.extendSum n (slack x) x) (Differences.subAddCancel Real.one (Sums.sum n x)),
+    }
+  };
+\definition projectLift[x: E.Point][positive: Nonnegative x][bounded: R.Le (Sums.sum n x) Real.one]: project (lift x positive bounded) = x :=
+  \axiom:funext(project (lift x positive bounded), x, Tuples.atSuccessor n (slack x) x);
+\definition member[x: E.Point]: Nonnegative x -> R.Le (Sums.sum n x) Real.one -> Sets.Member points x :=
+  \fun (positive: _)(bounded: _) =>
+    \idelim project (lift x positive bounded) = x \with y: E.Point => Sets.Member points y \by {
+      base: Maps.imageMember project Source.Whole (lift x positive bounded) (\refl(lift x positive bounded)),
+      equality: projectLift x positive bounded
+    };
+\definition projectNonnegative[x: Standard.CarrierSet]: Nonnegative (project x) :=
+  \fun (i: Fin.Fin n) => (Barycentric.barycentric n x).nonnegative (Fin.succ n i);
+\definition projectBound[x: Standard.CarrierSet]: R.Le (Sums.sum n (project x)) Real.one :=
+  R.leReplace (Real.add Real.zero (Sums.sum n (project x))) (Sums.sum n (project x))
+    (Real.add (x (Fin.zero n)) (Sums.sum n (project x))) Real.one
+    (Laws.addZeroLeft (Sums.sum n (project x))) (Barycentric.barycentric n x).total
+    (Laws.addMonotoneRight Real.zero (x (Fin.zero n)) (Sums.sum n (project x))
+      ((Barycentric.barycentric n x).nonnegative (Fin.zero n)));
+\definition liftProject[x: Standard.CarrierSet]: lift (project x) (projectNonnegative x) (projectBound x) = x :=
+  Refined.equality (Barycentric.Points n) (lift (project x) (projectNonnegative x) (projectBound x)) x
+    (Tuples.extensionality n (lift (project x) (projectNonnegative x) (projectBound x)) x
+      (trans!{Real.Real} _ _ _ (Tuples.atZero n (slack (project x)) (project x))
+        (Laws.addCancelRight (slack (project x)) (x (Fin.zero n)) (Sums.sum n (project x))
+          (trans!{Real.Real} _ _ _ (Differences.subAddCancel Real.one (Sums.sum n (project x)))
+            (sym!{Real.Real} _ _ (Barycentric.barycentric n x).total))))
+      (Tuples.atSuccessor n (slack (project x)) (project x)));
+\definition inequalities[x: E.Point]: Sets.Member points x -> Logic.And[Nonnegative x, R.Le (Sums.sum n x) Real.one] :=
+  Maps.imageElim project Source.Whole x _
+    (\fun (b: Standard.CarrierSet)(inside: _)(same: project b = x) =>
+      \idelim project b = x \with y: E.Point => Logic.And[Nonnegative y, R.Le (Sums.sum n y) Real.one] \by {
+        base: Logic.And[_, _]::# (projectNonnegative b) (projectBound b),
+        equality: same
+      });
+\module On(U: Open.OpenSet, within: Sets.Subset points U.points);

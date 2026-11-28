@@ -23,3 +23,4 @@ real = { path = "../../real/basic" }
 smooth_partitions = { path = "../smooth_partitions" }
 std = { path = "../../std" }
 topology = { path = "../../topology/basic" }
+algebraic_topology = { path = "../../topology/homotopy" }

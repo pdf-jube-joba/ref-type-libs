@@ -1,0 +1,20 @@
+\import boundary_manifolds.Model[n := n] \as Model;
+\definition nonnegative[x: E.Point]: Sets.Member points x -> Model.Nonnegative Model.unconstrained x :=
+  \fun (inside: _) => Model.unconstrainedNonnegative x;
+\import \root.CornerChart[n := n].On[C := Model.unconstrained, U := U] \as Chart;
+\import Chart.Within[K := points, compact := compact, included := within, nonnegative := nonnegative] \as Area;
+\definition Point: \Set := Area.Point;
+\definition coordinate[x: Point]: Open.Carrier U := Area.coordinate x;
+\definition Form: \Set := Chart.Form;
+\definition integral[omega: Form]: Real.Real := Area.integral omega;
+\module Along(m: N.Nat^, V: calculus.Real[].Multivariable[n := m].Open[].OpenSet, sigma: calculus.Maps[n := n, m := m].Map U V);
+\import manifolds.Dimension[n := n].Examples[].Euclidean[].Subspace[U := U] \as Parameter;
+\import manifolds.Dimension[n := n].Smooth[] \as Domain;
+\definition domain: Domain.Manifold := Parameter.smoothManifold;
+\import differential_forms.Forms[n := n].On[M := domain] \as SourceForms;
+\import manifolds.Dimension[n := n].Atlas[M := domain.Point, space := domain.space] \as Atlas;
+\import manifolds.Dimension[n := n].Chart[M := domain.Point, space := domain.space] \as Charts;
+\definition chart: SourceForms.Chart := \into[Charts.Chart](Parameter.standard, domain.atlas.charts) \by {
+  Atlas.includedInSaturation Parameter.atlas Parameter.standard (\refl(Parameter.standard))
+};
+\module Manifold(m: N.Nat^);

@@ -28,9 +28,13 @@ Compactly supported top forms are integrated in Euclidean coordinates by taking 
 | Permute.Between.Of.invariant | Transport compact-region coefficient integrals under coordinate permutations |
 | Rectangle.Of.green | Prove the planar curl integral formula with four signed edge integrals |
 | Rectangle.Signs | Compute the outward-first orientation of the four rectangle edges |
+| Rectangle.Differential.stokes | Integrate the exterior derivative of a smooth one-form over a rectangle and obtain the four oriented edge integrals |
 | StandardInterval.stokes | Prove Stokes on the actual G03 interval with the outward-first orientation at its two endpoints |
 | Collar.On.With.Of.At | Compute the outward-first contraction along the actual boundary inclusion from a G04 collar and prove the sign of its normal coefficient |
 | Corner.On.Over.cancel | Integrate the two orders of normal contraction over a common codimension-two parametrization and prove cancellation |
+| Simplex | Project the standard barycentric simplex onto its last \(n\) coordinates and recover the omitted coordinate |
+| Simplex.On.Along.cochain | Integrate a pullback along a smooth extension of a simplex into a Euclidean open set |
+| Simplex.On.Manifold.To.Along.cochain | Integrate a pullback along a smooth extension of a simplex into a smooth manifold |
 
 The interval API uses an open neighborhood of the parameter interval and allows the unit interval for singular paths. The path API takes a smooth extension to that neighborhood. Its signed endpoints are the terminal vertex with coefficient \(+1\) and the initial vertex with coefficient \(-1\).
 
@@ -38,6 +42,8 @@ The global integral applies to smooth manifolds without boundary. The input incl
 
 The quadrant chart integral takes a smooth form on the ambient open set. Its value depends only on the coefficient restricted to the compact region of the quadrant.
 
-Stokes for arbitrary compact manifolds with boundary or corners and the higher-dimensional smooth singular cochain map remain open.
+The higher-dimensional simplex integrals use the ordered coordinates \(x_1,\ldots,x_n\) with omitted barycentric coordinate \(1-\sum_i x_i\). The current interface takes a specified smooth extension on an open neighborhood of the simplex.
+
+For arbitrary manifolds with boundary or corners, the global integral and Stokes formula remain open. The higher-dimensional simplex integrals still need independence of the chosen extension and the comparison with the signed face coboundary.
 
 [Source](src/root.ref) · [Dependencies](ref.toml) · [Checking](../../USAGE.md)
