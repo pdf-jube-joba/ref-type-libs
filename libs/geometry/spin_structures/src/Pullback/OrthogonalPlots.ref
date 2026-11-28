@@ -1,0 +1,22 @@
+\import lie_groups.Euclidean[n := r] \as E;
+\import \root.Orthogonal[r := r].Plots[n := m] \as TargetPlots;
+\import \root.Orthogonal[r := r].Plots[n := n] \as SourcePlots;
+\import calculus.Maps[n := n, m := m] \as Calculus;
+\import E.Plots[d := m].Precomposition[e := n] \as OrthogonalPrecomposition;
+\import E.PinPlots[d := m].Precomposition[e := n] \as PinPrecomposition;
+\import lie_groups.SpinGroup[n := r] \as Spin;
+\import clifford.Field[K := R.Real, field := R.Algebra[].field].On[V := E.Vector, space := E.space].Of[form := E.form].Pin[] \as Pins;
+\import lie_groups.ComplexGroup[n := r].Over[G := E.Spin, group := E.spinGroup, embedding := Spin.embedding,
+  injective := Spin.embeddingInjective, sign := Pins.spinInvolution, compatible := Spin.compatible].Plots[d := m].Precomposition[e := n] \as ComplexPrecomposition;
+\definition orthogonal: \forall (U: SourceOpen.OpenSet)(V: TargetOpen.OpenSet)(g: Calculus.Map U V)(u: TargetOpen.Carrier V -> E.SO) ->
+    TargetPlots.Orthogonal V u -> SourcePlots.Orthogonal U (\fun (x: SourceOpen.Carrier U) => u (g.apply x)) :=
+  \fun (U: SourceOpen.OpenSet)(V: TargetOpen.OpenSet)(g: Calculus.Map U V)(u: TargetOpen.Carrier V -> E.SO)(regular: _) =>
+    OrthogonalPrecomposition.On[U := U, V := V, f := (\fun (x: TargetOpen.Carrier V) => u x), h := g, regular := regular].plot;
+\definition spin: \forall (U: SourceOpen.OpenSet)(V: TargetOpen.OpenSet)(g: Calculus.Map U V)(u: TargetOpen.Carrier V -> E.Spin) ->
+    TargetPlots.Spin V u -> SourcePlots.Spin U (\fun (x: SourceOpen.Carrier U) => u (g.apply x)) :=
+  \fun (U: SourceOpen.OpenSet)(V: TargetOpen.OpenSet)(g: Calculus.Map U V)(u: TargetOpen.Carrier V -> E.Spin)(regular: _) =>
+    PinPrecomposition.On[U := U, V := V, f := (\fun (x: TargetOpen.Carrier V) => Pins.inclusion (u x)), h := g, regular := regular].plot;
+\definition spinC: \forall (U: SourceOpen.OpenSet)(V: TargetOpen.OpenSet)(g: Calculus.Map U V)(u: TargetOpen.Carrier V -> E.SpinC) ->
+    TargetPlots.SpinC V u -> SourcePlots.SpinC U (\fun (x: SourceOpen.Carrier U) => u (g.apply x)) :=
+  \fun (U: SourceOpen.OpenSet)(V: TargetOpen.OpenSet)(g: Calculus.Map U V)(u: TargetOpen.Carrier V -> E.SpinC)(regular: _) =>
+    ComplexPrecomposition.On[U := U, V := V, f := u, h := g, regular := regular].plot;

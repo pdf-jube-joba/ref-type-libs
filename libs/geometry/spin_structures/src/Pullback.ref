@@ -1,0 +1,12 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.congr;
+\import real.Analysis[] \as R;
+\import manifolds.Dimension[n := n].Smooth[] \as Sources;
+\import manifolds.Dimension[n := m].Smooth[] \as Targets;
+\import calculus.Real[].Multivariable[n := n].Open[] \as SourceOpen;
+\import calculus.Real[].Multivariable[n := m].Open[] \as TargetOpen;
+\module Between(X: Sources.Manifold, Y: Targets.Manifold);
+\module OrthogonalPlots(r: std.Data[].Nat[].Nat^);

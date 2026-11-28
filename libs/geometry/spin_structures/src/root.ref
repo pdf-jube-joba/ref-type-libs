@@ -4,3 +4,5 @@
 \module CliffordEvaluation(n: std.Data[].Nat[].Nat^);
 \module Spinors(k: std.Data[].Nat[].Nat^);
 \module ComplexScalar(s: std.Data[].Nat[].Nat^);
+\module Pullback(n, m: std.Data[].Nat[].Nat^);
+\module SpinCProjection(r: std.Data[].Nat[].Nat^);

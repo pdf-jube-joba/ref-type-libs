@@ -1,0 +1,6 @@
+\import manifolds.SmoothMap[n := n, m := m].Between[M := X, N := Y] \as Maps;
+\import \root.Base[n := n].On[M := X] \as Source;
+\import \root.Base[n := m].On[M := Y] \as Target;
+\import manifolds.Dimension[n := n].Chart[M := X.Point, space := X.space] \as SourceCharts;
+\import manifolds.Dimension[n := m].Chart[M := Y.Point, space := Y.space] \as TargetCharts;
+\module Along(f: Maps.Map);

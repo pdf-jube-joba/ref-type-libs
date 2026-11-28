@@ -1,0 +1,6 @@
+\import \root.Orthogonal[r := r].Plots[n := n] \as Regular;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\module On(U: Open.OpenSet, f: Open.Carrier U -> E.SpinC, regular: Regular.SpinC U f);
+\definition smooth: \forall (U: Open.OpenSet)(f: Open.Carrier U -> E.SpinC) -> Regular.SpinC U f ->
+  Regular.Orthogonal U (\fun (x: Open.Carrier U) => Projection.spinC (f x)) :=
+  \fun (U: Open.OpenSet)(f: Open.Carrier U -> E.SpinC)(regular: Regular.SpinC U f) => On[U := U, f := f, regular := regular].smooth;

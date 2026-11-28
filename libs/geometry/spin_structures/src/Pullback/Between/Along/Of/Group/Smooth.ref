@@ -1,0 +1,5 @@
+\import Original.SmoothPrincipal[G := G, group := group, Regular := before] \as Old;
+\import Pulled.SmoothPrincipal[G := G, group := group, Regular := after] \as New;
+\definition Composes: \Prop := \forall (U: SourceOpen.OpenSet)(V: TargetOpen.OpenSet)(g: calculus.Maps[n := n, m := m].Map U V)
+  (u: TargetOpen.Carrier V -> G) -> before V u -> after U (\fun (x: SourceOpen.Carrier U) => u (g.apply x));
+\module Of(bundle: Old.Bundle, composes: Composes);

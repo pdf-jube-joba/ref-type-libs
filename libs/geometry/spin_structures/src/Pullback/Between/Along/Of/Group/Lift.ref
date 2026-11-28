@@ -1,0 +1,10 @@
+\import \parent.\parent.Group[G := H, group := liftedGroup] \as Lifted;
+\import Origin.Of[cocycle := data] \as Before;
+\import Target.Of[cocycle := cocycle data] \as After;
+\import Before.Lift[H := H, liftedGroup := liftedGroup, projection := projection] \as Old;
+\import After.Lift[H := H, liftedGroup := liftedGroup, projection := projection] \as New;
+\import \root.Principal[X := X.Point, G := H, Index := Pulled.Index, group := liftedGroup] \as LiftedTarget;
+\definition pullback[lift: Old.Structure]: New.Structure :=
+  \into[LiftedTarget.Cocycle](Lifted.cocycle lift, New.Structure) \by {
+    \fun (x: X.Point)(i, j: Pulled.Index x) => Old.With[data := lift].agrees (Maps.apply f x) (targetIndex x i) (targetIndex x j)
+  };

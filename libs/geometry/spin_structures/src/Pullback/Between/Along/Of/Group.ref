@@ -1,0 +1,11 @@
+\import \root.Principal[X := Y.Point, G := G, Index := Original.Index, group := group] \as Origin;
+\import \root.Principal[X := X.Point, G := G, Index := Pulled.Index, group := group] \as Target;
+\definition cocycle[data: Origin.Cocycle]: Target.Cocycle := Target.Cocycle {
+  change := \fun (x: X.Point)(i, j: Pulled.Index x) => data.change (Maps.apply f x) (targetIndex x i) (targetIndex x j),
+  identity := \fun (x: X.Point)(i: Pulled.Index x) => data.identity (Maps.apply f x) (targetIndex x i),
+  composition := \fun (x: X.Point)(i, j, k: Pulled.Index x) => data.composition (Maps.apply f x) (targetIndex x i) (targetIndex x j) (targetIndex x k),
+};
+\module Smooth(before: \forall (U: TargetOpen.OpenSet) -> (TargetOpen.Carrier U -> G) -> \Prop,
+  after: \forall (U: SourceOpen.OpenSet) -> (SourceOpen.Carrier U -> G) -> \Prop);
+\module Lift(H: \Set, liftedGroup: std.Alg[].Alg[].Group[H],
+  projection: algebra.Hom[A := H, B := G].GroupMap liftedGroup group, data: Origin.Cocycle);

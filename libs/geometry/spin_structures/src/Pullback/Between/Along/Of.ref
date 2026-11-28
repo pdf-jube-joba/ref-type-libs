@@ -1,0 +1,26 @@
+\import Target.OnCover[I := I, cover := cover] \as Original;
+\structure Index: \Set := {
+  chart: Source.Chart,
+  target: I,
+  inside: \forall (x: SourceCharts.LocalPoint chart) -> TargetCharts.Contains (cover.chart target) (Maps.apply f x),
+};
+\module Refine(c: Source.Chart, i: I);
+\definition covers: \forall (x: X.Point) -> \exists ( i: Index \where SourceCharts.Contains i.chart x ) :=
+  \fun (x: X.Point) => \block {
+    \takefrom original: \Cast[SourceCharts.Chart] ({ c: SourceCharts.Chart \where Logic.And[\In[SourceCharts.Chart] X.atlas.charts c, SourceCharts.Contains c x] }) \by X.atlas.covers x \then
+    \let evidence: Logic.And[\In[SourceCharts.Chart] X.atlas.charts original, SourceCharts.Contains original x] :=
+      \bysub(SourceCharts.Chart, { c: SourceCharts.Chart \where Logic.And[\In[SourceCharts.Chart] X.atlas.charts c, SourceCharts.Contains c x] }, original) \then
+    \let c: Source.Chart := \into[SourceCharts.Chart](original, X.atlas.charts) \by { evidence.left } \then
+    \takefrom i: Original.Index (Maps.apply f x) \by cover.covers (Maps.apply f x) \then
+    \return Logic.existsIntro[Index, { i: Index \where SourceCharts.Contains i.chart x }] (Refine[c := c, i := i].index)
+      (Refine[c := c, i := i].contains x evidence.right (\bysub(I, Original.Index (Maps.apply f x), i)))
+  };
+\definition pulledCover: Source.Cover[Index] := Source.Cover[Index] { chart := \fun (i: Index) => i.chart, covers := covers };
+\import Source.OnCover[I := Index, cover := pulledCover] \as Pulled;
+\definition targetIndex[x: X.Point][i: Pulled.Index x]: Original.Index (Maps.apply f x) :=
+  \into[I](i.target, Original.Index (Maps.apply f x)) \by {
+    i.inside (\into[X.Point](x, i.chart.domain) \by { \bysub(Index, Pulled.Index x, i) })
+  };
+\module Overlap(i, j: Index);
+\module Group(G: \Set, group: std.Alg[].Alg[].Group[G]);
+\module Orthogonal(r: std.Data[].Nat[].Nat^);

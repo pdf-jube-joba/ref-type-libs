@@ -1,0 +1,26 @@
+\import std.Data[].FinSet[] \as Fin;
+\import lie_groups.CliffordPlots[d := n] \as Plots;
+\import Plots.Dimension[n := r] \as AlgebraPlots;
+\import ComplexGeometry.Plots[d := n] \as ComplexPlots;
+\import clifford.EuclideanCoordinates[].Projection[] \as VectorRead;
+\definition operations: AlgebraPlots.Laws[U] := Plots.operations r U;
+\definition termPlot: \forall (a: Open.Carrier U -> Algebra.Carrier)(v: E.Vector) -> AlgebraPlots.Plot U a ->
+  AlgebraPlots.Plot U (\fun (x: Open.Carrier U) => term (a x) v) :=
+  \fun (a: Open.Carrier U -> Algebra.Carrier)(v: E.Vector)(regular: _) =>
+    operations.multiplication (\fun (x: Open.Carrier U) => Clifford.mul (a x) (Clifford.iota v)) (\fun (x: Open.Carrier U) => Reverse.map (a x))
+      (operations.multiplication a (\fun (x: Open.Carrier U) => Clifford.iota v) regular (operations.constant (Clifford.iota v)))
+      (operations.reversion a regular);
+\definition valuePlot[v: E.Vector]: AlgebraPlots.Plot U (\fun (x: Open.Carrier U) => value (f x) v) :=
+  operations.addition
+    (\fun (x: Open.Carrier U) => term (Parts.first (Coefficients.image (f x))) v)
+    (\fun (x: Open.Carrier U) => term (Parts.second (Coefficients.image (f x))) v)
+    (termPlot (\fun (x: Open.Carrier U) => Parts.first (Coefficients.image (f x))) v (ComplexPlots.real U f regular))
+    (termPlot (\fun (x: Open.Carrier U) => Parts.second (Coefficients.image (f x))) v (ComplexPlots.imaginary U f regular));
+\definition smooth: Regular.Orthogonal U (\fun (x: Open.Carrier U) => Projection.spinC (f x)) :=
+  \fun (v: E.Vector)(i: Fin.Fin r) => Plots.smoothEqual U
+    (\fun (x: Open.Carrier U) => (VectorRead.value r).read (value (f x) v) i)
+    (\fun (x: Open.Carrier U) => (Projection.spinC (f x)).value.apply v i)
+    (\fun (x: Open.Carrier U) => trans!{{R.Real}} _ _ _
+      (congr!{{Algebra.Carrier} {R.Real}} (\fun (a: Algebra.Carrier) => (VectorRead.value r).read a i) _ _ (formula (f x) v))
+      (congr!{{E.Vector} {R.Real}} (\fun (w: E.Vector) => w i) _ _ ((VectorRead.value r).onVector ((Projection.spinC (f x)).value.apply v))))
+    (Plots.VectorProjection[].law r U (\fun (x: Open.Carrier U) => value (f x) v) (valuePlot v) i);

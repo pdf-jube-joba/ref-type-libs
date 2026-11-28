@@ -1,0 +1,19 @@
+\definition pullbackFrames: PulledFrames.Bundle := FrameSmooth.Of[bundle := frameBundle, composes := Composition.orthogonal].pullback;
+\import Old.Of[frameBundle := frameBundle] \as OriginalStructures;
+\import New.Of[frameBundle := pullbackFrames] \as PulledStructures;
+\import FramePullback.Lift[H := E.Spin, liftedGroup := E.spinGroup, projection := Projections.spinProjection,
+  data := frameBundle.cocycle] \as SpinLift;
+\import FramePullback.Lift[H := E.SpinC, liftedGroup := E.spinCGroup, projection := Projections.spinCProjection,
+  data := frameBundle.cocycle] \as SpinCLift;
+\definition spinBundle[lift: OriginalStructures.SpinStructure]: OriginalSpin.Bundle :=
+  OriginalSpin.Bundle { cocycle := lift.lift, regular := lift.regular };
+\definition spinCBundle[lift: OriginalStructures.SpinCStructure]: OriginalSpinC.Bundle :=
+  OriginalSpinC.Bundle { cocycle := lift.lift, regular := lift.regular };
+\definition spin[lift: OriginalStructures.SpinStructure]: PulledStructures.SpinStructure := PulledStructures.SpinStructure {
+  lift := SpinLift.pullback lift.lift,
+  regular := (SpinSmooth.Of[bundle := spinBundle lift, composes := Composition.spin].pullback).regular,
+};
+\definition spinC[lift: OriginalStructures.SpinCStructure]: PulledStructures.SpinCStructure := PulledStructures.SpinCStructure {
+  lift := SpinCLift.pullback lift.lift,
+  regular := (SpinCSmooth.Of[bundle := spinCBundle lift, composes := Composition.spinC].pullback).regular,
+};
