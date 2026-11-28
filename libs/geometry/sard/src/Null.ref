@@ -48,3 +48,4 @@
 
 \module Open;
 \module Cube;
+\module Finite(A: \Set, parts: A -> \Pow E.Point);

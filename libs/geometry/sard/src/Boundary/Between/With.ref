@@ -1,0 +1,4 @@
+\import manifold_gluing.BoundaryInclusion[n := n].On[M := M].With[cover := cover] \as Inclusion;
+\import manifold_gluing.BoundaryDifferential[n := n].On[M := M].With[cover := cover] \as Differential;
+\import \root.Faces[n := Nat.add One.dimension n, m := m].Between[M := M, T := T] \as Faces;
+\module Of(f: Maps.Map);

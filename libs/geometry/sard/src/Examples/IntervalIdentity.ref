@@ -1,0 +1,30 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as Real;
+\import calculus.Real[].OneDimension[] \as One;
+\import boundary_manifolds.Interval[] \as Interval;
+\import boundary_manifolds.Disk[n := N.Nat^::zero] \as Disk;
+\import calculus.Real[].Multivariable[n := One.dimension].Open[] \as Open;
+\import boundary_manifolds.Sublevel[n := N.Nat^::zero].Of[U := Open.whole, f := Disk.function].Build[regular := Disk.regular] \as DiskGeometry;
+\import boundary_manifolds.Tangent[n := One.dimension].On[M := DiskGeometry.boundaryInput] \as Tangent;
+\import boundary_manifolds.MapIdentity[n := One.dimension].On[M := DiskGeometry.boundaryInput] \as Identity;
+\import boundary_manifolds.DifferentialIdentity[n := One.dimension].On[M := DiskGeometry.boundaryInput] \as Derivative;
+\import \root.Corners[n := One.dimension, m := One.dimension].Between[M := DiskGeometry.boundaryInput, N := DiskGeometry.boundaryInput].Of[f := Identity.map] \as Sard;
+\import \root.Boundary[n := N.Nat^::zero, m := One.dimension].Between[M := DiskGeometry.boundaryInput, T := DiskGeometry.boundaryInput] \as Both;
+\import Both.With[cover := DiskGeometry.boundaryCover] \as WithCover;
+\import WithCover.Of[f := Identity.map] \as Boundary;
+\import boundary_manifolds.Model[n := One.dimension] \as Model;
+\import boundary_manifolds.Dimension[n := One.dimension].Chart[M := DiskGeometry.boundaryInput.Point, space := DiskGeometry.boundaryInput.space] \as Charts;
+\import topology.Topology[Carrier := Model.Point] \as Sets;
+
+\definition leftBoundary: Tangent.At[x := Interval.left].Cones[].Boundary :=
+  (Interval.At[x := Interval.left].criterion).rtl (Logic.Or[_, _]::left (\refl(Interval.left)));
+\definition rightBoundary: Tangent.At[x := Interval.right].Cones[].Boundary :=
+  (Interval.At[x := Interval.right].criterion).rtl (Logic.Or[_, _]::right (\refl(Interval.right)));
+
+\module At(x: DiskGeometry.boundaryInput.Point, boundary: Tangent.At[x := x].Cones[].Boundary);
+\module InChart(right: Sard.TargetChart);

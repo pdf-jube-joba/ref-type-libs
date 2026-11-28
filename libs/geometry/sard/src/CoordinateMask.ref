@@ -1,0 +1,54 @@
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import std.Data[].Bool[] \as Bool;
+\import real.Analysis[] \as Real;
+\import real.Analysis[].Algebra[] \as Algebra;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\import topological_algebra.Euclidean[].Dimension[n := n] \as Space;
+\import boundary_manifolds.Model[n := n] \as Corner;
+\definition one: N.Nat^ := N.Nat^::succ N.Nat^::zero;
+\definition two: N.Nat^ := N.Nat^::succ one;
+\import Fin.Functions[n := two] \as Choices;
+\definition Mask: \Set := Choices.Tuple n;
+\definition all: \Pow Mask := Choices.Whole n;
+\definition finite: std.Set[].FiniteSubset[A := Mask].FiniteSubset := Choices.value n;
+\definition blocked: Fin.Fin two := Fin.zero one;
+\definition free: Fin.Fin two := Fin.succ one (Fin.zero N.Nat^::zero);
+
+\definition Matches[C: Corner.Constraints][a: Space.Point][mask: Mask]: \Prop :=
+  \forall (i: Fin.Fin n) -> Logic.PropEquiv[mask i = blocked, Corner.Active C a i];
+
+\definition CoordinateChoice[C: Corner.Constraints][a: Space.Point][i: Fin.Fin n]: \Set :=
+  \Cast[Fin.Fin two] ({ j: Fin.Fin two \where Logic.PropEquiv[j = blocked, Corner.Active C a i] });
+
+\definition chooseCoordinate: \forall (C: Corner.Constraints)(a: Space.Point)(i: Fin.Fin n) ->
+  \exists CoordinateChoice C a i :=
+  \fun (C: Corner.Constraints)(a: Space.Point)(i: Fin.Fin n) =>
+    Logic.orElim (Corner.Active C a i) (Logic.Not (Corner.Active C a i)) (\exists CoordinateChoice C a i)
+      (Classical.excludedMiddle (Corner.Active C a i))
+      (\fun (active: Corner.Active C a i) =>
+        Logic.existsIntro[Fin.Fin two, { j: Fin.Fin two \where Logic.PropEquiv[j = blocked, Corner.Active C a i] }]
+          blocked (Logic.PropEquiv[_, _] { ltr := \fun (_: blocked = blocked) => active, rtl := \fun (_: Corner.Active C a i) => \refl(blocked) }))
+      (\fun (inactive: Logic.Not (Corner.Active C a i)) =>
+        Logic.existsIntro[Fin.Fin two, { j: Fin.Fin two \where Logic.PropEquiv[j = blocked, Corner.Active C a i] }]
+          free (Logic.PropEquiv[_, _] {
+            ltr := \fun (same: free = blocked) => Logic.falseElim _ (Bool.Prop[].falseNeTrue (congr!{N.Nat^ Bool.Bool^} Nat.isZero free blocked same)),
+            rtl := \fun (active: Corner.Active C a i) => Logic.falseElim _ (inactive active),
+          }));
+
+\definition exists: \forall (C: Corner.Constraints)(a: Space.Point) -> \exists ( s: Mask \where Matches C a s ) := \block {
+  \fun (C: Corner.Constraints)(a: Space.Point) \then
+  \takefrom choices: \forall (i: Fin.Fin n) -> CoordinateChoice C a i \by
+    \axiom:classicalIndefiniteChoice(Fin.Fin n, (\fun (i: Fin.Fin n) => CoordinateChoice C a i), chooseCoordinate C a) \then
+  \let mask: Mask := \fun (i: Fin.Fin n) => choices i \then
+  \return Logic.existsIntro[Mask, { s: Mask \where Matches C a s }] mask
+    (\fun (i: Fin.Fin n) => \bysub(Fin.Fin two, { j: Fin.Fin two \where Logic.PropEquiv[j = blocked, Corner.Active C a i] }, choices i))
+};
+\module On(mask: Mask);

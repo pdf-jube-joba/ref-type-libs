@@ -20,3 +20,6 @@
 \module KernelProjection;
 \module Faces(n, m: std.Data[].Nat[].Nat^);
 \module RegularValues(n, m: std.Data[].Nat[].Nat^);
+\module CoordinateMask(n: std.Data[].Nat[].Nat^);
+\module Boundary(n, m: std.Data[].Nat[].Nat^);
+\module Examples;

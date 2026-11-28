@@ -6,6 +6,26 @@
 \definition Regular[y: N.Point]: \Prop := Values.Regular y;
 \definition SourceChart: \Set := \Cast[SourceCharts.Chart] M.atlas.charts;
 \definition TargetChart: \Set := \Cast[TargetCharts.Chart] N.atlas.charts;
+\definition TangentialSurjective[x: M.Point]: \Prop :=
+  \forall (v: TargetTangent.At[x := Maps.apply f x].Vector) ->
+    \exists ( u: SourceTangent.At[x := x].Vector \where Logic.And[
+      SourceTangent.At[x := x].Cones[].Tangential u, Differential.At[f := f, x := x].value.apply u = v] );
+
+\definition TangentialRegular[y: N.Point]: \Prop :=
+  \forall (x: M.Point) -> Maps.apply f x = y -> TangentialSurjective x;
+
+\definition regularOfTangential: \forall (y: N.Point) -> TangentialRegular y -> Regular y :=
+  \fun (y: N.Point)(regular: TangentialRegular y)(x: M.Point)(same: Maps.apply f x = y)
+    (v: TargetTangent.At[x := Maps.apply f x].Vector) => \block {
+      \takefrom u: \Cast[SourceTangent.At[x := x].Vector] ({ u: SourceTangent.At[x := x].Vector \where
+        Logic.And[SourceTangent.At[x := x].Cones[].Tangential u, Differential.At[f := f, x := x].value.apply u = v] })
+        \by regular x same v \then
+      \return Logic.existsIntro[SourceTangent.At[x := x].Vector,
+        { u: SourceTangent.At[x := x].Vector \where Differential.At[f := f, x := x].value.apply u = v }] u
+        (\bysub(SourceTangent.At[x := x].Vector, { u: SourceTangent.At[x := x].Vector \where
+          Logic.And[SourceTangent.At[x := x].Cones[].Tangential u, Differential.At[f := f, x := x].value.apply u = v] }, u)).right
+    };
+
 \module InChart(right: TargetChart);
 \definition criticalNull: Euclidean.Sard -> \forall (right: TargetChart) ->
   Null.Null InChart[right := right].criticalCoordinates :=

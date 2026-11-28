@@ -14,3 +14,11 @@
       \takefrom e: Local.Extension \by smooth \then
       \return Patch[e := e].localNull sard
   };
+
+\definition tangentialLocalNull: Euclidean.Sard ->
+  \exists ( W: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology W,
+    Logic.And[DomainSets.Member W x, Null.Null (Images.Image coordinate (DomainSets.Intersection tangentialCriticalPoints W))]] ) := \block {
+    \fun (sard: Euclidean.Sard) \then
+    \takefrom e: Local.Extension \by smooth \then
+    \return Patch[e := e].tangentialLocalNull sard
+  };

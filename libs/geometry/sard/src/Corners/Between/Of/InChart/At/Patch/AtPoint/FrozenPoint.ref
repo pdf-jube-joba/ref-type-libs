@@ -1,0 +1,55 @@
+\import \parent.\parent.Frozen[mask := mask] \as Face;
+\import Mask.On[mask := mask] \as Projection;
+\import std.Data[].FinSet[] \as Fin;
+\import real.Analysis[] \as Real;
+\import TangentDomain.Cones[] \as Cones;
+
+\definition fixed: Projection.apply Here.source = (Here.source \of Input.Point) :=
+  Projection.fixed Here.source (\fun (i: Fin.Fin n)(blocked: mask i = Mask.blocked) => ((matches i).ltr blocked).right);
+\definition belongs: \In[Input.Point] Face.domain.points Here.source :=
+  Face.point Here.source
+    (\idelim (Here.source \of Input.Point) = Projection.apply Here.source \with a: Input.Point => \In[Input.Point] e.neighborhood.points a \by {
+      base: near, equality: sym!{Input.Point} _ _ fixed });
+\definition point: InputOpen.Carrier Face.domain := \into[Input.Point](Here.source, Face.domain.points) \by { belongs };
+\definition projected: Face.projected point = (Using.center \of InputOpen.Carrier e.neighborhood) :=
+  boundary_manifolds.Refinement[A := Input.Point].equality e.neighborhood.points (Face.projected point) Using.center fixed;
+
+\definition liftVector[u: Input.Point]: TangentDomain.Vector := DomainVectors.encode (Projection.apply u);
+\definition coordinateVector: \forall (u: Input.Point) -> DomainVectors.decode (liftVector u) = Projection.apply u :=
+  \fun (u: Input.Point) => DomainVectors.decodeEncode (Projection.apply u);
+\definition tangent: \forall (u: Input.Point) -> Cones.Tangential (liftVector u) :=
+  \fun (u: Input.Point) =>
+    Cones.Lineality[c := sourceChart, v := liftVector u].toIntrinsic
+      (\fun (i: Fin.Fin n)(active: SourceModel.Active left.constraints Here.source i) =>
+        trans!{Real.Real} _ _ _
+          (congr!{Input.Point Real.Real} (\fun (v: Input.Point) => v i) _ _ (coordinateVector u))
+          (Projection.selected u i ((matches i).rtl active)));
+
+\definition lifts: Face.surjective point -> TangentialSurjective y := \block {
+  \fun (surjective: Face.surjective point)(v: TangentRange.Vector) \then
+  \takefrom u: \Cast[Input.Point] ({ u: Input.Point \where (Face.derivative point).apply u = TargetVectors.decode v })
+    \by surjective (TargetVectors.decode v) \then
+  \let w: TangentDomain.Vector := liftVector u \then
+  \let equation: TargetVectors.decode (Derivative.value.apply w) = TargetVectors.decode v :=
+    trans!{Output.Point} _ _ _ (coordinateDerivative w)
+      (trans!{Output.Point} _ _ _
+        (congr!{Input.Point Output.Point} (Extended.differential Using.center).apply _ _ (coordinateVector u))
+        (trans!{Output.Point} _ _ _
+          (congr!{{InputOpen.Carrier e.neighborhood} Output.Point}
+            (\fun (a: InputOpen.Carrier e.neighborhood) => (Extended.differential a).apply (Projection.apply u)) _ _
+            (sym!{{InputOpen.Carrier e.neighborhood}} _ _ projected))
+          (trans!{Output.Point} _ _ _ (sym!{Output.Point} _ _ (Face.At[x := point].chain u))
+            (\bysub(Input.Point, { u: Input.Point \where (Face.derivative point).apply u = TargetVectors.decode v }, u))))) \then
+  \return Logic.existsIntro[TangentDomain.Vector, { w: TangentDomain.Vector \where Logic.And[Cones.Tangential w, Derivative.value.apply w = v] }]
+    w (Logic.And[_, _]::# (tangent u) (TargetVectors.injective (Derivative.value.apply w) v equation))
+};
+
+\definition criticalValue: Logic.Not (TangentialSurjective y) -> OutputSets.Member Face.criticalValues (coordinate y) :=
+  \fun (critical: Logic.Not (TangentialSurjective y)) =>
+    \idelim Face.atValue point = coordinate y \with v: Output.Point => OutputSets.Member Face.criticalValues v \by {
+      base: Face.criticalValue point (\fun (surjective: Face.surjective point) => critical (lifts surjective)),
+      equality: trans!{Output.Point} _ _ _
+        (congr!{{InputOpen.Carrier e.neighborhood} Output.Point}
+          (\fun (a: InputOpen.Carrier e.neighborhood) => calculus.Maps[n := n, m := m].apply e.neighborhood OutputOpen.whole e.map a) _ _ projected)
+        Using.centerValue
+    };

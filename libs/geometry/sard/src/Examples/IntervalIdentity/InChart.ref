@@ -1,0 +1,21 @@
+\import Sard.InChart[right := right] \as Chartwise;
+\import Boundary.InChart[right := right] \as BoundaryValues;
+\import topology.Maps[A := Chartwise.Domain, B := Model.Point] \as Images;
+\definition value[x: Charts.LocalPoint right]: Model.Point := Charts.coordinate right x;
+
+\definition excluded: \forall (x: Charts.LocalPoint right)(boundary: Tangent.At[x := x].Cones[].Boundary) ->
+  Sets.Member BoundaryValues.exceptional (value x) :=
+  \fun (x: Charts.LocalPoint right)(boundary: Tangent.At[x := x].Cones[].Boundary) =>
+    Images.imageMember Chartwise.coordinate Chartwise.tangentialCriticalPoints
+      (\into[DiskGeometry.boundaryInput.Point](x, Chartwise.preimage) \by { \bysub(DiskGeometry.boundaryInput.Point, right.domain, x) })
+      (\parent.At[x := x, boundary := boundary].critical);
+
+\definition leftExcluded: \forall (inside: Charts.Contains right Interval.left) ->
+  Sets.Member BoundaryValues.exceptional (value (\into[DiskGeometry.boundaryInput.Point](Interval.left, right.domain) \by { inside })) :=
+  \fun (inside: Charts.Contains right Interval.left) =>
+    excluded (\into[DiskGeometry.boundaryInput.Point](Interval.left, right.domain) \by { inside }) leftBoundary;
+
+\definition rightExcluded: \forall (inside: Charts.Contains right Interval.right) ->
+  Sets.Member BoundaryValues.exceptional (value (\into[DiskGeometry.boundaryInput.Point](Interval.right, right.domain) \by { inside })) :=
+  \fun (inside: Charts.Contains right Interval.right) =>
+    excluded (\into[DiskGeometry.boundaryInput.Point](Interval.right, right.domain) \by { inside }) rightBoundary;

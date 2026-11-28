@@ -1,0 +1,5 @@
+\import FaceTangent.At[x := x] \as Domain;
+\import AmbientTangent.At[x := apply x] \as Codomain;
+\import InclusionDifferential.At[f := embedding, x := x] \as Derivative;
+\import Codomain.Cones[] \as Cones;
+\module In(form: Faces.LocalForm[embedding, x]);

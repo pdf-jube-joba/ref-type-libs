@@ -1,0 +1,12 @@
+\import \root.Corners[n := Nat.add One.dimension n, m := m].Between[M := M, N := T].Of[f := f] \as Ambient;
+\import Faces.Of[f := f].FaceDimension[d := n].From[F := Inclusion.manifold].Restricted[inclusion := Inclusion.map] \as Restricted;
+\import topology.Topology[Carrier := T.Point] \as TargetSets;
+
+\definition boundaryRestriction[right: TargetChart]: Faces.Restriction[right] := Restricted.restriction right;
+\import \root.Corners[n := n, m := m].Between[M := Inclusion.manifold, N := T].Of[f := Restricted.map] \as OnBoundary;
+\definition BoundaryRegular[y: T.Point]: \Prop := OnBoundary.Regular y;
+
+\definition regularOfTangential: \forall (y: T.Point) -> Ambient.TangentialRegular y -> BoundaryRegular y :=
+  Restricted.regularOfTangential (\fun (x: Inclusion.manifold.Point) => Differential.At[x := x].ontoTangential);
+
+\module InChart(right: TargetChart);

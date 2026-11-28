@@ -10,6 +10,7 @@ euclidean_measure = { path = "../../analysis/euclidean_measure" }
 functional_analysis = { path = "../../analysis/functional" }
 inverse_implicit = { path = "../inverse_implicit" }
 linear_algebra = { path = "../../algebra/linear_algebra" }
+manifold_gluing = { path = "../manifold_gluing" }
 manifolds = { path = "../manifolds" }
 matrix_invariants = { path = "../../algebra/matrix_invariants" }
 metric_spaces = { path = "../../topology/metric" }

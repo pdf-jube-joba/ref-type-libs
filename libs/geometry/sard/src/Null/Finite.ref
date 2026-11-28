@@ -1,0 +1,34 @@
+\import std.Set[].FiniteSubset[A := A] \as Finite;
+\import Measure.Sigma[] \as Sigma;
+\definition union[X: \Pow A]: \Pow E.Point :=
+  { y: E.Point \where \exists ( a: A \where Logic.And[\In[A] X a, Sets.Member (parts a) y] ) };
+
+\definition member[X: \Pow A][a: A][y: E.Point]: \In[A] X a -> Sets.Member (parts a) y -> Sets.Member (union X) y :=
+  \fun (inX: \In[A] X a)(inPart: Sets.Member (parts a) y) =>
+    Logic.existsIntro[A, { z: A \where Logic.And[\In[A] X z, Sets.Member (parts z) y] }]
+      a (Logic.And[_, _]::# inX inPart);
+
+\definition emptyIncluded: Sets.Subset (union Finite.Empty) Sets.Empty := \block {
+  \fun (y: E.Point)(inside: Sets.Member (union Finite.Empty) y) \then
+  \takefrom a: \Cast[A] ({ z: A \where Logic.And[\In[A] Finite.Empty z, Sets.Member (parts z) y] }) \by inside \then
+  \return (\bysub(A, { z: A \where Logic.And[\In[A] Finite.Empty z, Sets.Member (parts z) y] }, a)).left
+};
+\definition insertIncluded: \forall (X: \Pow A)(a: A) ->
+  Sets.Subset (union (Finite.Insert a X)) (Sigma.pairUnion (parts a) (union X)) := \block {
+  \fun (X: \Pow A)(a: A)(y: E.Point)(inside: Sets.Member (union (Finite.Insert a X)) y) \then
+  \takefrom b: \Cast[A] ({ z: A \where Logic.And[\In[A] (Finite.Insert a X) z, Sets.Member (parts z) y] }) \by inside \then
+  \let law: Logic.And[\In[A] (Finite.Insert a X) b, Sets.Member (parts b) y] :=
+    \bysub(A, { z: A \where Logic.And[\In[A] (Finite.Insert a X) z, Sets.Member (parts z) y] }, b) \then
+  \return Logic.orElim (b = a) (\In[A] X b) (Sets.Member (Sigma.pairUnion (parts a) (union X)) y) law.left
+    (\fun (same: b = a) => Logic.Or[_, _]::left
+      (\idelim b = a \with z: A => Sets.Member (parts z) y \by { base: law.right, equality: same }))
+    (\fun (old: \In[A] X b) => Logic.Or[_, _]::right (member X b y old law.right))
+};
+
+\definition null: (\forall (a: A) -> Null (parts a)) -> \forall (X: Finite.FiniteSubset) -> Null (union X) :=
+  \fun (laws: \forall (a: A) -> Null (parts a)) =>
+    Finite.induction ({ X: \Pow A \where Null (union X) })
+      (included (union Finite.Empty) Sets.Empty emptyIncluded empty)
+      (\fun (X: \Pow A)(prior: Null (union X))(a: A) =>
+        included (union (Finite.Insert a X)) (Sigma.pairUnion (parts a) (union X))
+          (insertIncluded X a) (pair (parts a) (union X) (laws a) prior));

@@ -10,6 +10,10 @@
 \import topology.Maps[A := Domain, B := Output.Point] \as Images;
 \definition criticalPoints: \Pow Domain := Subspace.Trace Values.criticalPoints;
 \definition criticalCoordinates: \Pow Output.Point := Images.Image coordinate criticalPoints;
+\definition tangentialCriticalPoints: \Pow Domain :=
+  { x: Domain \where Logic.Not (TangentialSurjective x) };
+\definition tangentialCriticalCoordinates: \Pow Output.Point := Images.Image coordinate tangentialCriticalPoints;
+
 \module At(x: Domain, left: SourceChart, contains: SourceCharts.Contains left x);
 
 \definition localNull: Euclidean.Sard -> Cover.LocallyNull criticalPoints := \block {
@@ -49,5 +53,43 @@
                 (Coordinates.coordinateInside (TargetCharts.point right u))
                 (TargetCharts.coordinatePoint right u))) \then
         \return outside (Logic.existsIntro[Domain, { p: Domain \where Logic.And[DomainSets.Member criticalPoints p, coordinate p = u] }]
+          t (Logic.And[_, _]::# critical value))
+      });
+
+\definition tangentialLocalNull: Euclidean.Sard -> Cover.LocallyNull tangentialCriticalPoints := \block {
+  \fun (sard: Euclidean.Sard)(x: Domain)(_: DomainSets.Member tangentialCriticalPoints x) \then
+  \takefrom left: \Cast[SourceCharts.Chart]
+    ({ c: SourceCharts.Chart \where Logic.And[\In[SourceCharts.Chart] M.atlas.charts c, SourceCharts.Contains c x] })
+    \by M.atlas.covers x \then
+  \let law: Logic.And[\In[SourceCharts.Chart] M.atlas.charts left, SourceCharts.Contains left x] :=
+    \bysub(SourceCharts.Chart, { c: SourceCharts.Chart \where Logic.And[\In[SourceCharts.Chart] M.atlas.charts c,
+      SourceCharts.Contains c x] }, left) \then
+  \let chosen: SourceChart := \into[SourceCharts.Chart](left, SourceChart) \by { law.left } \then
+  \return At[x := x, left := chosen, contains := law.right].tangentialLocalNull sard
+};
+
+\definition tangentialNull: Null.Null tangentialCriticalCoordinates :=
+  Cover.local (Subspace.Properties[].secondCountable M.space M.secondCountable)
+    tangentialCriticalPoints (tangentialLocalNull (\root.Proof[].theorem n m));
+
+\definition tangentialRegularAt: \forall (u: TargetModel.Carrier right.constraints right.image) ->
+  Logic.Not (OutputSets.Member tangentialCriticalCoordinates u) -> TangentialRegular (TargetCharts.point right u) :=
+  \fun (u: TargetModel.Carrier right.constraints right.image)(outside: Logic.Not (OutputSets.Member tangentialCriticalCoordinates u))
+    (x: M.Point)(same: Maps.apply f x = TargetCharts.point right u) =>
+    Classical.doubleNegative (TangentialSurjective x)
+      (\fun (critical: Logic.Not (TangentialSurjective x)) => \block {
+        \let inside: TargetCharts.Contains right (Maps.apply f x) :=
+          \idelim TargetCharts.point right u = Maps.apply f x \with y: N.Point => TargetCharts.Contains right y \by {
+            base: \bysub(N.Point, right.domain, TargetCharts.point right u), equality: sym!{N.Point} _ _ same } \then
+        \let t: Domain := \into[M.Point](x, preimage) \by { inside } \then
+        \let value: coordinate t = u :=
+          trans!{Output.Point} _ _ _
+            (sym!{Output.Point} _ _ (Coordinates.coordinateInside (\into[N.Point](Maps.apply f x, right.domain) \by { inside })))
+            (trans!{Output.Point} _ _ _
+              (congr!{N.Point Output.Point} Coordinates.coordinate _ _ same)
+              (trans!{Output.Point} _ _ _
+                (Coordinates.coordinateInside (TargetCharts.point right u))
+                (TargetCharts.coordinatePoint right u))) \then
+        \return outside (Logic.existsIntro[Domain, { p: Domain \where Logic.And[DomainSets.Member tangentialCriticalPoints p, coordinate p = u] }]
           t (Logic.And[_, _]::# critical value))
       });

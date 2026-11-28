@@ -1,0 +1,21 @@
+\import Mask.On[mask := mask] \as Projection;
+\import calculus.Maps[n := n, m := n] \as InputMaps;
+\import calculus.Maps[n := n, m := m] \as MapsToOutput;
+\import calculus.LinearMap[n := n, m := n].On[U := InputOpen.whole, L := Projection.linear] \as Linear;
+\import InputMaps.Preimage[U := InputOpen.whole, W := InputOpen.whole, V := e.neighborhood, f := Linear.map] \as Restricted;
+\definition domain: InputOpen.OpenSet := Restricted.domain;
+\import InputMaps.Composition[U := domain, V := e.neighborhood, f := Restricted.map].After[l := m, W := OutputOpen.whole, g := e.map] \as Composite;
+\definition map: MapsToOutput.Map domain OutputOpen.whole := Composite.compose;
+\import Euclidean.On[U := domain, V := OutputOpen.whole, f := map] \as ValuesOnFace;
+\definition criticalValues: \Pow Output.Point := ValuesOnFace.criticalValues;
+\definition null: Euclidean.Sard -> Null.Null criticalValues := \fun (sard: Euclidean.Sard) => sard domain OutputOpen.whole map;
+
+\definition projected[x: InputOpen.Carrier domain]: InputOpen.Carrier e.neighborhood := InputMaps.apply domain e.neighborhood Restricted.map x;
+\definition derivative[x: InputOpen.Carrier domain]: calculus.Vector[n := n, m := m].LinearMap := ValuesOnFace.differential x;
+\definition surjective[x: InputOpen.Carrier domain]: \Prop := ValuesOnFace.SurjectiveAt x;
+\definition atValue[x: InputOpen.Carrier domain]: Output.Point := MapsToOutput.apply domain OutputOpen.whole map x;
+\definition criticalValue: \forall (x: InputOpen.Carrier domain) -> Logic.Not (surjective x) -> OutputSets.Member criticalValues (atValue x) :=
+  ValuesOnFace.criticalValue;
+\definition point: \forall (x: Input.Point) -> \In[Input.Point] e.neighborhood.points (Projection.apply x) -> \In[Input.Point] domain.points x :=
+  \fun (x: Input.Point) => Restricted.intro (InputOpen.Whole[].point x);
+\module At(x: InputOpen.Carrier domain);

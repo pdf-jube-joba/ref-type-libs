@@ -23,6 +23,10 @@
   ChartSubset.Open[].imageMember domainRegion Local.local e.contains;
 
 \import Euclidean.On[U := e.neighborhood, V := OutputOpen.whole, f := e.map] \as Extended;
+\import \root.CoordinateMask[n := n] \as Mask;
+\module Frozen(mask: Mask.Mask);
+\definition part[mask: Mask.Mask]: \Pow Output.Point := Frozen[mask := mask].criticalValues;
+\import Null.Finite[A := Mask.Mask, parts := part] \as FiniteParts;
 \module AtPoint(y: Domain, z: SourceCharts.LocalPoint left, inside: ChartDomain.Member domainRegion z, same: z = y);
 
 \definition included: OutputSets.Subset (Images.Image coordinate (DomainSets.Intersection criticalPoints region)) Extended.criticalValues :=
@@ -44,3 +48,25 @@
       region (Logic.And[_, _]::# regionOpen (Logic.And[_, _]::# regionContains
         (Null.included (Images.Image coordinate (DomainSets.Intersection criticalPoints region)) Extended.criticalValues included
           (sard e.neighborhood OutputOpen.whole e.map))));
+
+\definition tangentialIncluded: OutputSets.Subset
+  (Images.Image coordinate (DomainSets.Intersection tangentialCriticalPoints region)) (FiniteParts.union Mask.all) :=
+  \fun (v: Output.Point) =>
+    Images.imageElim coordinate (DomainSets.Intersection tangentialCriticalPoints region) v (OutputSets.Member (FiniteParts.union Mask.all) v)
+      (\fun (y: Domain)(member: DomainSets.Member (DomainSets.Intersection tangentialCriticalPoints region) y)(value: coordinate y = v) =>
+        ChartSubset.Open[].imageElim domainRegion y (OutputSets.Member (FiniteParts.union Mask.all) v)
+          (\fun (z: SourceCharts.LocalPoint left)(inside: ChartDomain.Member domainRegion z)(same: z = y) =>
+            \idelim coordinate y = v \with u: Output.Point => OutputSets.Member (FiniteParts.union Mask.all) u \by {
+              base: AtPoint[y := y, z := z, inside := inside, same := same].tangentialCritical member.left,
+              equality: value }) member.right);
+
+\definition tangentialLocalNull: Euclidean.Sard ->
+  \exists ( W: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology W,
+    Logic.And[DomainSets.Member W x, Null.Null (Images.Image coordinate (DomainSets.Intersection tangentialCriticalPoints W))]] ) :=
+  \fun (sard: Euclidean.Sard) =>
+    Logic.existsIntro[\Pow Domain, { W: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology W,
+      Logic.And[DomainSets.Member W x, Null.Null (Images.Image coordinate (DomainSets.Intersection tangentialCriticalPoints W))]] }]
+      region (Logic.And[_, _]::# regionOpen (Logic.And[_, _]::# regionContains
+        (Null.included (Images.Image coordinate (DomainSets.Intersection tangentialCriticalPoints region))
+          (FiniteParts.union Mask.all) tangentialIncluded (FiniteParts.null
+            (\fun (mask: Mask.Mask) => Frozen[mask := mask].null sard) Mask.finite))));

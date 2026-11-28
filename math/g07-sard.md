@@ -5,7 +5,7 @@
 - Primary implementation: [`sard`](../libs/geometry/sard/README.md).
 - Prove critical values of smooth Euclidean maps form Lebesgue null sets by induction on rank and dimension.
 - Transfer to manifolds via countable charts; expose density of regular values and null exceptional parameter sets.
-- Provide simultaneous applicability to the boundary and each boundary face.
+- Provide a common null exceptional set for the G03 boundary and all G03 global faces, independently of any enumeration of faces.
 
 ## Dependencies
 

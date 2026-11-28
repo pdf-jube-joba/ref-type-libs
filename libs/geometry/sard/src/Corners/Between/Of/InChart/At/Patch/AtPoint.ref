@@ -66,3 +66,21 @@
         base: Extended.criticalValue Using.center (\fun (regular: Extended.SurjectiveAt Using.center) => critical (lifts regular)),
         equality: Using.centerValue
       };
+
+\definition coordinateDerivative: \forall (v: TangentDomain.Vector) ->
+  TargetVectors.decode (Derivative.value.apply v) = (Extended.differential Using.center).apply (DomainVectors.decode v) :=
+  \fun (v: TangentDomain.Vector) =>
+    trans!{Output.Point} _ _ _ (Derivative.coordinates sourceChart targetChart v)
+      (congr!{{calculus.Vector[n := n, m := m].LinearMap} Output.Point}
+        (\fun (L: calculus.Vector[n := n, m := m].LinearMap) => L.apply (DomainVectors.decode v)) _ _
+        (Here.ofExtension InCharts.smooth extension));
+
+\module FrozenPoint(mask: Mask.Mask, matches: Mask.Matches left.constraints Here.source mask);
+
+\definition tangentialCritical: Logic.Not (TangentialSurjective y) ->
+  OutputSets.Member (FiniteParts.union Mask.all) (coordinate y) := \block {
+    \fun (critical: Logic.Not (TangentialSurjective y)) \then
+    \takefrom mask: \Cast[Mask.Mask] ({ s: Mask.Mask \where Mask.Matches left.constraints Here.source s }) \by Mask.exists left.constraints Here.source \then
+    \return FiniteParts.member Mask.all mask (coordinate y) (\refl(mask))
+      (FrozenPoint[mask := mask, matches := \bysub(Mask.Mask, { s: Mask.Mask \where Mask.Matches left.constraints Here.source s }, mask)].criticalValue critical)
+  };

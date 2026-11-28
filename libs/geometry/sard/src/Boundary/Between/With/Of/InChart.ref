@@ -1,0 +1,14 @@
+\import Ambient.InChart[right := right] \as Chartwise;
+\definition exceptional: \Pow TargetModel.Point := Chartwise.tangentialCriticalCoordinates;
+\definition exceptionalNull: Null.Null exceptional := Chartwise.tangentialNull;
+\definition tangentialRegularAt: \forall (u: TargetModel.Carrier right.constraints right.image) ->
+  Logic.Not (Sets.Member exceptional u) -> Ambient.TangentialRegular (Charts.point right u) :=
+  Chartwise.tangentialRegularAt;
+
+\definition regularAt: \forall (u: TargetModel.Carrier right.constraints right.image) ->
+  Logic.Not (Sets.Member exceptional u) -> Logic.And[Ambient.Regular (Charts.point right u), BoundaryRegular (Charts.point right u)] :=
+  \fun (u: TargetModel.Carrier right.constraints right.image)(outside: Logic.Not (Sets.Member exceptional u)) =>
+    (\fun (regular: Ambient.TangentialRegular (Charts.point right u)) =>
+      Logic.And[_, _]::# (Ambient.regularOfTangential (Charts.point right u) regular)
+        (regularOfTangential (Charts.point right u) regular))
+      (tangentialRegularAt u outside);
