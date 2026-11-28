@@ -8,6 +8,7 @@
   .Associativity[p := p, q := q, r := r] \as Associativity;
 \definition n: N.Nat^ := Associativity.n;
 \definition m: N.Nat^ := Associativity.m;
+\definition association: m = n := Associativity.same;
 \import Comparison.Component[p := p, q := N.Basic[].Def[].add q r] \as Single;
 \import Comparison.Component[p := N.Basic[].Def[].add p q, q := r] \as Iterated;
 \import singular_cap.CochainPair[A := X, source := base, subset := U, R := K, ring := ring].Cohomology[p := p, q := q].Left[] \as BaseCup;

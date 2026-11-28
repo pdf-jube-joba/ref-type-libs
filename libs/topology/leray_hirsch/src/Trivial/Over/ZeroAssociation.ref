@@ -1,0 +1,54 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import Equality.Transport[A := I.Int^] \as Cast;
+\import Equality.Transport[A := N.Nat^] \as NatCast;
+\import \root.DegreeShift[] \as Shift;
+\import \root.RelativeZeroAction[A := X, source := base, subset := U, K := K, ring := ring] \as Action;
+\import \root.ZeroClasses[A := X, source := base, K := K, ring := ring] \as Scalars;
+\import singular_products.Cochains[A := Product.CarrierSet, source := External.topology, R := K, ring := ring].Cohomology[] \as T;
+\definition domain: I.Int^ := Shift.unshift r z;
+\definition degree: N.Nat^ := N.Basic[].Def[].add N.Nat^::zero r;
+\definition equal: degree = r := N.Basic[].Prop[].addZeroLeft r;
+\module Given(b: Scalars.Carrier, c: FiberCohomology.Group r) {
+  \import \parent.\parent.Associated[q := N.Nat^::zero, r := r, z := z].Given[b := b, c := c] \as Associated;
+  \import External.Cohomology[p := N.Nat^::zero, q := r] \as Product;
+  \definition raw: T.Group degree := Product.apply b c;
+  \definition factor: T.Group r := NatCast.cast T.Group degree r equal raw;
+  \import Comparison.Shifted[q := r, u := factor].To[z := z] \as Nested;
+  \import Comparison.Shifted[q := r, u := lift r c].To[z := z] \as Exterior;
+  \import Comparison.FactorDegree[z := z] \as Regrade;
+  \definition input: I.Int^ := Shift.unshift degree z;
+  \definition inputLaw: domain = input :=
+    congr!{N.Nat^ I.Int^} (\fun (k: N.Nat^) => Shift.unshift k z) r degree (sym!{N.Nat^} _ _ equal);
+  \definition regrade[x: Comparison.baseFamily.Carrier domain]: Comparison.baseFamily.Carrier input :=
+    Cast.cast Comparison.baseFamily.Carrier domain input inputLaw x;
+  \definition sourceLaw: \forall (x: Comparison.baseFamily.Carrier domain) ->
+    Nested.linear.apply x = Regrade.shifted degree raw (regrade x) :=
+    \fun (x: Comparison.baseFamily.Carrier domain) => trans!{{Comparison.totalFamily.Carrier z}} _ _ _
+      (Regrade.law degree r raw equal x)
+      (congr!{{Comparison.baseFamily.Carrier input} {Comparison.totalFamily.Carrier z}} (Regrade.shifted degree raw) _ _
+        (Regrade.shiftInput r degree (sym!{N.Nat^} _ _ equal) x));
+  \definition act[x: Comparison.baseFamily.Carrier domain]: Comparison.baseFamily.Carrier domain :=
+    Action.Signed[z := domain].act b x;
+  \definition actionAt[d: I.Int^]: Comparison.baseFamily.Carrier d -> Comparison.baseFamily.Carrier d :=
+    Action.Signed[z := d].act b;
+  \definition lawFor[x: Comparison.baseFamily.Carrier domain]: \Prop := Exterior.linear.apply (act x) = Nested.linear.apply x;
+  \module Positive(p: N.Nat^, same: I.Int^::ofNat p = domain);
+  \module Negative(n: N.Nat^, same: I.Int^::negSucc n = domain) {
+    \import Exterior.Below[p := n, same := same] \as First;
+    \import Nested.Below[p := n, same := same] \as Second;
+    \definition law: \forall (x: Comparison.baseFamily.Carrier domain) -> lawFor x :=
+      \fun (x: Comparison.baseFamily.Carrier domain) => trans!{{Comparison.totalFamily.Carrier z}} _ _ _
+        (First.zero (act x)) (sym!{{Comparison.totalFamily.Carrier z}} _ _ (Second.zero x));
+  }
+  \definition byDegree: \forall (d: I.Int^) -> d = domain -> \forall (x: Comparison.baseFamily.Carrier domain) -> lawFor x :=
+    \induction (d: I.Int^) \return d = domain -> \forall (x: Comparison.baseFamily.Carrier domain) -> lawFor x \with {
+      | ofNat: \fun (p: N.Nat^)(same: I.Int^::ofNat p = domain) => Positive[p := p, same := same].law
+      | negSucc: \fun (n: N.Nat^)(same: I.Int^::negSucc n = domain) => Negative[n := n, same := same].law
+    };
+  \definition law: \forall (x: Comparison.baseFamily.Carrier domain) -> lawFor x := byDegree domain (\refl(domain));
+}

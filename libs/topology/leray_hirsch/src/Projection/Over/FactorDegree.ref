@@ -1,0 +1,33 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\import Equality.Transport[A := N.Nat^] \as Transport;
+\definition Inputs[n: N.Nat^]: \Set := baseFamily.Carrier (Degrees.unshift n z);
+\definition Factors[n: N.Nat^]: \Set := TotalCohomology.Group n;
+\definition shifted[n: N.Nat^][u: Factors n][a: Inputs n]: totalFamily.Carrier z :=
+  \parent.Shifted[q := n, u := u].To[z := z].linear.apply a;
+\definition law: \forall (q, n: N.Nat^)(u: Factors q)(same: q = n)(a: Inputs n) ->
+  shifted n (Transport.cast Factors q n same u) a = shifted q u (Transport.cast Inputs n q (sym!{N.Nat^} q n same) a) :=
+  \fun (q, n: N.Nat^)(u: Factors q)(same: q = n) =>
+    (\idelim q = n \with k: N.Nat^ => \forall (eq: q = k)(a: Inputs k) ->
+      shifted k (Transport.cast Factors q k eq u) a = shifted q u (Transport.cast Inputs k q (sym!{N.Nat^} q k eq) a)
+    \by {
+      base: \fun (eq: q = q)(a: Inputs q) => trans!{{totalFamily.Carrier z}} _ _ _
+        (congr!{{Factors q} {totalFamily.Carrier z}} (\fun (v: Factors q) => shifted q v a) _ _ (Transport.castRefl Factors q u))
+        (congr!{{Inputs q} {totalFamily.Carrier z}} (shifted q u) _ _ (sym!{{Inputs q}} _ _ (Transport.castRefl Inputs q a))),
+      equality: same
+    }) same;
+\definition shiftInput[n: N.Nat^][q: N.Nat^][same: n = q][x: Inputs n]:
+  Transport.cast Inputs n q same x =
+  Equality.Transport[A := I.Int^].cast baseFamily.Carrier (Degrees.unshift n z) (Degrees.unshift q z)
+    (congr!{N.Nat^ I.Int^} (\fun (j: N.Nat^) => Degrees.unshift j z) n q same) x :=
+  (\idelim n = q \with t: N.Nat^ => \forall (eq: n = t) ->
+    Transport.cast Inputs n t eq x =
+    Equality.Transport[A := I.Int^].cast baseFamily.Carrier (Degrees.unshift n z) (Degrees.unshift t z)
+      (congr!{N.Nat^ I.Int^} (\fun (j: N.Nat^) => Degrees.unshift j z) n t eq) x
+  \by {
+    base: \fun (eq: n = n) => trans!{{Inputs n}} _ _ _ (Transport.castRefl Inputs n x)
+      (sym!{{Inputs n}} _ _ (Equality.Transport[A := I.Int^].castRefl baseFamily.Carrier (Degrees.unshift n z) x)),
+    equality: same
+  }) same;

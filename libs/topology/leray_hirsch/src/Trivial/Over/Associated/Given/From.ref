@@ -1,0 +1,39 @@
+\definition p1: N.Nat^ := Nat.add p q;
+\definition pz: I.Int^ := I.Int^::ofNat p;
+\definition p1z: I.Int^ := I.Int^::ofNat p1;
+\definition toOutput: p1z = output := eq_reason_in!{I.Int^ p1z
+  "=" _ "by" { sym!{I.Int^} _ _ (Shift.natural q p) }
+  "=" _ "by" { congr!{I.Int^ I.Int^} (Shift.shift q) _ _ same }
+  "=" _ "by" { Shift.coordinateShift degree r q z (\refl(degree)) }
+};
+\import Nested.Native[p := p, same := same] \as Forward;
+\import External.Native[p := p1, same := toOutput] \as Back;
+\import \parent.\parent.\parent.Factorization[p := p, q := q, r := r] \as Factor;
+\import singular_cap.CochainPair[A := X, source := base, subset := U, R := K, ring := ring].Cohomology[p := p, q := q].Left[] \as Cup;
+\definition Source: \Set := Comparison.baseFamily.Carrier input;
+\definition Target: \Set := Comparison.baseFamily.Carrier output;
+\definition term[a: Source]: Target :=
+  Cast.cast Comparison.baseFamily.Carrier p1z output toOutput (Cup.apply (Forward.raw a) b);
+\definition raw[a: Source]: Comparison.baseFamily.Carrier p1z :=
+  Cup.apply (Forward.raw a) b;
+\definition rawLaw[a: Source]: Back.raw (term a) = raw a :=
+  Cast.castInverse Comparison.baseFamily.Carrier p1z output toOutput (raw a);
+\definition native[m: N.Nat^]: I.Int^ := I.Int^::ofNat m;
+\definition law: \forall (a: Source) -> External.linear.apply (term a) = Nested.linear.apply a :=
+  \fun (a: Source) => eq_reason_in!{{Comparison.totalFamily.Carrier z} _
+    "=" _ "by" { Back.law (term a) }
+    "=" _ "by" { congr!{{Comparison.baseFamily.Carrier p1z} {Comparison.totalFamily.Carrier z}}
+      (\fun (v: Comparison.baseFamily.Carrier p1z) =>
+        Cast.cast Comparison.totalFamily.Carrier Back.resultDegree z Back.resultSame
+          (Comparison.Component[p := p1, q := r].apply (lift r c) v)) _ _ (rawLaw a) }
+    "=" _ "by" { congr!{{Comparison.totalFamily.Carrier Back.resultDegree} {Comparison.totalFamily.Carrier z}}
+      (Cast.cast Comparison.totalFamily.Carrier Back.resultDegree z Back.resultSame) _ _ (Factor.law (Forward.raw a) b c) }
+    "=" _ "by" { congr!{{Comparison.totalFamily.Carrier Back.resultDegree} {Comparison.totalFamily.Carrier z}}
+      (Cast.cast Comparison.totalFamily.Carrier Back.resultDegree z Back.resultSame) _ _
+      (Shift.nativeCast Comparison.totalFamily.Carrier Factor.m Factor.n Factor.association
+        (Comparison.Component[p := p, q := degree].apply (ExternalClass.apply b c) (Forward.raw a))) }
+    "=" _ "by" { Cast.castComposition Comparison.totalFamily.Carrier Forward.resultDegree Back.resultDegree z
+      (congr!{N.Nat^ I.Int^} native _ _ Factor.association) Back.resultSame
+      (Comparison.Component[p := p, q := degree].apply (ExternalClass.apply b c) (Forward.raw a)) }
+    "=" _ "by" { sym!{{Comparison.totalFamily.Carrier z}} _ _ (Forward.law a) }
+  };
