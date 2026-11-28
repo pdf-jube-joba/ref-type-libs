@@ -1,0 +1,3 @@
+\import Spaces.Linear[V := V, W := W, source := source, target := intermediate] \as Incidence;
+\import Spaces.Linear[V := W, W := Y, source := intermediate, target := values] \as Defining;
+\module Of(D: Incidence.Map, G: Defining.Map);

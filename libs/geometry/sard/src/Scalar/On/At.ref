@@ -1,0 +1,25 @@
+\import Maps.Differential[U := U, V := Line.whole, f := map, a := a] \as Differential;
+
+\definition componentEqual: (Differential.component index \of Open.ScalarFunction U) = (h \of Open.ScalarFunction U) :=
+  \axiom:funext((Differential.component index \of Open.ScalarFunction U), (h \of Open.ScalarFunction U),
+    \fun (x: Open.Carrier U) => \refl(h x));
+\definition differentialLaw: Analysis.HasDifferentialAt U h a (Differential.row index) :=
+  \idelim Differential.component index = h \with f: Open.ScalarFunction U =>
+    Analysis.HasDifferentialAt U f a (Differential.row index) \by {
+      base: Differential.componentLaw index, equality: componentEqual
+    };
+
+\definition partial: \forall (i: Fin.Fin n) ->
+  Differential.value.apply (Domain.Def[].basis i) index = Partials.derivative U h i a :=
+  \fun (i: Fin.Fin n) =>
+    Analysis.Properties[].partialUnique U h i a _ _
+      (Analysis.Differential[U := U, f := h, a := a, d := Differential.row index].Partial[i := i].law
+        differentialLaw)
+      (Partials.partialLaw U h i a);
+
+\definition regular: \forall (i: Fin.Fin n) -> Logic.Not (Partials.derivative U h i a = Real.zero) ->
+  \forall (v: Output.Point) -> \exists ( u: Domain.Point \where Differential.value.apply u = v ) :=
+  \fun (i: Fin.Fin n)(nonzero: Logic.Not (Partials.derivative U h i a = Real.zero)) =>
+    surjective Differential.value (Domain.Def[].basis i)
+      (\fun (zero: Differential.value.apply (Domain.Def[].basis i) index = Real.zero) =>
+        nonzero (trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ (partial i)) zero));

@@ -1,0 +1,9 @@
+\import Scalars.OnOpen[U := U, open := open] \as SmoothRegion;
+\definition SmoothOnU: \Prop := \forall (i: Fin.Fin m) -> SmoothRegion.IsSmooth (SmoothRegion.restrict (coordinate i));
+\module Within(regular: SmoothOnU, radius: Real.Real, positive: R.Lt Real.zero radius, fixed: Shrinking.ShrinkData[M.space, K, U]);
+\definition exists[compact: Space.IsCompact M.space][regular: SmoothOnU][radius: Real.Real][positive: R.Lt Real.zero radius]:
+  \exists Result[radius, K] := \block {
+  \takefrom fixed: Shrinking.ShrinkData[M.space, K, U] \by
+    Shrinking.shrink M.space (Compact.compactHausdorffNormal M.space compact M.hausdorff) K U closed open inside \then
+  \return Within[regular := regular, radius := radius, positive := positive, fixed := fixed].exists compact
+};

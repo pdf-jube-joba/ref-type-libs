@@ -1,0 +1,18 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Data[].Pair[] \as Pair;
+\import real.Analysis[] \as Real;
+\import Real.Estimates[] \as Estimates;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import topology.Topology[Carrier := X] \as XS;
+\import manifolds.SmoothMap[n := m, m := d].Between[M := M, N := Ambient.smoothManifold] \as EmbeddingMaps;
+\import topological_constructions.Product[A := X, B := M.Point] \as Graphs;
+\import topology.Topology[Carrier := Graphs.CarrierSet] \as GraphSets;
+\definition graphTopology: GraphSets.Topology := Graphs.topology source M.space;
+\definition graph[x: X][y: M.Point]: Graphs.CarrierSet := Pair.pair X M.Point x y;
+\definition embedded[x: X]: Ambient.smoothManifold.Point := e.apply (f x);
+\definition embeddedContinuous: topology.Continuity[A := X, B := Ambient.smoothManifold.Point].Continuous source Ambient.smoothManifold.space embedded :=
+  topology.Composition[A := X, B := M.Point, C := Ambient.smoothManifold.Point].composeContinuous
+    source M.space Ambient.smoothManifold.space f e.apply continuous
+    (\bysub(EmbeddingMaps.Data, { g: EmbeddingMaps.Data \where EmbeddingMaps.Continuous g }, e));
+\module With(neighborhood: Neighborhood);

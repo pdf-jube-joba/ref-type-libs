@@ -1,0 +1,27 @@
+\import Smooth.Derivative[] \as Partials;
+\definition scalar: Partials.Function extension.domain :=
+  \into[Open.ScalarFunction extension.domain](extension.value,
+    { g: Open.ScalarFunction extension.domain \where Smooth.SmoothOn extension.domain g }) \by { extension.smooth };
+\import Smooth.Nonvanishing[U := extension.domain, f := scalar] \as Nonvanishing;
+\definition included: Open.Included Nonvanishing.domain c.image :=
+  \fun (u: Model.Point)(member: Coordinates.Member Nonvanishing.domain.points u) =>
+    extension.included u (Nonvanishing.included u member);
+\definition localCenter: Model.Carrier c.constraints extension.domain :=
+  \into[Open.Carrier extension.domain](\into[Model.Point](center, extension.domain.points) \by { extension.contains },
+    Model.region c.constraints extension.domain) \by { \bysub(Open.Carrier c.image, Model.region c.constraints c.image, center) };
+\definition centerAgrees: extension.value localCenter = f x :=
+  trans!{Real.Real} _ _ _ (extension.agrees localCenter) (congr!{M.Point Real.Real} f _ _ (Charts.pointCoordinate c x));
+\definition contains: Coordinates.Member Nonvanishing.domain.points center :=
+  Nonvanishing.intro localCenter (\fun (zero: extension.value localCenter = Real.zero) =>
+    nonzero (trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ centerAgrees) zero));
+\definition inExtension[u: Model.Carrier c.constraints Nonvanishing.domain]: Model.Carrier c.constraints extension.domain :=
+  \into[Open.Carrier extension.domain](Nonvanishing.input u, Model.region c.constraints extension.domain) \by {
+    \bysub(Open.Carrier Nonvanishing.domain, Model.region c.constraints Nonvanishing.domain, u)
+  };
+\definition result: Extension[\fun (y: M.Point) => Laws.fieldInv (f y)] :=
+  Extension[\fun (y: M.Point) => Laws.fieldInv (f y)] {
+    domain := Nonvanishing.domain, included := included, contains := contains,
+    value := Nonvanishing.inverse, smooth := Nonvanishing.inverseSmooth,
+    agrees := \fun (u: Model.Carrier c.constraints Nonvanishing.domain) =>
+      congr!{Real.Real Real.Real} Laws.fieldInv _ _ (extension.agrees (inExtension u)),
+  };

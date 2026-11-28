@@ -1,0 +1,39 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Data[].Pair[] \as Pair;
+\import real.Analysis[] \as Real;
+\import Real.Estimates[] \as Estimates;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import topology.Topology[Carrier := X.Point] \as XS;
+\import manifolds.SmoothMap[n := m, m := d].Between[M := M, N := Ambient.smoothManifold] \as EmbeddingMaps;
+\import manifolds.SmoothMap[n := n, m := m].Between[M := X, N := M] \as Maps;
+\import topological_constructions.Product[A := X.Point, B := M.Point] \as Graphs;
+\import topology.Topology[Carrier := Graphs.CarrierSet] \as GraphSets;
+\definition graphTopology: GraphSets.Topology := Graphs.topology X.space M.space;
+\definition graph[x: X.Point][y: M.Point]: Graphs.CarrierSet := Pair.pair X.Point M.Point x y;
+\definition embedded[x: X.Point]: Ambient.smoothManifold.Point := e.apply (f x);
+\definition embeddedContinuous: topology.Continuity[A := X.Point, B := Ambient.smoothManifold.Point].Continuous X.space Ambient.smoothManifold.space embedded :=
+  topology.Composition[A := X.Point, B := M.Point, C := Ambient.smoothManifold.Point].composeContinuous
+    X.space M.space Ambient.smoothManifold.space f e.apply continuous
+    (\bysub(EmbeddingMaps.Data, { g: EmbeddingMaps.Data \where EmbeddingMaps.Continuous g }, e));
+\import \root.Approximation[n := n].On[M := X].Euclidean[m := d].Of[f := embedded, continuous := embeddedContinuous] \as Euclidean;
+\structure Result[K: \Pow X.Point, W: \Pow Graphs.CarrierSet]: \Set := {
+  map: Maps.Map,
+  neighborhood: \Pow X.Point,
+  neighborhoodOpen: XS.IsOpenIn X.space neighborhood,
+  contains: XS.Subset K neighborhood,
+  agrees: \forall (x: X.Point) -> XS.Member neighborhood x -> map.apply x = f x,
+  near: \forall (x: X.Point) -> GraphSets.Member W (graph x (map.apply x)),
+};
+\import \root.Retraction[m := m, k := k].On[M := M].Of[e := e]
+  .Topological[X := X.Point, source := X.space, f := f, continuous := continuous] \as Topological;
+\module With(neighborhood: Neighborhood);
+
+\module Relative(K, U: \Pow X.Point, closed: XS.IsClosedIn X.space K, open: XS.IsOpenIn X.space U, included: XS.Subset K U);
+\import \root.Approximation[n := n].On[M := X].Empty[] \as Empty;
+\definition exists[compactSource: XS.IsCompact X.space][compactTarget: TargetSets.IsCompact M.space]
+    [W: \Pow Graphs.CarrierSet][windowOpen: GraphSets.IsOpenIn graphTopology W]
+    [around: \forall (x: X.Point) -> GraphSets.Member W (graph x (f x))]: \exists Result[XS.Empty, W] :=
+  Relative[K := XS.Empty, U := XS.Empty, closed := Empty.closed, open := Empty.open, included := Empty.included]
+    .exists compactSource compactTarget
+      (\fun (i: Fin.Fin d) => Empty.smooth (Euclidean.coordinate i)) W windowOpen around;

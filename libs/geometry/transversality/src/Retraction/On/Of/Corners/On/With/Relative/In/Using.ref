@@ -1,0 +1,29 @@
+\import Coordinates.Components[f := improved.map] \as Vector;
+\definition insideTube[x: X.Point]: AmbientSets.Member neighborhood.image.points (Vector.vector x) :=
+  Window.tubePoint x (Vector.vector x) (radius.within x (Vector.vector x) (improved.close x));
+\import Coordinates.Build[g := Vector.vector, regular := Vector.smooth].OpenTarget[V := neighborhood.image, inside := insideTube] \as Restricted;
+\import boundary_manifolds.MapComposition[n := n, m := d, l := d].Between[M := X, N := OpenTarget.manifold, P := Source.manifold]
+  .Of[f := Restricted.map, g := IntoTube.map] \as Corestrict;
+\import boundary_manifolds.MapComposition[n := n, m := d, l := m].Between[M := X, N := Source.manifold, P := Target.manifold]
+  .Of[f := Corestrict.map, g := Lifted.map] \as Composite;
+\definition projected[x: X.Point]: Tube.Point := \into[Ambient.smoothManifold.Point](Vector.vector x, neighborhood.image.points) \by { insideTube x };
+\definition formula[x: X.Point]: (Composite.map.apply x \of M.Point) = neighborhood.retraction.apply (projected x) :=
+  congr!{Tube.Point M.Point} neighborhood.retraction.apply _ _ (chartFormula (Restricted.map.apply x));
+\definition agrees[x: X.Point]: XS.Member improved.neighborhood x -> (Composite.map.apply x \of M.Point) = f x :=
+  \fun (inFixed: _) => trans!{M.Point} _ _ _ (formula x)
+    ((\idelim Graph.embedded x = Vector.vector x \with y: Ambient.smoothManifold.Point =>
+      \forall (member: AmbientSets.Member neighborhood.image.points y) ->
+        neighborhood.retraction.apply (\into[Ambient.smoothManifold.Point](y, neighborhood.image.points) \by { member }) = f x \by {
+          base: \fun (member: _) => neighborhood.onEmbedding (f x),
+          equality: sym!{Ambient.smoothManifold.Point} _ _ (improved.agrees x inFixed)
+      }) (insideTube x));
+\definition near[x: X.Point]: GraphSets.Member W (Graph.graph x (Composite.map.apply x)) :=
+  \idelim neighborhood.retraction.apply (projected x) = (Composite.map.apply x \of M.Point)
+    \with y: M.Point => GraphSets.Member W (Graph.graph x y) \by {
+      base: Window.preserves x (Vector.vector x) (radius.within x (Vector.vector x) (improved.close x)),
+      equality: sym!{M.Point} _ _ (formula x)
+    };
+\definition result: Result[K, W] := Result[K, W] {
+  map := Composite.map, neighborhood := improved.neighborhood, neighborhoodOpen := improved.neighborhoodOpen,
+  contains := improved.contains, agrees := agrees, near := near,
+};

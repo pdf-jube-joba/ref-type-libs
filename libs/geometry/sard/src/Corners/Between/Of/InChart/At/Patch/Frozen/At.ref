@@ -1,0 +1,12 @@
+\import calculus.Vector[n := n, m := n] \as InputLinear;
+\import calculus.Vector[n := n, m := m] \as OutputLinear;
+\import InputMaps.Differential[U := domain, V := e.neighborhood, f := Restricted.map, a := x] \as InputDerivative;
+\definition projection: InputDerivative.value = Projection.linear :=
+  trans!{InputLinear.LinearMap} _ _ _ (Restricted.differential x) (Linear.differential (Restricted.input x));
+\definition chain: \forall (u: Input.Point) ->
+  (derivative x).apply u = (Extended.differential (projected x)).apply (Projection.apply u) :=
+  \fun (u: Input.Point) =>
+    trans!{Output.Point} _ _ _
+      (congr!{OutputLinear.LinearMap Output.Point} (\fun (L: OutputLinear.LinearMap) => L.apply u) _ _ (Composite.At[a := x].jacobian))
+      (congr!{Input.Point Output.Point} (Extended.differential (projected x)).apply _ _
+        (congr!{InputLinear.LinearMap Input.Point} (\fun (L: InputLinear.LinearMap) => L.apply u) _ _ projection));

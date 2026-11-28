@@ -1,0 +1,16 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\import calculus.Maps[n := n, m := m] \as Maps;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Source;
+\import calculus.Real[].Multivariable[n := m].Open[] \as Target;
+\import topological_algebra.Euclidean[].Dimension[n := n] \as Domain;
+\import topological_algebra.Euclidean[].Dimension[n := m] \as Codomain;
+\import topology.Topology[Carrier := Codomain.Point] \as Sets;
+\import \root.Null[m := m] \as Null;
+\import functional_analysis.Measure[A := Codomain.Point].Sigma[] \as Sigma;
+
+\module On(U: Source.OpenSet, V: Target.OpenSet, f: Maps.Map U V);
+
+\definition Sard: \Prop :=
+  \forall (U: Source.OpenSet)(V: Target.OpenSet)(f: Maps.Map U V) -> Null.Null On[U := U, V := V, f := f].criticalValues;

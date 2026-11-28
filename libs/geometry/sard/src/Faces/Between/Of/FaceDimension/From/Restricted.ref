@@ -1,0 +1,54 @@
+\import boundary_manifolds.MapComposition[n := d, m := n, l := m].Between[M := F, N := M, P := T].Of[
+  f := inclusion, g := f] \as Composition;
+\import boundary_manifolds.SmoothMap[n := d, m := m].Between[M := F, N := T] \as MapsOnFace;
+\definition map: MapsOnFace.Map := Composition.map;
+\import \root.Corners[n := d, m := m].Between[M := F, N := T].Of[f := map] \as Values;
+\definition restriction[right: Chart]: Restriction[right] := Restriction[right] {
+  regular := { y: T.Point \where Values.Regular y },
+  exceptional := Values.InChart[right := right].criticalCoordinates,
+  null := Values.sard right,
+  outside := Values.InChart[right := right].regularAt,
+};
+
+\import manifold_gluing.SmoothChainRule[n := d, m := n, l := m].Between[M := F, N := M, P := T].Of[f := inclusion, g := f] \as Chain;
+\import boundary_manifolds.SmoothMap[n := d, m := n].Between[M := F, N := M] \as InclusionMaps;
+\import boundary_manifolds.Tangent[n := d].On[M := F] \as FaceTangent;
+\import boundary_manifolds.Tangent[n := n].On[M := M] \as AmbientTangent;
+\import boundary_manifolds.Differential[n := d, m := n].Between[M := F, N := M] \as InclusionDifferential;
+\import boundary_manifolds.Tangent[n := m].On[M := T] \as OutputTangent;
+\import boundary_manifolds.Differential[n := n, m := m].Between[M := M, N := T] \as AmbientDifferential;
+\import boundary_manifolds.Differential[n := d, m := m].Between[M := F, N := T] \as RestrictedDifferential;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\definition TangentialImage: \Prop :=
+  \forall (x: F.Point)(v: AmbientTangent.At[x := InclusionMaps.apply inclusion x].Vector) ->
+    AmbientTangent.At[x := InclusionMaps.apply inclusion x].Cones[].Tangential v ->
+    \exists ( u: FaceTangent.At[x := x].Vector \where InclusionDifferential.At[f := inclusion, x := x].value.apply u = v );
+
+\definition regularOfTangential: TangentialImage -> \forall (y: T.Point) -> Ambient.TangentialRegular y -> Values.Regular y := \block {
+  \fun (image: TangentialImage)(y: T.Point)(regular: Ambient.TangentialRegular y)(x: F.Point)
+    (same: MapsOnFace.apply map x = y)(v: OutputTangent.At[x := MapsOnFace.apply map x].Vector) \then
+  \takefrom w: \Cast[AmbientTangent.At[x := InclusionMaps.apply inclusion x].Vector]
+    ({ w: AmbientTangent.At[x := InclusionMaps.apply inclusion x].Vector \where Logic.And[
+      AmbientTangent.At[x := InclusionMaps.apply inclusion x].Cones[].Tangential w,
+      AmbientDifferential.At[f := f, x := InclusionMaps.apply inclusion x].value.apply w = v] })
+    \by regular (InclusionMaps.apply inclusion x) same v \then
+  \let law: Logic.And[AmbientTangent.At[x := InclusionMaps.apply inclusion x].Cones[].Tangential w,
+    AmbientDifferential.At[f := f, x := InclusionMaps.apply inclusion x].value.apply w = v] :=
+    \bysub(AmbientTangent.At[x := InclusionMaps.apply inclusion x].Vector,
+      { w: AmbientTangent.At[x := InclusionMaps.apply inclusion x].Vector \where Logic.And[
+        AmbientTangent.At[x := InclusionMaps.apply inclusion x].Cones[].Tangential w,
+        AmbientDifferential.At[f := f, x := InclusionMaps.apply inclusion x].value.apply w = v] }, w) \then
+  \takefrom u: \Cast[FaceTangent.At[x := x].Vector]
+    ({ u: FaceTangent.At[x := x].Vector \where InclusionDifferential.At[f := inclusion, x := x].value.apply u = w })
+    \by image x w law.left \then
+  \return Logic.existsIntro[FaceTangent.At[x := x].Vector,
+    { u: FaceTangent.At[x := x].Vector \where RestrictedDifferential.At[f := map, x := x].value.apply u = v }] u
+    (trans!{{OutputTangent.At[x := MapsOnFace.apply map x].Vector}} _ _ _ (Chain.At[x := x].pointwise u)
+      (trans!{{OutputTangent.At[x := MapsOnFace.apply map x].Vector}} _ _ _
+        (congr!{{AmbientTangent.At[x := InclusionMaps.apply inclusion x].Vector} {OutputTangent.At[x := MapsOnFace.apply map x].Vector}}
+          AmbientDifferential.At[f := f, x := InclusionMaps.apply inclusion x].value.apply _ _
+          (\bysub(FaceTangent.At[x := x].Vector,
+            { u: FaceTangent.At[x := x].Vector \where InclusionDifferential.At[f := inclusion, x := x].value.apply u = w }, u)))
+        law.right))
+};

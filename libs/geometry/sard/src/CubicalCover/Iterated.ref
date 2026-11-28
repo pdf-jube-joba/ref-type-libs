@@ -1,0 +1,108 @@
+\use Equality.eq_reason_in;
+\import Real.Estimates[].Product[] \as Product;
+\import \root.Null[m := m] \as Null;
+\definition power[r: Real.Real][n: N.Nat^]: Real.Real := Real.Geometric[q := r].value n;
+\definition volume[c: Real.Real][n: N.Nat^][r: Real.Real]: Real.Real := Real.mul c (power r n);
+\definition mass: \forall (n: N.Nat^)(c, r: Real.Real) -> cost n (volume c n (half r)) = volume c n r :=
+  \induction (n: N.Nat^) \return \forall (c, r: Real.Real) -> cost n (volume c n (half r)) = volume c n r \with {
+    | zero: \fun (c, r: Real.Real) => \refl(Real.mul c Real.one)
+    | succ: \fun (n: N.Nat^)(previous: _)(c, r: Real.Real) => \block {
+      \let factor: Real.Real := volume c n r \then
+      \let child: volume c (N.Nat^::succ n) (half r) = volume (Real.mul (half r) c) n (half r) :=
+        trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ (Laws.fieldMulAssoc c (half r) (power (half r) n)))
+          (congr!{Real.Real Real.Real} (\fun (x: Real.Real) => Real.mul x (power (half r) n)) _ _ (Laws.fieldMulComm c (half r))) \then
+      \let small: Real.Real := volume c (N.Nat^::succ n) (half r) \then
+      \let shifted: Real.Real := volume (Real.mul (half r) c) n (half r) \then
+      \let unscaled: Real.Real := volume (Real.mul (half r) c) n r \then
+      \let side: Real.Real := Real.mul (half r) factor \then
+      \let oneSide: cost n small = side :=
+        trans!{Real.Real} (cost n small) (cost n shifted) side
+          (congr!{Real.Real Real.Real} (cost n) small shifted child)
+          (trans!{Real.Real} (cost n shifted) unscaled side
+            (previous (Real.mul (half r) c) r)
+            (Laws.fieldMulAssoc (half r) c (power r n))) \then
+      \return eq_reason_in!{Real.Real { Real.add (cost n small) (cost n small) }
+        "=" { Real.add side side } "by" { congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _ oneSide oneSide }
+        "=" { Real.mul (Real.add (half r) (half r)) factor } "by" {
+          sym!{Real.Real} _ _ (Real.Algebra[].mulAddRight (half r) (half r) factor) }
+        "=" { Real.mul r factor } "by" {
+          congr!{Real.Real Real.Real} (\fun (s: Real.Real) => Real.mul s factor) _ _ (Estimates.halfTwice r) }
+        "=" { Real.mul (Real.mul r c) (power r n) } "by" { sym!{Real.Real} _ _ (Laws.fieldMulAssoc r c (power r n)) }
+        "=" { Real.mul (Real.mul c r) (power r n) } "by" {
+          congr!{Real.Real Real.Real} (\fun (s: Real.Real) => Real.mul s (power r n)) _ _ (Laws.fieldMulComm r c) }
+        "=" { volume c (N.Nat^::succ n) r } "by" { Laws.fieldMulAssoc c r (power r n) }
+      }
+    }
+  };
+
+\definition mesh: \forall (k: N.Nat^) -> Real.Real -> Real.Real :=
+  \induction (k: N.Nat^) \return Real.Real -> Real.Real \with {
+    | zero: \fun (r: Real.Real) => r
+    | succ: \fun (k: N.Nat^)(prior: Real.Real -> Real.Real)(r: Real.Real) => prior (half r)
+  };
+
+\definition meshValue: \forall (k: N.Nat^)(r: Real.Real) ->
+  mesh k r = Real.mul r (power Real.half k) :=
+  \induction (k: N.Nat^) \return \forall (r: Real.Real) -> mesh k r = Real.mul r (power Real.half k) \with {
+    | zero: \fun (r: Real.Real) => sym!{Real.Real} _ _ (Real.Algebra[].mulOneRight r)
+    | succ: \fun (k: N.Nat^)(prior: _)(r: Real.Real) => eq_reason_in!{Real.Real _
+      "=" _ "by" { prior (half r) }
+      "=" _ "by" { congr!{Real.Real Real.Real} (\fun (s: Real.Real) => Real.mul s (power Real.half k)) _ _ (Laws.fieldMulComm Real.half r) }
+      "=" _ "by" { Laws.fieldMulAssoc r Real.half (power Real.half k) }
+    }
+  };
+
+\definition meshPositive: \forall (k: N.Nat^)(r: Real.Real) -> R.Lt Real.zero r -> R.Lt Real.zero (mesh k r) :=
+  \induction (k: N.Nat^) \return \forall (r: Real.Real) -> R.Lt Real.zero r -> R.Lt Real.zero (mesh k r) \with {
+    | zero: \fun (r: Real.Real)(positive: R.Lt Real.zero r) => positive
+    | succ: \fun (k: N.Nat^)(prior: _)(r: Real.Real)(positive: R.Lt Real.zero r) =>
+      prior (half r) (Estimates.halfOfPositive r positive)
+  };
+
+\definition arbitrarilySmall: \forall (r, epsilon: Real.Real) -> R.Lt Real.zero r -> R.Lt Real.zero epsilon ->
+  \exists ( k: N.Nat^ \where R.Lt (mesh k r) epsilon ) := \block {
+  \fun (r, epsilon: Real.Real)(positive: R.Lt Real.zero r)(small: R.Lt Real.zero epsilon) \then
+  \let halfPositive: R.Lt Real.zero Real.half :=
+    R.ltReplaceRight Real.zero (Real.mul Real.half Real.one) Real.half (Real.Algebra[].mulOneRight Real.half)
+      (Estimates.halfOfPositive Real.one Product.onePositive) \then
+  \let halfBelow: R.Lt Real.half Real.one :=
+    R.ltReplaceLeft (Real.mul Real.half Real.one) Real.half Real.one (Real.Algebra[].mulOneRight Real.half)
+      (Estimates.halfStrict Real.one Product.onePositive) \then
+  \takefrom k: \Cast[N.Nat^] ({ k: N.Nat^ \where R.Lt (Real.mul r (power Real.half k)) epsilon }) \by
+    Real.Geometric[q := Real.half].scaledEventual (Order.leOfLt Real.zero Real.half halfPositive)
+      halfBelow r epsilon (Order.leOfLt Real.zero r positive) small \then
+  \return Logic.existsIntro[N.Nat^, { k: N.Nat^ \where R.Lt (mesh k r) epsilon }] k
+    (R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (meshValue k r))
+      (\bysub(N.Nat^, { k: N.Nat^ \where R.Lt (Real.mul r (power Real.half k)) epsilon }, k)))
+};
+
+\definition bound: \forall (k, n: N.Nat^)(p: A -> Vector n)(S: \Pow A)(r, c: Real.Real) ->
+  (\forall (a: Vector n) -> Bound (Cube n p S a (mesh k r)) (volume c n (mesh k r))) ->
+  \forall (a: Vector n) -> Bound (Cube n p S a r) (volume c n r) :=
+  \induction (k: N.Nat^) \return \forall (n: N.Nat^)(p: A -> Vector n)(S: \Pow A)(r, c: Real.Real) ->
+    (\forall (a: Vector n) -> Bound (Cube n p S a (mesh k r)) (volume c n (mesh k r))) ->
+      \forall (a: Vector n) -> Bound (Cube n p S a r) (volume c n r) \with {
+    | zero: \fun (n: N.Nat^)(p: A -> Vector n)(S: \Pow A)(r, c: Real.Real)(bounds: _) => bounds
+    | succ: \fun (k: N.Nat^)(prior: _)(n: N.Nat^)(p: A -> Vector n)(S: \Pow A)(r, c: Real.Real)(bounds: _)(a: Vector n) =>
+      \idelim cost n (volume c n (half r)) = volume c n r \with b: Real.Real => Bound (Cube n p S a r) b \by {
+        base: subdivide n p S a r (volume c n (half r)) (\fun (u: Vector n)(_: Child n a r u) =>
+          prior n p S (half r) c bounds u),
+        equality: mass n c r
+      }
+  };
+
+\definition null: \forall (S: \Pow A) -> (\forall (epsilon: Real.Real) -> R.Lt Real.zero epsilon -> Bound S epsilon) ->
+  Null.Null (Images.Image f S) :=
+  \fun (S: \Pow A)(bounds: \forall (epsilon: Real.Real) -> R.Lt Real.zero epsilon -> Bound S epsilon) =>
+    \axiom:setext(E.outer (Images.Image f S), Measure.zero,
+      \fun (r: Real.Real)(inside: Measure.below (E.outer (Images.Image f S)) r) =>
+        Order.byContradiction (R.Lt r Real.zero)
+          (\fun (notNegative: Logic.Not (R.Lt r Real.zero)) =>
+            (\fun (nonnegative: R.Le Real.zero r) => \block {
+              \takefrom s: \Cast[Real.Real] ({ s: Real.Real \where Logic.And[R.Lt r s, Measure.below (E.outer (Images.Image f S)) s] })
+                \by (E.outerNonnegative (Images.Image f S)).rounded r inside \then
+              \let more: Logic.And[R.Lt r s, Measure.below (E.outer (Images.Image f S)) s] :=
+                \bysub(Real.Real, { s: Real.Real \where Logic.And[R.Lt r s, Measure.below (E.outer (Images.Image f S)) s] }, s) \then
+              \return R.ltIrrefl s (bounds s (R.leLtTrans _ _ _ nonnegative more.left) s more.right)
+            }) (Order.leOfNotLtReverse Real.zero r notNegative)),
+      (E.outerNonnegative (Images.Image f S)).negative);

@@ -1,0 +1,37 @@
+\import Scalar.On[U := U, h := w.function] \as Level;
+\import Hypersurface.On[U := U, V := V, f := f, g := Level.map, value := Scalar.constant Real.zero] \as Local;
+
+\definition included: DomainSets.Subset points Local.points :=
+  \fun (x: Open.Carrier U)(member: DomainSets.Member points x) =>
+    Logic.And[_, _]::#
+      (congr!{Real.Real {Fin.Fin one -> Real.Real}} Scalar.constant _ _
+        (w.vanishes x ((member.left j) i).left ((member.left j) i).right))
+      (rankZero k x member.left);
+
+\definition localNull: Smaller.Sard -> Flat (N.Nat^::succ k) a ->
+  \exists ( W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn Topology.topology W,
+    Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] ) := \block {
+    \fun (sard: Smaller.Sard)(flat: Flat (N.Nat^::succ k) a) \then
+    \let valueZero: Level.apply a = Scalar.constant Real.zero :=
+      congr!{Real.Real {Fin.Fin one -> Real.Real}} Scalar.constant _ _ (w.vanishes a ((flat j) i).left ((flat j) i).right) \then
+    \takefrom W: \Cast[\Pow (Open.Carrier U)] ({ W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn Topology.topology W,
+      Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection Local.points W))]] })
+      \by Local.At[a := a].localNull sard valueZero (Level.At[a := a].regular w.direction w.nonzero) \then
+    \let data: Logic.And[DomainSets.IsOpenIn Topology.topology W,
+      Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection Local.points W))]] :=
+      \bysub(\Pow (Open.Carrier U), { W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn Topology.topology W,
+        Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection Local.points W))]] }, W) \then
+    \let imageIncluded: OutputSets.Subset (Images.Image apply (DomainSets.Intersection points W))
+      (Images.Image apply (DomainSets.Intersection Local.points W)) :=
+      \fun (y: Output.Point) => Images.imageElim apply (DomainSets.Intersection points W) y
+        (OutputSets.Member (Images.Image apply (DomainSets.Intersection Local.points W)) y)
+        (\fun (x: Open.Carrier U)(member: DomainSets.Member (DomainSets.Intersection points W) x)(same: apply x = y) =>
+          Logic.existsIntro[Open.Carrier U, { x: Open.Carrier U \where Logic.And[
+            DomainSets.Member (DomainSets.Intersection Local.points W) x, apply x = y] }] x
+            (Logic.And[_, _]::# (Logic.And[_, _]::# (included x member.left) member.right) same)) \then
+    \return Logic.existsIntro[\Pow (Open.Carrier U), { W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn Topology.topology W,
+      Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] }]
+      W (Logic.And[_, _]::# data.left (Logic.And[_, _]::# data.right.left
+        (Null.included (Images.Image apply (DomainSets.Intersection points W)) (Images.Image apply (DomainSets.Intersection Local.points W))
+          imageIncluded data.right.right)))
+  };

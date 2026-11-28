@@ -1,0 +1,45 @@
+\definition term[j: Fin.Fin m]: Functions.Function :=
+  Functions.plus (Maps.coordinateFunction U Output.whole f j)
+    (Functions.product (Functions.constant (Real.neg (a j))) weight);
+\definition output[x: Input.Carrier U]: Output.Carrier Output.whole :=
+  Output.Whole[].point (\fun (j: Fin.Fin m) => term j x);
+\definition data: Maps.Data[U, Output.whole] := Maps.Data[U, Output.whole] { apply := output };
+\definition map: Maps.Map U Output.whole := \into[Maps.Data[U, Output.whole]](data, Maps.Map U Output.whole) \by {
+  Maps.Laws[U, Output.whole, data] {
+    smooth := \fun (j: Fin.Fin m) => \bysub(Input.ScalarFunction U, Functions.Predicate, term j),
+  }
+};
+\import sard.Euclidean[n := n, m := m].On[U := U, V := Output.whole, f := map] \as Perturbed;
+\definition RegularAtZero: \Prop := Perturbed.RegularValue Def.origin;
+
+\module Fixed(x: Input.Carrier U, zero: bump x = Real.zero);
+
+\import real.Analysis[].Estimates[].Product[] \as Product;
+\definition displacementVector[x: Input.Carrier U]:
+  Def.subPoint (Maps.apply U Output.whole map x) (Maps.apply U Output.whole f x) = Def.scale (weight x) (Def.negPoint a) :=
+  \axiom:funext(Def.subPoint (Maps.apply U Output.whole map x) (Maps.apply U Output.whole f x), Def.scale (weight x) (Def.negPoint a),
+    \fun (j: Fin.Fin m) => eq_reason_in!{Real.Real _
+      "=" _ "by" {congr!{Real.Real Real.Real} (\fun (z: Real.Real) => Real.sub z (f.apply x j)) _ _
+        (Laws.addComm (f.apply x j) (Real.mul (Real.neg (a j)) (weight x)))}
+      "=" _ "by" {Laws.addNegCancelRight (f.apply x j) (Real.mul (Real.neg (a j)) (weight x))}
+      "=" _ "by" {Laws.fieldMulComm (Real.neg (a j)) (weight x)}
+    });
+\definition originNeg: Def.negPoint Def.origin = Def.origin :=
+  \axiom:funext(Def.negPoint Def.origin, Def.origin, \fun (j: Fin.Fin m) => Laws.negZero);
+\definition normAsDistance[p: Coordinates.Point]: Def.norm p = Def.pointDistance p Def.origin :=
+  congr!{Coordinates.Point Real.Real} Def.norm _ _
+    (\axiom:funext(p, Def.subPoint p Def.origin, \fun (j: Fin.Fin m) => sym!{Real.Real} _ _ (Laws.subZeroRight (p j))));
+\definition normalDistance: Def.norm (Def.negPoint a) = Def.pointDistance a Def.origin := eq_reason_in!{Real.Real _
+  "=" _ "by" {normAsDistance (Def.negPoint a)}
+  "=" _ "by" {congr!{Coordinates.Point Real.Real} (Def.pointDistance (Def.negPoint a)) _ _
+    (sym!{Coordinates.Point} _ _ originNeg)}
+  "=" _ "by" {Norm.distanceNeg a Def.origin}
+};
+\definition displacement[x: Input.Carrier U]:
+  Def.pointDistance (Maps.apply U Output.whole map x) (Maps.apply U Output.whole f x) =
+    Real.mul (weight x) (Def.pointDistance a Def.origin) := eq_reason_in!{Real.Real _
+  "=" _ "by" {congr!{Coordinates.Point Real.Real} Def.norm _ _ (displacementVector x)}
+  "=" _ "by" {Norm.homogeneous (weight x) (Def.negPoint a)}
+  "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _
+    (Product.absOfNonnegative (weight x) (Algebra.squareNonnegative (bump x))) normalDistance}
+};

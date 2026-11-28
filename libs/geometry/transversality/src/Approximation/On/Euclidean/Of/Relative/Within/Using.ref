@@ -1,0 +1,19 @@
+\definition candidate[x: M.Point][i: Fin.Fin m]: Real.Real := (chosen i).map x;
+\definition smooth[i: Fin.Fin m]: Scalars.IsSmooth (\fun (x: M.Point) => candidate x i) :=
+  Functions.regular (chosen i).map;
+\definition map: Maps.Map := Vector.Of[f := candidate, regular := smooth].map;
+\definition exact[x: M.Point]: Space.Member fixed.inner x -> map.apply x = f x :=
+  \fun (inInner: _) => \axiom:funext(map.apply x, f x,
+    \fun (i: Fin.Fin m) => \parent.Coordinate[i := i].exact (chosen i) x inInner);
+\definition close[x: M.Point]: R.Lt (Def.pointDistance (f x) (map.apply x)) radius :=
+  Norm.finiteStrictUpper m (Def.subPoint (f x) (map.apply x)) radius positive
+    (\fun (i: Fin.Fin m) =>
+      R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Norm.distanceDifference (f x i) (map.apply x i))) ((chosen i).close x));
+\definition result: Result[radius, K] := Result[radius, K] {
+  map := map,
+  neighborhood := fixed.inner,
+  neighborhoodOpen := fixed.innerOpen,
+  contains := fixed.contains,
+  agrees := exact,
+  close := close,
+};

@@ -1,0 +1,6 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\import manifolds.Dimension[n := n].Smooth[] \as Source;
+\import manifolds.Dimension[n := r].Smooth[] \as Parameter;
+\module Between(M: Source.Manifold, P: Parameter.Manifold);

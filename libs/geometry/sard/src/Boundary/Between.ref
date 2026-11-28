@@ -1,0 +1,5 @@
+\import G03.Of[M := M] \as Atlas;
+\import boundary_manifolds.SmoothMap[n := Nat.add One.dimension n, m := m].Between[M := M, N := T] \as Maps;
+\import Targets.Chart[M := T.Point, space := T.space] \as Charts;
+\definition TargetChart: \Set := \Cast[Charts.Chart] T.atlas.charts;
+\module With(cover: Atlas.Cover);

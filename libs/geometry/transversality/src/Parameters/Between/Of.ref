@@ -1,0 +1,2 @@
+\import sard.Manifold[n := n, m := r].Between[M := M, N := P].Of[f := projection] \as Sard;
+\module Relative(A: \Set, fixed: \Pow A, transverse: P.Point -> A -> \Prop);

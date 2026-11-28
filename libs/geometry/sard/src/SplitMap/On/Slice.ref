@@ -1,0 +1,68 @@
+\import Input.LeftSection[V := U, c := c] \as Section;
+\import Inclusions.Composition[U := Section.domain, V := U, f := Section.map].After[l := m, W := RangeOpen.whole, g := h] \as Composition;
+\definition mapOnSlice: calculus.Maps[n := n, m := m].Map Section.domain RangeOpen.whole := Composition.compose;
+\import Smaller.On[U := Section.domain, V := RangeOpen.whole, f := mapOnSlice] \as SliceValues;
+\import product_integration.EuclideanProduct[m := p, n := m] \as Product;
+\import std.Data[].Pair[] \as Tuples;
+\import std.Data[].FinSet[].Sum[m := p, n := m].Tuples[A := real.Analysis[].Real] \as Coordinates;
+
+\module At(b: FiberOpen.Carrier Section.domain);
+
+\definition pointOnSlice: \forall (a: Open.Carrier U)(same: Input.left a = c) ->
+  \exists ( b: FiberOpen.Carrier Section.domain \where Section.apply b = a ) :=
+  \fun (a: Open.Carrier U)(same: Input.left a = c) => \block {
+    \let equal: Input.join c (Input.right a) = a :=
+      trans!{SourceSpace.Point} _ _ _
+        (congr!{Parameter.Point SourceSpace.Point} (\fun (t: Parameter.Point) => Input.join t (Input.right a)) _ _
+          (sym!{Parameter.Point} _ _ same))
+        (Input.recover a) \then
+    \let belongs: \In[SourceSpace.Point] U.points (Input.join c (Input.right a)) :=
+      \idelim a = Input.join c (Input.right a) \with v: SourceSpace.Point => \In[SourceSpace.Point] U.points v \by {
+        base: \bysub(SourceSpace.Point, U.points, a), equality: sym!{SourceSpace.Point} _ _ equal } \then
+    \let b: FiberOpen.Carrier Section.domain := \into[Fiber.Point](Input.right a, Section.domain.points) \by {
+      Section.intro (Input.right a) belongs } \then
+    \return Logic.existsIntro[FiberOpen.Carrier Section.domain,
+      { b: FiberOpen.Carrier Section.domain \where Section.apply b = a }] b equal
+  };
+
+\definition includedSection: \forall (S: \Pow TargetSpace.Point) -> TargetSets.Subset S Whole.criticalValues ->
+  RangeSets.Subset (ProductSections.On[S := S].section c) SliceValues.criticalValues :=
+  \fun (S: \Pow TargetSpace.Point)(included: TargetSets.Subset S Whole.criticalValues)
+    (y: Range.Point)(inside: RangeSets.Member (ProductSections.On[S := S].section c) y) => \block {
+      \let z: TargetSpace.Point := Product.join (Tuples.pair Parameter.Point Range.Point c y) \then
+      \takefrom a: \Cast[Open.Carrier U] ({ a: Open.Carrier U \where
+        Logic.And[Maps.apply U Target.whole map a = z, Whole.CriticalAt a] }) \by included z inside \then
+      \let witness: Logic.And[Maps.apply U Target.whole map a = z, Whole.CriticalAt a] :=
+        \bysub(Open.Carrier U, { a: Open.Carrier U \where Logic.And[Maps.apply U Target.whole map a = z, Whole.CriticalAt a] }, a) \then
+      \let left: Input.left a = c :=
+        trans!{Parameter.Point} _ _ _ (sym!{Parameter.Point} _ _ (\parent.At[a := a].valueLeft))
+          (trans!{Parameter.Point} _ _ _
+            (congr!{TargetSpace.Point Parameter.Point} Output.left _ _ witness.left)
+            (Output.leftJoin c y)) \then
+      \let right: Remainders.apply U RangeOpen.whole h a = y :=
+        trans!{Range.Point} _ _ _ (sym!{Range.Point} _ _ (\parent.At[a := a].valueRight))
+          (trans!{Range.Point} _ _ _
+            (congr!{TargetSpace.Point Range.Point} Output.right _ _ witness.left)
+            (Output.rightJoin c y)) \then
+      \takefrom b: \Cast[FiberOpen.Carrier Section.domain]
+        ({ b: FiberOpen.Carrier Section.domain \where Section.apply b = a }) \by pointOnSlice a left \then
+      \let same: Section.apply b = a :=
+        \bysub(FiberOpen.Carrier Section.domain, { b: FiberOpen.Carrier Section.domain \where Section.apply b = a }, b) \then
+      \let critical: SliceValues.CriticalAt b :=
+        \fun (surjective: SliceValues.SurjectiveAt b) =>
+          (\idelim a = Section.apply b \with x: Open.Carrier U => Whole.CriticalAt x \by {
+            base: witness.right, equality: sym!{{Open.Carrier U}} _ _ same })
+            (At[b := b].surjective surjective) \then
+      \return Logic.existsIntro[FiberOpen.Carrier Section.domain,
+        { b: FiberOpen.Carrier Section.domain \where Logic.And[calculus.Maps[n := n, m := m].apply Section.domain RangeOpen.whole mapOnSlice b = y,
+          SliceValues.CriticalAt b] }] b
+        (Logic.And[_, _]::#
+          (trans!{Range.Point} _ _ _ (congr!{{Open.Carrier U} Range.Point}
+            (\fun (x: Open.Carrier U) => Remainders.apply U RangeOpen.whole h x) _ _ same) right) critical)
+    };
+
+\definition sectionNull: Smaller.Sard -> \forall (S: \Pow TargetSpace.Point) ->
+  TargetSets.Subset S Whole.criticalValues -> Null.Null (ProductSections.On[S := S].section c) :=
+  \fun (sard: Smaller.Sard)(S: \Pow TargetSpace.Point)(included: TargetSets.Subset S Whole.criticalValues) =>
+    Null.included (ProductSections.On[S := S].section c) SliceValues.criticalValues
+      (includedSection S included) (sard Section.domain RangeOpen.whole mapOnSlice);

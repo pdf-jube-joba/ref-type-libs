@@ -1,0 +1,7 @@
+\import TubeGraph.Window[W := W, open := openWindow, around := around] \as Window;
+\module Using(radius: Window.Radius, improved: Approximation.Result[radius.size, K]);
+\definition exists[compact: XS.IsCompact X.space][regular: Coordinates.SmoothOn Graph.embedded U]: \exists Result[K, W] := \block {
+  \takefrom radius: Window.Radius \by Window.exists compact \then
+  \takefrom improved: Approximation.Result[radius.size, K] \by Approximate.exists compact regular radius.size radius.positive \then
+  \return \exact(Using[radius := radius, improved := improved].result, Result[K, W])
+};

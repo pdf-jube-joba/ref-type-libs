@@ -1,0 +1,47 @@
+\import SourceTangent.At[x := x] \as TangentDomain;
+\import TargetTangent.At[x := Maps.apply f x] \as TangentRange;
+\import Differential.At[f := f, x := x] \as Derivative;
+
+\definition leftChart: TangentDomain.Chart :=
+  \into[SourceCharts.Chart](left, TangentDomain.Chart) \by {
+    TangentDomain.ChartLaws[left] {
+      member := \bysub(SourceCharts.Chart, SourceChart, left),
+      contains := contains,
+    }
+  };
+
+\definition rightChart: TangentRange.Chart :=
+  \into[TargetCharts.Chart](right, TangentRange.Chart) \by {
+    TangentRange.ChartLaws[right] {
+      member := \bysub(TargetCharts.Chart, TargetChart, right),
+      contains := \bysub(M.Point, preimage, x),
+    }
+  };
+
+\import Derivative.InCharts[left := leftChart, right := rightChart] \as InCharts;
+\import TangentDomain.Coordinate[chart := leftChart] \as SourceCoordinates;
+\import TangentRange.Coordinate[chart := rightChart] \as TargetCoordinates;
+
+\definition lifts: Local.SurjectiveAt InCharts.point -> Surjective x := \block {
+  \fun (surjective: Local.SurjectiveAt InCharts.point)(v: TangentRange.Vector) \then
+  \takefrom u: \Cast[Input.Point] ({ u: Input.Point \where
+    (Local.differential InCharts.point).apply u = TargetCoordinates.decode v }) \by surjective (TargetCoordinates.decode v) \then
+  \let w: TangentDomain.Vector := SourceCoordinates.encode u \then
+  \let equal: TargetCoordinates.decode (Derivative.value.apply w) = TargetCoordinates.decode v :=
+    trans!{Output.Point} _ _ _
+      (Derivative.coordinates leftChart rightChart w)
+      (trans!{Output.Point} _ _ _
+        (congr!{Input.Point Output.Point} InCharts.jacobian.apply _ _ (SourceCoordinates.decodeEncode u))
+        (\bysub(Input.Point, { u: Input.Point \where
+          (Local.differential InCharts.point).apply u = TargetCoordinates.decode v }, u))) \then
+  \return Logic.existsIntro[TangentDomain.Vector, { w: TangentDomain.Vector \where Derivative.value.apply w = v }]
+    w (TargetCoordinates.injective (Derivative.value.apply w) v equal)
+};
+
+\definition criticalValue: Logic.Not (Surjective x) -> OutputSets.Member Local.criticalValues (coordinate x) :=
+  \fun (critical: Logic.Not (Surjective x)) =>
+    \idelim Calculus.apply Coordinates.domain right.image map InCharts.point = coordinate x
+      \with y: Output.Point => OutputSets.Member Local.criticalValues y \by {
+        base: Local.criticalValue InCharts.point (\fun (surjective: Local.SurjectiveAt InCharts.point) => critical (lifts surjective)),
+        equality: InCharts.coordinateAgreement
+      };

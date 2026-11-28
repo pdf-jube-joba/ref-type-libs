@@ -1,0 +1,12 @@
+\import boundary_manifolds.SmoothMap[n := n, m := m].Between[M := M, N := T] \as Maps;
+\import boundary_manifolds.Dimension[n := m].Chart[M := T.Point, space := T.space] \as TargetCharts;
+\definition Chart: \Set := \Cast[TargetCharts.Chart] T.atlas.charts;
+\import topology.Topology[Carrier := T.Point] \as TargetSets;
+\structure Restriction[right: Chart]: \Set := {
+  regular: \Pow T.Point,
+  exceptional: \Pow TargetModel.Point,
+  null: Null.Null exceptional,
+  outside: \forall (u: TargetModel.Carrier right.constraints right.image) ->
+    Logic.Not (Sets.Member exceptional u) -> TargetSets.Member regular (TargetCharts.point right u),
+};
+\module Of(f: Maps.Map);

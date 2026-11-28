@@ -1,0 +1,18 @@
+\import SourceTangent.At[x := x] \as Domain;
+\import TargetTangent.At[x := f.apply x] \as Range;
+\import ValueTangent.At[x := function.apply x] \as Value;
+\import First.At[f := f, x := x] \as DF;
+\import Second.At[f := defining, x := f.apply x] \as DG;
+\import Composite.At[f := function, x := x] \as DComposite;
+\import \root.Normal[].Through[V := Domain.Vector, W := Range.Vector, Y := Value.Vector,
+  source := Domain.space, intermediate := Range.space, values := Value.space].Of[D := DF.value, G := DG.value] \as Criterion;
+\definition DefiningSubmersion: \Prop := Criterion.DefiningSubmersion;
+\definition Transverse: \Prop := Criterion.Transverse;
+\definition regular: DefiningSubmersion -> Transverse -> \forall (v: Value.Vector) -> \exists ( u: Domain.Vector \where DComposite.value.apply u = v ) :=
+  \fun (onto: DefiningSubmersion)(transverse: Transverse)(v: Value.Vector) => \block {
+    \takefrom u: \Cast[Domain.Vector] ({ u: Domain.Vector \where DG.value.apply (DF.value.apply u) = v })
+      \by Criterion.regularOfTransverse onto transverse v \then
+    \return Logic.existsIntro[Domain.Vector, { u: Domain.Vector \where DComposite.value.apply u = v }] u
+      (trans!{Value.Vector} _ _ _ (Chain.At[x := x].pointwise u)
+        (\bysub(Domain.Vector, { u: Domain.Vector \where DG.value.apply (DF.value.apply u) = v }, u)))
+  };

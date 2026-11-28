@@ -1,0 +1,69 @@
+\import TargetCharts.Of[chart := right] \as Geometry;
+\import Target.Subspace[S := right.domain] \as LocalSubset;
+\import topology.Homeomorphism[A := TargetCharts.LocalPoint right, B := OutputOpen.Carrier right.image] \as Homeomorphism;
+\import topology.Continuity[A := OutputOpen.Carrier right.image, B := TargetCharts.LocalPoint right] \as Inverse;
+\import OutputOpen.Topology[] \as EuclideanTopology;
+\import OutputSets.Subspace[S := right.image.points].Open[] \as OpenImage;
+
+\definition coordinatePreimage[U: \Pow N.Point]: \Pow (OutputOpen.Carrier right.image) :=
+  Inverse.Preimage (TargetCharts.point right) (LocalSubset.Trace U);
+
+\definition chartOpen[U: \Pow N.Point][open: Target.IsOpenIn N.space U]: OutputOpen.OpenSet :=
+  EuclideanTopology.ofOpen (OpenImage.image (coordinatePreimage U))
+    (OpenImage.imageOpen Output.Topology[].topology (EuclideanTopology.open right.image) (coordinatePreimage U)
+      ((Homeomorphism.laws (TargetCharts.domainTopology right.domain) (TargetCharts.imageTopology right.image) right.coordinates).backwardContinuous
+        (LocalSubset.Trace U) (LocalSubset.traceOpen N.space U open)));
+
+\definition regularAt: \forall (y: OutputOpen.Carrier right.image) ->
+  Logic.Not (OutputSets.Member criticalCoordinates y) -> Regular (TargetCharts.point right y) :=
+  \fun (y: OutputOpen.Carrier right.image)(outside: Logic.Not (OutputSets.Member criticalCoordinates y))
+    (x: M.Point)(same: Maps.apply f x = TargetCharts.point right y) =>
+    OutputMeasure.Sigma[].doubleNegative (Surjective x)
+      (\fun (critical: Logic.Not (Surjective x)) => \block {
+        \let contains: TargetCharts.Contains right (Maps.apply f x) :=
+          \idelim TargetCharts.point right y = Maps.apply f x
+            \with z: N.Point => TargetCharts.Contains right z \by {
+              base: \bysub(N.Point, right.domain, TargetCharts.point right y),
+              equality: sym!{N.Point} _ _ same } \then
+        \let u: Domain := \into[M.Point](x, preimage) \by { contains } \then
+        \let coordinatesEqual: coordinate u = y :=
+          (\idelim TargetCharts.point right y = Maps.apply f x \with z: N.Point =>
+            \forall (member: TargetCharts.Contains right z) ->
+              TargetCharts.coordinate right (\into[N.Point](z, right.domain) \by { member }) = y \by {
+                base: \fun (_: TargetCharts.Contains right (TargetCharts.point right y)) => Geometry.coordinatePoint y,
+                equality: sym!{N.Point} _ _ same
+            }) contains \then
+        \return outside (Logic.existsIntro[Domain, { t: Domain \where Logic.And[DomainSets.Member criticalPoints t, coordinate t = y] }]
+          u (Logic.And[_, _]::# critical coordinatesEqual))
+      });
+
+\definition theorem: Euclidean.Sard -> \forall (U: \Pow N.Point) -> Target.IsOpenIn N.space U ->
+  \forall (a: N.Point) -> Target.Member U a -> TargetCharts.Contains right a ->
+  \exists ( y: N.Point \where Logic.And[Target.Member U y, Regular y] ) := \block {
+    \fun (sard: Euclidean.Sard)(U: \Pow N.Point)(open: Target.IsOpenIn N.space U)
+      (a: N.Point)(inside: Target.Member U a)(contains: TargetCharts.Contains right a) \then
+    \let local: TargetCharts.LocalPoint right := \into[N.Point](a, right.domain) \by { contains } \then
+    \let value: OutputOpen.Carrier right.image := TargetCharts.coordinate right local \then
+    \let inU: Target.Member U (TargetCharts.point right value) :=
+      \idelim a = TargetCharts.point right value \with p: N.Point => Target.Member U p \by {
+        base: inside, equality: sym!{N.Point} _ _ (Geometry.pointCoordinate local) } \then
+    \let V: OutputOpen.OpenSet := chartOpen U open \then
+    \let base: OutputOpen.Carrier V := \into[Output.Point](value, V.points) \by {
+      OpenImage.imageMember (coordinatePreimage U) value inU } \then
+    \takefrom q: \Cast[OutputOpen.Carrier V] ({ q: OutputOpen.Carrier V \where
+      Logic.Not (OutputSets.Member criticalCoordinates q) }) \by Null.Open[].avoids criticalCoordinates
+        (chartNull sard) V base \then
+    \let qMember: OutputSets.Member V.points q := \bysub(Output.Point, V.points, q) \then
+    \let point: OutputOpen.Carrier right.image := \into[Output.Point](q, right.image.points) \by {
+      OpenImage.imageIncluded (coordinatePreimage U) q qMember } \then
+    \let result: N.Point := TargetCharts.point right point \then
+    \let inOriginal: Target.Member U result :=
+      OpenImage.imageElim (coordinatePreimage U) q (Target.Member U result)
+        (\fun (p: OutputOpen.Carrier right.image)(member: \In[OutputOpen.Carrier right.image] (coordinatePreimage U) p)(same: p = q) =>
+          \idelim p = point \with z: OutputOpen.Carrier right.image => Target.Member U (TargetCharts.point right z)
+            \by { base: member, equality: same }) qMember \then
+    \return Logic.existsIntro[N.Point, { y: N.Point \where Logic.And[Target.Member U y, Regular y] }] result
+      (Logic.And[_, _]::# inOriginal (regularAt point
+        (\bysub(OutputOpen.Carrier V, { q: OutputOpen.Carrier V \where
+          Logic.Not (OutputSets.Member criticalCoordinates q) }, q))))
+  };

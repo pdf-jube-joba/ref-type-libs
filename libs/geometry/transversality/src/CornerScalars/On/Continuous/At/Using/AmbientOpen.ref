@@ -1,0 +1,50 @@
+\import Model.Topology[C := c.constraints, U := c.image] \as Range;
+\import topology.Topology[Carrier := Charts.LocalPoint c] \as ChartSets;
+\import topology.Homeomorphism[A := Charts.LocalPoint c, B := Model.Carrier c.constraints c.image] \as Homeomorphisms;
+\definition region: \Pow Model.Point := Coordinates.Intersection e.domain.points V;
+\definition regionOpen: Coordinates.IsOpenIn Ambient.topology region :=
+  (Coordinates.topologyLaws Ambient.topology).intersectionOpen _ _ (Open.Topology[].open e.domain) openV;
+\definition chartRegion: \Pow (Charts.LocalPoint c) :=
+  { y: Charts.LocalPoint c \where Coordinates.Member region (Charts.coordinate c y) };
+\definition chartOpen: ChartSets.IsOpenIn (Charts.domainTopology c.domain) chartRegion :=
+  (Homeomorphisms.laws (Charts.domainTopology c.domain) (Model.regionTopology c.constraints c.image) c.coordinates).forwardContinuous
+    ({ u: Model.Carrier c.constraints c.image \where Coordinates.Member region u }) (Range.ambient region regionOpen);
+\definition pointInDomain[y: Charts.LocalPoint c][member: Coordinates.Member e.domain.points (Charts.coordinate c y)]:
+  Model.Carrier c.constraints e.domain :=
+  \into[Open.Carrier e.domain](\into[Model.Point](Charts.coordinate c y, e.domain.points) \by { member },
+    Model.region c.constraints e.domain) \by {
+      \bysub(Open.Carrier c.image, Model.region c.constraints c.image, Charts.coordinate c y)
+    };
+\definition formula[y: Charts.LocalPoint c][member: Coordinates.Member e.domain.points (Charts.coordinate c y)]:
+  e.value (pointInDomain y member) = f y :=
+  trans!{Real.Real} _ _ _ (e.agrees (pointInDomain y member)) (congr!{M.Point Real.Real} f _ _ (Charts.pointCoordinate c y));
+\definition inPreimage[y: Charts.LocalPoint c][member: Coordinates.Member e.domain.points (Charts.coordinate c y)]:
+  Space.Member (Continuity.Preimage f W) y -> DomainSets.Member preimage (pointInDomain y member) :=
+  \fun (inside: _) => \idelim f y = e.value (pointInDomain y member) \with a: Real.Real => \In[Real.Real] W a \by {
+    base: inside, equality: sym!{Real.Real} _ _ (formula y member)
+  };
+\definition atCenter: ChartSets.Member chartRegion x :=
+  Logic.And[_, _]::# e.contains
+    (\idelim preimage = OpenDomain.Trace V \with o: \Pow (Open.Carrier e.domain) => DomainSets.Member o (pointInDomain x e.contains) \by {
+      base: inPreimage x e.contains inside, equality: same
+    });
+\definition trace[y: Charts.LocalPoint c]: ChartSets.Member chartRegion y -> Space.Member (Continuity.Preimage f W) y :=
+  \fun (member: ChartSets.Member chartRegion y) => \block {
+    \let z: Model.Carrier c.constraints e.domain := pointInDomain y member.left \then
+    \let inTrace: DomainSets.Member (OpenDomain.Trace V) z := member.right \then
+    \let value: DomainSets.Member preimage z :=
+      \idelim OpenDomain.Trace V = preimage \with o: \Pow (Open.Carrier e.domain) => DomainSets.Member o z \by {
+        base: inTrace, equality: sym!{\Pow (Open.Carrier e.domain)} _ _ same
+      } \then
+    \return \idelim e.value z = f y \with a: Real.Real => \In[Real.Real] W a \by { base: value, equality: formula y member.left }
+  };
+\definition image: \Pow M.Point := ChartImage.image chartRegion;
+\definition exists: \exists Neighborhood :=
+  Logic.existsIntro[\Pow M.Point, { U: \Pow M.Point \where Space.OpenNeighborhood[M.space, x, Continuity.Preimage f W, U] }] image
+    (Space.OpenNeighborhood[M.space, x, Continuity.Preimage f W, image] {
+      open := ChartImage.imageOpen M.space c.open chartRegion chartOpen,
+      contains := ChartImage.imageMember chartRegion x atCenter,
+      within := \fun (y: M.Point)(member: _) => ChartImage.imageElim chartRegion y (Space.Member (Continuity.Preimage f W) y)
+        (\fun (z: Charts.LocalPoint c)(inside: _)(equal: z = y) =>
+          \idelim z = y \with p: M.Point => Space.Member (Continuity.Preimage f W) p \by { base: trace z inside, equality: equal }) member,
+    });

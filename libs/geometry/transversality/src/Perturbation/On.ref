@@ -1,0 +1,16 @@
+\import sard.RegularValues[n := n, m := m].On[U := U, V := Output.whole, f := f] \as Sard;
+\import sard.Euclidean[n := n, m := m].On[U := U, V := Output.whole, f := f] \as Original;
+\module At(parameter: Coordinates.Point);
+\definition holds[parameter: Coordinates.Point]: \Prop := At[parameter := parameter].RegularAtZero;
+
+\definition dense[W: Output.OpenSet][center: Output.Carrier W]:
+  \exists ( parameter: Output.Carrier W \where holds parameter ) := \block {
+  \takefrom parameter: \Cast[Output.Carrier W] ({ p: Output.Carrier W \where Original.RegularValue p })
+    \by Sard.dense W center \then
+  \return Logic.existsIntro[Output.Carrier W, { p: Output.Carrier W \where holds p }] parameter
+    (At[parameter := parameter].regular (\bysub(Output.Carrier W, { p: Output.Carrier W \where Original.RegularValue p }, parameter)))
+};
+
+\import Input.Smooth[].Algebra[U := U] \as Functions;
+\module Supported(bump: Functions.Function);
+\module Relative(K: \Pow calculus.Real[].Multivariable[n := n].Point, protected: Input.OpenSet);

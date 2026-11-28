@@ -1,0 +1,19 @@
+\import sard.Corners[n := n, m := m].Between[M := Active.manifold, N := Euclidean.manifold].Of[f := map] \as Sard;
+\import sard.Null[m := m] \as Null;
+\definition chart: Sard.TargetChart := \into[TargetCharts.Chart](Euclidean.chart, Euclidean.manifold.atlas.charts) \by { \refl(Euclidean.chart) };
+\import Sard.InChart[right := chart] \as Critical;
+\definition coordinate[a: Target.Point]: TargetModel.Carrier TargetModel.unconstrained Output.whole :=
+  \into[Output.Carrier Output.whole](Output.Whole[].point a, TargetModel.region TargetModel.unconstrained Output.whole) \by {
+    TargetModel.unconstrainedNonnegative a
+  };
+\definition point[a: Target.Point]: Euclidean.Point := coordinate a;
+\definition regularIn[W: Output.OpenSet][center: Output.Carrier W]:
+  \exists (a: Output.Carrier W \where Sard.TangentialRegular (point a)) := \block {
+  \takefrom a: \Cast[Output.Carrier W] ({ z: Output.Carrier W \where Logic.Not (TargetSets.Member Critical.tangentialCriticalCoordinates z) })
+    \by Null.Open[].avoids Critical.tangentialCriticalCoordinates Critical.tangentialNull W center \then
+  \return Logic.existsIntro[Output.Carrier W, { z: Output.Carrier W \where Sard.TangentialRegular (point z) }] a
+    (Critical.tangentialRegularAt (coordinate a)
+      (\bysub(Output.Carrier W, { z: Output.Carrier W \where Logic.Not (TargetSets.Member Critical.tangentialCriticalCoordinates z) }, a)))
+};
+\definition Regular[a: Target.Point]: \Prop := Sard.TangentialRegular (point a);
+\definition Surjective[x: Active.Point]: \Prop := Sard.TangentialSurjective x;

@@ -1,0 +1,2 @@
+\import Spaces.Linear[V := V, W := W, source := source, target := target] \as Maps;
+\module Of(D: Maps.Map);

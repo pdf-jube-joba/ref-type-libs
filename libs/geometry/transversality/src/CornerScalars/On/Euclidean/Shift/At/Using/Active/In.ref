@@ -1,0 +1,88 @@
+\definition patch: Region.Patch := Region.Patch { source := c, representative := representative };
+\import Region.For[patch := patch] \as Patch;
+\import boundary_manifolds.Dimension[n := n].Chart[M := Region.Point, space := Region.topology] \as OpenCharts;
+\definition local: OpenCharts.LocalPoint Patch.chart := \into[Region.Point](activePoint, Patch.chart.domain) \by { contains };
+\import Normalized.Values[] \as Values;
+\import boundary_manifolds.Tangent[n := n].On[M := Region.manifold].At[x := activePoint] \as Domain;
+\import boundary_manifolds.Tangent[n := m].On[M := Euclidean.manifold].At[x := Normalized.map.apply activePoint] \as Range;
+\definition left: Domain.Chart := \into[OpenCharts.Chart](Patch.chart, Domain.Chart) \by {
+  Domain.ChartLaws[Patch.chart] {
+    member := Logic.existsIntro[Region.Patch, { p: Region.Patch \where Patch.chart = Region.chart p }] patch (\refl(Patch.chart)),
+    contains := contains,
+  }
+};
+\definition right: Range.Chart := \into[TargetCharts.Chart](Euclidean.chart, Range.Chart) \by {
+  Range.ChartLaws[Euclidean.chart] { member := \refl(Euclidean.chart), contains := \refl(Normalized.map.apply activePoint) }
+};
+\import \root.CornerDerivative[n := n, m := m].Between[M := Region.manifold, N := Euclidean.manifold].Of[f := Normalized.map]
+  .At[x := activePoint].InCharts[left := left, right := right] \as Jet;
+\import boundary_manifolds.SmoothMap[n := n, m := m].Between[M := Region.manifold, N := Euclidean.manifold]
+  .At[function := Normalized.map.apply, left := left, right := right, x := activePoint, contains := Domain.contains left] \as Local;
+\definition overlap: Open.OpenSet := Open.intersection Patch.image Nonvanishing.domain;
+\definition intoPatch: Open.Included overlap Patch.image := Open.intersectionLeft Patch.image Nonvanishing.domain;
+\definition intoLocal: Open.Included overlap Nonvanishing.domain := Open.intersectionRight Patch.image Nonvanishing.domain;
+\import Calculus.Restriction[U := overlap, V := Nonvanishing.domain, W := Output.whole] \as RestrictNormalized;
+\definition windowMap: Calculus.Map overlap Output.whole := RestrictNormalized.input intoLocal LocalActive.normalized;
+\definition activeAt[u: Model.Carrier c.constraints overlap]: Model.Carrier c.constraints Patch.image :=
+  \into[Open.Carrier Patch.image](Open.inclusion overlap Patch.image intoPatch u, Model.region c.constraints Patch.image) \by {
+    \bysub(Open.Carrier overlap, Model.region c.constraints overlap, u)
+  };
+\definition patchCenter: (Local.source \of Model.Point) = (Old.center \of Model.Point) :=
+  congr!{{Charts.LocalPoint c} {Model.Point}} (Charts.coordinate c) _ _
+    (boundary_manifolds.Refinement[A := M.Point].equality c.domain (Patch.old local) x (\refl(x \of M.Point)));
+\definition inNonzero: Coordinates.Member Nonvanishing.domain.points Local.source :=
+  \idelim (Old.center \of Model.Point) = (Local.source \of Model.Point) \with z: Model.Point => Coordinates.Member Nonvanishing.domain.points z \by {
+    base: \bysub(Model.Point, Nonvanishing.domain.points, localCenter),
+    equality: sym!{Model.Point} _ _ patchCenter
+  };
+\definition extension: Local.Extension := Local.Extension {
+  neighborhood := overlap, included := intoPatch, contains := Logic.And[_, _]::#
+    (\bysub(Model.Point, Patch.image.points, Local.source)) inNonzero, map := windowMap,
+  inside := \fun (u: Model.Carrier c.constraints overlap) => \refl(Normalized.map.apply (OpenCharts.point Patch.chart (activeAt u))),
+  agrees := \fun (u: Model.Carrier c.constraints overlap) =>
+    normalizedFormula (Open.inclusion overlap Nonvanishing.domain intoLocal u)
+      (\bysub(Open.Carrier overlap, Model.region c.constraints overlap, u)),
+};
+\import Local.Using[e := extension] \as Extended;
+\definition centerInWindow: Open.Carrier Nonvanishing.domain := Open.inclusion overlap Nonvanishing.domain intoLocal Extended.center;
+\definition restrictedCenter: centerInWindow = localCenter :=
+  boundary_manifolds.Refinement[A := Model.Point].equality Nonvanishing.domain.points centerInWindow localCenter patchCenter;
+\definition matrix: Extended.jacobian = calculus.Maps[n := n, m := m].Differential[
+  U := Nonvanishing.domain, V := Output.whole, f := LocalActive.normalized, a := localCenter].value :=
+  trans!{calculus.Vector[n := n, m := m].LinearMap} _ _ _
+    (RestrictNormalized.differential intoLocal LocalActive.normalized Extended.center)
+    (\idelim Open.inclusion overlap Nonvanishing.domain intoLocal Extended.center = localCenter \with z: Open.Carrier Nonvanishing.domain =>
+      calculus.Maps[n := n, m := m].Differential[U := Nonvanishing.domain, V := Output.whole, f := LocalActive.normalized,
+        a := Open.inclusion overlap Nonvanishing.domain intoLocal Extended.center].value =
+      calculus.Maps[n := n, m := m].Differential[U := Nonvanishing.domain, V := Output.whole, f := LocalActive.normalized, a := z].value \by {
+        base: \refl(calculus.Maps[n := n, m := m].Differential[U := Nonvanishing.domain, V := Output.whole, f := LocalActive.normalized,
+          a := Open.inclusion overlap Nonvanishing.domain intoLocal Extended.center].value), equality: restrictedCenter
+      });
+\definition sameCoordinates: (Domain.coordinate left \of Model.Point) = (Scalar.center \of Model.Point) :=
+  patchCenter;
+\import Calculus.Differential[U := Nonvanishing.domain, V := Output.whole, f := ActiveShift.shifted, a := localCenter] \as ShiftedDerivative;
+\definition regular[good: Values.Regular a][zero: shifted x = Def.origin][y: Target.Point]:
+  \exists (v: Model.Point \where Logic.And[Model.Tangential c.constraints Scalar.center v, New.jacobian.apply v = y]) := \block {
+  \let atLevel: Values.Surjective activePoint := good activePoint (atParameter zero) \then
+  \let onto: Jet.TangentialJacobian Extended.jacobian := (Jet.criterion extension).ltr atLevel \then
+  \let want: Target.Point := Def.scale (Laws.fieldInv (LocalShift.weight Old.center)) y \then
+  \takefrom v: \Cast[Model.Point] ({ v: Model.Point \where Logic.And[
+    Model.Tangential c.constraints (Domain.coordinate left) v, Extended.jacobian.apply v = want] }) \by onto want \then
+  \let law: Logic.And[Model.Tangential c.constraints (Domain.coordinate left) v, Extended.jacobian.apply v = want] :=
+    \bysub(Model.Point, { v: Model.Point \where Logic.And[Model.Tangential c.constraints (Domain.coordinate left) v, Extended.jacobian.apply v = want] }, v) \then
+  \let tangent: Model.Tangential c.constraints Scalar.center v :=
+    \idelim (Domain.coordinate left \of Model.Point) = (Scalar.center \of Model.Point) \with p: Model.Point =>
+      Model.Tangential c.constraints p v \by { base: law.left, equality: sameCoordinates } \then
+  \let translated: (ShiftedDerivative.value.apply v \of Target.Point) = want :=
+    trans!{Target.Point} _ _ _ (Translate.derivative localCenter v)
+      (trans!{Target.Point} _ _ _ (congr!{calculus.Vector[n := n, m := m].LinearMap Target.Point}
+        (\fun (D: calculus.Vector[n := n, m := m].LinearMap) => D.apply v) _ _
+        (sym!{calculus.Vector[n := n, m := m].LinearMap} _ _ matrix)) law.right) \then
+  \let same: (New.jacobian.apply v \of Target.Point) =
+    (Calculus.Differential[U := domain, V := Output.whole, f := Translation.map, a := Nonvanishing.input localCenter].value.apply v \of Target.Point) :=
+      congr!{calculus.Vector[n := n, m := m].LinearMap Target.Point} (\fun (D: calculus.Vector[n := n, m := m].LinearMap) => D.apply v)
+        _ _ newAtOld \then
+  \return Logic.existsIntro[Model.Point, { w: Model.Point \where Logic.And[Model.Tangential c.constraints Scalar.center w, New.jacobian.apply w = y] }]
+    v (Logic.And[_, _]::# tangent (trans!{Target.Point} _ _ _ same
+      (Transfer.derivative (Transfer.zeroShifted (shiftedZero zero)) v y translated)))
+};

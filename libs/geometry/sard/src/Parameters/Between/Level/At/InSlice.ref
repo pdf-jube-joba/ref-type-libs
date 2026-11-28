@@ -1,0 +1,25 @@
+\import Inclusion.InSlice[slice := slice, contains := contains] \as Kernel;
+
+\definition restrictProjection: Exceptional.Surjective x -> Full.SecondOnKernel :=
+  \fun (surjective: Exceptional.Surjective x)(v: Parameters.Vector) => \block {
+    \takefrom u: \Cast[LevelTangent.Vector] ({ u: LevelTangent.Vector \where DLevel.value.apply u = v }) \by surjective v \then
+    \let w: Inclusion.Kernel := Kernel.forward.apply u \then
+    \return Logic.existsIntro[Domain.Vector, { t: Domain.Vector \where Logic.And[DP.value.apply t = v, DF.value.apply t = Range.space.zero] }]
+      w (Logic.And[_, _]::#
+        (trans!{Parameters.Vector} _ _ _ (sym!{Parameters.Vector} _ _ (chainRule u))
+          (\bysub(LevelTangent.Vector, { u: LevelTangent.Vector \where DLevel.value.apply u = v }, u)))
+        (\bysub(Domain.Vector, Inclusion.kernel.carrier, w)))
+  };
+
+\definition liftProjection: Full.SecondOnKernel -> Exceptional.Surjective x :=
+  \fun (surjective: Full.SecondOnKernel)(v: Parameters.Vector) => \block {
+    \takefrom w: \Cast[Domain.Vector] ({ w: Domain.Vector \where Logic.And[DP.value.apply w = v, DF.value.apply w = Range.space.zero] })
+      \by surjective v \then
+    \let law: Logic.And[DP.value.apply w = v, DF.value.apply w = Range.space.zero] :=
+      \bysub(Domain.Vector, { w: Domain.Vector \where Logic.And[DP.value.apply w = v, DF.value.apply w = Range.space.zero] }, w) \then
+    \let k: Inclusion.Kernel := \into[Domain.Vector](w, Inclusion.kernel.carrier) \by { law.right } \then
+    \let u: LevelTangent.Vector := Kernel.backward.apply k \then
+    \return Logic.existsIntro[LevelTangent.Vector, { u: LevelTangent.Vector \where DLevel.value.apply u = v }] u
+      (trans!{Parameters.Vector} _ _ _ (chainRule u)
+        (trans!{Parameters.Vector} _ _ _ (congr!{Domain.Vector Parameters.Vector} DP.value.apply _ _ (Kernel.right k)) law.left))
+  };

@@ -1,0 +1,16 @@
+\import calculus.Maps[n := n, m := n] \as Maps;
+\import Maps.Composition[U := e.neighborhood, V := Open.whole, f := e.map] \as Composition;
+\import Smooth.Derivative[] \as Partials;
+\definition bump: Partials.Function Open.whole :=
+  \into[Open.ScalarFunction Open.whole](\fun (z: Open.Carrier Open.whole) => Bump.value z,
+    { h: Open.ScalarFunction Open.whole \where Smooth.SmoothOn Open.whole h }) \by { Bump.smooth };
+\definition transformed[u: Model.Carrier d.constraints e.neighborhood]: Charts.LocalPoint c :=
+  \into[M.Point](Here.actual e.neighborhood e.included u, c.domain) \by { e.inside u };
+\definition agrees[u: Model.Carrier d.constraints e.neighborhood]:
+  Composition.scalar bump u = value (Here.actual e.neighborhood e.included u) :=
+  trans!{Real.Real} _ _ _ (congr!{Model.Point Real.Real} Bump.value _ _ (e.agrees u))
+    (sym!{Real.Real} _ _ (valueAt (transformed u)));
+\definition extension: Here.Extension[value] := Here.Extension[value] {
+  domain := e.neighborhood, included := e.included, contains := e.contains, value := Composition.scalar bump,
+  smooth := Composition.smooth bump, agrees := agrees,
+};

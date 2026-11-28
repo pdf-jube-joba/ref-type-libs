@@ -1,0 +1,6 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].Nat[].Order[].Prop[] \as Nat;
+\import std.Data[].FinSet[] \as Fin;
+\import Subspaces.Of[subspace := ambientBoundary] \as Face;
+\import Spaces.Finite[V := Face.Carrier, I := Fin.Fin k, space := Face.induced] \as Bases;
+\module With(basis: Bases.Basis);

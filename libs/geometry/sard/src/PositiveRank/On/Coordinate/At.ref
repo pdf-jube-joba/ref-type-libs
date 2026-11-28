@@ -1,0 +1,24 @@
+\import G02.Submersion[U := U, f := Component.map, a := a] \as Submersion;
+\definition regular: (\exists ( i: Fin.Fin G02.dimension \where
+  Logic.Not ((Given.differential a).apply (Domain.Def[].basis i) j = Real.zero) )) -> Submersion.Surjective :=
+  \fun (nonzero: _) => \block {
+    \takefrom i: \Cast[Fin.Fin G02.dimension] ({ i: Fin.Fin G02.dimension \where
+      Logic.Not ((Given.differential a).apply (Domain.Def[].basis i) j = Real.zero) }) \by nonzero \then
+    \let nonzero: Logic.Not ((Given.differential a).apply (Domain.Def[].basis i) j = Real.zero) :=
+      \bysub(Fin.Fin G02.dimension, { i: Fin.Fin G02.dimension \where
+        Logic.Not ((Given.differential a).apply (Domain.Def[].basis i) j = Real.zero) }, i) \then
+    \return Component.At[a := a].regular i
+      (\fun (zero: calculus.Real[].Multivariable[n := G02.dimension].Open[].Smooth[].Derivative[].derivative U
+        (Maps.coordinateFunction U V f j) i a = Real.zero) =>
+        nonzero (trans!{Real.Real} _ _ _ (Given.Entries[].At[a := a].partial i j) zero))
+  };
+\module Patch(form: Submersion.LocalForm);
+
+\definition localNull: Smaller.Sard -> (\exists ( i: Fin.Fin G02.dimension \where
+  Logic.Not ((Given.differential a).apply (Domain.Def[].basis i) j = Real.zero) )) ->
+  \exists ( W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+    Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] ) := \block {
+    \fun (sard: Smaller.Sard)(nonzero: _) \then
+    \takefrom form: Submersion.LocalForm \by Submersion.localExistence (regular nonzero) \then
+    \return Patch[form := form].localNull sard
+  };

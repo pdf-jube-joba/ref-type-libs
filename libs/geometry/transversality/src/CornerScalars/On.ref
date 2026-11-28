@@ -1,0 +1,34 @@
+\import topology.Topology[Carrier := M.Point] \as Space;
+\import topology.Continuity[A := M.Point, B := Real.Real] \as Continuity;
+\import Space.Compactness[] \as Compact;
+\import Space.Closure[] \as Closure;
+\import Space.Finite[] \as Finite;
+\import Models.Chart[M := M.Point, space := M.space] \as Charts;
+\import smooth_partitions.Scalars[A := M.Point, space := M.space] \as Scalars;
+\definition Function: \Set := M.Point -> Real.Real;
+\definition Chart: \Set := \Cast[Charts.Chart] M.atlas.charts;
+\definition chartMember[c: Chart]: \In[Charts.Chart] M.atlas.charts c := \bysub(Charts.Chart, M.atlas.charts, c);
+\module At(c: Chart, x: Charts.LocalPoint c);
+\definition IsSmoothOn[f: Function][U: \Pow M.Point]: \Prop :=
+  \forall (c: Chart)(x: Charts.LocalPoint c) -> Space.Member U x -> \exists At[c := c, x := x].Extension[f];
+\definition IsSmooth[f: Function]: \Prop := IsSmoothOn f Space.Whole;
+
+\definition calculus: Scalars.Calculus := Scalars.Calculus {
+  smooth := { f: Function \where IsSmooth f },
+  constant := \fun (a: Real.Real)(c: Chart)(x: Charts.LocalPoint c)(whole: _) => At[c := c, x := x].constant a,
+  plus := \fun (f, g: Function)(left: IsSmooth f)(right: IsSmooth g)(c: Chart)(x: Charts.LocalPoint c)(whole: _) =>
+    At[c := c, x := x].add f g (left c x whole) (right c x whole),
+  times := \fun (f, g: Function)(left: IsSmooth f)(right: IsSmooth g)(c: Chart)(x: Charts.LocalPoint c)(whole: _) =>
+    At[c := c, x := x].multiply f g (left c x whole) (right c x whole),
+};
+\import Scalars.Using[calculus := calculus] \as Functions;
+\module Cutoff(K, U: \Pow M.Point, open: Space.IsOpenIn M.space U);
+\module Bumps(family: \Pow (\Pow M.Point));
+\module Partitions(family: \Pow (\Pow M.Point));
+\module Approximate(f: Function, continuous: Continuity.Continuous M.space Line.topology f);
+\module Supported(weight: Functions.Smooth, f: Function, U: \Pow M.Point,
+  inside: Space.Subset (Functions.support weight) U);
+\module Continuous(f: Function);
+\module Euclidean(m: N.Nat^);
+\module Invert(f: Function);
+\module Restrict(U: \Pow M.Point, open: Space.IsOpenIn M.space U);

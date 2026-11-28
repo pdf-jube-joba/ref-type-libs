@@ -1,0 +1,58 @@
+\use Equality.eq_reason_in;
+\import \root.CornerScalars[n := n].On[M := M].Supported[weight := cutoff.value, f := f, U := U, inside := cutoff.supportWithin] \as Original;
+\definition rest: Functions.Smooth := Functions.complement cutoff.value;
+\definition map: Functions.Smooth := Functions.plus (Original.value regular) (Functions.times rest ordinary);
+\definition agrees[x: M.Point]: Space.Member cutoff.neighborhood x -> map x = f x :=
+  \fun (member: _) => \block {
+    \let one: cutoff.value x = Real.one := cutoff.oneOn x member \then
+    \let zero: rest x = Real.zero := trans!{Real.Real} _ _ _
+      (congr!{Real.Real Real.Real} (Real.sub Real.one) _ _ one) (Laws.subSelf Real.one) \then
+    \return eq_reason_in!{Real.Real _
+      "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+        (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (f x)) _ _ one)
+        (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (ordinary x)) _ _ zero)}
+      "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _ (Laws.fieldMulOneLeft (f x)) (Laws.fieldMulZeroLeft (ordinary x))}
+      "=" _ "by" {Laws.addZeroRight (f x)}
+    }
+  };
+\definition total[x: M.Point]: Real.add (cutoff.value x) (rest x) = Real.one :=
+  Estimates.addSubCancel Real.one (cutoff.value x);
+\definition sumAgrees[x: M.Point]: Real.add (Real.mul (cutoff.value x) (f x)) (Real.mul (rest x) (f x)) = f x :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+      (Laws.fieldMulComm (cutoff.value x) (f x)) (Laws.fieldMulComm (rest x) (f x))}
+    "=" _ "by" {sym!{Real.Real} _ _ (Laws.fieldMulAdd (f x) (cutoff.value x) (rest x))}
+    "=" _ "by" {Laws.fieldMulComm (f x) (Real.add (cutoff.value x) (rest x))}
+    "=" _ "by" {congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (f x)) _ _ (total x)}
+    "=" _ "by" {Laws.fieldMulOneLeft (f x)}
+  };
+\definition restLower[x: M.Point]: R.Le Real.zero (rest x) :=
+  Distance.subNonnegative Real.one (cutoff.value x) (cutoff.upper x);
+\definition restUpper[x: M.Point]: R.Le (rest x) Real.one :=
+  R.leReplaceRight _ _ _ (Laws.subZeroRight Real.one)
+    (Laws.addMonotoneLeft (Real.neg (cutoff.value x)) (Real.neg Real.zero) Real.one
+      (Laws.negAntitone Real.zero (cutoff.value x) (cutoff.lower x)));
+\definition bound[x: M.Point]: R.Le (Distance.distance (f x) (map x)) (Distance.distance (f x) (ordinary x)) := \block {
+  \let first: Real.Real := Real.mul (cutoff.value x) (f x) \then
+  \let left: Real.Real := Real.mul (rest x) (f x) \then
+  \let right: Real.Real := Real.mul (rest x) (ordinary x) \then
+  \let d: Real.Real := Distance.distance (f x) (ordinary x) \then
+  \let sum: R.Le (Distance.distance (f x) (map x)) (Distance.distance left right) :=
+    R.leReplace _ _ _ _
+      (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Distance.distance a (map x)) _ _ (sumAgrees x))
+      (trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.add a (Distance.distance left right)) _ _ (Distance.distanceSelf first))
+        (Laws.addZeroLeft (Distance.distance left right)))
+      (Estimates.distanceAdd first left first right) \then
+  \return R.leTrans _ _ d sum
+    (R.leTrans _ _ _ (Estimates.distanceMul (rest x) (f x) (ordinary x) (restLower x))
+      (R.leReplace _ _ _ _ (Laws.fieldMulComm d (rest x)) (Algebra.mulOneRight d)
+        (Estimates.mulMonotone d (rest x) Real.one (Distance.distanceNonnegative (f x) (ordinary x)) (restUpper x))))
+};
+\definition close: Close map radius :=
+  \fun (x: M.Point) => R.leLtTrans _ _ _ (bound x)
+    ((\bysub(Functions.Smooth, { g: Functions.Smooth \where Close g radius }, ordinary)) x);
+\definition result: Result[radius] := Result[radius] {
+  map := \into[Functions.Smooth](map, { g: Functions.Smooth \where Close g radius }) \by { close },
+  neighborhood := cutoff.neighborhood, neighborhoodOpen := cutoff.neighborhoodOpen, contains := cutoff.contains, agrees := agrees,
+};

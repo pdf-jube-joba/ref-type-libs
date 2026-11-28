@@ -1,0 +1,73 @@
+\import Spaces.Laws[V := V, space := ambient] \as AmbientLaws;
+\import Spaces.Laws[V := B, space := boundary] \as BoundaryLaws;
+\import Heights.Operations[] \as HeightLaws;
+\import Spaces.Multilinear[V := V, space := ambient] \as Ambient;
+\import Ambient.Alternating[] \as Alternating;
+\import Alternating.Contraction[k := k] \as Contract;
+\import Spaces.Multilinear[V := Face.Carrier, space := Face.induced] \as OnFace;
+\import OnFace.Alternating[] \as FaceForms;
+\import FaceForms.Dimension[n := k, b := basis].Above[k := N.Nat^::succ k] \as Above;
+\import FaceForms.Precomposition[W := V, target := ambient] \as Precompose;
+\import Fin.Tuples[A := Face.Carrier].Mapping[B := V] \as Tuples;
+\import Fin.Tuples[A := Face.Carrier] \as FaceTuples;
+\import Fin.Tuples[A := V] \as AmbientTuples;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Reals;
+
+\definition data[args: OnFace.Arguments k]: Ambient.Arguments k := Precompose.arguments k Face.inclusion args;
+\definition boundaryForm[omega: Alternating.Form (N.Nat^::succ k)][u: V]: FaceForms.Form k :=
+  Precompose.precompose k Face.inclusion (Contract.apply omega u);
+
+\definition difference[u, v: V]: V := ambient.add (ambient.neg v) u;
+\definition tangential[u, v: V]: height.apply v = height.apply u -> Subspaces.Member ambientBoundary (difference u v) :=
+  \fun (same: _) => eq_reason_in!{B _
+    "=" _ "by" {height.preservesAdd (ambient.neg v) u}
+    "=" _ "by" {congr!{B B} (\fun (z: B) => boundary.add z (height.apply u)) _ _ (HeightLaws.preservesNeg height v)}
+    "=" _ "by" {congr!{B B} (\fun (z: B) => boundary.add (boundary.neg z) (height.apply u)) _ _ same}
+    "=" _ "by" {BoundaryLaws.inverseLeft (height.apply u)}
+  };
+\definition recover[u, v: V]: ambient.add v (difference u v) = u :=
+  eq_reason_in!{V _
+    "=" _ "by" {sym!{V} _ _ (AmbientLaws.assoc v (ambient.neg v) u)}
+    "=" _ "by" {congr!{V V} (\fun (z: V) => ambient.add z u) _ _
+      (trans!{V} _ _ _ (AmbientLaws.comm v (ambient.neg v)) (AmbientLaws.inverseLeft v))}
+    "=" _ "by" {AmbientLaws.zeroLeft u}
+  };
+
+\definition zeroOnFace[omega: Alternating.Form (N.Nat^::succ k)][u: Face.Carrier][args: OnFace.Arguments k]:
+  Contract.apply omega u (data args) = Real.zero := \block {
+  \let pulled: FaceForms.Form (N.Nat^::succ k) := Precompose.precompose (N.Nat^::succ k) Face.inclusion omega \then
+  \let tuple: OnFace.Arguments (N.Nat^::succ k) := FaceTuples.extend k u args \then
+  \let agrees: Precompose.arguments (N.Nat^::succ k) Face.inclusion tuple = AmbientTuples.extend k u (data args) :=
+    Tuples.extendMap k Face.inclusion.apply u args \then
+  \return eq_reason_in!{Real.Real _
+    "=" _ "by" {congr!{{Ambient.Arguments (N.Nat^::succ k)} Real.Real} omega _ _ (sym!{{Ambient.Arguments (N.Nat^::succ k)}} _ _ agrees)}
+    "=" _ "by" {congr!{{FaceForms.Form (N.Nat^::succ k)} Real.Real} (\fun (f: FaceForms.Form (N.Nat^::succ k)) => f tuple)
+      _ _ (Above.zeroAbove pulled (Nat.ltSelfSucc k))}
+  }
+};
+
+\definition independent: \forall (omega: Alternating.Form (N.Nat^::succ k))(u, v: V) ->
+  height.apply v = height.apply u -> boundaryForm omega u = boundaryForm omega v :=
+  \fun (omega: _)(u, v: V)(same: _) =>
+    FaceForms.At[k := k].ext (boundaryForm omega u) (boundaryForm omega v) (\fun (args: OnFace.Arguments k) => \block {
+      \let t: Face.Carrier := \into[V](difference u v, ambientBoundary.carrier) \by { tangential u v same } \then
+      \return eq_reason_in!{Real.Real _
+        "=" _ "by" {congr!{V Real.Real} (\fun (z: V) => Contract.apply omega z (data args)) _ _ (sym!{V} _ _ (recover u v))}
+        "=" _ "by" {congr!{{Alternating.Form k} Real.Real} (\fun (f: Alternating.Form k) => f (data args)) _ _
+          (Contract.headAddition omega v t)}
+        "=" _ "by" {congr!{Real.Real Real.Real} (Real.add (Contract.apply omega v (data args))) _ _ (zeroOnFace omega t args)}
+        "=" _ "by" {Reals.addZeroRight (Contract.apply omega v (data args))}
+      }
+    });
+
+\definition compatible[onto: HeightSubmersion][transverse: FaceTransverse][omega: Alternating.Form (N.Nat^::succ k)][u: V]:
+  \exists ( v: V \where Logic.And[height.apply v = height.apply u,
+    Logic.And[D.apply v = normal.zero, boundaryForm omega u = boundaryForm omega v]] ) := \block {
+  \takefrom v: \Cast[V] ({ v: V \where Logic.And[height.apply v = height.apply u, D.apply v = normal.zero] })
+    \by normalLift onto transverse (height.apply u) \then
+  \let laws: Logic.And[height.apply v = height.apply u, D.apply v = normal.zero] :=
+    \bysub(V, { v: V \where Logic.And[height.apply v = height.apply u, D.apply v = normal.zero] }, v) \then
+  \return Logic.existsIntro[V, { v: V \where Logic.And[height.apply v = height.apply u,
+    Logic.And[D.apply v = normal.zero, boundaryForm omega u = boundaryForm omega v]] }] v
+    (Logic.And[_, _]::# laws.left (Logic.And[_, _]::# laws.right (independent omega u v laws.left)))
+};

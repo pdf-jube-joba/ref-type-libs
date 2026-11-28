@@ -1,0 +1,10 @@
+\import Ambient.Subspace[U := neighborhood.image] \as Tube;
+\import topological_algebra.Euclidean[].Dimension[n := d] \as Coordinates;
+\import Coordinates.Def[] \as Def;
+\import Coordinates.Norm[] \as Norm;
+\import Coordinates.Topology[] \as ETopology;
+\import metric_spaces.RealLine[] \as Line;
+\import metric_spaces.MetricSpace[Carrier := Coordinates.Point] \as Metric;
+\import manifolds.SmoothMap[n := d, m := m].Between[M := Tube.smoothManifold, N := M] \as Retractions;
+\module Window(W: \Pow Graphs.CarrierSet, open: GraphSets.IsOpenIn graphTopology W,
+  around: \forall (x: X) -> GraphSets.Member W (graph x (f x)));

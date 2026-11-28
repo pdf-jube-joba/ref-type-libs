@@ -1,0 +1,22 @@
+\import Full.On[U := U, V := V, f := f] \as Given;
+\import topology.Topology[Carrier := Open.Carrier U] \as DomainSets;
+\import topology.Topology[Carrier := Domain.Point].Subspace[S := U.points] \as Subspace;
+\import Open.Topology[].Of[U := U] \as DomainTopology;
+\definition apply[x: Open.Carrier U]: Range.Point := Maps.apply U V f x;
+\import topology.Maps[A := Open.Carrier U, B := Range.Point] \as Images;
+\import \root.Cover[A := Open.Carrier U, m := targetDimension, space := DomainTopology.topology, f := apply] \as Cover;
+\definition points: \Pow (Open.Carrier U) := { x: Open.Carrier U \where Logic.And[Given.CriticalAt x,
+  \exists ( j: Fin.Fin targetDimension \where \exists ( i: Fin.Fin G02.dimension \where
+    Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero) ) )] };
+\module Coordinate(j: Fin.Fin targetDimension);
+
+\definition theorem: Smaller.Sard -> Null.Null (Images.Image apply points) :=
+  \fun (sard: Smaller.Sard) =>
+    Cover.local (Subspace.Properties[].secondCountable Domain.Topology[].topology Domain.Countability[].secondCountable)
+      points (\fun (x: Open.Carrier U)(member: DomainSets.Member points x) => \block {
+        \takefrom j: \Cast[Fin.Fin targetDimension] ({ j: Fin.Fin targetDimension \where \exists ( i: Fin.Fin G02.dimension \where
+          Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero) ) }) \by member.right \then
+        \return Coordinate[j := j].At[a := x].localNull sard
+          (\bysub(Fin.Fin targetDimension, { j: Fin.Fin targetDimension \where \exists ( i: Fin.Fin G02.dimension \where
+            Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero) ) }, j))
+      });

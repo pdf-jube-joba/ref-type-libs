@@ -1,0 +1,4 @@
+\import sard.Corners[n := Nat.add r d, m := m].Between[M := M, N := T].Of[f := f] \as Sard;
+\import topology.Topology[Carrier := T.Point] \as Values;
+\definition Face[F: Faces.Manifold]: \Set := boundary_manifolds.Face[n := d, r := r].Global[F := F, M := M].Face;
+\module InChart(right: Chart);

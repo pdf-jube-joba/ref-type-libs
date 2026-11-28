@@ -1,0 +1,26 @@
+\definition termLaw[i: Weight partition.size]: terms i x = pieces i x :=
+  congr!{Scalars.Function Real.Real} (\fun (g: Scalars.Function) => g x) _ _ (inside i);
+\definition exactTerms: Space.Member fixed.envelope x ->
+  \forall (i: N.Nat^) -> Nat.Lt i partition.size -> terms i x = Real.mul (weights i x) (f x) :=
+  \fun (atFixed: _)(i: N.Nat^)(index: _) => \block {
+    \let j: Weight partition.size := \into[N.Nat^](i, indices) \by { index } \then
+    \return trans!{Real.Real} _ _ _ (termLaw j) (\parent.At[i := j].exactOn x atFixed)
+  };
+\definition agrees: Space.Member fixed.envelope x -> candidate x = f x :=
+  \fun (atFixed: _) => Average.agrees (f x) x partition.size (partition.total x) (exactTerms atFixed);
+\definition lowerTerms: \forall (i: N.Nat^) -> Nat.Lt i partition.size -> R.Le (Real.mul (weights i x) (Real.sub (f x) tolerance)) (terms i x) :=
+  \fun (i: N.Nat^)(index: _) => \block {
+    \let j: Weight partition.size := \into[N.Nat^](i, indices) \by { index } \then
+    \return R.leReplaceRight _ _ _ (sym!{Real.Real} _ _ (termLaw j)) (\parent.At[i := j].lower x)
+  };
+\definition upperTerms: \forall (i: N.Nat^) -> Nat.Lt i partition.size -> R.Le (terms i x) (Real.mul (weights i x) (Real.add (f x) tolerance)) :=
+  \fun (i: N.Nat^)(index: _) => \block {
+    \let j: Weight partition.size := \into[N.Nat^](i, indices) \by { index } \then
+    \return R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (termLaw j)) (\parent.At[i := j].upper x)
+  };
+\definition close: R.Lt (Distance.distance (f x) (candidate x)) radius :=
+  R.leLtTrans _ tolerance radius
+    (Estimates.distanceLeOfInterval (f x) (candidate x) tolerance
+      (Average.lower (Real.sub (f x) tolerance) x partition.size (partition.total x) lowerTerms)
+      (Average.upper (Real.add (f x) tolerance) x partition.size (partition.total x) upperTerms))
+    (Estimates.halfStrict radius positive);

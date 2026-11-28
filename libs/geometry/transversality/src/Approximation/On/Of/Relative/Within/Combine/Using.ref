@@ -1,0 +1,34 @@
+\module At(i: Weight partition.size);
+\definition indices: \Pow N.Nat^ := { i: N.Nat^ \where Nat.Lt i partition.size };
+\import std.Set[].Extension[A := N.Nat^, B := Scalars.Function, domain := indices] \as Extension;
+\definition pieces[i: Weight partition.size]: Scalars.Function := At[i := i].term;
+\definition terms: Sums.Family := Extension.extend pieces (Functions.constant Real.zero);
+\definition inside[i: Weight partition.size]: terms i = pieces i := Extension.inside pieces (Functions.constant Real.zero) i;
+\definition termsSmooth[i: N.Nat^]: Scalars.IsSmooth (terms i) :=
+  either!{{(Classical.excludedMiddle (Nat.Lt i partition.size))} {Scalars.IsSmooth (terms i)}
+    {\fun (less: Nat.Lt i partition.size) => \block {
+      \let j: Weight partition.size := \into[N.Nat^](i, indices) \by { less } \then
+      \return \idelim pieces j = terms i \with g: Scalars.Function => Scalars.IsSmooth g \by {
+        base: At[i := j].termSmooth, equality: sym!{Scalars.Function} _ _ (inside j)
+      }
+    }}
+    {\fun (outside: Logic.Not (Nat.Lt i partition.size)) =>
+      \idelim Functions.constant Real.zero = terms i \with g: Scalars.Function => Scalars.IsSmooth g \by {
+        base: Functions.regular (Functions.constant Real.zero),
+        equality: sym!{Scalars.Function} _ _ (Extension.outside pieces (Functions.constant Real.zero) i outside)
+      }}
+  };
+\import \root.Averaging[A := M.Point].With[weights := weights, terms := terms] \as Average;
+\definition candidate[x: M.Point]: Real.Real := Sums.prefix terms x partition.size;
+\definition approximation: Functions.Smooth := \into[Scalars.Function](candidate, Scalars.calculus.smooth) \by {
+  Scalars.LocallyFinite[f := terms].prefixSmooth termsSmooth partition.size
+};
+\module AtPoint(x: M.Point);
+\definition result: Result[radius, K] := Result[radius, K] {
+  map := approximation,
+  neighborhood := fixed.inner,
+  neighborhoodOpen := fixed.innerOpen,
+  contains := fixed.contains,
+  agrees := \fun (x: M.Point)(inInner: _) => AtPoint[x := x].agrees (fixed.enclosed x inInner),
+  close := \fun (x: M.Point) => AtPoint[x := x].close,
+};

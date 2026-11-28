@@ -1,0 +1,28 @@
+\definition component[j: Fin.Fin q]: Partials.Function U := Maps.coordinateFunction U V f j;
+\definition Flat[k: N.Nat^][x: Open.Carrier U]: \Prop :=
+  \forall (j: Fin.Fin q) -> Taylor.Flat U x k (component j);
+\definition Part[k: N.Nat^]: \Pow (Open.Carrier U) := { x: Open.Carrier U \where Flat k x };
+
+\definition rankZero: \forall (k: N.Nat^)(x: Open.Carrier U) -> Flat (N.Nat^::succ k) x ->
+  \forall (v: Domain.Point) ->
+    Maps.Differential[U := U, V := V, f := f, a := x].value.apply v = Output.Def[].origin :=
+  \fun (k: N.Nat^)(x: Open.Carrier U)(flat: Flat (N.Nat^::succ k) x)(v: Domain.Point) =>
+    \axiom:funext(Maps.Differential[U := U, V := V, f := f, a := x].value.apply v, Output.Def[].origin,
+      \fun (j: Fin.Fin q) =>
+        trans!{Real.Real} _ _ _
+          (Sums.congruent p
+            (\fun (i: Fin.Fin p) => Real.mul (Partials.derivative U (component j) i x) (v i))
+            (\fun (_: Fin.Fin p) => Real.zero)
+            (\fun (i: Fin.Fin p) => trans!{Real.Real} _ _ _
+              (congr!{Real.Real Real.Real} (\fun (c: Real.Real) => Real.mul c (v i)) _ _ ((flat j) i).left)
+              (Laws.fieldMulZeroLeft (v i))))
+          (Sums.zeroSum p));
+
+\definition apply[x: Open.Carrier U]: Output.Point := Maps.apply U V f x;
+\import topology.Maps[A := Open.Carrier U, B := Output.Point] \as Images;
+\import topology.Topology[Carrier := Open.Carrier U] \as DomainSets;
+\import Open.Topology[].Of[U := U] \as Topology;
+\import topology.Topology[Carrier := Domain.Point].Subspace[S := U.points] \as Subspace;
+\import \root.Cover[A := Open.Carrier U, m := q, space := Topology.topology, f := apply] \as Cover;
+\module Layer(k: N.Nat^);
+\module Terminal;

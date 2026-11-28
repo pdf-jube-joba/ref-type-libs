@@ -1,0 +1,17 @@
+\import topology.Topology[Carrier := Real.Real] \as LineSets;
+\module At(c: Chart, x: Charts.LocalPoint c, W: \Pow Real.Real, open: LineSets.IsOpenIn Line.topology W,
+  inside: Space.Member (Continuity.Preimage f W) x);
+\definition continuous: IsSmooth f -> Continuity.Continuous M.space Line.topology f :=
+  \fun (regular: IsSmooth f)(W: \Pow Real.Real)(open: LineSets.IsOpenIn Line.topology W) =>
+    Space.openOfNeighborhoods M.space (Continuity.Preimage f W) (\block {
+      \fun (x: M.Point)(inside: Space.Member (Continuity.Preimage f W) x) \then
+      \takefrom chart: \Cast[Charts.Chart] ({ c: Charts.Chart \where Logic.And[\In[Charts.Chart] M.atlas.charts c, Charts.Contains c x] })
+        \by M.atlas.covers x \then
+      \let law: Logic.And[\In[Charts.Chart] M.atlas.charts chart, Charts.Contains chart x] :=
+        \bysub(Charts.Chart, { c: Charts.Chart \where Logic.And[\In[Charts.Chart] M.atlas.charts c, Charts.Contains c x] }, chart) \then
+      \let c: Chart := \into[Charts.Chart](chart, M.atlas.charts) \by { law.left } \then
+      \let point: Charts.LocalPoint c := \into[M.Point](x, c.domain) \by { law.right } \then
+      \let result: \exists ( V: \Pow M.Point \where Space.OpenNeighborhood[M.space, x, Continuity.Preimage f W, V] ) :=
+        At[c := c, x := point, W := W, open := open, inside := inside].exists (regular c point (\refl(point))) \then
+      \return result
+    });

@@ -1,0 +1,20 @@
+\import topology.Topology[Carrier := X.Point] \as XS;
+\import \root.Retraction[m := m, k := k].On[M := M].Of[e := e]
+  .Topological[X := X.Point, source := X.space, f := f, continuous := continuous] \as Graph;
+\import topological_constructions.Product[A := X.Point, B := M.Point] \as Graphs;
+\import topology.Topology[Carrier := Graphs.CarrierSet] \as GraphSets;
+\import boundary_manifolds.Boundaryless[n := m].Of[M := M] \as Target;
+\import boundary_manifolds.SmoothMap[n := n, m := m].Between[M := X, N := Target.manifold] \as Maps;
+\import \root.CornerScalars[n := n].On[M := X].Euclidean[m := d] \as Coordinates;
+\import Coordinates.Approximate[f := Graph.embedded, continuous := Graph.embeddedContinuous] \as Approximation;
+\structure Result[K: \Pow X.Point, W: \Pow Graphs.CarrierSet]: \Set := {
+  map: Maps.Map,
+  neighborhood: \Pow X.Point,
+  neighborhoodOpen: XS.IsOpenIn X.space neighborhood,
+  contains: XS.Subset K neighborhood,
+  agrees: \forall (x: X.Point) -> XS.Member neighborhood x -> (map.apply x \of M.Point) = f x,
+  near: \forall (x: X.Point) -> GraphSets.Member W (Graph.graph x (map.apply x)),
+};
+\module With(neighborhood: Neighborhood);
+\module Relative(K, U: \Pow X.Point, closed: XS.IsClosedIn X.space K,
+  open: XS.IsOpenIn X.space U, inside: XS.Subset K U);

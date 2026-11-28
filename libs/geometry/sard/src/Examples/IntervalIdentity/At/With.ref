@@ -1,0 +1,23 @@
+\import Space.Coordinate[chart := chart] \as Coordinates;
+\definition positiveVector: Model.Point := \fun (_: One.Index) => Real.one;
+\definition v: Space.Vector := Coordinates.encode positiveVector;
+
+\definition contradiction: Logic.Not (Sard.TangentialSurjective x) := \block {
+  \fun (surjective: Sard.TangentialSurjective x) \then
+  \takefrom u: \Cast[Space.Vector] ({ u: Space.Vector \where Logic.And[Cones.Tangential u, D.value.apply u = v] })
+    \by surjective v \then
+  \let pair: Logic.And[Cones.Tangential u, D.value.apply u = v] :=
+    \bysub(Space.Vector, { u: Space.Vector \where Logic.And[Cones.Tangential u, D.value.apply u = v] }, u) \then
+  \takefrom i: \Cast[One.Index] ({ i: One.Index \where Model.Active chart.constraints (Space.coordinate chart) i })
+    \by Cones.coordinateOfBoundary chart boundary \then
+  \let zero: Coordinates.decode u i = Real.zero :=
+    Cones.Lineality[c := chart, v := u].fromIntrinsic pair.left i
+      (\bysub(One.Index, { i: One.Index \where Model.Active chart.constraints (Space.coordinate chart) i }, i)) \then
+  \let same: u = v := trans!{Space.Vector} _ _ _ (sym!{Space.Vector} _ _ (Derivative.At[x := x].law u)) pair.right \then
+  \let one: Coordinates.decode u i = Real.one :=
+    trans!{Real.Real} _ _ _
+      (congr!{Space.Vector Real.Real} (\fun (w: Space.Vector) => Coordinates.decode w i) _ _ same)
+      (congr!{Model.Point Real.Real} (\fun (w: Model.Point) => w i) _ _ (Coordinates.decodeEncode positiveVector)) \then
+  \return dedekind_reals.DedekindReal[].Arithmetic[].Prop[].zeroNotOne
+    (trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ zero) one)
+};

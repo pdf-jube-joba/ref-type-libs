@@ -1,0 +1,43 @@
+\import manifolds.FromCharts[n := n, m := d].Between[M := X, N := Tube.smoothManifold] \as Plots;
+\import manifolds.Dimension[n := n].Chart[M := X.Point, space := X.space] \as Charts;
+\import manifolds.Dimension[n := d].Chart[M := Ambient.smoothManifold.Point, space := Ambient.smoothManifold.space] \as TargetCharts;
+\import manifolds.Dimension[n := d].Atlas[M := Ambient.smoothManifold.Point, space := Ambient.smoothManifold.space] \as TargetAtlas;
+\import calculus.Real[].Multivariable[n := n].Open[] \as SourceOpen;
+\import calculus.Maps[n := n, m := d] \as Calculus;
+
+\definition standard: \Cast[TargetCharts.Chart] Ambient.smoothManifold.atlas.charts :=
+  \into[TargetCharts.Chart](Ambient.standard, Ambient.smoothManifold.atlas.charts) \by {
+    TargetAtlas.includedInSaturation Ambient.atlas Ambient.standard (\refl(Ambient.standard))
+  };
+\definition imagePoint[x: X.Point]: Tube.Point :=
+  \into[Coordinates.Point](g.apply x, neighborhood.image.points) \by { within x };
+\module Local(c: Plots.SourceChart) {
+  \import IntoAmbient.Coordinates[f := g, left := c, right := standard] \as Chartwise;
+  \definition regular: Chartwise.Smooth :=
+    (\bysub(IntoAmbient.ContinuousMap, { h: IntoAmbient.ContinuousMap \where IntoAmbient.Chartwise h }, g))
+      c standard (\bysub(Charts.Chart, X.atlas.charts, c)) (\bysub(TargetCharts.Chart, Ambient.smoothManifold.atlas.charts, standard));
+  \definition included: SourceOpen.Included c.image Chartwise.domain :=
+    \fun (u: calculus.Real[].Multivariable[n := n].Point)(inside: _) =>
+      Chartwise.intro (\into[calculus.Real[].Multivariable[n := n].Point](u, c.image.points) \by { inside })
+        (\refl(g.apply (Charts.point c (\into[calculus.Real[].Multivariable[n := n].Point](u, c.image.points) \by { inside }))));
+  \definition whole: Calculus.Map c.image Open.whole :=
+    Calculus.Restriction[U := c.image, V := Chartwise.domain, W := Open.whole].input included (Chartwise.map regular);
+  \definition inside[u: SourceOpen.Carrier c.image]: AmbientSets.Member neighborhood.image.points (Calculus.apply c.image Open.whole whole u) :=
+    within (Charts.point c u);
+  \definition local: Calculus.Map c.image neighborhood.image :=
+    Calculus.Corestriction[U := c.image, V := Open.whole, W := neighborhood.image, f := whole, inside := inside].map;
+  \definition plot: Plots.LocalMap c :=
+    manifolds.EuclideanMap[n := n, m := d].Between[U := c.image, V := neighborhood.image].map local;
+}
+\import Plots.On[f := imagePoint, maps := \fun (c: Plots.SourceChart) => Local[c := c].plot,
+  agrees := \fun (c: Plots.SourceChart)(u: SourceOpen.Carrier c.image) => \refl(imagePoint (Charts.point c u))] \as Lift;
+\import manifolds.Composition[n := n, m := d, l := m].Between[M := X, N := Tube.smoothManifold, P := M] \as Composition;
+\definition map: Maps.Map := Composition.compose Lift.value neighborhood.retraction;
+\definition onFixed[x: X.Point]: g.apply x = embedded x -> map.apply x = f x :=
+  \fun (equal: _) =>
+    (\idelim embedded x = g.apply x \with y: Coordinates.Point =>
+      \forall (inside: AmbientSets.Member neighborhood.image.points y) ->
+        neighborhood.retraction.apply (\into[Coordinates.Point](y, neighborhood.image.points) \by { inside }) = f x \by {
+          base: \fun (inside: _) => neighborhood.onEmbedding (f x),
+          equality: sym!{Coordinates.Point} _ _ equal
+        }) (within x);

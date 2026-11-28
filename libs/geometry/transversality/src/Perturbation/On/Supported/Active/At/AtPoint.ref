@@ -1,0 +1,77 @@
+\definition weightHere: Real.Real := Domain.restricted x;
+\definition inverseHere: Real.Real := Domain.inverse x;
+\definition inverseLaw: Real.mul inverseHere weightHere = Real.one :=
+  Laws.fieldInverseNonzero weightHere (Domain.nonzero x);
+\definition inverseLeft[z: Real.Real]: Real.mul inverseHere (Real.mul weightHere z) = z := eq_reason_in!{Real.Real _
+  "=" _ "by" {sym!{Real.Real} _ _ (Laws.fieldMulAssoc inverseHere weightHere z)}
+  "=" _ "by" {congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Real.mul r z) _ _ inverseLaw}
+  "=" z "by" {Laws.fieldMulOneLeft z}
+};
+\definition inverseRight[z: Real.Real]: Real.mul weightHere (Real.mul inverseHere z) = z := eq_reason_in!{Real.Real _
+  "=" _ "by" {sym!{Real.Real} _ _ (Laws.fieldMulAssoc weightHere inverseHere z)}
+  "=" _ "by" {congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Real.mul r z) _ _
+    (trans!{Real.Real} _ _ _ (Laws.fieldMulComm weightHere inverseHere) inverseLaw)}
+  "=" z "by" {Laws.fieldMulOneLeft z}
+};
+\definition isProductCoordinate[j: Fin.Fin m]: product j x = restricted.apply x j := eq_reason_in!{Real.Real _
+  "=" _ "by" {congr!{Real.Real Real.Real} (Real.mul weightHere) _ _ (Laws.addComm (Real.neg (a j)) (normalizedCoordinate j x))}
+  "=" _ "by" {Laws.fieldMulAdd weightHere (normalizedCoordinate j x) (Real.neg (a j))}
+  "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+    (inverseRight (original.apply x j)) (Laws.fieldMulComm weightHere (Real.neg (a j)))}
+};
+\definition isProduct: productMap.apply x = restricted.apply x :=
+  \axiom:funext(productMap.apply x, restricted.apply x, isProductCoordinate);
+\definition shiftedPoint: Coordinates.Point := shifted.apply x;
+\definition zeroShifted[zero: restricted.apply x = Def.origin]: shifted.apply x = Def.origin :=
+  \axiom:funext(shiftedPoint, Def.origin, \fun (j: Fin.Fin m) => eq_reason_in!{Real.Real _
+    "=" _ "by" {sym!{Real.Real} _ _ (inverseLeft (shifted.apply x j))}
+    "=" _ "by" {congr!{Real.Real Real.Real} (Real.mul inverseHere) _ _
+      (trans!{Real.Real} _ _ _ (isProductCoordinate j)
+        (congr!{Coordinates.Point Real.Real} (\fun (u: Coordinates.Point) => u j) _ _ zero))}
+    "=" _ "by" {Laws.fieldMulZeroRight inverseHere}
+  });
+\import Maps.Differential[U := V, V := Output.whole, f := productMap, a := x] \as ProductDerivative;
+\import Maps.Differential[U := V, V := Output.whole, f := restricted, a := x] \as RestrictedDerivative;
+\import Maps.Differential[U := V, V := Output.whole, f := shifted, a := x] \as ShiftDerivative;
+\definition productEquality: ProductDerivative.value = RestrictedDerivative.value :=
+  ProductDerivative.Compare[W := Output.whole, g := restricted].equal
+    (\axiom:funext(productMap.apply, restricted.apply, \fun (y: Input.Carrier V) => \parent.AtPoint[x := y].isProduct));
+\definition differentialCoordinate[zero: shifted.apply x = Def.origin][v: calculus.Real[].Multivariable[n := n].Point][j: Fin.Fin m]:
+  ProductDerivative.value.apply v j = Real.mul weightHere (ShiftDerivative.value.apply v j) := \block {
+  \let h: Local.Function := Maps.coordinateFunction V Output.whole shifted j \then
+  \return eq_reason_in!{Real.Real _
+    "=" _ "by" {ProductRule.product Domain.restricted h x v}
+    "=" _ "by" {congr!{Real.Real Real.Real} (\fun (z: Real.Real) =>
+      Real.add (Real.mul z ((Differential.value V Domain.restricted x).apply v)) (Real.mul weightHere (ShiftDerivative.value.apply v j)))
+      _ _ (congr!{Coordinates.Point Real.Real} (\fun (p: Coordinates.Point) => p j) _ _ zero)}
+    "=" _ "by" {congr!{Real.Real Real.Real} (\fun (z: Real.Real) => Real.add z (Real.mul weightHere (ShiftDerivative.value.apply v j)))
+      _ _ (Laws.fieldMulZeroLeft ((Differential.value V Domain.restricted x).apply v))}
+    "=" _ "by" {Laws.addZeroLeft (Real.mul weightHere (ShiftDerivative.value.apply v j))}
+  }
+};
+\definition derivative[zero: shifted.apply x = Def.origin][v: calculus.Real[].Multivariable[n := n].Point][y: Coordinates.Point]:
+  ShiftDerivative.value.apply v = Def.scale inverseHere y ->
+  (Perturbed.differential (Domain.input x)).apply v = y :=
+  \fun (given: _) => \block {
+    \let comparison: ProductDerivative.value = Perturbed.differential (Domain.input x) :=
+      trans!{calculus.Vector[n := n, m := m].LinearMap} _ _ _ productEquality (Restrict.differential Domain.included Global.map x) \then
+    \return \axiom:funext((Perturbed.differential (Domain.input x)).apply v, y, \fun (j: Fin.Fin m) => eq_reason_in!{Real.Real _
+      "=" _ "by" {congr!{calculus.Vector[n := n, m := m].LinearMap Real.Real} (\fun (D: calculus.Vector[n := n, m := m].LinearMap) => D.apply v j)
+        _ _ (sym!{calculus.Vector[n := n, m := m].LinearMap} _ _ comparison)}
+      "=" _ "by" {differentialCoordinate zero v j}
+      "=" _ "by" {congr!{Coordinates.Point Real.Real} (\fun (p: Coordinates.Point) => Real.mul weightHere (p j)) _ _ given}
+      "=" _ "by" {inverseRight (y j)}
+    })
+  };
+\definition regular: Shifted.RegularAtZero -> restricted.apply x = Def.origin -> Perturbed.SurjectiveAt (Domain.input x) :=
+  \fun (active: Shifted.RegularAtZero)(zero: _)(y: Coordinates.Point) => \block {
+    \let h: shifted.apply x = Def.origin := zeroShifted zero \then
+    \takefrom v: \Cast[calculus.Real[].Multivariable[n := n].Point]
+      ({ v: calculus.Real[].Multivariable[n := n].Point \where ShiftDerivative.value.apply v = Def.scale inverseHere y })
+      \by active x h (Def.scale inverseHere y) \then
+    \return Logic.existsIntro[calculus.Real[].Multivariable[n := n].Point,
+      { u: calculus.Real[].Multivariable[n := n].Point \where (Perturbed.differential (Domain.input x)).apply u = y }]
+      v (derivative h v y
+        (\bysub(calculus.Real[].Multivariable[n := n].Point,
+          { u: calculus.Real[].Multivariable[n := n].Point \where ShiftDerivative.value.apply u = Def.scale inverseHere y }, v)))
+  };

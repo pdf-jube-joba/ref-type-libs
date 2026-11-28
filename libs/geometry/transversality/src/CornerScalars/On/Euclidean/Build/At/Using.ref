@@ -1,0 +1,33 @@
+\import Coordinates.IndexedIntersections[] \as Intersections;
+\definition domains[i: Fin.Fin m]: \Pow Model.Point := (extensions i).domain.points;
+\definition common: \Pow Model.Point := Intersections.All m domains;
+\definition commonOpen: Coordinates.IsOpenIn Ambient.topology common :=
+  Intersections.open Ambient.topology m domains (\fun (i: Fin.Fin m) => Open.Topology[].open (extensions i).domain);
+\definition domain: Open.OpenSet := Open.intersection c.image (Open.Topology[].ofOpen common commonOpen);
+\definition included: Open.Included domain c.image := Open.intersectionLeft c.image (Open.Topology[].ofOpen common commonOpen);
+\definition inside[i: Fin.Fin m]: Open.Included domain (extensions i).domain :=
+  \fun (u: Model.Point)(member: Coordinates.Member domain.points u) => member.right i;
+\definition coord[i: Fin.Fin m][u: Open.Carrier domain]: Real.Real :=
+  (extensions i).value (Open.inclusion domain (extensions i).domain (inside i) u);
+\import calculus.Maps[n := n, m := m] \as Calculus;
+\definition values[u: Open.Carrier domain]: Output.Carrier Output.whole :=
+  Output.Whole[].point (\fun (i: Fin.Fin m) => coord i u);
+\definition data: Calculus.Data[domain, Output.whole] := Calculus.Data[domain, Output.whole] { apply := values };
+\definition localMap: Calculus.Map domain Output.whole := \into[Calculus.Data[domain, Output.whole]](data, Calculus.Map domain Output.whole) \by {
+  Calculus.Laws[domain, Output.whole, data] {
+    smooth := \fun (i: Fin.Fin m) => Restriction.localSmooth domain (extensions i).domain (inside i) (extensions i).value (extensions i).smooth
+  }
+};
+\definition componentPoint[i: Fin.Fin m][u: Model.Carrier c.constraints domain]: Model.Carrier c.constraints (extensions i).domain :=
+  \into[Open.Carrier (extensions i).domain](Open.inclusion domain (extensions i).domain (inside i) u,
+    Model.region c.constraints (extensions i).domain) \by { \bysub(Open.Carrier domain, Model.region c.constraints domain, u) };
+\definition formula[u: Model.Carrier c.constraints domain]: values u = (into (Local.actual domain included u) \of Output.Carrier Output.whole) :=
+  \axiom:funext(values u, (into (Local.actual domain included u) \of Output.Carrier Output.whole),
+    \fun (i: Fin.Fin m) => (extensions i).agrees (componentPoint i u));
+\definition extension: Result.Extension := Result.Extension {
+  neighborhood := domain, included := included,
+  contains := Logic.And[_, _]::# (\bysub(Model.Point, c.image.points, Local.center)) (\fun (i: Fin.Fin m) => (extensions i).contains),
+  map := localMap,
+  inside := \fun (u: Model.Carrier c.constraints domain) => \refl(into (Local.actual domain included u)),
+  agrees := formula,
+};

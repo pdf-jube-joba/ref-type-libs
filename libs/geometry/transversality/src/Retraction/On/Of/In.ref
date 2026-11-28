@@ -1,0 +1,27 @@
+\import Normal.Projection[] \as Base;
+\import Ambient.Subspace[U := tube.image] \as Domain;
+\import manifolds.Composition[n := d, m := d, l := m].Between[M := Domain.smoothManifold, N := Normal.manifold, P := M] \as Composition;
+\definition map: Projection tube.image := Composition.compose tube.inverse Base.map;
+\definition atEmbedding[x: M.Point]: AmbientSets.Member tube.image.points (e.apply x) :=
+  \idelim Straight.endpoint (Tubular.zero x) = e.apply x \with y: Ambient.smoothManifold.Point => AmbientSets.Member tube.image.points y \by {
+    base: tube.into (\into[Normal.Point](Tubular.zero x, tube.domain) \by { tube.section x }),
+    equality: Straight.atZero x
+  };
+\definition included[x: M.Point]: Open.Carrier tube.image :=
+  \into[Ambient.smoothManifold.Point](e.apply x, tube.image.points) \by { atEmbedding x };
+\definition inverseAtEmbedding[x: M.Point]: tube.inverse.apply (included x) = Tubular.zero x :=
+  (\idelim Straight.endpoint (Tubular.zero x) = e.apply x \with y: Ambient.smoothManifold.Point =>
+    \forall (inside: AmbientSets.Member tube.image.points y) -> tube.inverse.apply (\into[Ambient.smoothManifold.Point](y, tube.image.points) \by { inside }) = Tubular.zero x \by {
+      base: \fun (inside: _) => tube.left (\into[Normal.Point](Tubular.zero x, tube.domain) \by { tube.section x }),
+      equality: Straight.atZero x
+    }) (atEmbedding x);
+\definition onEmbedding[x: M.Point]: map.apply (included x) = x :=
+  trans!{M.Point} _ _ _
+    (congr!{Normal.Point M.Point} (Base.map.apply) _ _ (inverseAtEmbedding x))
+    (congr!{{Normal.Point -> M.Point} M.Point} (\fun (f: Normal.Point -> M.Point) => f (Tubular.zero x)) _ _ Base.formula);
+\definition neighborhood: Neighborhood := Neighborhood {
+  image := tube.image,
+  includes := atEmbedding,
+  retraction := map,
+  onEmbedding := onEmbedding,
+};

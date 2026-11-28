@@ -1,0 +1,53 @@
+\import \root.CornerScalars[n := n].On[M := M].At[c := c, x := x] \as Scalar;
+\definition contains: Charts.Contains c x := \bysub(M.Point, c.domain, x);
+\import boundary_manifolds.Tangent[n := n].On[M := M].At[x := x] \as Domain;
+\import boundary_manifolds.Tangent[n := m].On[M := Euclidean.manifold].At[x := f.apply x] \as OldRange;
+\import boundary_manifolds.Tangent[n := m].On[M := Euclidean.manifold].At[x := map.apply x] \as NewRange;
+\definition left: Domain.Chart := \into[Charts.Chart](c, Domain.Chart) \by {
+  Domain.ChartLaws[c] { member := chartMember c, contains := contains }
+};
+\definition oldRight: OldRange.Chart := \into[TargetCharts.Chart](Euclidean.chart, OldRange.Chart) \by {
+  OldRange.ChartLaws[Euclidean.chart] { member := \refl(Euclidean.chart), contains := \refl(f.apply x) }
+};
+\definition newRight: NewRange.Chart := \into[TargetCharts.Chart](Euclidean.chart, NewRange.Chart) \by {
+  NewRange.ChartLaws[Euclidean.chart] { member := \refl(Euclidean.chart), contains := \refl(map.apply x) }
+};
+\import Maps.At[function := f.apply, left := left, right := oldRight, x := x, contains := Domain.contains left] \as OldMap;
+\import Maps.At[function := map.apply, left := left, right := newRight, x := x, contains := Domain.contains left] \as NewMap;
+\module Using(e: OldMap.Extension, b: Scalar.Extension[bump]);
+\import \root.CornerDerivative[n := n, m := m].Between[M := M, N := Euclidean.manifold].Of[f := f]
+  .At[x := x].InCharts[left := left, right := oldRight] \as OriginalJet;
+\import \root.CornerDerivative[n := n, m := m].Between[M := M, N := Euclidean.manifold].Of[f := map]
+  .At[x := x].InCharts[left := left, right := newRight] \as ShiftedJet;
+\import sard.Corners[n := n, m := m].Between[M := M, N := Euclidean.manifold].Of[f := f] \as OldSard;
+\import sard.Corners[n := n, m := m].Between[M := M, N := Euclidean.manifold].Of[f := map] \as NewSard;
+\import \root.CornerScalars[n := n].On[M := M].Euclidean[m := m].Normalize[f := f, bump := bump].Values[] \as ActiveValues;
+\module Run(e: OldMap.Extension, b: Scalar.Extension[bump]) {
+  \import \parent.Using[e := e, b := b] \as Shared;
+  \definition fixedRegular[zero: bump x = Real.zero]: OldSard.TangentialSurjective x -> NewSard.TangentialSurjective x :=
+    \fun (regular: OldSard.TangentialSurjective x) =>
+      (ShiftedJet.criterion Shared.shiftedExtension).rtl
+        (\idelim Shared.oldJacobian = Shared.newJacobian \with D: calculus.Vector[n := n, m := m].LinearMap =>
+          ShiftedJet.TangentialJacobian D \by {
+            base: (OriginalJet.criterion Shared.originalExtension).ltr regular,
+            equality: sym!{calculus.Vector[n := n, m := m].LinearMap} _ _ Shared.AtZero[zero := zero].equal
+          });
+  \module Active(nonzero: Logic.Not (weight x = Real.zero)) {
+    \import Shared.Active[nonzero := nonzero] \as ActiveCharts;
+    \definition regular[good: ActiveValues.Regular a][zero: shifted x = Def.origin]: NewSard.TangentialSurjective x :=
+      (ShiftedJet.criterion Shared.shiftedExtension).rtl (ActiveCharts.chartRegular good zero);
+  }
+  \definition regular[fixed: bump x = Real.zero -> OldSard.TangentialSurjective x]
+    [good: ActiveValues.Regular a][zero: shifted x = Def.origin]: NewSard.TangentialSurjective x :=
+    either!{{(Classical.excludedMiddle (bump x = Real.zero))} {NewSard.TangentialSurjective x}
+      { \fun (off: bump x = Real.zero) => fixedRegular off (fixed off) }
+      { \fun (on: Logic.Not (bump x = Real.zero)) =>
+        Active[nonzero := \fun (vanishes: weight x = Real.zero) => on (Algebra.squareZero (bump x) vanishes)].regular good zero }
+    };
+}
+\definition regular[fixed: bump x = Real.zero -> OldSard.TangentialSurjective x]
+  [good: ActiveValues.Regular a][zero: shifted x = Def.origin]: NewSard.TangentialSurjective x := \block {
+  \takefrom e: OldMap.Extension \by f.smooth left oldRight x (Domain.contains left) (Domain.member left) (OldRange.member oldRight) (OldRange.contains oldRight) \then
+  \takefrom b: Scalar.Extension[bump] \by Functions.regular bump c x (\refl(x)) \then
+  \return Run[e := e, b := b].regular fixed good zero
+};

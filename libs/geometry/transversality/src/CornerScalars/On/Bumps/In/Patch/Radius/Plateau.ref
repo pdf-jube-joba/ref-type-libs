@@ -1,0 +1,25 @@
+\import Space.Subspace[S := c.domain] \as Domain;
+\import Domain.Open[] \as Image;
+\import topology.Topology[Carrier := Charts.LocalPoint c] \as Local;
+\import topology.Homeomorphism[A := Charts.LocalPoint c, B := Model.Carrier c.constraints c.image] \as Homeomorphisms;
+\import metric_spaces.MetricSpace[Carrier := Model.Point] \as Metrics;
+\import Metrics.Topology[] \as MetricTopology;
+\import Model.Topology[C := c.constraints, U := c.image] \as Range;
+\definition ball: \Pow Model.Point := Metrics.Ball Norm.metric At.center q;
+\definition local: \Pow (Charts.LocalPoint c) :=
+  { y: Charts.LocalPoint c \where Coordinates.Member ball (Charts.coordinate c y) };
+\definition localOpen: Local.IsOpenIn (Charts.domainTopology c.domain) local :=
+  (Homeomorphisms.laws (Charts.domainTopology c.domain) (Model.regionTopology c.constraints c.image) c.coordinates).forwardContinuous
+    ({ v: Model.Carrier c.constraints c.image \where Coordinates.Member ball v })
+    (Range.ambient ball (MetricTopology.ballOpenIn Norm.metric At.center q));
+\definition plateau: \Pow M.Point := Image.image local;
+\definition openPlateau: Space.IsOpenIn M.space plateau := Image.imageOpen M.space c.open local localOpen;
+\definition contains: Space.Member plateau x := Image.imageMember local x (Metrics.ballCenter Norm.metric At.center q Bump.qPositive);
+\definition oneOn[y: M.Point]: Space.Member plateau y -> value y = Real.one :=
+  Image.imageElim local y (value y = Real.one)
+    (\fun (z: Charts.LocalPoint c)(member: Local.Member local z)(same: z = y) =>
+      \idelim z = y \with t: M.Point => value t = Real.one \by {
+        base: trans!{Real.Real} _ _ _ (valueAt z) (Bump.oneNear (Charts.coordinate c z)
+          (R.ltReplaceLeft _ _ _ (Norm.distanceSymmetric At.center (Charts.coordinate c z)) member)),
+        equality: same
+      });

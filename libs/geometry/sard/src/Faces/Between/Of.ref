@@ -1,0 +1,3 @@
+\import \root.Corners[n := n, m := m].Between[M := M, N := T].Of[f := f] \as Ambient;
+\module FaceDimension(d: N.Nat^);
+\module All(right: Chart, boundary: Restriction[right], faces: N.Nat^ -> Restriction[right]);

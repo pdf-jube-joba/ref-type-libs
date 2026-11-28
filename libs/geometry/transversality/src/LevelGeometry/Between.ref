@@ -1,0 +1,3 @@
+\import manifolds.SmoothMap[n := Nat.add m n, m := m].Between[M := M, N := T] \as Maps;
+\import inverse_implicit.Product[n := n, m := m].RegularValue[M := M, T := T] \as RegularValues;
+\module Of(f: Maps.Map, y: T.Point, regular: RegularValues.Of[f := f, y := y].Regular);

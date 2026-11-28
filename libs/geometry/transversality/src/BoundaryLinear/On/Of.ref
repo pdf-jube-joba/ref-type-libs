@@ -1,0 +1,40 @@
+\import sard.KernelProjection[].On[X := V, Y := B, Z := W, domain := ambient, first := boundary, second := normal]
+  .Of[D := height, G := D] \as Transfer;
+\definition FaceTransverse: \Prop := Transfer.SecondOnKernel;
+\definition HeightSubmersion: \Prop := Transfer.Full;
+\definition normalLift: HeightSubmersion -> FaceTransverse -> Transfer.FirstOnKernel := Transfer.transfer;
+\import Spaces.Subspace[V := V, space := ambient] \as Subspaces;
+\definition ambientBoundary: Subspaces.Subspace := Subspaces.Kernel[W := B, target := boundary].kernel height;
+\definition preimageTangent: Subspaces.Subspace := Subspaces.Kernel[W := W, target := normal].kernel D;
+\import Subspaces.Of[subspace := preimageTangent] \as Preimage;
+\import Spaces.Linear[V := Preimage.Carrier, W := B, source := Preimage.induced, target := boundary] \as Restricted;
+\definition restrictedHeight: Restricted.Map := Restricted.Map {
+  apply := \fun (v: Preimage.Carrier) => height.apply v,
+  preservesAdd := \fun (v, w: Preimage.Carrier) => height.preservesAdd v w,
+  preservesZero := height.preservesZero,
+  preservesScale := \fun (a: Real.Real)(v: Preimage.Carrier) => height.preservesScale a v,
+};
+\import Spaces.Subspace[V := Preimage.Carrier, space := Preimage.induced] \as PreimageSubspaces;
+\definition preimageBoundary: PreimageSubspaces.Subspace := PreimageSubspaces.Kernel[W := B, target := boundary].kernel restrictedHeight;
+\definition boundaryCriterion: \forall (v: Preimage.Carrier) ->
+  Logic.PropEquiv[PreimageSubspaces.Member preimageBoundary v, Subspaces.Member ambientBoundary v] :=
+  \fun (v: Preimage.Carrier) => Logic.PropEquiv[_, _] {
+    ltr := \fun (member: _) => member,
+    rtl := \fun (member: _) => member,
+  };
+\definition restrictedOnto: HeightSubmersion -> FaceTransverse ->
+  \forall (b: B) -> \exists ( v: Preimage.Carrier \where restrictedHeight.apply v = b ) :=
+  \fun (onto: HeightSubmersion)(transverse: FaceTransverse)(b: B) => \block {
+    \takefrom v: \Cast[V] ({ v: V \where Logic.And[height.apply v = b, D.apply v = normal.zero] })
+      \by normalLift onto transverse b \then
+    \let law: Logic.And[height.apply v = b, D.apply v = normal.zero] :=
+      \bysub(V, { v: V \where Logic.And[height.apply v = b, D.apply v = normal.zero] }, v) \then
+    \return Logic.existsIntro[Preimage.Carrier, { v: Preimage.Carrier \where restrictedHeight.apply v = b }]
+      (\into[V](v, preimageTangent.carrier) \by { law.right }) law.left
+  };
+
+\import \root.Normal[].Derivative[V := Preimage.Carrier, W := B, source := Preimage.induced, target := boundary]
+  .Of[D := restrictedHeight] \as BoundaryNormal;
+\definition normalComparison[onto: HeightSubmersion][transverse: FaceTransverse]: BoundaryNormal.Comparison :=
+  BoundaryNormal.normalIsomorphism (restrictedOnto onto transverse);
+\module Orientation(k: std.Data[].Nat[].Nat^);

@@ -1,0 +1,40 @@
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import N.Basic[].Prop[] \as NatLaw;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\definition one: N.Nat^ := N.Nat^::succ N.Nat^::zero;
+\definition SardIn[n: N.Nat^]: \Prop := \forall (m: N.Nat^) -> \root.Euclidean[n := n, m := m].Sard;
+\module Step(n, m: N.Nat^);
+\definition initial: SardIn N.Nat^::zero :=
+  \induction (m: N.Nat^) \return \root.Euclidean[n := N.Nat^::zero, m := m].Sard \with {
+    | zero: \root.Base[].Target[n := N.Nat^::zero].theorem
+    | succ: \fun (m: N.Nat^)(_: \root.Euclidean[n := N.Nat^::zero, m := m].Sard) =>
+      \root.Base[].Source[m := m].theorem
+  };
+
+\definition stepDimension: \forall (n: N.Nat^) -> Nat.add one n = N.Nat^::succ n :=
+  \fun (n: N.Nat^) =>
+    trans!{N.Nat^} _ _ _ (NatLaw.addSuccLeft N.Nat^::zero n)
+      (Nat.succCong (Nat.add N.Nat^::zero n) n (NatLaw.addZeroLeft n));
+
+\definition step: \forall (n: N.Nat^) -> SardIn n -> SardIn (N.Nat^::succ n) :=
+  \fun (n: N.Nat^)(prior: SardIn n) =>
+    \induction (m: N.Nat^) \return \root.Euclidean[n := N.Nat^::succ n, m := m].Sard \with {
+      | zero: \root.Base[].Target[n := N.Nat^::succ n].theorem
+      | succ: \fun (m: N.Nat^)(_: \root.Euclidean[n := N.Nat^::succ n, m := m].Sard) =>
+        \idelim Nat.add one n = N.Nat^::succ n \with dim: N.Nat^ =>
+          \root.Euclidean[n := dim, m := N.Nat^::succ m].Sard \by {
+            base: Step[n := n, m := m].theorem prior,
+            equality: stepDimension n
+          }
+    };
+
+\definition theorem: \forall (n: N.Nat^) -> SardIn n :=
+  \induction (n: N.Nat^) \return SardIn n \with {
+    | zero: initial
+    | succ: step
+  };

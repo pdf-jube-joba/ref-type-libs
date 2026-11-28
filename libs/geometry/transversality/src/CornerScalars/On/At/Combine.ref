@@ -1,0 +1,24 @@
+\definition domain: Open.OpenSet := Open.intersection left.domain right.domain;
+\definition inLeft: Open.Included domain left.domain := Open.intersectionLeft left.domain right.domain;
+\definition inRight: Open.Included domain right.domain := Open.intersectionRight left.domain right.domain;
+\definition included: Open.Included domain c.image :=
+  \fun (u: Model.Point)(member: _) => left.included u (inLeft u member);
+\definition leftAt[u: Model.Carrier c.constraints domain]: Model.Carrier c.constraints left.domain :=
+  \into[Open.Carrier left.domain](Open.inclusion domain left.domain inLeft u, Model.region c.constraints left.domain) \by {
+    \bysub(Open.Carrier domain, Model.region c.constraints domain, u)
+  };
+\definition rightAt[u: Model.Carrier c.constraints domain]: Model.Carrier c.constraints right.domain :=
+  \into[Open.Carrier right.domain](Open.inclusion domain right.domain inRight u, Model.region c.constraints right.domain) \by {
+    \bysub(Open.Carrier domain, Model.region c.constraints domain, u)
+  };
+\definition extension[op: Real.Real -> Real.Real -> Real.Real][smooth: SmoothBinary op]:
+  Extension[\fun (p: M.Point) => op (f p) (g p)] := Extension[\fun (p: M.Point) => op (f p) (g p)] {
+    domain := domain, included := included,
+    contains := Logic.And[_, _]::# left.contains right.contains,
+    value := \fun (u: Open.Carrier domain) => op (left.value (Open.inclusion domain left.domain inLeft u))
+      (right.value (Open.inclusion domain right.domain inRight u)),
+    smooth := smooth domain _ _ (Restriction.localSmooth domain left.domain inLeft left.value left.smooth)
+      (Restriction.localSmooth domain right.domain inRight right.value right.smooth),
+    agrees := \fun (u: Model.Carrier c.constraints domain) =>
+      congr!{Real.Real Real.Real Real.Real} op _ _ _ _ (left.agrees (leftAt u)) (right.agrees (rightAt u)),
+  };

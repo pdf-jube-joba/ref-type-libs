@@ -1,0 +1,15 @@
+\definition field[i: Fin.Fin m]: Functions.Smooth := \parent.Coordinate[i := i, chosen := chosen i].value;
+\definition vector[x: M.Point]: Target.Point := \fun (i: Fin.Fin m) => field i x;
+\definition smooth: SmoothEverywhere vector := \fun (i: Fin.Fin m) => Functions.regular (field i);
+\import \root.CornerScalars[n := n].On[M := M].Euclidean[m := m].Build[g := vector, regular := smooth] \as Built;
+\definition agrees[x: M.Point]: Space.Member cutoff.neighborhood x -> vector x = f x :=
+  \fun (inside: _) => \axiom:funext(vector x, f x,
+    \fun (i: Fin.Fin m) => \parent.Coordinate[i := i, chosen := chosen i].agrees x inside);
+\definition close[x: M.Point]: R.Lt (Def.pointDistance (f x) (vector x)) radius :=
+  Norm.finiteStrictUpper m (Def.subPoint (f x) (vector x)) radius positive
+    (\fun (i: Fin.Fin m) => R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Norm.distanceDifference (f x i) (vector x i)))
+      (\parent.Coordinate[i := i, chosen := chosen i].close x));
+\definition result: Result[radius, K] := Result[radius, K] {
+  map := Built.map, neighborhood := cutoff.neighborhood, neighborhoodOpen := cutoff.neighborhoodOpen,
+  contains := cutoff.contains, agrees := agrees, close := close,
+};

@@ -1,0 +1,67 @@
+\definition Full: \Prop :=
+  \forall (y: OutputSpace.Point) -> \exists ( v: InputSpace.Point \where D.apply v = y );
+
+\definition section[v: Domain.Point]: Range.Point := Output.right (D.apply (Input.rightLinear.apply v));
+
+\definition Fiber: \Prop :=
+  \forall (y: Range.Point) -> \exists ( v: Domain.Point \where section v = y );
+
+\definition rightAdd: \forall (u, v: InputSpace.Point) ->
+  Output.right (D.apply (InputSpace.Def[].addPoint u v)) =
+    Range.Def[].addPoint (Output.right (D.apply u)) (Output.right (D.apply v)) :=
+  \fun (u, v: InputSpace.Point) =>
+    congr!{OutputSpace.Point Range.Point} Output.right _ _ (D.preservesAdd u v);
+
+\definition fromFull: Full -> Fiber := \block {
+  \fun (full: Full)(y: Range.Point) \then
+  \let target: OutputSpace.Point := Output.join Parameters.Def[].origin y \then
+  \takefrom v: \Cast[InputSpace.Point] ({ v: InputSpace.Point \where D.apply v = target }) \by full target \then
+  \let value: D.apply v = target := \bysub(InputSpace.Point, { v: InputSpace.Point \where D.apply v = target }, v) \then
+  \let parametersZero: Input.left v = Parameters.Def[].origin :=
+    trans!{Parameters.Point} _ _ _ (sym!{Parameters.Point} _ _ (left v))
+      (trans!{Parameters.Point} _ _ _
+        (congr!{OutputSpace.Point Parameters.Point} Output.left _ _ value)
+        (Output.leftJoin Parameters.Def[].origin y)) \then
+  \let zeroed: Input.rightLinear.apply (Input.right v) = v :=
+    trans!{InputSpace.Point} _ _ _
+      (congr!{Parameters.Point InputSpace.Point} (\fun (c: Parameters.Point) => Input.join c (Input.right v)) _ _
+        (sym!{Parameters.Point} _ _ parametersZero))
+      (Input.recover v) \then
+  \return Logic.existsIntro[Domain.Point, { w: Domain.Point \where section w = y }]
+    (Input.right v)
+    (trans!{Range.Point} _ _ _
+      (congr!{InputSpace.Point Range.Point} (\fun (u: InputSpace.Point) => Output.right (D.apply u)) _ _ zeroed)
+      (trans!{Range.Point} _ _ _
+        (congr!{OutputSpace.Point Range.Point} Output.right _ _ value)
+        (Output.rightJoin Parameters.Def[].origin y)))
+};
+
+\definition fromFiber: Fiber -> Full := \block {
+  \fun (fiber: Fiber)(y: OutputSpace.Point) \then
+  \let v: InputSpace.Point := Input.join (Output.left y) Domain.Def[].origin \then
+  \let r: Range.Point := Output.right (D.apply v) \then
+  \let error: Range.Point := Range.Def[].subPoint (Output.right y) r \then
+  \takefrom w: \Cast[Domain.Point] ({ w: Domain.Point \where section w = error }) \by fiber error \then
+  \let correction: InputSpace.Point := Input.rightLinear.apply w \then
+  \let u: InputSpace.Point := InputSpace.Def[].addPoint v correction \then
+  \let first: Output.left (D.apply u) = Output.left y :=
+    trans!{Parameters.Point} _ _ _ (left u)
+      (trans!{Parameters.Point} _ _ _
+        (congr!{Parameters.Point Parameters.Point Parameters.Point} Parameters.Def[].addPoint _ _ _ _
+          (Input.leftJoin (Output.left y) Domain.Def[].origin)
+          (Input.leftJoin Parameters.Def[].origin w))
+        (\axiom:funext(Parameters.Def[].addPoint (Output.left y) Parameters.Def[].origin,
+          Output.left y, \fun (i: Fin.Fin p) => Laws.addZeroRight (Output.left y i)))) \then
+  \let second: Output.right (D.apply u) = Output.right y :=
+    trans!{Range.Point} _ _ _ (rightAdd v correction)
+      (trans!{Range.Point} _ _ _
+        (congr!{Range.Point Range.Point} (Range.Def[].addPoint r) _ _
+          (\bysub(Domain.Point, { w: Domain.Point \where section w = error }, w)))
+        (\axiom:funext(Range.Def[].addPoint r error, Output.right y,
+          \fun (i: Fin.Fin m) => Estimates.addSubCancel (Output.right y i) (r i)))) \then
+  \return Logic.existsIntro[InputSpace.Point, { w: InputSpace.Point \where D.apply w = y }] u
+    (trans!{OutputSpace.Point} _ _ _ (sym!{OutputSpace.Point} _ _ (Output.recover (D.apply u)))
+      (trans!{OutputSpace.Point} _ _ _
+        (congr!{Parameters.Point Range.Point OutputSpace.Point} Output.join _ _ _ _ first second)
+        (Output.recover y)))
+};

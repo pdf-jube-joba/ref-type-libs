@@ -1,0 +1,35 @@
+\import Taylor.Stratum[U := U, a := a] \as Stratum;
+\definition failedComponent: Logic.Not (Flat (N.Nat^::succ (N.Nat^::succ k)) a) ->
+  \exists ( j: Fin.Fin q \where Logic.Not (Taylor.Flat U a (N.Nat^::succ (N.Nat^::succ k)) (component j)) ) :=
+  \fun (failure: Logic.Not (Flat (N.Nat^::succ (N.Nat^::succ k)) a)) =>
+    Classical.doubleNegative _ (\fun (none: Logic.Not (\exists ( j: Fin.Fin q \where
+      Logic.Not (Taylor.Flat U a (N.Nat^::succ (N.Nat^::succ k)) (component j)) ))) =>
+      failure (\fun (j: Fin.Fin q) => Classical.doubleNegative _
+        (\fun (bad: Logic.Not (Taylor.Flat U a (N.Nat^::succ (N.Nat^::succ k)) (component j))) =>
+          none (Logic.existsIntro[Fin.Fin q, { j: Fin.Fin q \where Logic.Not (Taylor.Flat U a
+            (N.Nat^::succ (N.Nat^::succ k)) (component j)) }] j bad))));
+
+\module Using(j: Fin.Fin q, i: Fin.Fin p, w: Taylor.Transition[U, a, k, Partials.derivative U (component j) i]);
+
+\definition localNull: Smaller.Sard -> DomainSets.Member points a ->
+  \exists ( W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn Topology.topology W,
+    Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] ) := \block {
+    \fun (sard: Smaller.Sard)(member: DomainSets.Member points a) \then
+    \takefrom j: \Cast[Fin.Fin q] ({ j: Fin.Fin q \where Logic.Not (Taylor.Flat U a
+      (N.Nat^::succ (N.Nat^::succ k)) (component j)) }) \by failedComponent member.right \then
+    \let jBad: Logic.Not (Taylor.Flat U a (N.Nat^::succ (N.Nat^::succ k)) (component j)) :=
+      \bysub(Fin.Fin q, { j: Fin.Fin q \where Logic.Not (Taylor.Flat U a
+        (N.Nat^::succ (N.Nat^::succ k)) (component j)) }, j) \then
+    \takefrom i: \Cast[Fin.Fin p] ({ i: Fin.Fin p \where Logic.Not (Logic.And[
+      Partials.derivative U (component j) i a = Real.zero,
+      Taylor.Flat U a (N.Nat^::succ k) (Partials.derivative U (component j) i)]) })
+      \by Stratum.failedCoordinate (N.Nat^::succ k) (component j) jBad \then
+    \let g: Partials.Function U := Partials.derivative U (component j) i \then
+    \let iBad: Logic.Not (Logic.And[g a = Real.zero, Taylor.Flat U a (N.Nat^::succ k) g]) :=
+      \bysub(Fin.Fin p, { i: Fin.Fin p \where Logic.Not (Logic.And[
+        Partials.derivative U (component j) i a = Real.zero,
+        Taylor.Flat U a (N.Nat^::succ k) (Partials.derivative U (component j) i)]) }, i) \then
+    \takefrom w: Taylor.Transition[U, a, k, g] \by Stratum.transition k g ((member.left j) i).right
+      (\fun (flat: Taylor.Flat U a (N.Nat^::succ k) g) => iBad (Logic.And[_, _]::# ((member.left j) i).left flat)) \then
+    \return Using[j := j, i := i, w := w].localNull sard member.left
+  };

@@ -1,0 +1,25 @@
+\definition product[x: M.Point]: Real.Real := Real.mul (weight x) (f x);
+\definition zeroAway[x: M.Point]: Logic.Not (Space.Member (Functions.support weight) x) -> weight x = Real.zero :=
+  \fun (away: _) => Finite.doubleNegElim (weight x = Real.zero)
+    (\fun (nonzero: _) => away (Closure.contains M.space (Functions.Nonzero weight) x nonzero));
+\definition productZero[x: M.Point]: Logic.Not (Space.Member (Functions.support weight) x) -> product x = Real.zero :=
+  \fun (away: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (f x)) _ _ (zeroAway x away))
+    (Laws.fieldMulZeroLeft (f x));
+\definition awayOpen: Space.IsOpenIn M.space (Space.Complement (Functions.support weight)) :=
+  Closure.closed M.space (Functions.Nonzero weight);
+\module In(c: Chart, x: Charts.LocalPoint c) {
+  \import \parent.\parent.At[c := c, x := x] \as At;
+  \definition regular: IsSmoothOn f U -> \exists At.Extension[product] :=
+    \fun (smooth: _) => either!{{(Classical.excludedMiddle (Space.Member U x))} {\exists At.Extension[product]}
+      {\fun (inU: Space.Member U x) =>
+        At.multiply weight f (Functions.regular weight c x (\refl(x))) (smooth c x inU)}
+      {\fun (outside: Logic.Not (Space.Member U x)) =>
+        At.Near[U := Space.Complement (Functions.support weight), open := awayOpen,
+          contains := \fun (member: Space.Member (Functions.support weight) x) => outside (inside x member)].zero product productZero}
+    };
+}
+\definition smooth: IsSmoothOn f U -> IsSmooth product :=
+  \fun (regular: _)(c: Chart)(x: Charts.LocalPoint c)(whole: _) => In[c := c, x := x].regular regular;
+\definition value[regular: IsSmoothOn f U]: Functions.Smooth :=
+  \into[Function](product, calculus.smooth) \by { smooth regular };

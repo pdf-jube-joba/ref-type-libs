@@ -1,0 +1,12 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import tubular_neighborhoods.Euclidean[n := m, k := k] \as G06;
+\definition d: std.Data[].Nat[].Nat^ := G06.d;
+\import manifolds.Dimension[n := m].Smooth[] \as Targets;
+\import manifolds.Dimension[n := d].Examples[].Euclidean[] \as Ambient;
+\import calculus.Real[].Multivariable[n := d].Open[] \as Open;
+\import topology.Topology[Carrier := Ambient.smoothManifold.Point] \as AmbientSets;
+\module On(M: Targets.Manifold);

@@ -1,0 +1,9 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import manifolds.Dimension[n := n].Smooth[] \as Sources;
+\import manifolds.Dimension[n := m].Smooth[] \as Targets;
+\import \root.Euclidean[n := n, m := m] \as Euclidean;
+\module Between(M: Sources.Manifold, N: Targets.Manifold);

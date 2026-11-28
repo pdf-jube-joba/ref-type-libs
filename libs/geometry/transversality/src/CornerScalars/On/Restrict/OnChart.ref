@@ -1,0 +1,29 @@
+\import Region.For[patch := patch] \as Patch;
+\definition member: \In[OpenCharts.Chart] Region.manifold.atlas.charts (Region.chart patch) :=
+  Logic.existsIntro[Region.Patch, { p: Region.Patch \where Region.chart patch = Region.chart p }] patch (\refl(Region.chart patch));
+\definition chart: Inside.Chart := \into[OpenCharts.Chart](Region.chart patch, Region.manifold.atlas.charts) \by { member };
+\import Inside.At[c := chart, x := x] \as Local;
+\import \parent.\parent.At[c := patch.source, x := Patch.old x] \as Original;
+\module From(f: Function, e: Original.Extension[f]) {
+  \definition domain: Open.OpenSet := Open.intersection Patch.image e.domain;
+  \definition inPatch: Open.Included domain Patch.image := Open.intersectionLeft Patch.image e.domain;
+  \definition inOriginal: Open.Included domain e.domain := Open.intersectionRight Patch.image e.domain;
+  \definition included: Open.Included domain patch.source.image :=
+    \fun (u: Model.Point)(member: _) => e.included u (inOriginal u member);
+  \definition restricted[u: Model.Carrier patch.source.constraints domain]: Model.Carrier patch.source.constraints e.domain :=
+    \into[Open.Carrier e.domain](Open.inclusion domain e.domain inOriginal u, Model.region patch.source.constraints e.domain) \by {
+      \bysub(Open.Carrier domain, Model.region patch.source.constraints domain, u)
+    };
+  \definition extension: Local.Extension[restrict f] := Local.Extension[restrict f] {
+    domain := domain, included := inPatch,
+    contains := Logic.And[_, _]::# (\bysub(Model.Point, Patch.image.points, Local.center)) e.contains,
+    value := \fun (u: Open.Carrier domain) => e.value (Open.inclusion domain e.domain inOriginal u),
+    smooth := Restriction.localSmooth domain e.domain inOriginal e.value e.smooth,
+    agrees := \fun (u: Model.Carrier patch.source.constraints domain) => e.agrees (restricted u),
+  };
+}
+\definition exists[f: Function]: IsSmoothOn f U -> \exists Local.Extension[restrict f] :=
+  \fun (regular: IsSmoothOn f U) => \block {
+    \takefrom e: Original.Extension[f] \by regular patch.source (Patch.old x) (\bysub(M.Point, U, x)) \then
+    \return \exact(From[f := f, e := e].extension, Local.Extension[restrict f])
+  };

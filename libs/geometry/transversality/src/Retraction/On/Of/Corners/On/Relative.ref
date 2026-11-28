@@ -1,0 +1,8 @@
+\definition exists[compactSource: XS.IsCompact X.space][compactTarget: TargetSets.IsCompact M.space]
+    [smoothOnU: Coordinates.SmoothOn Graph.embedded U]
+    [W: \Pow Graphs.CarrierSet][windowOpen: GraphSets.IsOpenIn Graph.graphTopology W]
+    [around: \forall (x: X.Point) -> GraphSets.Member W (Graph.graph x (f x))]: \exists Result[K, W] := \block {
+  \takefrom neighborhood: Neighborhood \by existsNeighborhood compactTarget \then
+  \return \parent.With[neighborhood := neighborhood].Relative[K := K, U := U, closed := closed, open := open, inside := inside]
+    .In[W := W, openWindow := windowOpen, around := around].exists compactSource smoothOnU
+};

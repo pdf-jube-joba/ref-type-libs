@@ -1,0 +1,38 @@
+\import Remainders.Differential[U := U, V := RangeOpen.whole, f := h, a := a] \as DH;
+\import Projections.Differential[U := U, V := ParameterOpen.whole, f := Projection.map, a := a] \as DP;
+\definition derivativeLeft: \forall (v: SourceSpace.Point) ->
+  Output.left ((Whole.differential a).apply v) = Input.left v :=
+  \fun (v: SourceSpace.Point) =>
+    trans!{Parameter.Point} _ _ _
+      (congr!{{calculus.Vector[n := Input.dimension, m := Output.dimension].LinearMap} Parameter.Point}
+        (\fun (d: calculus.Vector[n := Input.dimension, m := Output.dimension].LinearMap) => Output.left (d.apply v)) _ _
+        (PairMap.At[a := a].jacobian))
+      (trans!{Parameter.Point} _ _ _
+        (Output.leftJoin (DP.value.apply v) (DH.value.apply v))
+        (congr!{{calculus.Vector[n := Input.dimension, m := p].LinearMap} Parameter.Point}
+          (\fun (d: calculus.Vector[n := Input.dimension, m := p].LinearMap) => d.apply v) _ _ (Projection.differential a)));
+\import Block.On[D := Whole.differential a, left := derivativeLeft] \as Criterion;
+
+\definition derivativeRight: \forall (v: SourceSpace.Point) ->
+  Output.right ((Whole.differential a).apply v) = DH.value.apply v :=
+  \fun (v: SourceSpace.Point) =>
+    trans!{Range.Point} _ _ _
+      (congr!{{calculus.Vector[n := Input.dimension, m := Output.dimension].LinearMap} Range.Point}
+        (\fun (d: calculus.Vector[n := Input.dimension, m := Output.dimension].LinearMap) => Output.right (d.apply v)) _ _
+        (PairMap.At[a := a].jacobian))
+      (Output.rightJoin (DP.value.apply v) (DH.value.apply v));
+\definition sectionSurjective: (\forall (y: Range.Point) -> \exists ( v: Fiber.Point \where
+  DH.value.apply (Input.rightLinear.apply v) = y )) -> Whole.SurjectiveAt a :=
+  \fun (surjective: _) =>
+    Criterion.fromFiber (\fun (y: Range.Point) => \block {
+      \takefrom v: \Cast[Fiber.Point] ({ v: Fiber.Point \where DH.value.apply (Input.rightLinear.apply v) = y }) \by surjective y \then
+      \return Logic.existsIntro[Fiber.Point, { v: Fiber.Point \where Criterion.section v = y }] v
+        (trans!{Range.Point} _ _ _ (derivativeRight (Input.rightLinear.apply v))
+          (\bysub(Fiber.Point, { v: Fiber.Point \where DH.value.apply (Input.rightLinear.apply v) = y }, v)))
+    });
+
+\definition valueLeft: Output.left (Maps.apply U Target.whole map a) = Input.left a :=
+  Output.leftJoin (Input.left a) (Remainders.apply U RangeOpen.whole h a);
+
+\definition valueRight: Output.right (Maps.apply U Target.whole map a) = Remainders.apply U RangeOpen.whole h a :=
+  Output.rightJoin (Input.left a) (Remainders.apply U RangeOpen.whole h a);

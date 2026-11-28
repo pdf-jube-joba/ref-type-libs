@@ -1,0 +1,11 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Data[].Nat[].Basic[].Def[] \as Nat;
+\import calculus.Real[].OneDimension[] \as One;
+\definition dimension: std.Data[].Nat[].Nat^ := Nat.add One.dimension n;
+\import boundary_manifolds.Dimension[n := Nat.add One.dimension n] \as Sources;
+\import boundary_manifolds.Dimension[n := m] \as Targets;
+\import boundary_manifolds.Boundary[n := n] \as G03;
+\import \root.Null[m := m] \as Null;
+\import boundary_manifolds.Model[n := m] \as TargetModel;
+\import topology.Topology[Carrier := TargetModel.Point] \as Sets;
+\module Between(M: Sources.Manifold, T: Targets.Manifold);

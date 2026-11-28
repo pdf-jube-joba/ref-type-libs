@@ -1,0 +1,34 @@
+\import \parent.\parent.Derivative[V := W, W := Y, source := intermediate, target := values].Of[D := G] \as Normal;
+\import \parent.\parent.Between[V := V, W := W, source := source, target := intermediate].Of[differential := D, tangent := Normal.kernel] \as Comparison;
+\definition Transverse: \Prop := Comparison.Transverse;
+\definition DefiningSubmersion: \Prop := Normal.Surjective;
+\definition Regular: \Prop := \forall (y: Y) -> \exists ( v: V \where G.apply (D.apply v) = y );
+\import Spaces.Quotient[V := W, space := intermediate].Of[S := Normal.kernel] \as TargetNormal;
+\import Spaces.Isomorphism[V := TargetNormal.Carrier, W := Y, source := TargetNormal.vectorSpace, target := values] \as Isomorphisms;
+
+\definition regularOfTransverse: DefiningSubmersion -> Transverse -> Regular :=
+  \fun (onto: DefiningSubmersion)(transverse: Transverse)(y: Y) => \block {
+    \let iso: Isomorphisms.Isomorphism := Normal.normalIsomorphism onto \then
+    \let q: TargetNormal.Carrier := iso.backward.apply y \then
+    \takefrom v: \Cast[V] ({ v: V \where Comparison.normalDerivative.apply v = q }) \by transverse q \then
+    \return Logic.existsIntro[V, { v: V \where G.apply (D.apply v) = y }] v
+      (eq_reason_in!{Y _
+        "=" _ "by" {sym!{Y} _ _ (Normal.onClass (D.apply v))}
+        "=" _ "by" {congr!{TargetNormal.Carrier Y} (Normal.normalComparison.apply) _ _
+          (\bysub(V, { v: V \where Comparison.normalDerivative.apply v = q }, v))}
+        "=" y "by" {(Isomorphisms.laws iso).rightInverse y}
+      })
+  };
+
+\definition transverseOfRegular: Regular -> Transverse :=
+  \fun (regular: Regular)(q: TargetNormal.Carrier) => \block {
+    \let y: Y := Normal.normalComparison.apply q \then
+    \takefrom v: \Cast[V] ({ v: V \where G.apply (D.apply v) = y }) \by regular y \then
+    \return Logic.existsIntro[V, { v: V \where Comparison.normalDerivative.apply v = q }] v
+      (Normal.injective _ _
+        (trans!{Y} _ _ _
+          (Normal.onClass (D.apply v)) (\bysub(V, { v: V \where G.apply (D.apply v) = y }, v))))
+  };
+\definition equivalence[onto: DefiningSubmersion]: Logic.PropEquiv[Transverse, Regular] := Logic.PropEquiv[_, _] {
+  ltr := regularOfTransverse onto, rtl := transverseOfRegular,
+};

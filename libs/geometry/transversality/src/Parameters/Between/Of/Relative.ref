@@ -1,0 +1,21 @@
+\definition FixedRegular[t: P.Point]: \Prop := \forall (x: A) -> \In[A] fixed x -> transverse t x;
+\definition AwayFromFixed[t: P.Point]: \Prop := \forall (x: A) -> Logic.Not (\In[A] fixed x) -> transverse t x;
+\definition AllRegular[t: P.Point]: \Prop := \forall (x: A) -> transverse t x;
+
+\definition splice[t: P.Point]: FixedRegular t -> AwayFromFixed t -> AllRegular t :=
+  \fun (atFixed: FixedRegular t)(outside: AwayFromFixed t)(x: A) =>
+    either!{{(Classical.excludedMiddle (\In[A] fixed x))} {transverse t x}
+      {atFixed x} {outside x}};
+
+\definition choose[U: \Pow P.Point][open: Sets.IsOpenIn P.space U][center: P.Point][inside: Sets.Member U center]:
+  (\forall (t: P.Point) -> Sets.Member U t -> FixedRegular t) ->
+  (\forall (t: P.Point) -> Sard.Regular t -> AwayFromFixed t) ->
+  \exists ( t: P.Point \where Logic.And[Sets.Member U t, AllRegular t] ) :=
+  \fun (fixedRegular: _)(sliceRegular: _) => \block {
+    \takefrom t: \Cast[P.Point] ({ t: P.Point \where Logic.And[Sets.Member U t, Sard.Regular t] })
+      \by Sard.regularDense U open center inside \then
+    \let law: Logic.And[Sets.Member U t, Sard.Regular t] :=
+      \bysub(P.Point, { t: P.Point \where Logic.And[Sets.Member U t, Sard.Regular t] }, t) \then
+    \return Logic.existsIntro[P.Point, { t: P.Point \where Logic.And[Sets.Member U t, AllRegular t] }] t
+      (Logic.And[_, _]::# law.left (splice t (fixedRegular t law.left) (sliceRegular t law.right)))
+  };

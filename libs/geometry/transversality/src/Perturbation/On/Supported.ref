@@ -1,0 +1,47 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import Input.Smooth[] \as Smooth;
+\import Smooth.Differential[] \as Differential;
+\import Differential.Operations[U := U] \as Derivatives;
+\import real.Analysis[].Algebra[] \as Algebra;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+
+\definition weight: Functions.Function := Functions.product bump bump;
+\definition FixedRegular: \Prop := \forall (x: Input.Carrier U) -> bump x = Real.zero ->
+  Maps.apply U Output.whole f x = Def.origin -> Original.SurjectiveAt x;
+\module AtParameter(a: Coordinates.Point);
+\import Smooth.Nonvanishing[U := U, f := weight] \as Domain;
+\module Active;
+\definition dense[W: Output.OpenSet][center: Output.Carrier W]:
+  FixedRegular -> \exists ( a: Output.Carrier W \where AtParameter[a := a].RegularAtZero ) := Active[].dense W center;
+\import real.Analysis[].Estimates[] \as Estimates;
+\import metric_spaces.MetricSpace[Carrier := Coordinates.Point] \as Metrics;
+\import Metrics.Topology[] \as Balls;
+\definition ball[radius: Real.Real]: Output.OpenSet :=
+  Output.Topology[].ofOpen (Metrics.Ball Norm.metric Def.origin radius) (Balls.ballOpenIn Norm.metric Def.origin radius);
+\definition close[a: Coordinates.Point][x: Input.Carrier U][radius: Real.Real]: R.Le (weight x) Real.one ->
+  R.Lt (Def.pointDistance Def.origin a) radius ->
+  R.Lt (Def.pointDistance (AtParameter[a := a].map.apply x) (f.apply x)) radius :=
+  \fun (bounded: _)(near: _) =>
+    R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (AtParameter[a := a].displacement x))
+      (R.leLtTrans _ (Def.pointDistance a Def.origin) radius
+        (R.leReplace _ _ _ _
+          (Laws.fieldMulComm (Def.pointDistance a Def.origin) (weight x))
+          (trans!{Real.Real} _ _ _ (Laws.fieldMulComm (Def.pointDistance a Def.origin) Real.one) (Laws.fieldMulOneLeft (Def.pointDistance a Def.origin)))
+          (Estimates.mulMonotone (Def.pointDistance a Def.origin) (weight x) Real.one (Norm.metric.nonnegative a Def.origin) bounded))
+        (R.ltReplaceLeft _ _ _ (Norm.distanceSymmetric Def.origin a) near));
+\definition Close[a: Coordinates.Point][radius: Real.Real]: \Prop :=
+  \forall (x: Input.Carrier U) -> R.Lt (Def.pointDistance (AtParameter[a := a].map.apply x) (f.apply x)) radius;
+\definition approximate[radius: Real.Real][positive: R.Lt Real.zero radius]:
+  FixedRegular -> (\forall (x: Input.Carrier U) -> R.Le (weight x) Real.one) ->
+  \exists ( a: Coordinates.Point \where Logic.And[AtParameter[a := a].RegularAtZero, Close a radius] ) :=
+  \fun (fixed: FixedRegular)(bounded: _) => \block {
+    \let center: Output.Carrier (ball radius) :=
+      \into[Coordinates.Point](Def.origin, (ball radius).points) \by { Metrics.ballCenter Norm.metric Def.origin radius positive } \then
+    \takefrom a: \Cast[Output.Carrier (ball radius)] ({ a: Output.Carrier (ball radius) \where AtParameter[a := a].RegularAtZero })
+      \by dense (ball radius) center fixed \then
+    \return Logic.existsIntro[Coordinates.Point, { a: Coordinates.Point \where Logic.And[AtParameter[a := a].RegularAtZero, Close a radius] }]
+      a (Logic.And[_, _]::#
+        (\bysub(Output.Carrier (ball radius), { a: Output.Carrier (ball radius) \where AtParameter[a := a].RegularAtZero }, a))
+        (\fun (x: Input.Carrier U) => close a x radius (bounded x) (\bysub(Coordinates.Point, (ball radius).points, a))))
+  };

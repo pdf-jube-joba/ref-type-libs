@@ -1,0 +1,49 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import \root.Null[m := m] \as Null;
+\import euclidean_measure.Euclidean[n := m] \as E;
+\import topology.Topology[Carrier := E.Point] \as Sets;
+\import functional_analysis.Measure[A := E.Point] \as Measure;
+\import calculus.Real[].Multivariable[n := m].Open[] \as Open;
+
+\definition exception[whole, boundary: \Pow E.Point][faces: N.Nat^ -> \Pow E.Point]: \Pow E.Point :=
+  Measure.Sigma[].pairUnion whole (Measure.Sigma[].pairUnion boundary (Measure.union faces));
+
+\definition null: \forall (whole, boundary: \Pow E.Point)(faces: N.Nat^ -> \Pow E.Point) ->
+  Null.Null whole -> Null.Null boundary -> (\forall (i: N.Nat^) -> Null.Null (faces i)) ->
+  Null.Null (exception whole boundary faces) :=
+  \fun (whole, boundary: \Pow E.Point)(faces: N.Nat^ -> \Pow E.Point)
+    (wholeNull: Null.Null whole)(boundaryNull: Null.Null boundary)(facesNull: \forall (i: N.Nat^) -> Null.Null (faces i)) =>
+    Null.pair whole (Measure.Sigma[].pairUnion boundary (Measure.union faces)) wholeNull
+      (Null.pair boundary (Measure.union faces) boundaryNull (Null.union faces facesNull));
+
+\structure Avoids[whole, boundary: \Pow E.Point, faces: N.Nat^ -> \Pow E.Point, y: E.Point]: \Prop := {
+  main: Logic.Not (Sets.Member whole y),
+  boundary: Logic.Not (Sets.Member boundary y),
+  face: \forall (i: N.Nat^) -> Logic.Not (Sets.Member (faces i) y),
+};
+\definition outside: \forall (whole, boundary: \Pow E.Point)(faces: N.Nat^ -> \Pow E.Point)(y: E.Point) ->
+  Logic.Not (Sets.Member (exception whole boundary faces) y) -> Avoids[whole, boundary, faces, y] :=
+  \fun (whole, boundary: \Pow E.Point)(faces: N.Nat^ -> \Pow E.Point)(y: E.Point)
+    (outside: Logic.Not (Sets.Member (exception whole boundary faces) y)) =>
+    Avoids[whole, boundary, faces, y] {
+      main := \fun (inside: Sets.Member whole y) => outside (Logic.Or[_, _]::left inside),
+      boundary := \fun (inside: Sets.Member boundary y) => outside (Logic.Or[_, _]::right (Logic.Or[_, _]::left inside)),
+      face := \fun (i: N.Nat^)(inside: Sets.Member (faces i) y) =>
+        outside (Logic.Or[_, _]::right (Logic.Or[_, _]::right
+          (Logic.existsIntro[N.Nat^, { j: N.Nat^ \where Sets.Member (faces j) y }] i inside))),
+    };
+
+\definition dense: \forall (whole, boundary: \Pow E.Point)(faces: N.Nat^ -> \Pow E.Point) ->
+  Null.Null whole -> Null.Null boundary -> (\forall (i: N.Nat^) -> Null.Null (faces i)) ->
+  \forall (U: Open.OpenSet)(a: Open.Carrier U) -> \exists ( y: Open.Carrier U \where Avoids[whole, boundary, faces, y] ) :=
+  \fun (whole, boundary: \Pow E.Point)(faces: N.Nat^ -> \Pow E.Point)
+    (wholeNull: Null.Null whole)(boundaryNull: Null.Null boundary)(facesNull: \forall (i: N.Nat^) -> Null.Null (faces i))
+    (U: Open.OpenSet)(a: Open.Carrier U) => \block {
+      \let exceptional: \Pow E.Point := exception whole boundary faces \then
+      \takefrom y: \Cast[Open.Carrier U] ({ y: Open.Carrier U \where Logic.Not (Sets.Member exceptional y) })
+        \by Null.Open[].avoids exceptional (null whole boundary faces wholeNull boundaryNull facesNull) U a \then
+      \return Logic.existsIntro[Open.Carrier U, { y: Open.Carrier U \where Avoids[whole, boundary, faces, y] }] y
+        (outside whole boundary faces y (\bysub(Open.Carrier U, { y: Open.Carrier U \where
+          Logic.Not (Sets.Member exceptional y) }, y)))
+    };

@@ -1,0 +1,8 @@
+\definition open: Space.IsOpenIn M.space Space.Empty := (Space.topologyLaws M.space).emptyOpen;
+\definition closed: Space.IsClosedIn M.space Space.Empty := Functions.Empty[].emptyClosed;
+\definition included: Space.Subset Space.Empty Space.Empty := \fun (x: M.Point)(inEmpty: _) => inEmpty;
+\import Scalars.OnOpen[U := Space.Empty, open := open] \as Empty;
+\definition smooth[f: Scalars.Function]: Empty.IsSmooth (Empty.restrict f) :=
+  Empty.congruent (Empty.restrict (Functions.constant Real.zero)) (Empty.restrict f)
+    (\fun (x: Empty.Carrier) => Logic.falseElim _ (\bysub(M.Point, Space.Empty, x)))
+    (Empty.restrictSmooth (Functions.constant Real.zero) (Functions.regular (Functions.constant Real.zero)));

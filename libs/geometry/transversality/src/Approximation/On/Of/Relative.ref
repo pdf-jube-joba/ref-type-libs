@@ -1,0 +1,11 @@
+\import Scalars.OnOpen[U := U, open := open] \as SmoothRegion;
+\module Within(regular: SmoothRegion.IsSmooth (SmoothRegion.restrict f), radius: Real.Real,
+  positive: R.Lt Real.zero radius, fixed: Shrinking.ShrinkData[M.space, K, U]);
+\definition exists[compact: Space.IsCompact M.space][regular: SmoothRegion.IsSmooth (SmoothRegion.restrict f)]
+    [radius: Real.Real][positive: R.Lt Real.zero radius]: \exists Result[radius, K] := \block {
+  \takefrom fixed: Shrinking.ShrinkData[M.space, K, U] \by
+    Shrinking.shrink M.space (Compact.compactHausdorffNormal M.space compact M.hausdorff) K U closed open inside \then
+  \takefrom result: \Cast[Result[radius, K]] ({ result: Result[radius, K] \where result.neighborhood = fixed.inner }) \by
+    Within[regular := regular, radius := radius, positive := positive, fixed := fixed].exists compact \then
+  \return \exact(result, Result[radius, K])
+};

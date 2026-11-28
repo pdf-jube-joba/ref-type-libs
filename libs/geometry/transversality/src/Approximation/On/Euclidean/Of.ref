@@ -1,0 +1,19 @@
+\definition coordinate[i: Fin.Fin m][x: M.Point]: Real.Real := f x i;
+\definition continuousCoordinate[i: Fin.Fin m]: Continuity.Continuous M.space Line.topology (coordinate i) :=
+  \fun (V: \Pow Real.Real)(open: _) =>
+    continuous _ (EuclideanTopology.coordinateContinuous i V open);
+
+\structure Result[radius: Real.Real, K: \Pow M.Point]: \Set := {
+  map: Maps.Map,
+  neighborhood: \Pow M.Point,
+  neighborhoodOpen: Space.IsOpenIn M.space neighborhood,
+  contains: Space.Subset K neighborhood,
+  agrees: \forall (x: M.Point) -> Space.Member neighborhood x -> map.apply x = f x,
+  close: \forall (x: M.Point) -> R.Lt (Def.pointDistance (f x) (map.apply x)) radius,
+};
+\module Relative(K, U: \Pow M.Point, closed: Space.IsClosedIn M.space K, open: Space.IsOpenIn M.space U, inside: Space.Subset K U);
+\import \parent.\parent.Empty[] \as Empty;
+\definition exists[compact: Space.IsCompact M.space][radius: Real.Real][positive: R.Lt Real.zero radius]:
+  \exists Result[radius, Space.Empty] :=
+  Relative[K := Space.Empty, U := Space.Empty, closed := Empty.closed, open := Empty.open, inside := Empty.included]
+    .exists compact (\fun (i: Fin.Fin m) => Empty.smooth (coordinate i)) radius positive;

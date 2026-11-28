@@ -1,0 +1,34 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\import real.Analysis[] \as Real;
+\import dedekind_reals.DedekindReal[].Completeness[] \as Complete;
+\import std.Data[].FinSet[].Sum[m := p, n := q] \as Index;
+\import euclidean_measure.Euclidean[n := p] \as Left;
+\import euclidean_measure.Euclidean[n := q] \as Right;
+\import euclidean_measure.Euclidean[n := Index.total] \as Output;
+\import topology.Topology[Carrier := Right.Point] \as RightSets;
+\import topology.Topology[Carrier := Output.Point] \as OutputSets;
+\import functional_analysis.Measure[A := Right.Point] \as RightMeasure;
+\import functional_analysis.Measure[A := Output.Point] \as OutputMeasure;
+\import product_integration.ProductSigma[A := Left.Point, B := Right.Point, left := Left.MeasureConstruction[].measure.sigma, right := Right.MeasureConstruction[].measure.sigma] \as Sigma;
+\import product_integration.EuclideanProduct[m := p, n := q] \as Product;
+\import \root.Null[m := q] \as Fiber;
+\import \root.Null[m := Index.total] \as Total;
+\import functional_analysis.Measure[A := Sigma.Point] \as Measure;
+
+\import product_integration.Product[A := Left.Point, B := Right.Point, mu := Left.MeasureConstruction[].measure,
+  nu := Right.MeasureConstruction[].measure, left := product_integration.Euclidean[n := p].exhaustion,
+  right := product_integration.Euclidean[n := q].exhaustion] \as ProductMeasure;
+\import euclidean_measure.Pushforward[A := Sigma.Point, B := Output.Point, source := ProductMeasure.measure, map := Product.join] \as Push;
+\import product_integration.Cuts[A := Sigma.Point] \as Cuts;
+\module On(S: \Pow Output.Point);
+
+\definition closed: \forall (S: \Pow Output.Point) ->
+  OutputSets.IsClosedIn topological_algebra.Euclidean[].Dimension[n := Index.total].Topology[].topology S ->
+  (\forall (x: Left.Point) -> Fiber.Null (On[S := S].section x)) -> Total.Null S :=
+  \fun (S: \Pow Output.Point)(closedSet: _)
+    (sections: \forall (x: Left.Point) -> Fiber.Null (On[S := S].section x)) =>
+    On[S := S].theorem (Output.Borel[].closed S closedSet) sections;

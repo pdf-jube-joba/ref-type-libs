@@ -1,0 +1,17 @@
+\import \parent.\parent.Cutoff[K := K, U := U, open := open] \as Cutoff;
+\structure Result[radius: Real.Real]: \Set := {
+  map: Approximation radius,
+  neighborhood: \Pow M.Point,
+  neighborhoodOpen: Space.IsOpenIn M.space neighborhood,
+  contains: Space.Subset K neighborhood,
+  agrees: \forall (x: M.Point) -> Space.Member neighborhood x -> map x = f x,
+};
+\module With(cutoff: Cutoff.Data, radius: Real.Real, ordinary: Approximation radius, regular: IsSmoothOn f U);
+\definition compactK[compact: Space.IsCompact M.space]: Space.IsCompactIn M.space K :=
+  Compact.closedSubset M.space Space.Whole K compact closed (\fun (x: M.Point)(inK: _) => \refl(x));
+\definition exists[compact: Space.IsCompact M.space][regular: IsSmoothOn f U][radius: Real.Real][positive: R.Lt Real.zero radius]:
+  \exists Result[radius] := \block {
+  \takefrom cutoff: Cutoff.Data \by Cutoff.exists (compactK compact) included \then
+  \takefrom ordinary: Approximation radius \by \parent.Absolute[radius := radius, positive := positive].exists compact \then
+  \return \exact(With[cutoff := cutoff, radius := radius, ordinary := ordinary, regular := regular].result, Result[radius])
+};

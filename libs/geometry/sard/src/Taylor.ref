@@ -1,0 +1,37 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\import real.Analysis[] \as Real;
+\import Real.Estimates[] \as Estimates;
+\import Real.FiniteSums[] \as Sums;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import Open.Smooth[].Derivative[] \as Partials;
+\import topological_algebra.Euclidean[].Dimension[n := n] \as Space;
+\import std.Data[].FinSet[] \as Fin;
+\definition count: Real.Real := Sums.sum n (\fun (_: Fin.Fin n) => Real.one);
+\definition countNonnegative: R.Le Real.zero count :=
+  Sums.nonnegative n (\fun (_: Fin.Fin n) => Real.one) (\fun (_: Fin.Fin n) => Laws.oneNonnegative);
+
+\definition Flat[U: Open.OpenSet][a: Open.Carrier U]:
+  \forall (k: N.Nat^) -> Partials.Function U -> \Prop :=
+  \induction (k: N.Nat^) \return Partials.Function U -> \Prop \with {
+    | zero: \fun (_: Partials.Function U) => Logic.True
+    | succ: \fun (k: N.Nat^)(prev: Partials.Function U -> \Prop)(f: Partials.Function U) =>
+      \forall (i: Fin.Fin n) -> Logic.And[Partials.derivative U f i a = Real.zero, prev (Partials.derivative U f i)]
+  };
+
+\module On(U: Open.OpenSet, a: Open.Carrier U, rho, r, bound: Real.Real);
+
+\structure Transition[U: Open.OpenSet, a: Open.Carrier U, k: N.Nat^, f: Partials.Function U]: \Set := {
+  function: Partials.Function U,
+  direction: Fin.Fin n,
+  nonzero: Logic.Not (Partials.derivative U function direction a = Real.zero),
+  vanishes: \forall (x: Open.Carrier U) -> f x = Real.zero -> Flat U x k f -> function x = Real.zero,
+};
+
+\module Stratum(U: Open.OpenSet, a: Open.Carrier U);
+
+\module Uniform(U: Open.OpenSet, a: Open.Carrier U);

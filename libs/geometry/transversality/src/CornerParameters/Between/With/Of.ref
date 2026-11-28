@@ -1,0 +1,11 @@
+\import sard.Corners[n := dimension, m := m].Between[M := M, N := T].Of[f := f] \as Ambient;
+\import sard.Boundary[n := n, m := m].Between[M := M, T := T].With[cover := cover].Of[f := f] \as BoundaryValues;
+\import BoundaryValues.InChart[right := right] \as InChart;
+
+\definition Good[u: Model.Carrier right.constraints right.image]: \Prop :=
+  Logic.And[Ambient.TangentialRegular (Charts.point right u), BoundaryValues.BoundaryRegular (Charts.point right u)];
+\definition outside[u: Model.Carrier right.constraints right.image]: Logic.Not (Sets.Member InChart.exceptional u) -> Good u :=
+  \fun (outside: _) => Logic.And[_, _]::# (InChart.tangentialRegularAt u outside) (InChart.regularAt u outside).right;
+
+\module Window(W: Output.OpenSet, included: Output.Included W right.image,
+  admissible: \forall (u: Output.Carrier W) -> Model.Nonnegative right.constraints u);

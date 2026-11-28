@@ -1,0 +1,68 @@
+\definition domain: Open.OpenSet := Open.intersection e.neighborhood b.domain;
+\definition inOriginal: Open.Included domain e.neighborhood := Open.intersectionLeft e.neighborhood b.domain;
+\definition inBump: Open.Included domain b.domain := Open.intersectionRight e.neighborhood b.domain;
+\definition included: Open.Included domain c.image :=
+  \fun (u: Model.Point)(member: Coordinates.Member domain.points u) => e.included u (inOriginal u member);
+\import calculus.Maps[n := n, m := m] \as Calculus;
+\import Calculus.Restriction[U := domain, V := e.neighborhood, W := Output.whole] \as RestrictMap;
+\definition original: Calculus.Map domain Output.whole := RestrictMap.input inOriginal e.map;
+\import Smooth.Algebra[U := domain] \as LocalAlgebra;
+\definition cutoff: LocalAlgebra.Function := \into[Open.ScalarFunction domain](
+  (\fun (u: Open.Carrier domain) => b.value (Open.inclusion domain b.domain inBump u)), LocalAlgebra.Predicate) \by {
+    Restriction.localSmooth domain b.domain inBump b.value b.smooth
+  };
+\import \root.Perturbation[n := n, m := m].On[U := domain, f := original].Supported[bump := cutoff] \as LocalShift;
+\import LocalShift.AtParameter[a := a] \as Translation;
+\definition inModel: Coordinates.Member domain.points Scalar.center := Logic.And[_, _]::# e.contains b.contains;
+\definition inChart[u: Model.Carrier c.constraints domain]: Model.Carrier c.constraints e.neighborhood :=
+  \into[Open.Carrier e.neighborhood](Open.inclusion domain e.neighborhood inOriginal u, Model.region c.constraints e.neighborhood) \by {
+    \bysub(Open.Carrier domain, Model.region c.constraints domain, u)
+  };
+\definition inScalar[u: Model.Carrier c.constraints domain]: Model.Carrier c.constraints b.domain :=
+  \into[Open.Carrier b.domain](Open.inclusion domain b.domain inBump u, Model.region c.constraints b.domain) \by {
+    \bysub(Open.Carrier domain, Model.region c.constraints domain, u)
+  };
+\definition formula[u: Model.Carrier c.constraints domain]: (original.apply u \of Target.Point) =
+  Original.vector (Scalar.actual domain included u) := e.agrees (inChart u);
+\definition bumpFormula[u: Model.Carrier c.constraints domain]: cutoff u = bump (Scalar.actual domain included u) := b.agrees (inScalar u);
+\definition shiftedFormula[u: Model.Carrier c.constraints domain]: (Translation.map.apply u \of Target.Point) =
+  shifted (Scalar.actual domain included u) :=
+  \axiom:funext((Translation.map.apply u \of Target.Point), shifted (Scalar.actual domain included u), \fun (i: Fin.Fin m) =>
+    congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+      (congr!{Target.Point Real.Real} (\fun (p: Target.Point) => p i) _ _ (formula u))
+      (congr!{Real.Real Real.Real} (Real.mul (Real.neg (a i))) _ _
+        (congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _ (bumpFormula u) (bumpFormula u))));
+\definition originalExtension: OldMap.Extension := OldMap.Extension {
+  neighborhood := domain, included := included, contains := inModel, map := original,
+  inside := \fun (u: Model.Carrier c.constraints domain) => \refl(f.apply (Scalar.actual domain included u)),
+  agrees := formula,
+};
+\definition shiftedExtension: NewMap.Extension := NewMap.Extension {
+  neighborhood := domain, included := included, contains := inModel, map := Translation.map,
+  inside := \fun (u: Model.Carrier c.constraints domain) => \refl(map.apply (Scalar.actual domain included u)),
+  agrees := shiftedFormula,
+};
+\import OldMap.Using[e := originalExtension] \as Old;
+\import NewMap.Using[e := shiftedExtension] \as New;
+\definition centerPoint: Scalar.actual domain included Old.center = (x \of M.Point) := Charts.pointCoordinate c x;
+\definition atZero: bump x = Real.zero -> cutoff Old.center = Real.zero :=
+  \fun (zero: _) => trans!{Real.Real} _ _ _ (bumpFormula Old.center)
+    (trans!{Real.Real} _ _ _ (congr!{M.Point Real.Real} (\fun (y: M.Point) => bump y) _ _ centerPoint) zero);
+\definition centers: (New.center \of Model.Point) = (Old.center \of Model.Point) := \refl(Scalar.center \of Model.Point);
+\definition newAtOld: New.jacobian = calculus.Maps[n := n, m := m].Differential[U := domain, V := Output.whole, f := Translation.map, a := Old.center].value :=
+  \idelim New.center = Old.center \with z: Model.Carrier c.constraints domain =>
+    New.jacobian = calculus.Maps[n := n, m := m].Differential[U := domain, V := Output.whole, f := Translation.map, a := z].value \by {
+      base: \refl(New.jacobian),
+      equality: Model.equality c.constraints domain New.center Old.center centers
+    };
+\module AtZero(zero: bump x = Real.zero) {
+  \import Translation.Fixed[x := Old.center, zero := atZero zero] \as Fixed;
+  \import Calculus.Differential[U := domain, V := Output.whole, f := Translation.map, a := Old.center] \as NewDerivative;
+  \definition equal: New.jacobian = Old.jacobian :=
+    trans!{calculus.Vector[n := n, m := m].LinearMap} _ _ _ newAtOld
+      (calculus.Vector[n := n, m := m].ext NewDerivative.value Old.jacobian
+        (\axiom:funext(NewDerivative.value.apply, Old.jacobian.apply, Fixed.derivative)));
+}
+\module Active(nonzero: Logic.Not (weight x = Real.zero));
+\definition newJacobian: calculus.Vector[n := n, m := m].LinearMap := New.jacobian;
+\definition oldJacobian: calculus.Vector[n := n, m := m].LinearMap := Old.jacobian;

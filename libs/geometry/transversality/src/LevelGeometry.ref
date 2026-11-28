@@ -1,0 +1,8 @@
+\import std.Data[].Nat[].Basic[].Def[] \as Nat;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\import manifolds.Dimension[n := Nat.add m n].Smooth[] \as Source;
+\import manifolds.Dimension[n := m].Smooth[] \as Target;
+\module Between(M: Source.Manifold, T: Target.Manifold);

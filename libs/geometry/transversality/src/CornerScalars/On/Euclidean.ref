@@ -1,0 +1,25 @@
+\import std.Data[].FinSet[] \as Fin;
+\import topology.Topology[Carrier := Real.Real] \as LineSets;
+\import topological_algebra.Euclidean[].Dimension[n := m] \as Target;
+\import Target.Def[] \as Def;
+\import Target.Norm[] \as Norm;
+\import Target.Topology[] \as Geometry;
+\import topology.Topology[Carrier := Target.Point] \as TargetSets;
+\import topology.Continuity[A := M.Point, B := Target.Point] \as MapsToAmbient;
+\import topological_algebra.Coordinates[K := Real.Real, I := Fin.Fin m].Universal[A := M.Point] \as Universal;
+\import calculus.Real[].Multivariable[n := m].Open[] \as Output;
+\import boundary_manifolds.Model[n := m] \as TargetModel;
+\import boundary_manifolds.Dimension[n := m].Quadrant[C := TargetModel.unconstrained, U := Output.whole] \as Euclidean;
+\import boundary_manifolds.Dimension[n := m].Chart[M := Euclidean.Point, space := Euclidean.topology] \as TargetCharts;
+\import boundary_manifolds.SmoothMap[n := n, m := m].Between[M := M, N := Euclidean.manifold] \as Maps;
+\definition FunctionToAmbient: \Set := M.Point -> Target.Point;
+\definition SmoothOn[g: FunctionToAmbient][U: \Pow M.Point]: \Prop :=
+  \forall (i: Fin.Fin m) -> IsSmoothOn (\fun (x: M.Point) => g x i) U;
+\definition SmoothEverywhere[g: FunctionToAmbient]: \Prop := SmoothOn g Space.Whole;
+\module Build(g: FunctionToAmbient, regular: SmoothEverywhere g);
+\module Approximate(f: FunctionToAmbient, continuous: MapsToAmbient.Continuous M.space Geometry.topology f);
+\module Components(f: Maps.Map);
+\module Normalize(f: Maps.Map, bump: Functions.Smooth);
+\module Shift(f: Maps.Map, bump: Functions.Smooth, a: Target.Point);
+\module Relative(f: Maps.Map, bump: Functions.Smooth);
+\module Protect(f: Maps.Map, K, U: \Pow M.Point, closed: Space.IsClosedIn M.space K, open: Space.IsOpenIn M.space U, included: Space.Subset K U);

@@ -1,0 +1,95 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as Real;
+\import Real.Estimates[] \as Estimates;
+\import Real.Distance[] \as Distance;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Order[] \as Order;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import euclidean_measure.Euclidean[n := m] \as E;
+\import topology.Topology[Carrier := A] \as Sets;
+\import topology.Topology[Carrier := E.Point] \as Target;
+\import topology.Maps[A := A, B := E.Point] \as Images;
+\import functional_analysis.Measure[A := E.Point] \as Measure;
+\import Measure.Sigma[] \as Sigma;
+\import Measure.ValueLaws[] \as Values;
+\import euclidean_measure.HeadCut[k := m] \as Cuts;
+\import Fin.Tuples[A := Real.Real] \as Tuples;
+\definition Vector[n: N.Nat^]: \Set := Fin.Fin n -> Real.Real;
+
+\definition Bound[S: \Pow A][b: Real.Real]: \Prop :=
+  \forall (r: Real.Real) -> Measure.below (E.outer (Images.Image f S)) r -> R.Lt r b;
+
+\definition monotone: \forall (S, T: \Pow A)(b: Real.Real) -> Sets.Subset S T -> Bound T b -> Bound S b :=
+  \fun (S, T: \Pow A)(b: Real.Real)(sub: Sets.Subset S T)(bound: Bound T b)(r: Real.Real)(inside: _) =>
+    bound r (E.monotone (Images.Image f S) (Images.Image f T)
+      (\fun (y: E.Point) => Images.imageElim f S y (Target.Member (Images.Image f T) y)
+        (\fun (x: A)(member: Sets.Member S x)(same: f x = y) =>
+          Logic.existsIntro[A, { z: A \where Logic.And[Sets.Member T z, f z = y] }] x (Logic.And[_, _]::# (sub x member) same)))
+      r inside);
+
+\definition split: \forall (S, L, H: \Pow A)(l, h: Real.Real) ->
+  (\forall (x: A) -> Sets.Member S x -> Logic.Or[Sets.Member L x, Sets.Member H x]) -> Bound L l -> Bound H h ->
+  Bound S (Real.add l h) :=
+  \fun (S, L, H: \Pow A)(l, h: Real.Real)(cover: _)(left: Bound L l)(right: Bound H h)(r: Real.Real)(inside: _) =>
+    \idelim Measure.add (Cuts.cut l) (Cuts.cut h) = Cuts.cut (Real.add l h) \with v: Measure.Value => Measure.below v r \by {
+      base: Values.addMono (E.outer (Images.Image f L)) (Cuts.cut l) (E.outer (Images.Image f H)) (Cuts.cut h)
+        left right r
+        (E.subadditivePair (Images.Image f L) (Images.Image f H) r
+          (E.monotone (Images.Image f S) (Sigma.pairUnion (Images.Image f L) (Images.Image f H))
+            (\fun (y: E.Point) => Images.imageElim f S y (Target.Member (Sigma.pairUnion (Images.Image f L) (Images.Image f H)) y)
+              (\fun (x: A)(member: Sets.Member S x)(same: f x = y) =>
+                Logic.orElim _ _ (Target.Member (Sigma.pairUnion (Images.Image f L) (Images.Image f H)) y) (cover x member)
+                  (\fun (insideL: Sets.Member L x) => Logic.Or[_, _]::left
+                    (Logic.existsIntro[A, { z: A \where Logic.And[Sets.Member L z, f z = y] }] x (Logic.And[_, _]::# insideL same)))
+                  (\fun (insideH: Sets.Member H x) => Logic.Or[_, _]::right
+                    (Logic.existsIntro[A, { z: A \where Logic.And[Sets.Member H z, f z = y] }] x (Logic.And[_, _]::# insideH same)))))
+            r inside)),
+      equality: Cuts.cutAdd l h
+    };
+
+\definition Interval[center, radius, x: Real.Real]: \Prop :=
+  Logic.And[R.Le (Real.sub center radius) x, R.Le x (Real.add center radius)];
+
+\definition half[r: Real.Real]: Real.Real := Real.mul Real.half r;
+\definition lower[a, r: Real.Real]: Real.Real := Real.sub a (half r);
+\definition upper[a, r: Real.Real]: Real.Real := Real.add a (half r);
+\module Halves(a, r: Real.Real);
+
+\definition Cube[n: N.Nat^][p: A -> Vector n][S: \Pow A][a: Vector n][r: Real.Real]: \Pow A :=
+  { x: A \where Logic.And[Sets.Member S x, \forall (i: Fin.Fin n) -> Interval (a i) r (p x i)] };
+
+\definition Child[n: N.Nat^][a: Vector n][r: Real.Real][b: Vector n]: \Prop :=
+  \forall (i: Fin.Fin n) -> Logic.Or[b i = lower (a i) r, b i = upper (a i) r];
+
+\definition cost: \forall (n: N.Nat^) -> Real.Real -> Real.Real :=
+  \induction (n: N.Nat^) \return Real.Real -> Real.Real \with {
+    | zero: \fun (r: Real.Real) => r
+    | succ: \fun (n: N.Nat^)(prior: Real.Real -> Real.Real)(r: Real.Real) => Real.add (prior r) (prior r)
+  };
+
+\definition Step[n: N.Nat^]: \Prop := \forall (p: A -> Vector n)(S: \Pow A)(a: Vector n)(r, b: Real.Real) ->
+  (\forall (c: Vector n) -> Child n a r c -> Bound (Cube n p S c (half r)) b) ->
+  Bound (Cube n p S a r) (cost n b);
+
+\module Head(n: N.Nat^, p: A -> Vector (N.Nat^::succ n), S: \Pow A, a: Vector (N.Nat^::succ n), r, b: Real.Real);
+
+\definition subdivide: \forall (n: N.Nat^) -> Step n :=
+  \induction (n: N.Nat^) \return Step n \with {
+    | zero: \fun (p: A -> Vector N.Nat^::zero)(S: \Pow A)(a: Vector N.Nat^::zero)(r, b: Real.Real)(children: _) =>
+      monotone (Cube N.Nat^::zero p S a r) (Cube N.Nat^::zero p S a (half r)) b
+        (\fun (x: A)(inside: Sets.Member (Cube N.Nat^::zero p S a r) x) =>
+          Logic.And[_, _]::# inside.left (\fun (i: Fin.Fin N.Nat^::zero) =>
+            Logic.falseElim _ (Fin.zeroImpossible i (Fin.bound N.Nat^::zero i))))
+        (children a (\fun (i: Fin.Fin N.Nat^::zero) => Logic.falseElim _ (Fin.zeroImpossible i (Fin.bound N.Nat^::zero i))))
+    | succ: \fun (n: N.Nat^)(prior: Step n)(p: A -> Vector (N.Nat^::succ n))(S: \Pow A)
+      (a: Vector (N.Nat^::succ n))(r, b: Real.Real)(children: _) =>
+        Head[n := n, p := p, S := S, a := a, r := r, b := b].step prior children
+  };
+
+\module Iterated;

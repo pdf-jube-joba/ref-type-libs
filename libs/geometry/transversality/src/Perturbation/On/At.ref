@@ -1,0 +1,43 @@
+\import calculus.Translation[n := m] \as Translation;
+\definition offset: Coordinates.Point := Def.negPoint parameter;
+\definition translation: calculus.Maps[n := m, m := m].Map Output.whole Output.whole := Translation.map Output.whole offset;
+\import Maps.Composition[U := U, V := Output.whole, f := f].After[l := m, W := Output.whole, g := translation] \as Composite;
+\definition map: Maps.Map U Output.whole := Composite.compose;
+\import sard.Euclidean[n := n, m := m].On[U := U, V := Output.whole, f := map] \as Perturbed;
+\definition RegularAtZero: \Prop := Perturbed.RegularValue Def.origin;
+
+\definition formula[x: Input.Carrier U]: Maps.apply U Output.whole map x = Def.addPoint offset (Maps.apply U Output.whole f x) :=
+  \refl(Maps.apply U Output.whole map x);
+\definition original[x: Input.Carrier U]: Coordinates.Point := Maps.apply U Output.whole f x;
+\definition shifted[x: Input.Carrier U]: Coordinates.Point := Maps.apply U Output.whole map x;
+\definition originalCoordinate: \forall (x: Input.Carrier U) -> shifted x = Def.origin ->
+  \forall (i: Fin.Fin m) -> original x i = parameter i :=
+  \fun (x: Input.Carrier U)(zero: shifted x = Def.origin)(i: Fin.Fin m) =>
+    Laws.addCancelLeft (Real.neg (parameter i)) (original x i) (parameter i)
+      (trans!{Real.Real} _ _ _
+        (congr!{Coordinates.Point Real.Real} (\fun (p: Coordinates.Point) => p i) _ _ zero)
+        (sym!{Real.Real} _ _ (Laws.addNegLeft (parameter i))));
+\definition originalValue: \forall (x: Input.Carrier U) -> shifted x = Def.origin -> original x = parameter :=
+  \fun (x: Input.Carrier U)(zero: shifted x = Def.origin) => \axiom:funext(original x, parameter, originalCoordinate x zero);
+
+\definition derivative[x: Input.Carrier U][v: calculus.Real[].Multivariable[n := n].Point]:
+  (Perturbed.differential x).apply v = (Original.differential x).apply v := \block {
+  \let chain: Perturbed.differential x = Composite.At[a := x].candidate := Composite.At[a := x].jacobian \then
+  \return trans!{Coordinates.Point} _ _ _
+    (congr!{calculus.Vector[n := n, m := m].LinearMap Coordinates.Point}
+      (\fun (D: calculus.Vector[n := n, m := m].LinearMap) => D.apply v) _ _ chain)
+    (congr!{calculus.Vector[n := m, m := m].LinearMap Coordinates.Point}
+      (\fun (D: calculus.Vector[n := m, m := m].LinearMap) => D.apply ((Original.differential x).apply v)) _ _
+      (Translation.differential Output.whole offset (Maps.apply U Output.whole f x)))
+};
+\definition regular: Original.RegularValue parameter -> RegularAtZero :=
+  \fun (good: Original.RegularValue parameter)(x: Input.Carrier U)(zero: _) (v: Coordinates.Point) => \block {
+    \takefrom u: \Cast[calculus.Real[].Multivariable[n := n].Point]
+      ({ u: calculus.Real[].Multivariable[n := n].Point \where (Original.differential x).apply u = v })
+      \by good x (originalValue x zero) v \then
+    \return Logic.existsIntro[calculus.Real[].Multivariable[n := n].Point,
+      { u: calculus.Real[].Multivariable[n := n].Point \where (Perturbed.differential x).apply u = v }] u
+      (trans!{Coordinates.Point} _ _ _ (derivative x u)
+        (\bysub(calculus.Real[].Multivariable[n := n].Point, { u: calculus.Real[].Multivariable[n := n].Point \where
+          (Original.differential x).apply u = v }, u)))
+  };
