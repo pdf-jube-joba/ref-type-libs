@@ -1,0 +1,13 @@
+\import grassmannians.Real[n := n, k := k].Model[] \as Base;
+\import \root.Stable[].FiniteThom[n := n, k := k, X := Base.Carrier, source := Base.topology,
+  classify := (\fun (p: Base.Carrier) => p), continuous := topology.Maps[A := Base.Carrier, B := Base.Carrier].Identity[].continuous Base.topology] \as Universal;
+\definition Carrier: \Set := Universal.Carrier;
+\definition pointed: algebraic_topology.Pointed[A := Carrier].Space := Universal.pointed;
+\import grassmannian_cells.OrientedReal[n := n, k := k] \as OrientedBase;
+\import \root.Stable[].FiniteThom[n := n, k := k, X := OrientedBase.Carrier, source := OrientedBase.topology,
+  classify := OrientedBase.projection, continuous := OrientedBase.projectionContinuous] \as Oriented;
+\definition OrientedCarrier: \Set := Oriented.Carrier;
+\definition orientedPointed: algebraic_topology.Pointed[A := OrientedCarrier].Space := Oriented.pointed;
+\import Oriented.ToUniversal[] \as Forget;
+\definition forgetOrientation: algebraic_topology.Pointed[A := OrientedCarrier].Maps[B := Carrier].Map[orientedPointed, pointed] :=
+  Forget.map;

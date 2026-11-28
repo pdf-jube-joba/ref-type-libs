@@ -1,0 +1,75 @@
+\import N.Basic[].Prop[] \as Order;
+\import compact_support_cohomology.Directed[Index := N.Nat^, before := Order.Le] \as Directed;
+\definition level[n: N.Nat^]: N.Nat^ := Nat.add startStage n;
+\definition dimension[n: N.Nat^]: N.Nat^ := Nat.add startDimension n;
+\module Stage(n: N.Nat^) {
+  \import \root.Stable[].Sphere[].Classes[n := dimension n, A := T (level n), target := spaces (level n)] \as Classes;
+  \import Classes.Step[B := T (level (N.Nat^::succ n)), range := spaces (level (N.Nat^::succ n)),
+    structureMap := structureMap (level n)] \as Step;
+  \definition Map: \Set := Classes.Map;
+  \definition Class: \Set := Classes.Carrier;
+  \definition Homotopy: _ := Classes.Homotopy;
+  \definition equalOfHomotopic: _ := Classes.equalOfHomotopic;
+  \definition homotopicOfEqual: _ := Classes.homotopicOfEqual;
+  \definition induction: _ := Classes.induction;
+  \definition class: Map -> Class := Classes.class;
+  \definition step: _ := Step.apply;
+  \definition stepMap: _ := Step.map;
+  \definition stepOnClass: _ := Step.onClass;
+  \definition constant: Map := Classes.constant;
+  \definition zero: Class := Classes.zero;
+  \definition zeroLaw: _ := Step.zeroLaw;
+}
+\definition classes[n: N.Nat^]: \Set := Stage[n := n].Class;
+\definition maps[n: N.Nat^]: \Set := Stage[n := n].Map;
+\definition class[n: N.Nat^][f: maps n]: classes n := Stage[n := n].class f;
+\definition step[n: N.Nat^][a: classes n]: classes (N.Nat^::succ n) := Stage[n := n].step a;
+\definition stepMap[n: N.Nat^][f: maps n]: maps (N.Nat^::succ n) := Stage[n := n].stepMap f;
+\definition naturalStep[n: N.Nat^][f: maps n]: class (N.Nat^::succ n) (stepMap n f) = step n (class n f) :=
+  sym!{{classes (N.Nat^::succ n)}} _ _ (Stage[n := n].stepOnClass f);
+\import \root.Stable[].Sequential[Stage := classes, step := step] \as Limit;
+\import \root.Stable[].Sequential[Stage := maps, step := stepMap] \as Raw;
+\import Raw.Natural[Other := classes, otherStep := step, transform := class, naturalStep := naturalStep] \as Quotient;
+
+\definition Carrier: \Set := Limit.Carrier;
+\definition ofStage: _ := Limit.ofStage;
+\definition ofMap[n: N.Nat^][f: maps n]: Carrier := ofStage n (class n f);
+\definition zero: Carrier := ofStage N.Nat^::zero Stage[n := N.Nat^::zero].zero;
+\definition next[n: N.Nat^][f: maps n]: ofMap n f = ofMap (N.Nat^::succ n) (stepMap n f) :=
+  trans!{Carrier} _ _ _ (Limit.next n (class n f))
+    (congr!{{classes (N.Nat^::succ n)} Carrier} (ofStage (N.Nat^::succ n)) _ _ (Stage[n := n].stepOnClass f));
+\definition advanceMap[i, j: N.Nat^][bound: Order.Le i j][f: maps i]: maps j :=
+  Raw.advance i j bound f;
+\definition advanceClass: _ := Quotient.onAdvance;
+
+\structure CommonStage[i, j: N.Nat^, f: maps i, g: maps j]: \Set := {
+  index: N.Nat^,
+  left: Directed.Evidence i index,
+  right: Directed.Evidence j index,
+  homotopy: Stage[n := index].Homotopy[
+    advanceMap i index (Directed.included i index left) f, advanceMap j index (Directed.included j index right) g],
+};
+
+\module Representatives(i, j: N.Nat^, f: maps i, g: maps j);
+\definition induction[P: Carrier -> \Prop]: (\forall (n: N.Nat^)(f: maps n) -> P (ofMap n f)) -> \forall (a: Carrier) -> P a :=
+  \fun (onMap: _) => Limit.induction P
+    (\fun (n: N.Nat^) => Stage[n := n].induction (\fun (a: classes n) => P (ofStage n a)) (onMap n));
+
+\module Descend(Target: \Set, stageMap: \forall (n: N.Nat^) -> classes n -> Target,
+  agreesNext: \forall (n: N.Nat^)(a: classes n) -> stageMap n a = stageMap (N.Nat^::succ n) (step n a)) {
+  \import Limit.Descend[Target := Target, stageMap := stageMap, agreesNext := agreesNext] \as Universal;
+  \definition map: Carrier -> Target := Universal.map;
+  \definition onStage: _ := Universal.onStage;
+  \definition unique: _ := Universal.unique;
+}
+
+\definition zeroAt: \forall (n: N.Nat^) -> ofStage n Stage[n := n].zero = zero :=
+  \induction (n: N.Nat^) \return ofStage n Stage[n := n].zero = zero \with {
+    | zero: \refl(zero)
+    | succ: \fun (n: N.Nat^)(previous: _) => eq_reason_in!{Carrier _
+        "=" _ "by" { congr!{{classes (N.Nat^::succ n)} Carrier} (ofStage (N.Nat^::succ n)) _ _
+          (sym!{{classes (N.Nat^::succ n)}} _ _ Stage[n := n].zeroLaw) }
+        "=" _ "by" { sym!{Carrier} _ _ (Limit.next n Stage[n := n].zero) }
+        "=" _ "by" previous
+      }
+  };

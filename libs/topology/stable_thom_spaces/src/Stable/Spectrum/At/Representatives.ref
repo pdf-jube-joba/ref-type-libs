@@ -1,0 +1,36 @@
+\definition equal[witness: CommonStage[i, j, f, g]]: ofMap i f = ofMap j g := \block {
+  \let k: N.Nat^ := witness.index \then
+  \let left: Order.Le i k := Directed.included i k witness.left \then
+  \let right: Order.Le j k := Directed.included j k witness.right \then
+  \let same: class k (advanceMap i k left f) = class k (advanceMap j k right g) :=
+    \parent.Stage[n := k].equalOfHomotopic _ _
+      (\exact(witness.homotopy, \parent.Stage[n := k].Homotopy[advanceMap i k left f, advanceMap j k right g])) \then
+  \return Limit.agrees i j (class i f) (class j g)
+    (\exact(Limit.Agreement[Limit.representative i (class i f), Limit.representative j (class j g)] {
+      index := k,
+      bounds := Directed.Upper[i, j, k] { left := left, right := right },
+      equal := eq_reason_in!{{classes k} _
+        "=" _ "by" { sym!{{classes k}} _ _ (advanceClass i k left f) }
+        "=" _ "by" same
+        "=" _ "by" { advanceClass j k right g }
+      },
+    }, Limit.Agreement[Limit.representative i (class i f), Limit.representative j (class j g)]))
+};
+\definition common: ofMap i f = ofMap j g -> \exists CommonStage[i, j, f, g] := \block {
+  \fun (same: ofMap i f = ofMap j g) \then
+  \takefrom witness: Limit.Agreement[Limit.representative i (class i f), Limit.representative j (class j g)]
+    \by Limit.agreementOf i j (class i f) (class j g) same \then
+  \let k: N.Nat^ := witness.index \then
+  \let classEqual: class k (advanceMap i k witness.bounds.left f) = class k (advanceMap j k witness.bounds.right g) :=
+    eq_reason_in!{{classes k} _
+      "=" _ "by" { advanceClass i k witness.bounds.left f }
+      "=" _ "by" { witness.equal }
+      "=" _ "by" { sym!{{classes k}} _ _ (advanceClass j k witness.bounds.right g) }
+    } \then
+  \takefrom h: \parent.Stage[n := k].Homotopy[advanceMap i k witness.bounds.left f, advanceMap j k witness.bounds.right g]
+    \by \parent.Stage[n := k].homotopicOfEqual _ _ classEqual \then
+  \return \exact(CommonStage[i, j, f, g] {
+    index := k, left := Directed.evidence i k witness.bounds.left,
+    right := Directed.evidence j k witness.bounds.right, homotopy := h,
+  }, CommonStage[i, j, f, g])
+};

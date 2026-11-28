@@ -1,0 +1,22 @@
+\import N.Basic[].Def[] \as Nat;
+\import std.Arithmetic[].Int[] \as I;
+\module At(startStage, startDimension: N.Nat^);
+\definition firstLevel: I.Int^ -> N.Nat^ :=
+  \induction (z: I.Int^) \return N.Nat^ \with {
+    | ofNat: \fun (_: N.Nat^) => N.Nat^::zero
+    | negSucc: \fun (n: N.Nat^) => N.Nat^::succ n
+  };
+\definition firstDimension: I.Int^ -> N.Nat^ :=
+  \induction (z: I.Int^) \return N.Nat^ \with {
+    | ofNat: \fun (n: N.Nat^) => n
+    | negSucc: \fun (_: N.Nat^) => N.Nat^::zero
+  };
+\module Degree(z: I.Int^) {
+  \import \parent.At[startStage := firstLevel z, startDimension := firstDimension z] \as StableClasses;
+  \definition Carrier: \Set := StableClasses.Carrier;
+  \definition maps: N.Nat^ -> \Set := StableClasses.maps;
+  \definition ofMap: _ := StableClasses.ofMap;
+  \definition zero: Carrier := StableClasses.zero;
+  \definition next: _ := StableClasses.next;
+  \definition induction: _ := StableClasses.induction;
+}

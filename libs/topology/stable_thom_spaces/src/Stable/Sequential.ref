@@ -1,0 +1,104 @@
+\import N.Basic[].Def[] \as Nat;
+\import N.Basic[].Prop[] \as Order;
+\import N.Order[].Prop[] \as Bounds;
+\import Equality.Transport[A := N.Nat^] \as Transport;
+\import compact_support_cohomology.Directed[Index := N.Nat^, before := Order.Le] \as Directed;
+
+\definition order: Directed.Order := Directed.Order { reflexive := Order.leRefl, transitive := Order.leTrans };
+\definition upper[i, j: N.Nat^]: Directed.Upper[i, j, Bounds.commonBound i j] :=
+  Directed.Upper[i, j, Bounds.commonBound i j] { left := Bounds.leftLeCommonBound i j, right := Bounds.rightLeCommonBound i j };
+\definition walk[i: N.Nat^][k: N.Nat^][x: Stage i]: Stage (Nat.add i k) :=
+  (\induction (k: N.Nat^) \return Stage (Nat.add i k) \with {
+    | zero: x
+    | succ: \fun (k: N.Nat^)(previous: Stage (Nat.add i k)) => step (Nat.add i k) previous
+  }) k;
+\definition arrive[i, j, k: N.Nat^][endpoint: Nat.add i k = j][x: Stage i]: Stage j :=
+  Transport.cast Stage (Nat.add i k) j endpoint (walk i k x);
+\definition advance[i, j: N.Nat^][bound: Order.Le i j][x: Stage i]: Stage j :=
+  arrive i j (Nat.sub j i) (Order.addSubOfLe i j bound) x;
+\definition action[i, j: N.Nat^][witness: Directed.Evidence i j][x: Stage i]: Stage j :=
+  advance i j (Directed.included i j witness) x;
+\import Directed.System[Stage := Stage, order := order, join := Bounds.commonBound, upper := upper, action := action] \as System;
+
+\definition lengthOf[i, j, k: N.Nat^][endpoint: Nat.add i k = j]: Nat.sub j i = k :=
+  eq_reason_in!{N.Nat^ _
+    "=" _ "by" { congr!{N.Nat^ N.Nat^} (\fun (m: N.Nat^) => Nat.sub m i) _ _ (sym!{N.Nat^} _ _ endpoint) }
+    "=" _ "by" { congr!{N.Nat^ N.Nat^} (\fun (m: N.Nat^) => Nat.sub m i) _ _ (Order.addComm i k) }
+    "=" _ "by" { Order.subAddCancel i k }
+  };
+\definition advanceOffset[i, j, k: N.Nat^][bound: Order.Le i j][x: Stage i][endpoint: Nat.add i k = j]:
+  advance i j bound x = arrive i j k endpoint x :=
+  (\idelim Nat.sub j i = k \with d: N.Nat^ =>
+    \forall (same: Nat.add i d = j) -> advance i j bound x = arrive i j d same x
+    \by { base: \fun (same: Nat.add i (Nat.sub j i) = j) => \refl(advance i j bound x), equality: lengthOf i j k endpoint }) endpoint;
+\definition identity[i: N.Nat^][x: Stage i]: advance i i (Order.leRefl i) x = x :=
+  trans!{{Stage i}} _ _ _ (advanceOffset i i N.Nat^::zero (Order.leRefl i) x (\refl(i)))
+    (Transport.castRefl Stage i x);
+\definition arriveSuccessor[i, j, k: N.Nat^][endpoint: Nat.add i k = j][x: Stage i]:
+  arrive i (N.Nat^::succ j) (N.Nat^::succ k) (Nat.succCong (Nat.add i k) j endpoint) x =
+    step j (arrive i j k endpoint x) :=
+  trans!{{Stage (N.Nat^::succ j)}} _ _ _
+    (sym!{{Stage (N.Nat^::succ j)}} _ _
+      (Transport.reindex Stage (\fun (m: N.Nat^) => N.Nat^::succ m) (Nat.add i k) j endpoint
+        (step (Nat.add i k) (walk i k x))))
+    (Transport.natural Stage (\fun (m: N.Nat^) => Stage (N.Nat^::succ m)) step (Nat.add i k) j endpoint (walk i k x));
+\definition advanceSuccessor[i, j: N.Nat^][bound: Order.Le i j][x: Stage i]:
+  advance i (N.Nat^::succ j) (Order.leTrans i j (N.Nat^::succ j) bound (Order.leSelfSucc j)) x =
+    step j (advance i j bound x) :=
+  eq_reason_in!{{Stage (N.Nat^::succ j)} _
+    "=" _ "by" { advanceOffset i (N.Nat^::succ j) (N.Nat^::succ (Nat.sub j i))
+      (Order.leTrans i j (N.Nat^::succ j) bound (Order.leSelfSucc j)) x
+      (Nat.succCong (Nat.add i (Nat.sub j i)) j (Order.addSubOfLe i j bound)) }
+    "=" _ "by" { arriveSuccessor i j (Nat.sub j i) (Order.addSubOfLe i j bound) x }
+  };
+\definition oneStep[i: N.Nat^][x: Stage i]: advance i (N.Nat^::succ i) (Order.leSelfSucc i) x = step i x :=
+  trans!{{Stage (N.Nat^::succ i)}} _ _ _
+    (advanceSuccessor i i (Order.leRefl i) x)
+    (congr!{{Stage i} {Stage (N.Nat^::succ i)}} (step i) _ _ (identity i x));
+
+\definition composeFrom[i, j: N.Nat^][ij: Order.Le i j][x: Stage i][d: N.Nat^]:
+  \forall (jk: Order.Le j (Nat.add j d)) ->
+    advance i (Nat.add j d) (Order.leTrans i j (Nat.add j d) ij jk) x =
+      advance j (Nat.add j d) jk (advance i j ij x) :=
+  (\induction (d: N.Nat^) \return \forall (jk: Order.Le j (Nat.add j d)) ->
+    advance i (Nat.add j d) (Order.leTrans i j (Nat.add j d) ij jk) x =
+      advance j (Nat.add j d) jk (advance i j ij x) \with {
+    | zero: \fun (jj: Order.Le j j) => sym!{{Stage j}} _ _ (identity j (advance i j ij x))
+    | succ: \fun (d: N.Nat^)(previous: _)(jk: Order.Le j (N.Nat^::succ (Nat.add j d))) => \block {
+        \let k: N.Nat^ := Nat.add j d \then
+        \let lower: Order.Le j k := Order.leAddRight j d \then
+        \return eq_reason_in!{{Stage (N.Nat^::succ k)} _
+          "=" _ "by" { advanceSuccessor i k (Order.leTrans i j k ij lower) x }
+          "=" _ "by" { congr!{{Stage k} {Stage (N.Nat^::succ k)}} (step k) _ _ (previous lower) }
+          "=" _ "by" { sym!{{Stage (N.Nat^::succ k)}} _ _ (advanceSuccessor j k lower (advance i j ij x)) }
+        }
+      }
+  }) d;
+\definition compose[i, j, k: N.Nat^][ij: Order.Le i j][jk: Order.Le j k][x: Stage i]:
+  advance i k (Order.leTrans i j k ij jk) x = advance j k jk (advance i j ij x) :=
+  (\idelim Nat.add j (Nat.sub k j) = k \with m: N.Nat^ =>
+    \forall (jm: Order.Le j m) -> advance i m (Order.leTrans i j m ij jm) x = advance j m jm (advance i j ij x)
+    \by { base: composeFrom i j ij x (Nat.sub k j), equality: Order.addSubOfLe j k jk }) jk;
+\definition laws: System.Laws := System.Laws { identity := identity, compose := compose };
+\import System.With[laws := laws] \as Limit;
+
+\definition Carrier: \Set := Limit.Carrier;
+\definition Representative: \Set := System.Representative;
+\definition representative: _ := Limit.represent;
+\definition Agreement: _ := System.Agreement;
+\definition ofStage: _ := Limit.ofStage;
+\definition agrees: _ := Limit.agrees;
+\definition agreementOf: _ := Limit.agreementOf;
+\definition compatible: _ := Limit.compatible;
+\definition induction: _ := Limit.induction;
+\definition next[i: N.Nat^][x: Stage i]: ofStage i x = ofStage (N.Nat^::succ i) (step i x) :=
+  trans!{Carrier} _ _ _ (compatible i (N.Nat^::succ i) (Order.leSelfSucc i) x)
+    (congr!{{Stage (N.Nat^::succ i)} Carrier} (ofStage (N.Nat^::succ i)) _ _ (oneStep i x));
+
+\module Descend(Target: \Set, stageMap: \forall (i: N.Nat^) -> Stage i -> Target,
+  agreesNext: \forall (i: N.Nat^)(x: Stage i) -> stageMap i x = stageMap (N.Nat^::succ i) (step i x));
+\module Natural(Other: N.Nat^ -> \Set, otherStep: \forall (n: N.Nat^) -> Other n -> Other (N.Nat^::succ n),
+  transform: \forall (n: N.Nat^) -> Stage n -> Other n,
+  naturalStep: \forall (n: N.Nat^)(x: Stage n) ->
+    transform (N.Nat^::succ n) (step n x) = otherStep n (transform n x));
+\module Tail;

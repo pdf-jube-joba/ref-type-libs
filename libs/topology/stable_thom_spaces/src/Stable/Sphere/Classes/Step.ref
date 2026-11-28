@@ -1,0 +1,29 @@
+\import \root.Stable[].Sphere[].Disk[n := N.Nat^::succ n] \as Higher;
+\import Source.Successor[] \as Model;
+\import \root.Stable[].Suspension[A := Source.Carrier, B := A, source := Source.pointed, target := target] \as Suspend;
+\import puppe_sequences.Puppe[].Suspension[A := Source.Carrier, source := Source.pointed] \as Domain;
+\import puppe_sequences.Puppe[].Suspension[A := A, source := target] \as Codomain;
+\import puppe_sequences.Puppe[].Maps[A := Domain.Carrier, B := Codomain.Carrier,
+  source := Domain.pointed, target := Codomain.pointed] \as SuspendedMaps;
+\import SuspendedMaps.Precompose[C := Higher.Carrier, domain := Higher.pointed, f := Model.forward] \as Precompose;
+\import puppe_sequences.Puppe[].Maps[A := Higher.Carrier, B := Codomain.Carrier,
+  source := Higher.pointed, target := Codomain.pointed] \as Intermediate;
+\import Intermediate.Postcompose[C := B, range := range, f := structureMap] \as Postcompose;
+\import \root.Stable[].Sphere[].Classes[n := N.Nat^::succ n, A := B, target := range] \as Result;
+
+\definition map[f: Map]: Result.Map := Postcompose.map (Precompose.map (Suspend.map f));
+\definition apply[x: Carrier]: Result.Carrier := Postcompose.apply (Precompose.apply (Suspend.apply x));
+\definition onClass[f: Map]: apply (class f) = Result.class (map f) :=
+  eq_reason_in!{Result.Carrier _
+    "=" _ "by" { congr!{SuspendedMaps.Class Result.Carrier} (\fun (c: SuspendedMaps.Class) => Postcompose.apply (Precompose.apply c))
+      _ _ (Suspend.onClass f) }
+    "=" _ "by" { congr!{Intermediate.Class Result.Carrier} Postcompose.apply _ _ (Precompose.onClass (Suspend.map f)) }
+    "=" _ "by" { Postcompose.onClass (Precompose.map (Suspend.map f)) }
+  };
+\definition zeroLaw: apply zero = Result.zero :=
+  eq_reason_in!{Result.Carrier _
+    "=" _ "by" { congr!{SuspendedMaps.Class Result.Carrier} (\fun (c: SuspendedMaps.Class) => Postcompose.apply (Precompose.apply c))
+      _ _ Suspend.zero }
+    "=" _ "by" { congr!{Intermediate.Class Result.Carrier} Postcompose.apply _ _ Precompose.zero }
+    "=" _ "by" Postcompose.zero
+  };

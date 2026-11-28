@@ -1,0 +1,49 @@
+\definition Point: \Set := thom_spaces.Thom[].Unit;
+\definition pointTopology: topology.Topology[Carrier := Point].Topology := topology.Topology[Carrier := Point].Discrete;
+\module Disk(n: N.Nat^) {
+  \import thom_spaces.Thom[].DiskSuspension[X := Point, space := pointTopology, n := n] \as Model;
+  \definition Carrier: \Set := Model.Carrier;
+  \definition pointed: algebraic_topology.Pointed[A := Carrier].Space := Model.pointed;
+  \module Successor {
+    \import Model.Step[].Cylinder[] \as Round;
+    \import \parent.\parent.Disk[n := N.Nat^::succ n] \as Higher;
+    \import puppe_sequences.Puppe[].Suspension[A := Carrier, source := pointed] \as Suspended;
+    \definition homeomorphism: topology.Homeomorphism[A := Higher.Carrier, B := Suspended.Carrier].Homeomorphism[
+      Higher.pointed.topology, Suspended.topology] := Round.suspensionHomeomorphism;
+    \import topology.Homeomorphism[A := Higher.Carrier, B := Suspended.Carrier] \as Homeomorphism;
+    \definition laws: _ := Homeomorphism.laws Higher.pointed.topology Suspended.topology homeomorphism;
+    \definition forward: algebraic_topology.Pointed[A := Higher.Carrier].Maps[B := Suspended.Carrier].Map[Higher.pointed, Suspended.pointed] :=
+      \into[Higher.Carrier -> Suspended.Carrier](homeomorphism.forward, _) \by {
+        algebraic_topology.Pointed[A := Higher.Carrier].Maps[B := Suspended.Carrier].Laws[Higher.pointed, Suspended.pointed, homeomorphism.forward] {
+          continuous := laws.forwardContinuous,
+          pointed := Round.suspensionPointed,
+        }
+      };
+    \definition backward: algebraic_topology.Pointed[A := Suspended.Carrier].Maps[B := Higher.Carrier].Map[Suspended.pointed, Higher.pointed] :=
+      \into[Suspended.Carrier -> Higher.Carrier](homeomorphism.backward, _) \by {
+        algebraic_topology.Pointed[A := Suspended.Carrier].Maps[B := Higher.Carrier].Laws[Suspended.pointed, Higher.pointed, homeomorphism.backward] {
+          continuous := laws.backwardContinuous,
+          pointed := trans!{Higher.Carrier} _ _ _
+            (congr!{Suspended.Carrier Higher.Carrier} homeomorphism.backward _ _ (sym!{Suspended.Carrier} _ _ Round.suspensionPointed))
+            (laws.leftInverse Higher.pointed.basepoint),
+        }
+      };
+  }
+}
+\module Classes(n: N.Nat^, A: \Set, target: algebraic_topology.Pointed[A := A].Space) {
+  \import \parent.Disk[n := n] \as Source;
+  \import puppe_sequences.Puppe[].Maps[A := Source.Carrier, B := A, source := Source.pointed, target := target] \as Maps;
+  \definition Map: \Set := Maps.Map;
+  \definition Carrier: \Set := Maps.Class;
+  \definition class[f: Map]: Carrier := Maps.class f;
+  \definition zero: Carrier := Maps.zero;
+  \definition constant: Map := Maps.constant;
+  \module Step(B: \Set, range: algebraic_topology.Pointed[A := B].Space,
+    structureMap: algebraic_topology.Pointed[A := puppe_sequences.Puppe[].Suspension[A := A, source := target].Carrier]
+      .Maps[B := B].Map[puppe_sequences.Puppe[].Suspension[A := A, source := target].pointed, range]);
+  \definition Homotopy[f, g: Map]: \Set := Maps.Homotopy[f, g];
+  \definition equalOfHomotopic: _ := Maps.equalOfHomotopic;
+  \definition homotopicOfEqual: _ := Maps.homotopicOfEqual;
+  \definition induction: _ := Maps.induction;
+  \module Suspend;
+}

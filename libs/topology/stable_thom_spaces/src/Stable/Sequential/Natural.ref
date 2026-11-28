@@ -1,0 +1,21 @@
+\import \root.Stable[].Sequential[Stage := Other, step := otherStep] \as Destination;
+\definition onWalk[i, d: N.Nat^][x: Stage i]:
+  transform (Nat.add i d) (walk i d x) = Destination.walk i d (transform i x) :=
+  (\induction (d: N.Nat^) \return transform (Nat.add i d) (walk i d x) = Destination.walk i d (transform i x) \with {
+    | zero: \refl(transform i x)
+    | succ: \fun (d: N.Nat^)(previous: _) => eq_reason_in!{{Other (N.Nat^::succ (Nat.add i d))} _
+        "=" _ "by" { naturalStep (Nat.add i d) (walk i d x) }
+        "=" _ "by" { congr!{{Other (Nat.add i d)} {Other (N.Nat^::succ (Nat.add i d))}}
+          (otherStep (Nat.add i d)) _ _ previous }
+      }
+  }) d;
+\definition onAdvance[i, j: N.Nat^][ij: Order.Le i j][x: Stage i]:
+  transform j (advance i j ij x) = Destination.advance i j ij (transform i x) := \block {
+  \let d: N.Nat^ := Nat.sub j i \then
+  \let k: N.Nat^ := Nat.add i d \then
+  \let endpoint: k = j := Order.addSubOfLe i j ij \then
+  \return eq_reason_in!{{Other j} _
+    "=" _ "by" { sym!{{Other j}} _ _ (Transport.natural Stage Other transform k j endpoint (walk i d x)) }
+    "=" _ "by" { congr!{{Other k} {Other j}} (Transport.cast Other k j endpoint) _ _ (onWalk i d x) }
+  }
+};

@@ -1,0 +1,90 @@
+\import algebraic_topology.Cylinder[A := SourceCylinder.Carrier] \as Double;
+\import algebraic_topology.Cylinder[A := Source.Carrier] \as Cylinder;
+\import algebraic_topology.Homotopy[A := Source.Carrier, B := Target.Carrier] \as Homotopy;
+\import algebraic_topology.Suspension[A := B].Reduced[basepoint := target.basepoint] \as ReducedTarget;
+\import algebraic_topology.Collapse[A := TargetCylinder.Carrier, subset := ReducedTarget.Collapsed] \as TargetQuotient;
+
+\definition domain: topology.Topology[Carrier := Double.Carrier].Topology :=
+  Double.topology (SourceCylinder.topology source.topology);
+\definition height[p: Double.Carrier]: I.Carrier := SourceCylinder.time (Double.point p);
+\definition input[p: Double.Carrier]: SourceCylinder.Carrier :=
+  SourceCylinder.at (Double.time p) (SourceCylinder.point (Double.point p));
+\definition lifted[p: Double.Carrier]: TargetCylinder.Carrier := TargetCylinder.at (height p) (h (input p));
+\definition raw[p: Double.Carrier]: Target.Carrier := Target.class (lifted p);
+\definition heightContinuous: topology.Continuity[A := Double.Carrier, B := I.Carrier].Continuous domain I.topology height :=
+  topology.Composition[A := Double.Carrier, B := SourceCylinder.Carrier, C := I.Carrier].composeContinuous
+    domain (SourceCylinder.topology source.topology) I.topology Double.point SourceCylinder.time
+    (Double.pointContinuous (SourceCylinder.topology source.topology)) (SourceCylinder.timeContinuous source.topology);
+\definition inputContinuous: topology.Continuity[A := Double.Carrier, B := SourceCylinder.Carrier].Continuous
+  domain (SourceCylinder.topology source.topology) input :=
+  topological_constructions.Product[A := I.Carrier, B := A].Universal[X := Double.Carrier].pairContinuous
+    domain I.topology source.topology Double.time (\fun (p: Double.Carrier) => SourceCylinder.point (Double.point p))
+    (Double.timeContinuous (SourceCylinder.topology source.topology))
+    (topology.Composition[A := Double.Carrier, B := SourceCylinder.Carrier, C := A].composeContinuous
+      domain (SourceCylinder.topology source.topology) source.topology Double.point SourceCylinder.point
+      (Double.pointContinuous (SourceCylinder.topology source.topology)) (SourceCylinder.pointContinuous source.topology));
+\definition liftedContinuous: topology.Continuity[A := Double.Carrier, B := TargetCylinder.Carrier].Continuous
+  domain (TargetCylinder.topology target.topology) lifted :=
+  topological_constructions.Product[A := I.Carrier, B := B].Universal[X := Double.Carrier].pairContinuous
+    domain I.topology target.topology height (\fun (p: Double.Carrier) => h (input p)) heightContinuous
+    (topology.Composition[A := Double.Carrier, B := SourceCylinder.Carrier, C := B].composeContinuous
+      domain (SourceCylinder.topology source.topology) target.topology input h
+      inputContinuous (Maps.homotopyLaws f g h).homotopy.continuous);
+\definition rawContinuous: topology.Continuity[A := Double.Carrier, B := Target.Carrier].Continuous domain Target.topology raw :=
+  topology.Composition[A := Double.Carrier, B := TargetCylinder.Carrier, C := Target.Carrier].composeContinuous
+    domain (TargetCylinder.topology target.topology) Target.topology lifted Target.class
+    liftedContinuous (TargetQuotient.projectionContinuous (TargetCylinder.topology target.topology));
+
+\definition vanishes[t: I.Carrier][p: SourceCylinder.Carrier][inside: \In[SourceCylinder.Carrier] Reduced.Collapsed p]:
+  raw (Double.at t p) = Target.point :=
+  either!{inside {raw (Double.at t p) = Target.point}
+    {\fun (bottom: SourceCylinder.time p = I.start) => Target.collapsed (lifted (Double.at t p)) (Logic.Or[_, _]::left bottom)}
+    {\fun (other: _) => either!{other {raw (Double.at t p) = Target.point}
+      {\fun (top: SourceCylinder.time p = I.end) => Target.collapsed (lifted (Double.at t p)) (Logic.Or[_, _]::right (Logic.Or[_, _]::left top))}
+      {\fun (line: SourceCylinder.point p = source.basepoint) => Target.collapsed (lifted (Double.at t p))
+        (Logic.Or[_, _]::right (Logic.Or[_, _]::right
+          (trans!{B} _ _ _ (congr!{A B} (\fun (x: A) => h (SourceCylinder.at t x)) _ _ line) (Maps.atBasepoint f g h t))))}
+    }}
+  };
+\import topological_constructions.RelationQuotient[A := SourceCylinder.Carrier, relation := Quotient.Related].Families[
+  X := I.Carrier, C := Target.Carrier, factor := I.topology, source := SourceCylinder.topology source.topology,
+  target := Target.topology, laws := Quotient.equivalence] \as Families;
+\definition respects: Families.Respects raw :=
+  \fun (t: I.Carrier)(p, q: SourceCylinder.Carrier)(related: Quotient.Related p q) =>
+    either!{related {raw (Double.at t p) = raw (Double.at t q)}
+      {\fun (same: p = q) => congr!{SourceCylinder.Carrier Target.Carrier} (\fun (r: SourceCylinder.Carrier) => raw (Double.at t r)) _ _ same}
+      {\fun (both: Logic.And[\In[SourceCylinder.Carrier] Reduced.Collapsed p, \In[SourceCylinder.Carrier] Reduced.Collapsed q]) =>
+        trans!{Target.Carrier} _ _ _ (vanishes t p both.left) (sym!{Target.Carrier} _ _ (vanishes t q both.right))}
+    };
+\definition family: Homotopy.Family := Families.apply raw respects;
+\definition onClass: \forall (t: I.Carrier)(p: SourceCylinder.Carrier) ->
+  family (Cylinder.at t (Source.class p)) = raw (Double.at t p) := Families.onClass raw respects;
+\definition endpoint[t: I.Carrier][k: Maps.Map][at: \forall (x: A) -> h (SourceCylinder.at t x) = k x]:
+  \forall (q: Source.Carrier) -> family (Cylinder.at t q) = map k q :=
+  Quotient.induction (\fun (q: Source.Carrier) => family (Cylinder.at t q) = map k q)
+    (\induction (p: SourceCylinder.Carrier) \return family (Cylinder.at t (Source.class p)) = map k (Source.class p) \with {
+      | pair: \fun (s: I.Carrier)(x: A) => eq_reason_in!{Target.Carrier _
+        "=" _ "by" { onClass t (SourceCylinder.at s x) }
+        "=" _ "by" { congr!{B Target.Carrier} (\fun (y: B) => Target.class (TargetCylinder.at s y)) _ _ (at x) }
+        "=" _ "by" { sym!{Target.Carrier} _ _ (onPoint k s x) }
+      }
+    });
+\definition atPoint[t: I.Carrier]: family (Cylinder.at t Source.point) = Target.point :=
+  trans!{Target.Carrier} _ _ _ (onClass t (SourceCylinder.at I.start source.basepoint))
+    (vanishes t (SourceCylinder.at I.start source.basepoint) (Logic.Or[_, _]::left (\refl(I.start))));
+\definition homotopy: Suspended.Homotopy[map f, map g] :=
+  \into[Homotopy.Family](family, Suspended.Homotopy[map f, map g]) \by {
+    Homotopy.RelativeLaws[Source.topology, Target.topology, Suspended.fixed, map f, map g, family] {
+      homotopy := Homotopy.Laws[Source.topology, Target.topology, map f, map g, family] {
+        continuous := Families.continuous I.compact I.hausdorff raw respects rawContinuous,
+        start := endpoint I.start f (Maps.homotopyLaws f g h).homotopy.start,
+        end := endpoint I.end g (Maps.homotopyLaws f g h).homotopy.end,
+      },
+      fixed := \fun (t: I.Carrier)(q: Source.Carrier)(same: q = Source.point) => eq_reason_in!{Target.Carrier _
+        "=" _ "by" { congr!{Source.Carrier Target.Carrier} (\fun (r: Source.Carrier) => family (Cylinder.at t r)) _ _ same }
+        "=" _ "by" { atPoint t }
+        "=" _ "by" { sym!{Target.Carrier} _ _ (algebraic_topology.Pointed[A := Source.Carrier].Maps[B := Target.Carrier].laws Source.pointed Target.pointed (map f)).pointed }
+        "=" _ "by" { congr!{Source.Carrier Target.Carrier} (map f) _ _ (sym!{Source.Carrier} _ _ same) }
+      },
+    }
+  };

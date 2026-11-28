@@ -1,0 +1,31 @@
+\import grassmannians.Real[n := n, k := k].Model[] \as Base;
+\import Complements.Projection[X := Base.Carrier, n := n, baseSpace := Base.topology, P := Base.projection, regular := Base.regular] \as TargetBundle;
+\import Bundles.Family[X := Base.Carrier, F := TargetBundle.Fiber] \as TargetFamily;
+\import \root.Stable[].FiniteThom[n := n, k := k, X := Base.Carrier, source := Base.topology,
+  classify := (\fun (p: Base.Carrier) => p), continuous := topology.Maps[A := Base.Carrier, B := Base.Carrier].Identity[].continuous Base.topology] \as Universal;
+\definition total[p: Family.Point]: TargetFamily.Point := TargetFamily.include (classify p.base) p.vector;
+\definition totalContinuous: topology.Continuity[A := Family.Point, B := TargetFamily.Point].Continuous
+  Tautological.bundle.totalSpace TargetBundle.bundle.totalSpace total :=
+  TargetBundle.Universal[Y := Family.Point, source := Tautological.bundle.totalSpace].continuous total
+    (topology.Composition[A := Family.Point, B := X, C := Base.Carrier].composeContinuous
+      Tautological.bundle.totalSpace source Base.topology Family.projection classify Tautological.projectionContinuous continuous)
+    Tautological.vectorContinuous;
+\definition disk[p: Disk]: Universal.Disk :=
+  \into[TargetFamily.Point](total p, Universal.closedBall) \by { \bysub(Family.Point, closedBall, p) };
+\definition diskContinuous: topology.Continuity[A := Disk, B := Universal.Disk].Continuous diskTopology Universal.diskTopology disk :=
+  topology.Continuity[A := Disk, B := TargetFamily.Point].Corestriction[S := Universal.closedBall].corestrictContinuous
+    diskTopology TargetBundle.bundle.totalSpace disk
+    (topology.Continuity[A := Family.Point, B := TargetFamily.Point].Restriction[S := closedBall].restrictContinuous
+      Tautological.bundle.totalSpace TargetBundle.bundle.totalSpace total totalContinuous);
+\import Thom.Mapping[B := Universal.Disk, target := Universal.diskTopology, targetSubset := Universal.boundary] \as Map;
+\definition preserves[p: Disk][member: \In[Disk] boundary p]: \In[Universal.Disk] Universal.boundary (disk p) := member;
+\definition apply: Carrier -> Universal.Carrier := Map.apply disk preserves;
+\definition onClass: \forall (p: Disk) -> apply (class p) = Universal.class (disk p) := Map.onClass disk preserves;
+\import algebraic_topology.Pointed[A := Carrier].Maps[B := Universal.Carrier] \as Pointed;
+\definition map: Pointed.Map[pointed, Universal.pointed] :=
+  \into[Carrier -> Universal.Carrier](apply, Pointed.Map[pointed, Universal.pointed]) \by {
+    Pointed.Laws[pointed, Universal.pointed, apply] {
+      continuous := Map.continuous disk preserves diskContinuous,
+      pointed := Map.onPoint disk preserves,
+    }
+  };

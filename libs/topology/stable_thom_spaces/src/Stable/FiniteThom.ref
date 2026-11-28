@@ -1,0 +1,22 @@
+\import real.Analysis[] \as R;
+\import hermitian_frames.Hermitian[] \as Hermitian;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Bundles;
+\import bundle_complements.Complements[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Complements;
+\import bundle_classification.Classification[].RealGeometry[X := X, baseSpace := source].Finite[n := n, k := k, f := classify, continuous := continuous] \as Classifier;
+\import Complements.Projection[X := X, n := n, baseSpace := source, P := Classifier.projection, regular := Classifier.regular] \as Tautological;
+\import Bundles.Family[X := X, F := Tautological.Fiber] \as Family;
+\import algebraic_topology.Euclidean[].Dimension[n := n] \as Euclidean;
+\definition squared[p: Family.Point]: R.Real := Euclidean.normSquared p.vector;
+\definition closedBall: \Pow Family.Point := { p: Family.Point \where dedekind_reals.DedekindReal[].Le (squared p) R.one };
+\import topology.Topology[Carrier := Family.Point].Subspace[S := closedBall] \as DiskSpace;
+\definition Disk: \Set := DiskSpace.CarrierSet;
+\definition diskTopology: topology.Topology[Carrier := Disk].Topology := DiskSpace.topology Tautological.bundle.totalSpace;
+\definition boundary: \Pow Disk := { p: Disk \where squared p = R.one };
+\import thom_spaces.Thom[].Collapse[A := Disk, source := diskTopology, subset := boundary] \as Thom;
+\definition Carrier: \Set := Thom.Carrier;
+\definition pointed: algebraic_topology.Pointed[A := Carrier].Space := Thom.pointed;
+\definition class[p: Disk]: Carrier := Thom.class p;
+\definition collapsed: _ := Thom.collapsed;
+\module ToUniversal;
