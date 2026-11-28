@@ -27,5 +27,13 @@ The following implementations were inspected in addition to the README; completi
 | Embedding and smoothness | [EmbeddingTheorem.theorem](../libs/analysis/euclidean_sobolev/src/Euclidean/EmbeddingTheorem.ref) constructs \(C^r\) representatives of \(H^{r+p}\) when \(2p>n\); [Regularity.smooth](../libs/analysis/euclidean_sobolev/src/Euclidean/Regularity.ref) gives a common smooth representative for elements belonging to all nonnegative orders. |
 | Examples | No standalone Examples module has been confirmed. |
 
-No record confirming successful type checking of the current sources and dependency closure has been found.
+The November 19 inspection did not identify a successful type check of the inspected sources and dependency closure.
 The scope of inspected records is documented in the [roadmap check status](_roadmap.md#progress-and-checks).
+
+### Fourier and weak-derivative comparison
+
+- For every nonnegative integer order, taking the real part of the physical \(L^2\) class of a Fourier element gives a unique real \(W^{k,2}\) class. The construction uses Schwartz density, the Fourier derivative estimate, and convergence against compactly supported tests. Each constructed weak derivative through order `k` has an `L^2` norm bounded by the Fourier Sobolev norm. [Implementation](../libs/analysis/euclidean_sobolev/src/Euclidean/Weak/Approximation.ref)
+- At order zero, the two maps are inverse on real physical classes and preserve the Fourier and \(L^2\) norms. [Implementation](../libs/analysis/euclidean_sobolev/src/Euclidean/Weak/Zero.ref)
+- The positive-order converse and the full comparison for complex weak-derivative classes remain open.
+
+On 2026-11-28, the official CLI v0.1.2 accepted all 40 modules in this package with `python3 scripts/check.py run --package euclidean_sobolev`. The package job checked all 40 modules and the checker reused 1,586 dependency module results. The checker reported zero cache-save failures.
