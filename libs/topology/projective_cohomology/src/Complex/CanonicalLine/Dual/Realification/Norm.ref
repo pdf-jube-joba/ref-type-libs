@@ -1,0 +1,50 @@
+\import \parent.\parent.\parent.Realification[].Norm[] \as Standard;
+\import \parent.\parent.\parent.Hopf[] \as Hopf;
+\import Numbers.Def[] \as C;
+\import Numbers.Prop[] \as ComplexLaws;
+\import std.Data[].FinSet[] \as Fin;
+\import R.FiniteSums[] \as Sums;
+\import linear_algebra.Hermitian[].Over[K := R.Real, field := R.Algebra[].field, scalar := Hermitian.Real[].scalar]
+  .Finite[n := realDimension] \as RealVector;
+\definition conjugate[v: Vector.Vector]: Vector.Vector := \fun (i: Fin.Fin ambient) => C.conj (v i);
+\definition conjugateNorm[v: Vector.Vector]: Vector.squared (conjugate v) = Vector.squared v :=
+  Sums.congruent ambient _ _ (\fun (i: Fin.Fin ambient) => eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (Standard.coordinateNorm (C.conj (v i))) }
+    "=" _ "by" { ComplexLaws.normSqConj (v i) }
+    "=" _ "by" { Standard.coordinateNorm (v i) }
+  });
+\import thom_spaces.Thom[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Disks;
+\import Disks.For[X := Space, F := Line, bundle := Canonical.bundle].With[metric := Canonical.metric] \as Old;
+\import Disks.For[X := Space, F := Fiber, bundle := underlying].With[metric := metric] \as New;
+\definition embedded[p: Original.Point]: fromNative (transform p) = conjugate p.vector :=
+  \axiom:funext(fromNative (transform p), conjugate p.vector, \fun (i: Fin.Fin ambient) => Embedding.riesz p.base p.vector i);
+\definition squared[p: Original.Point]: New.squared (transform p) = Old.squared p :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { RealVector.squaredFormula (coordinates (transform p)) }
+    "=" _ "by" { Standard.vector (fromNative (transform p)) }
+    "=" _ "by" { congr!{{Vector.Vector} {R.Real}} Vector.squared _ _ (embedded p) }
+    "=" _ "by" { conjugateNorm p.vector }
+    "=" _ "by" { sym!{R.Real} _ _ (Hopf.squared (CanonicalUnderlying.backward p)) }
+    "=" _ "by" { sym!{R.Real} _ _ (Standard.squared p) }
+  };
+\import dedekind_reals.DedekindReal[] \as D;
+\definition diskMap[p: Old.DiskBundle]: New.DiskBundle :=
+  \into[Family.Point](transform p, New.ClosedBall) \by {
+    D.leReplaceLeft (Old.squared p) (New.squared (transform p)) R.one (sym!{R.Real} _ _ (squared p))
+      (\bysub(Original.Point, Old.ClosedBall, p))
+  };
+\definition diskContinuous: topology.Continuity[A := Old.DiskBundle, B := New.DiskBundle].Continuous Old.diskTopology New.diskTopology diskMap :=
+  topology.Continuity[A := Old.DiskBundle, B := Family.Point].Corestriction[S := New.ClosedBall].corestrictContinuous
+    Old.diskTopology underlying.totalSpace diskMap
+    (topology.Continuity[A := Original.Point, B := Family.Point].Restriction[S := Old.ClosedBall].restrictContinuous
+      Canonical.bundle.totalSpace underlying.totalSpace transform transformContinuous);
+\definition boundary[p: \Cast[Old.DiskBundle] Old.Boundary]: \In[New.DiskBundle] New.Boundary (diskMap p) :=
+  trans!{R.Real} _ _ _ (squared p) (\bysub(Old.DiskBundle, Old.Boundary, p));
+\import singular_cohomology.Relative[A := Old.DiskBundle, source := Old.diskTopology, subset := Old.Boundary]
+  .Maps[B := New.DiskBundle].Over[target := New.diskTopology, targetSubset := New.Boundary] \as Pairs;
+\definition map: Pairs.Map := \into[Old.DiskBundle -> New.DiskBundle](diskMap, Pairs.Map) \by {
+  Pairs.Laws[diskMap] { continuous := diskContinuous, contained := boundary }
+};
+\import \parent.\parent.\parent.Integral[].Charts[] \as Charts;
+\module Home;

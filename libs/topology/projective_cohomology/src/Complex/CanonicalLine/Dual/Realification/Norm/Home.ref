@@ -1,0 +1,50 @@
+\definition inverse[p: Family.Point]: Original.Point := CanonicalUnderlying.forward (Riesz.backward (Underlying.backward p));
+\definition inverseContinuous: topology.Continuity[A := Family.Point, B := Original.Point].Continuous underlying.totalSpace Canonical.bundle.totalSpace inverse :=
+  topology.Composition[A := Family.Point, B := Bundles.Family[X := Space, F := Line].Point, C := Original.Point].composeContinuous
+    underlying.totalSpace lineBundle.totalSpace Canonical.bundle.totalSpace
+    (\fun (p: Family.Point) => Riesz.backward (Underlying.backward p)) CanonicalUnderlying.forward
+    (topology.Composition[A := Family.Point, B := Bundles.Family[X := Space, F := Fiber].Point, C := Bundles.Family[X := Space, F := Line].Point].composeContinuous
+      underlying.totalSpace bundle.totalSpace lineBundle.totalSpace Underlying.backward Riesz.backward
+      Underlying.backwardContinuous Riesz.Inverse[].continuous)
+    CanonicalUnderlying.forwardContinuous;
+\import Equality.Transport[A := Space] \as Transport;
+\definition left[p: Original.Point]: inverse (transform p) = p :=
+  Original.ext (inverse (transform p)) p (\refl(p.base))
+    (trans!{{Line p.base}} _ _ _ (Transport.castRefl Line p.base (inverse (transform p)).vector)
+      (\parent.\parent.\parent.At[x := p.base].leftInverse p.vector));
+\definition right[p: Family.Point]: transform (inverse p) = p :=
+  Family.ext (transform (inverse p)) p (\refl(p.base))
+    (trans!{{Fiber p.base}} _ _ _ (Transport.castRefl Fiber p.base (transform (inverse p)).vector)
+      (\parent.\parent.\parent.At[x := p.base].rightInverse p.vector));
+\definition inverseSquared[p: Family.Point]: Old.squared (inverse p) = New.squared p :=
+  trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (squared (inverse p)))
+    (congr!{{Family.Point} {R.Real}} New.squared _ _ (right p));
+\definition inverseDisk[p: New.DiskBundle]: Old.DiskBundle :=
+  \into[Original.Point](inverse p, Old.ClosedBall) \by {
+    D.leReplaceLeft (New.squared p) (Old.squared (inverse p)) R.one
+      (sym!{R.Real} _ _ (inverseSquared p)) (\bysub(Family.Point, New.ClosedBall, p))
+  };
+\definition inverseDiskContinuous: topology.Continuity[A := New.DiskBundle, B := Old.DiskBundle].Continuous New.diskTopology Old.diskTopology inverseDisk :=
+  topology.Continuity[A := New.DiskBundle, B := Original.Point].Corestriction[S := Old.ClosedBall].corestrictContinuous
+    New.diskTopology Canonical.bundle.totalSpace inverseDisk
+    (topology.Continuity[A := Family.Point, B := Original.Point].Restriction[S := New.ClosedBall].restrictContinuous
+      underlying.totalSpace Canonical.bundle.totalSpace inverse inverseContinuous);
+\import topology.Homeomorphism[A := Old.DiskBundle, B := New.DiskBundle] \as Home;
+\definition diskHomeomorphism: Home.Homeomorphism[Old.diskTopology, New.diskTopology] :=
+  Home.Homeomorphism[Old.diskTopology, New.diskTopology] {
+    forward := diskMap, backward := inverseDisk, forwardContinuous := diskContinuous, backwardContinuous := inverseDiskContinuous,
+    leftInverse := \fun (p: Old.DiskBundle) => left p, rightInverse := \fun (p: New.DiskBundle) => right p
+  };
+\import singular_cohomology.Relative[A := Old.DiskBundle, source := Old.diskTopology, subset := Old.Boundary]
+  .Homeomorphism[B := New.DiskBundle].Over[target := New.diskTopology, targetSubset := New.Boundary] \as Pairs;
+\definition pair: Pairs.Data := Pairs.Data {
+  homeomorphism := diskHomeomorphism,
+  forwardPreserves := boundary,
+  backwardPreserves := \fun (p: \Cast[New.DiskBundle] New.Boundary) =>
+    trans!{R.Real} _ _ _ (inverseSquared p) (\bysub(New.DiskBundle, New.Boundary, p))
+};
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import cohomology_thom.Thom[].Real[].For[X := Space, F := Line, bundle := Canonical.bundle].With[metric := Canonical.metric] \as OldGeometry;
+\import cohomology_thom.Thom[].Real[].For[X := Space, F := Fiber, bundle := underlying].With[metric := metric] \as NewGeometry;
+\import singular_products.Cochains[A := Space, source := topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
