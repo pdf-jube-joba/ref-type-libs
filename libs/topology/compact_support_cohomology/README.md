@@ -18,6 +18,8 @@ The construction uses all compact subsets and applies in particular to locally c
 | `On.With.Supported.Vanishing` | Characterization of the support predicate by vanishing on the relative subspace |
 | `On.With.Supported.Comparison` | Linear isomorphism from the direct limit to cohomology of the supported cochain complex |
 | `Proper.With.WithCoefficients` | Pull back along a continuous map with compact inverse images of compact sets, with a representative formula |
+| `ProperIdentity.Degree` and `Proper.With.Then.Degree` | Identity and composition laws for proper pullback |
+| `OpenEmbedding.With` | Linear extension by zero along an open embedding presented by a homeomorphism onto its image |
 | `On.Excision.With` | Restriction to an open neighborhood of a compact support is an isomorphism |
 | `On.Open.With.AtSupport` | Excision for an open subspace at a chosen compact support |
 | `On.Open.With.Extension` | Extension by zero using inverse excision, with a representative formula |
@@ -28,6 +30,7 @@ The construction uses all compact subsets and applies in particular to locally c
 | `On.Collar.With.LongExact` | Long exact sequence of a compact collared pair with all terms written in compact-support cohomology |
 | `On.With.Supported.Compact.Cohomology` | Comparison with ordinary cohomology on a compact space |
 | `RealBundle.With.Finite.With` | Disk/sphere-relative, reduced Thom-space, and total-space compact-support comparisons for a real vector bundle over a finite CW complex |
+| `RealBundle.With.CompactBase.Cohomology` | Disk/sphere-relative, reduced Thom-space, and total-space compact-support comparisons over any compact Hausdorff base |
 | `On.Exact.Between.With` | Exactness after taking direct limits of stagewise exact pairs |
 
 For \(K\subseteq L\), the transition is pullback along the identity map of pairs from
@@ -65,7 +68,10 @@ through the open-complement comparison and the ordinary-cohomology
 comparisons on the compact ambient space and its closed boundary. The
 bundle comparison combines the radial homeomorphism from the total space
 to the open disk bundle with the C03 shell deformation and the reduced
-Thom-space comparison.
+Thom-space comparison. For a compact Hausdorff base, a bundle embedding
+into a trivial bundle gives compactness of the disk of an induced metric.
+The comparison of sphere bundles for two metrics and the mapping cylinder
+of the sphere projection give compactness of the disk for the chosen metric.
 
 Run the package check from the repository root.
 

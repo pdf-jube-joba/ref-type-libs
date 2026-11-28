@@ -1,0 +1,29 @@
+\import \root.Proper[A := A, B := A, source := source, target := source] \as Proper;
+\import \root.On[A := A, space := source] \as Source;
+\import topology.Topology[Carrier := A] \as SourceTop;
+\import topology.Maps[A := A, B := A] \as Maps;
+\import singular_cohomology.Identity[A := A, source := source] \as TopIdentity;
+\definition compactPreimage: Proper.Proper TopIdentity.function := \fun (K: \Pow A)(compact: SourceTop.IsCompactIn source K) =>
+  \idelim K = Maps.Preimage TopIdentity.function K \with S: \Pow A => SourceTop.IsCompactIn source S \by {
+    base: compact,
+    equality: \axiom:setext(K, Maps.Preimage TopIdentity.function K,
+      \fun (x: A)(inside: SourceTop.Member K x) => inside,
+      \fun (x: A)(inside: SourceTop.Member K x) => inside)
+  };
+\import Proper.With[f := TopIdentity.function, continuous := TopIdentity.continuous, proper := compactPreimage] \as Pullback;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\module Degree(coefficients: Modules.Bundle, z: I.Int^) {
+  \import Source.With[coefficients := coefficients].Degree[z := z] \as Theory;
+  \import Pullback.WithCoefficients[coefficients := coefficients, z := z] \as Action;
+  \import std.Logic[].Equality[] \as Equality;
+  \use Equality.eq_reason_in;
+  \use Equality.sym;
+  \definition included[K: Source.Support][x: A][inside: SourceTop.Member K x]: SourceTop.Member (Pullback.preimage K) x := inside;
+  \definition law: \forall (x: Theory.Cohomology) -> Action.pullback x = x :=
+    Theory.induction (\fun (x: Theory.Cohomology) => Action.pullback x = x)
+      (\fun (K: Source.Support)(x: Theory.Stage K) => eq_reason_in!{Theory.Cohomology _
+        "=" _ "by" { Action.onSupport K x }
+        "=" _ "by" { sym!{Theory.Cohomology} _ _ (Theory.compatible K (Pullback.preimage K) (included K) x) }});
+}

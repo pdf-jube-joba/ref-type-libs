@@ -1,0 +1,7 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\import topology.Topology[Carrier := B].Subspace[S := image] \as Image;
+\import \root.Homeomorphic[A := A, B := Image.CarrierSet, source := source, target := Image.topology target, h := h] \as Homeomorphism;
+\import \root.On[A := B, space := target].Open[U := image, hausdorff := hausdorff, open := open] \as Open;
+\module With(coefficients: Modules.Bundle, z: I.Int^);

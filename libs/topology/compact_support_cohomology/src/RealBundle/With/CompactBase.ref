@@ -1,0 +1,20 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import bundle_complements.Complements[].Over[K := Real.Real, field := Real.Algebra[].field,
+  conjugation := linear_algebra.Hermitian[].Real[].scalar, scalar := Scalars.scalar] \as Complements;
+\import Complements.For[X := X, F := F, bundle := bundle] \as Complement;
+\module Embedded(embedding: Complement.Embedding);
+\definition diskCompact: DiskSpace.IsCompact Disk.diskTopology := \block {
+  \takefrom embedding: Complement.Embedding \by Complement.embeddingExists compactBase hausdorffBase \then
+  \return Embedded[embedding := embedding].compact
+};
+\definition diskHausdorff: DiskSpace.IsT2 Disk.diskTopology := \block {
+  \takefrom embedding: Complement.Embedding \by Complement.embeddingExists compactBase hausdorffBase \then
+  \return Embedded[embedding := embedding].hausdorff
+};
+\module Cohomology(coefficients: Modules.Bundle, z: I.Int^) {
+  \import \parent.\parent.Compare[diskCompact := diskCompact, diskHausdorff := diskHausdorff].With[coefficients := coefficients, z := z] \as Comparison;
+  \definition diskSphere: _ := Comparison.diskSphere;
+  \definition thomDisk: _ := Comparison.thomDisk;
+  \definition diskSphereTotal: _ := Comparison.diskSphereTotal;
+  \definition thomTotal: _ := Comparison.thomTotal;
+}

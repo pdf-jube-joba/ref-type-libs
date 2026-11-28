@@ -12,3 +12,9 @@
   bundle: vector_bundles.Bundles[].Over[K := real.Analysis[].Real, field := real.Analysis[].Algebra[].field,
     conjugation := linear_algebra.Hermitian[].Real[].scalar, scalar := vector_bundles.Bundles[].Real[].scalar]
     .Family[X := X, F := F].Bundle);
+\module OpenEmbedding(A, B: \Set, source: topology.Topology[Carrier := A].Topology,
+  target: topology.Topology[Carrier := B].Topology, image: \Pow B,
+  hausdorff: topology.Topology[Carrier := B].IsT2 target, open: topology.Topology[Carrier := B].IsOpenIn target image,
+  h: topology.Homeomorphism[A := A, B := \Cast[B] image].Homeomorphism[source,
+    topology.Topology[Carrier := B].Subspace[S := image].topology target]);
+\module ProperIdentity(A: \Set, source: topology.Topology[Carrier := A].Topology);

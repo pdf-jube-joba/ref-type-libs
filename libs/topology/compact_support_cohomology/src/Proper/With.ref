@@ -8,3 +8,6 @@
 
 \module AtSupport(K: Target.Support);
 \module WithCoefficients(coefficients: Modules.Bundle, z: I.Int^);
+\module Then(C: \Set, final: topology.Topology[Carrier := C].Topology, g: B -> C,
+  gContinuous: topology.Continuity[A := B, B := C].Continuous target final g,
+  gProper: \root.Proper[A := B, B := C, source := target, target := final].Proper g);

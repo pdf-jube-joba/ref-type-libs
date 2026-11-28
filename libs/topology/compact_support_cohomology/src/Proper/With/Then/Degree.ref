@@ -1,0 +1,31 @@
+\import First.WithCoefficients[coefficients := coefficients, z := z] \as FirstMap;
+\import Second.WithCoefficients[coefficients := coefficients, z := z] \as SecondMap;
+\import Direct.WithCoefficients[coefficients := coefficients, z := z] \as DirectMap;
+\import Source.With[coefficients := coefficients].Degree[z := z] \as Start;
+\import Target.With[coefficients := coefficients].Degree[z := z] \as Middle;
+\import Final.With[coefficients := coefficients].Degree[z := z] \as End;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\use Equality.sym;
+
+\module AtSupport(K: Final.Support) {
+  \import First.AtSupport[K := Second.preimage K] \as FirstPair;
+  \import Second.AtSupport[K := K] \as SecondPair;
+  \import singular_cohomology.Relative[A := A, source := source, subset := Source.outside (Direct.preimage K)]
+    .Maps[B := B].Over[target := target, targetSubset := Target.outside (Second.preimage K)]
+    .Composition[C := C].Over[final := final, finalSubset := Final.outside K]
+    .On[f := FirstPair.pairMap, g := SecondPair.pairMap].With[coefficients := coefficients] \as Compose;
+  \definition law[x: End.Stage K]:
+    DirectMap.pullback (End.ofSupport K x) = FirstMap.pullback (SecondMap.pullback (End.ofSupport K x)) :=
+    eq_reason_in!{Start.Cohomology _
+      "=" _ "by" { DirectMap.onSupport K x }
+      "=" _ "by" { congr!{{Start.Stage (Direct.preimage K)} Start.Cohomology}
+        (Start.ofSupport (Direct.preimage K)) _ _ (Compose.law z x) }
+      "=" _ "by" { sym!{Start.Cohomology} _ _ (FirstMap.onSupport (Second.preimage K) (SecondPair.Degree[coefficients := coefficients, z := z].apply x)) }
+      "=" _ "by" { congr!{Middle.Cohomology Start.Cohomology} FirstMap.pullback _ _
+        (sym!{Middle.Cohomology} _ _ (SecondMap.onSupport K x)) }};
+}
+\definition composition: \forall (x: End.Cohomology) -> DirectMap.pullback x = FirstMap.pullback (SecondMap.pullback x) :=
+  End.induction (\fun (x: End.Cohomology) => DirectMap.pullback x = FirstMap.pullback (SecondMap.pullback x))
+    (\fun (K: Final.Support) => AtSupport[K := K].law);

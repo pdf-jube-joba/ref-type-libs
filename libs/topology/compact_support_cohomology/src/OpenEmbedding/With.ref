@@ -1,0 +1,10 @@
+\import \root.On[A := A, space := source].With[coefficients := coefficients].Degree[z := z] \as Domain;
+\import \root.On[A := Image.CarrierSet, space := Image.topology target].With[coefficients := coefficients].Degree[z := z] \as Range;
+\import \root.On[A := B, space := target].With[coefficients := coefficients].Degree[z := z] \as Target;
+\import Homeomorphism.With[coefficients := coefficients, z := z].Isomorphism[] \as Transfer;
+\import Open.With[coefficients := coefficients, z := z].Extension[].Linear[] \as Extend;
+\import Modules.Hom[V := Range.Cohomology, W := Target.Cohomology,
+  source := Range.Module[].moduleSpace, target := Target.Module[].moduleSpace]
+  .Composition[U := Domain.Cohomology, domain := Domain.Module[].moduleSpace] \as Compose;
+\definition linear: _ := Compose.compose Extend.map (Transfer.isomorphism).backward;
+\definition extend[x: Domain.Cohomology]: Target.Cohomology := (linear).apply x;

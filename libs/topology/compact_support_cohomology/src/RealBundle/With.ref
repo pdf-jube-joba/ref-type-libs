@@ -16,3 +16,5 @@
 \module Radial;
 \module Compare(diskCompact: DiskSpace.IsCompact Disk.diskTopology, diskHausdorff: DiskSpace.IsT2 Disk.diskTopology);
 \module Finite(complex: algebraic_topology.CW[A := X].FiniteComplex[bundle.baseSpace]);
+\module CompactBase(compactBase: topology.Topology[Carrier := X].IsCompact bundle.baseSpace,
+  hausdorffBase: topology.Topology[Carrier := X].IsT2 bundle.baseSpace);
