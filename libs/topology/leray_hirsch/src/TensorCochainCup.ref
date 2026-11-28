@@ -24,4 +24,8 @@
   \import Hom.Native[P := Total.complex] \as TotalHom;
   \import Double.Coordinates[C := Tensor.complex] \as Coordinates;
   \module At(p, q: N.Nat^);
+  \module Fixed(q: N.Nat^, beta: Right.Carrier q, closed: Right.apply q beta = (Right.space (N.Nat^::succ q)).zero);
+  \module Along(B: Chains.Complex, f: Chains.Map[C := B, D := C].Map) {
+    \module At(p, q: N.Nat^);
+  }
 }

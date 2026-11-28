@@ -123,9 +123,11 @@ the dual tensor total. Evaluation on a free basis identifies the
 cochain complex of one free tensor column with a product of fiber
 cochain complexes and carries a fiber quasi-isomorphism to a
 quasi-isomorphism for the column. The tensor cup differential
-formula for a closed right factor has only the horizontal term, and the
-cohomology comparison at the middle of a short exact sequence follows
-from the five lemma. For a cochain complex in integer degrees, the
+formula for a closed right factor has only the horizontal term.
+Multiplication by that factor therefore defines a map on cohomology.
+The map commutes with pullback along a map of base chain complexes.
+The cohomology comparison at the middle of a short exact sequence
+follows from the five lemma. For a cochain complex in integer degrees, the
 differential twisted by $(-1)^p$ is identified with the untwisted
 differential by multiplication by $(-1)^{p|q|}$ in degree $q$.
 

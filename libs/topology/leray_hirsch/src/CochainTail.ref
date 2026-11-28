@@ -46,6 +46,21 @@
         squareZero := \fun (q: N.Nat^) => C.laws.squareZero (grade q),
       }
     };
+    \definition TailBoundary[q: N.Nat^][x: family.Carrier q]: \Prop :=
+      \In[family.Carrier q] Cochains.At[C := complex, k := q].boundaries.carrier x;
+    \definition FullBoundary[q: N.Nat^][x: family.Carrier q]: \Prop :=
+      \In[family.Carrier q] Cochains.At[C := C, k := grade q].boundaries.carrier x;
+    \definition ToBoundary[q: N.Nat^]: \Prop := \forall (x: family.Carrier q) -> TailBoundary q x -> FullBoundary q x;
+    \definition toBoundary: \forall (q: N.Nat^) -> ToBoundary q :=
+      \induction (q: N.Nat^) \return ToBoundary q \with {
+        | zero: \fun (x: C.family.Carrier cutoff)(same: x = (C.family.space cutoff).zero) =>
+          \idelim (C.family.space cutoff).zero = x \with y: C.family.Carrier cutoff =>
+            FullBoundary N.Nat^::zero y \by {
+              base: Cochains.At[C := C, k := cutoff].boundaryZero cutoff, equality: sym!{{C.family.Carrier cutoff}} _ _ same
+            }
+        | succ: \fun (q: N.Nat^)(prior: ToBoundary q)(x: family.Carrier (N.Nat^::succ q))(h: TailBoundary (N.Nat^::succ q) x) => h
+      };
+    \module At(q: N.Nat^);
     \module Compare(zeros: LowerZero cutoff);
   }
 }

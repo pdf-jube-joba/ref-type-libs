@@ -33,7 +33,8 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `ChainTruncation.Layer.Sequence.Tensor.exact` | Split exact truncation layer after tensoring |
 | `ChainTruncation.Layer.TensorColumn.Model.Coefficients.At.isomorphism` | Cohomology of the reindexed tensor layer with its differential sign accounted for |
 | `ChainTruncation.Layer.Stable.At.isomorphism` | Stabilization of tensor cohomology when the cutoff contains degree $n+1$ |
-| `TensorCochainCup.Of.At.Differential.law` | Tensor cochain differential with a closed right factor |
+| `TensorCochainCup.Of.Fixed.Cohomology.linear` | Tensor cohomology multiplication by a fixed right cocycle |
+| `TensorCochainCup.Of.Along.At.Closed.naturality` | Compatibility of tensor cohomology multiplication with base chain maps |
 | `Projection.Over.MayerVietoris.Shifted.At` | Exact products of the shifted base terms |
 | `Trivial.Over.Degree.law` | Agreement with relative external cup on a product bundle |
 

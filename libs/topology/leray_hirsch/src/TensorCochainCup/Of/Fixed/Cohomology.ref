@@ -1,0 +1,14 @@
+\import Cochains.At[C := Left.complex, k := p] \as Source;
+\import Cochains.At[C := target, k := p] \as TruncatedTarget;
+\import Cochains.At[C := TotalHom.complex, k := Tail.grade p] \as Target;
+\import Maps.At[k := p] \as Action;
+\import Tail.At[q := p] \as Include;
+\import Modules.Hom[V := TruncatedTarget.Cohomology, W := Target.Cohomology,
+  source := TruncatedTarget.cohomologySpace, target := Target.cohomologySpace]
+  .Composition[U := Source.Cohomology, domain := Source.cohomologySpace] \as Compose;
+\definition linear: _ := Compose.compose Include.forward (Action.induced map);
+\definition onClass: \forall (x: Source.CycleCarrier) ->
+  linear.apply (Source.classOf x) = Target.classOf ((Action.cyclesMap map).apply x) :=
+  \fun (x: Source.CycleCarrier) => trans!{Target.Cohomology} _ _ _
+    (congr!{TruncatedTarget.Cohomology Target.Cohomology} Include.forward.apply _ _ (Action.onClass map x))
+    (Include.forwardOnClass ((Action.cyclesMap map).apply x));

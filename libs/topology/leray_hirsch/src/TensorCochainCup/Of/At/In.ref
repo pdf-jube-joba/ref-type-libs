@@ -1,0 +1,6 @@
+\import Coordinates.Degree[n := k] \as Current;
+\definition position: Double.Index k := Coordinates.diagonal k p q equal;
+\import IntegerModules.Hom[V := Term.Carrier, W := K, source := Term.space, target := integerCoefficients.space]
+  .Composition[U := Total.Carrier k, domain := Total.space k] \as Compose;
+\definition evaluation[alpha: Left.Carrier p][beta: Right.Carrier q]: TotalHom.Carrier k :=
+  Compose.compose (map alpha beta) Current.At[i := position].map;

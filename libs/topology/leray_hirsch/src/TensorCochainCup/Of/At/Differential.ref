@@ -25,3 +25,16 @@
           }) }
     "=" _ "by" { Scalars.zeroRight ((Upper.map (Left.apply p alpha) beta).apply (NextCoordinates.coordinate Position.horizontalIndex x)) }
   };
+
+\import N.Basic[].Prop[] \as Arithmetic;
+\definition upperDegree: N.Nat^ := N.Nat^::succ n;
+\definition degreeLaw: Upper.n = upperDegree := Arithmetic.addSuccLeft p q;
+\import Upper.In[k := upperDegree, equal := degreeLaw] \as Regraded;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Regrade;
+\definition rightClosed[closed: Vertical[].cycle]:
+  TotalHom.apply n (total alpha beta) = Regrade.cast TotalHom.Carrier Upper.n upperDegree degreeLaw (Upper.total (Left.apply p alpha) beta) :=
+  trans!{{TotalHom.Carrier upperDegree}} _ _ _
+    (TotalHom.At[n := upperDegree].ext (TotalHom.apply n (total alpha beta)) (Regraded.evaluation (Left.apply p alpha) beta)
+      (\fun (x: Total.Carrier upperDegree) => law closed x))
+    (sym!{{TotalHom.Carrier upperDegree}} _ _
+      (Upper.onDegree upperDegree degreeLaw (Left.apply p alpha) beta));
