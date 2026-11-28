@@ -31,3 +31,20 @@
   forwardPreserves := \fun (e: TotalPair.SubspaceCarrier) => \bysub(E, preimage U, e),
   backwardPreserves := \fun (x: TargetTotal.SubspaceCarrier) => \bysub(Whole.TotalCarrier, Whole.totalPart, x),
 };
+
+\import \root.PairHomeomorphism[A := X, B := Whole.BaseCarrier, source := base, target := Whole.baseTopology,
+  part := U, boundary := Whole.basePart, K := K, ring := ring, data := baseData] \as BaseIso;
+\import \root.PairHomeomorphism[A := E, B := Whole.TotalCarrier, source := total, target := Whole.totalTopology,
+  part := preimage U, boundary := Whole.totalPart, K := K, ring := ring, data := totalData] \as TotalIso;
+\import \root.Projection[X := Whole.BaseCarrier, E := Whole.TotalCarrier, base := Whole.baseTopology, total := Whole.totalTopology,
+  projection := Whole.project, continuous := Whole.regular].Over[U := Whole.basePart, K := K, ring := ring] \as Previous;
+\definition baseMap: _ := BaseMaps.forwardMap baseData;
+\definition totalMap: _ := TotalMaps.forwardMap totalData;
+\definition square: \forall (e: E) -> Whole.project (totalMap e) = baseMap (projection e) :=
+  \fun (e: E) => \refl(Whole.project (totalMap e));
+\import Previous.Along[Y := X, Z := E, newBase := base, newTotal := total, newPart := U, newProjection := projection,
+  newContinuous := continuous, baseMap := baseMap, totalMap := totalMap, square := square] \as Along;
+\import \root.AbsoluteHomeomorphism[A := E, B := Whole.TotalCarrier, source := total, target := Whole.totalTopology, K := K, ring := ring,
+  homeomorphism := totalHomeomorphism] \as Absolute;
+\import std.Data[].FinSet[] \as Finite;
+\module With(count: N.Nat^, degree: Finite.Fin count -> N.Nat^, classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

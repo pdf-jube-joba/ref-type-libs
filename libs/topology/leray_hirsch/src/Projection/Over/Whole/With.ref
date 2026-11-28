@@ -1,0 +1,34 @@
+\definition Index: \Set := Finite.Fin count;
+\import Whole.Comparison[count := count, degree := degree, classes := classes] \as Restricted;
+\import Along.FiniteComparison[count := count, degree := degree, classes := Restricted.localClasses] \as Natural;
+\import \parent.\parent.Comparison[count := count].With[degree := degree, classes := classes] \as Goal;
+\import \parent.\parent.Comparison[count := count].With[degree := degree, classes := Natural.newClasses] \as Transported;
+\definition matching: \forall (i: Index) -> Natural.newClasses i = classes i :=
+  \fun (i: Index) => Absolute.At[n := degree i].rightInverse (classes i);
+\module At(z: I.Int^) {
+  \import Goal.At[z := z] \as Result;
+  \import Result.ProductCoordinates[] \as Terms;
+  \import Transported.At[z := z].ProductCoordinates[] \as Output;
+  \import Previous.Comparison[count := count].With[degree := degree, classes := Restricted.localClasses].At[z := z] \as Input;
+  \import Input.ProductCoordinates[] \as Source;
+  \import Natural.At[z := z].Transfer[] \as Transport;
+  \definition baseIsos[i: Index]: _ := BaseIso.At[z := Input.inputDegree i].isomorphism;
+  \definition totalIso: _ := TotalIso.At[z := z].isomorphism;
+  \definition baseLaw: \forall (i: Index)(a: Input.family.Carrier i) ->
+    (baseIsos i).forward.apply a = (Along.baseRestriction (Input.inputDegree i)).apply a :=
+    \fun (i: Index)(a: Input.family.Carrier i) => \refl((Along.baseRestriction (Input.inputDegree i)).apply a);
+  \definition totalLaw: \forall (a: Source.range.Carrier) -> totalIso.forward.apply a = (Along.totalRestriction z).apply a :=
+    \fun (a: Source.range.Carrier) => \refl((Along.totalRestriction z).apply a);
+  \import Transport.Given[baseIsos := baseIsos, totalIso := totalIso, baseLaw := baseLaw, totalLaw := totalLaw] \as Equivalent;
+  \definition localIso[h: Restricted.Isomorphisms]: _ :=
+    Restricted.At[z := z].isomorphism (h.injective z) (h.onto z);
+  \definition localLaw[h: Restricted.Isomorphisms]: \forall (v: Source.domain.Carrier) -> (localIso h).forward.apply v = Source.finite.apply v :=
+    \fun (v: Source.domain.Carrier) => \refl(Source.finite.apply v);
+  \definition transported[h: Restricted.Isomorphisms]: _ := Equivalent.With[iso := localIso h, law := localLaw h].comparison;
+  \import Output.Agree[other := classes, equal := matching] \as Agree;
+  \definition product[h: Restricted.Isomorphisms]: _ :=
+    Agree.isomorphism (transported h) (\fun (v: Output.domain.Carrier) => \refl(Output.finite.apply v));
+  \definition law[h: Restricted.Isomorphisms]: \forall (v: Terms.domain.Carrier) -> (product h).forward.apply v = Terms.finite.apply v :=
+    \fun (v: Terms.domain.Carrier) => \refl(Terms.finite.apply v);
+  \definition isomorphism[h: Restricted.Isomorphisms]: _ := Terms.With[iso := product h, law := law h].isomorphism;
+}
