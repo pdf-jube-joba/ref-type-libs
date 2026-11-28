@@ -10,6 +10,7 @@ Compactly supported top forms are integrated in Euclidean coordinates by taking 
 | Euclidean.Decomposition | Decompose a compactly supported coefficient over an open cover and compare finite sums of the piece integrals |
 | Atlas.On.Orientation | Specify an oriented chart cover |
 | Atlas.On.Compact.Compare.independent | Compare two oriented coordinate integrals for a global form supported in their overlap |
+| Flat.Of.stokes | Integrate the exterior derivative of a compactly supported form of degree (n) on (mathbb R^{n+1}) |
 | Interval.On.Exact.stokes | Integrate the exterior derivative of a smooth function on a closed interval with its increasing orientation |
 | Interval.On.Simplex.stokes | Integrate pullbacks along smooth singular paths into a Euclidean open set and compare with the signed endpoint coboundary |
 | Collar.On.With.Of.At | Compute the outward-first contraction along the actual boundary inclusion from a G04 collar and prove the sign of its normal coefficient |

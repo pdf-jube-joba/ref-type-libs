@@ -1,0 +1,36 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\import real.Analysis[] \as Real;
+\import Real.FiniteSums[] \as Sums;
+\import functional_analysis.Measure[A := A].Integral[mu := mu] \as Integral;
+\import Integral.Linear[] \as Linear;
+\import Integral.Zero[] \as Zero;
+\definition representative: \forall (n: N.Nat^) -> (Fin.Fin n -> Integral.Representatives) -> Integral.Representatives :=
+  \induction (n: N.Nat^) \return (Fin.Fin n -> Integral.Representatives) -> Integral.Representatives \with {
+    | zero: \fun (f: Fin.Fin N.Nat^::zero -> Integral.Representatives) => Zero.representative
+    | succ: \fun (n: N.Nat^)(tail: (Fin.Fin n -> Integral.Representatives) -> Integral.Representatives)
+        (f: Fin.Fin (N.Nat^::succ n) -> Integral.Representatives) =>
+      Linear.addRepresentative (f (Fin.zero n)) (tail (\fun (i: Fin.Fin n) => f (Fin.succ n i)))
+  };
+\definition pointwise: \forall (n: N.Nat^)(f: Fin.Fin n -> Integral.Representatives)(x: A) ->
+  representative n f x = Sums.sum n (\fun (i: Fin.Fin n) => f i x) :=
+  \induction (n: N.Nat^) \return \forall (f: Fin.Fin n -> Integral.Representatives)(x: A) ->
+    representative n f x = Sums.sum n (\fun (i: Fin.Fin n) => f i x) \with {
+    | zero: \fun (f: Fin.Fin N.Nat^::zero -> Integral.Representatives)(x: A) => \refl(Real.zero)
+    | succ: \fun (n: N.Nat^)(prev: _)(f: Fin.Fin (N.Nat^::succ n) -> Integral.Representatives)(x: A) =>
+      congr!{Real.Real Real.Real} (Real.add (f (Fin.zero n) x)) _ _ (prev (\fun (i: Fin.Fin n) => f (Fin.succ n i)) x)
+  };
+\definition integral: \forall (n: N.Nat^)(f: Fin.Fin n -> Integral.Representatives) ->
+  Integral.integral (representative n f) = Sums.sum n (\fun (i: Fin.Fin n) => Integral.integral (f i)) :=
+  \induction (n: N.Nat^) \return \forall (f: Fin.Fin n -> Integral.Representatives) ->
+    Integral.integral (representative n f) = Sums.sum n (\fun (i: Fin.Fin n) => Integral.integral (f i)) \with {
+    | zero: \fun (f: Fin.Fin N.Nat^::zero -> Integral.Representatives) => Zero.integralZero
+    | succ: \fun (n: N.Nat^)(prev: _)(f: Fin.Fin (N.Nat^::succ n) -> Integral.Representatives) =>
+      trans!{Real.Real} _ _ _
+        (Linear.integralAdd (f (Fin.zero n)) (representative n (\fun (i: Fin.Fin n) => f (Fin.succ n i))))
+        (congr!{Real.Real Real.Real} (Real.add (Integral.integral (f (Fin.zero n)))) _ _
+          (prev (\fun (i: Fin.Fin n) => f (Fin.succ n i))))
+  };

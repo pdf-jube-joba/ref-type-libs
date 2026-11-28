@@ -1,0 +1,71 @@
+\import \root.Euclidean[n := dimension].Chart[U := Open.whole] \as Chart;
+\import euclidean_measure.Euclidean[n := dimension].MeasureConstruction[] \as Lebesgue;
+\import functional_analysis.Measure[A := Change.Point].Integral[mu := Lebesgue.measure] \as Integral;
+\import lp_spaces.On[A := Change.Point, mu := Lebesgue.measure].One[].Norm[] \as IntegralEquality;
+\import \root.FiniteIntegral[A := Change.Point, mu := Lebesgue.measure] \as Finite;
+\definition closed: Sets.IsClosedIn Ambient.topology K :=
+  Sets.Compactness[].compactClosed Ambient.topology Ambient.hausdorff K compact;
+\definition coefficient[i: Fin.Fin dimension][x: Change.Point]: Real.Real := Top.coefficient (wedged i omega) (Whole.point x);
+\definition coefficientZero[i: Fin.Fin dimension][x: Change.Point]: Logic.Not (Sets.Member K x) -> coefficient i x = Real.zero :=
+  \fun (outside: _) => congr!{{Forms.Form dimension} Real.Real}
+    (\fun (u: Forms.Form dimension) => u Basis.basisArguments) _ _ (wedgedZeroAt i omega (Whole.point x) (vanishes x outside));
+\definition within[i: Fin.Fin dimension]: Sets.Subset (Smooth.support (coefficient i)) K :=
+  Support.supportWithinClosed Ambient.topology (coefficient i) K closed (coefficientZero i);
+\definition primitive[i: Fin.Fin dimension]: CompactFunctions.SmoothCompact :=
+  \into[CompactFunctions.Function](coefficient i, CompactFunctions.SmoothCompact) \by {
+    CompactFunctions.SmoothCompactLaws[coefficient i] {
+      smooth := \bysub(Open.ScalarFunction Open.whole, Open.Smooth[].SmoothFunction Open.whole, Top.coefficient (wedged i omega)),
+      compact := Support.compactSupportWithin Ambient.topology (coefficient i) K compact (within i),
+    }
+  };
+\definition termValue[i: Fin.Fin dimension][x: Change.Point]:
+  Top.coefficient (D.term i omega) (Whole.point x) = Compact.partial (primitive i) i x :=
+  trans!{Real.Real} _ _ _
+    (congr!{{Local.Form dimension} Real.Real} (\fun (u: Local.Form dimension) => Top.coefficient u (Whole.point x)) _ _
+      (sym!{{Local.Form dimension}} _ _ (partialWedge i omega)))
+    (congr!{{Open.Smooth[].SmoothFunction Open.whole} Real.Real}
+      (\fun (f: Open.Smooth[].SmoothFunction Open.whole) => f (Whole.point x)) _ _
+      (Partial.evaluation i (wedged i omega) Basis.basisArguments));
+\definition exactCoefficient[x: Change.Point]: Real.Real := Top.coefficient (D.apply omega) (Whole.point x);
+\definition coefficientSum[x: Change.Point]: exactCoefficient x = Sums.sum dimension (\fun (i: Fin.Fin dimension) => Compact.partial (primitive i) i x) :=
+  eq_reason_in!{Real.Real _
+    "=" { Spaces.Sums[I := Fin.Fin dimension].sum (Fin.elements dimension) (\fun (i: Fin.Fin dimension) => Top.coefficient (D.term i omega) (Whole.point x)) } "by" {
+      Evaluation.evaluateSum (Fin.elements dimension) (\fun (i: Fin.Fin dimension) => D.term i omega) (Whole.point x) Basis.basisArguments }
+    "=" { Sums.sum dimension (\fun (i: Fin.Fin dimension) => Top.coefficient (D.term i omega) (Whole.point x)) } "by" {
+      Enumeration.sumLaw dimension (\fun (i: Fin.Fin dimension) => Top.coefficient (D.term i omega) (Whole.point x)) }
+    "=" _ "by" { Sums.congruent dimension (\fun (i: Fin.Fin dimension) => Top.coefficient (D.term i omega) (Whole.point x))
+      (\fun (i: Fin.Fin dimension) => Compact.partial (primitive i) i x) (\fun (i: Fin.Fin dimension) => termValue i x) }
+  };
+\definition exactZero[x: Change.Point]: Logic.Not (Sets.Member K x) -> exactCoefficient x = Real.zero :=
+  \fun (outside: _) => trans!{Real.Real} _ _ _ (coefficientSum x)
+    (trans!{Real.Real} _ _ _
+      (Sums.congruent dimension (\fun (i: Fin.Fin dimension) => Compact.partial (primitive i) i x)
+        (\fun (i: Fin.Fin dimension) => Real.zero) (\fun (i: Fin.Fin dimension) => CompactOperations.Partial[f := primitive i, i := i].outside x
+        (\fun (member: _) => outside (within i x member))))
+      (Sums.zeroSum dimension));
+\definition exact: CompactFunctions.SmoothCompact := \into[CompactFunctions.Function](exactCoefficient, CompactFunctions.SmoothCompact) \by {
+  CompactFunctions.SmoothCompactLaws[exactCoefficient] {
+    smooth := \bysub(Open.ScalarFunction Open.whole, Open.Smooth[].SmoothFunction Open.whole, Top.coefficient (D.apply omega)),
+    compact := Support.compactSupportWithin Ambient.topology exactCoefficient K compact
+      (Support.supportWithinClosed Ambient.topology exactCoefficient K closed exactZero),
+  }
+};
+\definition wholeSupport: Sets.Subset (Smooth.support exact) Open.whole.points :=
+  \fun (x: Change.Point)(member: _) => \refl(x);
+\definition agreement[x: Open.Carrier Open.whole]: Top.coefficient (D.apply omega) x = exact x :=
+  \refl(Top.coefficient (D.apply omega) x);
+\import Chart.Represented[omega := D.apply omega, f := exact, within := wholeSupport, agrees := agreement] \as Representation;
+\definition support: Chart.Supported (D.apply omega) := Representation.support;
+\definition stokes: Chart.integral (D.apply omega) support = Real.zero :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { Representation.integralLaw support }
+    "=" _ "by" { IntegralEquality.integralPointwise (Compact.representative exact)
+      (Finite.representative dimension (\fun (i: Fin.Fin dimension) => Compact.representative (Compact.partial (primitive i) i)))
+      (\fun (x: Change.Point) => trans!{Real.Real} _ _ _ (coefficientSum x)
+        (sym!{Real.Real} _ _ (Finite.pointwise dimension (\fun (i: Fin.Fin dimension) => Compact.representative (Compact.partial (primitive i) i)) x))) }
+    "=" _ "by" { Finite.integral dimension (\fun (i: Fin.Fin dimension) => Compact.representative (Compact.partial (primitive i) i)) }
+    "=" {Sums.sum dimension (\fun (i: Fin.Fin dimension) => Real.zero)} "by" {
+      Sums.congruent dimension (\fun (i: Fin.Fin dimension) => Integral.integral (Compact.representative (Compact.partial (primitive i) i)))
+        (\fun (i: Fin.Fin dimension) => Real.zero) (\fun (i: Fin.Fin dimension) => Compact.integralDerivative (primitive i) i) }
+    "=" _ "by" { Sums.zeroSum dimension }
+  };
