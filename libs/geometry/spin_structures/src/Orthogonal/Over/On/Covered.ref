@@ -1,0 +1,6 @@
+\import Base.OnCover[I := I, cover := cover] \as Cover;
+\import \root.Orthogonal[r := r].Plots[n := n] \as Plots;
+\import Cover.SmoothPrincipal[G := E.SO, group := E.specialOrthogonalGroup, Regular := Plots.Orthogonal] \as Frames;
+\import Cover.SmoothPrincipal[G := E.Spin, group := E.spinGroup, Regular := Plots.Spin] \as SpinBundles;
+\import Cover.SmoothPrincipal[G := E.SpinC, group := E.spinCGroup, Regular := Plots.SpinC] \as SpinCBundles;
+\module Of(frameBundle: Frames.Bundle);

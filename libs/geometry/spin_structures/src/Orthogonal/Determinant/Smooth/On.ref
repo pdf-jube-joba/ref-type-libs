@@ -1,0 +1,9 @@
+\import ComplexGeometry.Plots[d := n].Square[U := U, f := f, regular := regular] \as Square;
+\import smooth_bundles.ComplexCalculus[n := n].On[U := U] \as SmoothComplex;
+\definition phaseSmooth: SmoothComplex.Smooth (\fun (x: Open.Carrier U) => character (f x)) :=
+  SmoothComplex.SmoothLaws[\fun (x: Open.Carrier U) => character (f x)] {
+    real := Square.realSmooth, imaginary := Square.imaginarySmooth,
+  };
+\definition value: smooth_bundles.ComplexLinear[r := N.Nat^::succ N.Nat^::zero].Smooth[d := n].Regular U (\fun (x: Open.Carrier U) => action (f x)) :=
+  \fun (v: Line.Vector)(a: Fin.Fin (N.Nat^::succ N.Nat^::zero)) =>
+    SmoothComplex.times (\fun (x: Open.Carrier U) => character (f x)) (\fun (x: Open.Carrier U) => v a) phaseSmooth (SmoothComplex.constant (v a));

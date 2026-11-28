@@ -1,0 +1,3 @@
+\import \root.Orthogonal[r := rank].Over[n := n].On[M := M].Covered[I := I, cover := cover].Of[frameBundle := frameBundle] \as Structures;
+\module SpinBundle(lift: Structures.SpinStructure);
+\module SpinCBundle(lift: Structures.SpinCStructure);

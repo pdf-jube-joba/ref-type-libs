@@ -1,0 +1,74 @@
+\import lie_groups.Euclidean[n := r] \as E;
+\import E.PinRepresentation[] \as PinAction;
+\import E.Orientation[] \as Orientation;
+\import clifford.Field[K := real.Analysis[].Real, field := real.Analysis[].Algebra[].field].On[V := E.Vector, space := E.space].Of[form := E.form].Pin[] \as Pins;
+\import spinor_representations.Orientation[].Dimension[d := r].Even[] \as Parity;
+\import lie_groups.Classical[].On[V := E.Vector, space := E.space].Orthogonal[form := E.form].Special[n := r] \as Special;
+\import algebra.Hom[A := E.Spin, B := E.SO] \as SpinHom;
+\definition spin[g: E.Spin]: E.SO := \into[E.O](PinAction.spinMap g, Special.subset) \by {
+  (Orientation.preservesIff (PinAction.spinMap g)).rtl (Parity.determinant g)
+};
+\definition spinUnit: spin E.spinGroup.unit = E.specialOrthogonalGroup.unit := PinAction.atOne;
+\definition spinProduct: \forall (g, h: E.Spin) -> spin (E.spinGroup.op g h) = E.specialOrthogonalGroup.op (spin g) (spin h) :=
+  \fun (g, h: E.Spin) => PinAction.multiplication (Pins.inclusion g) (Pins.inclusion h);
+\definition spinProjection: SpinHom.GroupMap E.spinGroup E.specialOrthogonalGroup :=
+  \into[E.Spin -> E.SO](spin, SpinHom.GroupMap E.spinGroup E.specialOrthogonalGroup) \by {
+    SpinHom.MonoidLaws[_, _, spin] {
+      unit := spinUnit,
+      operation := spinProduct,
+    }
+  };
+\import Parity.Surjectivity[] \as Onto;
+\definition spinSurjective: \forall (g: E.SO) -> \exists Onto.Lift g := Onto.exists;
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import clifford.Circle[] \as Circle;
+\import clifford.ComplexExtension[G := E.Spin, group := E.spinGroup].By[sign := Pins.spinInvolution] \as Extension;
+\definition baseValue[g: E.Spin][z: Circle.Circle]: E.SO := spin g;
+\definition baseInvariant: \forall (g: E.Spin)(z: Circle.Circle) ->
+  baseValue (E.spinGroup.op Pins.spinSign g) (Circle.product Circle.minusOne z) = baseValue g z :=
+  \fun (g: E.Spin)(z: Circle.Circle) => eq_reason_in!{{E.O} _
+    "=" _ "by" { PinAction.multiplication Pins.sign (Pins.inclusion g) }
+    "=" _ "by" { congr!{{E.O} {E.O}} (\fun (q: E.O) => E.orthogonalGroup.op q (spin g)) _ _ PinAction.atSign }
+    "=" _ "by" { E.orthogonalGroup.monoid.leftIdentity (spin g) }
+  };
+\import Extension.Lift[B := E.SO, values := baseValue, invariant := baseInvariant] \as ComplexProjection;
+\definition spinC: E.SpinC -> E.SO := ComplexProjection.map;
+\definition spinCOnClass: \forall (g: E.Spin)(z: Circle.Circle) -> spinC (Extension.class g z) = spin g := ComplexProjection.onClass;
+\definition spinCProduct: \forall (a, b: E.SpinC) -> spinC (E.spinCGroup.op a b) = E.specialOrthogonalGroup.op (spinC a) (spinC b) :=
+  Extension.induction2 (\fun (a, b: E.SpinC) => spinC (E.spinCGroup.op a b) = E.specialOrthogonalGroup.op (spinC a) (spinC b))
+    (\fun (g: E.Spin)(z: Circle.Circle)(h: E.Spin)(w: Circle.Circle) => eq_reason_in!{{E.SO} _
+      "=" _ "by" { congr!{{E.SpinC} {E.SO}} spinC _ _ (Extension.multiplication g h z w) }
+      "=" _ "by" { spinCOnClass (E.spinGroup.op g h) (Circle.product z w) }
+      "=" _ "by" { spinProduct g h }
+      "=" _ "by" { congr!{{E.SO} {E.SO} {E.SO}} E.specialOrthogonalGroup.op _ _ _ _
+        (sym!{{E.SO}} _ _ (spinCOnClass g z)) (sym!{{E.SO}} _ _ (spinCOnClass h w)) }
+    });
+\import algebra.Hom[A := E.SpinC, B := E.SO] \as SpinCHom;
+\definition spinCProjection: SpinCHom.GroupMap E.spinCGroup E.specialOrthogonalGroup :=
+  \into[E.SpinC -> E.SO](spinC, SpinCHom.GroupMap E.spinCGroup E.specialOrthogonalGroup) \by {
+    SpinCHom.MonoidLaws[_, _, spinC] {
+      unit := trans!{{E.SO}} _ _ _ (spinCOnClass E.spinGroup.unit Circle.one) spinUnit,
+      operation := spinCProduct,
+    }
+  };
+\definition SpinCLift[g: E.SO]: \Set := \Cast[E.SpinC] ({ h: E.SpinC \where spinC h = g });
+\definition spinCSurjective: \forall (g: E.SO) -> \exists SpinCLift g := \block {
+  \fun (g: E.SO) \then
+  \takefrom s: Onto.Lift g \by spinSurjective g \then
+  \let h: E.SpinC := Extension.class s Circle.one \then
+  \let same: spinC h = g := trans!{{E.SO}} _ _ _ (spinCOnClass s Circle.one) (\bysub(E.Spin, Onto.Lift g, s)) \then
+  \return \exact(\into[E.SpinC](h, SpinCLift g) \by { same }, SpinCLift g)
+};
+
+\import lie_groups.SpinGroup[n := r] \as SpinGeometry;
+\import lie_groups.ComplexGroup[n := r].Over[G := E.Spin, group := E.spinGroup, embedding := SpinGeometry.embedding,
+  injective := SpinGeometry.embeddingInjective, sign := Pins.spinInvolution, compatible := SpinGeometry.compatible] \as ComplexGeometry;
+\module Plots(n: N.Nat^);
+\module RealFrames;
+\module Determinant;
+\module Over(n: N.Nat^);

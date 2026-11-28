@@ -1,0 +1,35 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import clifford.Circle[] \as Circle;
+\import complex.Complex[] \as C;
+\import smooth_bundles.GeneralLinear[K := C.Complex, field := C.Algebra[].field, conjugation := linear_algebra.Hermitian[].Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar, n := s] \as GL;
+\import linear_algebra.Commutative[K := C.Complex, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing C.Complex C.Algebra[].field] \as Spaces;
+\import Spaces.Isomorphism[V := GL.Vector, W := GL.Vector, source := GL.coordinates, target := GL.coordinates] \as Iso;
+\import linear_algebra.Commutative[K := C.Complex, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing C.Complex C.Algebra[].field].Eigen[V := GL.Vector, space := GL.coordinates] \as Scalars;
+\definition scalar[z: Circle.Circle]: GL.Carrier := Iso.Isomorphism {
+  forward := Scalars.scalar z, backward := Scalars.scalar (Circle.inverse z),
+  leftInverse := \fun (v: GL.Vector) => trans!{{GL.Vector}} _ _ _
+    (sym!{{GL.Vector}} _ _ (GL.coordinates.scalarAssoc (Circle.inverse z) z v))
+    (trans!{{GL.Vector}} _ _ _
+      (congr!{{C.Complex} {GL.Vector}} (\fun (a: C.Complex) => GL.coordinates.smul a v) _ _ (Circle.group.leftInverse z))
+      (GL.coordinates.scalarOne v)),
+  rightInverse := \fun (v: GL.Vector) => trans!{{GL.Vector}} _ _ _
+    (sym!{{GL.Vector}} _ _ (GL.coordinates.scalarAssoc z (Circle.inverse z) v))
+    (trans!{{GL.Vector}} _ _ _
+      (congr!{{C.Complex} {GL.Vector}} (\fun (a: C.Complex) => GL.coordinates.smul a v) _ _ (Circle.group.rightInverse z))
+      (GL.coordinates.scalarOne v)),
+};
+
+\import algebra.Hom[A := Circle.Circle, B := GL.Carrier] \as Hom;
+\definition identity: scalar Circle.one = GL.identity :=
+  GL.ext (scalar Circle.one) GL.identity GL.coordinates.scalarOne;
+\definition product: \forall (z, w: Circle.Circle) -> scalar (Circle.product z w) = GL.multiply (scalar z) (scalar w) :=
+  \fun (z, w: Circle.Circle) => GL.ext (scalar (Circle.product z w)) (GL.multiply (scalar z) (scalar w))
+    (\fun (v: GL.Vector) => GL.coordinates.scalarAssoc z w v);
+\definition homomorphism: Hom.GroupMap Circle.group GL.group :=
+  \into[Circle.Circle -> GL.Carrier](scalar, Hom.GroupMap Circle.group GL.group) \by {
+    Hom.MonoidLaws[_, _, scalar] { unit := identity, operation := product }
+  };

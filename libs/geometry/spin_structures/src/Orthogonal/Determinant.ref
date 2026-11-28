@@ -1,0 +1,19 @@
+\import clifford.ComplexRepresentation[n := r].By[G := E.Spin, group := E.spinGroup, embedding := SpinGeometry.embedding,
+  injective := SpinGeometry.embeddingInjective, sign := Pins.spinInvolution, compatible := SpinGeometry.compatible].Phase[] \as PhaseSquare;
+\import \root.ComplexScalar[s := N.Nat^::succ N.Nat^::zero] \as LineScalars;
+\import complex.Complex[] \as C;
+\import std.Data[].FinSet[] \as Fin;
+\import smooth_bundles.GeneralLinear[K := C.Complex, field := C.Algebra[].field, conjugation := linear_algebra.Hermitian[].Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar, n := N.Nat^::succ N.Nat^::zero] \as Line;
+\definition character: E.SpinC -> Circle.Circle := PhaseSquare.base;
+\definition onClass: \forall (g: E.Spin)(z: Circle.Circle) -> character (Extension.class g z) = Circle.square z := PhaseSquare.onSquareClass;
+\import algebra.Hom[A := E.SpinC, B := Circle.Circle] \as Character;
+\definition characterHomomorphism: Character.GroupMap E.spinCGroup Circle.group :=
+  \into[E.SpinC -> Circle.Circle](character, Character.GroupMap E.spinCGroup Circle.group) \by {
+    Character.MonoidLaws[_, _, character] { unit := PhaseSquare.baseOne, operation := PhaseSquare.baseProduct }
+  };
+\import Character.Composition[C := Line.Carrier] \as Compose;
+\definition homomorphism: algebra.Hom[A := E.SpinC, B := Line.Carrier].GroupMap E.spinCGroup Line.group :=
+  Compose.groupMap E.spinCGroup Circle.group Line.group characterHomomorphism LineScalars.homomorphism;
+\definition action[g: E.SpinC]: Line.Carrier := LineScalars.scalar (character g);
+\module Smooth(n: N.Nat^);

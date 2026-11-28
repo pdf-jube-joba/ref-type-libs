@@ -1,0 +1,29 @@
+\import std.Data[].FinSet[] \as Fin;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import \root.Principal[X := M.Point, G := E.SO, Index := Atlas.Index, group := E.specialOrthogonalGroup] \as Principal;
+\definition identity: \forall (x: M.Point)(i: Atlas.Index x) -> reduction.change x i i = E.specialOrthogonalGroup.unit :=
+  \fun (x: M.Point)(i: Atlas.Index x) => inclusionInjective _ _ (eq_reason_in!{{GL.Carrier} _
+    "=" _ "by" { reduction.agrees x i i }
+    "=" _ "by" { GL.Frames[V := F x, space := space x].changeIdentity (localFrame x i) }
+    "=" _ "by" { sym!{{GL.Carrier}} _ _ includeOne }
+  });
+\definition composition: \forall (x: M.Point)(i, j, k: Atlas.Index x) ->
+  E.specialOrthogonalGroup.op (reduction.change x j k) (reduction.change x i j) = reduction.change x i k :=
+  \fun (x: M.Point)(i, j, k: Atlas.Index x) => inclusionInjective _ _ (eq_reason_in!{{GL.Carrier} _
+    "=" _ "by" { includeProduct (reduction.change x j k) (reduction.change x i j) }
+    "=" _ "by" { congr!{{GL.Carrier} {GL.Carrier} {GL.Carrier}} GL.multiply _ _ _ _ (reduction.agrees x j k) (reduction.agrees x i j) }
+    "=" _ "by" { GL.Frames[V := F x, space := space x].composition (localFrame x i) (localFrame x j) (localFrame x k) }
+    "=" _ "by" { sym!{{GL.Carrier}} _ _ (reduction.agrees x i k) }
+  });
+\definition cocycle: Principal.Cocycle := Principal.Cocycle { change := reduction.change, identity := identity, composition := composition };
+\module Change(i, j: I);
+\definition orientedFrames: FrameAtlas.Bundle := FrameAtlas.Bundle {
+  cocycle := cocycle, regular := \fun (i, j: I) => Change[i := i, j := j].smooth,
+};
+\import Principal.Of[cocycle := cocycle] \as Total;
+\module At(x: M.Point);

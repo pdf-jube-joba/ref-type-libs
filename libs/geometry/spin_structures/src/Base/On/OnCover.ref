@@ -1,0 +1,8 @@
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\definition Index[x: M.Point]: \Set := \Cast[I] ({ i: I \where Charts.Contains (cover.chart i) x });
+\definition Local[i: I]: \Set := Charts.LocalPoint (cover.chart i);
+\definition index[i: I][x: Local i]: Index x := \into[I](i, Index x) \by {
+  \bysub(M.Point, (cover.chart i).domain, x)
+};
+\module Overlap(i, j: I);
+\module SmoothPrincipal(G: \Set, group: std.Alg[].Alg[].Group[G], Regular: \forall (U: Open.OpenSet) -> (Open.Carrier U -> G) -> \Prop);

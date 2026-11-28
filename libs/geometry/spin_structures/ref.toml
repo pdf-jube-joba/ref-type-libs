@@ -1,0 +1,21 @@
+[package]
+name = "spin_structures"
+
+[dependencies]
+std = { path = "../../std" }
+algebra = { path = "../../algebra/basic" }
+real = { path = "../../real/basic" }
+dedekind_reals = { path = "../../real/dedekind" }
+complex = { path = "../../complex" }
+lie_algebras = { path = "../../algebra/lie_algebras" }
+linear_algebra = { path = "../../algebra/linear_algebra" }
+calculus = { path = "../../analysis/calculus" }
+manifolds = { path = "../manifolds" }
+tangent_bundles = { path = "../tangent_bundles" }
+smooth_bundles = { path = "../smooth_bundles" }
+smooth_partitions = { path = "../smooth_partitions" }
+vector_bundles = { path = "../vector_bundles" }
+bundle_operations = { path = "../bundle_operations" }
+lie_groups = { path = "../lie_groups" }
+clifford = { path = "../../algebra/clifford" }
+spinor_representations = { path = "../../algebra/spinor_representations" }

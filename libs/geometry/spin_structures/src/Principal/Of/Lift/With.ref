@@ -1,0 +1,32 @@
+\import Lifted.Of[cocycle := data] \as Total;
+\definition agrees: Coherent data := \bysub(Lifted.Cocycle, Structure, data);
+\definition values[x: X][u: Total.Fiber x][i: Index x]: G := projection (u i);
+\definition fiberMap[x: X][u: Total.Fiber x]: Fiber x := \into[Coordinates x](values x u, Fiber x) \by {
+  \fun (i, j: Index x) => eq_reason_in!{G _
+    "=" _ "by" { congr!{G G} (\fun (a: G) => Group.mul a (projection (u i))) _ _ (sym!{G} _ _ (agrees x i j)) }
+    "=" _ "by" { sym!{G} _ _ (homLaws.operation (data.change x i j) (u i)) }
+    "=" _ "by" { congr!{H G} projection _ _ (Total.compatible x u i j) }
+  }
+};
+\definition map[p: Total.Point]: Point := Point { base := p.base, fiber := fiberMap p.base p.fiber };
+\definition equivariant: \forall (x: X)(u: Total.Fiber x)(h: H) -> fiberMap x (Total.act x u h) = act x (fiberMap x u) (projection h) :=
+  \fun (x: X)(u: Total.Fiber x)(h: H) => \axiom:funext(values x (Total.act x u h), right x (fiberMap x u) (projection h),
+    \fun (i: Index x) => homLaws.operation (u i) h);
+\definition inCoordinates: \forall (x: X)(i: Index x)(h: H) -> fiberMap x (Total.decode x i h) = decode x i (projection h) :=
+  \fun (x: X)(i: Index x)(h: H) => \axiom:funext(values x (Total.decode x i h), assemble x i (projection h),
+    \fun (j: Index x) => trans!{G} _ _ _
+      (homLaws.operation (data.change x i j) h)
+      (congr!{G G} (\fun (a: G) => Group.mul a (projection h)) _ _ (agrees x i j)));
+\definition Preimage[g: G]: \Set := \Cast[H] ({ h: H \where projection h = g });
+\definition PreimageInFiber[x: X][v: Fiber x]: \Set := \Cast[Total.Fiber x] ({ u: Total.Fiber x \where fiberMap x u = v });
+\definition surjective: (\forall (g: G) -> \exists Preimage g) ->
+  \forall (x: X)(i: Index x)(v: Fiber x) -> \exists PreimageInFiber x v := \block {
+  \fun (onto: _)(x: X)(i: Index x)(v: Fiber x) \then
+  \takefrom h: Preimage (v i) \by onto (v i) \then
+  \let same: fiberMap x (Total.decode x i h) = v := eq_reason_in!{{Fiber x} _
+    "=" _ "by" { inCoordinates x i h }
+    "=" _ "by" { congr!{G {Fiber x}} (decode x i) _ _ (\bysub(H, Preimage (v i), h)) }
+    "=" _ "by" { decodeEncode x i v }
+  } \then
+  \return \exact(\into[Total.Fiber x](Total.decode x i h, PreimageInFiber x v) \by { same }, PreimageInFiber x v)
+};

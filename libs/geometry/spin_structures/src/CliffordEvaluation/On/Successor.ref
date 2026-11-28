@@ -1,0 +1,39 @@
+\import \parent.\parent.On[r := N.Nat^::succ r] \as Upper;
+\import clifford.Euclidean[n := N.Nat^::succ r] \as Next;
+\import clifford.Field[K := R.Real, field := Scalars.field].On[V := Next.Vector, space := Next.space].Of[form := Next.form] \as Higher;
+\import E.Successor[].Inclusion[] \as Inclusion;
+\import E.Successor[].NormalForm[] \as Normal;
+\import Normal.Spanning[] \as Spanning;
+\import Plots.Step[n := r] \as Step;
+\definition left[ell: Upper.Functional]: Functional := Functional {
+  apply := \fun (a: E.Carrier) => ell.apply (Inclusion.map a),
+  add := \fun (a, b: E.Carrier) => trans!{{R.Real}} _ _ _
+    (congr!{{Next.Carrier} {R.Real}} ell.apply _ _ (Inclusion.laws.add a b))
+    (ell.add (Inclusion.map a) (Inclusion.map b)),
+  scale := \fun (c: R.Real)(a: E.Carrier) => trans!{{R.Real}} _ _ _
+    (congr!{{Next.Carrier} {R.Real}} ell.apply _ _ (Inclusion.onScale c a))
+    (ell.scale c (Inclusion.map a)),
+};
+\definition shifted[a: E.Carrier]: Next.Carrier := Higher.mul (Inclusion.map a) Normal.gamma;
+\definition right[ell: Upper.Functional]: Functional := Functional {
+  apply := \fun (a: E.Carrier) => ell.apply (shifted a),
+  add := \fun (a, b: E.Carrier) => eq_reason_in!{{R.Real} _
+    "=" _ "by" { congr!{{Next.Carrier} {R.Real}} (\fun (z: Next.Carrier) => ell.apply (Higher.mul z Normal.gamma)) _ _
+      (Inclusion.laws.add a b) }
+    "=" _ "by" { congr!{{Next.Carrier} {R.Real}} ell.apply _ _
+      (Next.ring.semiring.rightDistributive (Inclusion.map a) (Inclusion.map b) Normal.gamma) }
+    "=" _ "by" { ell.add (shifted a) (shifted b) }
+  },
+  scale := \fun (c: R.Real)(a: E.Carrier) => eq_reason_in!{{R.Real} _
+    "=" _ "by" { congr!{{Next.Carrier} {R.Real}} (\fun (z: Next.Carrier) => ell.apply (Higher.mul z Normal.gamma)) _ _
+      (Inclusion.onScale c a) }
+    "=" _ "by" { congr!{{Next.Carrier} {R.Real}} ell.apply _ _
+      (sym!{{Next.Carrier}} _ _ (Higher.algebra.scalarMulLeft c (Inclusion.map a) Normal.gamma)) }
+    "=" _ "by" { ell.scale c (shifted a) }
+  },
+};
+\module Of(previous: Law, U: Open.OpenSet, f: Open.Carrier U -> Next.Carrier, ell: Upper.Functional,
+  regular: Plots.Dimension[n := N.Nat^::succ r].Plot U f);
+\definition smooth: Law -> Upper.Law :=
+  \fun (previous: Law)(U: Open.OpenSet)(f: Open.Carrier U -> Next.Carrier)(ell: Upper.Functional)(regular: _) =>
+    Of[previous := previous, U := U, f := f, ell := ell, regular := regular].smooth;

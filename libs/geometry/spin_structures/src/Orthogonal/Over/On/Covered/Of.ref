@@ -1,0 +1,13 @@
+\import \root.Principal[X := M.Point, G := E.SO, Index := Cover.Index, group := E.specialOrthogonalGroup].Of[cocycle := frameBundle.cocycle] \as FrameTotal;
+\import FrameTotal.Lift[H := E.Spin, liftedGroup := E.spinGroup, projection := spinProjection] \as SpinLift;
+\import FrameTotal.Lift[H := E.SpinC, liftedGroup := E.spinCGroup, projection := spinCProjection] \as ComplexLift;
+\structure SpinStructure: \Set := {
+  lift: SpinLift.Structure,
+  regular: SpinBundles.Smooth lift,
+};
+\structure SpinCStructure: \Set := {
+  lift: ComplexLift.Structure,
+  regular: SpinCBundles.Smooth lift,
+};
+\module Spin(structure: SpinStructure);
+\module SpinC(structure: SpinCStructure);

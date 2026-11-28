@@ -1,0 +1,13 @@
+\import std.Data[].FinSet[] \as Fin;
+\import complex.Complex[] \as C;
+\import smooth_bundles.Complex[n := n, r := s] \as Complex;
+\import linear_algebra.Commutative[K := C.Complex, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing C.Complex C.Algebra[].field] \as Spaces;
+\import smooth_bundles.GeneralLinear[K := C.Complex, field := C.Algebra[].field, conjugation := linear_algebra.Hermitian[].Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar, n := s] \as GL;
+\import algebra.Hom[A := G, B := GL.Carrier] \as Hom;
+\structure Representation: \Set := {
+  homomorphism: Hom.GroupMap group GL.group,
+  smooth: \forall (U: Open.OpenSet)(f: Open.Carrier U -> G) -> Regular U f ->
+    smooth_bundles.ComplexLinear[r := s].Smooth[d := n].Regular U (\fun (x: Open.Carrier U) => homomorphism (f x)),
+};
+\module Using(representation: Representation);

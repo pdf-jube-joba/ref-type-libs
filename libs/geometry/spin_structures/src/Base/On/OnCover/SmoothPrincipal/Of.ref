@@ -1,0 +1,10 @@
+\import Principal.Of[cocycle := bundle.cocycle] \as Total;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\definition fiberNonempty: \forall (x: M.Point) -> \exists Total.Fiber x := \block {
+  \fun (x: M.Point) \then
+  \takefrom i: Index x \by cover.covers x \then
+  \return \exact(Total.section x i, Total.Fiber x)
+};
+\module Local(i: I);
+\module Associated(s: std.Data[].Nat[].Nat^);

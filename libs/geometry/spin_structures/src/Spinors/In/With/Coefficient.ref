@@ -1,0 +1,23 @@
+\import std.Alg[].Ring[] \as Rings;
+\import algebra.Hom[A := Clifford.Carrier, B := End.Carrier] \as Extension;
+\definition laws: Extension.SemiringLaws[Rings.ringAsSemiring Clifford.Carrier Clifford.ring,
+  Rings.ringAsSemiring End.Carrier End.ring, Action.extension] := Extension.semiringLaws _ _ Action.extension;
+\import RealAlgebra.Universal[A := End.Carrier, target := End.ring] \as Universal;
+\definition evaluation[e: End.Carrier]: C.Complex := (linear e).apply v a;
+\definition value[x: Clifford.Carrier]: C.Complex := evaluation (Action.extension x);
+\definition add: \forall (x, y: Clifford.Carrier) -> value (RealAlgebra.add x y) = Def.add (value x) (value y) :=
+  \fun (x, y: Clifford.Carrier) => trans!{{C.Complex}} _ _ _
+    (congr!{{End.Carrier} {C.Complex}} evaluation _ _ (laws.add x y))
+    (congr!{{GL.Vector} {C.Complex}} (\fun (w: GL.Vector) => w a) _ _
+      (coordinates.forward.preservesAdd ((Action.extension x).apply (coordinates.backward.apply v)) ((Action.extension y).apply (coordinates.backward.apply v))));
+\definition scales: \forall (z: C.Complex)(e: End.Carrier) -> evaluation (End.scale z e) = Def.mul z (evaluation e) :=
+  \fun (z: C.Complex)(e: End.Carrier) => congr!{{GL.Vector} {C.Complex}} (\fun (w: GL.Vector) => w a) _ _
+    (coordinates.forward.preservesScale z (e.apply (coordinates.backward.apply v)));
+\definition scale: \forall (z: R.Real)(x: Clifford.Carrier) -> value (RealAlgebra.scale z x) = Def.mul (Def.ofReal z) (value x) :=
+  \fun (z: R.Real)(x: Clifford.Carrier) => eq_reason_in!{{C.Complex} _
+    "=" _ "by" { congr!{{End.Carrier} {C.Complex}} evaluation _ _ (laws.mul (Clifford.scalar z) x) }
+    "=" _ "by" { congr!{{End.Carrier} {C.Complex}} (\fun (e: End.Carrier) => evaluation (End.mul e (Action.extension x))) _ _
+      (Universal.onScalar Action.representation z) }
+    "=" _ "by" { scales (Def.ofReal z) (Action.extension x) }
+  };
+\module On(n: N.Nat^);

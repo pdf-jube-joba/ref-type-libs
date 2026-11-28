@@ -1,0 +1,37 @@
+\import clifford.Circle[] \as Circle;
+\import lie_groups.SpinGroup[n := rank] \as SpinGroup;
+\import clifford.Field[K := R.Real, field := R.Algebra[].field].On[V := E.Vector, space := E.space].Of[form := E.form].Pin[] \as Pins;
+\import clifford.ComplexRepresentation[n := rank] \as Representation;
+\import Representation.By[G := E.Spin, group := E.spinGroup, embedding := SpinGroup.embedding, injective := SpinGroup.embeddingInjective,
+  sign := Pins.spinInvolution, compatible := SpinGroup.compatible] \as Coefficients;
+\import clifford.ComplexExtension[G := E.Spin, group := E.spinGroup].By[sign := Pins.spinInvolution] \as Extension;
+\import lie_groups.ComplexGroup[n := rank].Over[G := E.Spin, group := E.spinGroup, embedding := SpinGroup.embedding, injective := SpinGroup.embeddingInjective,
+  sign := Pins.spinInvolution, compatible := SpinGroup.compatible].Plots[d := n] \as ComplexPlots;
+\import smooth_bundles.ComplexCalculus[n := n].On[U := U] \as ComplexSmooth;
+\import C.Prop[] \as CProp;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as RProp;
+\definition combine[z, w: C.Complex]: C.Complex := Def.add z (Def.mul Def.i w);
+\definition imaginaryReal: \forall (b: R.Real) -> Def.mul Def.i (Def.ofReal b) = C.make R.zero b :=
+  \fun (b: R.Real) => CProp.ext (Def.mul Def.i (Def.ofReal b)) (C.make R.zero b)
+    (trans!{{R.Real}} _ _ _
+      (congr!{{R.Real} {R.Real} {R.Real}} R.sub _ _ _ _ (RProp.fieldMulZeroLeft b) (RProp.fieldMulZeroRight R.one))
+      (RProp.subZeroRight R.zero))
+    (trans!{{R.Real}} _ _ _
+      (congr!{{R.Real} {R.Real} {R.Real}} R.add _ _ _ _ (RProp.fieldMulZeroLeft R.zero) (RProp.fieldMulOneLeft b))
+      (RProp.addZeroLeft b));
+\definition split: \forall (z: C.Complex) -> combine (Def.ofReal (C.re z)) (Def.ofReal (C.im z)) = z :=
+  \fun (z: C.Complex) => eq_reason_in!{{C.Complex} _
+    "=" _ "by" { congr!{{C.Complex} {C.Complex}} (Def.add (Def.ofReal (C.re z))) _ _ (imaginaryReal (C.im z)) }
+    "=" _ "by" { CProp.ext (Def.add (Def.ofReal (C.re z)) (C.make R.zero (C.im z))) z (RProp.addZeroRight (C.re z)) (RProp.addZeroLeft (C.im z)) }
+  };
+\definition scaled: \forall (z, w: C.Complex) ->
+    combine (Def.mul (Def.ofReal (C.re z)) w) (Def.mul (Def.ofReal (C.im z)) w) = Def.mul z w :=
+  \fun (z, w: C.Complex) => eq_reason_in!{{C.Complex} _
+    "=" _ "by" { congr!{{C.Complex} {C.Complex}} (Def.add (Def.mul (Def.ofReal (C.re z)) w)) _ _
+      (sym!{{C.Complex}} _ _ (CProp.mulAssoc Def.i (Def.ofReal (C.im z)) w)) }
+    "=" _ "by" { sym!{{C.Complex}} _ _ (CProp.mulAddRight (Def.ofReal (C.re z)) (Def.mul Def.i (Def.ofReal (C.im z))) w) }
+    "=" _ "by" { congr!{{C.Complex} {C.Complex}} (\fun (a: C.Complex) => Def.mul a w) _ _ (split z) }
+  };
+\module Entry(v: GL.Vector, a: Fin.Fin s);
+\definition smooth: TargetSmooth.Regular U (\fun (x: Open.Carrier U) => spinC (f x)) :=
+  \fun (v: GL.Vector)(a: Fin.Fin s) => Entry[v := v, a := a].smooth;

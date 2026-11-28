@@ -1,0 +1,4 @@
+\import smooth_bundles.GeneralLinear[K := C.Complex, field := C.Algebra[].field, conjugation := linear_algebra.Hermitian[].Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar, n := s] \as GL;
+\import Spaces.Isomorphism[V := Fock.Carrier, W := GL.Vector, source := Fock.totalSpace, target := GL.coordinates] \as Coordinates;
+\module With(coordinates: Coordinates.Isomorphism);

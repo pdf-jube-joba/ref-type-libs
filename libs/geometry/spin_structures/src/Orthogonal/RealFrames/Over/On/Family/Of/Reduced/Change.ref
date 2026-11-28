@@ -1,0 +1,12 @@
+\import Atlas.Overlap[i := i, j := j] \as BaseChange;
+\import AllFrames.Change[i := i, j := j] \as RealChange;
+\definition transition[t: Open.Carrier BaseChange.domain]: E.SO := FrameAtlas.transition cocycle i j t;
+\import calculus.MatrixFamily[d := n, p := r, q := r] \as Matrix;
+\definition smooth: Plots.Orthogonal BaseChange.domain transition :=
+  \fun (v: E.Vector)(a: Fin.Fin r) => smooth_partitions.Euclidean[n := n].smoothCongruent BaseChange.domain
+    (\fun (t: Open.Carrier BaseChange.domain) => (RealChange.value t).forward.apply v a)
+    (\fun (t: Open.Carrier BaseChange.domain) => (transition t).value.apply v a)
+    (\fun (t: Open.Carrier BaseChange.domain) => sym!{{R.Real}} _ _
+      (congr!{{GL.Carrier} {R.Real}} (\fun (g: GL.Carrier) => g.forward.apply v a) _ _
+        (reduction.agrees (BaseChange.left t) (Atlas.index i (BaseChange.left t)) (Atlas.index j (BaseChange.right t)))))
+    (Matrix.evaluate BaseChange.domain (\fun (t: Open.Carrier BaseChange.domain) => (RealChange.value t).forward) RealChange.smooth v a);

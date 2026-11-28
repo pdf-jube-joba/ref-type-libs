@@ -1,0 +1,21 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import real.Analysis[] \as R;
+\import R.Algebra[] \as Scalars;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import Open.Smooth[] \as Smooth;
+\import Smooth.Operations[] \as Operations;
+\import lie_groups.CliffordPlots[d := n] \as Plots;
+\module On(r: N.Nat^);
+\module Zero;
+\definition Law[r: N.Nat^]: \Prop := On[r := r].Law;
+\definition smooth: \forall (r: N.Nat^) -> Law r :=
+  \induction (r: N.Nat^) \return Law r \with {
+    | zero: Zero[].smooth
+    | succ: \fun (r: N.Nat^)(previous: Law r) => On[r := r].Successor[].smooth previous
+  };

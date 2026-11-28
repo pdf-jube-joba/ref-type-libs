@@ -1,0 +1,9 @@
+\import Principal.Associated[s := N.Nat^::succ N.Nat^::zero] \as Line;
+\import \root.Orthogonal[r := r].Determinant[] \as Character;
+\import Character.Smooth[n := n] \as CharacterSmooth;
+\definition determinantRepresentation: Line.Representation := Line.Representation {
+  homomorphism := Character.homomorphism, smooth := CharacterSmooth.smooth,
+};
+\import Line.Using[representation := determinantRepresentation] \as DeterminantLine;
+\import smooth_bundles.Complex[n := n, r := N.Nat^::succ N.Nat^::zero].On[M := M].Family[F := DeterminantLine.Fiber, space := DeterminantLine.fiberSpace] \as LineBundle;
+\definition determinantLine: LineBundle.Bundle[I] := DeterminantLine.associated;
