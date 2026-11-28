@@ -120,3 +120,21 @@
 
 \definition refinedZero[x: Large.Carrier][same: (select active).apply x = (C.family.space n).zero]: project x = space.zero :=
   Refined.ext (project x) space.zero same;
+\definition include[x: Carrier]: C.family.Carrier n := x;
+\definition atCutoff[same: n = cutoff][x: C.family.Carrier n]: Carrier :=
+  \into[C.family.Carrier n](x, submodule.carrier) \by {
+    \fun (outside: Logic.Not (n = cutoff)) => Logic.falseElim _ (outside same)
+  };
+\import Modules.Hom[V := Carrier, W := C.family.Carrier n, source := space, target := C.family.space n] \as FullIn;
+\import Modules.Hom[V := C.family.Carrier n, W := Carrier, source := C.family.space n, target := space] \as FullOut;
+\import Modules.Isomorphism[V := Carrier, W := C.family.Carrier n, source := space, target := C.family.space n] \as Full;
+\definition identification[same: n = cutoff]: Full.Isomorphism := Full.Isomorphism {
+  forward := FullIn.Map { apply := include,
+    addition := \fun (x, y: Carrier) => \refl((C.family.space n).add x y),
+    scalar := \fun (r: I.Int^)(x: Carrier) => \refl((C.family.space n).smul r x) },
+  backward := FullOut.Map { apply := atCutoff same,
+    addition := \fun (x, y: C.family.Carrier n) => \refl(atCutoff same ((C.family.space n).add x y)),
+    scalar := \fun (r: I.Int^)(x: C.family.Carrier n) => \refl(atCutoff same ((C.family.space n).smul r x)) },
+  leftInverse := \fun (x: Carrier) => \refl(x),
+  rightInverse := \fun (x: C.family.Carrier n) => \refl(x),
+};

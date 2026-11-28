@@ -1,0 +1,37 @@
+\import Modules.Free[Generators := Generators] \as Free;
+\import Free.To[W := K, target := Abelian.coefficients.space] \as Universal;
+\import Modules.Hom[V := Free.Carrier, W := K, source := Free.space, target := Abelian.coefficients.space]
+  .Composition[U := concentrated.family.Carrier cutoff, domain := concentrated.family.space cutoff] \as ExtendMap;
+\import Modules.Hom[V := concentrated.family.Carrier cutoff, W := K, source := concentrated.family.space cutoff, target := Abelian.coefficients.space]
+  .Composition[U := Free.Carrier, domain := Free.space] \as Restrict;
+\definition onGenerator[h: Cochains.Carrier cutoff][g: Generators]: K := h.apply (basis.forward.apply (Free.generator g));
+\definition evaluation[a: classes active][g: Generators]: K := onGenerator (comparison.backward.apply a) g;
+\definition extend[v: Generators -> K]: Cochains.Carrier cutoff := ExtendMap.compose (Universal.extension v) basis.backward;
+\definition evaluates: \forall (v: Generators -> K)(g: Generators) -> onGenerator (extend v) g = v g :=
+  \fun (v: Generators -> K)(g: Generators) => trans!{K} _ _ _
+    (congr!{Free.Carrier K} (Universal.extension v).apply _ _ (basis.leftInverse (Free.generator g))) (Universal.onGenerator v g);
+\definition onCycle: \forall (h: Cochains.Carrier cutoff)(g: Generators) -> evaluation (class h) g = onGenerator h g :=
+  \fun (h: Cochains.Carrier cutoff)(g: Generators) => congr!{{Extend.Carrier active} K}
+    (\fun (x: Extend.Carrier active) => onGenerator x g) _ _ (comparison.leftInverse (Extend.Positive[n := cutoff].intro h));
+\definition retrieve: \forall (v: Generators -> K)(g: Generators) -> evaluation (class (extend v)) g = v g :=
+  \fun (v: Generators -> K)(g: Generators) => trans!{K} _ _ _ (onCycle (extend v) g) (evaluates v g);
+\import Modules.Hom[V := Free.Carrier, W := K, source := Free.space, target := Abelian.coefficients.space] \as FreeValues;
+\definition chainInjective: \forall (a, b: Cochains.Carrier cutoff) ->
+  (\forall (g: Generators) -> onGenerator a g = onGenerator b g) -> a = b :=
+  \fun (a, b: Cochains.Carrier cutoff)(same: _) => Cochains.At[n := cutoff].ext a b
+    (\fun (x: concentrated.family.Carrier cutoff) => trans!{K} _ _ _
+      (sym!{K} _ _ (congr!{{concentrated.family.Carrier cutoff} K} a.apply _ _ (basis.rightInverse x)))
+      (trans!{K} _ _ _
+        (congr!{FreeValues.Map K} (\fun (f: FreeValues.Map) => f.apply (basis.backward.apply x)) _ _
+          (Universal.ext (Restrict.compose a basis.forward) (Restrict.compose b basis.forward) same))
+        (congr!{{concentrated.family.Carrier cutoff} K} b.apply _ _ (basis.rightInverse x))));
+\import Extend.Index[z := active] \as Active;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Cochains.Carrier cutoff, S := Active.submodule.carrier] \as Refinement;
+\definition injective: \forall (a, b: classes active) -> (\forall (g: Generators) -> evaluation a g = evaluation b g) -> a = b :=
+  \fun (a, b: classes active)(same: _) => trans!{{classes active}} _ _ _
+    (sym!{{classes active}} _ _ (comparison.rightInverse a))
+    (trans!{{classes active}} _ _ _
+      (congr!{{Extend.Carrier active} {classes active}} comparison.forward.apply _ _
+        (Refinement.ext (comparison.backward.apply a) (comparison.backward.apply b)
+          (chainInjective (comparison.backward.apply a) (comparison.backward.apply b) same)))
+      (comparison.rightInverse b));

@@ -20,6 +20,7 @@
     scalar := \fun (r: K)(v: Source.Carrier) => Target.ext (apply f (Source.scale r v)) (Target.scale r (apply f v))
       (\fun (i: Index) => (f i).scalar r (v i)),
   };
+  \module Isomorphism;
 }
 \module Pair(A, B, C: Modules.Family[Index]) {
   \import \parent.Maps[source := A, target := B] \as First;

@@ -33,3 +33,7 @@
   };
 \definition cochains: _ := Comparison.isomorphism commutes;
 \module Cohomology(q: N.Nat^);
+
+\module Cup(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero);
+
+\module TotalCohomology(q: N.Nat^);

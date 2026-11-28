@@ -1,0 +1,36 @@
+\import std.Data[].FinSet[] \as Finite;
+\import std.Logic[].Classical[] \as Classical;
+\import \root.DegreeShift[] \as Degree;
+\import \root.TensorBasis[K := K, ring := ring] \as Comparison;
+\import Comparison.Of[P := concentrated, Q := D] \as LayerMap;
+\import \root.CohomologyBasis[K := K, ring := ring] \as Basis;
+\import \parent.TensorColumn[D := D].Model[].Coefficients[K := K, ring := ring] \as TensorLayer;
+\import \parent.Dual[K := K, ring := ring] \as BaseLayer;
+\import BaseLayer.Evaluate[Generators := Generators, basis := baseBasis] \as Evaluation;
+\import TensorLayer.FreeRow[Generators := Generators, basis := baseBasis] \as Row;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Scalars;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\import chain_complexes.Integer[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as NatTransport;
+\import \root.DegreeBound[] \as Bound;
+\use Equality.eq_reason_in;
+\definition coefficients: Scalars.Bundle := Scalars.Bundle { Carrier := K, space := Scalars.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients].Native[P := D] \as Fiber;
+\definition active: I.Int^ := I.Int^::ofNat cutoff;
+\definition FiberCycle[q: N.Nat^]: \Set := Native.At[C := Fiber.complex, k := q].CycleCarrier;
+\import \root.CohomologyReindex[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].On[C := Fiber.complex] \as FiberDegree;
+\definition family[d: I.Int^]: \Set := (LayerMap.source d).Carrier;
+\definition deg[q: N.Nat^]: I.Int^ := I.Int^::ofNat (Nat.add cutoff q);
+\definition ofNatInjective[a, b: N.Nat^][same: I.Int^::ofNat a = I.Int^::ofNat b]: a = b :=
+  congr!{I.Int^ N.Nat^} Bound.cap _ _ same;
+\definition fromActive[q: N.Nat^][z: I.Int^][same: Degree.unshift q z = active]: deg q = z :=
+  eq_reason_in!{I.Int^ {deg q}
+    "=" {Degree.shift q active} "by" { sym!{I.Int^} _ _ (Degree.natural q cutoff) }
+    "=" {Degree.shift q (Degree.unshift q z)} "by" { congr!{I.Int^ I.Int^} (Degree.shift q) _ _ (sym!{I.Int^} _ _ same) }
+    "=" {z} "by" { Degree.shiftUnshift q z }
+  };
+\definition matches[q: N.Nat^]: active = Degree.unshift q (deg q) :=
+  trans!{I.Int^} _ _ _ (sym!{I.Int^} _ _ (Degree.unshiftShift q active))
+    (congr!{I.Int^ I.Int^} (Degree.unshift q) _ _ (Degree.natural q cutoff));
+\module NativeDegree(q: N.Nat^);

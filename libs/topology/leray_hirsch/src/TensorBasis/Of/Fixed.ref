@@ -39,4 +39,15 @@
   \import Modules.Hom[V := (target shifted).Carrier, W := (target z).Carrier, source := (target shifted).space, target := (target z).space]
     .Composition[U := (source unshifted).Carrier, domain := (source unshifted).space] \as Compose;
   \definition linear: _ := Compose.compose Regrade.At[m := shifted, n := z, same := Degree.shiftUnshift q z].map (map unshifted);
+  \import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+  \definition sourceFamily[t: I.Int^]: \Set := (source t).Carrier;
+  \definition fromDegree: \forall (d: I.Int^)(same: d = unshifted)(degree: Degree.shift q d = z)(x: sourceFamily d) ->
+    linear.apply (Transport.cast sourceFamily d unshifted same x) = \parent.To[input := d, output := z, same := degree].linear.apply x :=
+    \fun (d: I.Int^)(same: d = unshifted)(degree: Degree.shift q d = z)(x: sourceFamily d) =>
+      (\idelim unshifted = d \with j: I.Int^ => \forall (s: j = unshifted)(t: Degree.shift q j = z)(v: sourceFamily j) ->
+        linear.apply (Transport.cast sourceFamily j unshifted s v) = \parent.To[input := j, output := z, same := t].linear.apply v \by {
+          base: \fun (s: unshifted = unshifted)(t: Degree.shift q unshifted = z)(v: sourceFamily unshifted) =>
+            congr!{{sourceFamily unshifted} {(target z).Carrier}} linear.apply _ _ (Transport.castRefl sourceFamily unshifted v),
+          equality: sym!{I.Int^} _ _ same
+        }) same degree x;
 }

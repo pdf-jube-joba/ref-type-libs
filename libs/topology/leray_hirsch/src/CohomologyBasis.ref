@@ -1,0 +1,37 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Finite;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Transport;
+\definition baseRing: std.Alg[].Ring[].Ring[K] := std.Alg[].Ring[].commutativeRingAsRing K ring;
+\import module_theory.Module[].Over[R := K, ring := baseRing] \as Modules;
+\import chain_complexes.Cochain[].Over[R := K, ring := baseRing] \as Native;
+\import chain_complexes.Integer[].Over[R := K, ring := baseRing] \as Signed;
+\module For(C: Native.Complex, count: N.Nat^, degrees: Finite.Fin count -> N.Nat^,
+  cycles: \forall (i: Finite.Fin count) -> Native.At[C := C, k := degrees i].CycleCarrier) {
+  \import \root.CohomologyReindex[K := K, ring := baseRing].On[C := C] \as Reindex;
+  \import Native.ZeroExtension[C := C] \as Extend;
+  \definition Index: \Set := Finite.Fin count;
+  \module At(q: N.Nat^) {
+    \definition z: I.Int^ := I.Int^::ofNat q;
+    \definition Selected: \Pow Index := { i: Index \where degrees i = q };
+    \definition Indices: \Set := \Cast[Index] Selected;
+    \import \root.FiniteBasisSubset[K := K, ring := ring, count := count, S := Selected] \as Coordinates;
+    \import Modules.Free[Generators := Indices] \as Free;
+    \import Signed.At[C := Extend.complex, z := z] \as H;
+    \definition Carrier: \Set := H.Cohomology;
+    \definition space: Modules.Space Carrier := H.cohomologySpace;
+    \definition degreeLaw[i: Indices]: degrees i = q := \bysub(Index, Selected, i);
+    \definition representative[i: Indices]: Reindex.cycles q :=
+      Transport.cast Reindex.cycles (degrees i) q (degreeLaw i) (cycles i);
+    \definition class[i: Indices]: Carrier := Reindex.signed q (representative i);
+    \import Free.To[W := Carrier, target := space] \as Extension;
+    \definition comparison: _ := Extension.extension class;
+    \definition onGenerator: \forall (i: Indices) -> comparison.apply (Free.generator i) = class i :=
+      Extension.onGenerator class;
+    \import Modules.Isomorphism[V := Free.Carrier, W := Carrier, source := Free.space, target := space]
+      .OfBijective[f := comparison] \as Iso;
+    \definition IsBasis: \Prop := Logic.And[Iso.Injective, Iso.Onto];
+    \definition isomorphism[h: IsBasis]: _ := Iso.isomorphism h.left h.right;
+  }
+}

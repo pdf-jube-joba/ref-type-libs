@@ -54,3 +54,13 @@
 \module TensorBasis(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
 
 \module CohomologyZero(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module CohomologyReindex(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module NativeDualWindow(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module DegreeBound;
+
+\module FiniteBasisSubset(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], count: std.Data[].Nat[].Nat^, S: \Pow (std.Data[].FinSet[].Fin count));
+
+\module CohomologyBasis(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

@@ -44,3 +44,9 @@
 \module TensorColumn(D: Chains.Complex);
 
 \module Stable(D: Chains.Complex, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module Dual(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module Comparison(D: Chains.Complex, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Generators: \Set,
+  baseBasis: Modules.Isomorphism[V := Modules.Free[Generators := Generators].Carrier, W := concentrated.family.Carrier cutoff,
+    source := Modules.Free[Generators := Generators].space, target := concentrated.family.space cutoff].Isomorphism);

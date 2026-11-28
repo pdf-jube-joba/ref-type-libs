@@ -14,3 +14,7 @@
 \definition basePull[z: I.Int^]: _ := Signed.Map[C := Input.complex, D := SourceInput.complex].At[k := z].induced BaseSigned.map;
 \definition tensorPull[z: I.Int^]: _ := Signed.Map[C := Output.complex, D := SourceOutput.complex].At[k := z].induced ProductSigned.map;
 \module Fixed(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero);
+
+\module Finite(count: N.Nat^, degrees: Finite.Fin count -> N.Nat^,
+  cycles: \forall (i: Finite.Fin count) -> Fiber.Carrier (degrees i),
+  closed: \forall (i: Finite.Fin count) -> Fiber.apply (degrees i) (cycles i) = (Fiber.space (N.Nat^::succ (degrees i))).zero);

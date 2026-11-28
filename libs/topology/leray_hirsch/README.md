@@ -35,6 +35,8 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `ChainTruncation.Layer.TensorColumn.Model.Coefficients.FreeRow.Cohomology.isomorphism` | Evaluation of the reindexed layer cohomology on a free basis of its base chain module |
 | `ChainTruncation.Layer.Sequence.Cohomology.Step.glue` | Five-lemma step for the finite comparison on a cutoff sequence |
 | `ChainTruncation.Comparison.With.realizations` | Induction from an empty cutoff and the comparison on each concentrated layer |
+| `ChainTruncation.Comparison.With.Stable.At.With.isomorphism` | Passage from the cutoff comparisons to the unrestricted tensor comparison |
+| `ChainTruncation.Layer.Comparison.NativeDegree.matched` | Evaluation of an external cup summand on a free chain generator, with its degree and sign |
 | `ChainTruncation.Layer.Stable.At.isomorphism` | Stabilization of tensor cohomology when the cutoff contains degree $n+1$ |
 | `TensorCochainCup.Of.Fixed.Cohomology.linear` | Tensor cohomology multiplication by a fixed right cocycle |
 | `TensorCochainCup.Of.Along.At.Closed.naturality` | Compatibility of tensor cohomology multiplication with base chain maps |

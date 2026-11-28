@@ -1,0 +1,48 @@
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Prop[] \as Nat;
+\import N.Order[].Prop[] \as Order;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Proposition[] \as Logic;
+\import chain_complexes.Integer[] \as Degrees;
+\import \root.DegreeShift[] \as Shift;
+\definition Within[n: N.Nat^][z: I.Int^]: \Prop := (\induction (x: I.Int^) \return \Prop \with {
+  | ofNat: \fun (m: N.Nat^) => Nat.Le m n
+  | negSucc: \fun (m: N.Nat^) => Logic.True
+}) z;
+\definition previous[n: N.Nat^]: \forall (k: I.Int^) -> Within n k -> Within n (Degrees.previous k) :=
+  \induction (z: I.Int^) \return Within n z -> Within n (Degrees.previous z) \with {
+    | ofNat: \induction (m: N.Nat^) \return Within n (I.Int^::ofNat m) -> Within n (Degrees.previous (I.Int^::ofNat m)) \with {
+      | zero: \fun (zero: Nat.Le N.Nat^::zero n) => Logic.True::intro
+      | succ: \fun (m: N.Nat^)(prior: _)(bound: Nat.Le (N.Nat^::succ m) n) =>
+        Nat.leTrans m (N.Nat^::succ m) n (Nat.leStep m m (Nat.leRefl m)) bound
+    }
+    | negSucc: \fun (m: N.Nat^)(bound: Logic.True) => Logic.True::intro
+  };
+\definition grow[n: N.Nat^]: \forall (z: I.Int^) -> Within n z -> Within (N.Nat^::succ n) z :=
+  \induction (z: I.Int^) \return Within n z -> Within (N.Nat^::succ n) z \with {
+    | ofNat: \fun (m: N.Nat^) => Nat.leStep n m
+    | negSucc: \fun (m: N.Nat^)(bound: Logic.True) => bound
+  };
+\definition next[n: N.Nat^]: \forall (k: I.Int^) -> Within n k -> Within (N.Nat^::succ n) (Degrees.next k) :=
+  \induction (z: I.Int^) \return Within n z -> Within (N.Nat^::succ n) (Degrees.next z) \with {
+    | ofNat: \fun (m: N.Nat^)(bound: Nat.Le m n) => Nat.leSuccSucc m n bound
+    | negSucc: \induction (m: N.Nat^) \return Within n (I.Int^::negSucc m) -> Within (N.Nat^::succ n) (Degrees.next (I.Int^::negSucc m)) \with {
+      | zero: \fun (bound: Logic.True) => Nat.zeroLe (N.Nat^::succ n)
+      | succ: \fun (m: N.Nat^)(prior: _)(bound: Logic.True) => Logic.True::intro
+    }
+  };
+\definition shift[n: N.Nat^]: \forall (q: N.Nat^)(z: I.Int^) -> Within n z -> Within n (Shift.unshift q z) :=
+  \induction (q: N.Nat^) \return \forall (z: I.Int^) -> Within n z -> Within n (Shift.unshift q z) \with {
+    | zero: \fun (z: I.Int^)(bound: Within n z) => bound
+    | succ: \fun (q: N.Nat^)(prior: \forall (z: I.Int^) -> Within n z -> Within n (Shift.unshift q z))(z: I.Int^)(bound: Within n z) =>
+      prior (Degrees.previous z) (previous n z bound)
+  };
+\definition cap: I.Int^ -> N.Nat^ := \induction (z: I.Int^) \return N.Nat^ \with {
+  | ofNat: \fun (n: N.Nat^) => n
+  | negSucc: \fun (n: N.Nat^) => N.Nat^::zero
+};
+\definition within: \forall (z: I.Int^) -> Within (cap z) z :=
+  \induction (z: I.Int^) \return Within (cap z) z \with {
+    | ofNat: Nat.leRefl
+    | negSucc: \fun (n: N.Nat^) => Logic.True::intro
+  };

@@ -152,10 +152,14 @@ of the overlap sum and the whole-space comparison on the vector of
 componentwise connecting classes.
 
 The pair homeomorphism over a chart and the comparison isomorphism
-for an empty base are formalized. The remaining algebraic step is to identify the actual finite comparison
-on each concentrated layer with evaluation on the chosen fiber
-cohomology basis. The cutoff induction and stabilization must then
-give the unrestricted comparison. For the relative base chain complex
+for an empty base are formalized. The map on a matching summand of a concentrated layer is now
+computed after the sign change. Its value at a free base generator
+is the base cochain value times the signed fiber class. The
+remaining algebraic step is to sum these formulas and use the
+fiber basis to show bijectivity on the layer. Naturality of the
+finite comparison along each cutoff inclusion and stabilization in
+the three degrees around the current degree give the unrestricted
+comparison from the layerwise bijectivity predicate. For the relative base chain complex
 $P_*=C_*(V,W;\mathbb Z)$, this should show that the map with
 components $(x,y)\mapsto a_i(x)u_i(y)$ induces an isomorphism from the
 direct sum of shifted cohomology groups of

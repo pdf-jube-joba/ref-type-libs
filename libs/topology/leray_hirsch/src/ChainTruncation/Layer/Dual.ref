@@ -1,0 +1,71 @@
+\import chain_complexes.Integer[] \as Degrees;
+\import Degrees.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Scalars;
+\import \root.CohomologyZero[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Vanish;
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+\definition coefficients: Scalars.Bundle := Scalars.Bundle { Carrier := K, space := Scalars.scalarModule };
+\import Scalars.AbelianHom[N := coefficients] \as Abelian;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients].Native[P := concentrated] \as Cochains;
+\import Native.ZeroExtension[C := Cochains.complex] \as Extend;
+\definition classes[z: I.Int^]: \Set := Signed.At[C := Extend.complex, z := z].Cohomology;
+\definition space[z: I.Int^]: Scalars.Space (classes z) := Signed.At[C := Extend.complex, z := z].cohomologySpace;
+\module Degree(n: N.Nat^) {
+  \import \parent.\parent.At[n := n] \as ChainsAt;
+  \import Modules.Hom[V := concentrated.family.Carrier n, W := K, source := concentrated.family.space n, target := Abelian.coefficients.space] \as From;
+  \definition zeroOutside[h: Logic.Not (n = cutoff)]: \forall (x: Cochains.Carrier n) -> x = (Cochains.space n).zero :=
+    \fun (x: Cochains.Carrier n) => Cochains.At[n := n].ext x (Cochains.space n).zero
+      (\fun (y: concentrated.family.Carrier n) => trans!{K} _ _ _
+        (congr!{{concentrated.family.Carrier n} K} x.apply _ _ (ChainsAt.zero h y)) (From.zeroPreserved x));
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \import Extend.Index[z := z] \as SourceRefinement;
+  \import Extend.Index[z := Degrees.next z] \as TargetRefinement;
+  \import singular_cellular_algebra.Algebra[].Refinement[A := Cochains.Carrier n, S := SourceRefinement.submodule.carrier] \as SourceEq;
+  \import singular_cellular_algebra.Algebra[].Refinement[A := Cochains.Carrier (N.Nat^::succ n), S := TargetRefinement.submodule.carrier] \as TargetEq;
+  \definition signedZero[h: Logic.Not (n = cutoff)]: \forall (x: classes (I.Int^::ofNat n)) ->
+    x = (space (I.Int^::ofNat n)).zero :=
+    Vanish.On[C := Extend.complex, z := z].zero (\fun (x: Extend.Carrier z) =>
+      SourceEq.ext x (Extend.space z).zero (zeroOutside h x));
+  \definition delta: \forall (x: Cochains.Carrier n) -> Cochains.apply n x = (Cochains.space (N.Nat^::succ n)).zero :=
+    \fun (x: Cochains.Carrier n) => Cochains.At[n := N.Nat^::succ n].ext (Cochains.apply n x) (Cochains.space (N.Nat^::succ n)).zero
+      (\fun (y: concentrated.family.Carrier (N.Nat^::succ n)) => From.zeroPreserved x);
+  \definition extendDelta: \forall (x: Extend.Carrier z) -> Extend.apply z x = (Extend.space (Degrees.next z)).zero :=
+    \fun (x: Extend.Carrier z) => TargetEq.ext (Extend.apply z x) (Extend.space (Degrees.next z)).zero (delta x);
+}
+\definition active: I.Int^ := I.Int^::ofNat cutoff;
+\definition outside: \forall (z: I.Int^) -> Logic.Not (z = active) -> \forall (a: classes z) -> a = (space z).zero :=
+  \induction (z: I.Int^) \return Logic.Not (z = active) -> \forall (a: classes z) -> a = (space z).zero \with {
+    | ofNat: \fun (n: N.Nat^)(diff: Logic.Not (I.Int^::ofNat n = active)) =>
+      Degree[n := n].signedZero (\fun (e: n = cutoff) => diff (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ e))
+    | negSucc: \fun (n: N.Nat^)(unused: _) => Extend.NegativeCohomology[n := n].zero
+  };
+\definition signedDelta: \forall (z: I.Int^)(x: Extend.Carrier z) ->
+  Extend.apply z x = (Extend.space (Degrees.next z)).zero :=
+  \induction (z: I.Int^) \return \forall (x: Extend.Carrier z) -> Extend.apply z x = (Extend.space (Degrees.next z)).zero \with {
+    | ofNat: \fun (n: N.Nat^) => Degree[n := n].extendDelta
+    | negSucc: \fun (n: N.Nat^)(x: Extend.Carrier (I.Int^::negSucc n)) => \refl((Extend.space (Degrees.next (I.Int^::negSucc n))).zero)
+  };
+\import Signed.Prior[C := Extend.complex] \as Prior;
+\definition signedPrior: \forall (z: I.Int^)(x: Extend.Carrier (Degrees.previous z)) ->
+  Prior.value z x = (Extend.space z).zero :=
+  \fun (z: I.Int^)(x: Extend.Carrier (Degrees.previous z)) => trans!{{Extend.Carrier z}} _ _ _
+    (Prior.formula z x) (trans!{{Extend.Carrier z}} _ _ _
+      (congr!{{Extend.Carrier (Degrees.next (Degrees.previous z))} {Extend.Carrier z}}
+        (Transport.cast Extend.Carrier (Degrees.next (Degrees.previous z)) z (Degrees.nextPrevious z)) _ _
+        (signedDelta (Degrees.previous z) x))
+      (Transport.pointNatural Extend.Carrier (\fun (t: I.Int^) => (Extend.space t).zero)
+        (Degrees.next (Degrees.previous z)) z (Degrees.nextPrevious z)));
+\import Signed.At[C := Extend.complex, z := active] \as H;
+\import H.ZeroDifferentials[] \as Trivial;
+\definition comparison: _ := Trivial.isomorphism (signedDelta active) (signedPrior active);
+\import Native.At[C := Cochains.complex, k := cutoff] \as NativeH;
+\definition Cochain: \Set := Cochains.Carrier cutoff;
+\definition cycle[h: Cochains.Carrier cutoff]: NativeH.CycleCarrier :=
+  \into[Cochains.Carrier cutoff](h, NativeH.cycles.carrier) \by { Degree[n := cutoff].delta h };
+\definition class[h: Cochains.Carrier cutoff]: classes active := comparison.forward.apply (Extend.Positive[n := cutoff].intro h);
+\definition onClass: \forall (h: Cochains.Carrier cutoff) ->
+  Extend.PositiveCohomology[n := cutoff].backward.apply (NativeH.classOf (cycle h)) = class h :=
+  \fun (h: Cochains.Carrier cutoff) => Extend.PositiveCohomology[n := cutoff].onNaturalClass (cycle h);
+\module Evaluate(Generators: \Set,
+  basis: Modules.Isomorphism[V := Modules.Free[Generators := Generators].Carrier, W := concentrated.family.Carrier cutoff,
+    source := Modules.Free[Generators := Generators].space, target := concentrated.family.space cutoff].Isomorphism);

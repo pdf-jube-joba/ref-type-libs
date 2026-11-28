@@ -1,0 +1,17 @@
+\import Modules.Isomorphism[V := Sum.Carrier, W := range.Carrier, source := Sum.space, target := range.space].OfBijective[f := comparison] \as Inverse;
+\definition actualFormula: \forall (x: Sum.Carrier) -> comparison.apply x = ProductComparison.apply (Coordinates.coordinates x) :=
+  \fun (x: Sum.Carrier) => trans!{{range.Carrier}} _ _ _
+    (congr!{{Sum.Carrier} {range.Carrier}} comparison.apply _ _ (sym!{{Sum.Carrier}} _ _ (reconstruction x)))
+    (formula (Coordinates.coordinates x));
+\definition injective[h: Bijective]: Inverse.Injective :=
+  \fun (x, y: Sum.Carrier)(eq: comparison.apply x = comparison.apply y) =>
+    Coordinates.injective x y (Refinement.ext (Coordinates.forward.apply x) (Coordinates.forward.apply y)
+      (h.injective (Coordinates.coordinates x) (Coordinates.coordinates y) (trans!{{range.Carrier}} _ _ _
+        (sym!{{range.Carrier}} _ _ (actualFormula x)) (trans!{{range.Carrier}} _ _ _ eq (actualFormula y)))));
+\definition onto[h: Bijective]: Inverse.Onto := \block {
+  \fun (y: range.Carrier) \then
+  \takefrom x: \Cast[domain.Carrier] ({ x: domain.Carrier \where ProductComparison.apply x = y }) \by h.onto y \then
+  \return Logic.existsIntro[Sum.Carrier, { a: Sum.Carrier \where comparison.apply a = y }]
+    (combine x) (trans!{{range.Carrier}} _ _ _ (formula x) (\bysub(domain.Carrier, { x: domain.Carrier \where ProductComparison.apply x = y }, x)))
+};
+\definition isomorphism[h: Bijective]: _ := Inverse.isomorphism (injective h) (onto h);

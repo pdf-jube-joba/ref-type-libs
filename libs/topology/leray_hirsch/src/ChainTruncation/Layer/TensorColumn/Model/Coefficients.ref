@@ -72,6 +72,8 @@
       (Backward.onClass Push.map x);
 }
 
+\module LayerCup;
+
 \module FreeRow(Generators: \Set,
   basis: Modules.Isomorphism[V := Modules.Free[Generators := Generators].Carrier, W := concentrated.family.Carrier cutoff,
     source := Modules.Free[Generators := Generators].space, target := concentrated.family.space cutoff].Isomorphism);

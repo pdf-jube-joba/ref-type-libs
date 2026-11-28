@@ -47,3 +47,5 @@
 \definition invert[h: Bijective]: _ := Comparison.isomorphism h.injective h.onto;
 
 \module Vanishing;
+
+\module DirectSum;

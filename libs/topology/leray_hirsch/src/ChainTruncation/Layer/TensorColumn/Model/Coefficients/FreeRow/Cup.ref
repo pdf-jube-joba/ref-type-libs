@@ -1,0 +1,54 @@
+\import \parent.\parent.LayerCup[] \as Cup;
+\import Cup.At[q := q, beta := beta, closed := closed] \as Actual;
+\import \parent.Cohomology[q := q] \as Compare;
+\import \parent.Positive[q := q] \as Coordinates;
+\definition z: I.Int^ := I.Int^::ofNat q;
+\import Signed.At[C := Target.complex, z := z] \as FiberH;
+\import Signed.At[C := Powers.complex, z := z] \as ProductH;
+\import Signed.Map[C := Source.complex, D := Powers.complex].At[k := z] \as Induced;
+\import Powers.Degree[z := z] \as Terms;
+\definition baseCycle: \Set := Actual.BaseCycle;
+\definition cycleBeta: FiberH.Closed := Target.PositiveCohomology[n := q].toInteger
+  (\into[Fiber.Carrier q](beta, Cochains.At[C := Fiber.complex, k := q].cycles.carrier) \by { closed });
+\definition fiberClass: FiberH.Cohomology := FiberH.classOf cycleBeta;
+\import double_complexes.DoubleComplex[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as KDouble;
+\import KDouble.Sign[V := FiberH.Closed, space := FiberH.cycleSpace].Mapping[W := FiberH.Cohomology, target := FiberH.cohomologySpace] \as Classes;
+\import KDouble.Sign[V := FiberH.Closed, space := FiberH.cycleSpace] \as CyclesSign;
+\import KDouble.Sign[V := FiberH.Cohomology, space := FiberH.cohomologySpace] \as CohomologySign;
+\import Cochains.ZeroExtension[C := Fiber.complex].Index[z := z] \as FiberDegree;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Fiber.Carrier q, S := FiberDegree.submodule.carrier] \as CochainEq;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Target.Carrier z, S := FiberH.cycles.carrier] \as CycleEq;
+\definition evaluateSign: \forall (n: N.Nat^)(x: FiberH.Closed)(w: D.family.Carrier q) ->
+  ((CyclesSign.map n).apply x).apply w = (Actual.numericSign n).apply (x.apply w) :=
+  \induction (n: N.Nat^) \return \forall (x: FiberH.Closed)(w: D.family.Carrier q) ->
+    ((CyclesSign.map n).apply x).apply w = (Actual.numericSign n).apply (x.apply w) \with {
+      | zero: \fun (x: FiberH.Closed)(w: D.family.Carrier q) => \refl(x.apply w)
+      | succ: \fun (n: N.Nat^)(previous: _)(x: FiberH.Closed)(w: D.family.Carrier q) =>
+        congr!{K K} coefficients.space.neg _ _ (previous x w)
+    };
+\definition value[a: baseCycle][g: Generators]: K := a.apply (basis.forward.apply (Free.generator g));
+\definition obtained[a: baseCycle][g: Generators]: FiberH.Closed :=
+  Terms.cycle ((Induced.cyclesMap cochains.forward).apply (Actual.unsigned a)) g;
+\definition expected[a: baseCycle][g: Generators]: FiberH.Closed :=
+  (CyclesSign.map (Nat.mul cutoff q)).apply (FiberH.cycleSpace.smul (value a g) cycleBeta);
+\definition cycles: \forall (a: baseCycle)(g: Generators) -> obtained a g = expected a g :=
+  \fun (a: baseCycle)(g: Generators) => CycleEq.ext (obtained a g) (expected a g)
+    (CochainEq.ext (obtained a g) (expected a g)
+      (Fiber.At[n := q].ext (obtained a g) (expected a g) (\fun (w: D.family.Carrier q) => eq_reason_in!{K _
+        "=" _ "by" { Coordinates.onTensor (Actual.unsigned a) g w }
+        "=" _ "by" { Actual.onTensor a (basis.forward.apply (Free.generator g)) w }
+        "=" _ "by" { sym!{K} _ _ (evaluateSign (Nat.mul cutoff q) (FiberH.cycleSpace.smul (value a g) cycleBeta) w) }
+      })));
+\definition law: \forall (a: baseCycle)(g: Generators) ->
+  Compare.isomorphism.forward.apply (Actual.rowOutput (Actual.adjusted.apply (Actual.toSigned a))) g =
+  (CohomologySign.map (Nat.mul cutoff q)).apply (FiberH.cohomologySpace.smul (value a g) fiberClass) :=
+  \fun (a: baseCycle)(g: Generators) => eq_reason_in!{FiberH.Cohomology _
+    "=" _ "by" { congr!{{Actual.RowCohomology} FiberH.Cohomology}
+      (\fun (u: Actual.RowCohomology) => Compare.isomorphism.forward.apply u g) _ _ (Actual.rowOnClass a) }
+    "=" _ "by" { congr!{{Terms.classes.Carrier} FiberH.Cohomology}
+      (\fun (x: Terms.classes.Carrier) => x g) _ _ (Compare.onClass (Actual.unsigned a)) }
+    "=" _ "by" { congr!{FiberH.Closed FiberH.Cohomology} FiberH.classOf _ _ (cycles a g) }
+    "=" _ "by" { Classes.naturality FiberH.classLinear (Nat.mul cutoff q) (FiberH.cycleSpace.smul (value a g) cycleBeta) }
+    "=" _ "by" { congr!{FiberH.Cohomology FiberH.Cohomology}
+      ((CohomologySign.map (Nat.mul cutoff q)).apply) _ _ (FiberH.classLinear.scalar (value a g) cycleBeta) }
+  };

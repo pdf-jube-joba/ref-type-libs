@@ -1,0 +1,29 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\import \root.ProductExact[K := K, ring := ring, Index := Finite.Fin count] \as Exact;
+\import \parent.\parent.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Input;
+\import Restricted.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Output;
+\module At(z: I.Int^) {
+  \import Input.At[z := z] \as Source;
+  \import Output.At[z := z] \as Target;
+  \import Input.At[z := z].Product[] \as SourceProduct;
+  \import Output.At[z := z].Product[] \as TargetProduct;
+  \import Exact.Maps[source := Source.family, target := Target.family] \as Linear;
+  \definition pull: _ := Linear.map (\fun (i: Finite.Fin count) => basePull (Source.sourceDegree i));
+  \definition onInput: \forall (i: Finite.Fin count)(x: Source.family.Carrier i) ->
+    (tensorPull z).apply ((Source.components i).apply x) = (Target.components i).apply ((basePull (Source.sourceDegree i)).apply x) :=
+    \fun (i: Finite.Fin count) => \parent.\parent.Fixed[q := degrees i, beta := cycles i, closed := closed i].At[z := z].naturality;
+  \import Modules.Sums[I := Finite.Fin count].Vector[V := Source.range.Carrier, space := Source.range.space]
+    .Mapping[W := Target.range.Carrier, target := Target.range.space] \as Sums;
+  \import Modules.Sums[I := Finite.Fin count].Vector[V := Target.range.Carrier, space := Target.range.space] \as Result;
+  \definition law: \forall (x: SourceProduct.domain.Carrier) ->
+    (tensorPull z).apply (SourceProduct.ProductComparison.apply x) = TargetProduct.ProductComparison.apply (pull.apply x) :=
+    \fun (x: SourceProduct.domain.Carrier) => trans!{Target.range.Carrier} _ _ _
+      (Sums.law (tensorPull z) (Finite.elements count) (\fun (i: Finite.Fin count) => (Source.components i).apply (x i)))
+      (Result.congruent (Finite.elements count)
+        (\fun (i: Finite.Fin count) => (tensorPull z).apply ((Source.components i).apply (x i)))
+        (\fun (i: Finite.Fin count) => (Target.components i).apply (pull.apply x i))
+        (\fun (i: Finite.Fin count) => onInput i (x i)));
+}

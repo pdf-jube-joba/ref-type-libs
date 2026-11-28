@@ -28,3 +28,5 @@
     | zero: \fun (z: I.Int^) => Empty[].At[z := z].bijective
     | succ: \fun (p: N.Nat^)(prev: Cutoff[p := p].Through) => Cutoff[p := p].next prev (layer p)
   };
+
+\module Stable;
