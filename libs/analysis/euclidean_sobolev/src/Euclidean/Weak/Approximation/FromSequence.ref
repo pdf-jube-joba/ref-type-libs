@@ -1,0 +1,11 @@
+\definition Jets: \Set :=
+  \forall (d: E.Directions) -> \Cast[Global.Representatives] ({ f: Global.Representatives \where Jet s d f });
+\definition jetsExist: \exists Jets := \axiom:classicalIndefiniteChoice(E.Directions,
+  (\fun (d: E.Directions) => \Cast[Global.Representatives] ({ f: Global.Representatives \where Jet s d f })),
+  (\fun (d: E.Directions) => jetExists s x d limit));
+\module WithJets(f: Jets);
+\definition Corresponds[w: W.Wkp]: \Prop := Classes.underlying w = RealL2.realPart (H.physical x);
+\definition exists: \exists ( w: W.Wkp \where Corresponds w ) := \block {
+  \takefrom f: Jets \by jetsExist \then
+  \return Logic.existsIntro[W.Wkp, { w: W.Wkp \where Corresponds w }] (WithJets[f := f].value) (WithJets[f := f].underlying)
+};

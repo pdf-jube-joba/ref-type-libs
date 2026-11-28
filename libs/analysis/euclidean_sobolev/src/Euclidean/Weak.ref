@@ -46,3 +46,16 @@
   };
 \definition ofSchwartz[k: N.Nat^][f: E.Schwartz]: Weak.Space[k := k, p := PA.two].Wkp :=
   Weak.Space[k := k, p := PA.two].ofFunction (representative k f);
+\import Comparison.Finite[p := PA.two] \as DistributionL2;
+\import LocalMeasure.Lp[mu := Transport.measure] \as LocalLp;
+\import LocalMeasure.AlmostEverywhere[mu := Transport.measure] \as LocalAE;
+\import M.AlmostEverywhere[mu := LE.measure] \as GlobalAE;
+\import std.Set[].Quotient[A := Global.Representatives, Equivalent := \fun (f,g: Global.Representatives) =>
+  M.AlmostEqual LE.measure f g] \as GQ;
+\module Measure;
+\module Classes(k: N.Nat^);
+\module RealL2;
+\module Zero;
+\module Pairing;
+\module DerivativeLimits(k: N.Nat^);
+\module Approximation(k: N.Nat^);

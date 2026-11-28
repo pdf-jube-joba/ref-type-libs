@@ -1,0 +1,31 @@
+\import \parent.Measure[] \as Bridge;
+\import Weak.Space[k := k, p := PA.two] \as W;
+\import std.Set[].Quotient[A := Weak.Representatives k PA.two, Equivalent := \fun (f,g: Weak.Representatives k PA.two) =>
+  LocalMeasure.AlmostEqual Transport.measure f g] \as Q;
+\import Q.Maps[B := Global.Space] \as Maps;
+\definition laws: Q.EquivalenceLaws := Q.EquivalenceLaws {
+  refl := \fun (f: Weak.Representatives k PA.two) => LocalAE.reflexive f,
+  sym := \fun (f,g: Weak.Representatives k PA.two) => LocalAE.symmetric f g,
+  trans := \fun (f,g,h: Weak.Representatives k PA.two) => LocalAE.transitive f g h,
+};
+\definition local[f: Weak.Representatives k PA.two]: Local.Representatives := \into[Whole.Functions](f, Local.Representatives) \by { \block {
+  \takefrom jets: \Cast[E.Directions -> Whole.Functions] ({ jets: E.Directions -> Whole.Functions \where
+    Weak.Derivatives[f, k, PA.two, jets] }) \by \bysub(Whole.Functions, { u: Whole.Functions \where Weak.HasWeakDerivatives u k PA.two }, f) \then
+  \let law: Weak.Derivatives[f, k, PA.two, jets] := \bysub(E.Directions -> Whole.Functions, { jets: E.Directions -> Whole.Functions \where
+    Weak.Derivatives[f, k, PA.two, jets] }, jets) \then
+  \return \idelim jets E.Directions::nil = f \with u: Whole.Functions => LocalLp.HasFiniteMoment[u, PA.two] \by {
+    base: law.integrable E.Directions::nil (Nat.zeroLe k), equality: law.function
+  }
+} };
+\definition class[f: Weak.Representatives k PA.two]: Global.Space := Global.ofFunction (Bridge.extend (local f));
+\definition respects: Maps.Respects class := \fun (f,g: Weak.Representatives k PA.two)(same: _) =>
+  GQ.classOfEq Global.equivalence (Bridge.extend (local f)) (Bridge.extend (local g)) (Bridge.globalAlmost f g same);
+\definition underlying: W.Wkp -> Global.Space := Maps.value laws class respects;
+\definition onClass[f: Weak.Representatives k PA.two]: underlying (W.ofFunction f) = class f := Maps.onClass laws class respects f;
+\definition injective: \forall (x,y: W.Wkp) -> underlying x = underlying y -> x = y := Q.induction2
+  (\fun (x,y: W.Wkp) => underlying x = underlying y -> x = y)
+  (\fun (f,g: Weak.Representatives k PA.two)(same: _) => Q.classOfEq laws f g
+    (Bridge.localAlmost (Bridge.extend (local f)) (Bridge.extend (local g))
+      (GQ.equivalentOfClassEq Global.equivalence (Bridge.extend (local f)) (Bridge.extend (local g))
+        (trans!{Global.Space} _ _ _ (sym!{Global.Space} _ _ (onClass f)) (trans!{Global.Space} _ _ _ same (onClass g))))));
+\definition classAlmost[f,g: Weak.Representatives k PA.two]: LocalMeasure.AlmostEqual Transport.measure f g -> W.ofFunction f = W.ofFunction g := Q.classOfEq laws f g;

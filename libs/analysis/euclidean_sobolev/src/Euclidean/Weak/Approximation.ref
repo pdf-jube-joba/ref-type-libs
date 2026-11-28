@@ -1,0 +1,106 @@
+\import \root.Euclidean[n := n].Order[k := k] \as H;
+\import H.Density[] \as Density;
+\import \parent.DerivativeLimits[k := k] \as Limits;
+\import \parent.RealL2[] \as RealL2;
+\import \parent.Pairing[] \as Pairing;
+\import \parent.Classes[k := k] \as Classes;
+\import Weak.Space[k := k, p := PA.two] \as W;
+\import functional_analysis.Metric[Carrier := L2.Space] \as Metric;
+\import functional_analysis.Metric[Carrier := Global.Space] \as RealMetric;
+\import L.Norm[p := PA.two] \as RN;
+\import L2.Complete[] \as Complete;
+\import functional_analysis.Sobolev[n := n] \as Sobolev;
+\definition realConverges[s: N.Nat^ -> L2.Space][x: L2.Space]: Metric.Converges Geometry.metric s x ->
+  RealMetric.Converges RN.metric (\fun (j: N.Nat^) => RealL2.realPart (s j)) (RealL2.realPart x) :=
+  \fun (limit: _)(epsilon: Real.Real)(positive: _) => \block {
+    \takefrom j: \Cast[N.Nat^] ({ j: N.Nat^ \where Metric.LimitControl Geometry.metric s x epsilon j }) \by limit epsilon positive \then
+    \let control: Metric.LimitControl Geometry.metric s x epsilon j :=
+      \bysub(N.Nat^, { j: N.Nat^ \where Metric.LimitControl Geometry.metric s x epsilon j }, j) \then
+    \return Logic.existsIntro[N.Nat^, { j: N.Nat^ \where RealMetric.LimitControl RN.metric
+      (\fun (a: N.Nat^) => RealL2.realPart (s a)) (RealL2.realPart x) epsilon j }] j
+      (\fun (a: N.Nat^)(ja: _) => R.leLtTrans _ _ _ (Complete.realDistanceBound (s a) x) (control a ja))
+  };
+\definition realEmbedding[f: S.Function]: RealL2.realPart (Embedding.value f) = Global.ofFunction (Embedding.real f.real) :=
+  trans!{Global.Space} _ _ _ (Complete.realOnClass (Embedding.representative f))
+    (Global.classPointwise (L2.realPart (Embedding.representative f)) (Embedding.real f.real) (\fun (x: Point) => \refl(E.value f.real x)));
+\definition distributionOnJet[f: S.Function][d: E.Directions]:
+  Pairing.value (RealL2.realPart (Embedding.value (Derivatives.iterated f d))) = distribution (Ops.iterated f.real d) :=
+  eq_reason_in!{Dist.Distribution _
+    "=" _ "by" { congr!{Global.Space Dist.Distribution} Pairing.value _ _ (realEmbedding (Derivatives.iterated f d)) }
+    "=" _ "by" { Pairing.onSchwartz (Derivatives.iterated f d).real }
+    "=" _ "by" { congr!{E.Schwartz Dist.Distribution} distribution _ _ (Limits.iteratedReal f d) }
+  };
+\definition distributionLimit[s: Density.Sequence][d: E.Directions][x: L2.Space]:
+  Metric.Converges Geometry.metric (Limits.image s d) x ->
+  Dual.Converges (\fun (j: N.Nat^) => distribution (Ops.iterated (s j).real d)) (Pairing.value (RealL2.realPart x)) :=
+  \fun (limit: _) =>
+    \idelim (\fun (j: N.Nat^) => Pairing.value (RealL2.realPart (Limits.image s d j))) =
+      (\fun (j: N.Nat^) => distribution (Ops.iterated (s j).real d)) \with t: (N.Nat^ -> Dist.Distribution) =>
+      Dual.Converges t (Pairing.value (RealL2.realPart x)) \by {
+        base: Pairing.converges _ _ (realConverges (Limits.image s d) x limit),
+        equality: \axiom:funext((\fun (j: N.Nat^) => Pairing.value (RealL2.realPart (Limits.image s d j))),
+          (\fun (j: N.Nat^) => distribution (Ops.iterated (s j).real d)), (\fun (j: N.Nat^) => distributionOnJet (s j) d))
+      };
+\definition weakJet[s: Density.Sequence][d: E.Directions][x,y: L2.Space]:
+  Metric.Converges Geometry.metric (Limits.image s E.Directions::nil) x ->
+  Metric.Converges Geometry.metric (Limits.image s d) y ->
+  Dual.derivative d (Pairing.value (RealL2.realPart x)) = Pairing.value (RealL2.realPart y) :=
+  \fun (source: _)(target: _) => Dual.convergesUnique
+    (\fun (j: N.Nat^) => distribution (Ops.iterated (s j).real d)) _ _
+    (\idelim (\fun (j: N.Nat^) => Dual.derivative d (distribution (s j).real)) =
+      (\fun (j: N.Nat^) => distribution (Ops.iterated (s j).real d)) \with t: (N.Nat^ -> Dist.Distribution) =>
+      Dual.Converges t (Dual.derivative d (Pairing.value (RealL2.realPart x))) \by {
+        base: Dual.derivativesConverge d (\fun (j: N.Nat^) => distribution (s j).real) _
+          (distributionLimit s E.Directions::nil x source),
+        equality: \axiom:funext((\fun (j: N.Nat^) => Dual.derivative d (distribution (s j).real)),
+          (\fun (j: N.Nat^) => distribution (Ops.iterated (s j).real d)), (\fun (j: N.Nat^) => distributionJet (s j).real d))
+      })
+    (distributionLimit s d y target);
+\structure JetLimit[s: Density.Sequence, d: E.Directions, f: Global.Representatives, y: L2.Space]: \Prop := {
+  underlying: Global.ofFunction f = RealL2.realPart y,
+  converges: Metric.Converges Geometry.metric (Limits.image s d) y,
+};
+\definition Jet[s: Density.Sequence][d: E.Directions][f: Global.Representatives]: \Prop :=
+  \forall (bound: Nat.Le (Sobolev.order d) k) -> \exists ( y: L2.Space \where JetLimit[s,d,f,y] );
+\definition jetExists[s: Density.Sequence][x: H.Positive][d: E.Directions]: Metric.Converges Geometry.metric (Limits.source s) x ->
+  \exists ( f: Global.Representatives \where Jet s d f ) := \fun (limit: _) =>
+  Logic.orElim _ _ _ (std.Logic[].Classical[].excludedMiddle (Nat.Le (Sobolev.order d) k))
+    (\fun (bound: Nat.Le (Sobolev.order d) k) => \block {
+      \takefrom y: \Cast[L2.Space] ({ y: L2.Space \where Metric.Converges Geometry.metric (Limits.image s d) y })
+        \by Limits.imageExists s x d bound limit \then
+      \takefrom f: GQ.Representative (RealL2.realPart y) \by GQ.classProperty (RealL2.realPart y) \then
+      \return Logic.existsIntro[Global.Representatives, { f: Global.Representatives \where Jet s d f }] f
+        (\fun (degree: _) => Logic.existsIntro[L2.Space, { z: L2.Space \where JetLimit[s,d,f,z] }] y
+          (JetLimit[s,d,f,y] {
+            underlying := sym!{{\Pow Global.Representatives}} _ _ (GQ.represents (RealL2.realPart y) f),
+            converges := \bysub(L2.Space, { y: L2.Space \where Metric.Converges Geometry.metric (Limits.image s d) y }, y),
+          }))
+    })
+    (\fun (outside: _) => Logic.existsIntro[Global.Representatives, { f: Global.Representatives \where Jet s d f }]
+      Global.zeroRepresentative (\fun (bound: _) => Logic.falseElim _ (outside bound)));
+\definition regularRestriction[f: Global.Representatives]:
+  Regular.distribution (DistributionL2.regular (restrict f) (Local.properties (restrict f))) = Pairing.value (Global.ofFunction f) :=
+  trans!{Dist.Distribution} _ _ _
+    (Regular.respects (DistributionL2.regular (restrict f) (Local.properties (restrict f)))
+      (Regular.Lp[p := PA.two].representative f) (GlobalAE.reflexive f))
+    (sym!{Dist.Distribution} _ _ (Pairing.onClass f));
+\module FromSequence(s: Density.Sequence, x: H.Positive, limit: Metric.Converges Geometry.metric (Limits.source s) x);
+\definition Corresponds[x: H.Positive][w: W.Wkp]: \Prop := Classes.underlying w = RealL2.realPart (H.physical x);
+\definition exists[x: H.Positive]: \exists ( w: W.Wkp \where Corresponds x w ) := \block {
+  \takefrom s: \Cast[Density.Sequence] ({ s: Density.Sequence \where Metric.Converges Geometry.metric (Limits.source s) x })
+    \by Density.sequenceExists x \then
+  \return FromSequence[s := s, x := x, limit := \bysub(Density.Sequence, { s: Density.Sequence \where
+    Metric.Converges Geometry.metric (Limits.source s) x }, s)].exists
+};
+\definition Image[x: H.Positive]: \Set := \Cast[W.Wkp] ({ w: W.Wkp \where Corresponds x w });
+\definition unique[x: H.Positive][a,b: Image x]: a = b :=
+  Classes.injective a b (trans!{Global.Space} _ _ _
+    (\bysub(W.Wkp, { w: W.Wkp \where Corresponds x w }, a))
+    (sym!{Global.Space} _ _ (\bysub(W.Wkp, { w: W.Wkp \where Corresponds x w }, b))));
+\definition toWeak[x: H.Positive]: Image x := \choice Image x \by { existence: exists x, uniqueness: unique x };
+\definition underlying[x: H.Positive]: Corresponds x (toWeak x) := \bysub(W.Wkp, { w: W.Wkp \where Corresponds x w }, toWeak x);
+\definition realPhysical[x: H.Positive]:
+  RealL2.complexify (RealL2.realPart (H.physical x)) = H.physical x ->
+  RealL2.complexify (Classes.underlying (toWeak x)) = H.physical x :=
+  \fun (real: _) => trans!{L2.Space} _ _ _
+    (congr!{Global.Space L2.Space} RealL2.complexify _ _ (underlying x)) real;
