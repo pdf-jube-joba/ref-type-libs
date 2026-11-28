@@ -1,0 +1,11 @@
+\import \root.On[A := A, space := source] \as Source;
+\import \root.On[A := B, space := target] \as Target;
+\import topology.Topology[Carrier := A] \as SourceTop;
+\import topology.Topology[Carrier := B] \as TargetTop;
+\import topology.Maps[A := A, B := B] \as Maps;
+
+\definition Proper[f: A -> B]: \Prop :=
+  \forall (K: \Pow B) -> TargetTop.IsCompactIn target K ->
+    SourceTop.IsCompactIn source (Maps.Preimage f K);
+
+\module With(f: A -> B, continuous: topology.Continuity[A := A, B := B].Continuous source target f, proper: Proper f);

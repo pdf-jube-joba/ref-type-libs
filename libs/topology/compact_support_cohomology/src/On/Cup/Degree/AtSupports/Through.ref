@@ -1,0 +1,39 @@
+\import \parent.\parent.AtSupports[K := K1, L := L1] \as Later;
+\import \parent.\parent.\parent.AtSupports[K := K1, L := L1] \as LaterFixed;
+\import cohomology_thom.MixedCup[A := A, source := space, first := outside K, second := outside L, K := R, ring := ring] \as Mixed;
+\import singular_cohomology.Identity[A := A, source := space] \as Identity;
+\import Mixed.From[Y := A, target := space, firstPart := outside K1, secondPart := outside L1,
+  f := Identity.function, regular := Identity.continuous, firstContained := outsideReverse K K1 first,
+  secondContained := outsideReverse L L1 second].Covers[conditions := Fixed.conditions, newConditions := LaterFixed.conditions]
+  .Cup[p := p, q := q] \as Naturality;
+\import Mixed.From[Y := A, target := space, firstPart := outside K1, secondPart := outside L1,
+  f := Identity.function, regular := Identity.continuous, firstContained := outsideReverse K K1 first,
+  secondContained := outsideReverse L L1 second] \as Pullback;
+\definition IJ: Support := intersection K L;
+\definition IJ1: Support := intersection K1 L1;
+\definition inclusion: before IJ IJ1 := intersectionMonotone K L K1 L1 first second;
+\import Theory.Enlarge[K := IJ, L := IJ1, inclusion := inclusion] \as Advance;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside IJ1]
+  .Maps[B := A].Over[target := space, targetSubset := outside IJ]
+  .Composition[C := A].Over[final := space, finalSubset := Fixed.unionSubset]
+  .On[f := Advance.pairMap, g := Fixed.refine].With[coefficients := coefficients] \as Before;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside IJ1]
+  .Maps[B := A].Over[target := space, targetSubset := LaterFixed.unionSubset]
+  .Composition[C := A].Over[final := space, finalSubset := Fixed.unionSubset]
+  .On[f := LaterFixed.refine, g := Pullback.unionMap].With[coefficients := coefficients] \as After;
+\import singular_cohomology.Relative[A := A, source := space, subset := Fixed.unionSubset]
+  .With[coefficients := coefficients].At[z := outputDegree] \as OldUnion;
+\import singular_cohomology.Relative[A := A, source := space, subset := LaterFixed.unionSubset]
+  .With[coefficients := coefficients].At[z := outputDegree] \as NewUnion;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.sym;
+\use Equality.congr;
+
+\definition commutes[a: Left.Stage K][b: Right.Stage L]:
+  Target.advance IJ IJ1 inclusion (cup a b) = Later.cup (Left.advance K K1 first a) (Right.advance L L1 second b) :=
+  eq_reason_in!{{Target.Stage IJ1} _
+    "=" _ "by" { sym!{{Target.Stage IJ1}} _ _ (Before.law outputDegree (Fixed.Product[p := p, q := q].cup a b)) }
+    "=" _ "by" { After.law outputDegree (Fixed.Product[p := p, q := q].cup a b) }
+    "=" _ "by" { congr!{NewUnion.Carrier {Target.Stage IJ1}} ((LaterFixed.fromUnion outputDegree).apply) _ _
+       (Naturality.law a b) }};

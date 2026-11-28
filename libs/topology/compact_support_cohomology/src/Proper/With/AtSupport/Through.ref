@@ -1,0 +1,25 @@
+\import \parent.\parent.AtSupport[K := L] \as Later;
+\import Source.With[coefficients := coefficients].Enlarge[K := preimage K, L := preimage L, inclusion := monotone K L inclusion] \as EnlargeSource;
+\import Target.With[coefficients := coefficients].Enlarge[K := K, L := L, inclusion := inclusion] \as EnlargeTarget;
+\import singular_cohomology.Relative[A := A, source := source, subset := Source.outside (preimage L)]
+  .Maps[B := B].Over[target := target, targetSubset := Target.outside L]
+  .Composition[C := B].Over[final := target, finalSubset := Target.outside K]
+  .On[f := Later.pairMap, g := EnlargeTarget.pairMap].With[coefficients := coefficients] \as PullThenEnlarge;
+\import singular_cohomology.Relative[A := A, source := source, subset := Source.outside (preimage L)]
+  .Maps[B := A].Over[target := source, targetSubset := Source.outside (preimage K)]
+  .Composition[C := B].Over[final := target, finalSubset := Target.outside K]
+  .On[f := EnlargeSource.pairMap, g := pairMap].With[coefficients := coefficients] \as EnlargeThenPull;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.sym;
+
+\module Degree(z: I.Int^) {
+  \import Source.With[coefficients := coefficients].Degree[z := z] \as SourceDegree;
+  \import Target.With[coefficients := coefficients].Degree[z := z] \as TargetDegree;
+  \definition law[x: TargetDegree.Stage K]:
+    Later.Degree[coefficients := coefficients, z := z].apply (TargetDegree.advance K L inclusion x) =
+    SourceDegree.advance (preimage K) (preimage L) (monotone K L inclusion) (\parent.\parent.Degree[coefficients := coefficients, z := z].apply x) :=
+    eq_reason_in!{{SourceDegree.Stage (preimage L)} _
+      "=" _ "by" { sym!{{SourceDegree.Stage (preimage L)}} _ _ (PullThenEnlarge.law z x) }
+      "=" _ "by" { EnlargeThenPull.law z x }};
+}

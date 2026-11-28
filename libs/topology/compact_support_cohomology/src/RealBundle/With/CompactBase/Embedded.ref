@@ -1,0 +1,59 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].Pair[] \as Pair;
+\import dedekind_reals.DedekindReal[] \as Order;
+\import Complement.FromEmbedding[embedding := embedding] \as Construction;
+\definition n: N.Nat^ := embedding.dimension;
+\import Construction.Image[] \as Image;
+\import Complements.Projection[X := X, n := n, baseSpace := bundle.baseSpace, P := Image.projection, regular := Image.regular] \as Projected;
+\import Bundles.Trivial[X := X, n := n, baseSpace := bundle.baseSpace] \as Trivial;
+\import Bundles.Family[X := X, F := (\fun (_: X) => Bundles.Vector n)] \as AmbientFamily;
+\import Bundles.Family[X := X, F := Image.ImageFiber] \as ImageFamily;
+\import Bundles.Morphisms[X := X, Y := X, F := (\fun (_: X) => Bundles.Vector n), G := Image.ImageFiber,
+  source := Trivial.bundle, target := Image.imageBundle, f := (\fun (x: X) => x)] \as ProjectionMaps;
+\import Bundles.Morphisms[X := X, Y := X, F := Image.ImageFiber, G := F,
+  source := Image.imageBundle, target := bundle, f := (\fun (x: X) => x)] \as BackwardMaps;
+\import Bundles.Isomorphisms[X := X, F := F, G := Image.ImageFiber, source := bundle, target := Image.imageBundle] \as Isomorphisms;
+\definition retract[p: AmbientFamily.Point]: Family.Point := BackwardMaps.total Image.isomorphism.backward (ProjectionMaps.total Projected.projectMap p);
+\definition retractContinuous: topology.Continuity[A := AmbientFamily.Point, B := Family.Point].Continuous Trivial.topology bundle.totalSpace retract :=
+  topology.Composition[A := AmbientFamily.Point, B := ImageFamily.Point, C := Family.Point].composeContinuous Trivial.topology Image.imageBundle.totalSpace bundle.totalSpace
+    (ProjectionMaps.total Projected.projectMap) (BackwardMaps.total Image.isomorphism.backward)
+    (ProjectionMaps.continuous Projected.projectMap) (BackwardMaps.continuous Image.isomorphism.backward);
+\definition vector[p: Family.Point]: Bundles.Vector n := (embedding.map.fiber p.base).apply p.vector;
+\definition embeddingPoint[p: Family.Point]: AmbientFamily.Point := AmbientFamily.include p.base (vector p);
+\definition retractEmbedding[p: Family.Point]: retract (embeddingPoint p) = p :=
+  eq_reason_in!{Family.Point _
+    "=" _ "by" { congr!{ImageFamily.Point Family.Point} (BackwardMaps.total Image.isomorphism.backward) _ _
+      (congr!{{Image.ImageFiber p.base} ImageFamily.Point} (ImageFamily.include p.base)
+        ((Projected.projectMap.fiber p.base).apply (vector p))
+        ((Image.isomorphism.forward.fiber p.base).apply p.vector)
+        (Image.Comparison[].At[x := p.base].fixed p.vector)) }
+    "=" _ "by" { Isomorphisms.leftInverse Image.isomorphism p }};
+\import Bundles.Morphisms[X := X, Y := X, F := F, G := (\fun (_: X) => Bundles.Vector n),
+  source := bundle, target := Trivial.bundle, f := (\fun (x: X) => x)] \as EmbeddingMap;
+\definition embeddingContinuous: topology.Continuity[A := Family.Point, B := AmbientFamily.Point].Continuous bundle.totalSpace Trivial.topology embeddingPoint :=
+  EmbeddingMap.continuous embedding.map;
+\import algebraic_topology.Euclidean[].Dimension[n := n] \as Euclidean;
+\import topological_constructions.Product[A := X, B := Euclidean.Coordinate] \as Coordinates;
+\definition embed[p: Family.Point]: Coordinates.CarrierSet := Trivial.forward (embeddingPoint p);
+\definition coordinateTopology: topology.Topology[Carrier := Coordinates.CarrierSet].Topology := Coordinates.topology bundle.baseSpace Euclidean.topology;
+\definition embedContinuous: topology.Continuity[A := Family.Point, B := Coordinates.CarrierSet].Continuous bundle.totalSpace coordinateTopology embed :=
+  topology.Composition[A := Family.Point, B := AmbientFamily.Point, C := Coordinates.CarrierSet].composeContinuous bundle.totalSpace Trivial.topology
+    coordinateTopology embeddingPoint Trivial.forward embeddingContinuous Trivial.forwardContinuous;
+\definition embedInjective[p, q: Family.Point][same: embed p = embed q]: p = q :=
+  eq_reason_in!{Family.Point p
+    "=" _ "by" { sym!{Family.Point} _ _ (retractEmbedding p) }
+    "=" _ "by" { congr!{AmbientFamily.Point Family.Point} retract _ _
+      (eq_reason_in!{AmbientFamily.Point _
+        "=" _ "by" { sym!{AmbientFamily.Point} _ _ (\refl(embeddingPoint p)) }
+        "=" _ "by" { congr!{Coordinates.CarrierSet AmbientFamily.Point} Trivial.backward _ _ same }
+        "=" _ "by" { \refl(embeddingPoint q) }}) }
+    "=" _ "by" { retractEmbedding q }};
+\definition totalHausdorff: Total.IsT2 bundle.totalSpace :=
+  thom_spaces.Thom[].CWType[].InjectionHausdorff[A := Family.Point, B := Coordinates.CarrierSet,
+    source := bundle.totalSpace, target := coordinateTopology, f := embed, continuous := embedContinuous, injective := embedInjective,
+    hausdorff := thom_spaces.Thom[].CWType[].ProductHausdorff[A := X, B := Euclidean.Coordinate,
+      left := bundle.baseSpace, right := Euclidean.topology, first := hausdorffBase, second := Euclidean.Compactness[].hausdorff].hausdorff].law;
+\definition hausdorff: DiskSpace.IsT2 Disk.diskTopology := DiskInTotal.Properties[].hausdorff bundle.totalSpace totalHausdorff;
+\module Squared;
+\module Standard;
+\definition compact: DiskSpace.IsCompact Disk.diskTopology := Standard[].diskCompact;

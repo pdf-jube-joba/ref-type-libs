@@ -1,0 +1,19 @@
+\import singular_cohomology.Relative[A := A, source := space, subset := outside K].With[coefficients := coefficients] \as RelativeTheory;
+\import \parent.\parent.AtSupport[K := K] \as Relative;
+\import \parent.\parent.CompareSupport[K := K] \as Compare;
+\import CochainComplexes.At[C := RelativeTheory.complex, z := z] \as RelativeH;
+\definition closed: ((RelativeTheory.complex).differential).apply z lift = (Relative.moduleSpace (Degrees.next z)).zero :=
+  Relative.injective (Degrees.next z) _ _
+    (eq_reason_in!{{Whole.Carrier (Degrees.next z)} _
+      "=" _ "by" { sym!{{Whole.Carrier (Degrees.next z)}} _ _ (Relative.coboundary z lift) }
+      "=" _ "by" { congr!{{Whole.Carrier z} {Whole.Carrier (Degrees.next z)}} ((Whole.complex.differential).apply z) _ _ equal }
+      "=" _ "by" { \bysub(Carrier z, Cohomology.cycles.carrier, cycle) }
+      "=" _ "by" { sym!{{Whole.Carrier (Degrees.next z)}} _ _ (Relative.zero (Degrees.next z)) }});
+\definition lifted: RelativeH.Closed := RelativeH.cycle lift closed;
+\definition hit: \exists (x: Limit.Cohomology \where forward x = Cohomology.classOf cycle) :=
+  Logic.existsIntro[Limit.Cohomology, { x: Limit.Cohomology \where forward x = Cohomology.classOf cycle }]
+    (Limit.ofSupport K (RelativeH.classOf lifted))
+    (eq_reason_in!{Group _
+      "=" _ "by" { onStage K (RelativeH.classOf lifted) }
+      "=" _ "by" { Compare.Degree[z := z].onClass lifted }
+      "=" _ "by" { congr!{Cohomology.Closed Group} Cohomology.classOf ((Compare.Degree[z := z].cycles).apply lifted) cycle equal }});

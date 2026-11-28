@@ -1,0 +1,43 @@
+\import topology.Topology[Carrier := Subspace.CarrierSet] \as BoundaryTop;
+\import BoundaryTop.Compactness[] \as BoundaryCompact;
+\import \root.Proper[A := Subspace.CarrierSet, B := A, source := Subspace.topology space, target := space] \as Proper;
+\definition proper: Proper.Proper Relative.inclusion :=
+  \fun (K: \Pow A)(isCompact: Top.IsCompactIn space K) => BoundaryCompact.closedCompact
+    (Subspace.topology space) boundaryCompact (Subspace.Trace K)
+    (Subspace.traceOpen space (Top.Complement K) (Compactness.compactClosed space hausdorff K isCompact));
+\import Proper.With[f := Relative.inclusion, continuous := Relative.inclusionContinuous, proper := proper] \as InclusionProper;
+\import InclusionProper.WithCoefficients[coefficients := coefficients, z := z] \as Pullback;
+\import CompactAmbient.Cohomology[z := z] \as CompactComparison;
+\import CompactBoundary.Cohomology[z := z] \as BoundaryComparison;
+\definition H: \Set := BoundaryOrdinary.cohomology z;
+
+\module AtSupport(K: Support) {
+  \import InclusionProper.AtSupport[K := K] \as AtK;
+  \import AtK.Degree[coefficients := coefficients, z := z] \as StagePullback;
+  \import singular_cohomology.Relative[A := Subspace.CarrierSet, source := Subspace.topology space,
+    subset := Boundary.outside (InclusionProper.preimage K)] \as SourcePair;
+  \import SourcePair.Maps[B := A].Over[target := space, targetSubset := outside K]
+    .On[f := AtK.pairMap].Integer[].With[coefficients := coefficients].Naturality[].At[z := z] \as ForgetNaturality;
+  \definition law[x: AmbientDegree.Stage K]:
+    (restrict).apply ((CompactComparison.isomorphism.forward).apply (AmbientDegree.ofSupport K x)) =
+      (BoundaryComparison.isomorphism.forward).apply (Pullback.pullback (AmbientDegree.ofSupport K x)) :=
+    eq_reason_in!{H _
+      "=" _ "by" { congr!{{Ordinary.cohomology z} H} ((restrict).apply) _ _ (CompactComparison.onSupport K x) }
+      "=" _ "by" { ForgetNaturality.inclusionNaturality x }
+      "=" _ "by" { sym!{H} _ _ (BoundaryComparison.onSupport (InclusionProper.preimage K)
+        (StagePullback.apply x)) }
+      "=" _ "by" { congr!{BoundaryDegree.Cohomology H} ((BoundaryComparison.isomorphism.forward).apply)
+        _ _ (sym!{BoundaryDegree.Cohomology} _ _ (Pullback.onSupport K x)) }};
+}
+\definition compare: \forall (x: AmbientDegree.Cohomology) ->
+  (restrict).apply ((CompactComparison.isomorphism.forward).apply x) =
+    (BoundaryComparison.isomorphism.forward).apply (Pullback.pullback x) :=
+  AmbientDegree.induction
+    (\fun (x: AmbientDegree.Cohomology) => (restrict).apply ((CompactComparison.isomorphism.forward).apply x) =
+      (BoundaryComparison.isomorphism.forward).apply (Pullback.pullback x))
+    (\fun (K: Support) => AtSupport[K := K].law);
+\definition law[x: AmbientDegree.Cohomology]: (restriction).apply x = Pullback.pullback x :=
+  eq_reason_in!{BoundaryDegree.Cohomology _
+    "=" _ "by" { congr!{H BoundaryDegree.Cohomology} ((BoundaryComparison.isomorphism.backward).apply)
+      _ _ (compare x) }
+    "=" _ "by" { BoundaryComparison.isomorphism.leftInverse (Pullback.pullback x) }};

@@ -1,0 +1,14 @@
+\import AmbientDegree.Module[] \as AmbientModule;
+\import LocalDegree.Module[] \as LocalModule;
+\import Modules.Hom[V := LocalDegree.Cohomology, W := AmbientDegree.Cohomology,
+  source := LocalModule.moduleSpace, target := AmbientModule.moduleSpace] \as Maps;
+\module On(K: Local.Support) {
+  \import \parent.\parent.\parent.AtSupport[K := K] \as Fixed;
+  \import Modules.Hom[V := AmbientDegree.Stage (image K), W := AmbientDegree.Cohomology,
+    source := AmbientModule.spaces (image K), target := AmbientModule.moduleSpace]
+    .Composition[U := LocalDegree.Stage K, domain := LocalModule.spaces K] \as Compose;
+  \definition linear: _ := Compose.compose (AmbientModule.ofSupportLinear (image K)) (Fixed.isomorphism).backward;
+}
+\import LocalModule.LinearDescent[W := AmbientDegree.Cohomology, target := AmbientModule.moduleSpace,
+  stageMap := (\fun (K: Local.Support) => On[K := K].linear), compatibleMap := compatible] \as Linear;
+\definition map: Maps.Map := Linear.map;

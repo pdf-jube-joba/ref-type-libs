@@ -91,6 +91,7 @@ packages = [
     "topology/puppe_sequences",
     "topology/thom_spaces",
     "topology/cohomology_thom",
+    "topology/compact_support_cohomology",
     "topology/leray_hirsch",
     "topology/metric",
     "topology/k_theory",

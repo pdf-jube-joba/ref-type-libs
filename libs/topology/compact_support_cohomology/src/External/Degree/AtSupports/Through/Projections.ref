@@ -1,0 +1,32 @@
+\import LeftSpace.With[coefficients := coefficients].Enlarge[K := K, L := K1, inclusion := first] \as FirstAdvance;
+\import RightSpace.With[coefficients := coefficients].Enlarge[K := L, L := L1, inclusion := second] \as SecondAdvance;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := LaterFixed.first] \as FirstPair;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := LaterFixed.second] \as SecondPair;
+
+\import FirstPair.Maps[B := Carrier].Over[target := topology, targetSubset := Fixed.first]
+  .Composition[C := A].Over[final := left, finalSubset := LeftSpace.outside K]
+  .On[f := Pullback.firstMap, g := Fixed.leftPair].With[coefficients := coefficients] \as OldFirst;
+\import FirstPair.Maps[B := A].Over[target := left, targetSubset := LeftSpace.outside K1]
+  .Composition[C := A].Over[final := left, finalSubset := LeftSpace.outside K]
+  .On[f := LaterFixed.leftPair, g := FirstAdvance.pairMap].With[coefficients := coefficients] \as LaterFirst;
+\import SecondPair.Maps[B := Carrier].Over[target := topology, targetSubset := Fixed.second]
+  .Composition[C := B].Over[final := right, finalSubset := RightSpace.outside L]
+  .On[f := Pullback.secondMap, g := Fixed.rightPair].With[coefficients := coefficients] \as OldSecond;
+\import SecondPair.Maps[B := B].Over[target := right, targetSubset := RightSpace.outside L1]
+  .Composition[C := B].Over[final := right, finalSubset := RightSpace.outside L]
+  .On[f := LaterFixed.rightPair, g := SecondAdvance.pairMap].With[coefficients := coefficients] \as LaterSecond;
+\import FirstPair.Maps[B := Carrier].Over[target := topology, targetSubset := Fixed.first]
+  .On[f := Pullback.firstMap].Integer[].With[coefficients := coefficients].At[z := I.Int^::ofNat p] \as LeftPull;
+\import SecondPair.Maps[B := Carrier].Over[target := topology, targetSubset := Fixed.second]
+  .On[f := Pullback.secondMap].Integer[].With[coefficients := coefficients].At[z := I.Int^::ofNat q] \as RightPull;
+
+\definition leftLaw[a: Left.Stage K]:
+  (LeftPull.induced).apply (leftPull a) = Later.leftPull (Left.advance K K1 first a) :=
+  eq_reason_in!{NewFirst.Carrier _
+    "=" _ "by" { sym!{NewFirst.Carrier} _ _ (OldFirst.law (I.Int^::ofNat p) a) }
+    "=" _ "by" { LaterFirst.law (I.Int^::ofNat p) a }};
+\definition rightLaw[b: Right.Stage L]:
+  (RightPull.induced).apply (rightPull b) = Later.rightPull (Right.advance L L1 second b) :=
+  eq_reason_in!{NewSecond.Carrier _
+    "=" _ "by" { sym!{NewSecond.Carrier} _ _ (OldSecond.law (I.Int^::ofNat q) b) }
+    "=" _ "by" { LaterSecond.law (I.Int^::ofNat q) b }};

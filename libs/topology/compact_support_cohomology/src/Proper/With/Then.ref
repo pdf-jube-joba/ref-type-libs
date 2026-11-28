@@ -1,0 +1,16 @@
+\import topology.Topology[Carrier := C] \as FinalTop;
+\import \root.Proper[A := A, B := B, source := source, target := target]
+  .With[f := f, continuous := continuous, proper := proper] \as First;
+\import \root.Proper[A := B, B := C, source := target, target := final]
+  .With[f := g, continuous := gContinuous, proper := gProper] \as Second;
+\import topology.Maps[A := A, B := C] \as Maps;
+\definition composite[x: A]: C := g (f x);
+\definition compactPreimage[K: \Pow C][compact: FinalTop.IsCompactIn final K]:
+  SourceTop.IsCompactIn source (Maps.Preimage composite K) :=
+  proper (topology.Maps[A := B, B := C].Preimage g K) (gProper K compact);
+\definition regular: topology.Continuity[A := A, B := C].Continuous source final composite :=
+  topology.Composition[A := A, B := B, C := C].composeContinuous source target final f g continuous gContinuous;
+\import \root.Proper[A := A, B := C, source := source, target := final]
+  .With[f := composite, continuous := regular, proper := compactPreimage] \as Direct;
+\import \root.On[A := C, space := final] \as Final;
+\module Degree(coefficients: Modules.Bundle, z: I.Int^);

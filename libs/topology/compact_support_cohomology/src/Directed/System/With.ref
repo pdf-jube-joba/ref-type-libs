@@ -1,0 +1,80 @@
+\definition move[x, y: Representative][at: Agreement[x, y]][k: Index][into: before at.index k]:
+  advance x.index k (order.transitive x.index at.index k at.bounds.left into) x.value =
+  advance y.index k (order.transitive y.index at.index k at.bounds.right into) y.value :=
+  eq_reason_in!{{Stage k} _
+    "=" _ "by" { laws.compose x.index at.index k at.bounds.left into x.value }
+    "=" _ "by" { congr!{{Stage at.index} {Stage k}} (advance at.index k into) _ _ at.equal }
+    "=" _ "by" { sym!{{Stage k}} _ _ (laws.compose y.index at.index k at.bounds.right into y.value) }};
+
+\definition transitive[x, y, z: Representative]: Equivalent x y -> Equivalent y z -> Equivalent x z := \block {
+  \fun (xy: Equivalent x y)(yz: Equivalent y z) \then
+  \takefrom first: Agreement[x, y] \by xy \then
+  \takefrom second: Agreement[y, z] \by yz \then
+  \let k: Index := join first.index second.index \then
+  \let both: Upper[first.index, second.index, k] := upper first.index second.index \then
+  \return \exact(Agreement[x, z] {
+    index := k,
+    bounds := Upper[x.index, z.index, k] {
+      left := order.transitive x.index first.index k first.bounds.left both.left,
+      right := order.transitive z.index second.index k second.bounds.right both.right,
+    },
+    equal := eq_reason_in!{{Stage k} _ "=" _ "by" { move x y first k both.left } "=" _ "by" { move y z second k both.right }},
+  }, Agreement[x, z])
+};
+
+\definition equivalence: Quotient.EquivalenceLaws :=
+  Quotient.EquivalenceLaws { refl := reflexive, sym := symmetric, trans := transitive };
+
+\definition Carrier: \Set := Quotient.Carrier;
+\definition represent[i: Index][x: Stage i]: Representative := Representative { index := i, value := x };
+\definition ofStage[i: Index][x: Stage i]: Carrier := Quotient.class (represent i x);
+
+\definition agrees[i, j: Index][x: Stage i][y: Stage j]:
+  Equivalent (represent i x) (represent j y) -> ofStage i x = ofStage j y :=
+  Quotient.classOfEq equivalence (represent i x) (represent j y);
+
+\definition agreementOf[i, j: Index][x: Stage i][y: Stage j]:
+  ofStage i x = ofStage j y -> Equivalent (represent i x) (represent j y) :=
+  Quotient.equivalentOfClassEq equivalence (represent i x) (represent j y);
+
+\definition compatible[i, j: Index][ij: before i j][x: Stage i]:
+  ofStage i x = ofStage j (advance i j ij x) :=
+  agrees i j x (advance i j ij x) (\exact(Agreement[represent i x, represent j (advance i j ij x)] {
+    index := j,
+    bounds := Upper[i, j, j] { left := ij, right := order.reflexive j },
+    equal := sym!{{Stage j}} _ _ (laws.identity j (advance i j ij x)),
+  }, Agreement[represent i x, represent j (advance i j ij x)]));
+
+\definition representativeEta: \forall (r: Representative) -> represent r.index r.value = r :=
+  \induction (r: Representative) \return represent r.index r.value = r \with {
+    | # : \fun (i: Index)(x: Stage i) => \refl(represent i x)
+  };
+
+\definition induction[P: Carrier -> \Prop]:
+  (\forall (i: Index)(x: Stage i) -> P (ofStage i x)) -> \forall (c: Carrier) -> P c :=
+  \fun (step: _) => Quotient.induction P (\fun (r: Representative) => \idelim represent r.index r.value = r
+    \with u: Representative => P (Quotient.class u) \by { base: step r.index r.value, equality: representativeEta r });
+
+\module Into(Target: \Set, stageMap: \forall (i: Index) -> Stage i -> Target,
+  compatibleMap: \forall (i, j: Index)(ij: before i j)(x: Stage i) -> stageMap i x = stageMap j (advance i j ij x));
+\module Terminal(last: Index, above: \forall (i: Index) -> before i last);
+
+\module Together;
+\module Unary(operation: \forall (i: Index) -> Stage i -> Stage i,
+  naturality: \forall (i, j: Index)(ij: before i j)(x: Stage i) ->
+    advance i j ij (operation i x) = operation j (advance i j ij x));
+\module Binary(operation: \forall (i: Index) -> Stage i -> Stage i -> Stage i,
+  naturality: \forall (i, j: Index)(ij: before i j)(x, y: Stage i) ->
+    advance i j ij (operation i x y) = operation j (advance i j ij x) (advance i j ij y));
+
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\module Additive(spaces: \forall (i: Index) -> Modules.Space (Stage i), origin: Index,
+  preservesZero: \forall (i, j: Index)(ij: before i j) -> advance i j ij (spaces i).zero = (spaces j).zero,
+  preservesAdd: \forall (i, j: Index)(ij: before i j)(x, y: Stage i) ->
+    advance i j ij ((spaces i).add x y) = (spaces j).add (advance i j ij x) (advance i j ij y),
+  preservesNeg: \forall (i, j: Index)(ij: before i j)(x: Stage i) ->
+    advance i j ij ((spaces i).neg x) = (spaces j).neg (advance i j ij x),
+  preservesScale: \forall (i, j: Index)(ij: before i j)(a: I.Int^)(x: Stage i) ->
+    advance i j ij ((spaces i).smul a x) = (spaces j).smul a (advance i j ij x));

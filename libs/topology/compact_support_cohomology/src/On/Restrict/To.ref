@@ -1,0 +1,20 @@
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := part] \as LocalPair;
+\import LocalPair.Maps[B := A].Over[target := space, targetSubset := outside K] \as Maps;
+\definition pairMap: Maps.Map := \into[Carrier -> A](inclusion, Maps.Map) \by {
+  Maps.Laws[inclusion] {
+    continuous := continuous,
+    contained := \fun (x: LocalPair.SubspaceCarrier) => preserves x (\bysub(Carrier, part, x)),
+  }
+};
+\import Maps.On[f := pairMap].Integer[] \as Native;
+\module With(coefficients: Modules.Bundle, z: I.Int^) {
+  \definition pull: _ := Native.With[coefficients := coefficients].At[z := z].induced;
+  \import LocalPair.With[coefficients := coefficients].At[z := z] \as Source;
+  \import singular_cohomology.Relative[A := A, source := space, subset := outside K]
+    .With[coefficients := coefficients].At[z := z] \as Target;
+  \import Modules.Isomorphism[V := Target.Carrier, W := Source.Carrier, source := Target.space, target := Source.space] \as Iso;
+  \import Iso.OfBijective[f := pull] \as Bijective;
+  \definition Isomorphism: \Set := Iso.Isomorphism;
+  \definition IsBijective: \Prop := Logic.And[Bijective.Injective, Bijective.Onto];
+  \definition isomorphism[h: IsBijective]: Isomorphism := Bijective.isomorphism h.left h.right;
+}

@@ -1,0 +1,67 @@
+\import Top.Subspace[S := J] \as Subspace;
+\import topology.Topology[Carrier := Subspace.CarrierSet] \as Local;
+\import Local.Finite[] \as LocalFinite;
+\import Local.Urysohn[] \as Shrink;
+\import Local.Compactness[] \as LocalCompact;
+\import Subspace.Open[] \as Inclusion;
+\definition local: Local.Topology := Subspace.topology space;
+\definition compactLocal: Local.IsCompact local := Subspace.Properties[].compact space (compact J);
+\definition normal: Local.IsNormal local :=
+  LocalCompact.compactHausdorffNormal local compactLocal (Subspace.Properties[].hausdorff space hausdorff);
+\definition leftOpen: Local.IsOpenIn local (Subspace.Trace U) := Subspace.traceOpen space U openU;
+\definition rightOpen: Local.IsOpenIn local (Subspace.Trace V) := Subspace.traceOpen space V openV;
+\definition leftClosed: Local.IsClosedIn local (Local.Complement (Subspace.Trace V)) :=
+  LocalFinite.openComplementClosed local (Subspace.Trace V) rightOpen;
+\definition insideLeft[x: Subspace.CarrierSet][outsideV: Local.Member (Local.Complement (Subspace.Trace V)) x]:
+  Local.Member (Subspace.Trace U) x :=
+  either!{{covers x} {Local.Member (Subspace.Trace U) x}
+    {\fun (inU: Top.Member U x) => inU}
+    {\fun (inV: Top.Member V x) => Logic.falseElim (Local.Member (Subspace.Trace U) x) (outsideV inV)}};
+
+\import topology.Continuity[A := Subspace.CarrierSet, B := A].Corestriction[S := J] \as Continuity;
+\import topology.Compactness[A := Subspace.CarrierSet, B := A] \as Image;
+\definition support[F: \Pow Subspace.CarrierSet][closed: Local.IsClosedIn local F]: Support :=
+  \into[\Pow A](Inclusion.image F, Supports) \by {
+    Image.continuousImage local space Inclusion.inclusion (Continuity.inclusionContinuous space) F
+      (LocalCompact.closedCompact local compactLocal F closed)
+  };
+\definition imageInside[F: \Pow Subspace.CarrierSet][W: \Pow A][inside: Local.Subset F (Subspace.Trace W)]:
+  Top.Subset (Inclusion.image F) W :=
+  \fun (x: A)(member: Top.Member (Inclusion.image F) x) => Inclusion.imageElim F x (Top.Member W x)
+    (\fun (y: Subspace.CarrierSet)(inF: Local.Member F y)(equal: y = x) =>
+      \idelim y = x \with z: A => Top.Member W z \by { base: inside y inF, equality: equal })
+    member;
+
+\module FromShrink(data: Shrink.ShrinkData[local, Local.Complement (Subspace.Trace V), Subspace.Trace U]) {
+  \definition rightClosed: Local.IsClosedIn local (Local.Complement data.inner) :=
+    LocalFinite.openComplementClosed local data.inner data.innerOpen;
+  \definition rightWithin[x: Subspace.CarrierSet][outsideInner: Local.Member (Local.Complement data.inner) x]:
+    Local.Member (Subspace.Trace V) x :=
+    LocalFinite.doubleNegElim (Local.Member (Subspace.Trace V) x)
+      (\fun (outsideV: Local.Member (Local.Complement (Subspace.Trace V)) x) => outsideInner (data.contains x outsideV));
+  \definition left: Support := support data.envelope data.envelopeClosed;
+  \definition right: Support := support (Local.Complement data.inner) rightClosed;
+  \definition covers[x: A][inJ: Top.Member J x]: Top.Member (union left right) x := \block {
+    \let y: Subspace.CarrierSet := \into[A](x, J) \by { inJ } \then
+    \return either!{{Classical.excludedMiddle (Local.Member data.inner y)} {Top.Member (union left right) x}
+      {\fun (inside: Local.Member data.inner y) => Logic.Or[_, _]::left
+        (Inclusion.imageMember data.envelope y (data.enclosed y inside))}
+      {\fun (outside: Local.Member (Local.Complement data.inner) y) => Logic.Or[_, _]::right
+        (Inclusion.imageMember (Local.Complement data.inner) y outside)}}
+  };
+  \definition split: Split[J] := Split[J] {
+    left := left,
+    right := right,
+    leftInU := imageInside data.envelope U data.within,
+    rightInV := imageInside (Local.Complement data.inner) V rightWithin,
+    leftInJ := Inclusion.imageIncluded data.envelope,
+    rightInJ := Inclusion.imageIncluded (Local.Complement data.inner),
+    coversJ := covers,
+  };
+}
+\definition existsSplit: \exists Split[J] := \block {
+  \takefrom data: Shrink.ShrinkData[local, Local.Complement (Subspace.Trace V), Subspace.Trace U]
+    \by Shrink.shrink[local] normal (Local.Complement (Subspace.Trace V)) (Subspace.Trace U)
+      leftClosed leftOpen insideLeft \then
+  \return \exact(FromShrink[data := data].split, Split[J])
+};

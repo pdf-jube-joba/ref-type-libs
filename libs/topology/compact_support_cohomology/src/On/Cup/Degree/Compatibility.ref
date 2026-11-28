@@ -1,0 +1,22 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\definition both[K, L, K1, L1: Support][first: before K K1][second: before L L1][a: Left.Stage K][b: Right.Stage L]:
+  stage K L a b = stage K1 L1 (Left.advance K K1 first a) (Right.advance L L1 second b) :=
+  eq_reason_in!{Target.Cohomology _
+    "=" _ "by" { Target.compatible (intersection K L) (intersection K1 L1) (intersectionMonotone K L K1 L1 first second)
+      (\parent.AtSupports[K := K, L := L].cup a b) }
+    "=" _ "by" { congr!{{Target.Stage (intersection K1 L1)} Target.Cohomology} (Target.ofSupport (intersection K1 L1)) _ _
+      (\parent.AtSupports[K := K, L := L].Through[K1 := K1, L1 := L1, first := first, second := second].commutes a b) }};
+
+\definition first[K, K1, L: Support][included: before K K1][a: Left.Stage K][b: Right.Stage L]:
+  stage K L a b = stage K1 L (Left.advance K K1 included a) b :=
+  eq_reason_in!{Target.Cohomology _
+    "=" _ "by" { both K L K1 L included (order.reflexive L) a b }
+    "=" _ "by" { congr!{{Right.Stage L} Target.Cohomology} (stage K1 L (Left.advance K K1 included a)) _ _ (Right.identity L b) }};
+
+\definition second[K, L, L1: Support][included: before L L1][a: Left.Stage K][b: Right.Stage L]:
+  stage K L a b = stage K L1 a (Right.advance L L1 included b) :=
+  eq_reason_in!{Target.Cohomology _
+    "=" _ "by" { both K L K L1 (order.reflexive K) included a b }
+    "=" _ "by" { congr!{{Left.Stage K} Target.Cohomology} (\fun (x: Left.Stage K) => stage K L1 x (Right.advance L L1 included b)) _ _ (Left.identity K a) }};

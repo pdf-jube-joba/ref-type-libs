@@ -1,0 +1,19 @@
+\import Comparison.With[coefficients := coefficients, z := z].Linear[] \as DiskComparison;
+\import TotalComparison.With[coefficients := coefficients, z := z].Isomorphism[] \as Homeomorphism;
+\import C03.Additive[coefficients := coefficients].Degree[z := z] \as Thom;
+\import \root.On[A := Family.Point, space := bundle.totalSpace].With[coefficients := coefficients].Degree[z := z] \as Total;
+\import \root.On[A := Radial.UnitCarrier, space := Radial.unitTopology].With[coefficients := coefficients].Degree[z := z] \as OpenDisk;
+\definition diskSphere: _ := DiskComparison.isomorphism;
+\definition thomDisk: _ := Thom.thomComparison;
+\definition interiorTotal: _ := Homeomorphism.isomorphism;
+\import Modules.Isomorphism[V := OpenDisk.Cohomology, W := Thom.Class,
+  source := OpenDisk.Module[].moduleSpace, target := Thom.space].Inverse[] \as Inverse;
+\import Modules.Isomorphism[V := Thom.Class, W := OpenDisk.Cohomology,
+  source := Thom.space, target := OpenDisk.Module[].moduleSpace]
+  .Composition[U := Total.Cohomology, final := Total.Module[].moduleSpace] \as Compose;
+\definition diskSphereTotal: _ := Compose.compose interiorTotal (Inverse.inverse diskSphere);
+\import singular_cohomology.Chains[A := Disk.Thom, source := Disk.thomTopology].Reduced[]
+  .With[coefficients := coefficients].At[z := z] \as Reduced;
+\import Modules.Isomorphism[V := Reduced.Carrier, W := Thom.Class, source := Reduced.space, target := Thom.space]
+  .Composition[U := Total.Cohomology, final := Total.Module[].moduleSpace] \as Compare;
+\definition thomTotal: _ := Compare.compose diskSphereTotal thomDisk;

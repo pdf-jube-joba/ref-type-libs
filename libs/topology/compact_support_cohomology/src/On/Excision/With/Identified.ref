@@ -1,0 +1,9 @@
+\definition Preserves[S: \Pow Local.Carrier]: \Prop :=
+  \forall (x: Local.Carrier) -> \In[Local.Carrier] S x -> \In[A] (outside K) (Local.inclusion x);
+
+\definition bijective: \forall (preserves: Preserves part) ->
+  Local.To[part := part, preserves := preserves].With[coefficients := coefficients, z := z].IsBijective :=
+  \idelim Local.trace = part \with S: \Pow Local.Carrier =>
+    \forall (preserves: Preserves S) ->
+      Local.To[part := S, preserves := preserves].With[coefficients := coefficients, z := z].IsBijective
+  \by { base: \fun (preserves: Preserves Local.trace) => traceBijective, equality: partEquality };

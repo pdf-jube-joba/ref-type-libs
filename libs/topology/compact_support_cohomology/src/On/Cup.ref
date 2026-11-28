@@ -1,0 +1,25 @@
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\import singular_products.Cochains[A := A, source := space, R := R, ring := ring] \as Cochains;
+\definition coefficients: Modules.Bundle := Cochains.integerCoefficients;
+\definition intersection[K, L: Support]: Support :=
+  \into[\Pow A](Top.Intersection K L, Supports) \by {
+    Compactness.closedSubset space K (Top.Intersection K L) (compact K)
+      (Finite.intersectionClosed space K L (Compactness.compactClosed space hausdorff K (compact K))
+        (Compactness.compactClosed space hausdorff L (compact L)))
+      (\fun (x: A)(member: Top.Member (Top.Intersection K L) x) => member.left)
+  };
+\definition intersectionMonotone[K, L, K1, L1: Support][first: before K K1][second: before L L1]:
+  before (intersection K L) (intersection K1 L1) :=
+  \fun (x: A)(member: Top.Member (intersection K L) x) => Logic.And[_, _]::#
+    (first x member.left) (second x member.right);
+\definition outsideIntersection[K, L: Support][x: A][member: Top.Member (outside (intersection K L)) x]:
+  Logic.Or[Top.Member (outside K) x, Top.Member (outside L) x] :=
+  either!{{(Classical.excludedMiddle (Top.Member K x))} {Logic.Or[Top.Member (outside K) x, Top.Member (outside L) x]}
+    {\fun (left: Top.Member K x) => Logic.Or[_, _]::right (\fun (right: Top.Member L x) => member (Logic.And[_, _]::# left right))}
+    {\fun (left: Top.Member (outside K) x) => Logic.Or[_, _]::left left}};
+
+\module AtSupports(K, L: Support);
+\module Degree(p, q: N.Nat^);

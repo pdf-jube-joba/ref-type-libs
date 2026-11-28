@@ -1,0 +1,39 @@
+\definition spaces[K: Support]: Modules.Space (Stage K) :=
+  singular_cohomology.Relative[A := A, source := space, subset := outside K]
+    .With[coefficients := coefficients].At[z := z].space;
+
+\module Enlargement(K, L: Support, inclusion: before K L) {
+  \import \parent.\parent.\parent.Enlarge[K := K, L := L, inclusion := inclusion] \as Enlarge;
+  \import Modules.Hom[V := Stage K, W := Stage L, source := spaces K, target := spaces L] \as Maps;
+  \definition linear: Maps.Map := Enlarge.advance z;
+  \definition zero: _ := Maps.zeroPreserved linear;
+  \definition neg: _ := Maps.negativePreserved linear;
+  \definition add: _ := linear.addition;
+  \definition scalar: _ := linear.scalar;
+}
+\definition preservesZero[K, L: Support][inclusion: before K L]: advance K L inclusion (spaces K).zero = (spaces L).zero :=
+  Enlargement[K := K, L := L, inclusion := inclusion].zero;
+\definition preservesAdd[K, L: Support][inclusion: before K L][x, y: Stage K]:
+  advance K L inclusion ((spaces K).add x y) = (spaces L).add (advance K L inclusion x) (advance K L inclusion y) :=
+  Enlargement[K := K, L := L, inclusion := inclusion].add x y;
+\definition preservesNeg[K, L: Support][inclusion: before K L][x: Stage K]:
+  advance K L inclusion ((spaces K).neg x) = (spaces L).neg (advance K L inclusion x) :=
+  Enlargement[K := K, L := L, inclusion := inclusion].neg x;
+\definition preservesScale[K, L: Support][inclusion: before K L][a: I.Int^][x: Stage K]:
+  advance K L inclusion ((spaces K).smul a x) = (spaces L).smul a (advance K L inclusion x) :=
+  Enlargement[K := K, L := L, inclusion := inclusion].scalar a x;
+
+\import Limit.Additive[spaces := spaces, origin := empty, preservesZero := preservesZero, preservesAdd := preservesAdd,
+  preservesNeg := preservesNeg, preservesScale := preservesScale] \as Additive;
+\definition moduleSpace: Modules.Space Cohomology := Additive.moduleSpace;
+\definition ofSupportLinear[K: Support]: _ := Additive.OfStage[i := K].linear;
+\definition zeroOnSupport: _ := Additive.zeroOnStage;
+\definition addOnSupport: _ := Additive.addOnStage;
+\definition scalarOnSupport[a: I.Int^]: _ := Additive.smulOnStage a;
+\definition simultaneous[P: Cohomology -> Cohomology -> \Prop]: _ := Limit.Together[].two P;
+
+\module LinearDescent(W: \Set, target: Modules.Space W,
+  stageMap: \forall (K: Support) -> Modules.Hom[V := Stage K, W := W, source := spaces K, target := target].Map,
+  compatibleMap: \forall (K, L: Support)(included: before K L)(x: Stage K) ->
+    (stageMap K).apply x = (stageMap L).apply (advance K L included x));
+\module Vanishing;

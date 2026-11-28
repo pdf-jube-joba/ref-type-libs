@@ -1,0 +1,43 @@
+\definition support: Support := whole compactSpace;
+\import Top.Subspace[S := outside support] \as Exterior;
+\import singular_cohomology.Calculations[A := Exterior.CarrierSet, source := Exterior.topology space].ChainEmpty[] \as Empty;
+\import Empty.With[coefficients := coefficients] \as EmptyTheory;
+\definition empty[x: Exterior.CarrierSet]: Logic.False := (\bysub(A, outside support, x)) (\refl(x));
+\import singular_cohomology.Relative[A := A, source := space, subset := outside support]
+  .With[coefficients := coefficients] \as Relative;
+\import Relative.PairSequence[] \as PairSequence;
+\module AtDegree(z: I.Int^) {
+  \definition all[h: Whole.Carrier z]: HasSupport z h := \block {
+    \takefrom lift: \Cast[Relative.Carrier z] ({ g: Relative.Carrier z \where (PairSequence.inclusion).apply z g = h })
+      \by PairSequence.At[z := z].kernelImage h (EmptyTheory.At[z := z].zero empty ((PairSequence.restriction).apply z h)) \then
+    \return supports support z lift h (\bysub(Relative.Carrier z,
+      { g: Relative.Carrier z \where (PairSequence.inclusion).apply z g = h }, lift))
+  };
+  \definition restrict[h: Carrier z]: Whole.Carrier z := h;
+  \definition include[h: Whole.Carrier z]: Carrier z :=
+    \into[Whole.Carrier z](h, \parent.\parent.At[z := z].Supported) \by { all h };
+
+  \import Modules.Hom[V := Carrier z, W := Whole.Carrier z, source := moduleSpace z, target := Whole.space z] \as Forward;
+  \import Modules.Hom[V := Whole.Carrier z, W := Carrier z, source := Whole.space z, target := moduleSpace z] \as Backward;
+  \definition forward: Forward.Map := Forward.Map {
+    apply := restrict,
+    addition := \fun (h, k: Carrier z) => \refl((Whole.space z).add h k),
+    scalar := \fun (a: I.Int^)(h: Carrier z) => \refl((Whole.space z).smul a h),
+  };
+  \definition backward: Backward.Map := Backward.Map {
+    apply := include,
+    addition := \fun (h, k: Whole.Carrier z) => \refl((Whole.space z).add h k),
+    scalar := \fun (a: I.Int^)(h: Whole.Carrier z) => \refl((Whole.space z).smul a h),
+  };
+  \import Modules.Isomorphism[V := Carrier z, W := Whole.Carrier z, source := moduleSpace z, target := Whole.space z] \as Iso;
+  \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+    forward := forward, backward := backward,
+    leftInverse := \fun (h: Carrier z) => \refl(h),
+    rightInverse := \fun (h: Whole.Carrier z) => \refl(h),
+  };
+}
+\import CochainComplexes.Isomorphism[C := supportedComplex, D := Whole.complex] \as Iso;
+\import Iso.Degreewise[isomorphisms := (\fun (z: I.Int^) => AtDegree[z := z].isomorphism)] \as Degreewise;
+\definition complexIsomorphism: Iso.Isomorphism := Degreewise.isomorphism
+  (\fun (z: I.Int^)(h: Carrier z) => \refl(((Whole.complex).differential).apply z h));
+\module Cohomology(z: I.Int^);

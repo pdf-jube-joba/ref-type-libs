@@ -1,0 +1,56 @@
+\import Modules.Of[V := Whole.Carrier z, space := Whole.space z].Submodule[] \as Submodules;
+\definition Supported: \Pow (Whole.Carrier z) := { h: Whole.Carrier z \where HasSupport z h };
+\module Sum(J, K: Support) {
+  \import \parent.\parent.AtSupport[K := J] \as Left;
+  \import \parent.\parent.AtSupport[K := K] \as Right;
+  \import \parent.\parent.AtSupport[K := union J K] \as Both;
+  \import Left.Enlarge[L := union J K, included := (upper J K).left] \as First;
+  \import Right.Enlarge[L := union J K, included := (upper J K).right] \as Second;
+  \definition sum[x: Left.Carrier z][y: Right.Carrier z]: Both.Carrier z :=
+    (Both.moduleSpace z).add (First.apply z x) (Second.apply z y);
+  \definition equality[x: Left.Carrier z][y: Right.Carrier z]:
+    Both.include z (sum x y) = (Whole.space z).add (Left.include z x) (Right.include z y) :=
+    eq_reason_in!{{Whole.Carrier z} _
+      "=" _ "by" { Both.addition z (First.apply z x) (Second.apply z y) }
+      "=" _ "by" { congr!{{Whole.Carrier z} {Whole.Carrier z} {Whole.Carrier z}} ((Whole.space z).add)
+        _ _ _ _ (First.inclusion z x) (Second.inclusion z y) }};
+}
+\definition addition[h, k: Whole.Carrier z]: HasSupport z h -> HasSupport z k -> HasSupport z ((Whole.space z).add h k) := \block {
+  \fun (left: HasSupport z h)(right: HasSupport z k) \then
+  \takefrom a: Witness[z, h] \by left \then
+  \takefrom b: Witness[z, k] \by right \then
+  \return supports (union a.support b.support) z (Sum[J := a.support, K := b.support].sum a.value b.value) _
+    (eq_reason_in!{{Whole.Carrier z} _
+      "=" _ "by" { Sum[J := a.support, K := b.support].equality a.value b.value }
+      "=" _ "by" { congr!{{Whole.Carrier z} {Whole.Carrier z} {Whole.Carrier z}} ((Whole.space z).add) _ _ _ _ a.equal b.equal }})
+};
+
+\definition scalar[a: I.Int^][h: Whole.Carrier z]: HasSupport z h -> HasSupport z ((Whole.space z).smul a h) := \block {
+  \fun (supported: HasSupport z h) \then
+  \takefrom at: Witness[z, h] \by supported \then
+  \let same: \parent.AtSupport[K := at.support].include z ((\parent.AtSupport[K := at.support].moduleSpace z).smul a at.value) =
+    (Whole.space z).smul a h := eq_reason_in!{{Whole.Carrier z} _
+      "=" _ "by" { \parent.AtSupport[K := at.support].scalar z a at.value }
+      "=" _ "by" { congr!{{Whole.Carrier z} {Whole.Carrier z}} ((Whole.space z).smul a) _ _ at.equal }} \then
+  \return supports at.support z ((\parent.AtSupport[K := at.support].moduleSpace z).smul a at.value) _ same
+};
+
+\definition coboundary[h: Whole.Carrier z]: HasSupport z h -> HasSupport (Degrees.next z) (((Whole.complex).differential).apply z h) := \block {
+  \fun (supported: HasSupport z h) \then
+  \takefrom at: Witness[z, h] \by supported \then
+  \let d: \parent.AtSupport[K := at.support].Carrier (Degrees.next z) := \parent.AtSupport[K := at.support].coboundaryValue z at.value \then
+  \return supports at.support (Degrees.next z) d _
+    (eq_reason_in!{{Whole.Carrier (Degrees.next z)} _
+      "=" _ "by" { sym!{{Whole.Carrier (Degrees.next z)}} _ _ (\parent.AtSupport[K := at.support].coboundary z at.value) }
+      "=" _ "by" { congr!{{Whole.Carrier z} {Whole.Carrier (Degrees.next z)}} (((Whole.complex).differential).apply z) _ _ at.equal }})
+};
+
+\definition submodule: Submodules.Submodule := Submodules.Submodule {
+  carrier := Supported,
+  zero := supports empty z (\parent.AtSupport[K := empty].moduleSpace z).zero (Whole.space z).zero (\parent.AtSupport[K := empty].zero z),
+  addition := addition,
+  scalar := scalar,
+};
+\import Submodules.Of[S := submodule] \as Submodule;
+\definition Carrier: \Set := Submodule.Carrier;
+\definition moduleSpace: Modules.Space Carrier := Submodule.moduleSpace;

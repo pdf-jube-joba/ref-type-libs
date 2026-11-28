@@ -1,0 +1,16 @@
+\import \parent.AtSupport[K := K] \as Relative;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside K]
+  .With[coefficients := coefficients] \as RelativeTheory;
+\import CochainComplexes.Map[C := RelativeTheory.complex, D := supportedComplex] \as Maps;
+\definition map: Maps.Map := Maps.Map {
+  apply := \fun (z: I.Int^)(h: Relative.Carrier z) =>
+    \into[Whole.Carrier z](Relative.include z h, \parent.At[z := z].Supported) \by { supports K z h (Relative.include z h) (\refl(Relative.include z h)) },
+  addition := Relative.addition,
+  scalar := Relative.scalar,
+  commutes := Relative.coboundary,
+};
+\module Degree(z: I.Int^) {
+  \definition induced: _ := Maps.At[k := z].induced map;
+  \definition cycles: _ := Maps.At[k := z].cyclesMap map;
+  \definition onClass: _ := Maps.At[k := z].onClass map;
+}

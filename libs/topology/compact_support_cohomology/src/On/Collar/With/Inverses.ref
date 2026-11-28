@@ -1,0 +1,29 @@
+\import \parent.AtSupport[K := baseSupport] \as Base;
+\import Relative.Maps[B := A].Over[target := space, targetSubset := outside (Open.image baseSupport)]
+  .Composition[C := A].Over[final := space, finalSubset := boundary] \as FromBoundary;
+\import Relative.Maps[B := A].Over[target := space, targetSubset := boundary] \as End;
+\definition onBoundary: End.Map := FromBoundary.compose Base.keepBoundary collapse;
+\import Relative.Identity[] \as RelativeIdentity;
+\import End.Homotopy[f := RelativeIdentity.map, g := onBoundary] \as Homotopy;
+\definition staysBoundary: Homotopy.Homotopy := \into[Homotopy.Family](adjusted RelativeIdentity.map onBoundary motionLaws.start motionLaws.end, Homotopy.Homotopy) \by {
+  \fun (t: Interval.Carrier)(x: Relative.SubspaceCarrier) =>
+    \idelim x = motion (Cylinder.at t x) \with y: A => Top.Member boundary y
+      \by { base: \bysub(A, boundary, x), equality: sym!{A} _ _ (fixedMotion (Cylinder.at t x) (\bysub(A, boundary, x))) }
+};
+\import Homotopy.On[h := staysBoundary].With[coefficients := coefficients] \as Invariance;
+\import FromBoundary.On[f := Base.keepBoundary, g := collapse].With[coefficients := coefficients] \as Composition;
+\definition relativeLaw[x: Group]: Base.pullback (atBase x) = x :=
+  eq_reason_in!{Group _
+    "=" _ "by" { sym!{Group} _ _ (Composition.law z x) }
+    "=" _ "by" { sym!{Group} _ _ (Invariance.At[z := z].law x) }
+    "=" _ "by" { RelativeIdentity.With[coefficients := coefficients].law z x }};
+\definition forwardBackward[x: Group]: forward (backward x) = x :=
+  eq_reason_in!{Group _
+    "=" _ "by" { onStage baseSupport (Extension.AtSupport[K := baseSupport].restrict (atBase x)) }
+    "=" _ "by" { congr!{{AmbientDegree.Stage (Open.image baseSupport)} Group} Base.pullback _ _
+      ((Extension.AtSupport[K := baseSupport].isomorphism).leftInverse (atBase x)) }
+    "=" _ "by" { relativeLaw x }};
+\module AtSupport(K: Interior.Support);
+\definition backwardForward: \forall (x: InteriorDegree.Cohomology) -> backward (forward x) = x :=
+  InteriorDegree.induction (\fun (x: InteriorDegree.Cohomology) => backward (forward x) = x)
+    (\fun (K: Interior.Support) => AtSupport[K := K].law);

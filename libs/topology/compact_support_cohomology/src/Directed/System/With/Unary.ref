@@ -1,0 +1,10 @@
+\definition rule[i: Index][x: Stage i]: Carrier := ofStage i (operation i x);
+\definition ruleCompatible[i, j: Index][ij: before i j][x: Stage i]:
+  rule i x = rule j (advance i j ij x) :=
+  eq_reason_in!{Carrier _
+    "=" _ "by" { compatible i j ij (operation i x) }
+    "=" _ "by" { congr!{{Stage j} Carrier} (ofStage j) _ _ (naturality i j ij x) }};
+
+\import \parent.Into[Target := Carrier, stageMap := rule, compatibleMap := ruleCompatible] \as Into;
+\definition apply: Carrier -> Carrier := Into.map;
+\definition onStage: _ := Into.onStage;

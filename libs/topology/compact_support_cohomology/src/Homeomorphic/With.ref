@@ -1,0 +1,54 @@
+\import \root.Homeomorphic[A := B, B := A, source := target, target := source, h := inverse] \as Reverse;
+\import \root.Proper[A := A, B := B, source := source, target := target]
+  .With[f := h.forward, continuous := continuous, proper := proper] \as F;
+\import \root.Proper[A := B, B := A, source := target, target := source]
+  .With[f := h.backward, continuous := inverseContinuous, proper := Reverse.proper] \as G;
+\import F.WithCoefficients[coefficients := coefficients, z := z] \as Forward;
+\import G.WithCoefficients[coefficients := coefficients, z := z] \as Backward;
+\import \root.On[A := A, space := source] \as Source;
+\import \root.On[A := B, space := target] \as Target;
+\import Source.With[coefficients := coefficients].Degree[z := z] \as SourceDegree;
+\import Target.With[coefficients := coefficients].Degree[z := z] \as TargetDegree;
+
+\module OnSupport(K: Source.Support) {
+  \definition larger: Source.Support := F.preimage (G.preimage K);
+  \definition included[x: A][member: SourceTop.Member K x]: SourceTop.Member larger x :=
+    \idelim x = h.backward (h.forward x) \with y: A => SourceTop.Member K y
+      \by { base: member, equality: sym!{A} _ _ ((Homeomorphism.laws source target h).leftInverse x) };
+  \import Source.With[coefficients := coefficients].Enlarge[K := K, L := larger, inclusion := included] \as Enlarge;
+  \import F.AtSupport[K := G.preimage K] \as First;
+  \import G.AtSupport[K := K] \as Second;
+  \import singular_cohomology.Relative[A := A, source := source, subset := Source.outside larger]
+    .Maps[B := B].Over[target := target, targetSubset := Target.outside (G.preimage K)]
+    .Composition[C := A].Over[final := source, finalSubset := Source.outside K] \as Composition;
+  \import Composition.On[f := First.pairMap, g := Second.pairMap].With[coefficients := coefficients] \as Action;
+  \import singular_cohomology.Relative[A := A, source := source, subset := Source.outside larger]
+    .Maps[B := A].Over[target := source, targetSubset := Source.outside K] \as PairMaps;
+  \definition composite: PairMaps.Map := Composition.compose First.pairMap Second.pairMap;
+  \definition same: composite = Enlarge.pairMap :=
+    \axiom:funext(composite, Enlarge.pairMap, (Homeomorphism.laws source target h).leftInverse);
+  \module Pullback(m: PairMaps.Map) {
+    \definition apply: SourceDegree.Stage K -> SourceDegree.Stage larger :=
+      (PairMaps.On[f := m].Integer[].With[coefficients := coefficients].At[z := z].induced).apply;
+  }
+  \definition onStage[x: SourceDegree.Stage K]:
+    F.AtSupport[K := G.preimage K].Degree[coefficients := coefficients, z := z].apply
+        (G.AtSupport[K := K].Degree[coefficients := coefficients, z := z].apply x) =
+    SourceDegree.advance K larger included x :=
+    eq_reason_in!{{SourceDegree.Stage larger} _
+      "=" _ "by" { sym!{{SourceDegree.Stage larger}} _ _ (Action.law z x) }
+      "=" _ "by" { congr!{PairMaps.Map {SourceDegree.Stage larger}}
+          (\fun (m: PairMaps.Map) => Pullback[m := m].apply x) _ _ same }};
+
+  \definition law[x: SourceDegree.Stage K]:
+    Forward.pullback (Backward.pullback (SourceDegree.ofSupport K x)) = SourceDegree.ofSupport K x :=
+    eq_reason_in!{SourceDegree.Cohomology _
+      "=" _ "by" { congr!{TargetDegree.Cohomology SourceDegree.Cohomology} Forward.pullback _ _ (Backward.onSupport K x) }
+      "=" _ "by" { Forward.onSupport (G.preimage K) (G.AtSupport[K := K].Degree[coefficients := coefficients, z := z].apply x) }
+      "=" _ "by" { congr!{{SourceDegree.Stage larger} SourceDegree.Cohomology} (SourceDegree.ofSupport larger) _ _ (onStage x) }
+      "=" _ "by" { sym!{SourceDegree.Cohomology} _ _ (SourceDegree.compatible K larger included x) }};
+}
+\definition inverseLaw: \forall (c: SourceDegree.Cohomology) -> Forward.pullback (Backward.pullback c) = c :=
+  SourceDegree.induction (\fun (c: SourceDegree.Cohomology) => Forward.pullback (Backward.pullback c) = c)
+    (\fun (K: Source.Support) => OnSupport[K := K].law);
+\module Isomorphism;

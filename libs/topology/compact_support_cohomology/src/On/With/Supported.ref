@@ -1,0 +1,42 @@
+\import chain_complexes.Integer[] \as Degrees;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as CochainComplexes;
+\import singular_cohomology.Cochains[A := A, source := space]
+  .With[coefficients := coefficients].Integer[] \as Whole;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\use Equality.sym;
+
+\module AtSupport(K: Support);
+\structure Witness[z: I.Int^, h: Whole.Carrier z]: \Set := {
+  support: Support,
+  value: AtSupport[K := support].Carrier z,
+  equal: AtSupport[K := support].include z value = h,
+};
+\definition HasSupport[z: I.Int^][h: Whole.Carrier z]: \Prop := \exists Witness[z, h];
+\definition supports[K: Support][z: I.Int^][a: AtSupport[K := K].Carrier z][h: Whole.Carrier z]
+  [same: AtSupport[K := K].include z a = h]: HasSupport z h :=
+  \exact(Witness[z, h] { support := K, value := a, equal := same }, Witness[z, h]);
+
+\module At(z: I.Int^);
+\definition Carrier[z: I.Int^]: \Set := At[z := z].Carrier;
+\definition moduleSpace[z: I.Int^]: Modules.Space (Carrier z) := At[z := z].moduleSpace;
+\definition family: CochainComplexes.Family := CochainComplexes.Family { Carrier := Carrier, space := moduleSpace };
+\definition differential: CochainComplexes.DifferentialData[family] := CochainComplexes.DifferentialData[family] {
+  apply := \fun (z: I.Int^)(h: Carrier z) => \into[Whole.Carrier (Degrees.next z)](
+    ((Whole.complex).differential).apply z h, At[z := Degrees.next z].Supported) \by {
+      At[z := z].coboundary h (\bysub(Whole.Carrier z, At[z := z].Supported, h))
+    },
+};
+\definition supportedComplex: CochainComplexes.Complex := CochainComplexes.Complex {
+  family := family, differential := differential,
+  laws := CochainComplexes.DifferentialLaws[family, differential] {
+    addition := \fun (z: I.Int^)(x, y: Carrier z) => ((Whole.complex).laws).addition z x y,
+    scalar := \fun (z: I.Int^)(a: I.Int^)(x: Carrier z) => ((Whole.complex).laws).scalar z a x,
+    squareZero := \fun (z: I.Int^)(x: Carrier z) => ((Whole.complex).laws).squareZero z x,
+  },
+};
+\module CompareSupport(K: Support);
+\module Comparison(z: I.Int^);
+\module Vanishing(z: I.Int^);
+\module Compact(compactSpace: Top.IsCompact space);

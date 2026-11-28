@@ -1,0 +1,18 @@
+\definition toTerminal[i: Index][x: Stage i]: Stage last := advance i last (above i) x;
+
+\definition toTerminalCompatible[i, j: Index][ij: before i j][x: Stage i]:
+  toTerminal i x = toTerminal j (advance i j ij x) :=
+  laws.compose i j last ij (above j) x;
+
+\import \parent.Into[Target := Stage last, stageMap := toTerminal, compatibleMap := toTerminalCompatible] \as Into;
+\definition forward[x: Carrier]: Stage last := Into.map x;
+\definition backward[x: Stage last]: Carrier := ofStage last x;
+\definition forwardBackward[x: Stage last]: forward (backward x) = x :=
+  eq_reason_in!{{Stage last} _
+    "=" _ "by" { Into.onStage last x }
+    "=" _ "by" { laws.identity last x }};
+\definition backwardForward: \forall (c: Carrier) -> backward (forward c) = c :=
+  induction (\fun (c: Carrier) => backward (forward c) = c)
+    (\fun (i: Index)(x: Stage i) => eq_reason_in!{Carrier _
+      "=" _ "by" { congr!{{Stage last} Carrier} backward _ _ (Into.onStage i x) }
+      "=" _ "by" { sym!{Carrier} _ _ (compatible i last (above i) x) }});

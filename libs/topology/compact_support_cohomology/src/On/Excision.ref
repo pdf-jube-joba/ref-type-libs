@@ -1,0 +1,19 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\import \parent.Restrict[U := U, K := K] \as Local;
+\import singular_excision.Excision[A := A].Over[source := space] \as Excision;
+\import Top.Closure[] \as Closure;
+\import Top.Interior[] \as Interior;
+\definition deleted: \Pow A := Top.Complement U;
+\definition exteriorOpen: Top.IsOpenIn space (outside K) := Compactness.compactClosed space hausdorff K (compact K);
+\definition deletedOutside[x: A][inClosure: Top.Member (Closure.closure space deleted) x]: Top.Member (outside K) x :=
+  \fun (inK: Top.Member K x) =>
+    (Closure.least space deleted deleted (Finite.openComplementClosed space U open)
+      (\fun (y: A)(member: Top.Member deleted y) => member) x inClosure) (included x inK);
+\definition excisionPair: Excision.Pair := \into[Excision.PairData](
+  Excision.PairData { subset := outside K, removed := deleted }, Excision.Pair) \by {
+  \fun (x: A)(member: _) => Interior.greatest space (outside K) (outside K) exteriorOpen
+    (\fun (y: A)(inside: _) => inside) x (deletedOutside x member)
+};
+\module With(coefficients: Modules.Bundle, z: I.Int^);

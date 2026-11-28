@@ -1,0 +1,26 @@
+\definition values[K: Support][x: Stage K]: W := (stageMap K).apply x;
+\import \parent.\parent.Descend[Target := W, stageMap := values, compatibleMap := compatibleMap] \as Descend;
+\definition apply: Cohomology -> W := Descend.map;
+\import Modules.Hom[V := Cohomology, W := W, source := moduleSpace, target := target] \as Maps;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\use Equality.sym;
+
+\definition addition: \forall (a, b: Cohomology) -> apply ((moduleSpace).add a b) = target.add (apply a) (apply b) :=
+  simultaneous (\fun (a, b: Cohomology) => apply ((moduleSpace).add a b) = target.add (apply a) (apply b))
+    (\fun (K: Support)(x, y: Stage K) => eq_reason_in!{W _
+      "=" _ "by" { congr!{Cohomology W} apply _ _ (addOnSupport K x y) }
+      "=" _ "by" { Descend.onStage K ((spaces K).add x y) }
+      "=" _ "by" { (stageMap K).addition x y }
+      "=" _ "by" { congr!{W W W} target.add _ _ _ _ (sym!{W} _ _ (Descend.onStage K x)) (sym!{W} _ _ (Descend.onStage K y)) }});
+
+\definition scalar[a: I.Int^]: \forall (h: Cohomology) -> apply ((moduleSpace).smul a h) = target.smul a (apply h) :=
+  induction (\fun (h: Cohomology) => apply ((moduleSpace).smul a h) = target.smul a (apply h))
+    (\fun (K: Support)(x: Stage K) => eq_reason_in!{W _
+      "=" _ "by" { congr!{Cohomology W} apply _ _ (scalarOnSupport a K x) }
+      "=" _ "by" { Descend.onStage K ((spaces K).smul a x) }
+      "=" _ "by" { (stageMap K).scalar a x }
+      "=" _ "by" { congr!{W W} (target.smul a) _ _ (sym!{W} _ _ (Descend.onStage K x)) }});
+\definition map: Maps.Map := Maps.Map { apply := apply, addition := addition, scalar := scalar };
+\definition onStage: _ := Descend.onStage;

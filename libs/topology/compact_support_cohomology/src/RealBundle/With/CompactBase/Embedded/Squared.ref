@@ -1,0 +1,12 @@
+\import std.Data[].FinSet[] \as Fin;
+\import linear_algebra.Hermitian[].Over[K := Real.Real, field := Real.Algebra[].field, scalar := linear_algebra.Hermitian[].Real[].scalar] \as Hermitian;
+\definition formula: \forall (k: N.Nat^)(v: Bundles.Vector k) ->
+  Hermitian.Finite[n := k].dot v v = algebraic_topology.Euclidean[].Dimension[n := k].normSquared v :=
+  \induction (k: N.Nat^) \return \forall (v: Bundles.Vector k) ->
+    Hermitian.Finite[n := k].dot v v = algebraic_topology.Euclidean[].Dimension[n := k].normSquared v \with {
+    | zero: \fun (v: Bundles.Vector N.Nat^::zero) => \refl(Real.zero)
+    | succ: \fun (k: N.Nat^)(previous: _)(v: Bundles.Vector (N.Nat^::succ k)) => eq_reason_in!{Real.Real _
+        "=" _ "by" { congr!{Real.Real Real.Real} (Real.add (Real.mul (v (Fin.zero k)) (v (Fin.zero k)))) _ _
+          (previous (\fun (i: Fin.Fin k) => v (Fin.succ k i))) }
+        "=" _ "by" { sym!{Real.Real} _ _ (algebraic_topology.Euclidean[].Dimension[n := k].Splitting[].normSplit v) }}
+  };

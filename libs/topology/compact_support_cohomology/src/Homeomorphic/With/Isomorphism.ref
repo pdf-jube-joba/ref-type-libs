@@ -1,0 +1,9 @@
+\import Reverse.With[coefficients := coefficients, z := z] \as Other;
+\import SourceDegree.Module[] \as SourceModule;
+\import TargetDegree.Module[] \as TargetModule;
+\import Modules.Isomorphism[V := TargetDegree.Cohomology, W := SourceDegree.Cohomology,
+  source := TargetModule.moduleSpace, target := SourceModule.moduleSpace] \as Theory;
+\definition isomorphism: Theory.Isomorphism := Theory.Isomorphism {
+  forward := Forward.Linear[].map, backward := Backward.Linear[].map,
+  leftInverse := Other.inverseLaw, rightInverse := inverseLaw,
+};

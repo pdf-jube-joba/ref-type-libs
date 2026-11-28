@@ -1,0 +1,22 @@
+\definition HasCompactVanishing[h: Whole.Carrier z]: \Prop :=
+  \exists (K: Support \where \parent.AtSupport[K := K].Vanishing[z := z].Vanishes h);
+
+\definition fromSupport[h: Whole.Carrier z]: HasSupport z h -> HasCompactVanishing h := \block {
+  \fun (supported: HasSupport z h) \then
+  \takefrom witness: Witness[z, h] \by supported \then
+  \return Logic.existsIntro[Support, { K: Support \where \parent.AtSupport[K := K].Vanishing[z := z].Vanishes h }]
+    witness.support
+    (\idelim \parent.AtSupport[K := witness.support].include z witness.value = h
+      \with k: Whole.Carrier z => \parent.AtSupport[K := witness.support].Vanishing[z := z].Vanishes k \by {
+        base: \parent.AtSupport[K := witness.support].Vanishing[z := z].holds witness.value,
+        equality: witness.equal
+      })
+};
+\definition toSupport[h: Whole.Carrier z]: HasCompactVanishing h -> HasSupport z h := \block {
+  \fun (vanishes: HasCompactVanishing h) \then
+  \takefrom K: \Cast[Support] ({ K: Support \where \parent.AtSupport[K := K].Vanishing[z := z].Vanishes h }) \by vanishes \then
+  \let outside: \parent.AtSupport[K := K].Vanishing[z := z].Vanishes h :=
+    \bysub(Support, { K: Support \where \parent.AtSupport[K := K].Vanishing[z := z].Vanishes h }, K) \then
+  \return supports K z (\parent.AtSupport[K := K].Vanishing[z := z].descend h outside) h
+    (\parent.AtSupport[K := K].Vanishing[z := z].onDescend h outside)
+};

@@ -1,0 +1,12 @@
+\import singular_cohomology.Relative[A := A, source := space, subset := outside L] \as Domain;
+\import Domain.Maps[B := A].Over[target := space, targetSubset := outside K] \as Pairs;
+\import singular_cohomology.Identity[A := A, source := space] \as Identity;
+\definition pairMap: Pairs.Map := \into[A -> A](Identity.function, Pairs.Map) \by {
+  Pairs.Laws[Identity.function] {
+    continuous := Identity.continuous,
+    contained := \fun (x: Domain.SubspaceCarrier) => outsideReverse K L inclusion x (\bysub(A, outside L, x)),
+  }
+};
+\import Pairs.On[f := pairMap].Integer[].With[coefficients := coefficients] \as Pullback;
+\definition advance[z: I.Int^]: _ := Pullback.At[z := z].induced;
+\module Through(M: Support, next: before L M);

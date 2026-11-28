@@ -1,0 +1,42 @@
+\import topology.Homeomorphism[A := A, B := B] \as Homeomorphism;
+\import topology.Maps[A := A, B := B] \as Forward;
+\import topology.Maps[A := B, B := A] \as Backward;
+\import topology.Topology[Carrier := A] \as SourceTop;
+\import topology.Topology[Carrier := B] \as TargetTop;
+\import \root.Proper[A := A, B := B, source := source, target := target] \as Proper;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+
+\definition continuous: topology.Continuity[A := A, B := B].Continuous source target h.forward :=
+  (Homeomorphism.laws source target h).forwardContinuous;
+\definition inverseContinuous: topology.Continuity[A := B, B := A].Continuous target source h.backward :=
+  (Homeomorphism.laws source target h).backwardContinuous;
+\definition preimageIsImage[K: \Pow B]: Backward.Image h.backward K = Forward.Preimage h.forward K :=
+  \axiom:setext(Backward.Image h.backward K, Forward.Preimage h.forward K,
+    \fun (x: A)(member: SourceTop.Member (Backward.Image h.backward K) x) =>
+      Backward.imageElim h.backward K x (TargetTop.Member K (h.forward x))
+        (\fun (y: B)(inside: TargetTop.Member K y)(same: h.backward y = x) =>
+          \idelim y = h.forward x \with z: B => TargetTop.Member K z \by {
+            base: inside,
+            equality: eq_reason_in!{B y
+              "=" _ "by" { sym!{B} _ _ ((Homeomorphism.laws source target h).rightInverse y) }
+              "=" _ "by" { congr!{A B} h.forward _ _ same }}
+          }) member,
+    \fun (x: A)(member: TargetTop.Member K (h.forward x)) =>
+      \idelim h.backward (h.forward x) = x \with y: A => SourceTop.Member (Backward.Image h.backward K) y
+        \by { base: Backward.imageMember h.backward K (h.forward x) member, equality: (Homeomorphism.laws source target h).leftInverse x });
+
+\definition proper: Proper.Proper h.forward :=
+  \fun (K: \Pow B)(compact: TargetTop.IsCompactIn target K) =>
+    \idelim Backward.Image h.backward K = Forward.Preimage h.forward K \with W: \Pow A => SourceTop.IsCompactIn source W
+      \by { base: topology.Compactness[A := B, B := A].continuousImage target source h.backward inverseContinuous K compact,
+        equality: preimageIsImage K };
+
+\definition inverse: topology.Homeomorphism[A := B, B := A].Homeomorphism[target, source] :=
+  Homeomorphism.Inverse[].inverse source target h;
+\module With(coefficients: Modules.Bundle, z: I.Int^);

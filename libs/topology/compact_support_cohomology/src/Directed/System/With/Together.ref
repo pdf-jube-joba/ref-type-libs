@@ -1,0 +1,42 @@
+\definition two[P: Carrier -> Carrier -> \Prop]:
+  (\forall (i: Index)(x, y: Stage i) -> P (ofStage i x) (ofStage i y)) -> \forall (a, b: Carrier) -> P a b :=
+  \fun (step: _) => induction (\fun (a: Carrier) => \forall (b: Carrier) -> P a b)
+    (\fun (i: Index)(x: Stage i) => induction (P (ofStage i x))
+      (\block {
+        \fun (j: Index)(y: Stage j) \then
+        \let k: Index := join i j \then
+        \let both: Upper[i, j, k] := upper i j \then
+        \let left: Carrier := ofStage k (advance i k both.left x) \then
+        \let right: Carrier := ofStage k (advance j k both.right y) \then
+        \let sameLeft: P (ofStage i x) right := \idelim left = ofStage i x
+          \with a: Carrier => P a right \by {
+            base: step k (advance i k both.left x) (advance j k both.right y),
+            equality: sym!{Carrier} _ _ (compatible i k both.left x)
+          } \then
+        \return \idelim right = ofStage j y \with b: Carrier => P (ofStage i x) b
+          \by { base: sameLeft, equality: sym!{Carrier} _ _ (compatible j k both.right y) }
+      }));
+
+\definition three[P: Carrier -> Carrier -> Carrier -> \Prop]:
+  (\forall (i: Index)(x, y, z: Stage i) -> P (ofStage i x) (ofStage i y) (ofStage i z)) ->
+  \forall (a, b, c: Carrier) -> P a b c :=
+  \fun (step: _) => two (\fun (a, b: Carrier) => \forall (c: Carrier) -> P a b c)
+    (\fun (i: Index)(x, y: Stage i) => induction (P (ofStage i x) (ofStage i y))
+      (\block {
+        \fun (j: Index)(z: Stage j) \then
+        \let k: Index := join i j \then
+        \let both: Upper[i, j, k] := upper i j \then
+        \let first: Carrier := ofStage k (advance i k both.left x) \then
+        \let second: Carrier := ofStage k (advance i k both.left y) \then
+        \let third: Carrier := ofStage k (advance j k both.right z) \then
+        \let atFirst: P (ofStage i x) second third :=
+          \idelim first = ofStage i x \with a: Carrier => P a second third \by {
+            base: step k (advance i k both.left x) (advance i k both.left y) (advance j k both.right z),
+            equality: sym!{Carrier} _ _ (compatible i k both.left x)
+          } \then
+        \let atSecond: P (ofStage i x) (ofStage i y) third :=
+          \idelim second = ofStage i y \with b: Carrier => P (ofStage i x) b third
+            \by { base: atFirst, equality: sym!{Carrier} _ _ (compatible i k both.left y) } \then
+        \return \idelim third = ofStage j z \with c: Carrier => P (ofStage i x) (ofStage i y) c
+          \by { base: atSecond, equality: sym!{Carrier} _ _ (compatible j k both.right z) }
+      }));

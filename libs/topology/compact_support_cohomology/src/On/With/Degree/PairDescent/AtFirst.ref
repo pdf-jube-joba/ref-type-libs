@@ -1,0 +1,13 @@
+\definition stage[L: SecondSpace.Support][b: Second.Stage L]: Result := \parent.AtSecond[L := L, b := b].map a;
+\definition compatible[L, L1: SecondSpace.Support][included: SecondSpace.before L L1][b: Second.Stage L]:
+  stage L b = stage L1 (Second.advance L L1 included b) :=
+  induction (\fun (x: Cohomology) =>
+    \parent.AtSecond[L := L, b := b].map x =
+    \parent.AtSecond[L := L1, b := Second.advance L L1 included b].map x)
+    (\fun (K: Support)(x: Stage K) => eq_reason_in!{Result _
+      "=" _ "by" { \parent.AtSecond[L := L, b := b].onStage K x }
+      "=" _ "by" { secondCompatible K L L1 included x b }
+      "=" _ "by" { sym!{Result} _ _ (\parent.AtSecond[L := L1, b := Second.advance L L1 included b].onStage K x) }}) a;
+\import Second.Descend[Target := Result, stageMap := stage, compatibleMap := compatible] \as Descend;
+\definition apply: Second.Cohomology -> Result := Descend.map;
+\definition onStage: _ := Descend.onStage;

@@ -1,0 +1,17 @@
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as NativeComplexes;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside K]
+  .With[coefficients := coefficients] \as Relative;
+\import Relative.PairSequence[] \as Sequence;
+\definition Carrier[z: I.Int^]: \Set := Relative.Carrier z;
+\definition moduleSpace[z: I.Int^]: Modules.Space (Carrier z) := Relative.space z;
+\definition coboundaryValue[z: I.Int^][h: Carrier z]: Carrier (Degrees.next z) :=
+  ((Relative.complex).differential).apply z h;
+\definition include[z: I.Int^][h: Carrier z]: Whole.Carrier z := (Sequence.inclusion).apply z h;
+\definition injective[z: I.Int^]: _ := Sequence.At[z := z].injective;
+\definition addition[z: I.Int^]: _ := (Sequence.inclusion).addition z;
+\definition scalar[z: I.Int^]: _ := (Sequence.inclusion).scalar z;
+\definition coboundary[z: I.Int^]: _ := (Sequence.inclusion).commutes z;
+\import NativeComplexes.Map[C := Relative.complex, D := Whole.complex] \as Embedding;
+\definition zero[z: I.Int^]: _ := Embedding.At[k := z].zeroPreserved Sequence.inclusion;
+\module Enlarge(L: Support, included: before K L);
+\module Vanishing(z: I.Int^);

@@ -1,0 +1,25 @@
+\import \root.On[A := B, space := secondSpace] \as SecondSpace;
+\import SecondSpace.With[coefficients := coefficients].Degree[z := secondDegree] \as Second;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.sym;
+
+\module AtSecond(L: SecondSpace.Support, b: Second.Stage L) {
+  \definition stage[K: Support][a: Stage K]: Result := product K L a b;
+  \definition compatible[K, K1: Support][included: before K K1][a: Stage K]:
+    stage K a = stage K1 (advance K K1 included a) :=
+    firstCompatible K K1 L included a b;
+  \import \parent.\parent.Descend[Target := Result, stageMap := stage, compatibleMap := compatible] \as Descend;
+  \definition map: Cohomology -> Result := Descend.map;
+  \definition onStage: _ := Descend.onStage;
+}
+
+\module AtFirst(a: Cohomology);
+\definition map[a: Cohomology][b: Second.Cohomology]: Result := AtFirst[a := a].apply b;
+\definition onStages[K: Support][L: SecondSpace.Support][a: Stage K][b: Second.Stage L]:
+  map (ofSupport K a) (Second.ofSupport L b) = product K L a b :=
+  eq_reason_in!{Result _
+    "=" _ "by" { AtFirst[a := ofSupport K a].onStage L b }
+    "=" _ "by" { AtSecond[L := L, b := b].onStage K a }};
+
+\module Bilinearity(output: Modules.Space Result);

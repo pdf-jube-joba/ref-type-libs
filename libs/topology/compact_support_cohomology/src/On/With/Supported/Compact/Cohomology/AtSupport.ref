@@ -1,0 +1,20 @@
+\import singular_cohomology.Relative[A := A, source := space, subset := outside K].With[coefficients := coefficients] \as RelativeStage;
+\import RelativeStage.PairSequence[] \as StagePair;
+\import \parent.\parent.\parent.CompareSupport[K := K] \as IntoSupported;
+\import CochainComplexes.Map[C := RelativeStage.complex, D := Whole.complex] \as Maps;
+\import CochainComplexes.Map[C := supportedComplex, D := Whole.complex]
+  .Composition[B := RelativeStage.complex] \as Composite;
+\definition forget[x: Limit.Stage K]: Whole.cohomology z := (Maps.At[k := z].induced StagePair.inclusion).apply x;
+\definition composite: Maps.Map := Composite.compose complexIsomorphism.forward IntoSupported.map;
+\definition agrees: composite = StagePair.inclusion :=
+  Maps.ext composite StagePair.inclusion
+    (\fun (k: I.Int^)(h: RelativeStage.Carrier k) => \refl((StagePair.inclusion).apply k h));
+\definition law[x: Limit.Stage K]:
+  ((Compose.compose ToWhole.isomorphism SupportedLimit.isomorphism).forward).apply (Limit.ofSupport K x) = forget x :=
+  eq_reason_in!{{Whole.cohomology z} _
+    "=" _ "by" { congr!{SupportedLimit.Group {Whole.cohomology z}} ((ToWhole.isomorphism.forward).apply)
+      _ _ (SupportedLimit.onStage K x) }
+    "=" _ "by" {
+      sym!{{Whole.cohomology z}} _ _ (Composite.At[k := z].compositionOnCohomology complexIsomorphism.forward IntoSupported.map x) }
+    "=" _ "by" { congr!{Maps.Map {Whole.cohomology z}} (\fun (m: Maps.Map) => (Maps.At[k := z].induced m).apply x)
+      _ _ agrees }};

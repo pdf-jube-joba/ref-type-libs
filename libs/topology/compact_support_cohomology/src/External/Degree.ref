@@ -1,0 +1,20 @@
+\definition total: N.Nat^ := Nat.add p q;
+\definition outputDegree: I.Int^ := I.Int^::ofNat total;
+\import ProductSpace.With[coefficients := coefficients] \as Theory;
+\import LeftSpace.With[coefficients := coefficients].Degree[z := I.Int^::ofNat p] \as Left;
+\import RightSpace.With[coefficients := coefficients].Degree[z := I.Int^::ofNat q] \as Right;
+\import Theory.Degree[z := outputDegree] \as Target;
+\module AtSupports(K: LeftSpace.Support, L: RightSpace.Support);
+\definition stage[K: LeftSpace.Support][L: RightSpace.Support][a: Left.Stage K][b: Right.Stage L]: Target.Cohomology :=
+  Target.ofSupport (rectangle K L) (AtSupports[K := K, L := L].cross a b);
+\module Compatibility;
+\import Left.PairDescent[B := B, secondSpace := right, secondDegree := I.Int^::ofNat q,
+  Result := Target.Cohomology, product := stage,
+  firstCompatible := Compatibility[].first, secondCompatible := Compatibility[].second] \as CrossProduct;
+\definition cross: Left.Cohomology -> Right.Cohomology -> Target.Cohomology := CrossProduct.map;
+\definition onSupports: _ := CrossProduct.onStages;
+
+\import Target.Module[] \as TargetModule;
+\import CrossProduct.Bilinearity[output := TargetModule.moduleSpace] \as Descent;
+\module Bilinear;
+\definition bilinear: _ := Bilinear[].map;

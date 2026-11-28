@@ -1,0 +1,27 @@
+[package]
+name = "compact_support_cohomology"
+
+[dependencies]
+std = { path = "../../std" }
+topology = { path = "../basic" }
+module_theory = { path = "../../algebra/module_theory" }
+singular_cohomology = { path = "../singular/cohomology" }
+singular_excision = { path = "../singular/excision" }
+chain_complexes = { path = "../../algebra/homological/chain_complexes" }
+double_complexes = { path = "../../algebra/homological/double_complexes" }
+resolutions = { path = "../../algebra/homological/resolutions" }
+singular_products = { path = "../singular/products" }
+cohomology_thom = { path = "../cohomology_thom" }
+algebraic_topology = { path = "../homotopy" }
+topological_constructions = { path = "../constructions" }
+singular_cap = { path = "../singular/cap" }
+thom_spaces = { path = "../thom_spaces" }
+vector_bundles = { path = "../../geometry/vector_bundles" }
+linear_algebra = { path = "../../algebra/linear_algebra" }
+bundle_operations = { path = "../../geometry/bundle_operations" }
+hermitian_frames = { path = "../../algebra/hermitian_frames" }
+metric_spaces = { path = "../metric" }
+real = { path = "../../real/basic" }
+dedekind_reals = { path = "../../real/dedekind" }
+bundle_complements = { path = "../../geometry/bundle_complements" }
+commutative_algebra = { path = "../../algebra/commutative_algebra" }

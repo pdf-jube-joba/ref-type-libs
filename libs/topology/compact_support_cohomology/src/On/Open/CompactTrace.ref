@@ -1,0 +1,24 @@
+\import Top.Subspace[S := K] \as Small;
+\definition include[x: Small.CarrierSet]: Part.CarrierSet := \into[A](x, U) \by { within x (\bysub(A, K, x)) };
+\definition continuous: topology.Continuity[A := Small.CarrierSet, B := Part.CarrierSet].Continuous (Small.topology space) (Part.topology space) include :=
+  topology.Continuity[A := Small.CarrierSet, B := A].Corestriction[S := U].corestrictContinuous (Small.topology space) space include
+    (topology.Continuity[A := Small.CarrierSet, B := A].Corestriction[S := K].inclusionContinuous space);
+\import topology.Maps[A := Small.CarrierSet, B := Part.CarrierSet] \as Maps;
+\import topology.Topology[Carrier := Small.CarrierSet] \as SmallTop;
+\definition subspaceImage: Maps.Image include SmallTop.Whole = Part.Trace K :=
+  \axiom:setext(Maps.Image include SmallTop.Whole, Part.Trace K,
+    \fun (y: Part.CarrierSet)(member: LocalTop.Member (Maps.Image include SmallTop.Whole) y) =>
+      Maps.imageElim include SmallTop.Whole y (LocalTop.Member (Part.Trace K) y)
+        (\fun (x: Small.CarrierSet)(_: SmallTop.Member SmallTop.Whole x)(same: include x = y) =>
+          \idelim include x = y \with z: Part.CarrierSet => LocalTop.Member (Part.Trace K) z \by { base: \bysub(A, K, x), equality: same })
+        member,
+    \fun (y: Part.CarrierSet)(member: LocalTop.Member (Part.Trace K) y) =>
+      Maps.imageMember include SmallTop.Whole (\into[A](y, K) \by { member }) (\refl(y)));
+\definition trace: Local.Support := \into[\Pow Part.CarrierSet](Part.Trace K, Local.Supports) \by {
+  \idelim Maps.Image include SmallTop.Whole = Part.Trace K \with T: \Pow Part.CarrierSet => LocalTop.IsCompactIn (Part.topology space) T
+    \by { base: topology.Compactness[A := Small.CarrierSet, B := Part.CarrierSet].continuousImage
+        (Small.topology space) (Part.topology space) include continuous SmallTop.Whole (Small.Properties[].compact space (compact K)),
+      equality: subspaceImage }
+};
+\definition ambientContains[x: A][inside: Top.Member K x]: Top.Member (image trace) x :=
+  Image.imageMember trace (\into[A](x, U) \by { within x inside }) inside;

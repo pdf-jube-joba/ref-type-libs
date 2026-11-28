@@ -1,0 +1,24 @@
+\import Source.With[coefficients := coefficients].Degree[z := z] \as SourceDegree;
+\import Target.With[coefficients := coefficients].Degree[z := z] \as TargetDegree;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\use Equality.sym;
+
+\definition stage[K: Target.Support][x: TargetDegree.Stage K]: SourceDegree.Cohomology :=
+  SourceDegree.ofSupport (preimage K) (\parent.AtSupport[K := K].Degree[coefficients := coefficients, z := z].apply x);
+
+\definition compatible[K, L: Target.Support][inclusion: Target.before K L][x: TargetDegree.Stage K]:
+  stage K x = stage L (TargetDegree.advance K L inclusion x) :=
+  eq_reason_in!{SourceDegree.Cohomology _
+    "=" _ "by" { SourceDegree.compatible (preimage K) (preimage L) (monotone K L inclusion)
+      (\parent.AtSupport[K := K].Degree[coefficients := coefficients, z := z].apply x) }
+    "=" _ "by" { congr!{{SourceDegree.Stage (preimage L)} SourceDegree.Cohomology} (SourceDegree.ofSupport (preimage L)) _ _
+      (sym!{{SourceDegree.Stage (preimage L)}} _ _
+        (\parent.AtSupport[K := K].Through[L := L, inclusion := inclusion, coefficients := coefficients].Degree[z := z].law x)) }};
+
+\import TargetDegree.Descend[Target := SourceDegree.Cohomology, stageMap := stage, compatibleMap := compatible] \as Descend;
+\definition pullback[x: TargetDegree.Cohomology]: SourceDegree.Cohomology := Descend.map x;
+\definition onSupport[K: Target.Support][x: TargetDegree.Stage K]: pullback (TargetDegree.ofSupport K x) = stage K x :=
+  Descend.onStage K x;
+\module Linear;

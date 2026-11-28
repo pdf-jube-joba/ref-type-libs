@@ -1,0 +1,74 @@
+\import singular_cohomology.Relative[A := A, source := space, subset := outside K].With[coefficients := coefficients] \as RelativeTheory;
+\import \parent.\parent.AtSupport[K := K] \as Relative;
+\import \parent.\parent.CompareSupport[K := K] \as Compare;
+\import CochainComplexes.At[C := RelativeTheory.complex, z := z] \as RelativeH;
+\import CochainComplexes.Map[C := RelativeTheory.complex, D := supportedComplex].At[k := z] \as Actions;
+\import Modules.Of[V := Carrier z, space := moduleSpace z].Submodule[] \as Submodules;
+\import Submodules.Image[U := Carrier (Degrees.previous z), source := moduleSpace (Degrees.previous z)] \as Images;
+
+\module Lift(L: Support, x: RelativeH.Closed, primitive: \parent.\parent.\parent.AtSupport[K := L].Carrier (Degrees.previous z),
+  boundary: Cohomology.prior.apply ((\parent.\parent.\parent.CompareSupport[K := L].map).apply (Degrees.previous z) primitive) = Relative.include z x) {
+  \definition J: Support := union K L;
+  \import \parent.\parent.\parent.AtSupport[K := J] \as Both;
+  \import singular_cohomology.Relative[A := A, source := space, subset := outside J].With[coefficients := coefficients] \as BothTheory;
+  \import \parent.\parent.\parent.AtSupport[K := L] \as Other;
+  \import singular_cohomology.Relative[A := A, source := space, subset := outside L].With[coefficients := coefficients] \as OtherTheory;
+  \import \parent.\parent.\parent.CompareSupport[K := L] \as OtherCompare;
+  \import Relative.Enlarge[L := J, included := (upper K L).left] \as MoveCycle;
+  \import Other.Enlarge[L := J, included := (upper K L).right] \as MovePrimitive;
+  \import CochainComplexes.At[C := BothTheory.complex, z := z] \as EnlargedH;
+  \import CochainComplexes.At[C := OtherTheory.complex, z := z] \as OtherGroup;
+  \import CochainComplexes.Map[C := RelativeTheory.complex, D := BothTheory.complex].At[k := z] \as ToBoth;
+  \import CochainComplexes.Map[C := OtherTheory.complex, D := BothTheory.complex] \as PrimitiveToBoth;
+  \import CochainComplexes.Map[C := OtherTheory.complex, D := supportedComplex] \as PrimitiveToWhole;
+  \import Modules.Of[V := Both.Carrier z, space := Both.moduleSpace z].Submodule[] \as BothSubmodules;
+  \import BothSubmodules.Image[U := Both.Carrier (Degrees.previous z), source := Both.moduleSpace (Degrees.previous z)] \as BothImages;
+
+  \definition movedPrimitive: Both.Carrier (Degrees.previous z) := MovePrimitive.apply (Degrees.previous z) primitive;
+  \definition movedCycle: EnlargedH.Closed := (ToBoth.cyclesMap MoveCycle.map).apply x;
+  \definition same: EnlargedH.prior.apply movedPrimitive = movedCycle :=
+    Both.injective z _ _ (eq_reason_in!{{Whole.Carrier z} _
+      "=" _ "by" { congr!{{Both.Carrier z} {Whole.Carrier z}} (Both.include z) _ _
+        (PrimitiveToBoth.priorCommutes z MovePrimitive.map primitive) }
+      "=" _ "by" { MovePrimitive.inclusion z (OtherGroup.prior.apply primitive) }
+      "=" _ "by" { sym!{{Whole.Carrier z}} _ _ (PrimitiveToWhole.priorCommutes z OtherCompare.map primitive) }
+      "=" _ "by" { boundary }
+      "=" _ "by" { sym!{{Whole.Carrier z}} _ _ (MoveCycle.inclusion z x) }});
+  \definition kills: Limit.advance K J (upper K L).left (RelativeH.classOf x) = EnlargedH.zeroClass :=
+    eq_reason_in!{EnlargedH.Cohomology _
+      "=" _ "by" { ToBoth.onClass MoveCycle.map x }
+      "=" _ "by" { EnlargedH.boundaryClassZero movedCycle
+        (\idelim EnlargedH.prior.apply movedPrimitive = movedCycle \with y: Both.Carrier z =>
+          BothSubmodules.Member EnlargedH.boundaries y \by { base: BothImages.member EnlargedH.prior movedPrimitive, equality: same }) }};
+  \definition law: Limit.ofSupport K (RelativeH.classOf x) = (Limit.Module[].moduleSpace).zero :=
+    eq_reason_in!{Limit.Cohomology _
+      "=" _ "by" { Limit.compatible K J (upper K L).left (RelativeH.classOf x) }
+      "=" _ "by" { congr!{{Limit.Stage J} Limit.Cohomology} (Limit.ofSupport J) _ _ kills }
+      "=" _ "by" { sym!{Limit.Cohomology} _ _ (Limit.Module[].zeroOnSupport J) }};
+}
+
+\definition lifts[x: RelativeH.Closed][primitive: Carrier (Degrees.previous z)]
+  [equal: Cohomology.prior.apply primitive = (Actions.cyclesMap Compare.map).apply x]:
+  Limit.ofSupport K (RelativeH.classOf x) = (Limit.Module[].moduleSpace).zero := \block {
+  \takefrom witness: Witness[Degrees.previous z, primitive]
+    \by \bysub(Whole.Carrier (Degrees.previous z), \parent.\parent.At[z := Degrees.previous z].Supported, primitive) \then
+  \let boundary: Cohomology.prior.apply ((\parent.\parent.CompareSupport[K := witness.support].map).apply (Degrees.previous z) witness.value) = Relative.include z x :=
+    eq_reason_in!{{Whole.Carrier z} _
+      "=" _ "by" { congr!{{Carrier (Degrees.previous z)} {Whole.Carrier z}} (\fun (y: Carrier (Degrees.previous z)) => Cohomology.prior.apply y)
+        ((\parent.\parent.CompareSupport[K := witness.support].map).apply (Degrees.previous z) witness.value) primitive witness.equal }
+      "=" _ "by" { equal }} \then
+  \return Lift[L := witness.support, x := x, primitive := witness.value, boundary := boundary].law
+};
+
+\definition onCycle[x: RelativeH.Closed][zero: stage K (RelativeH.classOf x) = Cohomology.zeroClass]:
+  Limit.ofSupport K (RelativeH.classOf x) = (Limit.Module[].moduleSpace).zero :=
+  Images.eliminate Cohomology.prior ((Actions.cyclesMap Compare.map).apply x)
+    (Limit.ofSupport K (RelativeH.classOf x) = (Limit.Module[].moduleSpace).zero)
+    (lifts x)
+    (Cohomology.zeroClassBoundary ((Actions.cyclesMap Compare.map).apply x)
+      (eq_reason_in!{Group _
+        "=" _ "by" { sym!{Group} _ _ (Compare.Degree[z := z].onClass x) }
+        "=" _ "by" { zero }}));
+
+\definition law: \forall (q: Limit.Stage K) -> stage K q = Cohomology.zeroClass -> Limit.ofSupport K q = (Limit.Module[].moduleSpace).zero :=
+  RelativeH.classInduction (\fun (q: Limit.Stage K) => stage K q = Cohomology.zeroClass -> Limit.ofSupport K q = (Limit.Module[].moduleSpace).zero) onCycle;

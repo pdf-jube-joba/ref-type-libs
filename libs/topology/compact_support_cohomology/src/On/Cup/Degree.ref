@@ -1,0 +1,19 @@
+\definition total: N.Nat^ := Nat.add p q;
+\definition outputDegree: I.Int^ := I.Int^::ofNat total;
+\import \parent.\parent.With[coefficients := coefficients] \as Theory;
+\import Theory.Degree[z := I.Int^::ofNat p] \as Left;
+\import Theory.Degree[z := I.Int^::ofNat q] \as Right;
+\import Theory.Degree[z := outputDegree] \as Target;
+\module AtSupports(K, L: Support);
+\definition stage[K, L: Support][a: Left.Stage K][b: Right.Stage L]: Target.Cohomology :=
+  Target.ofSupport (intersection K L) (AtSupports[K := K, L := L].cup a b);
+\module Compatibility;
+\import Left.PairDescent[B := A, secondSpace := space, secondDegree := I.Int^::ofNat q, Result := Target.Cohomology, product := stage,
+  firstCompatible := Compatibility[].first, secondCompatible := Compatibility[].second] \as CupProduct;
+\definition cup: Left.Cohomology -> Right.Cohomology -> Target.Cohomology := CupProduct.map;
+\definition onSupports: _ := CupProduct.onStages;
+
+\import Target.Module[] \as TargetModule;
+\import CupProduct.Bilinearity[output := TargetModule.moduleSpace] \as Descent;
+\module Bilinear;
+\definition bilinear: _ := Bilinear[].map;

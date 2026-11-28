@@ -1,0 +1,44 @@
+\import \parent.\parent.AtSupports[K := K1, L := L1] \as Later;
+\import \parent.\parent.\parent.AtSupports[K := K1, L := L1] \as LaterFixed;
+\import cohomology_thom.MixedCup[A := Carrier, source := topology, first := Fixed.first, second := Fixed.second, K := R, ring := ring] \as Mixed;
+\import singular_cohomology.Identity[A := Carrier, source := topology] \as Identity;
+\definition firstIncluded[x: Carrier]: ProductTop.Member LaterFixed.first x -> ProductTop.Member Fixed.first x :=
+  LeftSpace.outsideReverse K K1 first (C01.leftProjection x);
+\definition secondIncluded[x: Carrier]: ProductTop.Member LaterFixed.second x -> ProductTop.Member Fixed.second x :=
+  RightSpace.outsideReverse L L1 second (C01.rightProjection x);
+\import Mixed.From[Y := Carrier, target := topology, firstPart := LaterFixed.first, secondPart := LaterFixed.second,
+  f := Identity.function, regular := Identity.continuous, firstContained := firstIncluded, secondContained := secondIncluded] \as Pullback;
+\import Pullback.Covers[conditions := Fixed.conditions, newConditions := LaterFixed.conditions].Cup[p := p, q := q] \as Naturality;
+
+\definition oldRect: ProductSpace.Support := rectangle K L;
+\definition newRect: ProductSpace.Support := rectangle K1 L1;
+\definition included: ProductSpace.before oldRect newRect := monotone K K1 L L1 first second;
+\import Theory.Enlarge[K := oldRect, L := newRect, inclusion := included] \as Advance;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := ProductSpace.outside newRect]
+  .Maps[B := Carrier].Over[target := topology, targetSubset := ProductSpace.outside oldRect]
+  .Composition[C := Carrier].Over[final := topology, finalSubset := Fixed.unionSubset]
+  .On[f := Advance.pairMap, g := Fixed.refine].With[coefficients := coefficients] \as Before;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := ProductSpace.outside newRect]
+  .Maps[B := Carrier].Over[target := topology, targetSubset := LaterFixed.unionSubset]
+  .Composition[C := Carrier].Over[final := topology, finalSubset := Fixed.unionSubset]
+  .On[f := LaterFixed.refine, g := Pullback.unionMap].With[coefficients := coefficients] \as After;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := LaterFixed.unionSubset]
+  .With[coefficients := coefficients].At[z := outputDegree] \as NewUnion;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.sym;
+\use Equality.congr;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := LaterFixed.first].With[coefficients := coefficients].At[z := I.Int^::ofNat p] \as NewFirst;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := LaterFixed.second].With[coefficients := coefficients].At[z := I.Int^::ofNat q] \as NewSecond;
+\module Projections;
+\definition commutes[a: Left.Stage K][b: Right.Stage L]:
+  Target.advance oldRect newRect included (cross a b) = Later.cross (Left.advance K K1 first a) (Right.advance L L1 second b) :=
+  eq_reason_in!{{Target.Stage newRect} _
+    "=" _ "by" { sym!{{Target.Stage newRect}} _ _ (Before.law outputDegree (Fixed.Product[p := p, q := q].cup (leftPull a) (rightPull b))) }
+    "=" _ "by" { After.law outputDegree (Fixed.Product[p := p, q := q].cup (leftPull a) (rightPull b)) }
+    "=" _ "by" { congr!{NewUnion.Carrier {Target.Stage newRect}} ((LaterFixed.fromUnion outputDegree).apply) _ _
+        (Naturality.law (leftPull a) (rightPull b)) }
+    "=" _ "by" { congr!{NewFirst.Carrier NewSecond.Carrier {Target.Stage newRect}}
+        (\fun (x: NewFirst.Carrier)(y: NewSecond.Carrier) =>
+          (LaterFixed.fromUnion outputDegree).apply (LaterFixed.Product[p := p, q := q].cup x y)) _ _ _ _
+        (Projections[].leftLaw a) (Projections[].rightLaw b) }};

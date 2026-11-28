@@ -1,0 +1,53 @@
+\import TargetProduct.AtSupports[K := K, L := L] \as TargetFixed;
+\import SourceProduct.AtSupports[K := preimage K, L := preimage L] \as SourceFixed;
+\import TargetCup.AtSupports[K := K, L := L] \as TargetStage;
+\import SourceCup.AtSupports[K := preimage K, L := preimage L] \as SourceStage;
+\definition intersection: Target.Support := TargetProduct.intersection K L;
+\definition sourceIntersection: Source.Support := SourceProduct.intersection (preimage K) (preimage L);
+\import \parent.\parent.\parent.AtSupport[K := K] \as First;
+\import \parent.\parent.\parent.AtSupport[K := L] \as Second;
+\import \parent.\parent.\parent.AtSupport[K := intersection] \as AtIntersection;
+\import First.Degree[coefficients := coefficients, z := I.Int^::ofNat p] \as LeftStage;
+\import Second.Degree[coefficients := coefficients, z := I.Int^::ofNat q] \as RightStage;
+\import AtIntersection.Degree[coefficients := coefficients, z := TargetCup.outputDegree] \as OutputStage;
+\import cohomology_thom.MixedCup[A := B, source := target, first := Target.outside K,
+  second := Target.outside L, K := R, ring := ring] \as Mixed;
+\import Mixed.From[Y := A, target := source, firstPart := Source.outside (preimage K), secondPart := Source.outside (preimage L),
+  f := f, regular := continuous,
+  firstContained := (\fun (x: A)(member: SourceTop.Member (Source.outside (preimage K)) x) => member),
+  secondContained := (\fun (x: A)(member: SourceTop.Member (Source.outside (preimage L)) x) => member)] \as Pullback;
+\import Pullback.Covers[conditions := TargetFixed.conditions, newConditions := SourceFixed.conditions].Cup[p := p, q := q] \as Native;
+\import singular_cohomology.Relative[A := A, source := source, subset := Source.outside (preimage intersection)]
+  .Maps[B := B].Over[target := target, targetSubset := Target.outside intersection]
+  .Composition[C := B].Over[final := target, finalSubset := TargetFixed.unionSubset]
+  .On[f := AtIntersection.pairMap, g := TargetFixed.refine].With[coefficients := coefficients] \as Before;
+\import singular_cohomology.Relative[A := A, source := source, subset := Source.outside sourceIntersection]
+  .Maps[B := A].Over[target := source, targetSubset := SourceFixed.unionSubset]
+  .Composition[C := B].Over[final := target, finalSubset := TargetFixed.unionSubset]
+  .On[f := SourceFixed.refine, g := Pullback.unionMap].With[coefficients := coefficients] \as After;
+\import singular_cohomology.Relative[A := A, source := source, subset := SourceFixed.unionSubset]
+  .With[coefficients := coefficients].At[z := TargetCup.outputDegree] \as NewUnion;
+
+\definition stageLaw[a: Left.Stage K][b: Right.Stage L]:
+  OutputStage.apply (TargetStage.cup a b) = SourceStage.cup (LeftStage.apply a) (RightStage.apply b) :=
+  eq_reason_in!{{SourceOutput.Stage sourceIntersection} _
+    "=" _ "by" { sym!{{SourceOutput.Stage sourceIntersection}} _ _
+      (Before.law TargetCup.outputDegree (TargetFixed.Product[p := p, q := q].cup a b)) }
+    "=" _ "by" { After.law TargetCup.outputDegree (TargetFixed.Product[p := p, q := q].cup a b) }
+    "=" _ "by" { congr!{NewUnion.Carrier {SourceOutput.Stage sourceIntersection}}
+      ((SourceFixed.fromUnion TargetCup.outputDegree).apply) _ _ (Native.law a b) }};
+
+\definition law[a: Left.Stage K][b: Right.Stage L]:
+  PullProduct.pullback (TargetCup.cup (Left.ofSupport K a) (Right.ofSupport L b)) =
+    SourceCup.cup (PullLeft.pullback (Left.ofSupport K a)) (PullRight.pullback (Right.ofSupport L b)) :=
+  eq_reason_in!{SourceOutput.Cohomology _
+    "=" _ "by" { congr!{Product.Cohomology SourceOutput.Cohomology}
+      PullProduct.pullback _ _ (TargetCup.onSupports K L a b) }
+    "=" _ "by" { PullProduct.onSupport intersection (TargetStage.cup a b) }
+    "=" _ "by" { congr!{{SourceOutput.Stage sourceIntersection} SourceOutput.Cohomology}
+      (SourceOutput.ofSupport sourceIntersection) _ _ (stageLaw a b) }
+    "=" _ "by" { sym!{SourceOutput.Cohomology} _ _
+      (SourceCup.onSupports (preimage K) (preimage L) (LeftStage.apply a) (RightStage.apply b)) }
+    "=" _ "by" { congr!{SourceLeft.Cohomology SourceRight.Cohomology SourceOutput.Cohomology} SourceCup.cup _ _ _ _
+      (sym!{SourceLeft.Cohomology} _ _ (PullLeft.onSupport K a))
+      (sym!{SourceRight.Cohomology} _ _ (PullRight.onSupport L b)) }};

@@ -1,0 +1,13 @@
+\import \parent.\parent.Module[] \as FirstModule;
+\import Second.Module[] \as SecondModule;
+\structure Laws: \Prop := {
+  addLeft: \forall (K: Support)(L: SecondSpace.Support)(x, y: Stage K)(z: Second.Stage L) ->
+    product K L ((FirstModule.spaces K).add x y) z = output.add (product K L x z) (product K L y z),
+  addRight: \forall (K: Support)(L: SecondSpace.Support)(x: Stage K)(y, z: Second.Stage L) ->
+    product K L x ((SecondModule.spaces L).add y z) = output.add (product K L x y) (product K L x z),
+  scaleLeft: \forall (K: Support)(L: SecondSpace.Support)(a: I.Int^)(x: Stage K)(y: Second.Stage L) ->
+    product K L ((FirstModule.spaces K).smul a x) y = output.smul a (product K L x y),
+  scaleRight: \forall (K: Support)(L: SecondSpace.Support)(a: I.Int^)(x: Stage K)(y: Second.Stage L) ->
+    product K L x ((SecondModule.spaces L).smul a y) = output.smul a (product K L x y),
+};
+\module With(laws: Laws);

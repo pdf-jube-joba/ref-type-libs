@@ -1,0 +1,6 @@
+\import \parent.\parent.Enlarge[K := L, L := M, inclusion := next] \as Second;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside M]
+  .Maps[B := A].Over[target := space, targetSubset := outside L]
+  .Composition[C := A].Over[final := space, finalSubset := outside K]
+  .On[f := Second.pairMap, g := pairMap].With[coefficients := coefficients] \as Functor;
+\definition law: _ := Functor.law;

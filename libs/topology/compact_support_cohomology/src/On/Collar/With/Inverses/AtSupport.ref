@@ -1,0 +1,51 @@
+\import \parent.\parent.AtSupport[K := K] \as Original;
+\import \parent.\parent.\parent.Enlarge[K := K] \as Saturation;
+\definition J: Interior.Support := Saturation.larger;
+\definition baseIncluded: before (Open.image baseSupport) (Open.image J) := Open.imageMonotone baseSupport J Saturation.includesBase;
+\definition originalIncluded: before (Open.image K) (Open.image J) := Open.imageMonotone K J Saturation.includesOriginal;
+\import \parent.\parent.\parent.\parent.With[coefficients := coefficients]
+  .Enlarge[K := Open.image baseSupport, L := Open.image J, inclusion := baseIncluded] \as BaseAdvance;
+\import \parent.\parent.\parent.\parent.With[coefficients := coefficients]
+  .Enlarge[K := Open.image K, L := Open.image J, inclusion := originalIncluded] \as OriginalAdvance;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside (Open.image J)] \as EnlargedPair;
+\import EnlargedPair.Maps[B := A].Over[target := space, targetSubset := outside (Open.image baseSupport)]
+  .Composition[C := A].Over[final := space, finalSubset := boundary] \as First;
+\definition intoBoundary: _ := First.compose BaseAdvance.pairMap collapse;
+\import EnlargedPair.Maps[B := A].Over[target := space, targetSubset := boundary]
+  .Composition[C := A].Over[final := space, finalSubset := outside (Open.image K)] \as Second;
+\import First.On[f := BaseAdvance.pairMap, g := collapse].With[coefficients := coefficients] \as FirstAction;
+\import Second.On[f := intoBoundary, g := Original.keepBoundary].With[coefficients := coefficients] \as SecondAction;
+\import EnlargedPair.Maps[B := A].Over[target := space, targetSubset := outside (Open.image K)] \as End;
+\definition finalMap: End.Map := Second.compose intoBoundary Original.keepBoundary;
+\import End.Homotopy[f := OriginalAdvance.pairMap, g := finalMap] \as Homotopy;
+\definition staysOutside: Homotopy.Homotopy := \into[Homotopy.Family](adjusted OriginalAdvance.pairMap finalMap motionLaws.start motionLaws.end, Homotopy.Homotopy) \by {
+  \fun (t: Interval.Carrier)(x: EnlargedPair.SubspaceCarrier) =>
+    Saturation.outsideAtAllTimes t x (\bysub(A, outside (Open.image J), x))
+};
+\import Homotopy.On[h := staysOutside].With[coefficients := coefficients] \as Invariance;
+\definition cohomologyLaw[x: AmbientDegree.Stage (Open.image K)]:
+  AmbientDegree.advance (Open.image baseSupport) (Open.image J) baseIncluded (atBase (Original.pullback x)) =
+    AmbientDegree.advance (Open.image K) (Open.image J) originalIncluded x :=
+  eq_reason_in!{{AmbientDegree.Stage (Open.image J)} _
+    "=" _ "by" { sym!{{AmbientDegree.Stage (Open.image J)}} _ _ (FirstAction.law z (Original.pullback x)) }
+    "=" _ "by" { sym!{{AmbientDegree.Stage (Open.image J)}} _ _ (SecondAction.law z x) }
+    "=" _ "by" { sym!{{AmbientDegree.Stage (Open.image J)}} _ _ (Invariance.At[z := z].law x) }};
+
+\definition law[x: InteriorDegree.Stage K]:
+  backward (forward (InteriorDegree.ofSupport K x)) = InteriorDegree.ofSupport K x :=
+  eq_reason_in!{InteriorDegree.Cohomology _
+    "=" _ "by" { congr!{Group InteriorDegree.Cohomology} backward _ _ (onStage K x) }
+    "=" _ "by" { InteriorDegree.compatible baseSupport J Saturation.includesBase
+      (Extension.AtSupport[K := baseSupport].restrict (atBase (Original.apply x))) }
+    "=" _ "by" { congr!{{InteriorDegree.Stage J} InteriorDegree.Cohomology} (InteriorDegree.ofSupport J) _ _
+      (sym!{{InteriorDegree.Stage J}} _ _
+        (Extension.AtSupport[K := baseSupport].Through[L := J, included := Saturation.includesBase].restrictLaw (atBase (Original.apply x)))) }
+    "=" _ "by" { congr!{{AmbientDegree.Stage (Open.image J)} InteriorDegree.Cohomology}
+      (\fun (a: AmbientDegree.Stage (Open.image J)) => InteriorDegree.ofSupport J (Extension.AtSupport[K := J].restrict a)) _ _
+      (cohomologyLaw (Extension.AtSupport[K := K].extend x)) }
+    "=" _ "by" { congr!{{InteriorDegree.Stage J} InteriorDegree.Cohomology} (InteriorDegree.ofSupport J) _ _
+      (Extension.AtSupport[K := K].Through[L := J, included := Saturation.includesOriginal].restrictLaw (Extension.AtSupport[K := K].extend x)) }
+    "=" _ "by" { congr!{{InteriorDegree.Stage K} InteriorDegree.Cohomology}
+      (\fun (y: InteriorDegree.Stage K) => InteriorDegree.ofSupport J (InteriorDegree.advance K J Saturation.includesOriginal y)) _ _
+      ((Extension.AtSupport[K := K].isomorphism).rightInverse x) }
+    "=" _ "by" { sym!{InteriorDegree.Cohomology} _ _ (InteriorDegree.compatible K J Saturation.includesOriginal x) }};

@@ -1,0 +1,7 @@
+\import Relative.Vanishing[z := z] \as Null;
+\definition Vanishes[h: Whole.Carrier z]: \Prop := Null.Vanishes h;
+\definition holds[h: Carrier z]: Vanishes (include z h) := Null.precomposeVanishes h;
+\definition descend[h: Whole.Carrier z][vanishes: Vanishes h]: Carrier z :=
+  Null.descend (\into[Whole.Carrier z](h, (Null.submodule).carrier) \by { vanishes });
+\definition onDescend[h: Whole.Carrier z][vanishes: Vanishes h]: include z (descend h vanishes) = h :=
+  Null.rightInverse (\into[Whole.Carrier z](h, (Null.submodule).carrier) \by { vanishes });

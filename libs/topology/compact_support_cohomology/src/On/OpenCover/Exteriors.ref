@@ -1,0 +1,40 @@
+\definition leftClosed: Top.IsClosedIn space K := Compactness.compactClosed space hausdorff K (compact K);
+\definition rightClosed: Top.IsClosedIn space L := Compactness.compactClosed space hausdorff L (compact L);
+\definition intersection: Support :=
+  \into[\Pow A](Top.Intersection K L, Supports) \by {
+    Compactness.closedSubset space K (Top.Intersection K L) (compact K)
+      (Finite.intersectionClosed space K L leftClosed rightClosed)
+      (\fun (x: A)(member: Top.Member (Top.Intersection K L) x) => member.left)
+  };
+\definition outsideUnion: outside (union K L) = Top.Intersection (outside K) (outside L) :=
+  \axiom:setext(outside (union K L), Top.Intersection (outside K) (outside L),
+    \fun (x: A)(neither: Top.Member (outside (union K L)) x) => Logic.And[_, _]::#
+      (\fun (left: Top.Member K x) => neither (Logic.Or[_, _]::left left))
+      (\fun (right: Top.Member L x) => neither (Logic.Or[_, _]::right right)),
+    \fun (x: A)(neither: Top.Member (Top.Intersection (outside K) (outside L)) x)
+      (member: Top.Member (union K L) x) => Logic.orElim (Top.Member K x) (Top.Member L x) Logic.False member neither.left neither.right);
+\definition outsideIntersection: outside intersection = Finite.Join (outside K) (outside L) :=
+  \axiom:setext(outside intersection, Finite.Join (outside K) (outside L),
+    \fun (x: A)(outsideBoth: Top.Member (outside intersection) x) =>
+      either!{{Classical.excludedMiddle (Top.Member K x)} {Top.Member (Finite.Join (outside K) (outside L)) x}
+        {\fun (inK: Top.Member K x) => Logic.Or[_, _]::right
+          (\fun (inL: Top.Member L x) => outsideBoth (Logic.And[_, _]::# inK inL))}
+        {\fun (left: Top.Member (outside K) x) => Logic.Or[_, _]::left left}},
+    \fun (x: A)(eitherOutside: Top.Member (Finite.Join (outside K) (outside L)) x)
+      (inBoth: Top.Member intersection x) => Logic.orElim (Top.Member (outside K) x) (Top.Member (outside L) x) Logic.False eitherOutside
+        (\fun (left: Top.Member (outside K) x) => left inBoth.left)
+        (\fun (right: Top.Member (outside L) x) => right inBoth.right));
+
+\import singular_cap.Triple[A := A, source := space, first := outside K, second := outside L].Union[].Cover[] \as ExteriorCover;
+\import Top.Subspace[S := Finite.Join (outside K) (outside L)] \as ExteriorUnion;
+\definition conditions: ExteriorCover.Conditions := ExteriorCover.Conditions {
+  leftOpen := ExteriorUnion.traceOpen space (outside K) leftClosed,
+  rightOpen := ExteriorUnion.traceOpen space (outside L) rightClosed,
+};
+\import ExteriorCover.On[conditions := conditions].Comparison[] \as SmallComparison;
+\module With(coefficients: Modules.Bundle) {
+  \import SmallComparison.With[coefficients := coefficients] \as Comparison;
+  \module Degree(z: I.Int^) {
+    \definition isomorphism: _ := Comparison.At[z := z].isomorphism;
+  }
+}

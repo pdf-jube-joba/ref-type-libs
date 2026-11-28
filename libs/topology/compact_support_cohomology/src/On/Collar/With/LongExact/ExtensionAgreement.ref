@@ -1,0 +1,38 @@
+\import CompactAmbient.Cohomology[z := z] \as CompactComparison;
+\import Identity.Integer[].With[coefficients := coefficients].At[z := z] \as AbsoluteIdentity;
+\import \parent.\parent.Linear[] \as InteriorComparison;
+\import Extension.Extension[] \as OpenExtension;
+\definition H: \Set := Ordinary.cohomology z;
+
+\module AtSupport(K: Interior.Support) {
+  \import \parent.\parent.\parent.AtSupport[K := K] \as AtK;
+  \import CompactComparison.AtSupport[K := Open.image K] \as SupportComparison;
+  \import Relative.Maps[B := A].Over[target := space, targetSubset := outside (Open.image K)]
+    .On[f := AtK.keepBoundary].Integer[].With[coefficients := coefficients].Naturality[].At[z := z] \as ForgetNaturality;
+  \definition include[x: InteriorDegree.Stage K]: AmbientDegree.Stage (Open.image K) := Extension.AtSupport[K := K].extend x;
+  \definition forgetPair[y: AmbientDegree.Stage (Open.image K)]: SupportComparison.forget y = (forget).apply (AtK.pullback y) :=
+    eq_reason_in!{H _
+      "=" _ "by" { sym!{H} _ _ (AbsoluteIdentity.onCohomology (SupportComparison.forget y)) }
+      "=" _ "by" { ForgetNaturality.inclusionNaturality y }};
+  \definition law[x: InteriorDegree.Stage K]:
+    (CompactComparison.isomorphism.forward).apply (OpenExtension.extend (InteriorDegree.ofSupport K x)) =
+      (forget).apply ((InteriorComparison.isomorphism.forward).apply (InteriorDegree.ofSupport K x)) :=
+    eq_reason_in!{H _
+      "=" _ "by" { congr!{AmbientDegree.Cohomology H} ((CompactComparison.isomorphism.forward).apply)
+        _ _ (OpenExtension.onSupport K x) }
+      "=" _ "by" { CompactComparison.onSupport (Open.image K) (include x) }
+      "=" _ "by" { forgetPair (include x) }
+      "=" _ "by" { congr!{Group H} ((forget).apply) _ _ (sym!{Group} _ _ (onStage K x)) }};
+}
+\definition compare: \forall (x: InteriorDegree.Cohomology) ->
+  (CompactComparison.isomorphism.forward).apply (OpenExtension.extend x) =
+    (forget).apply ((InteriorComparison.isomorphism.forward).apply x) :=
+  InteriorDegree.induction
+    (\fun (x: InteriorDegree.Cohomology) => (CompactComparison.isomorphism.forward).apply (OpenExtension.extend x) =
+      (forget).apply ((InteriorComparison.isomorphism.forward).apply x))
+    (\fun (K: Interior.Support) => AtSupport[K := K].law);
+\definition law[x: InteriorDegree.Cohomology]: (extension).apply x = OpenExtension.extend x :=
+  eq_reason_in!{AmbientDegree.Cohomology _
+    "=" _ "by" { congr!{H AmbientDegree.Cohomology} ((CompactComparison.isomorphism.backward).apply)
+      _ _ (sym!{H} _ _ (compare x)) }
+    "=" _ "by" { CompactComparison.isomorphism.leftInverse (OpenExtension.extend x) }};

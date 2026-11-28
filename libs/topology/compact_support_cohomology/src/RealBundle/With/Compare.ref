@@ -1,0 +1,18 @@
+\import C03.Shell[] \as Collar;
+\import algebraic_topology.Interval[] \as Interval;
+\import algebraic_topology.Cylinder[A := Disk.DiskBundle] \as Cylinder;
+\definition contains[x: Disk.DiskBundle][member: DiskSpace.Member Disk.Boundary x]: DiskSpace.Member Collar.shell x :=
+  Collar.contains (\into[Disk.DiskBundle](x, Disk.Boundary) \by { member });
+\definition retracts[x: Disk.DiskBundle][member: DiskSpace.Member Collar.shell x]: DiskSpace.Member Disk.Boundary (Collar.clip x) :=
+  Collar.endsInBoundary (\into[Disk.DiskBundle](x, Collar.shell) \by { member });
+\definition fixed[t: Interval.Carrier][x: Disk.DiskBundle][member: DiskSpace.Member Disk.Boundary x]:
+  Collar.deformation (Cylinder.at t x) = x :=
+  Collar.fixed t (\into[Disk.DiskBundle](x, Disk.Boundary) \by { member });
+\import \root.On[A := Disk.DiskBundle, space := Disk.diskTopology]
+  .Collar[compactSpace := diskCompact, hausdorff := diskHausdorff, boundary := Disk.Boundary, closed := boundaryClosed,
+    neighborhood := Collar.shell, neighborhoodOpen := Collar.open, containsBoundary := contains,
+    retract := Collar.clip, motion := Collar.deformation, fixed := fixed, retracts := retracts] \as Comparison;
+\import \parent.Radial[].UnitDisk[] \as Radial;
+\import \root.Homeomorphic[A := Family.Point, B := Radial.UnitCarrier,
+  source := bundle.totalSpace, target := Radial.unitTopology, h := Radial.unitHomeomorphism] \as TotalComparison;
+\module With(coefficients: Modules.Bundle, z: I.Int^);

@@ -1,0 +1,63 @@
+\import thom_spaces.Thom[].Over[K := Real.Real, field := Real.Algebra[].field,
+  conjugation := linear_algebra.Hermitian[].Real[].scalar, scalar := Scalars.scalar].For[X := X, F := F, bundle := bundle] \as Model;
+\import Model.With[metric := Construction.metric] \as Source;
+\import topological_constructions.Product[A := X, B := Euclidean.Disk] \as Domain;
+\definition topology: topology.Topology[Carrier := Domain.CarrierSet].Topology := Domain.topology bundle.baseSpace Euclidean.diskTopology;
+\import topology.Topology[Carrier := Domain.CarrierSet] \as DomainSpace;
+\definition coordinateMap[q: Domain.CarrierSet]: Coordinates.CarrierSet :=
+  Pair.pair X Euclidean.Coordinate (Pair.first X Euclidean.Disk q) (Pair.second X Euclidean.Disk q);
+\definition coordinateContinuous: topology.Continuity[A := Domain.CarrierSet, B := Coordinates.CarrierSet].Continuous topology coordinateTopology coordinateMap :=
+  Coordinates.Universal[X := Domain.CarrierSet].pairContinuous topology bundle.baseSpace Euclidean.topology
+    (Pair.first X Euclidean.Disk) (\fun (p: Domain.CarrierSet) => Pair.second X Euclidean.Disk p)
+    (Domain.Maps[].firstContinuous bundle.baseSpace Euclidean.diskTopology)
+    (topology.Composition[A := Domain.CarrierSet, B := Euclidean.Disk, C := Euclidean.Coordinate].composeContinuous topology Euclidean.diskTopology Euclidean.topology
+      (Pair.second X Euclidean.Disk) (\fun (v: Euclidean.Disk) => v)
+      (Domain.Maps[].secondContinuous bundle.baseSpace Euclidean.diskTopology)
+      (topology.Continuity[A := Euclidean.Disk, B := Euclidean.Coordinate].Corestriction[S := Euclidean.ClosedBall].inclusionContinuous Euclidean.topology));
+\definition ambient[p: Domain.CarrierSet]: AmbientFamily.Point := Trivial.backward (coordinateMap p);
+\definition ambientContinuous: topology.Continuity[A := Domain.CarrierSet, B := AmbientFamily.Point].Continuous topology Trivial.topology ambient :=
+  topology.Composition[A := Domain.CarrierSet, B := Coordinates.CarrierSet, C := AmbientFamily.Point].composeContinuous topology coordinateTopology Trivial.topology
+    coordinateMap Trivial.backward coordinateContinuous Trivial.backwardContinuous;
+\definition toTotal[p: Domain.CarrierSet]: Family.Point := retract (ambient p);
+\definition continuous: topology.Continuity[A := Domain.CarrierSet, B := Family.Point].Continuous topology bundle.totalSpace toTotal :=
+  topology.Composition[A := Domain.CarrierSet, B := AmbientFamily.Point, C := Family.Point].composeContinuous topology Trivial.topology bundle.totalSpace
+    ambient retract ambientContinuous retractContinuous;
+\import topology.Maps[A := Domain.CarrierSet, B := Family.Point] \as Maps;
+\definition image: \Pow Family.Point := Maps.Image toTotal DomainSpace.Whole;
+\definition compact: Total.IsCompactIn bundle.totalSpace image :=
+  topology.Compactness[A := Domain.CarrierSet, B := Family.Point].continuousImage topology bundle.totalSpace toTotal continuous DomainSpace.Whole
+    (Domain.Compactness[].productCompact bundle.baseSpace Euclidean.diskTopology compactBase Euclidean.Compactness[].compact);
+\definition coordinatesInDisk[p: Source.DiskBundle]: Euclidean.Disk :=
+  \into[Euclidean.Coordinate](vector p, Euclidean.ClosedBall) \by {
+    Order.leReplaceLeft (Source.squared p) (Euclidean.normSquared (vector p)) Real.one (\parent.Squared[].formula n (vector p))
+      (\bysub(Family.Point, Source.ClosedBall, p))
+  };
+\definition point[p: Source.DiskBundle]: Domain.CarrierSet :=
+  Pair.pair X Euclidean.Disk p.base (coordinatesInDisk p);
+\definition lift[p: Source.DiskBundle]: toTotal (point p) = p := retractEmbedding p;
+\definition contains[p: Family.Point][member: Total.Member Source.ClosedBall p]: Total.Member image p :=
+  Logic.existsIntro[Domain.CarrierSet, { q: Domain.CarrierSet \where Logic.And[DomainSpace.Member DomainSpace.Whole q, toTotal q = p] }]
+    (point (\into[Family.Point](p, Source.ClosedBall) \by { member }))
+    (Logic.And[_, _]::# (\refl(point (\into[Family.Point](p, Source.ClosedBall) \by { member })))
+      (lift (\into[Family.Point](p, Source.ClosedBall) \by { member })));
+\definition standardDisk: Total.IsCompactIn bundle.totalSpace Source.ClosedBall :=
+  Total.Compactness[].closedSubset bundle.totalSpace image Source.ClosedBall compact Source.diskClosed contains;
+\definition standardSphere: topology.Topology[Carrier := Source.SphereBundle].IsCompact Source.sphereTopology :=
+  Total.Subspace[S := Source.UnitSphere].Properties[].compact bundle.totalSpace
+    (Total.Compactness[].closedSubset bundle.totalSpace Source.ClosedBall Source.UnitSphere standardDisk Source.sphereClosed
+      (\fun (p: Family.Point)(unit: Source.squared p = Real.one) =>
+        Order.leReplaceLeft Real.one (Source.squared p) Real.one (sym!{Real.Real} _ _ unit) (Order.leRefl Real.one)));
+\import Model.Change[left := Construction.metric, right := metric] \as Change;
+\import topology.Homeomorphism[A := Source.SphereBundle, B := Disk.SphereBundle] \as Homeomorphism;
+\definition sphereCompact: topology.Topology[Carrier := Disk.SphereBundle].IsCompact Disk.sphereTopology :=
+  topology.Compactness[A := Source.SphereBundle, B := Disk.SphereBundle].surjectiveImage Source.sphereTopology Disk.sphereTopology Change.sphereHomeomorphism.forward
+    (Homeomorphism.laws Source.sphereTopology Disk.sphereTopology Change.sphereHomeomorphism).forwardContinuous
+    (\fun (p: Disk.SphereBundle) => Logic.existsIntro[Source.SphereBundle,
+      { v: Source.SphereBundle \where Change.sphereHomeomorphism.forward v = p }] (Change.sphereHomeomorphism.backward p)
+        ((Homeomorphism.laws Source.sphereTopology Disk.sphereTopology Change.sphereHomeomorphism).rightInverse p)) standardSphere;
+\import Disk.CylinderModel[] \as Cylinder;
+\import thom_spaces.Thom[].CWType[].MappingCylinder[A := Disk.SphereBundle, B := X, source := Disk.sphereTopology,
+  target := bundle.baseSpace, f := Disk.sphereProjection, continuous := Disk.sphereProjectionContinuous] \as MappingCylinder;
+\definition diskCompact: DiskSpace.IsCompact Disk.diskTopology :=
+  topology.Compactness[A := MappingCylinder.Carrier, B := Disk.DiskBundle].surjectiveImage MappingCylinder.topology Disk.diskTopology Cylinder.toDisk
+    Cylinder.toDiskContinuous Cylinder.onto (MappingCylinder.compact sphereCompact compactBase);
