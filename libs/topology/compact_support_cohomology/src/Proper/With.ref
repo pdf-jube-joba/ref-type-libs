@@ -11,3 +11,6 @@
 \module Then(C: \Set, final: topology.Topology[Carrier := C].Topology, g: B -> C,
   gContinuous: topology.Continuity[A := B, B := C].Continuous target final g,
   gProper: \root.Proper[A := B, B := C, source := target, target := final].Proper g);
+
+\module Cup(R: \Set, ring: std.Alg[].Ring[].CommutativeRing[R],
+  sourceHausdorff: SourceTop.IsT2 source, targetHausdorff: TargetTop.IsT2 target);

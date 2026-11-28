@@ -1,0 +1,24 @@
+\use std.Logic[].Equality[].sym;
+\import \parent.\parent.With[coefficients := coefficients].Degree[z := z] \as Degree;
+\structure Representative[x: Degree.Cohomology]: \Set := {
+  left: Support,
+  right: Support,
+  leftInU: Top.Subset left U,
+  rightInV: Top.Subset right V,
+  relative: Degree.Stage (union left right),
+  represents: Degree.ofSupport (union left right) relative = x,
+};
+\definition onStage[J: Support][x: Degree.Stage J]: \exists Representative[Degree.ofSupport J x] := \block {
+  \takefrom s: Split[J] \by split J \then
+  \let witness: Representative[Degree.ofSupport J x] := Representative[Degree.ofSupport J x] {
+    left := s.left,
+    right := s.right,
+    leftInU := s.leftInU,
+    rightInV := s.rightInV,
+    relative := Degree.advance J (union s.left s.right) s.coversJ x,
+    represents := sym!{Degree.Cohomology} _ _ (Degree.compatible J (union s.left s.right) s.coversJ x),
+  } \then
+  \return \exact(witness, Representative[Degree.ofSupport J x])
+};
+\definition cofinal: \forall (x: Degree.Cohomology) -> \exists Representative[x] :=
+  Degree.induction (\fun (x: Degree.Cohomology) => \exists Representative[x]) onStage;

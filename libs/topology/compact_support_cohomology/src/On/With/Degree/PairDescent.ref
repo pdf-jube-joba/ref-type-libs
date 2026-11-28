@@ -21,3 +21,5 @@
   eq_reason_in!{Result _
     "=" _ "by" { AtFirst[a := ofSupport K a].onStage L b }
     "=" _ "by" { AtSecond[L := L, b := b].onStage K a }};
+
+\module Bilinearity(output: Modules.Space Result);

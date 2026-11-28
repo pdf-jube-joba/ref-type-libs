@@ -1,0 +1,8 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\use Equality.sym;
+\import Source.Cup[R := R, ring := ring, hausdorff := sourceHausdorff] \as SourceProduct;
+\import Target.Cup[R := R, ring := ring, hausdorff := targetHausdorff] \as TargetProduct;
+\module Degree(p, q: N.Nat^);

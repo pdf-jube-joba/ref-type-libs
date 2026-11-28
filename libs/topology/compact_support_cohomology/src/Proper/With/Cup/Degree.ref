@@ -1,0 +1,24 @@
+\import SourceProduct.Degree[p := p, q := q] \as SourceCup;
+\import TargetProduct.Degree[p := p, q := q] \as TargetCup;
+\definition coefficients: Modules.Bundle := TargetProduct.coefficients;
+\import \parent.\parent.WithCoefficients[coefficients := coefficients, z := I.Int^::ofNat p] \as PullLeft;
+\import \parent.\parent.WithCoefficients[coefficients := coefficients, z := I.Int^::ofNat q] \as PullRight;
+\import \parent.\parent.WithCoefficients[coefficients := coefficients, z := TargetCup.outputDegree] \as PullProduct;
+\import Target.With[coefficients := coefficients] \as TargetTheory;
+\import TargetTheory.Degree[z := I.Int^::ofNat p] \as Left;
+\import TargetTheory.Degree[z := I.Int^::ofNat q] \as Right;
+\import TargetTheory.Degree[z := TargetCup.outputDegree] \as Product;
+\import Source.With[coefficients := coefficients] \as SourceTheory;
+\import SourceTheory.Degree[z := I.Int^::ofNat p] \as SourceLeft;
+\import SourceTheory.Degree[z := I.Int^::ofNat q] \as SourceRight;
+\import SourceTheory.Degree[z := TargetCup.outputDegree] \as SourceOutput;
+\module AtSupports(K, L: Target.Support);
+\definition naturality: \forall (a: Left.Cohomology)(b: Right.Cohomology) ->
+  PullProduct.pullback (TargetCup.cup a b) = SourceCup.cup (PullLeft.pullback a) (PullRight.pullback b) :=
+  Left.induction (\fun (a: Left.Cohomology) => \forall (b: Right.Cohomology) ->
+    PullProduct.pullback (TargetCup.cup a b) = SourceCup.cup (PullLeft.pullback a) (PullRight.pullback b))
+    (\fun (K: Target.Support)(a: Left.Stage K) => Right.induction
+      (\fun (b: Right.Cohomology) =>
+        PullProduct.pullback (TargetCup.cup (Left.ofSupport K a) b) =
+          SourceCup.cup (PullLeft.pullback (Left.ofSupport K a)) (PullRight.pullback b))
+      (\fun (L: Target.Support) => AtSupports[K := K, L := L].law a));

@@ -13,3 +13,8 @@
   firstCompatible := Compatibility[].first, secondCompatible := Compatibility[].second] \as CrossProduct;
 \definition cross: Left.Cohomology -> Right.Cohomology -> Target.Cohomology := CrossProduct.map;
 \definition onSupports: _ := CrossProduct.onStages;
+
+\import Target.Module[] \as TargetModule;
+\import CrossProduct.Bilinearity[output := TargetModule.moduleSpace] \as Descent;
+\module Bilinear;
+\definition bilinear: _ := Bilinear[].map;

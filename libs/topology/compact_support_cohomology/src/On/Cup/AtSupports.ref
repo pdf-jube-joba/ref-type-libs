@@ -22,5 +22,10 @@
 \import Maps.On[f := refine].Integer[].With[coefficients := coefficients] \as Pull;
 \definition fromUnion[z: I.Int^]: _ := Pull.At[z := z].induced;
 \module Product(p, q: N.Nat^) {
-  \definition cup: _ := Cover.On[conditions := conditions].Cup[p := p, q := q].apply;
+  \import Cover.On[conditions := conditions].Cup[p := p, q := q] \as Native;
+  \definition cup: _ := Native.apply;
+  \definition bilinear: _ := Native.bilinear;
+  \definition inputLeft: Modules.Bundle := Native.left;
+  \definition inputRight: Modules.Bundle := Native.right;
+  \definition output: Modules.Bundle := Native.output;
 }

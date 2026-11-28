@@ -1,0 +1,32 @@
+\import commutative_algebra.Modules[R := I.Int^, ring := Integers.commutativeRing] \as Commutative;
+\import Left.Module[] \as LeftModule;
+\import Right.Module[] \as RightModule;
+
+\module AtSupports(K: LeftSpace.Support, L: RightSpace.Support) {
+  \import \parent.\parent.\parent.AtSupports[K := K, L := L] \as Fixed;
+  \import \parent.\parent.AtSupports[K := K, L := L] \as StageProduct;
+  \import Fixed.Product[p := p, q := q] \as Native;
+  \definition leftBundle: Modules.Bundle := Modules.Bundle { Carrier := Left.Stage K, space := LeftModule.spaces K };
+  \definition rightBundle: Modules.Bundle := Modules.Bundle { Carrier := Right.Stage L, space := RightModule.spaces L };
+  \definition target: Modules.Bundle := Modules.Bundle {
+    Carrier := Target.Stage (rectangle K L), space := TargetModule.spaces (rectangle K L),
+  };
+  \definition limit: Modules.Bundle := Modules.Bundle { Carrier := Target.Cohomology, space := TargetModule.moduleSpace };
+  \import Commutative.Bilinear[A := Native.inputLeft, B := Native.inputRight, C := Native.output]
+    .Precompose[D := leftBundle, E := rightBundle] \as Precompose;
+  \import Commutative.Bilinear[A := leftBundle, B := rightBundle, C := Native.output].Postcompose[D := target] \as Pull;
+  \import Commutative.Bilinear[A := leftBundle, B := rightBundle, C := target].Postcompose[D := limit] \as IntoLimit;
+  \import Commutative.Bilinear[A := leftBundle, B := rightBundle, C := limit] \as Map;
+  \definition bilinear: Map.Map := IntoLimit.apply
+    (Pull.apply (Precompose.apply Native.bilinear StageProduct.leftMap StageProduct.rightMap) (Fixed.fromUnion outputDegree))
+    (TargetModule.ofSupportLinear (rectangle K L));
+  \definition laws: Map.Laws[bilinear] := Map.laws bilinear;
+}
+\definition laws: Descent.Laws := Descent.Laws {
+  addLeft := \fun (K: LeftSpace.Support)(L: RightSpace.Support) => AtSupports[K := K, L := L].laws.addLeft,
+  addRight := \fun (K: LeftSpace.Support)(L: RightSpace.Support) => AtSupports[K := K, L := L].laws.addRight,
+  scaleLeft := \fun (K: LeftSpace.Support)(L: RightSpace.Support) => AtSupports[K := K, L := L].laws.scaleLeft,
+  scaleRight := \fun (K: LeftSpace.Support)(L: RightSpace.Support) => AtSupports[K := K, L := L].laws.scaleRight,
+};
+\import Descent.With[laws := laws] \as BilinearDescent;
+\definition map: _ := BilinearDescent.bilinear;

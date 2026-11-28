@@ -1,0 +1,76 @@
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import commutative_algebra.Modules[R := I.Int^, ring := Integers.commutativeRing] \as Commutative;
+\use Equality.congr;
+\module LeftAt(L: SecondSpace.Support, y: Second.Stage L) {
+  \module StageMap(K: Support) {
+    \import Modules.Hom[V := Stage K, W := Result, source := FirstModule.spaces K, target := output] \as Maps;
+    \definition linear: Maps.Map := Maps.Map {
+      apply := \fun (x: Stage K) => product K L x y,
+      addition := \fun (a, b: Stage K) => laws.addLeft K L a b y,
+      scalar := \fun (a: I.Int^)(x: Stage K) => laws.scaleLeft K L a x y,
+    };
+  }
+  \definition compatibility[K, J: Support][included: before K J][x: Stage K]:
+    product K L x y = product J L (advance K J included x) y := firstCompatible K J L included x y;
+  \import FirstModule.LinearDescent[W := Result, target := output,
+    stageMap := (\fun (K: Support) => StageMap[K := K].linear), compatibleMap := compatibility] \as Descend;
+  \definition linear: _ := Descend.map;
+  \definition same: \forall (x: Cohomology) -> map x (Second.ofSupport L y) = (linear).apply x :=
+    induction (\fun (x: Cohomology) => map x (Second.ofSupport L y) = (linear).apply x)
+      (\fun (K: Support)(x: Stage K) => eq_reason_in!{Result _
+        "=" _ "by" { onStages K L x y }
+        "=" _ "by" { sym!{Result} _ _ (Descend.onStage K x) }});
+}
+\module RightAt(K: Support, x: Stage K) {
+  \module StageMap(L: SecondSpace.Support) {
+    \import Modules.Hom[V := Second.Stage L, W := Result, source := SecondModule.spaces L, target := output] \as Maps;
+    \definition linear: Maps.Map := Maps.Map {
+      apply := product K L x,
+      addition := laws.addRight K L x,
+      scalar := (\fun (a: I.Int^)(y: Second.Stage L) => laws.scaleRight K L a x y),
+    };
+  }
+  \definition compatibility[L, J: SecondSpace.Support][included: SecondSpace.before L J][y: Second.Stage L]:
+    product K L x y = product K J x (Second.advance L J included y) := secondCompatible K L J included x y;
+  \import SecondModule.LinearDescent[W := Result, target := output,
+    stageMap := (\fun (L: SecondSpace.Support) => StageMap[L := L].linear), compatibleMap := compatibility] \as Descend;
+  \definition linear: _ := Descend.map;
+  \definition same: \forall (y: Second.Cohomology) -> map (ofSupport K x) y = (linear).apply y :=
+    Second.induction (\fun (y: Second.Cohomology) => map (ofSupport K x) y = (linear).apply y)
+      (\fun (L: SecondSpace.Support)(y: Second.Stage L) => eq_reason_in!{Result _
+        "=" _ "by" { onStages K L x y }
+        "=" _ "by" { sym!{Result} _ _ (Descend.onStage L y) }});
+}
+\definition first: Modules.Bundle := Modules.Bundle { Carrier := Cohomology, space := FirstModule.moduleSpace };
+\definition second: Modules.Bundle := Modules.Bundle { Carrier := Second.Cohomology, space := SecondModule.moduleSpace };
+\definition result: Modules.Bundle := Modules.Bundle { Carrier := Result, space := output };
+\import Commutative.Bilinear[A := first, B := second, C := result] \as Product;
+\definition bilinear: Product.Map := Product.Map {
+  apply := map,
+  addLeft := \fun (x, y: Cohomology) => Second.induction
+    (\fun (z: Second.Cohomology) => map ((first.space).add x y) z = output.add (map x z) (map y z))
+    (\fun (L: SecondSpace.Support)(z: Second.Stage L) => eq_reason_in!{Result _
+      "=" _ "by" { LeftAt[L := L, y := z].same ((first.space).add x y) }
+      "=" _ "by" { (LeftAt[L := L, y := z].linear).addition x y }
+      "=" _ "by" { congr!{Result Result Result} output.add _ _ _ _
+        (sym!{Result} _ _ (LeftAt[L := L, y := z].same x)) (sym!{Result} _ _ (LeftAt[L := L, y := z].same y)) }}),
+  addRight := induction
+    (\fun (x: Cohomology) => \forall (y, z: Second.Cohomology) -> map x ((second.space).add y z) = output.add (map x y) (map x z))
+    (\fun (K: Support)(x: Stage K)(y, z: Second.Cohomology) => eq_reason_in!{Result _
+      "=" _ "by" { RightAt[K := K, x := x].same ((second.space).add y z) }
+      "=" _ "by" { (RightAt[K := K, x := x].linear).addition y z }
+      "=" _ "by" { congr!{Result Result Result} output.add _ _ _ _
+        (sym!{Result} _ _ (RightAt[K := K, x := x].same y)) (sym!{Result} _ _ (RightAt[K := K, x := x].same z)) }}),
+  scaleLeft := \fun (a: I.Int^)(x: Cohomology) => Second.induction
+    (\fun (y: Second.Cohomology) => map ((first.space).smul a x) y = output.smul a (map x y))
+    (\fun (L: SecondSpace.Support)(y: Second.Stage L) => eq_reason_in!{Result _
+      "=" _ "by" { LeftAt[L := L, y := y].same ((first.space).smul a x) }
+      "=" _ "by" { (LeftAt[L := L, y := y].linear).scalar a x }
+      "=" _ "by" { congr!{Result Result} (output.smul a) _ _ (sym!{Result} _ _ (LeftAt[L := L, y := y].same x)) }}),
+  scaleRight := \fun (a: I.Int^) => induction
+    (\fun (x: Cohomology) => \forall (y: Second.Cohomology) -> map x ((second.space).smul a y) = output.smul a (map x y))
+    (\fun (K: Support)(x: Stage K)(y: Second.Cohomology) => eq_reason_in!{Result _
+      "=" _ "by" { RightAt[K := K, x := x].same ((second.space).smul a y) }
+      "=" _ "by" { (RightAt[K := K, x := x].linear).scalar a y }
+      "=" _ "by" { congr!{Result Result} (output.smul a) _ _ (sym!{Result} _ _ (RightAt[K := K, x := x].same y)) }}),
+};

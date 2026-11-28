@@ -12,3 +12,8 @@
   firstCompatible := Compatibility[].first, secondCompatible := Compatibility[].second] \as CupProduct;
 \definition cup: Left.Cohomology -> Right.Cohomology -> Target.Cohomology := CupProduct.map;
 \definition onSupports: _ := CupProduct.onStages;
+
+\import Target.Module[] \as TargetModule;
+\import CupProduct.Bilinearity[output := TargetModule.moduleSpace] \as Descent;
+\module Bilinear;
+\definition bilinear: _ := Bilinear[].map;

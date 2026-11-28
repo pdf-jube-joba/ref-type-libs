@@ -72,3 +72,13 @@
 \definition exactAtAmbient: _ := LeftExact.transported;
 \definition exactAtBoundary: _ := MiddleExact.transported;
 \definition exactAtInteriorNext: _ := RightExact.transported;
+
+\module ExtensionAgreement;
+\definition extensionAgreement: _ := ExtensionAgreement[].law;
+\module RestrictionAgreement;
+\definition restrictionAgreement: _ := RestrictionAgreement[].law;
+
+\import Next.LongExact[].ExtensionAgreement[] \as HigherExtension;
+\import Open.With[coefficients := coefficients, z := next].Extension[] \as HigherOpenExtension;
+\definition nextExtensionAgreement[x: NextInteriorDegree.Cohomology]:
+  (nextExtension).apply x = HigherOpenExtension.extend x := HigherExtension.law x;

@@ -1,0 +1,23 @@
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+
+\structure Split[J: Support]: \Set := {
+  left: Support,
+  right: Support,
+  leftInU: Top.Subset left U,
+  rightInV: Top.Subset right V,
+  leftInJ: before left J,
+  rightInJ: before right J,
+  coversJ: before J (union left right),
+};
+\module OnSupport(J: Support);
+\definition split[J: Support]: \exists Split[J] := OnSupport[J := J].existsSplit;
+
+\definition unionOfSplit[J: Support][s: Split[J]]: Finite.Join s.left s.right = J :=
+  \axiom:setext(Finite.Join s.left s.right, J,
+    \fun (x: A)(member: Top.Member (union s.left s.right) x) => Logic.orElim
+      (Top.Member s.left x) (Top.Member s.right x) (Top.Member J x) member (s.leftInJ x) (s.rightInJ x),
+    s.coversJ);
+
+\module Exteriors(K, L: Support);
+\module With(coefficients: Modules.Bundle, z: I.Int^);

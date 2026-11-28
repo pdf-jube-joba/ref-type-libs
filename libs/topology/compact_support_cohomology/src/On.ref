@@ -43,3 +43,6 @@
     motion (algebraic_topology.Cylinder[A := A].at t x) = x,
   retracts: \forall (x: A) -> Top.Member neighborhood x -> Top.Member boundary (retract x));
 \module Exact;
+\module OpenCover(U, V: \Pow A, hausdorff: Top.IsT2 space,
+  openU: Top.IsOpenIn space U, openV: Top.IsOpenIn space V,
+  covers: \forall (x: A) -> Top.Member (Finite.Join U V) x);

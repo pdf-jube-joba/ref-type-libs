@@ -24,3 +24,4 @@ metric_spaces = { path = "../metric" }
 real = { path = "../../real/basic" }
 dedekind_reals = { path = "../../real/dedekind" }
 bundle_complements = { path = "../../geometry/bundle_complements" }
+commutative_algebra = { path = "../../algebra/commutative_algebra" }
