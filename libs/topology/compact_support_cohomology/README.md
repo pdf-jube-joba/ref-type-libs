@@ -14,6 +14,9 @@ The construction uses all compact subsets and applies in particular to locally c
 | `On.With.Degree.Descend` | Factor a compatible family of maps out of the stages through the direct limit |
 | `On.With.Degree.Compact` | Compare the direct limit with its terminal stage at the whole support |
 | `On.With.Degree.Module` | Abelian group operations on the direct limit and linear structure maps from the relative stages |
+| `On.With.Supported` | Subcomplex of singular cochains vanishing off some compact support |
+| `On.With.Supported.Vanishing` | Characterization of the support predicate by vanishing on the relative subspace |
+| `On.With.Supported.Comparison` | Linear isomorphism from the direct limit to cohomology of the supported cochain complex |
 | `Proper.With.WithCoefficients` | Pull back along a continuous map with compact inverse images of compact sets, with a representative formula |
 | `On.Excision.With` | Restriction to an open neighborhood of a compact support is an isomorphism |
 | `On.Open.With.AtSupport` | Excision for an open subspace at a chosen compact support |
@@ -27,9 +30,14 @@ compose to pullback by the same map of pairs.
 
 For an open subspace of a Hausdorff space, extension by zero sends a class at
 a compact support in the subspace to the inverse excision class at its image
-in the ambient space. The fixed-support comparison uses the complement of
+in the ambient space. Both proper pullback and extension by zero expose linear maps through their `Linear` modules. The fixed-support comparison uses the complement of
 the open subspace as the excised closed set. Naturality of restriction under
 support enlargement also gives naturality of the inverse excision maps.
+
+The cochain comparison sends a relative class to the class of its cochain on
+the ambient space. Every supported cocycle lifts to a relative stage. A
+supported primitive witnesses zero after enlarging to a compact support
+containing both the original cocycle support and the primitive support.
 
 Run the package check from the repository root.
 

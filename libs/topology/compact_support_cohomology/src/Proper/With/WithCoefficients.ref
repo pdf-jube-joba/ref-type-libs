@@ -21,3 +21,4 @@
 \definition pullback[x: TargetDegree.Cohomology]: SourceDegree.Cohomology := Descend.map x;
 \definition onSupport[K: Target.Support][x: TargetDegree.Stage K]: pullback (TargetDegree.ofSupport K x) = stage K x :=
   Descend.onStage K x;
+\module Linear;

@@ -7,3 +7,6 @@ topology = { path = "../basic" }
 module_theory = { path = "../../algebra/module_theory" }
 singular_cohomology = { path = "../singular/cohomology" }
 singular_excision = { path = "../singular/excision" }
+chain_complexes = { path = "../../algebra/homological/chain_complexes" }
+double_complexes = { path = "../../algebra/homological/double_complexes" }
+resolutions = { path = "../../algebra/homological/resolutions" }

@@ -28,3 +28,11 @@
 \definition moduleSpace: Modules.Space Cohomology := Additive.moduleSpace;
 \definition ofSupportLinear[K: Support]: _ := Additive.OfStage[i := K].linear;
 \definition zeroOnSupport: _ := Additive.zeroOnStage;
+\definition addOnSupport: _ := Additive.addOnStage;
+\definition scalarOnSupport[a: I.Int^]: _ := Additive.smulOnStage a;
+\definition simultaneous[P: Cohomology -> Cohomology -> \Prop]: _ := Limit.Together[].two P;
+
+\module LinearDescent(W: \Set, target: Modules.Space W,
+  stageMap: \forall (K: Support) -> Modules.Hom[V := Stage K, W := W, source := spaces K, target := target].Map,
+  compatibleMap: \forall (K, L: Support)(included: before K L)(x: Stage K) ->
+    (stageMap K).apply x = (stageMap L).apply (advance K L included x));

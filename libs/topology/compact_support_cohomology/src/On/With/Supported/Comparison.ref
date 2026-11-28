@@ -1,0 +1,62 @@
+\import \parent.\parent.Degree[z := z] \as Limit;
+\import CochainComplexes.At[C := supportedComplex, z := z] \as Cohomology;
+\definition Group: \Set := Cohomology.Cohomology;
+\definition cohomologySpace: Modules.Space Group := Cohomology.cohomologySpace;
+
+\module Through(K, L: Support, included: before K L) {
+  \import \parent.\parent.AtSupport[K := K] \as Small;
+  \import singular_cohomology.Relative[A := A, source := space, subset := outside K].With[coefficients := coefficients] \as SmallTheory;
+  \import \parent.\parent.AtSupport[K := L] \as Large;
+  \import singular_cohomology.Relative[A := A, source := space, subset := outside L].With[coefficients := coefficients] \as LargeTheory;
+  \import Small.Enlarge[L := L, included := included] \as Advance;
+  \import \parent.\parent.CompareSupport[K := K] \as First;
+  \import \parent.\parent.CompareSupport[K := L] \as Second;
+  \import CochainComplexes.Map[C := SmallTheory.complex, D := supportedComplex] \as Maps;
+  \import CochainComplexes.Map[C := LargeTheory.complex, D := supportedComplex].Composition[B := SmallTheory.complex] \as Composition;
+  \definition commutes: First.map = Composition.compose Second.map Advance.map :=
+    Maps.ext First.map (Composition.compose Second.map Advance.map)
+      (\fun (k: I.Int^)(h: Small.Carrier k) => sym!{{Whole.Carrier k}} _ _ (Advance.inclusion k h));
+  \definition law[x: Limit.Stage K]:
+    (First.Degree[z := z].induced).apply x = (Second.Degree[z := z].induced).apply (Limit.advance K L included x) :=
+    eq_reason_in!{Group _
+      "=" _ "by" { congr!{Maps.Map Group} (\fun (m: Maps.Map) => (Maps.At[k := z].induced m).apply x) _ _ commutes }
+      "=" _ "by" { Composition.At[k := z].compositionOnCohomology Second.map Advance.map x }};
+}
+
+\import Limit.Module[] \as LimitModule;
+\module Stage(K: Support) {
+  \import Modules.Hom[V := Limit.Stage K, W := Group, source := LimitModule.spaces K, target := cohomologySpace] \as StageMaps;
+  \definition linear: StageMaps.Map := \parent.\parent.CompareSupport[K := K].Degree[z := z].induced;
+}
+\definition stageMaps[K: Support]: Modules.Hom[V := Limit.Stage K, W := Group, source := LimitModule.spaces K, target := cohomologySpace].Map :=
+  Stage[K := K].linear;
+\definition stage[K: Support][x: Limit.Stage K]: Group := (stageMaps K).apply x;
+\definition compatible[K, L: Support][included: before K L][x: Limit.Stage K]:
+  stage K x = stage L (Limit.advance K L included x) := Through[K := K, L := L, included := included].law x;
+\import LimitModule.LinearDescent[W := Group, target := cohomologySpace, stageMap := stageMaps, compatibleMap := compatible] \as Descend;
+\import Modules.Isomorphism[V := Limit.Cohomology, W := Group, source := LimitModule.moduleSpace, target := cohomologySpace] \as Iso;
+\definition linear: Modules.Hom[V := Limit.Cohomology, W := Group, source := LimitModule.moduleSpace, target := cohomologySpace].Map := Descend.map;
+\definition forward: Limit.Cohomology -> Group := (linear).apply;
+\definition onStage: _ := Descend.onStage;
+
+\module OnSupport(K: Support, cycle: Cohomology.Closed, lift: \parent.\parent.AtSupport[K := K].Carrier z,
+  equal: \parent.\parent.AtSupport[K := K].include z lift = cycle);
+\definition onCycle[cycle: Cohomology.Closed]: \exists (x: Limit.Cohomology \where forward x = Cohomology.classOf cycle) := \block {
+  \takefrom witness: Witness[z, cycle] \by \bysub(Whole.Carrier z, \parent.At[z := z].Supported, cycle) \then
+  \return OnSupport[K := witness.support, cycle := cycle, lift := witness.value, equal := witness.equal].hit
+};
+\definition onto: \forall (y: Group) -> \exists (x: Limit.Cohomology \where forward x = y) :=
+  Cohomology.classInduction (\fun (y: Group) => \exists (x: Limit.Cohomology \where forward x = y)) onCycle;
+
+\module Kernel(K: Support);
+
+\import Modules.Hom[V := Limit.Cohomology, W := Group, source := LimitModule.moduleSpace, target := cohomologySpace] \as Maps;
+\definition zeroKernel: \forall (x: Limit.Cohomology) -> forward x = Cohomology.zeroClass -> x = (LimitModule.moduleSpace).zero :=
+  Limit.induction (\fun (x: Limit.Cohomology) => forward x = Cohomology.zeroClass -> x = (LimitModule.moduleSpace).zero)
+    (\fun (K: Support)(x: Limit.Stage K)(zero: forward (Limit.ofSupport K x) = Cohomology.zeroClass) =>
+      Kernel[K := K].law x (eq_reason_in!{Group _
+        "=" _ "by" { sym!{Group} _ _ (onStage K x) }
+        "=" _ "by" { zero }}));
+\definition injective: _ := Maps.injectiveOfZeroKernel linear zeroKernel;
+\import Iso.OfBijective[f := linear] \as Bijective;
+\definition isomorphism: Iso.Isomorphism := Bijective.isomorphism injective onto;

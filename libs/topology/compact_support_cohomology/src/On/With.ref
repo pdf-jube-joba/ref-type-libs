@@ -1,2 +1,3 @@
 \module Enlarge(K, L: Support, inclusion: before K L);
 \module Degree(z: I.Int^);
+\module Supported;

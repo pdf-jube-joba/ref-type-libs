@@ -14,3 +14,4 @@
 \definition extend[x: LocalDegree.Cohomology]: AmbientDegree.Cohomology := Descend.map x;
 \definition onSupport[K: Local.Support][x: LocalDegree.Stage K]: extend (LocalDegree.ofSupport K x) = stage K x :=
   Descend.onStage K x;
+\module Linear;

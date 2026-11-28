@@ -1,0 +1,17 @@
+\import SourceDegree.Module[] \as SourceModule;
+\import TargetDegree.Module[] \as TargetModule;
+\import Modules.Hom[V := TargetDegree.Cohomology, W := SourceDegree.Cohomology,
+  source := TargetModule.moduleSpace, target := SourceModule.moduleSpace] \as Maps;
+\module On(K: Target.Support) {
+  \import \parent.\parent.\parent.AtSupport[K := K].Degree[coefficients := coefficients, z := z] \as Fixed;
+  \import Modules.Hom[V := TargetDegree.Stage K, W := SourceDegree.Stage (preimage K),
+    source := TargetModule.spaces K, target := SourceModule.spaces (preimage K)] \as Pull;
+  \definition fixed: Pull.Map := Fixed.pull;
+  \import Modules.Hom[V := SourceDegree.Stage (preimage K), W := SourceDegree.Cohomology,
+    source := SourceModule.spaces (preimage K), target := SourceModule.moduleSpace]
+    .Composition[U := TargetDegree.Stage K, domain := TargetModule.spaces K] \as Compose;
+  \definition linear: _ := Compose.compose (SourceModule.ofSupportLinear (preimage K)) fixed;
+}
+\import TargetModule.LinearDescent[W := SourceDegree.Cohomology, target := SourceModule.moduleSpace,
+  stageMap := (\fun (K: Target.Support) => On[K := K].linear), compatibleMap := compatible] \as Linear;
+\definition map: Maps.Map := Linear.map;

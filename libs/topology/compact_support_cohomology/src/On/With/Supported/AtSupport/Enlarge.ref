@@ -1,0 +1,22 @@
+\import \parent.\parent.AtSupport[K := L] \as Larger;
+\import \parent.\parent.\parent.Enlarge[K := K, L := L, inclusion := included] \as Maps;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside L]
+  .Maps[B := A].Over[target := space, targetSubset := outside K]
+  .On[f := Maps.pairMap].Integer[].With[coefficients := coefficients] \as Native;
+\import Native.Naturality[] \as Naturality;
+\import singular_cohomology.Identity[A := A, source := space].Integer[].With[coefficients := coefficients] \as Identity;
+\import CochainComplexes.Map[C := Whole.complex, D := Whole.complex] \as WholeMaps;
+\import CochainComplexes.End[C := Whole.complex] \as End;
+\import singular_cohomology.Chains[A := A, source := space] \as Chains;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring].ZeroExtension[C := Chains.complex] \as ChainExtension;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing].IntegerEnd[P := ChainExtension.complex, N := coefficients] \as HomIdentity;
+\definition map: _ := Native.pullback;
+\definition apply[z: I.Int^][h: Carrier z]: Larger.Carrier z := (map).apply z h;
+\definition inclusion[z: I.Int^][h: Carrier z]: Larger.include z (apply z h) = include z h :=
+  eq_reason_in!{{Whole.Carrier z} _
+    "=" _ "by" { sym!{{Whole.Carrier z}} _ _ (Naturality.Square[z := z].inclusion h) }
+    "=" _ "by" { congr!{WholeMaps.Map {Whole.Carrier z}}
+        (\fun (f: WholeMaps.Map) => (f).apply z (include z h)) _ _
+        (eq_reason_in!{WholeMaps.Map _
+          "=" _ "by" { Identity.identityLaw }
+          "=" _ "by" { HomIdentity.law }}) }};

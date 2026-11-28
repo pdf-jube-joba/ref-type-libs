@@ -31,4 +31,6 @@
   \idelim Top.Complement deleted = U \with V: \Pow A => Trace[V := V].IsBijective
     \by { base: modelBijective, equality: Finite.doubleComplement U };
 
+\definition isomorphism: Actual.Isomorphism := Actual.isomorphism traceBijective;
+
 \module Identified(part: \Pow Local.Carrier, partEquality: Local.trace = part);
