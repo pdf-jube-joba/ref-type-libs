@@ -1,0 +1,33 @@
+\definition lowerBound: Real.Real := Real.sub (f x) tolerance;
+\definition upperBound: Real.Real := Real.add (f x) tolerance;
+\definition zeroOutside[i: N.Nat^][bound: Nat.Lt i partition.size]: Logic.Not (Space.Member (partition.targets i) x) -> weights i x = Real.zero :=
+  \fun (outside: _) => Finite.doubleNegElim (weights i x = Real.zero)
+    (\fun (nonzero: _) => outside (partition.subordinate i bound x (Closure.contains M.space (Functions.Nonzero (partition.functions i)) x nonzero)));
+\definition weightedZero[i: N.Nat^][bound: Nat.Lt i partition.size][a: Real.Real]: Logic.Not (Space.Member (partition.targets i) x) ->
+  Real.mul (weights i x) a = Real.zero :=
+  \fun (outside: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (w: Real.Real) => Real.mul w a) _ _ (zeroOutside i bound outside)) (Laws.fieldMulZeroLeft a);
+\definition lower[i: N.Nat^][bound: Nat.Lt i partition.size]: R.Le (Real.mul (weights i x) lowerBound) (terms i x) :=
+  either!{{(Classical.excludedMiddle (Space.Member (partition.targets i) x))} {R.Le (Real.mul (weights i x) lowerBound) (terms i x)}
+    {\fun (inside: _) => Estimates.mulMonotone (weights i x) lowerBound (sample i) (partition.lower i x)
+      (Order.leOfLt _ _ (Distance.distanceLtLower (f x) (sample i) tolerance
+        ((\bysub(Real.Real, { a: Real.Real \where Suitable i a }, samples i)) bound x inside)))}
+    {\fun (outside: _) => R.leReplace _ _ _ _
+      (sym!{Real.Real} _ _ (weightedZero i bound lowerBound outside))
+      (sym!{Real.Real} _ _ (weightedZero i bound (sample i) outside)) (R.leRefl Real.zero)}
+  };
+\definition upper[i: N.Nat^][bound: Nat.Lt i partition.size]: R.Le (terms i x) (Real.mul (weights i x) upperBound) :=
+  either!{{(Classical.excludedMiddle (Space.Member (partition.targets i) x))} {R.Le (terms i x) (Real.mul (weights i x) upperBound)}
+    {\fun (inside: _) => Estimates.mulMonotone (weights i x) (sample i) upperBound (partition.lower i x)
+      (Order.leOfLt _ _ (Distance.distanceLtUpper (f x) (sample i) tolerance
+        ((\bysub(Real.Real, { a: Real.Real \where Suitable i a }, samples i)) bound x inside)))}
+    {\fun (outside: _) => R.leReplace _ _ _ _
+      (sym!{Real.Real} _ _ (weightedZero i bound (sample i) outside))
+      (sym!{Real.Real} _ _ (weightedZero i bound upperBound outside)) (R.leRefl Real.zero)}
+  };
+\definition close: R.Lt (Distance.distance (f x) (Sums.prefix terms x partition.size)) radius :=
+  R.leLtTrans _ tolerance radius
+    (Estimates.distanceLeOfInterval (f x) (Sums.prefix terms x partition.size) tolerance
+      (Average.lower lowerBound x partition.size (partition.total x) lower)
+      (Average.upper upperBound x partition.size (partition.total x) upper))
+    (Estimates.halfStrict radius positive);

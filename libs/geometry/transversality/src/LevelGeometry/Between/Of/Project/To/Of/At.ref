@@ -1,0 +1,20 @@
+\import SourceTangent.At[x := x] \as Domain;
+\import TargetTangent.At[x := f.apply x] \as Values;
+\import ParameterTangent.At[x := projection.apply x] \as Parameters;
+\import PreimageTangent.At[x := x] \as FiberTangent;
+\import Differential.At[f := f, x := x] \as DF;
+\import ParameterDerivative.At[f := projection, x := x] \as DP;
+\import InclusionDerivative.At[f := Smooth.inclusion, x := x] \as DI;
+\import LevelDerivative.At[f := parameterMap, x := x] \as DL;
+\import Smooth.At[x := x] \as Inclusion;
+\import sard.KernelProjection[].On[X := Domain.Vector, Y := Values.Vector, Z := Parameters.Vector,
+  domain := Domain.space, first := Values.space, second := Parameters.space].Of[D := DF.value, G := DP.value] \as Transfer;
+\import manifolds.Dimension[n := Nat.add m n].Chart[M := M.Point, space := M.space] \as Charts;
+\definition SliceRegular: \Prop := Transfer.FirstOnKernel;
+\module InSlice(local: Level.Slice, contains: Charts.Contains local.source x);
+\definition slice: Sard.Surjective x -> SliceRegular :=
+  \fun (onto: Sard.Surjective x) => \block {
+    \takefrom local: \Cast[Level.Slice] ({ c: Level.Slice \where Charts.Contains c.source x }) \by Level.covers regular x \then
+    \return Transfer.transfer (regular x)
+      (InSlice[local := local, contains := \bysub(Level.Slice, { c: Level.Slice \where Charts.Contains c.source x }, local)].ontoKernel onto)
+  };

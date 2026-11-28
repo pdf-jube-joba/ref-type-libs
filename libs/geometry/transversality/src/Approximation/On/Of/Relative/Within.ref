@@ -1,0 +1,48 @@
+\definition tolerance: Real.Real := Real.mul Real.half radius;
+\definition tolerancePositive: R.Lt Real.zero tolerance := Estimates.halfOfPositive radius positive;
+\definition errorBall[a: M.Point]: \Pow Real.Real := Distances.Ball Metric.metric (f a) tolerance;
+\definition away: \Pow M.Point := Space.Complement fixed.envelope;
+\definition around[a: M.Point]: \Pow M.Point := Space.Intersection (Continuity.Preimage f (errorBall a)) away;
+
+\definition aroundOpen[a: M.Point]: Space.IsOpenIn M.space (around a) :=
+  (Space.topologyLaws M.space).intersectionOpen _ _
+    (continuous (errorBall a) (MetricTopology.ballOpenIn Metric.metric (f a) tolerance)) fixed.envelopeClosed;
+
+\definition CoverMember[V: \Pow M.Point]: \Prop := Logic.Or[V = U, \exists ( a: M.Point \where V = around a )];
+\definition family: \Pow (\Pow M.Point) := { V: \Pow M.Point \where CoverMember V };
+\definition openMember[V: \Pow M.Point]: CoverMember V -> Space.IsOpenIn M.space V :=
+  \fun (member: _) => either!{member {Space.IsOpenIn M.space V}
+    {\fun (same: V = U) => \idelim U = V \with W: \Pow M.Point => Space.IsOpenIn M.space W \by {
+      base: open, equality: sym!{\Pow M.Point} _ _ same }}
+    {\fun (local: _) => \block {
+      \takefrom a: \Cast[M.Point] ({ a: M.Point \where V = around a }) \by local \then
+      \return \idelim around a = V \with W: \Pow M.Point => Space.IsOpenIn M.space W \by {
+        base: aroundOpen a, equality: sym!{\Pow M.Point} _ _ (\bysub(M.Point, { a: M.Point \where V = around a }, a)) }
+    }}
+  };
+\definition covers[x: M.Point]: Space.Member (Space.Union family) x :=
+  either!{{(Classical.excludedMiddle (Space.Member fixed.envelope x))} {Space.Member (Space.Union family) x}
+    {\fun (inside: _) => Space.unionMemberOf family U x (Logic.Or[_, _]::left (\refl(U))) (fixed.within x inside)}
+    {\fun (outside: _) => Space.unionMemberOf family (around x) x
+      (Logic.Or[_, _]::right (Logic.existsIntro[M.Point, { a: M.Point \where around x = around a }] x (\refl(around x))))
+      (Logic.And[_, _]::#
+        (R.ltReplaceLeft Real.zero (Distance.distance (f x) (f x)) tolerance
+          (sym!{Real.Real} _ _ (Distance.distanceSelf (f x))) tolerancePositive) outside)}
+  };
+\definition cover: Space.IsOpenCover[M.space, family, Space.Whole] := Space.IsOpenCover[M.space, family, Space.Whole] {
+  open := openMember,
+  covers := \fun (x: M.Point)(whole: _) => covers x,
+};
+\structure Patch[V: \Pow M.Point]: \Set := {
+  openSet: Space.IsOpenIn M.space V,
+  sample: Scalars.Function,
+  smooth: Scalars.OnOpen[U := V, open := openSet].IsSmooth (Scalars.OnOpen[U := V, open := openSet].restrict sample),
+  exactOn: \forall (x: M.Point) -> Space.Member V x -> Space.Member fixed.envelope x -> sample x = f x,
+  close: \forall (x: M.Point) -> Space.Member V x -> R.Lt (Distance.distance (f x) (sample x)) tolerance,
+};
+\module Patches;
+\module Combine(partition: Functions.FinitePartition[family]);
+\definition exists[compact: Space.IsCompact M.space]: \exists ( result: Result[radius, K] \where result.neighborhood = fixed.inner ) := \block {
+  \takefrom partition: Functions.FinitePartition[family] \by Scalars.Partitions[family := family].existsFinitePartition compact cover \then
+  \return Combine[partition := partition].exists
+};

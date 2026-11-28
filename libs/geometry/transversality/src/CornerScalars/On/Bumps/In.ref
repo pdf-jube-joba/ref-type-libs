@@ -1,0 +1,15 @@
+\import \parent.\parent.At[c := c, x := x] \as At;
+\import At.Near[U := U, open := open, contains := inside] \as Neighborhood;
+\import manifold_gluing.QuadrantNeighborhood[n := n].On[C := c.constraints, U := c.image] \as Ranges;
+\module Patch(region: Ranges.Neighborhood[Neighborhood.preimage, At.center]) {
+  \module Radius(r: Real.Real, ball: Open.BallInside[region.domain.points, At.center, r]);
+  \definition exists: \exists ( b: Functions.Bump[family] \where Space.Member b.oneRegion x ) := \block {
+    \takefrom r: \Cast[Real.Real] ({ r: Real.Real \where Open.BallInside[region.domain.points, At.center, r] }) \by
+      region.domain.open At.center region.contains \then
+    \return Radius[r := r, ball := \bysub(Real.Real, { r: Real.Real \where Open.BallInside[region.domain.points, At.center, r] }, r)].exists
+  };
+}
+\definition exists: \exists ( b: Functions.Bump[family] \where Space.Member b.oneRegion x ) := \block {
+  \takefrom region: Ranges.Neighborhood[Neighborhood.preimage, At.center] \by Neighborhood.exists \then
+  \return Patch[region := region].exists
+};

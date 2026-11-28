@@ -1,0 +1,23 @@
+\import smooth_partitions.Euclidean[n := n] \as Euclidean;
+\import Real.Estimates[] \as Estimates;
+\import Real.Algebra[] \as Algebra;
+\import topological_algebra.Euclidean[].Dimension[n := n].Def[] \as Def;
+\import topological_algebra.Euclidean[].Dimension[n := n].Norm[] \as Norm;
+
+\module In(c: Chart, x: Charts.LocalPoint c, U: \Pow M.Point, member: Space.FamilyMember family U,
+  open: Space.IsOpenIn M.space U, inside: Space.Member U x);
+\definition at[U: \Pow M.Point][member: Space.FamilyMember family U][open: Space.IsOpenIn M.space U]
+    [x: M.Point][inside: Space.Member U x]: \exists ( b: Functions.Bump[family] \where Space.Member b.oneRegion x ) := \block {
+  \takefrom c: \Cast[Charts.Chart] ({ c: Charts.Chart \where Logic.And[\In[Charts.Chart] M.atlas.charts c, Charts.Contains c x] }) \by M.atlas.covers x \then
+  \let rules: Logic.And[\In[Charts.Chart] M.atlas.charts c, Charts.Contains c x] :=
+    \bysub(Charts.Chart, { c: Charts.Chart \where Logic.And[\In[Charts.Chart] M.atlas.charts c, Charts.Contains c x] }, c) \then
+  \let chart: Chart := \into[Charts.Chart](c, M.atlas.charts) \by { rules.left } \then
+  \let point: Charts.LocalPoint chart := \into[M.Point](x, chart.domain) \by { rules.right } \then
+  \let result: \exists ( b: Functions.Bump[family] \where Space.Member b.oneRegion x ) :=
+    In[c := chart, x := point, U := U, member := member, open := open, inside := inside].exists \then
+  \return result
+};
+\definition local: Space.IsOpenCover[M.space, family, Space.Whole] -> Functions.LocalBumps family :=
+  \fun (cover: _)(x: M.Point) =>
+    Space.unionMemberElim family x (\exists ( b: Functions.Bump[family] \where Space.Member b.oneRegion x ))
+      (\fun (U: \Pow M.Point)(member: _)(inside: _) => at U member (cover.open U member) x inside) (cover.covers x (\refl(x)));

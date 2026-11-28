@@ -1,0 +1,22 @@
+\import Spaces.Quotient[V := W, space := target].Of[S := tangent] \as TargetNormal;
+\import Spaces.Linear[V := V, W := TargetNormal.Carrier, source := source, target := TargetNormal.vectorSpace] \as NormalMap;
+\definition normalDerivative: NormalMap.Map :=
+  Spaces.Linear[V := W, W := TargetNormal.Carrier, source := target, target := TargetNormal.vectorSpace]
+    .Composition[U := V, domain := source].compose TargetNormal.projection differential;
+
+\definition Transverse: \Prop :=
+  \forall (q: TargetNormal.Carrier) -> \exists ( v: V \where normalDerivative.apply v = q );
+
+\definition Stabilizes[v: V]: \Prop := TargetSubspaces.Member tangent (differential.apply v);
+
+\import Spaces.Subspace[V := V, space := source].Kernel[W := TargetNormal.Carrier, target := TargetNormal.vectorSpace] \as Kernels;
+\definition preimageTangent: Spaces.Subspace[V := V, space := source].Subspace := Kernels.kernel normalDerivative;
+\definition tangentCriterion: \forall (v: V) -> Logic.PropEquiv[Stabilizes v, normalDerivative.apply v = TargetNormal.vectorSpace.zero] :=
+  \fun (v: V) => Logic.PropEquiv[_, _]::# (TargetNormal.classZero (differential.apply v))
+    (TargetNormal.zeroClassMember (differential.apply v));
+
+\import \parent.\parent.Derivative[V := V, W := TargetNormal.Carrier, source := source,
+  target := TargetNormal.vectorSpace].Of[D := normalDerivative] \as Quotient;
+\definition SourceNormal: \Set := Quotient.SourceNormalCarrier;
+\definition Comparison: \Set := Quotient.Comparison;
+\definition normalIsomorphism[transverse: Transverse]: Comparison := Quotient.normalIsomorphism transverse;

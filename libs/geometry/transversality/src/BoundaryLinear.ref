@@ -1,0 +1,9 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import real.Analysis[] \as Real;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Real.Algebra[].field] \as Spaces;
+\module On(V, W, B: \Set, ambient: Spaces.VectorSpace V, normal: Spaces.VectorSpace W, boundary: Spaces.VectorSpace B);

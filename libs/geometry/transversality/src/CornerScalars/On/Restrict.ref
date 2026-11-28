@@ -1,0 +1,29 @@
+\import manifold_gluing.OpenManifold[n := n].On[M := M].Within[U := U, open := open] \as Region;
+\import \root.CornerScalars[n := n].On[M := Region.manifold] \as Inside;
+\import Models.Chart[M := Region.Point, space := Region.topology] \as OpenCharts;
+\definition manifold: Models.Manifold := Region.manifold;
+\definition Point: \Set := Region.Point;
+\definition Chart: \Set := Inside.Chart;
+\definition LocalPoint[c: Chart]: \Set := OpenCharts.LocalPoint c;
+\definition Smooth[g: Point -> Real.Real]: \Prop := Inside.IsSmooth g;
+\definition restrict[f: Function][x: Region.Point]: Real.Real := f x;
+\definition chartOf[c: OpenCharts.Chart][member: \In[OpenCharts.Chart] Region.manifold.atlas.charts c]: Inside.Chart :=
+  \into[OpenCharts.Chart](c, Region.manifold.atlas.charts) \by { member };
+\module OnChart(patch: Region.Patch, x: OpenCharts.LocalPoint (Region.chart patch));
+\definition smooth[f: Function]: IsSmoothOn f U -> Inside.IsSmooth (restrict f) :=
+  \fun (regular: IsSmoothOn f U)(c: Inside.Chart)(x: OpenCharts.LocalPoint c)(whole: _) => \block {
+    \takefrom patch: \Cast[Region.Patch] ({ p: Region.Patch \where (c \of OpenCharts.Chart) = Region.chart p }) \by Inside.chartMember c \then
+    \let same: (c \of OpenCharts.Chart) = Region.chart patch :=
+      \bysub(Region.Patch, { p: Region.Patch \where (c \of OpenCharts.Chart) = Region.chart p }, patch) \then
+    \let result: \forall (chartMember: \In[OpenCharts.Chart] Region.manifold.atlas.charts c)(y: OpenCharts.LocalPoint c) ->
+      \exists Inside.At[c := chartOf c chartMember, x := y].Extension[restrict f] :=
+      \idelim Region.chart patch = (c \of OpenCharts.Chart) \with b: OpenCharts.Chart =>
+          \forall (chartMember: \In[OpenCharts.Chart] Region.manifold.atlas.charts b)(y: OpenCharts.LocalPoint b) ->
+            \exists Inside.At[c := chartOf b chartMember, x := y].Extension[restrict f]
+          \by {
+            base: \fun (chartMember: _)(y: OpenCharts.LocalPoint (Region.chart patch)) =>
+              OnChart[patch := patch, x := y].exists f regular,
+            equality: sym!{OpenCharts.Chart} _ _ same
+          } \then
+    \return result (Inside.chartMember c) x
+  };

@@ -1,0 +1,12 @@
+\import SourceTangent.At[x := x] \as Ambient;
+\import TargetTangent.At[x := Maps.apply f x] \as Range;
+\import Differential.At[f := f, x := x] \as Derivative;
+\import \root.Normal[].Derivative[V := Ambient.Vector, W := Range.Vector, source := Ambient.space,
+  target := Range.space].Of[D := Derivative.value] \as Quotient;
+\definition normalComparison: Quotient.Comparison := Quotient.normalIsomorphism (regular x);
+\import Smooth.At[x := x] \as TangentKernel;
+\import PreimageTangent.At[x := x] \as Tangent;
+\import real.Analysis[] \as Real;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Real.Algebra[].field]
+  .Isomorphism[V := Tangent.Vector, W := TangentKernel.Kernel, source := Tangent.space, target := TangentKernel.kernelSpace] \as TangentIsomorphisms;
+\definition tangentComparison: \exists TangentIsomorphisms.Isomorphism := TangentKernel.identificationExists;

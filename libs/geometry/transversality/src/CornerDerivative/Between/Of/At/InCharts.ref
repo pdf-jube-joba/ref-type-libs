@@ -1,0 +1,51 @@
+\import Domain.Coordinate[chart := left] \as SourceCoordinates;
+\import Range.Coordinate[chart := right] \as TargetCoordinates;
+\import Domain.Cones[] \as Cones;
+\import D.InCharts[left := left, right := right] \as Charts;
+\import Maps.At[function := f.apply, left := left, right := right, x := x, contains := Domain.contains left] \as Local;
+
+\definition TangentialJacobian[jacobian: calculus.Vector[n := n, m := m].LinearMap]: \Prop :=
+  \forall (w: Values.Point) -> \exists ( v: Model.Point \where Logic.And[
+    Model.Tangential left.constraints (Domain.coordinate left) v, jacobian.apply v = w] );
+\definition toCoordinates: Sard.TangentialSurjective x -> TangentialJacobian Charts.jacobian :=
+  \fun (onto: Sard.TangentialSurjective x)(w: Values.Point) => \block {
+    \let target: Range.Vector := TargetCoordinates.encode w \then
+    \takefrom u: \Cast[Domain.Vector] ({ v: Domain.Vector \where Logic.And[Cones.Tangential v, D.value.apply v = target] })
+      \by onto target \then
+    \let law: Logic.And[Cones.Tangential u, D.value.apply u = target] :=
+      \bysub(Domain.Vector, { v: Domain.Vector \where Logic.And[Cones.Tangential v, D.value.apply v = target] }, u) \then
+    \return Logic.existsIntro[Model.Point, { v: Model.Point \where Logic.And[
+      Model.Tangential left.constraints (Domain.coordinate left) v, Charts.jacobian.apply v = w] }] (SourceCoordinates.decode u)
+      (Logic.And[_, _]::# (Cones.Lineality[c := left, v := u].fromIntrinsic law.left)
+        (trans!{Values.Point} _ _ _ (sym!{Values.Point} _ _ (D.coordinates left right u))
+          (trans!{Values.Point} _ _ _
+            (congr!{Range.Vector Values.Point} TargetCoordinates.decode _ _ law.right)
+            (TargetCoordinates.decodeEncode w))))
+  };
+\definition fromCoordinates: TangentialJacobian Charts.jacobian -> Sard.TangentialSurjective x :=
+  \fun (onto: TangentialJacobian Charts.jacobian)(w: Range.Vector) => \block {
+    \let coordinate: Values.Point := TargetCoordinates.decode w \then
+    \takefrom v: \Cast[Model.Point] ({ v: Model.Point \where Logic.And[
+      Model.Tangential left.constraints (Domain.coordinate left) v, Charts.jacobian.apply v = coordinate] }) \by onto coordinate \then
+    \let law: Logic.And[Model.Tangential left.constraints (Domain.coordinate left) v, Charts.jacobian.apply v = coordinate] :=
+      \bysub(Model.Point, { v: Model.Point \where Logic.And[Model.Tangential left.constraints (Domain.coordinate left) v,
+        Charts.jacobian.apply v = coordinate] }, v) \then
+    \let u: Domain.Vector := SourceCoordinates.encode v \then
+    \let same: SourceCoordinates.decode u = v := SourceCoordinates.decodeEncode v \then
+    \let tangent: Cones.Tangential u :=
+      Cones.Lineality[c := left, v := u].toIntrinsic
+        (\idelim v = SourceCoordinates.decode u \with z: Model.Point => Model.Tangential left.constraints (Domain.coordinate left) z \by {
+          base: law.left, equality: sym!{Model.Point} _ _ same }) \then
+    \return Logic.existsIntro[Domain.Vector, { v: Domain.Vector \where Logic.And[Cones.Tangential v, D.value.apply v = w] }] u
+      (Logic.And[_, _]::# tangent (TargetCoordinates.injective _ _
+        (trans!{Values.Point} _ _ _ (D.coordinates left right u)
+          (trans!{Values.Point} _ _ _
+            (congr!{Model.Point Values.Point} Charts.jacobian.apply _ _ same) law.right))))
+  };
+\definition criterion[e: Local.Extension]:
+  Logic.PropEquiv[Sard.TangentialSurjective x, TangentialJacobian Local.Using[e := e].jacobian] :=
+  \idelim Charts.jacobian = Local.Using[e := e].jacobian \with J: calculus.Vector[n := n, m := m].LinearMap =>
+    Logic.PropEquiv[Sard.TangentialSurjective x, TangentialJacobian J] \by {
+      base: Logic.PropEquiv[_, _] { ltr := toCoordinates, rtl := fromCoordinates },
+      equality: Local.ofExtension Charts.smooth e
+    };

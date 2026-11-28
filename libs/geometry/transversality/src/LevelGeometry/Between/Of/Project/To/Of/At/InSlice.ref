@@ -1,0 +1,11 @@
+\import Inclusion.InSlice[slice := local, contains := contains] \as Tangents;
+\definition ontoKernel: Sard.Surjective x -> Transfer.SecondOnKernel :=
+  \fun (onto: Sard.Surjective x)(v: Parameters.Vector) => \block {
+    \takefrom u: \Cast[FiberTangent.Vector] ({ u: FiberTangent.Vector \where DL.value.apply u = v }) \by onto v \then
+    \let w: Inclusion.Kernel := Tangents.forward.apply u \then
+    \return Logic.existsIntro[Domain.Vector, { t: Domain.Vector \where Logic.And[DP.value.apply t = v, DF.value.apply t = Values.space.zero] }]
+      w (Logic.And[_, _]::#
+        (trans!{Parameters.Vector} _ _ _ (sym!{Parameters.Vector} _ _ (Chain.At[x := x].pointwise u))
+          (\bysub(FiberTangent.Vector, { u: FiberTangent.Vector \where DL.value.apply u = v }, u)))
+        (\bysub(Domain.Vector, Inclusion.kernel.carrier, w)))
+  };

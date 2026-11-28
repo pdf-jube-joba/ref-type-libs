@@ -1,0 +1,8 @@
+\definition inChart[u: Output.Carrier W]: Model.Carrier right.constraints right.image :=
+  \into[Output.Carrier right.image](Output.inclusion W right.image included u, Model.region right.constraints right.image) \by { admissible u };
+\definition dense[center: Output.Carrier W]: \exists ( u: Output.Carrier W \where AllFaces (Charts.point right (inChart u)) ) := \block {
+  \takefrom u: \Cast[Output.Carrier W] ({ u: Output.Carrier W \where Logic.Not (Sets.Member exceptional u) })
+    \by Null.Open[].avoids exceptional null W center \then
+  \return Logic.existsIntro[Output.Carrier W, { u: Output.Carrier W \where AllFaces (Charts.point right (inChart u)) }] u
+    (regularOutside (inChart u) (\bysub(Output.Carrier W, { u: Output.Carrier W \where Logic.Not (Sets.Member exceptional u) }, u)))
+};

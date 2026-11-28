@@ -1,0 +1,23 @@
+\import topological_algebra.Euclidean[].Dimension[n := n].Topology[] \as SourceTopology;
+\import topology.Topology[Carrier := calculus.Real[].Multivariable[n := n].Point] \as Sets;
+\import smooth_partitions.Euclidean[n := n] \as Partitions;
+\import Partitions.CompactCutoff[K := K, U := protected] \as Cutoff;
+
+\definition RegularOnProtected: \Prop := \forall (x: Input.Carrier U) -> Sets.Member protected.points x ->
+  f.apply x = Def.origin -> Original.SurjectiveAt x;
+\structure Result[radius: Real.Real]: \Set := {
+  map: Maps.Map U Output.whole,
+  neighborhood: \Pow calculus.Real[].Multivariable[n := n].Point,
+  neighborhoodOpen: Sets.IsOpenIn SourceTopology.topology neighborhood,
+  contains: Sets.Subset K neighborhood,
+  agrees: \forall (x: Input.Carrier U) -> Sets.Member neighborhood x -> map.apply x = f.apply x,
+  regular: sard.Euclidean[n := n, m := m].On[U := U, V := Output.whole, f := map].RegularValue Def.origin,
+  close: \forall (x: Input.Carrier U) -> R.Lt (Def.pointDistance (map.apply x) (f.apply x)) radius,
+};
+\module With(cutoff: Cutoff.Data);
+\definition exists[radius: Real.Real][positive: R.Lt Real.zero radius]
+    [compact: Sets.IsCompactIn SourceTopology.topology K][included: Sets.Subset K protected.points]
+    [regular: RegularOnProtected]: \exists Result[radius] := \block {
+  \takefrom cutoff: Cutoff.Data \by Cutoff.existsCutoff compact included \then
+  \return With[cutoff := cutoff].exists radius positive regular
+};

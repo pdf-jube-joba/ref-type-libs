@@ -1,0 +1,29 @@
+\definition into[x: M.Point]: Euclidean.Point :=
+  \into[Output.Carrier Output.whole](\into[Target.Point](g x, Output.whole.points) \by { \refl(g x) },
+    TargetModel.region TargetModel.unconstrained Output.whole) \by { TargetModel.unconstrainedNonnegative (g x) };
+\import TargetModel.Topology[C := TargetModel.unconstrained, U := Output.whole].Into[X := M.Point, source := M.space, f := into] \as Into;
+\definition coordinatesContinuous: MapsToAmbient.Continuous M.space Geometry.topology g :=
+  \fun (V: \Pow Target.Point)(open: TargetSets.IsOpenIn Geometry.topology V) =>
+    Universal.continuous M.space Line.topology g
+      (\fun (i: Fin.Fin m) => \parent.\parent.Continuous[f := \fun (x: M.Point) => g x i].continuous (regular i))
+      V (Geometry.metricOpen V open);
+\definition data: Maps.Data := Maps.Data { apply := into };
+\module At(c: Charts.Chart, x: M.Point, inChart: Charts.Contains c x, atlasMember: \In[Charts.Chart] M.atlas.charts c);
+\module ChartsAt(c: Charts.Chart, d: TargetCharts.Chart, x: M.Point, inChart: Charts.Contains c x) {
+  \import Maps.At[function := into, left := c, right := d, x := x, contains := inChart] \as Local;
+  \definition extension: \In[Charts.Chart] M.atlas.charts c -> \In[TargetCharts.Chart] Euclidean.manifold.atlas.charts d -> \exists Local.Extension :=
+    \fun (left: \In[Charts.Chart] M.atlas.charts c)(right: \In[TargetCharts.Chart] Euclidean.manifold.atlas.charts d) =>
+      \idelim Euclidean.chart = d \with target: TargetCharts.Chart =>
+        \exists Maps.At[function := into, left := c, right := target, x := x, contains := inChart].Extension \by {
+          base: \parent.At[c := c, x := x, inChart := inChart, atlasMember := left].exists,
+          equality: sym!{TargetCharts.Chart} d Euclidean.chart right
+        };
+}
+\definition map: Maps.Map := \into[Maps.Data](data, Maps.Map) \by {
+  Maps.Laws[data] {
+    continuous := Into.continuous coordinatesContinuous,
+    smooth := \fun (c: Charts.Chart)(d: TargetCharts.Chart)(x: M.Point)(contains: Charts.Contains c x)
+      (left: _)(right: _)(target: _) => ChartsAt[c := c, d := d, x := x, inChart := contains].extension left right,
+  }
+};
+\module OpenTarget(V: Output.OpenSet, inside: \forall (x: M.Point) -> TargetSets.Member V.points (g x));

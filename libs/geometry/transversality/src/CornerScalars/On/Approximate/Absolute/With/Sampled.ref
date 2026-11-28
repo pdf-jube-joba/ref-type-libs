@@ -1,0 +1,22 @@
+\definition sample[i: N.Nat^]: Real.Real := samples i;
+\definition weights: Sums.Family := Functions.FamilyValues partition.functions;
+\definition pieces[i: N.Nat^]: Functions.Smooth := Functions.times (partition.functions i) (Functions.constant (sample i));
+\definition terms: Sums.Family := Functions.FamilyValues pieces;
+\definition prefix: N.Nat^ -> Functions.Smooth :=
+  \induction (k: N.Nat^) \return Functions.Smooth \with {
+    | zero: Functions.constant Real.zero
+    | succ: \fun (k: N.Nat^)(previous: Functions.Smooth) => Functions.plus previous (pieces k)
+  };
+\definition formula: \forall (k: N.Nat^)(x: M.Point) -> prefix k x = Sums.prefix terms x k :=
+  \induction (k: N.Nat^) \return \forall (x: M.Point) -> prefix k x = Sums.prefix terms x k \with {
+    | zero: \fun (x: M.Point) => \refl(Real.zero)
+    | succ: \fun (k: N.Nat^)(previous: _)(x: M.Point) =>
+      congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.add a (terms k x)) _ _ (previous x)
+  };
+\import \root.Averaging[A := M.Point].With[weights := weights, terms := terms] \as Average;
+\module At(x: M.Point);
+\definition result: Approximation radius :=
+  \into[Functions.Smooth](prefix partition.size, { g: Functions.Smooth \where Close g radius }) \by {
+    \fun (x: M.Point) => R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _
+      (congr!{Real.Real Real.Real} (Distance.distance (f x)) _ _ (formula partition.size x))) At[x := x].close
+  };

@@ -1,0 +1,24 @@
+[package]
+name = "transversality"
+
+[dependencies]
+boundary_manifolds = { path = "../boundary_manifolds" }
+calculus = { path = "../../analysis/calculus" }
+compact_embeddings = { path = "../compact_embeddings" }
+dedekind_reals = { path = "../../real/dedekind" }
+inverse_implicit = { path = "../inverse_implicit" }
+linear_algebra = { path = "../../algebra/linear_algebra" }
+manifold_gluing = { path = "../manifold_gluing" }
+manifolds = { path = "../manifolds" }
+module_theory = { path = "../../algebra/module_theory" }
+normal_bundles = { path = "../normal_bundles" }
+metric_spaces = { path = "../../topology/metric" }
+real = { path = "../../real/basic" }
+sard = { path = "../sard" }
+smooth_partitions = { path = "../smooth_partitions" }
+std = { path = "../../std" }
+tangent_bundles = { path = "../tangent_bundles" }
+topology = { path = "../../topology/basic" }
+topological_algebra = { path = "../../topology/algebra" }
+topological_constructions = { path = "../../topology/constructions" }
+tubular_neighborhoods = { path = "../tubular_neighborhoods" }

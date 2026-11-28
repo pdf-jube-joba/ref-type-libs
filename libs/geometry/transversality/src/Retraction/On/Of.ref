@@ -1,0 +1,25 @@
+\import G06.On[M := M].Of[e := e] \as Tubular;
+\import Tubular.With[lift := Tubular.straight] \as Straight;
+\import normal_bundles.Dimension[n := m, k := k].On[M := M].Of[i := Embeddings.asImmersion e] \as Normal;
+\module Project(U: Open.OpenSet) {
+  \import Ambient.Subspace[U := U] \as Domain;
+  \import manifolds.SmoothMap[n := d, m := m].Between[M := Domain.smoothManifold, N := M] \as Maps;
+  \definition Map: \Set := Maps.Map;
+}
+\definition Projection[U: Open.OpenSet]: \Set := Project[U := U].Map;
+
+\structure Neighborhood: \Set := {
+  image: Open.OpenSet,
+  includes: \forall (x: M.Point) -> AmbientSets.Member image.points (e.apply x),
+  retraction: Projection image,
+  onEmbedding: \forall (x: M.Point) -> retraction.apply (\into[Ambient.smoothManifold.Point](e.apply x, image.points) \by { includes x }) = x,
+};
+\module In(tube: Straight.Neighborhood);
+\definition existsNeighborhood[compact: TargetSets.IsCompact M.space]: \exists Neighborhood := \block {
+  \takefrom disk: Straight.DiskNeighborhood \by Tubular.tubularNeighborhood compact \then
+  \return \exact(In[tube := disk.tube].neighborhood, Neighborhood)
+};
+\module From(n: std.Data[].Nat[].Nat^);
+\module Topological(X: \Set, source: topology.Structures[].Topology[X], f: X -> M.Point,
+  continuous: topology.Continuity[A := X, B := M.Point].Continuous source M.space f);
+\module Corners(n: std.Data[].Nat[].Nat^);

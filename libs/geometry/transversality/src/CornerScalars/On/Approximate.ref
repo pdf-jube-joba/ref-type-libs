@@ -1,0 +1,16 @@
+\import N.Basic[].Prop[] \as Nat;
+\import R.Order[] \as Order;
+\import Real.Distance[] \as Distance;
+\import Real.Estimates[] \as Estimates;
+\import Real.Algebra[] \as Algebra;
+\import metric_spaces.RealMetric[] \as Metric;
+\import metric_spaces.MetricSpace[Carrier := Real.Real] \as Metrics;
+\import Metrics.Topology[] \as MetricTopology;
+\import smooth_partitions.Countable[A := M.Point] \as Sums;
+
+\definition Close[g: Function][radius: Real.Real]: \Prop := \forall (x: M.Point) -> R.Lt (Distance.distance (f x) (g x)) radius;
+\definition Approximation[radius: Real.Real]: \Set := \Cast[Functions.Smooth] ({ g: Functions.Smooth \where Close g radius });
+\module Absolute(radius: Real.Real, positive: R.Lt Real.zero radius);
+\module Relative(K, U: \Pow M.Point, closed: Space.IsClosedIn M.space K, open: Space.IsOpenIn M.space U, included: Space.Subset K U);
+\definition exists[compact: Space.IsCompact M.space][radius: Real.Real][positive: R.Lt Real.zero radius]:
+  \exists Approximation radius := Absolute[radius := radius, positive := positive].exists compact;

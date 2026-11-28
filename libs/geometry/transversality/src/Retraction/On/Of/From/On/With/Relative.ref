@@ -1,0 +1,4 @@
+\import Euclidean.Relative[K := K, U := U, closed := closed, open := open, inside := included] \as Approximate;
+\definition SmoothOnU: \Prop := Approximate.SmoothOnU;
+\module In(W: \Pow Graphs.CarrierSet, windowOpen: GraphSets.IsOpenIn graphTopology W,
+  around: \forall (x: X.Point) -> GraphSets.Member W (graph x (f x)));

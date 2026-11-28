@@ -1,0 +1,16 @@
+\definition function: ResultMaps.Map :=
+  Composition.compose f defining;
+\import RegularValues.Of[f := function, y := y] \as Fiber;
+\import manifolds.DifferentialComposition[n := Nat.add m n, m := p, l := m].Between[M := M, N := N, P := T].Of[f := f, g := defining] \as Chain;
+\module At(x: Fiber.Fiber);
+\definition DefiningSubmersion: \Prop := \forall (x: Fiber.Fiber) -> At[x := x].DefiningSubmersion;
+\definition Transverse: \Prop := \forall (x: Fiber.Fiber) -> At[x := x].Transverse;
+\definition transverseRegular: DefiningSubmersion -> Transverse -> Fiber.Regular :=
+  \fun (onto: DefiningSubmersion)(transverse: Transverse)(x: Fiber.Fiber) => At[x := x].regular (onto x) (transverse x);
+\module Smooth(onto: DefiningSubmersion, transverse: Transverse) {
+  \import \root.LevelGeometry[n := n, m := m].Between[M := M, T := T].Of[f := function, y := y, regular := transverseRegular onto transverse] \as Geometry;
+  \import manifolds.Dimension[n := n].Smooth[] \as Models;
+  \definition manifold: Models.Manifold := Geometry.preimage;
+  \import manifolds.Immersion[n := n, m := Nat.add m n].Between[M := manifold, N := M] \as Embeddings;
+  \definition embedding: Embeddings.Embedding := Geometry.embedding;
+}

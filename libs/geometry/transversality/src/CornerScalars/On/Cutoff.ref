@@ -1,0 +1,20 @@
+\definition family: \Pow (\Pow M.Point) := { V: \Pow M.Point \where V = U };
+\import \parent.Bumps[family := family] \as Bumps;
+\import Functions.Selection[family := family, S := K] \as Selection;
+\structure Data: \Set := {
+  value: Functions.Smooth,
+  neighborhood: \Pow M.Point,
+  neighborhoodOpen: Space.IsOpenIn M.space neighborhood,
+  contains: Space.Subset K neighborhood,
+  oneOn: \forall (x: M.Point) -> Space.Member neighborhood x -> value x = Real.one,
+  supportWithin: Space.Subset (Functions.support value) U,
+  supportCompact: Space.IsCompactIn M.space (Functions.support value),
+  lower: \forall (x: M.Point) -> R.Le Real.zero (value x),
+  upper: \forall (x: M.Point) -> R.Le (value x) Real.one,
+};
+\module Using(selected: Selection.CountableBumps);
+\definition exists[compact: Space.IsCompactIn M.space K][included: Space.Subset K U]: \exists Data := \block {
+  \takefrom selected: Selection.CountableBumps \by Selection.countable M.secondCountable
+    (\fun (x: M.Point)(inK: _) => Bumps.at U (\refl(U)) open x (included x inK)) \then
+  \return Using[selected := selected].exists compact
+};

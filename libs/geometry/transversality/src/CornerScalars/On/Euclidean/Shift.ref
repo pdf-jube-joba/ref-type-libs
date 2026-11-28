@@ -1,0 +1,60 @@
+\use Equality.eq_reason_in;
+\import \parent.Components[f := f] \as Original;
+\import Real.Algebra[] \as Algebra;
+\import Real.Estimates[] \as Estimates;
+\import Estimates.Product[] \as Product;
+\definition weight: Functions.Smooth := Functions.times bump bump;
+\definition component[i: Fin.Fin m]: Functions.Smooth :=
+  Functions.plus (\into[Function](Original.coordinate i, calculus.smooth) \by { Original.smooth i })
+    (Functions.times (Functions.constant (Real.neg (a i))) weight);
+\definition shifted[x: M.Point]: Target.Point := \fun (i: Fin.Fin m) => component i x;
+\definition smooth: SmoothEverywhere shifted := \fun (i: Fin.Fin m) => Functions.regular (component i);
+\definition map: Maps.Map := \parent.Build[g := shifted, regular := smooth].map;
+\definition fixed[x: M.Point]: bump x = Real.zero -> (map.apply x \of Target.Point) = Original.vector x :=
+  \fun (vanishes: _) => \block {
+    \let zero: weight x = Real.zero := trans!{Real.Real} _ _ _
+      (congr!{Real.Real Real.Real} (Real.mul (bump x)) _ _ vanishes) (Laws.fieldMulZeroRight (bump x)) \then
+    \return \axiom:funext(shifted x, Original.vector x, \fun (i: Fin.Fin m) => eq_reason_in!{Real.Real _
+      "=" _ "by" {congr!{Real.Real Real.Real} (\fun (w: Real.Real) => Real.add (Original.vector x i) (Real.mul (Real.neg (a i)) w)) _ _ zero}
+      "=" _ "by" {congr!{Real.Real Real.Real} (Real.add (Original.vector x i)) _ _ (Laws.fieldMulZeroRight (Real.neg (a i)))}
+      "=" _ "by" {Laws.addZeroRight (Original.vector x i)}
+    })
+  };
+\definition displacementVector[x: M.Point]:
+  Def.subPoint (shifted x) (Original.vector x) = Def.scale (weight x) (Def.negPoint a) :=
+  \axiom:funext(Def.subPoint (shifted x) (Original.vector x), Def.scale (weight x) (Def.negPoint a),
+    \fun (i: Fin.Fin m) => eq_reason_in!{Real.Real _
+      "=" _ "by" {congr!{Real.Real Real.Real} (\fun (z: Real.Real) => Real.sub z (Original.vector x i)) _ _
+        (Laws.addComm (Original.vector x i) (Real.mul (Real.neg (a i)) (weight x)))}
+      "=" _ "by" {Laws.addNegCancelRight (Original.vector x i) (Real.mul (Real.neg (a i)) (weight x))}
+      "=" _ "by" {Laws.fieldMulComm (Real.neg (a i)) (weight x)}
+    });
+\definition originNeg: Def.negPoint Def.origin = Def.origin :=
+  \axiom:funext(Def.negPoint Def.origin, Def.origin, \fun (i: Fin.Fin m) => Laws.negZero);
+\definition normAsDistance[p: Target.Point]: Def.norm p = Def.pointDistance p Def.origin :=
+  congr!{Target.Point Real.Real} Def.norm _ _
+    (\axiom:funext(p, Def.subPoint p Def.origin, \fun (i: Fin.Fin m) => sym!{Real.Real} _ _ (Laws.subZeroRight (p i))));
+\definition normalDistance: Def.norm (Def.negPoint a) = Def.pointDistance a Def.origin := eq_reason_in!{Real.Real _
+  "=" _ "by" {normAsDistance (Def.negPoint a)}
+  "=" _ "by" {congr!{Target.Point Real.Real} (Def.pointDistance (Def.negPoint a))
+    _ _ (sym!{Target.Point} _ _ originNeg)}
+  "=" _ "by" {Norm.distanceNeg a Def.origin}
+};
+\definition displacement[x: M.Point]:
+  Def.pointDistance (map.apply x) (f.apply x) = Real.mul (weight x) (Def.pointDistance a Def.origin) := eq_reason_in!{Real.Real _
+  "=" _ "by" {congr!{Target.Point Real.Real} Def.norm _ _ (displacementVector x)}
+  "=" _ "by" {Norm.homogeneous (weight x) (Def.negPoint a)}
+  "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _
+    (Product.absOfNonnegative (weight x) (Algebra.squareNonnegative (bump x))) normalDistance}
+};
+\definition close[x: M.Point][radius: Real.Real]: R.Le (weight x) Real.one ->
+  R.Lt (Def.pointDistance Def.origin a) radius -> R.Lt (Def.pointDistance (map.apply x) (f.apply x)) radius :=
+  \fun (bounded: _)(near: _) =>
+    R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (displacement x))
+      (R.leLtTrans _ (Def.pointDistance a Def.origin) radius
+        (R.leReplace _ _ _ _
+          (Laws.fieldMulComm (Def.pointDistance a Def.origin) (weight x))
+          (trans!{Real.Real} _ _ _ (Laws.fieldMulComm (Def.pointDistance a Def.origin) Real.one) (Laws.fieldMulOneLeft (Def.pointDistance a Def.origin)))
+          (Estimates.mulMonotone (Def.pointDistance a Def.origin) (weight x) Real.one (Norm.metric.nonnegative a Def.origin) bounded))
+        (R.ltReplaceLeft _ _ _ (Norm.distanceSymmetric Def.origin a) near));
+\module At(c: Chart, x: Charts.LocalPoint c);

@@ -1,0 +1,15 @@
+\import \root.CornerScalars[n := n].On[M := M].At[c := c, x := x] \as Local;
+\definition inChart: Charts.Contains c x := \bysub(M.Point, c.domain, x);
+\import Maps.At[function := f.apply, left := c, right := Euclidean.chart, x := x, contains := inChart] \as MapsAt;
+\import calculus.Maps[n := n, m := m] \as Calculus;
+\definition convert[e: MapsAt.Extension]: Local.Extension[coordinate i] := Local.Extension[coordinate i] {
+  domain := e.neighborhood, included := e.included, contains := e.contains,
+  value := Calculus.coordinateFunction e.neighborhood Output.whole e.map i,
+  smooth := e.map.smooth i,
+  agrees := \fun (u: Model.Carrier c.constraints e.neighborhood) =>
+    congr!{Target.Point Real.Real} (\fun (v: Target.Point) => v i) _ _ (e.agrees u),
+};
+\definition exists: \exists Local.Extension[coordinate i] := \block {
+  \takefrom e: MapsAt.Extension \by f.smooth c Euclidean.chart x inChart (chartMember c) (\refl(Euclidean.chart)) (\refl(f.apply x)) \then
+  \return \exact(convert e, Local.Extension[coordinate i])
+};

@@ -1,0 +1,15 @@
+\import Coordinates.Subspace[S := e.domain.points] \as OpenDomain;
+\import topology.Topology[Carrier := Open.Carrier e.domain] \as DomainSets;
+\import topology.Continuity[A := Open.Carrier e.domain, B := Real.Real] \as DomainMaps;
+\import Open.Topology[].Of[U := e.domain].Continuity[] \as DomainContinuity;
+\definition preimage: \Pow (Open.Carrier e.domain) := DomainMaps.Preimage e.value W;
+\definition preimageOpen: DomainSets.IsOpenIn (Open.Topology[].Of[U := e.domain].topology) preimage :=
+  DomainContinuity.topological e.value (Smooth.Properties[].continuous e.domain e.value e.smooth) W open;
+\module AmbientOpen(V: \Pow Model.Point, openV: Coordinates.IsOpenIn Ambient.topology V, same: preimage = OpenDomain.Trace V);
+\definition exists: \exists Neighborhood := \block {
+  \takefrom V: \Cast[\Pow Model.Point] ({ V: \Pow Model.Point \where Logic.And[Coordinates.IsOpenIn Ambient.topology V, preimage = OpenDomain.Trace V] })
+    \by OpenDomain.openRepresentation Ambient.topology preimage preimageOpen \then
+  \let law: Logic.And[Coordinates.IsOpenIn Ambient.topology V, preimage = OpenDomain.Trace V] :=
+    \bysub(\Pow Model.Point, { V: \Pow Model.Point \where Logic.And[Coordinates.IsOpenIn Ambient.topology V, preimage = OpenDomain.Trace V] }, V) \then
+  \return AmbientOpen[V := V, openV := law.left, same := law.right].exists
+};

@@ -1,0 +1,95 @@
+--- /dev/null
++++ b/libs/geometry/transversality/src/Parameters/Between/Level/Relative.ref
+@@ -0,0 +1,21 @@
++\definition FixedRegular[t: P.Point]: \Prop := \forall (x: A) -> \In[A] fixed x -> transverse t x;
++\definition AwayFromFixed[t: P.Point]: \Prop := \forall (x: A) -> Logic.Not (\In[A] fixed x) -> transverse t x;
++\definition AllRegular[t: P.Point]: \Prop := \forall (x: A) -> transverse t x;
++
++\definition splice[t: P.Point]: FixedRegular t -> AwayFromFixed t -> AllRegular t :=
++  \fun (atFixed: FixedRegular t)(outside: AwayFromFixed t)(x: A) =>
++    either!{{(Classical.excludedMiddle (\In[A] fixed x))} {transverse t x}
++      {atFixed x} {outside x}};
++
++\definition choose[U: \Pow P.Point][open: Sets.IsOpenIn P.space U][center: P.Point][inside: Sets.Member U center]:
++  (\forall (t: P.Point) -> Sets.Member U t -> FixedRegular t) ->
++  (\forall (t: P.Point) -> Slices.RegularParameter t -> AwayFromFixed t) ->
++  \exists ( t: P.Point \where Logic.And[Sets.Member U t, AllRegular t] ) :=
++  \fun (fixedRegular: _)(sliceRegular: _) => \block {
++    \takefrom t: \Cast[P.Point] ({ t: P.Point \where Logic.And[Sets.Member U t, Slices.RegularParameter t] })
++      \by Slices.dense U open center inside \then
++    \let law: Logic.And[Sets.Member U t, Slices.RegularParameter t] :=
++      \bysub(P.Point, { t: P.Point \where Logic.And[Sets.Member U t, Slices.RegularParameter t] }, t) \then
++    \return Logic.existsIntro[P.Point, { t: P.Point \where Logic.And[Sets.Member U t, AllRegular t] }] t
++      (Logic.And[_, _]::# law.left (splice t (fixedRegular t law.left) (sliceRegular t law.right)))
++  };
+--- /dev/null
++++ b/libs/geometry/transversality/src/Parameters/Between/Level.ref
+@@ -0,0 +1,4 @@
++\import Sard.Between[M := M, T := T, P := P].Level[f := f, y := y, regular := regular, projection := projection] \as Slices;
++\import RegularValue.Of[f := f, y := y] \as Fiber;
++
++\module Relative(A: \Set, fixed: \Pow A, transverse: P.Point -> A -> \Prop);
+--- a/libs/geometry/transversality/src/Parameters/Between/Of/Relative.ref
++++ /dev/null
+@@ -1,21 +0,0 @@
+-\definition FixedRegular[t: P.Point]: \Prop := \forall (x: A) -> \In[A] fixed x -> transverse t x;
+-\definition AwayFromFixed[t: P.Point]: \Prop := \forall (x: A) -> Logic.Not (\In[A] fixed x) -> transverse t x;
+-\definition AllRegular[t: P.Point]: \Prop := \forall (x: A) -> transverse t x;
+-
+-\definition splice[t: P.Point]: FixedRegular t -> AwayFromFixed t -> AllRegular t :=
+-  \fun (atFixed: FixedRegular t)(outside: AwayFromFixed t)(x: A) =>
+-    either!{{(Classical.excludedMiddle (\In[A] fixed x))} {transverse t x}
+-      {atFixed x} {outside x}};
+-
+-\definition choose[U: \Pow P.Point][open: Sets.IsOpenIn P.space U][center: P.Point][inside: Sets.Member U center]:
+-  (\forall (t: P.Point) -> Sets.Member U t -> FixedRegular t) ->
+-  (\forall (t: P.Point) -> Sard.Regular t -> AwayFromFixed t) ->
+-  \exists ( t: P.Point \where Logic.And[Sets.Member U t, AllRegular t] ) :=
+-  \fun (fixedRegular: _)(sliceRegular: _) => \block {
+-    \takefrom t: \Cast[P.Point] ({ t: P.Point \where Logic.And[Sets.Member U t, Sard.Regular t] })
+-      \by Sard.regularDense U open center inside \then
+-    \let law: Logic.And[Sets.Member U t, Sard.Regular t] :=
+-      \bysub(P.Point, { t: P.Point \where Logic.And[Sets.Member U t, Sard.Regular t] }, t) \then
+-    \return Logic.existsIntro[P.Point, { t: P.Point \where Logic.And[Sets.Member U t, AllRegular t] }] t
+-      (Logic.And[_, _]::# law.left (splice t (fixedRegular t law.left) (sliceRegular t law.right)))
+-  };
+--- a/libs/geometry/transversality/src/Parameters/Between/Of.ref
++++ /dev/null
+@@ -1,2 +0,0 @@
+-\import sard.Manifold[n := n, m := r].Between[M := M, N := P].Of[f := projection] \as Sard;
+-\module Relative(A: \Set, fixed: \Pow A, transverse: P.Point -> A -> \Prop);
+--- a/libs/geometry/transversality/src/Parameters/Between.ref
++++ b/libs/geometry/transversality/src/Parameters/Between.ref
+@@ -1,3 +1,5 @@
+-\import manifolds.SmoothMap[n := n, m := r].Between[M := M, N := P] \as Projections;
++\import manifolds.SmoothMap[n := Sard.dimension, m := m].Between[M := M, N := T] \as Maps;
++\import manifolds.SmoothMap[n := Sard.dimension, m := r].Between[M := M, N := P] \as Projections;
++\import inverse_implicit.Product[n := n, m := m].RegularValue[M := M, T := T] \as RegularValue;
+ \import topology.Topology[Carrier := P.Point] \as Sets;
+-\module Of(projection: Projections.Map);
++\module Level(f: Maps.Map, y: T.Point, regular: RegularValue.Of[f := f, y := y].Regular, projection: Projections.Map);
+--- a/libs/geometry/transversality/src/Parameters.ref
++++ b/libs/geometry/transversality/src/Parameters.ref
+@@ -1,6 +1,9 @@
++\import std.Data[].Nat[] \as N;
+ \import std.Logic[].Proposition[] \as Logic;
+ \import std.Logic[].Classical[] \as Classical;
+ \use Logic.either;
+-\import manifolds.Dimension[n := n].Smooth[] \as Source;
++\import sard.Parameters[n := n, m := m, r := r] \as Sard;
++\import manifolds.Dimension[n := Sard.dimension].Smooth[] \as Source;
++\import manifolds.Dimension[n := m].Smooth[] \as Values;
+ \import manifolds.Dimension[n := r].Smooth[] \as Parameter;
+-\module Between(M: Source.Manifold, P: Parameter.Manifold);
++\module Between(M: Source.Manifold, T: Values.Manifold, P: Parameter.Manifold);
+--- a/libs/geometry/transversality/src/root.ref
++++ b/libs/geometry/transversality/src/root.ref
+@@ -3,7 +3,7 @@
+ \module Approximation(n: std.Data[].Nat[].Nat^);
+ \module Perturbation(n, m: std.Data[].Nat[].Nat^);
+ \module Retraction(m, k: std.Data[].Nat[].Nat^);
+-\module Parameters(n, r: std.Data[].Nat[].Nat^);
++\module Parameters(n, m, r: std.Data[].Nat[].Nat^);
+ \module CornerParameters(n, m: std.Data[].Nat[].Nat^);
+ \module BoundaryLinear;
+ \module LevelGeometry(n, m: std.Data[].Nat[].Nat^);

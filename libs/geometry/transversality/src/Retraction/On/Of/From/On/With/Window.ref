@@ -1,0 +1,9 @@
+\import Uniform.Window[W := W, open := open, around := around] \as Window;
+\definition Radius: \Set := Window.Radius;
+\definition exists[compact: XS.IsCompact X.space]: \exists Radius := Window.exists compact;
+\definition tubePoint[x: X.Point][y: Coordinates.Point]: \In[Window.P] Window.controls (Window.enclosing x y) ->
+  AmbientSets.Member neighborhood.image.points y := Window.tubePoint x y;
+\definition preserves[x: X.Point][y: Coordinates.Point][inControl: \In[Window.P] Window.controls (Window.enclosing x y)]:
+  GraphSets.Member W (graph x (neighborhood.retraction.apply
+    (\into[Coordinates.Point](y, neighborhood.image.points) \by { tubePoint x y inControl }))) :=
+  Window.preserves x y inControl;

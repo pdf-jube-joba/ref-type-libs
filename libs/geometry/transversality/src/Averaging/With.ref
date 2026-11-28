@@ -1,0 +1,61 @@
+\definition scaled[a: Real.Real][x: A]: \forall (k: N.Nat^) ->
+  Sums.prefix (\fun (i: N.Nat^)(y: A) => Real.mul (weights i y) a) x k = Real.mul (Sums.prefix weights x k) a :=
+  \induction (k: N.Nat^) \return
+    Sums.prefix (\fun (i: N.Nat^)(y: A) => Real.mul (weights i y) a) x k = Real.mul (Sums.prefix weights x k) a \with {
+    | zero: sym!{Real.Real} _ _ (Laws.fieldMulZeroLeft a)
+    | succ: \fun (k: N.Nat^)(previous: _) =>
+      trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} (\fun (v: Real.Real) => Real.add v (Real.mul (weights k x) a)) _ _ previous)
+        (trans!{Real.Real} _ _ _
+          (congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+            (Laws.fieldMulComm (Sums.prefix weights x k) a) (Laws.fieldMulComm (weights k x) a))
+          (trans!{Real.Real} _ _ _
+            (sym!{Real.Real} _ _ (Laws.fieldMulAdd a (Sums.prefix weights x k) (weights k x)))
+            (Laws.fieldMulComm a (Real.add (Sums.prefix weights x k) (weights k x)))))
+  };
+
+\definition prefixLower[a: Real.Real][x: A]:
+  \forall (k: N.Nat^) -> (\forall (i: N.Nat^) -> Nat.Lt i k -> R.Le (Real.mul (weights i x) a) (terms i x)) ->
+  R.Le (Sums.prefix (\fun (i: N.Nat^)(y: A) => Real.mul (weights i y) a) x k) (Sums.prefix terms x k) :=
+  \induction (k: N.Nat^) \return
+    (\forall (i: N.Nat^) -> Nat.Lt i k -> R.Le (Real.mul (weights i x) a) (terms i x)) ->
+    R.Le (Sums.prefix (\fun (i: N.Nat^)(y: A) => Real.mul (weights i y) a) x k) (Sums.prefix terms x k) \with {
+    | zero: \fun (_: _) => R.leRefl Real.zero
+    | succ: \fun (k: N.Nat^)(previous: _)(bounds: _) =>
+      Estimates.addLe _ _ _ _
+        (previous (\fun (i: N.Nat^)(less: Nat.Lt i k) => bounds i (Nat.ltLeTrans i k (N.Nat^::succ k) less (Nat.leSelfSucc k))))
+        (bounds k (Nat.ltOfSuccLe (N.Nat^::succ k) k (Nat.leRefl (N.Nat^::succ k))))
+  };
+
+\definition prefixUpper[a: Real.Real][x: A]:
+  \forall (k: N.Nat^) -> (\forall (i: N.Nat^) -> Nat.Lt i k -> R.Le (terms i x) (Real.mul (weights i x) a)) ->
+  R.Le (Sums.prefix terms x k) (Sums.prefix (\fun (i: N.Nat^)(y: A) => Real.mul (weights i y) a) x k) :=
+  \induction (k: N.Nat^) \return
+    (\forall (i: N.Nat^) -> Nat.Lt i k -> R.Le (terms i x) (Real.mul (weights i x) a)) ->
+    R.Le (Sums.prefix terms x k) (Sums.prefix (\fun (i: N.Nat^)(y: A) => Real.mul (weights i y) a) x k) \with {
+    | zero: \fun (_: _) => R.leRefl Real.zero
+    | succ: \fun (k: N.Nat^)(previous: _)(bounds: _) =>
+      Estimates.addLe _ _ _ _
+        (previous (\fun (i: N.Nat^)(less: Nat.Lt i k) => bounds i (Nat.ltLeTrans i k (N.Nat^::succ k) less (Nat.leSelfSucc k))))
+        (bounds k (Nat.ltOfSuccLe (N.Nat^::succ k) k (Nat.leRefl (N.Nat^::succ k))))
+  };
+
+\definition normalized[a: Real.Real][x: A][k: N.Nat^]: Sums.prefix weights x k = Real.one ->
+  Sums.prefix (\fun (i: N.Nat^)(y: A) => Real.mul (weights i y) a) x k = a :=
+  \fun (total: _) => trans!{Real.Real} _ _ _ (scaled a x k)
+    (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} (\fun (w: Real.Real) => Real.mul w a) _ _ total)
+      (Laws.fieldMulOneLeft a));
+
+\definition lower[a: Real.Real][x: A][k: N.Nat^]: Sums.prefix weights x k = Real.one ->
+  (\forall (i: N.Nat^) -> Nat.Lt i k -> R.Le (Real.mul (weights i x) a) (terms i x)) -> R.Le a (Sums.prefix terms x k) :=
+  \fun (total: _)(bounds: _) => R.leReplaceLeft _ _ _ (normalized a x k total) (prefixLower a x k bounds);
+
+\definition upper[a: Real.Real][x: A][k: N.Nat^]: Sums.prefix weights x k = Real.one ->
+  (\forall (i: N.Nat^) -> Nat.Lt i k -> R.Le (terms i x) (Real.mul (weights i x) a)) -> R.Le (Sums.prefix terms x k) a :=
+  \fun (total: _)(bounds: _) => R.leReplaceRight _ _ _ (normalized a x k total) (prefixUpper a x k bounds);
+
+\definition agrees[a: Real.Real][x: A][k: N.Nat^]: Sums.prefix weights x k = Real.one ->
+  (\forall (i: N.Nat^) -> Nat.Lt i k -> terms i x = Real.mul (weights i x) a) -> Sums.prefix terms x k = a :=
+  \fun (total: _)(same: _) => R.leAntisym _ _
+    (upper a x k total (\fun (i: N.Nat^)(less: _) => R.leReplaceRight _ _ _ (same i less) (R.leRefl (terms i x))))
+    (lower a x k total (\fun (i: N.Nat^)(less: _) => R.leReplaceLeft _ _ _ (same i less) (R.leRefl (terms i x))));

@@ -1,0 +1,45 @@
+\definition onSmooth: Patch U := Patch[U] {
+  openSet := open,
+  sample := f,
+  smooth := regular,
+  exactOn := \fun (x: M.Point)(inside: _)(fixed: _) => \refl(f x),
+  close := \fun (x: M.Point)(inside: _) => R.ltReplaceLeft Real.zero _ tolerance
+    (sym!{Real.Real} _ _ (Distance.distanceSelf (f x))) tolerancePositive,
+};
+\module At(a: M.Point) {
+  \import Scalars.OnOpen[U := around a, open := aroundOpen a] \as Local;
+  \definition patch: Patch (around a) := Patch[around a] {
+    openSet := aroundOpen a,
+    sample := \fun (x: M.Point) => f a,
+    smooth := Local.restrictSmooth (Functions.constant (f a)) (Functions.regular (Functions.constant (f a))),
+    exactOn := \fun (x: M.Point)(inside: Logic.And[Space.Member (Continuity.Preimage f (errorBall a)) x, Space.Member away x])
+      (fixed: Space.Member fixed.envelope x) => Logic.falseElim _ (inside.right fixed),
+    close := \fun (x: M.Point)(inside: Logic.And[Space.Member (Continuity.Preimage f (errorBall a)) x, Space.Member away x]) =>
+      R.ltReplaceLeft (Distance.distance (f a) (f x)) (Distance.distance (f x) (f a)) tolerance
+        (Distance.distanceSymmetric (f a) (f x)) inside.left,
+  };
+}
+\definition emptyOpen: Space.IsOpenIn M.space Space.Empty := (Space.topologyLaws M.space).emptyOpen;
+\import Scalars.OnOpen[U := Space.Empty, open := emptyOpen] \as Empty;
+\definition empty: Patch Space.Empty := Patch[Space.Empty] {
+  openSet := emptyOpen,
+  sample := Functions.constant Real.zero,
+  smooth := Empty.restrictSmooth (Functions.constant Real.zero) (Functions.regular (Functions.constant Real.zero)),
+  exactOn := \fun (x: M.Point)(inside: Logic.False)(fixed: _) => Logic.falseElim _ inside,
+  close := \fun (x: M.Point)(inside: Logic.False) => Logic.falseElim _ inside,
+};
+\definition exists[V: \Pow M.Point]: Logic.Or[CoverMember V, V = Space.Empty] -> \exists Patch V :=
+  \fun (member: _) => either!{member {\exists Patch V}
+    {\fun (inCover: _) => either!{inCover {\exists Patch V}
+      {\fun (same: V = U) => \idelim U = V \with W: \Pow M.Point => \exists Patch W \by {
+        base: \exact(onSmooth, Patch U), equality: sym!{\Pow M.Point} _ _ same }}
+      {\fun (local: _) => \block {
+        \takefrom a: \Cast[M.Point] ({ a: M.Point \where V = around a }) \by local \then
+        \return \idelim around a = V \with W: \Pow M.Point => \exists Patch W \by {
+          base: \exact(At[a := a].patch, Patch (around a)),
+          equality: sym!{\Pow M.Point} _ _ (\bysub(M.Point, { a: M.Point \where V = around a }, a)) }
+      }}
+    }}
+    {\fun (same: V = Space.Empty) => \idelim Space.Empty = V \with W: \Pow M.Point => \exists Patch W \by {
+      base: \exact(empty, Patch Space.Empty), equality: sym!{\Pow M.Point} _ _ same }}
+  };

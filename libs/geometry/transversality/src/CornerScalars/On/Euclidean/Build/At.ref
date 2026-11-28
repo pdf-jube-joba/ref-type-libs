@@ -1,0 +1,13 @@
+\definition sourceChart: Chart := \into[Charts.Chart](c, M.atlas.charts) \by { atlasMember };
+\definition sourcePoint: Charts.LocalPoint sourceChart := \into[M.Point](x, c.domain) \by { inChart };
+\import \root.CornerScalars[n := n].On[M := M].At[c := sourceChart, x := sourcePoint] \as Local;
+\import Maps.At[function := into, left := c, right := Euclidean.chart, x := x, contains := inChart] \as Result;
+\definition Component[i: Fin.Fin m]: Function := \fun (y: M.Point) => g y i;
+\definition Extensions: \Set := \forall (i: Fin.Fin m) -> Local.Extension[Component i];
+\definition existsExtensions: \exists Extensions := \axiom:classicalIndefiniteChoice(Fin.Fin m,
+  \fun (i: Fin.Fin m) => Local.Extension[Component i], \fun (i: Fin.Fin m) => regular i sourceChart sourcePoint (\refl(x)));
+\module Using(extensions: Extensions);
+\definition exists: \exists Result.Extension := \block {
+  \takefrom extensions: Extensions \by existsExtensions \then
+  \return \exact(Using[extensions := extensions].extension, Result.Extension)
+};

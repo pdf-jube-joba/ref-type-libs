@@ -1,0 +1,3 @@
+\import manifolds.Dimension[n := n].Smooth[] \as Source;
+\module On(X: Source.Manifold, f: X.Point -> M.Point,
+  continuous: topology.Continuity[A := X.Point, B := M.Point].Continuous X.space M.space f);

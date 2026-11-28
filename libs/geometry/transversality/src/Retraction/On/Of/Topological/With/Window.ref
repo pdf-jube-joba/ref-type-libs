@@ -1,0 +1,125 @@
+\import topological_constructions.Product[A := Coordinates.Point, B := X] \as Product;
+\definition P: \Set := Product.CarrierSet;
+\import topology.Topology[Carrier := P] \as PS;
+\definition productTopology: PS.Topology := Product.topology Ambient.smoothManifold.space source;
+\definition offset: P -> Coordinates.Point := Pair.first Coordinates.Point X;
+\definition point: P -> X := Pair.second Coordinates.Point X;
+\definition shifted[p: P]: Coordinates.Point := Def.addPoint (embedded (point p)) (offset p);
+\import topology.Continuity[A := P, B := Coordinates.Point] \as ToAmbient;
+\import topological_algebra.Coordinates[K := Real.Real, I := Fin.Fin d].Universal[A := P] \as Tuples;
+\import metric_spaces.RealFunctions[A := P] \as Scalars;
+
+\definition firstCoordinate[i: Fin.Fin d]: Scalars.Continuous productTopology (\fun (p: P) => embedded (point p) i) :=
+  \fun (V: \Pow Real.Real)(openV: _) => Product.Maps[].secondContinuous Ambient.smoothManifold.space source
+    _ (embeddedContinuous _ (ETopology.coordinateContinuous i V openV));
+\definition secondCoordinate[i: Fin.Fin d]: Scalars.Continuous productTopology (\fun (p: P) => offset p i) :=
+  \fun (V: \Pow Real.Real)(openV: _) => Product.Maps[].firstContinuous Ambient.smoothManifold.space source
+    _ (ETopology.coordinateContinuous i V openV);
+\definition shiftContinuous: ToAmbient.Continuous productTopology Ambient.smoothManifold.space shifted :=
+  \fun (V: \Pow Coordinates.Point)(openV: _) =>
+    Tuples.continuous productTopology Line.topology shifted
+      (\fun (i: Fin.Fin d) => Scalars.sumContinuous productTopology
+        (\fun (p: P) => embedded (point p) i) (\fun (p: P) => offset p i)
+        (firstCoordinate i) (secondCoordinate i))
+      V (ETopology.metricOpen V openV);
+\definition region: \Pow P := ToAmbient.Preimage shifted neighborhood.image.points;
+\definition regionOpen: PS.IsOpenIn productTopology region :=
+  shiftContinuous neighborhood.image.points (Open.Topology[].open neighborhood.image);
+\import PS.Subspace[S := region] \as Restricted;
+\definition Domain: \Set := Restricted.CarrierSet;
+\definition domainTopology: topology.Topology[Carrier := Domain].Topology := Restricted.topology productTopology;
+\definition send[p: Domain]: Tube.Point :=
+  \into[Coordinates.Point](shifted p, neighborhood.image.points) \by { \bysub(P, region, p) };
+\import ToAmbient.Restriction[S := region] \as Restrict;
+\import topology.Continuity[A := Domain, B := Coordinates.Point].Corestriction[S := neighborhood.image.points] \as Corestrict;
+\definition sendContinuous: topology.Continuity[A := Domain, B := Tube.Point].Continuous domainTopology Tube.smoothManifold.space send :=
+  Corestrict.corestrictContinuous domainTopology Ambient.smoothManifold.space send
+    (Restrict.restrictContinuous productTopology Ambient.smoothManifold.space shifted shiftContinuous);
+\definition returned[p: Domain]: M.Point := neighborhood.retraction.apply (send p);
+\definition returnedContinuous: topology.Continuity[A := Domain, B := M.Point].Continuous domainTopology M.space returned :=
+  topology.Composition[A := Domain, B := Tube.Point, C := M.Point].composeContinuous
+    domainTopology Tube.smoothManifold.space M.space send neighborhood.retraction.apply sendContinuous
+    (\bysub(Retractions.Data, { h: Retractions.Data \where Retractions.Continuous h }, neighborhood.retraction));
+\definition pair[p: Domain]: Graphs.CarrierSet := graph (point p) (returned p);
+\definition pairContinuous: topology.Continuity[A := Domain, B := Graphs.CarrierSet].Continuous domainTopology graphTopology pair :=
+  Graphs.Universal[X := Domain].pairContinuous domainTopology source M.space (\fun (p: Domain) => point p) returned
+    (topology.Continuity[A := P, B := X].Restriction[S := region].restrictContinuous productTopology source point
+      (Product.Maps[].secondContinuous Ambient.smoothManifold.space source)) returnedContinuous;
+\definition good: \Pow Domain := topology.Continuity[A := Domain, B := Graphs.CarrierSet].Preimage pair W;
+\import Restricted.Open[] \as Image;
+\definition controls: \Pow P := Image.image good;
+\definition controlsOpen: PS.IsOpenIn productTopology controls :=
+  Image.imageOpen productTopology regionOpen good (pairContinuous W open);
+\definition atOffset[a: Coordinates.Point][x: X]: P := Pair.pair Coordinates.Point X a x;
+\definition shiftZero[x: X]: shifted (atOffset Def.origin x) = embedded x :=
+  \axiom:funext(shifted (atOffset Def.origin x), embedded x, \fun (i: Fin.Fin d) => Laws.addZeroRight (embedded x i));
+\definition zeroIn[x: X]: PS.Member region (atOffset Def.origin x) :=
+  \idelim embedded x = shifted (atOffset Def.origin x) \with y: Coordinates.Point => AmbientSets.Member neighborhood.image.points y \by {
+    base: neighborhood.includes (f x),
+    equality: sym!{Coordinates.Point} _ _ (shiftZero x)
+  };
+\definition atZero[x: X]: Domain :=
+  \into[P](atOffset Def.origin x, region) \by { zeroIn x };
+\definition retractShiftZero[x: X]: returned (atZero x) = f x :=
+  (\idelim embedded x = shifted (atZero x) \with y: Coordinates.Point =>
+    \forall (inside: AmbientSets.Member neighborhood.image.points y) ->
+      neighborhood.retraction.apply (\into[Coordinates.Point](y, neighborhood.image.points) \by { inside }) = f x \by {
+        base: \fun (inside: _) => neighborhood.onEmbedding (f x),
+        equality: sym!{Coordinates.Point} _ _ (shiftZero x)
+      }) (zeroIn x);
+\definition central[x: X]: PS.Member controls (atOffset Def.origin x) :=
+  Image.imageMember good (atZero x)
+    (\idelim f x = returned (atZero x) \with y: M.Point => GraphSets.Member W (graph x y) \by {
+      base: around x,
+      equality: sym!{M.Point} _ _ (retractShiftZero x)
+    });
+\definition goodOfControl[p: Domain]: PS.Member controls p -> GraphSets.Member W (pair p) :=
+  Image.imageElim good p (GraphSets.Member W (pair p))
+    (\fun (q: Domain)(good: GraphSets.Member W (pair q))(same: (q \of P) = (p \of P)) =>
+      \idelim q = p \with u: Domain => GraphSets.Member W (pair u) \by {
+        base: good, equality: boundary_manifolds.Refinement[A := P].equality region q p same
+      });
+\definition enclosing[x: X][y: Coordinates.Point]: P := atOffset (Def.subPoint y (embedded x)) x;
+\definition reaches[x: X][y: Coordinates.Point]: shifted (enclosing x y) = y :=
+  \axiom:funext(shifted (enclosing x y), y, \fun (i: Fin.Fin d) => Estimates.addSubCancel (y i) (embedded x i));
+\definition offsetDistance[x: X][y: Coordinates.Point]:
+  Def.pointDistance Def.origin (offset (enclosing x y)) = Def.pointDistance (embedded x) y :=
+  trans!{Real.Real} _ _ _
+    (Norm.distanceSymmetric Def.origin (Def.subPoint y (embedded x)))
+    (trans!{Real.Real} _ _ _ (Norm.difference y (embedded x)) (Norm.distanceSymmetric y (embedded x)));
+\definition tubePoint[x: X][y: Coordinates.Point]: PS.Member controls (enclosing x y) -> AmbientSets.Member neighborhood.image.points y :=
+  \fun (inControl: _) =>
+    \idelim shifted (enclosing x y) = y \with z: Coordinates.Point => AmbientSets.Member neighborhood.image.points z \by {
+      base: Image.imageIncluded good (enclosing x y) inControl,
+      equality: reaches x y
+    };
+\definition preserves[x: X][y: Coordinates.Point][inControl: PS.Member controls (enclosing x y)]:
+  GraphSets.Member W (graph x (neighborhood.retraction.apply (\into[Coordinates.Point](y, neighborhood.image.points) \by { tubePoint x y inControl }))) :=
+  (\idelim shifted (enclosing x y) = y \with z: Coordinates.Point => \forall (inside: AmbientSets.Member neighborhood.image.points z) ->
+    GraphSets.Member W (graph x (neighborhood.retraction.apply (\into[Coordinates.Point](z, neighborhood.image.points) \by { inside }))) \by {
+      base: \fun (inside: _) => goodOfControl (\into[P](enclosing x y, region) \by { inside }) inControl,
+      equality: reaches x y
+    }) (tubePoint x y inControl);
+\structure Radius: \Set := {
+  size: Real.Real,
+  positive: R.Lt Real.zero size,
+  within: \forall (x: X)(y: Coordinates.Point) ->
+    R.Lt (Def.pointDistance (embedded x) y) size -> PS.Member controls (enclosing x y),
+};
+\definition exists[compact: XS.IsCompact source]: \exists Radius := \block {
+  \takefrom tube: Product.Compactness[].Tube[Ambient.smoothManifold.space, Def.origin, controls, XS.Whole]
+    \by Product.Compactness[].tubeLemma Ambient.smoothManifold.space source XS.Whole compact Def.origin controls controlsOpen
+      (\fun (x: X)(whole: _) => central x) \then
+  \takefrom r: \Cast[Real.Real] (Metric.NeighborhoodRadius Norm.metric tube.neighborhood Def.origin)
+    \by tube.open Def.origin tube.contains \then
+  \let bounds: Logic.And[R.Lt Real.zero r,
+    AmbientSets.Subset (Metric.Ball Norm.metric Def.origin r) tube.neighborhood] :=
+    \bysub(Real.Real, Metric.NeighborhoodRadius Norm.metric tube.neighborhood Def.origin, r) \then
+  \return \exact(Radius {
+    size := r,
+    positive := bounds.left,
+    within := \fun (x: X)(y: Coordinates.Point)(close: _) =>
+      tube.within (offset (enclosing x y)) (bounds.right (offset (enclosing x y))
+        (R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (offsetDistance x y)) close)) x (\refl(x)),
+  }, Radius)
+};

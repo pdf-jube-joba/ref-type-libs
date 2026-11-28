@@ -1,0 +1,21 @@
+\import \parent.\parent.AtParameter[a := a] \as Global;
+\import Translations.At[parameter := a] \as Shifted;
+\import sard.Euclidean[n := n, m := m].On[U := U, V := Output.whole, f := Global.map] \as Perturbed;
+\definition shifted: Maps.Map V Output.whole := Shifted.map;
+\definition restricted: Maps.Map V Output.whole := Restrict.input Domain.included Global.map;
+\definition product[j: Fin.Fin m]: Local.Function := Local.product Domain.restricted (Maps.coordinateFunction V Output.whole shifted j);
+\definition productData: Maps.Data[V, Output.whole] := Maps.Data[V, Output.whole] {
+  apply := \fun (x: Input.Carrier V) => Output.Whole[].point (\fun (j: Fin.Fin m) => product j x),
+};
+\definition productMap: Maps.Map V Output.whole := \into[Maps.Data[V, Output.whole]](productData, Maps.Map V Output.whole) \by {
+  Maps.Laws[V, Output.whole, productData] { smooth := \fun (j: Fin.Fin m) => \bysub(Input.ScalarFunction V, Local.Predicate, product j) }
+};
+\module AtPoint(x: Input.Carrier V);
+\definition regular: FixedRegular -> Shifted.RegularAtZero -> Global.RegularAtZero :=
+  \fun (fixed: FixedRegular)(active: Shifted.RegularAtZero)(x: Input.Carrier U)(zero: _) =>
+    either!{{(Classical.excludedMiddle (bump x = Real.zero))} {Perturbed.SurjectiveAt x}
+      {\fun (unchanged: _) => Global.Fixed[x := x, zero := unchanged].regular fixed zero}
+      {\fun (changes: _) => AtPoint[x := \into[calculus.Real[].Multivariable[n := n].Point](x, V.points) \by {
+        Domain.intro x (\fun (vanishes: weight x = Real.zero) => changes (Algebra.squareZero (bump x) vanishes))
+      }].regular active zero}
+    };

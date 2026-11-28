@@ -1,0 +1,9 @@
+\definition vector[x: M.Point]: Target.Point := f.apply x;
+\definition coordinate[i: Fin.Fin m]: Function := \fun (x: M.Point) => vector x i;
+\definition continuous: MapsToAmbient.Continuous M.space Geometry.topology vector :=
+  topology.Composition[A := M.Point, B := Euclidean.Point, C := Target.Point].composeContinuous
+    M.space Euclidean.topology Geometry.topology f.apply (\fun (z: Euclidean.Point) => z) f.continuous
+    (TargetModel.Topology[C := TargetModel.unconstrained, U := Output.whole].ambient);
+\module At(i: Fin.Fin m, c: Chart, x: Charts.LocalPoint c);
+\definition smooth: SmoothEverywhere vector :=
+  \fun (i: Fin.Fin m)(c: Chart)(x: Charts.LocalPoint c)(whole: _) => At[i := i, c := c, x := x].exists;

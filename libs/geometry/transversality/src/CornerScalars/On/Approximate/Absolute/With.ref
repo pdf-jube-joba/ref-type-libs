@@ -1,0 +1,32 @@
+\definition Suitable[i: N.Nat^][c: Real.Real]: \Prop :=
+  Nat.Lt i partition.size -> \forall (x: M.Point) -> Space.Member (partition.targets i) x ->
+    R.Lt (Distance.distance (f x) c) tolerance;
+\definition Sample[i: N.Nat^]: \Set := \Cast[Real.Real] ({ a: Real.Real \where Suitable i a });
+\definition closeSample[a, x: M.Point]: Space.Member (around a) x -> R.Lt (Distance.distance (f x) (f a)) tolerance :=
+  \fun (near: _) => R.ltReplaceLeft _ _ _ (Distance.distanceSymmetric (f a) (f x)) near;
+\definition existsSample[i: N.Nat^]: \exists Sample i :=
+  either!{{(Classical.excludedMiddle (Nat.Lt i partition.size))} {\exists Sample i}
+    {\fun (less: Nat.Lt i partition.size) =>
+      either!{{(partition.refines i less)} {\exists Sample i}
+        {\fun (inFamily: _) => \block {
+          \takefrom a: \Cast[M.Point] ({ a: M.Point \where partition.targets i = around a }) \by inFamily \then
+          \return Logic.existsIntro[Real.Real, { c: Real.Real \where Suitable i c }] (f a)
+            (\fun (bound: Nat.Lt i partition.size)(x: M.Point)(inside: _) => closeSample a x
+              (\idelim partition.targets i = around a \with V: \Pow M.Point => Space.Member V x \by {
+                base: inside, equality: \bysub(M.Point, { a: M.Point \where partition.targets i = around a }, a)
+              }))
+        }}
+        {\fun (empty: partition.targets i = Space.Empty) =>
+          Logic.existsIntro[Real.Real, { c: Real.Real \where Suitable i c }] Real.zero
+            (\fun (bound: Nat.Lt i partition.size)(x: M.Point)(inside: _) =>
+              Logic.falseElim _ (\idelim partition.targets i = Space.Empty \with V: \Pow M.Point => Space.Member V x \by { base: inside, equality: empty }))}
+      }}
+    {\fun (outside: Logic.Not (Nat.Lt i partition.size)) =>
+      Logic.existsIntro[Real.Real, { c: Real.Real \where Suitable i c }] Real.zero
+        (\fun (bound: Nat.Lt i partition.size) => Logic.falseElim _ (outside bound))}
+  };
+\module Sampled(samples: \forall (i: N.Nat^) -> Sample i);
+\definition exists: \exists Approximation radius := \block {
+  \takefrom samples: (\forall (i: N.Nat^) -> Sample i) \by \axiom:classicalIndefiniteChoice(N.Nat^, Sample, existsSample) \then
+  \return \exact(Sampled[samples := samples].result, Approximation radius)
+};

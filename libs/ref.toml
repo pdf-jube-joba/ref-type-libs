@@ -69,6 +69,7 @@ packages = [
     "geometry/tangent_bundles",
     "geometry/normal_bundles",
     "geometry/tubular_neighborhoods",
+    "geometry/transversality",
     "geometry/examples/tangent_normal",
     "geometry/lie_groups",
     "real/axiomatic",
