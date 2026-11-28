@@ -18,3 +18,13 @@
   \definition transferred: _ := Transfer.With[iso := provided, law := law].comparison;
   \definition result: _ := Change.isomorphism transferred (\fun (x: Output.domain.Carrier) => \refl(Output.finite.apply x));
 }
+
+\module WithAnchor(x: Local.BaseCarrier, values: \parent.\parent.\parent.At[x := x].Reference[].Representatives,
+  based: Lifting.LiftsBasis) {
+  \import \parent.\parent.\parent.At[x := x].Reference[].Given[values := values].Expansion[based := based]
+    .Relative[part := Local.basePart, z := z] \as ProductProof;
+  \definition input: Iso.Isomorphism := ProductProof.isomorphism;
+  \definition proof: \forall (v: InputCoordinates.domain.Carrier) -> input.forward.apply v = InputCoordinates.finite.apply v :=
+    \fun (v: InputCoordinates.domain.Carrier) => \refl(InputCoordinates.finite.apply v);
+  \definition isomorphism: _ := \parent.With[provided := input, law := proof].result;
+}

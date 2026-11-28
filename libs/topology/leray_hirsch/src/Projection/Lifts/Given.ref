@@ -1,2 +1,6 @@
 \definition LiftsBasis: \Prop := \forall (x: X)(q: N.Nat^) ->
   \parent.Fiber[x := x].Basis[degree := degree, classes := classes, q := q].IsBasis;
+
+\module LerayHirsch(A: \Pow X, F: \Set, fiber: topology.Topology[Carrier := F].Topology,
+  trivial: \parent.\parent.\parent.Charts[F := F, fiber := fiber].LocallyTrivial,
+  complex: algebraic_topology.CW[A := X].FiniteComplex[base], based: LiftsBasis);

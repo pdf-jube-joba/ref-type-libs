@@ -181,5 +181,14 @@ Mayer–Vietoris row are identified by pair homeomorphisms. The full
 finite direct sum commutes with pullback and with coefficient change.
 On a product chart, the absolute expansion of a lift in the reference
 basis restricts to the fiber using only its degree-zero coefficients.
-It remains to assemble the relative comparison for the chosen lifts
-and apply the finite cover induction.
+Relative right cup expresses the comparison for the chosen lifts as
+the reference comparison composed with the resulting matrix action.
+The equal-degree blocks act invertibly on relative cohomology. Composing
+the matrix action with their inverse gives the identity plus a strictly
+degree-lowering operator, whose finite geometric series gives the inverse
+of the normalized action. The chart pair homeomorphism transports the
+comparison isomorphism to the bundle over the chart. The empty case
+and the relative Mayer–Vietoris gluing step then give the comparison
+on the entire finite chart cover. The theorem and its forward formula
+are exposed as `Projection.Lifts.Given.LerayHirsch.At.isomorphism` and
+`Projection.Lifts.Given.LerayHirsch.At.forward`.

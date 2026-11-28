@@ -1,0 +1,43 @@
+\import Goal.At[z := z] \as Direct;
+\import Direct.ProductCoordinates[] \as Coordinates;
+\import Modules.Isomorphism[V := Coordinates.domain.Carrier, W := Coordinates.range.Carrier, source := Coordinates.domain.space, target := Coordinates.range.space] \as ActualIso;
+\structure Result: \Set := {
+  isomorphism: ActualIso.Isomorphism,
+  forward: \forall (x: Coordinates.domain.Carrier) -> isomorphism.forward.apply x = Coordinates.finite.apply x,
+};
+\definition nonempty[h: \exists Local.BaseCarrier]: \exists Result := \block {
+  \takefrom x: Local.BaseCarrier \by h \then
+  \takefrom values: \parent.\parent.\parent.At[x := x].Reference[].Representatives
+    \by \parent.\parent.\parent.At[x := x].Reference[].existsRepresentatives \then
+  \let iso: ActualIso.Isomorphism :=
+    \parent.\parent.At[z := z].WithAnchor[x := x, values := values, based := based].isomorphism \then
+  \return \exact(Result {
+    isomorphism := iso,
+    forward := \fun (v: Coordinates.domain.Carrier) => \refl(Coordinates.finite.apply v),
+  }, Result)
+};
+\definition none[h: Logic.Not (\exists Local.BaseCarrier)][x: Local.BaseCarrier]: Logic.False := h (\exact(x, Local.BaseCarrier));
+\module Empty(h: Logic.Not (\exists Local.BaseCarrier)) {
+  \import Direct.Empty[empty := none h] \as Zero;
+  \import Modules.DirectSum[Index := Index, family := Direct.family] \as Sum;
+  \definition law: \forall (x: Sum.Carrier) -> Zero.isomorphism.forward.apply x = Direct.linear.apply x :=
+    \fun (x: Sum.Carrier) => \refl(Direct.linear.apply x);
+  \import Coordinates.FromDirect[iso := Zero.isomorphism, law := law] \as ToCoordinates;
+  \definition value: Result := Result {
+    isomorphism := ToCoordinates.isomorphism,
+    forward := \fun (v: Coordinates.domain.Carrier) => \refl(Coordinates.finite.apply v),
+  };
+}
+\definition existence: \exists Result :=
+  either!{{Classical.excludedMiddle (\exists Local.BaseCarrier)} {\exists Result}
+    {nonempty} {\fun (h: Logic.Not (\exists Local.BaseCarrier)) => \exact(Empty[h := h].value, Result)}
+  };
+\import ActualIso.OfBijective[f := Coordinates.finite] \as Verified;
+\definition injective: Verified.Injective := \block {
+  \takefrom result: Result \by existence \then
+  \return Coordinates.Verified[iso := result.isomorphism, law := result.forward].injective
+};
+\definition onto: Verified.Onto := \block {
+  \takefrom result: Result \by existence \then
+  \return Coordinates.Verified[iso := result.isomorphism, law := result.forward].onto
+};

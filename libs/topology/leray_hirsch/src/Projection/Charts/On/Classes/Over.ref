@@ -52,4 +52,6 @@
   part := Local.basePart, boundary := Local.basePart, K := K, ring := ring, data := baseData] \as BaseIso;
 \import \root.PairHomeomorphism[A := Local.TotalCarrier, B := Product.CarrierSet, source := Local.totalTopology, target := chartTarget,
   part := Local.totalPart, boundary := ChartPair.targetBoundary, K := K, ring := ring, data := ChartPair.chartPair] \as TotalIso;
+\import Lifts.Given[degree := degree, classes := classes] \as Lifting;
 \module At(z: I.Int^);
+\module Proved(based: Lifting.LiftsBasis);

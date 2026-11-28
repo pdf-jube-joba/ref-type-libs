@@ -18,6 +18,8 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `Projection.Charts.On.Restriction.result` | Restriction of a chart to a smaller subspace |
 | `Projection.Charts.Cover.Induction.whole` | Finite-union induction from local and gluing lemmas |
 | `Projection.Lifts.Given.LiftsBasis` | Homogeneous basis hypothesis on each actual fiber |
+| `Projection.Lifts.Given.LerayHirsch.At.isomorphism` | Relative Leray–Hirsch module isomorphism for a locally trivial bundle over a finite CW base |
+| `Projection.Lifts.Given.LerayHirsch.At.forward` | Identification of the forward map with the comparison above |
 | `Projection.Lifts.Fiber.Model.Given.isomorphism` | Fiber cocycle model built from a lifted basis |
 | `Projection.Over.Component.linear` | Relative pullback followed by cup with a total-space class |
 | `Projection.Over.Comparison.With.At.linear` | Finite direct-sum comparison in integer total degree |
@@ -52,8 +54,8 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `Projection.Over.MayerVietoris.Shifted.At` | Exact products of the shifted base terms |
 | `Trivial.Over.Degree.law` | Agreement with relative external cup on a product bundle |
 
-The [C11 plan](../../../math/c11-leray-hirsch.md) records the
-mathematical proof and the remaining formalization of bijectivity.
+The [C11 plan](../../../math/c11-leray-hirsch.md) describes the product
+calculation, the change to the chosen lifts, and the finite-cover induction.
 
 Run the checker from the repository root.
 

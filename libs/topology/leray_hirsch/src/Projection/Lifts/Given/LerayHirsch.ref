@@ -1,0 +1,36 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Proposition[] \as Logic;
+\import \parent.\parent.\parent.Charts[F := F, fiber := fiber] \as Charts;
+\import Charts.Cover[trivial := trivial] \as Cover;
+\import \parent.\parent.\parent.Over[U := A, K := K, ring := ring] \as Projection;
+\definition Property[V: \Pow X]: \Prop := Projection.Restriction[V := V].Comparison[count := count, degree := degree, classes := classes].Isomorphisms;
+\import Cover.Induction[P := Property] \as Induction;
+\module Empty;
+\module OnChart(U, V: \Pow X, contained: Base.Subset V U, chart: Charts.On[U := U].Chart) {
+  \definition coordinates: Charts.On[U := V].Chart := Charts.On[U := U].Restriction[V := V, contained := contained, chart := chart].result;
+  \import Charts.On[U := V].Classes[chart := coordinates, K := K, ring := ring, count := count, degree := degree, classes := classes]
+    .Over[subset := A].Proved[based := based] \as Local;
+  \definition result: Property V := Local.comparison;
+}
+\definition local: Induction.Local := \block {
+  \fun (U: \Pow X)(chart: Cover.IsChart U)(V: \Pow X)(isOpen: Base.IsOpenIn base V)(contained: Base.Subset V U) \then
+  \takefrom coordinates: Charts.On[U := U].Chart \by chart.right \then
+  \return OnChart[U := U, V := V, contained := contained, chart := coordinates].result
+};
+\definition glue: Induction.Gluing :=
+  \fun (U, V: \Pow X)(leftOpen: Base.IsOpenIn base U)(rightOpen: Base.IsOpenIn base V)
+    (left: Property U)(right: Property V)(overlap: Property (Base.Intersection U V)) =>
+    Projection.Union[L := U, R := V, leftOpen := leftOpen, rightOpen := rightOpen]
+      .Glue[count := count, degree := degree, classes := classes].Given[onLeft := left, onRight := right, onOverlap := overlap].result;
+\definition covered: Property Base.Whole := Induction.whole complex Empty[].result local glue;
+\import Projection.Whole[].With[count := count, degree := degree, classes := classes] \as Whole;
+\import Projection.Comparison[count := count].With[degree := degree, classes := classes] \as Comparison;
+\module At(z: I.Int^) {
+  \import Comparison.At[z := z] \as Map;
+  \import Modules.DirectSum[Index := Index, family := Map.family] \as Source;
+  \import Modules.Isomorphism[V := Source.Carrier, W := Projection.totalFamily.Carrier z,
+    source := Source.space, target := Projection.totalFamily.space z] \as Iso;
+  \definition isomorphism: Iso.Isomorphism := Whole.At[z := z].isomorphism covered;
+  \definition forward: \forall (a: Source.Carrier) -> isomorphism.forward.apply a = Map.linear.apply a :=
+    \fun (a: Source.Carrier) => \refl(Map.linear.apply a);
+}
