@@ -43,6 +43,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `ComplexLineSphere.Section.Frame.Thom` | The projected north frame defines a continuous complex trivialization, and its standard local disk class equals the restriction of the canonical Thom class |
 | `ComplexLineSphere.Section.Frame.EquatorProjection` | The projected coordinate section has complex coordinate \(x+iy\) in the northern frame on the equator |
 | `ComplexLineSphere.Section.Frame.DiskCoordinates.Puncture` | The northern section gives a map into the disk relative to its punctured subspace. Its normalized equatorial restriction is the identity on the circle |
+| `ComplexLineSphere.Section.Frame.DiskCoordinates.LocalPuncture` and `OpenToModel` | The northern punctured disk bundle retracts onto its boundary. The northern chart map preserves the boundary and the punctured disk pairs |
 | `ComplexLineSphere.Orientation` | The chosen integral generator of the standard two-sphere is obtained from its northern relative generator by the excision comparison and forgetting |
 | `ComplexLineSphere.Orientation.PositiveConnecting` | The positive-degree comparison from ordinary to reduced cohomology commutes with the connecting map of a pair |
 | `ComplexLineSphere.DiskOrientation.ZeroSphereSign.DiscreteRepresentative.Spherical` | The chosen reduced integral generator of the standard zero-sphere is represented by the cocycle with values one and zero at its positive and negative points |

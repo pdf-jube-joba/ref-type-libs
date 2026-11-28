@@ -52,3 +52,5 @@
   preservesSquared (inChart s);
 \module Equator(w: Spheres.Carrier Degrees.one);
 \module Puncture;
+\module LocalPuncture;
+\module OpenToModel;
