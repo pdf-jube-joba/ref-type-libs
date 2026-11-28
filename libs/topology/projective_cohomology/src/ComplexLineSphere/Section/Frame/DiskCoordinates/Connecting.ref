@@ -1,0 +1,70 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import singular_products.Cochains[A := Projective.Space, source := Projective.topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\import \parent.Puncture[] \as ModelSection;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import singular_cellular.DiskCollar[n := Degrees.two] \as Collar;
+\definition z: I.Int^ := I.Int^::ofNat Degrees.two;
+\import \root.ComplexLineSphere[].Orientation[] \as Orientation;
+\import singular_cellular.DiskRelative[n := Degrees.one] \as DiskBoundary;
+\import singular_cellular.DiskLocal[n := Degrees.two] \as DiskLocal;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two].Normalization[] \as Normalization;
+\import singular_cohomology.Relative[A := Plane.Disk, source := Plane.diskTopology, subset := DiskLocal.boundary] \as DiskPair;
+\import singular_cohomology.Relative[A := Plane.Disk, source := Plane.diskTopology, subset := Collar.punctured] \as PuncturedPair;
+\import DiskPair.With[coefficients := Product.integerCoefficients].At[z := z] \as DiskOutput;
+\import PuncturedPair.With[coefficients := Product.integerCoefficients].At[z := z] \as PuncturedOutput;
+\import DiskLocal.With[coefficients := Product.integerCoefficients].At[z := z] \as Comparison;
+\import DiskPair.With[coefficients := Product.integerCoefficients].PairSequence[].LongExact[z := I.Int^::ofNat Degrees.one] \as DiskSequence;
+\import PuncturedPair.With[coefficients := Product.integerCoefficients].PairSequence[].LongExact[z := I.Int^::ofNat Degrees.one] \as PuncturedSequence;
+\import DiskPair.Maps[B := Plane.Disk].Over[target := Plane.diskTopology, targetSubset := Collar.punctured].On[f := DiskLocal.map]
+  .Integer[].With[coefficients := Product.integerCoefficients].Naturality[].At[z := I.Int^::ofNat Degrees.one] \as Comparing;
+\import DiskPair.Maps[B := Plane.Disk].Over[target := Plane.diskTopology, targetSubset := Collar.punctured].On[f := DiskLocal.map] \as Included;
+\import topology.Topology[Carrier := Plane.Disk].Subspace[S := DiskLocal.boundary] \as Boundary;
+\definition boundaryTopology: topology.Topology[Carrier := DiskPair.SubspaceCarrier].Topology := Boundary.topology Plane.diskTopology;
+\definition boundaryAngle[x: DiskPair.SubspaceCarrier]: Plane.Sphere := ModelSection.normalize (Included.restriction x);
+\definition boundaryAngleLaw[x: DiskPair.SubspaceCarrier]: boundaryAngle x = DiskBoundary.homeomorphism.backward x :=
+  Normalization.normalizesUnit (DiskBoundary.homeomorphism.backward x);
+\definition boundaryAngleContinuous: topology.Continuity[A := DiskPair.SubspaceCarrier, B := Plane.Sphere].Continuous
+  boundaryTopology Plane.sphereTopology boundaryAngle :=
+  topology.Composition[A := DiskPair.SubspaceCarrier, B := Collar.Carrier, C := Plane.Sphere].composeContinuous
+    boundaryTopology Collar.topology Plane.sphereTopology Included.restriction ModelSection.normalize
+    Included.restrictionContinuous ModelSection.normalizeContinuous;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring].End[V := I.Int^, space := Product.integerCoefficients.space] \as Scalars;
+\import singular_cohomology.Maps[A := Collar.Carrier, B := Plane.Sphere, source := Collar.topology, target := Plane.sphereTopology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients]
+  .Integer[f := ModelSection.normalize, continuous := ModelSection.normalizeContinuous, coefficientMap := Scalars.identity].At[n := Degrees.one] \as Angle;
+\import singular_cohomology.Cochains[A := Plane.Sphere, source := Plane.sphereTopology].With[coefficients := Product.integerCoefficients] \as Circle;
+\import Circle.Integer[].At[n := Degrees.one] \as CircleComparison;
+\definition degree: I.Int^ := I.Int^::ofNat Degrees.one;
+\definition circleClass: Circle.Integer[].cohomology degree := CircleComparison.isomorphism.backward.apply Orientation.circleGenerator;
+\definition punctureClass: _ := Angle.induced.apply circleClass;
+\definition punctureDelta: PuncturedOutput.Carrier := PuncturedSequence.connecting.apply punctureClass;
+\import singular_cohomology.Cochains[A := Collar.Carrier, source := Collar.topology].With[coefficients := Product.integerCoefficients] \as PuncturedCohomology;
+\import singular_cohomology.Maps[A := Collar.Carrier, B := Plane.Sphere, source := Collar.topology, target := Plane.sphereTopology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as CirclePull;
+\definition punctureLaw: Angle.targetComparison.forward.apply punctureClass = (CirclePull.induced ModelSection.normalize ModelSection.normalizeContinuous Scalars.identity).apply Orientation.circleGenerator :=
+  trans!{{PuncturedCohomology.cohomology Degrees.one}} _ _ _ (Angle.law circleClass)
+    (congr!{{Circle.cohomology Degrees.one} {PuncturedCohomology.cohomology Degrees.one}}
+      (CirclePull.induced ModelSection.normalize ModelSection.normalizeContinuous Scalars.identity).apply _ _
+      (CircleComparison.isomorphism.rightInverse Orientation.circleGenerator));
+\import singular_cohomology.Maps[A := DiskPair.SubspaceCarrier, B := Plane.Sphere, source := boundaryTopology, target := Plane.sphereTopology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients]
+  .Integer[f := boundaryAngle, continuous := boundaryAngleContinuous, coefficientMap := Scalars.identity].At[n := Degrees.one] \as BoundaryAngle;
+\import singular_cohomology.Maps[A := DiskPair.SubspaceCarrier, B := Collar.Carrier, source := boundaryTopology, target := Collar.topology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients]
+  .Integer[f := Included.restriction, continuous := Included.restrictionContinuous, coefficientMap := Scalars.identity].At[n := Degrees.one] \as Subspace;
+\import \root.ComplexLineSphere[].DiskOrientation[].OrdinaryComposition[A := DiskPair.SubspaceCarrier, B := Collar.Carrier, C := Plane.Sphere,
+  source := boundaryTopology, target := Collar.topology, final := Plane.sphereTopology, coefficients := Product.integerCoefficients, z := degree] \as Compose;
+\import singular_cohomology.Cochains[A := DiskPair.SubspaceCarrier, source := boundaryTopology].With[coefficients := Product.integerCoefficients] \as BoundaryOrdinary;
+\definition boundaryClass: BoundaryOrdinary.Integer[].cohomology degree := BoundaryAngle.induced.apply circleClass;
+\definition onRestriction: Subspace.induced.apply punctureClass = boundaryClass :=
+  sym!{{BoundaryOrdinary.Integer[].cohomology degree}} _ _
+    (Compose.law Included.restriction Included.restrictionContinuous ModelSection.normalize ModelSection.normalizeContinuous circleClass);
+\definition restrictionLaw: Comparison.neighborhood.forward.apply punctureDelta = DiskSequence.connecting.apply boundaryClass :=
+  trans!{DiskOutput.Carrier} _ _ _
+    (sym!{DiskOutput.Carrier} _ _ (Comparing.connectingNaturality punctureClass))
+    (congr!{{BoundaryOrdinary.Integer[].cohomology (I.Int^::ofNat Degrees.one)} DiskOutput.Carrier} DiskSequence.connecting.apply _ _ onRestriction);
+\definition DiskClass: \Set := DiskOutput.Carrier;
+\definition PuncturedClass: \Set := PuncturedOutput.Carrier;
+\definition neighborhood: _ := Comparison.neighborhood;
+\definition diskConnecting: _ := DiskSequence.connecting;

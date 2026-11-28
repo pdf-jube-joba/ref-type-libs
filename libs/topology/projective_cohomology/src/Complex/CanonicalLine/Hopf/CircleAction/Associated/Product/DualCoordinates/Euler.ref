@@ -1,0 +1,5 @@
+\import \root.Complex[dimension := dimension].CanonicalLine[].Integral[].Canonical[] \as Tautological;
+\import Dual.Realification[].Norm[].Home[].Integral[] \as DualLine;
+\definition positiveCharacterEuler: _ := Tautological.generator;
+\definition negativeCharacterEuler: _ := DualLine.generator;
+\definition sign: _ := DualLine.Euler[].sign;

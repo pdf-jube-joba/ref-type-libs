@@ -1,0 +1,58 @@
+\import \parent.\parent.\parent.At[x := x] \as Inclusion;
+\import OldCharts.Patch[U := old.domain, frames := old.frames] \as SourceChart;
+\import NewCharts.Patch[U := new.domain, frames := new.frames] \as TargetChart;
+\definition sourcePoint: \Cast[Space] old.domain := \into[Space](x, old.domain) \by { old.contains };
+\definition targetPoint: \Cast[Target.Space] new.domain := \into[Target.Space](map x, new.domain) \by { new.contains };
+\import SourceChart.AtPoint[x := sourcePoint] \as SourceFiber;
+\import TargetChart.AtPoint[x := targetPoint] \as TargetFiber;
+\import SourceFiber.Angular[] \as SourceAngle;
+\import TargetFiber.Angular[] \as TargetAngle;
+\import sphere_maps.Circle[] \as Circle;
+\import Numbers.Def[] \as Complex;
+\import Numbers.Prop[] \as Laws;
+\import linear_algebra.Commutative[K := Numbers.Complex,
+  scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Numbers.Complex Numbers.Algebra[].field] \as Linear;
+\import Linear.Isomorphism[V := Target.Line (map x), W := Bundles.Vector Degrees.one,
+  source := Target.lineBundle.space (map x), target := Bundles.coordinates Degrees.one].Composition[U := Line x, domain := lineBundle.space x] \as Compose;
+\definition targetFrame: _ := Compose.compose (TargetChart.nativeChart.frame targetPoint) Inclusion.isomorphism;
+\import OldCharts.Transition[x := x, source := SourceChart.nativeChart.frame sourcePoint, target := targetFrame] \as Change;
+\import Change.Phase[] \as Phase;
+\definition destinationUnit[w: Line x][unit: SourceAngle.squared w = R.one]: TargetAngle.squared (image x w) = R.one :=
+  trans!{R.Real} _ _ _ (squared (Family.include x w)) unit;
+\definition rawLaw[w: Line x]: TargetAngle.value (image x w) = Complex.mul Change.coefficient (SourceAngle.value w) :=
+  trans!{Numbers.Complex} _ _ _
+    (congr!{{Line x} {Numbers.Complex}} (\fun (v: Line x) => TargetAngle.value (image x v)) _ _
+      (sym!{{Line x}} _ _ ((SourceChart.nativeChart.frame sourcePoint).leftInverse w)))
+    (trans!{Numbers.Complex} _ _ _
+      (Change.action ((SourceChart.nativeChart.frame sourcePoint).forward.apply w))
+      (Laws.mulComm (SourceAngle.value w) Change.coefficient));
+\definition sourceAngle[w: Line x][unit: SourceAngle.squared w = R.one]: Circle.Carrier :=
+  SourceFiber.angle (SourceAngle.fromUnit w unit);
+\definition targetAngle[w: Line x][unit: SourceAngle.squared w = R.one]: Circle.Carrier :=
+  TargetFiber.angle (TargetAngle.fromUnit (image x w) (destinationUnit w unit));
+\definition targetFormula[w: Line x][unit: SourceAngle.squared w = R.one]:
+  targetAngle w unit = Complex.mul (Complex.ofReal (TargetAngle.scale (image x w))) (Complex.mul Change.coefficient (SourceAngle.value w)) :=
+  trans!{Numbers.Complex} _ _ _ (TargetAngle.formula (image x w) (destinationUnit w unit))
+    (congr!{Numbers.Complex Numbers.Complex} (Complex.mul (Complex.ofReal (TargetAngle.scale (image x w)))) _ _ (rawLaw w));
+\definition rotation[w: Line x][unit: SourceAngle.squared w = R.one]: targetAngle w unit = Circle.multiply Phase.unit (sourceAngle w unit) :=
+  Phase.Angles[u := sourceAngle w unit, v := targetAngle w unit, raw := SourceAngle.value w, s := SourceAngle.scale w,
+    t := TargetAngle.scale (image x w), sNonnegative := SourceAngle.nonnegative w, tNonnegative := TargetAngle.nonnegative (image x w),
+    first := SourceAngle.formula w unit, second := targetFormula w unit].rotation;
+\import Equality.Transport[A := Space] \as FiberCast;
+\definition targetBoundary[p: \Cast[Old.Carrier] Old.boundary]: \Cast[New.Carrier] New.boundary :=
+  \into[New.Carrier](toFiber p, New.boundary) \by { (comparison.forwardPreserves p) };
+\definition boundaryRotation[v: \Cast[Old.Carrier] Old.boundary]: TargetFiber.angle (targetBoundary v) = Circle.multiply Phase.unit (SourceFiber.angle v) := \block {
+  \let same: v.base = x := \bysub(Disk.DiskBundle, Old.subset, v) \then
+  \let w: Line x := FiberCast.cast Line v.base x same v.vector \then
+  \let pointEqual: Family.include x w = v := Family.ext _ _ (sym!{Space} _ _ same)
+    (FiberCast.castInverse Line v.base x same v.vector) \then
+  \let unit: SourceAngle.squared w = R.one := trans!{R.Real} _ _ _
+    (congr!{{Family.Point} {R.Real}} Disk.squared _ _ pointEqual) (\bysub(Old.Carrier, Old.boundary, v)) \then
+  \let sameBoundary: SourceAngle.fromUnit w unit = v := pointEqual \then
+  \return trans!{{Circle.Carrier}} _ _ _
+    (congr!{{\Cast[Old.Carrier] Old.boundary} {Circle.Carrier}} (\fun (p: \Cast[Old.Carrier] Old.boundary) => TargetFiber.angle (targetBoundary p)) _ _
+      (sym!{{\Cast[Old.Carrier] Old.boundary}} _ _ sameBoundary))
+    (trans!{{Circle.Carrier}} _ _ _ (rotation w unit)
+      (congr!{{\Cast[Old.Carrier] Old.boundary} {Circle.Carrier}} (\fun (p: \Cast[Old.Carrier] Old.boundary) => Circle.multiply Phase.unit (SourceFiber.angle p)) _ _ sameBoundary))
+};
+\module Relative;

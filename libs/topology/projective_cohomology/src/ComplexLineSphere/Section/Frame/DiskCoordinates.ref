@@ -1,0 +1,58 @@
+\import LineBundle.Integral[].Charts[] \as Charts;
+\import \parent.Trivialization[] \as NativeChart;
+\definition frames: Charts.At domain Degrees.one := Charts.fromNative NativeChart.chart;
+\import Charts.RealPatch[U := domain, frames := frames] \as Patch;
+\import cohomology_thom.Thom[].Real[].For[X := Projective.Space, F := Projective.Line, bundle := Realification.bundle].With[metric := Realification.metric] \as Geometry;
+\import Geometry.Chart[c := Patch.realChart] \as Chart;
+\import Chart.Open[] \as Open;
+\import Family.Of[bundle := Realification.bundle].Restriction[U := domain] \as NativeRestriction;
+\import Geometry.Pullback[Y := Chart.BasePoint, source := Chart.baseTopology, f := Chart.inclusion, regular := NativeRestriction.regular] \as Pulled;
+\import thom_spaces.Thom[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].For[X := Chart.BasePoint, F := (\fun (x: Chart.BasePoint) => Projective.Line x),
+  bundle := Pulled.pulledBundle].With[metric := Pulled.pulledMetric] \as OpenDisk;
+\import thom_spaces.Thom[].DiskSuspension[X := Chart.BasePoint, space := Chart.baseTopology, n := Degrees.two] \as ChartDisk;
+\import thom_spaces.Thom[].CWType[].Point[] \as PointModel;
+\import std.Data[].Pair[] \as Pair;
+\import topology.Maps[A := Chart.BasePoint, B := PointModel.Carrier] \as Constants;
+\definition constant[x: Chart.BasePoint]: PointModel.Carrier := PointModel.point;
+\definition constantContinuous: topology.Continuity[A := Chart.BasePoint, B := PointModel.Carrier].Continuous Chart.baseTopology PointModel.topology constant :=
+  Constants.constantContinuous Chart.baseTopology PointModel.topology PointModel.point;
+\import cohomology_thom.LocalDisk[].On[X := PointModel.Carrier, source := PointModel.topology]
+  .From[B := Chart.BasePoint, target := Chart.baseTopology, f := constant, regular := constantContinuous] \as Projection;
+\import Projection.Rank[n := Degrees.two] \as ToPoint;
+\import thom_spaces.Thom[].DiskSuspension[X := PointModel.Carrier, space := PointModel.topology, n := Degrees.two] \as PointDisk;
+\definition inChart[s: Base.Left]: Open.Carrier := \into[Disk.DiskBundle](sphereSection s, Open.domain) \by {
+  \idelim s = homeomorphism.forward (onSphere s) \with w: Spheres.Carrier Degrees.two => \In[Spheres.Carrier Degrees.two] Base.left w \by {
+    base: \bysub(Spheres.Carrier Degrees.two, Base.left, s), equality: sym!{{Spheres.Carrier Degrees.two}} _ _ (homeomorphism.rightInverse s)
+  }
+};
+\definition inChartContinuous: topology.Continuity[A := Base.Left, B := Open.Carrier].Continuous Base.leftTopology Open.topology inChart :=
+  topology.Continuity[A := Base.Left, B := Disk.DiskBundle].Corestriction[S := Open.domain].corestrictContinuous Base.leftTopology Disk.diskTopology inChart
+    (topology.Continuity[A := Spheres.Carrier Degrees.two, B := Disk.DiskBundle].Restriction[S := Base.left].restrictContinuous
+      (Spheres.topology Degrees.two) Disk.diskTopology sphereSection sphereContinuous);
+\definition standardize[p: Open.Carrier]: ChartDisk.DiskCarrier := Chart.pair.homeomorphism.forward (Open.backward p);
+\definition standardizeContinuous: topology.Continuity[A := Open.Carrier, B := ChartDisk.DiskCarrier].Continuous Open.topology ChartDisk.diskTopology standardize :=
+  topology.Composition[A := Open.Carrier, B := OpenDisk.DiskBundle, C := ChartDisk.DiskCarrier].composeContinuous
+    Open.topology OpenDisk.diskTopology ChartDisk.diskTopology Open.backward Chart.pair.homeomorphism.forward Open.backwardContinuous Chart.diskContinuous;
+\definition normalized[s: Base.Left]: ChartDisk.DiskCarrier := standardize (inChart s);
+\definition normalizedContinuous: topology.Continuity[A := Base.Left, B := ChartDisk.DiskCarrier].Continuous Base.leftTopology ChartDisk.diskTopology normalized :=
+  topology.Composition[A := Base.Left, B := Open.Carrier, C := ChartDisk.DiskCarrier].composeContinuous
+    Base.leftTopology Open.topology ChartDisk.diskTopology inChart standardize inChartContinuous standardizeContinuous;
+\definition atPoint[p: Open.Carrier]: PointDisk.DiskCarrier := ToPoint.map (standardize p);
+\definition atPointContinuous: topology.Continuity[A := Open.Carrier, B := PointDisk.DiskCarrier].Continuous Open.topology PointDisk.diskTopology atPoint :=
+  topology.Composition[A := Open.Carrier, B := ChartDisk.DiskCarrier, C := PointDisk.DiskCarrier].composeContinuous
+    Open.topology ChartDisk.diskTopology PointDisk.diskTopology standardize ToPoint.map standardizeContinuous ToPoint.continuous;
+\definition point[s: Base.Left]: PointDisk.DiskCarrier := atPoint (inChart s);
+\definition pointContinuous: topology.Continuity[A := Base.Left, B := PointDisk.DiskCarrier].Continuous Base.leftTopology PointDisk.diskTopology point :=
+  topology.Composition[A := Base.Left, B := Open.Carrier, C := PointDisk.DiskCarrier].composeContinuous
+    Base.leftTopology Open.topology PointDisk.diskTopology inChart atPoint inChartContinuous atPointContinuous;
+\definition preservesSquared[p: Open.Carrier]: PointDisk.squared (atPoint p) = Disk.squared p :=
+  trans!{R.Real} _ _ _ (Chart.forwardSquared (Open.backward p)) (Open.normBackward p);
+\definition squared[s: Base.Left]: PointDisk.squared (point s) = Disk.squared (sphereSection s) :=
+  preservesSquared (inChart s);
+\module Equator(w: Spheres.Carrier Degrees.one);
+\module Puncture;
+\module LocalPuncture;
+\module OpenToModel;
+\module EquatorialPull;
+\module Connecting;

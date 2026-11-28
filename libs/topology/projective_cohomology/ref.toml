@@ -1,0 +1,38 @@
+[package]
+name = "projective_cohomology"
+
+[dependencies]
+std = { path = "../../std" }
+algebra = { path = "../../algebra/basic" }
+algebraic_topology = { path = "../homotopy" }
+topology = { path = "../basic" }
+grassmannians = { path = "../../geometry/grassmannians" }
+grassmannian_cells = { path = "../../geometry/grassmannian_cells" }
+cohomology_thom = { path = "../cohomology_thom" }
+singular_cellular = { path = "../singular/cellular" }
+singular_products = { path = "../singular/products" }
+real = { path = "../../real/basic" }
+complex = { path = "../../complex" }
+linear_algebra = { path = "../../algebra/linear_algebra" }
+hermitian_frames = { path = "../../algebra/hermitian_frames" }
+vector_bundles = { path = "../../geometry/vector_bundles" }
+bundle_complements = { path = "../../geometry/bundle_complements" }
+bundle_operations = { path = "../../geometry/bundle_operations" }
+thom_spaces = { path = "../thom_spaces" }
+chain_complexes = { path = "../../algebra/homological/chain_complexes" }
+singular_cohomology = { path = "../singular/cohomology" }
+topological_algebra = { path = "../algebra" }
+cohomology_models = { path = "../examples/cohomology" }
+module_theory = { path = "../../algebra/module_theory" }
+resolutions = { path = "../../algebra/homological/resolutions" }
+double_complexes = { path = "../../algebra/homological/double_complexes" }
+dedekind_reals = { path = "../../real/dedekind" }
+topological_constructions = { path = "../constructions" }
+cohomology_examples = { path = "../examples/finite_models" }
+bott_product = { path = "../bott_product" }
+commutative_algebra = { path = "../../algebra/commutative_algebra" }
+singular_cap = { path = "../singular/cap" }
+sphere_maps = { path = "../spheres" }
+metric_spaces = { path = "../metric" }
+singular_excision = { path = "../singular/excision" }
+singular_subdivision = { path = "../singular/subdivision" }

@@ -1,0 +1,44 @@
+\definition degree: N.Nat^ := N.Nat^::succ (N.Nat^::succ (Degrees.double k));
+\definition previous: I.Int^ := I.Int^::ofNat (N.Nat^::succ (Degrees.double k));
+\definition z: I.Int^ := I.Int^::ofNat degree;
+\import \parent.Boundary[] \as Boundary;
+\import PairSequence.LongExact[z := previous] \as Previous;
+\import PairSequence.LongExact[z := z] \as Sequence;
+\definition forget: Abelian.MapBetween (Raw.relative z) (Raw.disk z) :=
+  Geometry.Additive[coefficients := Product.integerCoefficients].Degree[z := z].forget;
+\import Abelian.Hom[V := (Raw.relative z).Carrier, W := (Raw.disk z).Carrier, source := (Raw.relative z).space, target := (Raw.disk z).space] \as Map;
+\import Abelian.Isomorphism[V := (Raw.relative z).Carrier, W := (Raw.disk z).Carrier, source := (Raw.relative z).space, target := (Raw.disk z).space]
+  .OfBijective[f := forget] \as Iso;
+\definition degreeBound[bound: Basic.Le (N.Nat^::succ k) dimension]: Basic.Le degree (Degrees.double dimension) :=
+  \idelim Degrees.double (N.Nat^::succ k) = degree \with q: N.Nat^ => Basic.Le q (Degrees.double dimension) \by {
+    base: Degrees.doubleMonotone (N.Nat^::succ k) dimension bound, equality: Degrees.doubleSucc k
+  };
+\definition positiveBound[bound: Basic.Le (N.Nat^::succ k) dimension]: Basic.Lt degree Hopf.sphereDimension :=
+  Boundary.belowTop degree (degreeBound bound);
+\definition previousBound[bound: Basic.Le (N.Nat^::succ k) dimension]: Basic.Lt (N.Nat^::succ (Degrees.double k)) Hopf.sphereDimension :=
+  Basic.leLtTrans _ _ _ (Basic.leSelfSucc (N.Nat^::succ (Degrees.double k))) (positiveBound bound);
+\import Abelian.Hom[V := (Raw.boundary previous).Carrier, W := (Raw.relative z).Carrier,
+  source := (Raw.boundary previous).space, target := (Raw.relative z).space] \as Connecting;
+\definition connectingZero[bound: Basic.Le (N.Nat^::succ k) dimension][a: (Raw.boundary previous).Carrier]:
+  Previous.connecting.apply a = (Raw.relative z).space.zero :=
+  trans!{{(Raw.relative z).Carrier}} _ _ _
+    (congr!{{(Raw.boundary previous).Carrier} {(Raw.relative z).Carrier}} Previous.connecting.apply _ _
+      (Boundary.Positive[p := Degrees.double k].zero (previousBound bound) a))
+    (Connecting.zeroPreserved Previous.connecting);
+\definition zeroKernel[bound: Basic.Le (N.Nat^::succ k) dimension]:
+  \forall (a: (Raw.relative z).Carrier) -> forget.apply a = (Raw.disk z).space.zero -> a = (Raw.relative z).space.zero := \block {
+    \fun (a: (Raw.relative z).Carrier)(zero: _) \then
+    \takefrom b: \Cast[(Raw.boundary previous).Carrier] ({ b: (Raw.boundary previous).Carrier \where Previous.connecting.apply b = a })
+      \by Previous.exactAtRelative a zero \then
+    \return trans!{{(Raw.relative z).Carrier}} _ _ _
+      (sym!{{(Raw.relative z).Carrier}} _ _
+        (\bysub((Raw.boundary previous).Carrier, { b: (Raw.boundary previous).Carrier \where Previous.connecting.apply b = a }, b)))
+      (connectingZero bound b)
+  };
+\definition onto[bound: Basic.Le (N.Nat^::succ k) dimension]: Iso.Onto :=
+  \fun (a: (Raw.disk z).Carrier) => Sequence.exactAtSpace a
+    (Boundary.Positive[p := N.Nat^::succ (Degrees.double k)].zero (positiveBound bound)
+      (Geometry.Additive[coefficients := Product.integerCoefficients].Degree[z := z].sphereRestriction.apply a));
+\definition isomorphism[bound: Basic.Le (N.Nat^::succ k) dimension]: _ :=
+  Iso.isomorphism (Map.injectiveOfZeroKernel forget (zeroKernel bound)) (onto bound);
+\module Section;

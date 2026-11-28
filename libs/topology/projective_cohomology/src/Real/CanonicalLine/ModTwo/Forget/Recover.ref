@@ -1,0 +1,10 @@
+\import Geometry.Additive[coefficients := Singular.integerCoefficients].Degree[z := next] \as PairDegree;
+\import singular_cohomology.Cochains[A := Space, source := topology].With[coefficients := Singular.integerCoefficients].Integer[].At[n := N.Nat^::succ p] \as BaseDegree;
+\definition backward[a: H.Group (N.Nat^::succ p)]: (Raw.disk next).Carrier :=
+  PairDegree.diskComparison.backward.apply (BaseDegree.isomorphism.backward.apply a);
+\definition law[a: (Raw.disk next).Carrier]:
+  backward (BaseDegree.isomorphism.forward.apply (PairDegree.diskComparison.forward.apply a)) = a :=
+  trans!{{(Raw.disk next).Carrier}} _ _ _
+    (congr!{{(Raw.base next).Carrier} {(Raw.disk next).Carrier}} PairDegree.diskComparison.backward.apply _ _
+      (BaseDegree.isomorphism.leftInverse (PairDegree.diskComparison.forward.apply a)))
+    (PairDegree.diskComparison.leftInverse a);

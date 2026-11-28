@@ -1,0 +1,49 @@
+\definition image[z: I.Int^][x: A.family.Carrier z]: B1.family.Carrier z := b.apply z (s.inclusion.apply z x);
+\definition killed[z: I.Int^][x: A.family.Carrier z]: t.projection.apply z (image z x) = (C.family.space z).zero :=
+  trans!{{C.family.Carrier z}} _ _ _ (right z (s.inclusion.apply z x)) (s.zero z x);
+\definition Sources[z: I.Int^][x: A.family.Carrier z]: \Pow (A1.family.Carrier z) :=
+  { y: A1.family.Carrier z \where t.inclusion.apply z y = image z x };
+\definition value[z: I.Int^][x: A.family.Carrier z]: \Cast[A1.family.Carrier z] (Sources z x) :=
+  \choice (\Cast[A1.family.Carrier z] (Sources z x)) \by {
+    existence: t.kernelImage z (image z x) (killed z x),
+    uniqueness: \fun (u, v: \Cast[A1.family.Carrier z] (Sources z x)) => t.injective z u v
+      (trans!{{B1.family.Carrier z}} _ _ _ (\bysub(A1.family.Carrier z, Sources z x, u))
+        (sym!{{B1.family.Carrier z}} _ _ (\bysub(A1.family.Carrier z, Sources z x, v))))
+  };
+\definition square[z: I.Int^][x: A.family.Carrier z]: t.inclusion.apply z (value z x) = image z x :=
+  \bysub(A1.family.Carrier z, Sources z x, value z x);
+\definition addition[z: I.Int^][x, y: A.family.Carrier z]: value z ((A.family.space z).add x y) = (A1.family.space z).add (value z x) (value z y) :=
+  t.injective z _ _ (trans!{{B1.family.Carrier z}} _ _ _
+    (square z ((A.family.space z).add x y))
+    (trans!{{B1.family.Carrier z}} _ _ _
+      (congr!{{B.family.Carrier z} {B1.family.Carrier z}} (b.apply z) _ _ (s.inclusion.addition z x y))
+      (trans!{{B1.family.Carrier z}} _ _ _ (b.addition z (s.inclusion.apply z x) (s.inclusion.apply z y))
+        (trans!{{B1.family.Carrier z}} _ _ _
+          (congr!{{B1.family.Carrier z} {B1.family.Carrier z} {B1.family.Carrier z}} ((B1.family.space z).add) _ _ _ _
+            (sym!{{B1.family.Carrier z}} _ _ (square z x)) (sym!{{B1.family.Carrier z}} _ _ (square z y)))
+          (sym!{{B1.family.Carrier z}} _ _ (t.inclusion.addition z (value z x) (value z y)))))));
+\definition scalar[z: I.Int^][r: I.Int^][x: A.family.Carrier z]: value z ((A.family.space z).smul r x) = (A1.family.space z).smul r (value z x) :=
+  t.injective z _ _ (trans!{{B1.family.Carrier z}} _ _ _
+    (square z ((A.family.space z).smul r x))
+    (trans!{{B1.family.Carrier z}} _ _ _
+      (congr!{{B.family.Carrier z} {B1.family.Carrier z}} (b.apply z) _ _ (s.inclusion.scalar z r x))
+      (trans!{{B1.family.Carrier z}} _ _ _ (b.scalar z r (s.inclusion.apply z x))
+        (trans!{{B1.family.Carrier z}} _ _ _
+          (congr!{{B1.family.Carrier z} {B1.family.Carrier z}} ((B1.family.space z).smul r) _ _ (sym!{{B1.family.Carrier z}} _ _ (square z x)))
+          (sym!{{B1.family.Carrier z}} _ _ (t.inclusion.scalar z r (value z x)))))));
+\definition differential[z: I.Int^][x: A.family.Carrier z]: A1.differential.apply z (value z x) = value (Degree.next z) (A.differential.apply z x) :=
+  t.injective (Degree.next z) _ _ (trans!{{B1.family.Carrier (Degree.next z)}} _ _ _
+    (sym!{{B1.family.Carrier (Degree.next z)}} _ _ (t.inclusion.commutes z (value z x)))
+    (trans!{{B1.family.Carrier (Degree.next z)}} _ _ _
+      (congr!{{B1.family.Carrier z} {B1.family.Carrier (Degree.next z)}} (B1.differential.apply z) _ _ (square z x))
+      (trans!{{B1.family.Carrier (Degree.next z)}} _ _ _ (b.commutes z (s.inclusion.apply z x))
+        (trans!{{B1.family.Carrier (Degree.next z)}} _ _ _
+          (congr!{{B.family.Carrier (Degree.next z)} {B1.family.Carrier (Degree.next z)}} (b.apply (Degree.next z)) _ _ (s.inclusion.commutes z x))
+          (sym!{{B1.family.Carrier (Degree.next z)}} _ _ (square (Degree.next z) (A.differential.apply z x)))))));
+\import Cochains.Map[C := A, D := A1] \as Maps;
+\definition map: Maps.Map := Maps.Map { apply := value, addition := addition, scalar := scalar, commutes := differential };
+\import Cochains.End[C := C] \as Identity;
+\import Source.Morphism[A1 := A1, B1 := B1, C1 := C].Diagram[s := s, t := t, a := map, b := b, c := Identity.identity] \as Exact;
+\definition diagram: Exact.Commutative := Exact.Commutative { left := \fun (z: I.Int^)(x: A.family.Carrier z) =>
+  sym!{{B1.family.Carrier z}} _ _ (square z x), right := right };
+\definition connecting[z: I.Int^]: _ := Exact.At[k := z].naturality diagram;

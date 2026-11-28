@@ -1,0 +1,17 @@
+\import topology.Topology[Carrier := Sphere].Subspace[S := MayerVietoris.remaining] \as Remainder;
+\definition remainderTopology: topology.Topology[Carrier := MayerVietoris.Remaining].Topology := Remainder.topology sphereTopology;
+\import Local.Homeomorphism[B := MayerVietoris.Remaining].Over[target := remainderTopology, targetSubset := MayerVietoris.trace] \as RemainderPairs;
+\definition first: _ := RemainderPairs.forwardMap MayerVietoris.pairHomeomorphism;
+\import singular_excision.Excision[A := Sphere].Over[source := sphereTopology].On[pair := MayerVietoris.excision].Chains[].Ordinary[] \as Removed;
+\definition second: _ := Removed.inclusion;
+\import Local.Maps[B := MayerVietoris.Remaining].Over[target := remainderTopology, targetSubset := MayerVietoris.trace] \as Before;
+\import Before.Composition[C := Sphere].Over[final := sphereTopology, finalSubset := Geometry.right] \as Pairs;
+\definition inclusion: _ := Pairs.compose first second;
+\definition onPoint[s: Geometry.Left]: inclusion s = s := \refl(s);
+\definition degree: I.Int^ := I.Int^::ofNat Degrees.two;
+\import Global.With[coefficients := coefficients].At[z := degree] \as WholeGroup;
+\import Local.With[coefficients := coefficients].At[z := degree] \as LocalGroup;
+\import Local.Maps[B := Sphere].Over[target := sphereTopology, targetSubset := Geometry.right].On[f := inclusion].Integer[]
+  .With[coefficients := coefficients].At[z := degree] \as Pull;
+\definition law[u: WholeGroup.Carrier]: Shift.cut.forward.apply u = Pull.induced.apply u :=
+  sym!{LocalGroup.Carrier} _ _ (Pairs.On[f := first, g := second].With[coefficients := coefficients].law degree u);

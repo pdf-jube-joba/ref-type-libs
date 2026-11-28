@@ -1,0 +1,31 @@
+\import \parent.\parent.Orbit[] \as OriginalOrbit;
+\structure Witness[p, q: Carrier]: \Set := { phase: Circle.Carrier,
+  frameLaw: frame q = action phase (frame p), scalarLaw: scalar q = C.mul phase (scalar p)
+};
+\definition Related[p, q: Carrier]: \Prop := \exists Witness[p, q];
+\definition underRiesz[p: Carrier]: Dual.Riesz[].backward (evaluateDual p) = evaluate (conjugate p) :=
+  trans!{{Family.Point}} _ _ _ (congr!{{DualFamily.Point} {Family.Point}} Dual.Riesz[].backward _ _ (sym!{{DualFamily.Point}} _ _ (comparison p)))
+    (Dual.Riesz[].leftInverse (evaluate (conjugate p)));
+\definition originalSame[p, q: Carrier][same: evaluateDual p = evaluateDual q]: evaluate (conjugate p) = evaluate (conjugate q) :=
+  eq_reason_in!{{Family.Point} _
+    "=" _ "by" { sym!{{Family.Point}} _ _ (underRiesz p) }
+    "=" _ "by" { congr!{{DualFamily.Point} {Family.Point}} Dual.Riesz[].backward _ _ same }
+    "=" _ "by" { underRiesz q }
+  };
+\definition conjugateLaw[p, q: Carrier][g: OriginalOrbit.Witness[conjugate p, conjugate q]]: scalar q = C.mul g.rotation (scalar p) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (ComplexLaws.conjConj (scalar q)) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} C.conj _ _ g.scalarLaw }
+    "=" _ "by" { ComplexLaws.conjMul (Circle.inverse g.rotation) (C.conj (scalar p)) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex Numbers.Complex} C.mul _ _ _ _ (Circle.inverseInvolutive g.rotation) (ComplexLaws.conjConj (scalar p)) }
+  };
+\definition related[p, q: Carrier][same: evaluateDual p = evaluateDual q]: Related p q := \block {
+  \takefrom g: OriginalOrbit.Witness[conjugate p, conjugate q] \by OriginalOrbit.related (conjugate p) (conjugate q) (originalSame p q same) \then
+  \return \exact(Witness[p, q] { phase := g.rotation, frameLaw := g.frameLaw, scalarLaw := conjugateLaw p q g }, Witness[p, q])
+};
+\definition equal[p, q: Carrier][related: Related p q]: evaluateDual p = evaluateDual q := \block {
+  \takefrom g: Witness[p, q] \by related \then
+  \return sym!{{DualFamily.Point}} _ _ (trans!{{DualFamily.Point}} _ _ _
+    (congr!{Sphere Numbers.Complex {DualFamily.Point}} dual _ _ _ _ g.frameLaw g.scalarLaw)
+    (dualAction g.phase (frame p) (scalar p)))
+};

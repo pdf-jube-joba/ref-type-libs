@@ -1,0 +1,69 @@
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import sphere_maps.Circle[] \as Circle;
+\import \root.ComplexLineSphere[].Section[].Frame[].EquatorProjection[w := w] \as EquatorialFrame;
+\definition pointOnLeft: Base.Left := EquatorialFrame.pointOnLeft;
+\definition projected: Chart.BasePoint := Open.projection (inChart pointOnLeft);
+\import thom_spaces.Thom[].Quadratic[].Over[X := Chart.BasePoint, F := (\fun (x: Chart.BasePoint) => Projective.Line x),
+  bundle := Pulled.pulledBundle].Comparison[left := Chart.metricGauge, right := Chart.gauge] \as Radial;
+\definition scale: R.Real := Radial.coefficient (Open.canonical (inChart pointOnLeft));
+\definition nonnegative: D.Le R.zero scale := Radial.nonnegative (Open.canonical (inChart pointOnLeft));
+\import Charts.ScalarCoordinates[] \as Angle;
+\definition actual: Plane.Coordinate :=
+  Pair.second PointModel.Carrier Plane.Coordinate (point pointOnLeft);
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].Family[X := Chart.BasePoint, F := (\fun (x: Chart.BasePoint) => Projective.Line x)] \as ChartFamily;
+\definition actualFormula: actual = Open.normalCoordinate (inChart pointOnLeft) :=
+  congr!{{ChartFamily.Point} {Plane.Coordinate}}
+    (\fun (p: ChartFamily.Point) => Pair.second Chart.BasePoint Plane.Coordinate (Chart.totalHomeomorphism.forward p)) _ _
+    (Open.backwardCanonical (inChart pointOnLeft));
+\definition complexCoordinate: Circle.Coordinates[].ambientForward actual = Arithmetic.mul (Arithmetic.ofReal scale) (Circle.Coordinates[].forward w) :=
+  eq_reason_in!{C.Complex _
+    "=" _ "by" { congr!{{Plane.Coordinate} {C.Complex}} Circle.Coordinates[].ambientForward _ _ actualFormula }
+    "=" _ "by" { Angle.realCoordinates ((Patch.nativeChart.frame projected).forward.apply ((Projective.lineBundle.space projected).smul (Arithmetic.ofReal scale) (sphereSection pointOnLeft).vector)) }
+    "=" _ "by" { congr!{{Bundles.Vector Degrees.one} {C.Complex}} (\fun (v: Bundles.Vector Degrees.one) => v Angle.index) _ _
+      ((Patch.nativeChart.frame projected).forward.preservesScale (Arithmetic.ofReal scale) (sphereSection pointOnLeft).vector) }
+    "=" _ "by" { congr!{C.Complex C.Complex} (Arithmetic.mul (Arithmetic.ofReal scale)) _ _ EquatorialFrame.coordinateAtEquator }
+  };
+\import Plane.Contraction[] \as Scaling;
+\import Plane.Geometry[] \as PlaneGeometry;
+\import Plane.Normalization[] \as Normalize;
+\definition realFormula: C.re (Arithmetic.mul (Arithmetic.ofReal scale) (Circle.Coordinates[].forward w)) = R.mul scale (w Circle.Coordinates[].first) :=
+  trans!{R.Real} _ _ _
+    (congr!{R.Real R.Real} (R.sub (R.mul scale (w Circle.Coordinates[].first))) _ _ (Laws.fieldMulZeroLeft (w Circle.Coordinates[].second)))
+    (Laws.subZeroRight (R.mul scale (w Circle.Coordinates[].first)));
+\definition imaginaryFormula: C.im (Arithmetic.mul (Arithmetic.ofReal scale) (Circle.Coordinates[].forward w)) = R.mul scale (w Circle.Coordinates[].second) :=
+  trans!{R.Real} _ _ _
+    (congr!{R.Real R.Real} (R.add (R.mul scale (w Circle.Coordinates[].second))) _ _ (Laws.fieldMulZeroLeft (w Circle.Coordinates[].first)))
+    (Laws.addZeroRight (R.mul scale (w Circle.Coordinates[].second)));
+\definition scaleLaw: actual = Scaling.scale scale w := \block {
+  \let equal: Circle.Coordinates[].ambientForward actual = Circle.Coordinates[].ambientForward (Scaling.scale scale w) :=
+    trans!{C.Complex} _ _ _ complexCoordinate (ComplexLaws.ext _ _ realFormula imaginaryFormula) \then
+  \return trans!{{Plane.Coordinate}} _ _ _
+    (sym!{{Plane.Coordinate}} _ _ (Circle.Coordinates[].ambientLeftInverse actual))
+    (trans!{{Plane.Coordinate}} _ _ _
+      (congr!{C.Complex {Plane.Coordinate}} Circle.Coordinates[].ambientBackward _ _ equal)
+      (Circle.Coordinates[].ambientLeftInverse (Scaling.scale scale w)))
+};
+\definition normSquare: Plane.normSquared actual = R.mul scale scale :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { congr!{{Plane.Coordinate} {R.Real}} Plane.normSquared _ _ scaleLaw }
+    "=" _ "by" { Scaling.normScale scale w }
+    "=" _ "by" { congr!{R.Real R.Real} (R.mul (R.mul scale scale)) _ _
+      (\bysub(Plane.Coordinate, Plane.Boundary, w)) }
+    "=" _ "by" { R.Algebra[].mulOneRight (R.mul scale scale) }
+  };
+\definition norm: PlaneGeometry.norm actual = scale :=
+  trans!{R.Real} _ _ _ (congr!{R.Real R.Real} R.SquareRoot[].sqrt _ _ normSquare) (R.SquareRoot[].sqrtSquared scale nonnegative);
+\definition normalized[r: Normalize.Nonzero][same: r = actual]: Normalize.normalize r = w :=
+  \axiom:funext(Normalize.normalize r, w, \fun (j: Plane.Index) => eq_reason_in!{R.Real _
+    "=" _ "by" { congr!{{Plane.Coordinate} {R.Real}} (\fun (v: Plane.Coordinate) => R.mul (Laws.fieldInv (PlaneGeometry.norm v)) (v j)) _ _ same }
+    "=" _ "by" { congr!{R.Real R.Real R.Real} R.mul _ _ _ _
+      (congr!{R.Real R.Real} Laws.fieldInv _ _ norm)
+      (congr!{{Plane.Coordinate} {R.Real}} (\fun (v: Plane.Coordinate) => v j) _ _ scaleLaw) }
+    "=" _ "by" { sym!{R.Real} _ _ (Laws.fieldMulAssoc (Laws.fieldInv scale) scale (w j)) }
+    "=" _ "by" { congr!{R.Real R.Real} (\fun (a: R.Real) => R.mul a (w j)) _ _
+      (Laws.fieldInverseNonzero scale (\fun (zero: scale = R.zero) => Normalize.normNonzero r
+        (trans!{R.Real} _ _ _ (congr!{{Plane.Coordinate} {R.Real}} PlaneGeometry.norm _ _ same)
+          (trans!{R.Real} _ _ _ norm zero)))) }
+    "=" _ "by" { Laws.fieldMulOneLeft (w j) }
+  });

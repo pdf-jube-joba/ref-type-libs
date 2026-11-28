@@ -1,0 +1,41 @@
+\import \root.Complex[dimension := dimension].CanonicalLine[].Integral[].PlaneDisk[] \as PlaneDisk;
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := Degrees.two] \as ModelDisk;
+\import singular_cohomology.Relative[A := Source.Carrier, source := Source.topology, subset := Source.boundary] \as Left;
+\import singular_cohomology.Relative[A := Target.Carrier, source := Target.topology, subset := Target.boundary] \as Right;
+\import singular_cohomology.Relative[A := ModelDisk.DiskCarrier, source := ModelDisk.diskTopology, subset := ModelDisk.boundary] \as Model;
+\import Left.Homeomorphism[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as OldCharts;
+\import Right.Homeomorphism[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as NewCharts;
+\import OldGeometry.Chart[c := OldChartPatch.realChart].Fiber[x := Chart.point] \as OldChart;
+\import NewGeometry.Chart[c := Chart.real].Fiber[x := Chart.point] \as NewChart;
+\import Left.Maps[B := Target.Carrier].Over[target := Target.topology, targetSubset := Target.boundary] \as FiberMaps;
+\import Left.Maps[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as PairMaps;
+\import Right.Maps[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as TargetMaps;
+\definition fiberMap: FiberMaps.Map := PairHomeomorphisms.forwardMap pair;
+\definition sourceMap: PairMaps.Map := OldCharts.forwardMap OldChart.fiberPair;
+\definition targetMap: TargetMaps.Map := NewCharts.forwardMap NewChart.fiberPair;
+\import FiberMaps.Composition[C := ModelDisk.DiskCarrier].Over[final := ModelDisk.diskTopology, finalSubset := ModelDisk.boundary] \as Composite;
+\definition composed: PairMaps.Map := Composite.compose fiberMap targetMap;
+\import PlaneDisk.Comparison[A := Source.Carrier, source := Source.topology, subset := Source.boundary, f := sourceMap, g := composed] \as Comparison;
+\import Comparison.Negative[] \as Inverted;
+\import PairMaps.On[f := sourceMap] \as OldMap;
+\import PairMaps.On[f := composed] \as NewMap;
+\import PlaneDisk.BoundaryReflection[] \as Boundary;
+\definition boundaryEqual[v: Left.SubspaceCarrier]: Inverted.reflected v = NewMap.restriction v :=
+  trans!{{Model.SubspaceCarrier}} _ _ _
+    (congr!{{Coordinates.Sphere} {Model.SubspaceCarrier}} PlaneDisk.boundaryPoint _ _ (sym!{{Coordinates.Sphere}} _ _ (directionLaw v)))
+    (Boundary.right (NewMap.restriction v));
+\definition reversed: Inverted.Reversed :=
+  \axiom:funext(Inverted.reflected, NewMap.restriction, boundaryEqual);
+\definition z: I.Int^ := I.Int^::ofNat Degrees.two;
+\import Left.With[coefficients := Product.integerCoefficients].At[z := z] \as SourceClass;
+\import Right.With[coefficients := Product.integerCoefficients].At[z := z] \as TargetClass;
+\import FiberMaps.On[f := fiberMap].Integer[].With[coefficients := Product.integerCoefficients].At[z := z] \as FiberPull;
+\import cohomology_thom.LocalDisk[].Point[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as ModelClass;
+\definition signed: (isomorphism).forward.apply (Chart.fiberClass Chart.point) = (SourceClass.space).neg (OldChartPatch.fiberClass Chart.point) :=
+  eq_reason_in!{{SourceClass.Carrier} _
+    "=" _ "by" { congr!{{TargetClass.Carrier} {SourceClass.Carrier}} FiberPull.induced.apply _ _ NewFiber.comparison }
+    "=" _ "by" { sym!{{SourceClass.Carrier}} _ _ (Composite.On[f := fiberMap, g := targetMap].With[coefficients := Product.integerCoefficients].law z ModelClass.generator) }
+    "=" _ "by" { Inverted.pullLaw reversed ModelClass.generator }
+    "=" _ "by" { congr!{{SourceClass.Carrier} {SourceClass.Carrier}} (SourceClass.space).neg _ _ (sym!{{SourceClass.Carrier}} _ _ OldFiber.comparison) }
+  };

@@ -1,0 +1,47 @@
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import Plane.Splitting[] \as Split;
+\import sphere_maps.Circle[] \as Circle;
+\definition equator: Spheres.Carrier Degrees.two := Split.equator w;
+\definition heightZero: height equator = R.zero := Split.equatorHead w;
+\definition pointOnLeft: Base.Left := \into[Spheres.Carrier Degrees.two](equator, Base.left) \by {
+  D.ltReplaceRight (R.neg R.one) R.zero (height equator) (sym!{R.Real} _ _ heightZero)
+    (D.ltReplaceRight (R.neg R.one) (R.neg R.zero) R.zero Laws.negZero
+      (Laws.negStrictAntitone R.zero R.one R.Estimates[].Product[].onePositive))
+};
+\definition projected: \Cast[Projective.Space] domain := \into[Projective.Space](onSphere equator, domain) \by {
+  \idelim equator = homeomorphism.forward (onSphere equator) \with p: Spheres.Carrier Degrees.two => \In[Spheres.Carrier Degrees.two] Base.left p \by {
+    base: \bysub(Spheres.Carrier Degrees.two, Base.left, pointOnLeft),
+    equality: sym!{{Spheres.Carrier Degrees.two}} _ _ (homeomorphism.rightInverse equator)
+  }
+};
+\import \root.ComplexLineSphere[].Section[].Frame[].Linear[x := projected] \as ProjectedPlane;
+\import \root.ComplexLineSphere[].Section[] \as Section;
+\definition columnCoordinate: C.Complex := ProjectedPlane.coordinate (Section.column projected);
+\definition offDiagonal: Section.column projected first = Matrix.b equator :=
+  Matrix.Projection[].Comparison[].upperEntry equator;
+\definition diagonal: alpha projected = Matrix.a equator :=
+  Matrix.Projection[].Comparison[].firstEntry equator;
+\definition diagonalHalf: alpha projected = Arithmetic.ofReal R.half :=
+  trans!{C.Complex} _ _ _ diagonal (congr!{R.Real C.Complex} Arithmetic.ofReal _ _
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (\fun (v: R.Real) => R.mul R.half (R.add R.one v)) _ _ heightZero)
+      (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (R.mul R.half) _ _ (Laws.addZeroRight R.one)) (R.Algebra[].mulOneRight R.half))));
+\definition phase: C.Complex := Circle.Coordinates[].forward w;
+\definition factor: C.Complex := Circle.Coordinates[].ambientForward (Split.tail equator);
+\definition phaseLaw: factor = phase := congr!{{algebraic_topology.Euclidean[].Dimension[n := Degrees.two].Coordinate} C.Complex}
+  Circle.Coordinates[].ambientForward _ _ (Split.equatorTail w);
+\definition scaledHalf: Matrix.b equator = Arithmetic.scale R.half factor := \refl(Matrix.b equator);
+\definition complexScale[a: R.Real][z: C.Complex]: Arithmetic.mul (Arithmetic.ofReal a) z = Arithmetic.scale a z :=
+  ComplexLaws.ext _ _
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (R.sub (R.mul a (C.re z))) _ _ (Laws.fieldMulZeroLeft (C.im z))) (Laws.subZeroRight (R.mul a (C.re z))))
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (R.add (R.mul a (C.im z))) _ _ (Laws.fieldMulZeroLeft (C.re z))) (Laws.addZeroRight (R.mul a (C.im z))));
+\definition factorization: Section.column projected first = Arithmetic.mul (alpha projected) phase :=
+  trans!{C.Complex} _ _ _ offDiagonal
+    (trans!{C.Complex} _ _ _ scaledHalf
+      (trans!{C.Complex} _ _ _ (sym!{C.Complex} _ _ (complexScale R.half factor))
+        (congr!{C.Complex C.Complex C.Complex} Arithmetic.mul _ _ _ _ (sym!{C.Complex} _ _ diagonalHalf) phaseLaw)));
+\definition coordinateAtEquator: columnCoordinate = phase :=
+  trans!{C.Complex} _ _ _ (congr!{C.Complex C.Complex} (Arithmetic.mul (Arithmetic.inv (alpha projected))) _ _ factorization)
+    (trans!{C.Complex} _ _ _ (sym!{C.Complex} _ _ (ComplexLaws.mulAssoc (Arithmetic.inv (alpha projected)) (alpha projected) phase))
+      (trans!{C.Complex} _ _ _
+        (congr!{C.Complex C.Complex} (\fun (v: C.Complex) => Arithmetic.mul v phase) _ _ (ComplexLaws.inverseNonzero (alpha projected) (nonzero projected)))
+        (ComplexLaws.mulOneLeft phase)));

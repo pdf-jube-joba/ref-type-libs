@@ -1,0 +1,68 @@
+\import \parent.\parent.BoundaryReflection[] \as Reflection;
+\import topology.Composition[A := Source.SubspaceCarrier, B := PairTheory.SubspaceCarrier, C := PairTheory.SubspaceCarrier] \as Topological;
+\definition reflected[v: Source.SubspaceCarrier]: PairTheory.SubspaceCarrier := Reflection.reflect (OldMap.restriction v);
+\definition reflectedContinuous: _ := Topological.composeContinuous sourceBoundary boundaryTopology boundaryTopology
+  OldMap.restriction Reflection.reflect OldMap.restrictionContinuous Reflection.continuous;
+\definition Reversed: \Prop := reflected = NewMap.restriction;
+\import singular_cohomology.Maps[A := Source.SubspaceCarrier, B := PairTheory.SubspaceCarrier, source := sourceBoundary, target := boundaryTopology]
+  .Composition[C := PairTheory.SubspaceCarrier, final := boundaryTopology].Coefficients[M := Product.integerCoefficients] \as Compose;
+\import BoundaryPull.At[n := Degrees.one] \as Ordinary;
+\definition old: _ := Ordinary.induced OldMap.restriction OldMap.restrictionContinuous Coefficients.identity;
+\definition new: _ := Ordinary.induced NewMap.restriction NewMap.restrictionContinuous Coefficients.identity;
+\definition reversePull: _ := Ordinary.induced reflected reflectedContinuous Coefficients.identity;
+\definition Domain: \Set := Reflection.Cohomology[].Group;
+\definition Range: \Set := NativeBoundary.cohomology Degrees.one;
+\import singular_cohomology.Cochains[A := PairTheory.SubspaceCarrier, source := boundaryTopology].With[coefficients := Product.integerCoefficients] \as TargetOrdinary;
+\import Abelian.Hom[V := Domain, W := Range, source := TargetOrdinary.cohomologySpace Degrees.one,
+  target := NativeBoundary.cohomologySpace Degrees.one] \as PullLinear;
+\definition equality[reverse: Reversed][u: Domain]: new.apply u = reversePull.apply u :=
+  (\idelim reflected = NewMap.restriction \with h: (Source.SubspaceCarrier -> PairTheory.SubspaceCarrier) =>
+    \forall (regular: topology.Continuity[A := Source.SubspaceCarrier, B := PairTheory.SubspaceCarrier].Continuous sourceBoundary boundaryTopology h) ->
+      (Ordinary.induced h regular Coefficients.identity).apply u = reversePull.apply u \by {
+        base: \fun (regular: topology.Continuity[A := Source.SubspaceCarrier, B := PairTheory.SubspaceCarrier].Continuous sourceBoundary boundaryTopology reflected) =>
+          \refl(reversePull.apply u),
+        equality: reverse
+    }) NewMap.restrictionContinuous;
+\definition ordinaryLaw[reverse: Reversed][u: Domain]: new.apply u = (NativeBoundary.cohomologySpace Degrees.one).neg (old.apply u) :=
+  eq_reason_in!{{Range} _
+    "=" _ "by" { equality reverse u }
+    "=" _ "by" { Compose.onCohomology OldMap.restriction OldMap.restrictionContinuous Reflection.reflect Reflection.continuous Degrees.one u }
+    "=" _ "by" { congr!{{Domain} {Range}} old.apply _ _ (Reflection.Cohomology[].action u) }
+    "=" _ "by" { PullLinear.negativePreserved old u }
+  };
+\import Abelian.Hom[V := Range, W := SourceBoundary.cohomology degreeOne, source := NativeBoundary.cohomologySpace Degrees.one,
+  target := SourceBoundary.cohomologySpace degreeOne] \as SignedLinear;
+\definition boundaryLaw[reverse: Reversed][u: TargetBoundary.cohomology degreeOne]:
+  NewSigned.induced.apply u = (SourceBoundary.cohomologySpace degreeOne).neg (OldSigned.induced.apply u) :=
+  eq_reason_in!{{SourceBoundary.cohomology degreeOne} _
+    "=" _ "by" { sym!{{SourceBoundary.cohomology degreeOne}} _ _ (NewSigned.targetComparison.leftInverse (NewSigned.induced.apply u)) }
+    "=" _ "by" { congr!{{Range} {SourceBoundary.cohomology degreeOne}} NewSigned.targetComparison.backward.apply _ _ (NewSigned.law u) }
+    "=" _ "by" { congr!{{Range} {SourceBoundary.cohomology degreeOne}} NewSigned.targetComparison.backward.apply _ _
+      (ordinaryLaw reverse (NewSigned.sourceComparison.forward.apply u)) }
+    "=" _ "by" { SignedLinear.negativePreserved NewSigned.targetComparison.backward (old.apply (NewSigned.sourceComparison.forward.apply u)) }
+    "=" _ "by" { congr!{{SourceBoundary.cohomology degreeOne} {SourceBoundary.cohomology degreeOne}}
+      (SourceBoundary.cohomologySpace degreeOne).neg _ _
+      (trans!{{SourceBoundary.cohomology degreeOne}} _ _ _
+        (congr!{{Range} {SourceBoundary.cohomology degreeOne}} NewSigned.targetComparison.backward.apply _ _ (sym!{{Range}} _ _ (OldSigned.law u)))
+        (OldSigned.targetComparison.leftInverse (OldSigned.induced.apply u))) }
+  };
+\import Abelian.Hom[V := SourceBoundary.cohomology degreeOne, W := SourceGroups.At[z := degreeTwo].Carrier, source := SourceBoundary.cohomologySpace degreeOne,
+  target := SourceGroups.At[z := degreeTwo].space] \as Connecting;
+\definition pullLaw[reverse: Reversed][u: TargetGroups.At[z := degreeTwo].Carrier]:
+  NewPull.At[z := degreeTwo].induced.apply u = (SourceGroups.At[z := degreeTwo].space).neg (OldPull.At[z := degreeTwo].induced.apply u) := \block {
+    \takefrom b: \Cast[DomainBoundary.cohomology degreeOne] ({ b: DomainBoundary.cohomology degreeOne \where TargetSequence.connecting.apply b = u })
+      \by connectingOnto u \then
+    \let lift: TargetSequence.connecting.apply b = u := \bysub(DomainBoundary.cohomology degreeOne, { v: DomainBoundary.cohomology degreeOne \where TargetSequence.connecting.apply v = u }, b) \then
+    \return eq_reason_in!{{SourceGroups.At[z := degreeTwo].Carrier} _
+      "=" _ "by" { congr!{{TargetGroups.At[z := degreeTwo].Carrier} {SourceGroups.At[z := degreeTwo].Carrier}}
+        NewPull.At[z := degreeTwo].induced.apply _ _ (sym!{{TargetGroups.At[z := degreeTwo].Carrier}} _ _ lift) }
+      "=" _ "by" { sym!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ (NewPull.Naturality[].At[z := degreeOne].connectingNaturality b) }
+      "=" _ "by" { congr!{{SourceBoundary.cohomology degreeOne} {SourceGroups.At[z := degreeTwo].Carrier}}
+        SourceSequence.connecting.apply _ _ (boundaryLaw reverse b) }
+      "=" _ "by" { Connecting.negativePreserved SourceSequence.connecting (OldSigned.induced.apply b) }
+      "=" _ "by" { congr!{{SourceGroups.At[z := degreeTwo].Carrier} {SourceGroups.At[z := degreeTwo].Carrier}}
+        (SourceGroups.At[z := degreeTwo].space).neg _ _
+        (trans!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ _ (OldPull.Naturality[].At[z := degreeOne].connectingNaturality b)
+          (congr!{{TargetGroups.At[z := degreeTwo].Carrier} {SourceGroups.At[z := degreeTwo].Carrier}} OldPull.At[z := degreeTwo].induced.apply _ _ lift)) }
+    }
+  };

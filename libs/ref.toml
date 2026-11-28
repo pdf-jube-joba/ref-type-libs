@@ -118,4 +118,5 @@ packages = [
     "topology/singular/tensor_bridge",
     "topology/singular/tensor_dual",
     "topology/spheres",
+    "topology/projective_cohomology",
 ]

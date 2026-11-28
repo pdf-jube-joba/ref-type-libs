@@ -1,0 +1,113 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as R;
+\import Bundles.Family[X := Space, F := Line] \as Family;
+\import linear_algebra.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field,
+  scalar := Hermitian.Complex[].scalar].Finite[n := ambient] \as E;
+\import thom_spaces.Thom[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, conjugation := Hermitian.Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar].For[X := Space, F := Line, bundle := lineBundle].With[metric := metric] \as Disk;
+\definition UnitVectors: \Pow E.Vector := { v: E.Vector \where E.squared v = R.one };
+\definition Sphere: \Set := \Cast[E.Vector] UnitVectors;
+\import topology.Topology[Carrier := E.Vector].Subspace[S := UnitVectors] \as SphereSpace;
+\definition sphereTopology: topology.Topology[Carrier := Sphere].Topology := SphereSpace.topology (Bundles.coordinateTopology ambient);
+\definition vector[v: Sphere]: E.Vector := v;
+\definition vectorContinuous: topology.Continuity[A := Sphere, B := E.Vector].Continuous sphereTopology (Bundles.coordinateTopology ambient) vector :=
+  topology.Continuity[A := Sphere, B := E.Vector].Corestriction[S := UnitVectors].inclusionContinuous (Bundles.coordinateTopology ambient);
+\definition unit[v: Sphere]: E.dot v v = Numbers.Algebra[].field.one :=
+  trans!{Numbers.Complex} _ _ _ (E.selfReal v)
+    (trans!{Numbers.Complex} _ _ _
+      (congr!{R.Real Numbers.Complex} Hermitian.Complex[].scalar.embed _ _ (\bysub(E.Vector, UnitVectors, v)))
+      Hermitian.Complex[].scalar.embedOne);
+\import Ambient.Families[X := Sphere] \as Coordinates;
+\import std.Data[].FinSet[] \as Fin;
+\definition coordinateContinuous: Coordinates.Continuous sphereTopology vector :=
+  \fun (i: Fin.Fin ambient) =>
+    topology.Composition[A := Sphere, B := E.Vector, C := Numbers.Complex].composeContinuous
+      sphereTopology (Bundles.coordinateTopology ambient) Hermitian.Complex[].topological.space vector
+      (\fun (v: E.Vector) => v i) vectorContinuous
+      (topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].evaluationContinuous Hermitian.Complex[].topological.space i);
+\import \root.UnitProjection[K := Numbers.Complex, field := Numbers.Algebra[].field, scalar := Hermitian.Complex[].scalar,
+  topological := Hermitian.Complex[].topological, n := ambient] \as Projection;
+\import Projection.Family[X := Sphere, space := sphereTopology, v := vector, unit := unit, continuous := coordinateContinuous] \as Lines;
+\import Model.Family[Y := Sphere, source := sphereTopology, P := Lines.projection, regularP := Lines.regular, rankP := Lines.rank] \as Classifier;
+\definition projection[v: Sphere]: Space := Classifier.map v;
+\definition projectionContinuous: _ := Classifier.continuous;
+\definition fixed[v: Sphere]: (Model.projection (projection v)).map.apply v = v := Lines.fixed v;
+\definition lift[v: Sphere]: Family.Point :=
+  Family.include (projection v) (\into[E.Vector](v, Universal.Image (projection v)) \by { fixed v });
+\definition liftContinuous: topology.Continuity[A := Sphere, B := Family.Point].Continuous sphereTopology lineBundle.totalSpace lift :=
+  Universal.Universal[Y := Sphere, source := sphereTopology].continuous lift projectionContinuous vectorContinuous;
+\definition squared[p: Family.Point]: Disk.squared p = E.squared p.vector := E.squaredFormula p.vector;
+\definition toBundle[v: Sphere]: Disk.SphereBundle := \into[Family.Point](lift v, Disk.UnitSphere) \by {
+  trans!{R.Real} _ _ _ (squared (lift v)) (\bysub(E.Vector, UnitVectors, v))
+};
+\definition fromBundle[p: Disk.SphereBundle]: Sphere := \into[E.Vector](p.vector, UnitVectors) \by {
+  trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (squared p)) (\bysub(Family.Point, Disk.UnitSphere, p))
+};
+\definition forwardContinuous: topology.Continuity[A := Sphere, B := Disk.SphereBundle].Continuous sphereTopology Disk.sphereTopology toBundle :=
+  topology.Continuity[A := Sphere, B := Family.Point].Corestriction[S := Disk.UnitSphere].corestrictContinuous sphereTopology lineBundle.totalSpace toBundle liftContinuous;
+\definition backwardContinuous: topology.Continuity[A := Disk.SphereBundle, B := Sphere].Continuous Disk.sphereTopology sphereTopology fromBundle :=
+  topology.Continuity[A := Disk.SphereBundle, B := E.Vector].Corestriction[S := UnitVectors].corestrictContinuous
+    Disk.sphereTopology (Bundles.coordinateTopology ambient) fromBundle
+    (topology.Continuity[A := Family.Point, B := E.Vector].Restriction[S := Disk.UnitSphere].restrictContinuous
+      lineBundle.totalSpace (Bundles.coordinateTopology ambient) (\fun (p: Family.Point) => p.vector) Universal.vectorContinuous);
+\definition recoveredBase[p: Disk.SphereBundle]: projection (fromBundle p) = p.base :=
+  Model.ext _ _ (sym!{Ambient.Map} _ _
+    (Projection.At[v := p.vector, unit := unit (fromBundle p)].Recover[P := Model.projection p.base,
+       hasRank := Model.rank p.base, fixes := \bysub(E.Vector, Universal.Image p.base, p.vector)].law));
+\import Equality.Transport[A := Space] \as Transport;
+\module AtLine(x: Space) {
+  \import Ambient.OnProjection[P := Model.projection x].Rank[k := Degrees.one] \as Rank;
+  \definition Frame: \Set := Rank.Frame;
+  \definition frameExists: \exists Frame := Rank.frameExists (Model.rank x);
+  \import linear_algebra.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field,
+    scalar := Hermitian.Complex[].scalar].Finite[n := Degrees.one] \as Domain;
+  \definition index: Fin.Fin Degrees.one := Fin.zero N.Nat^::zero;
+  \definition axis: Domain.Vector := Domain.basis index;
+  \definition unitAxis: Domain.dot axis axis = Numbers.Algebra[].field.one :=
+    trans!{Numbers.Complex} _ _ _ (Domain.dotBasis index axis)
+      (Linear.Coordinates[I := Fin.Fin Degrees.one].Kronecker[].equal index index (\refl(index)));
+  \module With(frame: Frame) {
+    \definition unitVector: E.Vector := frame.basis.value.apply axis;
+    \definition norm: E.dot unitVector unitVector = Numbers.Algebra[].field.one :=
+      trans!{Numbers.Complex} _ _ _ (frame.isometry axis axis) unitAxis;
+    \definition point: Sphere := \into[E.Vector](unitVector, UnitVectors) \by {
+      trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (E.squaredFormula unitVector))
+        (trans!{R.Real} _ _ _
+          (congr!{Numbers.Complex R.Real} Hermitian.Complex[].scalar.realPart _ _ norm)
+          (trans!{R.Real} _ _ _
+            (congr!{Numbers.Complex R.Real} Hermitian.Complex[].scalar.realPart _ _ (sym!{Numbers.Complex} _ _ Hermitian.Complex[].scalar.embedOne))
+            (Hermitian.Complex[].scalar.realEmbed R.one)))
+    };
+    \definition baseLaw: projection point = x :=
+      Model.ext _ _ (sym!{Ambient.Map} _ _
+        (Projection.At[v := unitVector, unit := unit point].Recover[P := Model.projection x,
+          hasRank := Model.rank x, fixes := Rank.fixed frame.basis axis].law));
+  }
+}
+\definition surjective: \forall (x: Space) -> \exists (v: Sphere \where projection v = x) := \block {
+  \fun (x: Space) \then
+  \takefrom frame: AtLine[x := x].Frame \by AtLine[x := x].frameExists \then
+  \return std.Logic[].Proposition[].existsIntro[Sphere, {v: Sphere \where projection v = x}]
+    AtLine[x := x].With[frame := frame].point AtLine[x := x].With[frame := frame].baseLaw
+};
+\definition castVector[x, y: Space][same: x = y][v: Line x]:
+  Transport.cast Line x y same v = v :=
+  trans!{{E.Vector}} _ _ _
+    (sym!{{E.Vector}} _ _ (Transport.natural Line (\fun (_: Space) => E.Vector)
+      (\fun (q: Space)(w: Line q) => w) x y same v))
+    (Transport.Constant[C := E.Vector].law x y v same);
+\definition leftInverse[v: Sphere]: fromBundle (toBundle v) = v := \refl(v);
+\definition rightInverse[p: Disk.SphereBundle]: toBundle (fromBundle p) = p :=
+  Family.ext _ _ (recoveredBase p) (castVector _ _ (recoveredBase p) (toBundle (fromBundle p)).vector);
+\import topology.Homeomorphism[A := Sphere, B := Disk.SphereBundle] \as Homeomorphisms;
+\definition homeomorphism: Homeomorphisms.Homeomorphism[sphereTopology, Disk.sphereTopology] :=
+  Homeomorphisms.Homeomorphism[sphereTopology, Disk.sphereTopology] {
+    forward := toBundle, backward := fromBundle,
+    forwardContinuous := forwardContinuous, backwardContinuous := backwardContinuous,
+    leftInverse := leftInverse, rightInverse := rightInverse
+  };
+\definition projectionLaw[v: Sphere]: Disk.sphereProjection (toBundle v) = projection v := \refl(projection v);
+\module CircleAction;

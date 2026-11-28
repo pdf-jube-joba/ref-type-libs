@@ -1,0 +1,11 @@
+\import \root.Degrees[] \as Degrees;
+\import \root.Complex[dimension := Degrees.one] \as Projective;
+\import algebraic_topology.Spheres[] \as Spheres;
+\import bott_product.Bott[].ProjectiveLine[].Homeomorphism[] \as Sphere;
+\definition homeomorphism: topology.Homeomorphism[A := Projective.Space, B := Spheres.Carrier Degrees.two].Homeomorphism[
+  Projective.topology, Spheres.topology Degrees.two] := Sphere.homeomorphism;
+\module Equator(w: Spheres.Carrier Degrees.one);
+\module Section;
+\module PulledHopf;
+\module Orientation;
+\module DiskOrientation;

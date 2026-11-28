@@ -1,0 +1,36 @@
+\import LineBundle.Integral[].PlaneCoordinates[] \as PlaneDisk;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import singular_cellular.DiskCollar[n := Degrees.two] \as Collar;
+\import Base.Equatorial[] \as Equatorial;
+\import \root.ComplexLineSphere[].Section[].Nonzero[] \as SectionNonzero;
+\definition vector[s: Base.Left]: Plane.Disk := PlaneDisk.vector (point s);
+\definition vectorContinuous: topology.Continuity[A := Base.Left, B := Plane.Disk].Continuous Base.leftTopology Plane.diskTopology vector :=
+  topology.Composition[A := Base.Left, B := PointDisk.DiskCarrier, C := Plane.Disk].composeContinuous
+    Base.leftTopology PointDisk.diskTopology Plane.diskTopology point PlaneDisk.vector pointContinuous PlaneDisk.vectorContinuous;
+\definition toRight[s: Base.Intersection]: \Cast[Spheres.Carrier Degrees.two] Base.right :=
+  \into[Spheres.Carrier Degrees.two](s, Base.right) \by { \bysub(Base.Left, Base.intersection, s) };
+\definition contained[s: Base.Intersection]: \In[Plane.Disk] Collar.punctured (vector s) :=
+  \fun (zero: Plane.normSquared (vector s) = R.zero) =>
+    D.Order[].ltNotEq _ _ (SectionNonzero.squaredPositive (toRight s))
+      (trans!{R.Real} _ _ _ (sym!{R.Real} _ _ zero) (squared s));
+\import singular_cohomology.Relative[A := Base.Left, source := Base.leftTopology, subset := Base.intersection]
+  .Maps[B := Plane.Disk].Over[target := Plane.diskTopology, targetSubset := Collar.punctured] \as Pairs;
+\definition map: Pairs.Map := \into[Base.Left -> Plane.Disk](vector, Pairs.Map) \by {
+  Pairs.Laws[vector] { continuous := vectorContinuous, contained := contained }
+};
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two].Normalization[] \as Normalize;
+\definition nonzero[p: Collar.Carrier]: Normalize.Nonzero := \into[Plane.Coordinate](p, Normalize.Nonzero) \by {
+  \bysub(Plane.Disk, Collar.punctured, p)
+};
+\definition normalize[p: Collar.Carrier]: Spheres.Carrier Degrees.one := Normalize.normalize (nonzero p);
+\definition ambientContinuous: topology.Continuity[A := Collar.Carrier, B := Plane.Coordinate].Continuous
+  Collar.topology Plane.topology (\fun (p: Collar.Carrier) => nonzero p) :=
+  Collar.Continuity[].ambientContinuous;
+\definition normalizeContinuous: topology.Continuity[A := Collar.Carrier, B := Spheres.Carrier Degrees.one].Continuous
+  Collar.topology (Spheres.topology Degrees.one) normalize :=
+  Normalize.Continuity[A := Collar.Carrier].continuous Collar.topology nonzero ambientContinuous;
+\import Pairs.On[f := map] \as PairMap;
+\definition boundaryPoint[s: Base.Intersection]: Collar.Carrier := PairMap.restriction s;
+\definition boundaryContinuous: topology.Continuity[A := Base.Intersection, B := Collar.Carrier].Continuous Base.intersectionTopology Collar.topology boundaryPoint := PairMap.restrictionContinuous;
+\definition boundaryLaw[w: Spheres.Carrier Degrees.one]: normalize (PairMap.restriction (Equatorial.inclusion w)) = w :=
+  \parent.Equator[w := w].normalized (nonzero (PairMap.restriction (Equatorial.inclusion w))) (\refl(\parent.Equator[w := w].actual));

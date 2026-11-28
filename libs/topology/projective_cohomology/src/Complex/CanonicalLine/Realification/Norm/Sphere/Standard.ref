@@ -1,0 +1,34 @@
+\import N.Basic[].Def[] \as Nat;
+\import algebraic_topology.Spheres[] \as Spheres;
+\import algebraic_topology.Euclidean[] \as Euclidean;
+\definition sphereDimension: N.Nat^ := Nat.add ambient dimension;
+\import Euclidean.Dimension[n := realDimension ambient] \as Standard;
+\import \root.Real[dimension := dimension].CanonicalLine[].Hopf[].Standard[] \as RealSphere;
+\definition norm[w: Total.Vector]: Total.squared w = Standard.normSquared w :=
+  RealSphere.normLaw (realDimension ambient) w;
+\import topology.Homeomorphism[A := Native.Vector, B := Total.Vector] \as NativeHome;
+\definition coordinatesHomeomorphism: NativeHome.Homeomorphism[Bundles.coordinateTopology ambient, Standard.topology] :=
+  NativeHome.Homeomorphism[Bundles.coordinateTopology ambient, Standard.topology] {
+    forward := Coordinates.frame.forward.apply,
+    backward := Coordinates.frame.backward.apply,
+    forwardContinuous := Coordinates.Topology[].forwardContinuous,
+    backwardContinuous := Coordinates.Topology[].backwardContinuous,
+    leftInverse := Coordinates.frame.leftInverse,
+    rightInverse := Coordinates.frame.rightInverse
+  };
+\definition toSquared[v: Native.Vector]: Standard.normSquared (coordinatesHomeomorphism.forward v) = Native.squared v :=
+  trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (norm (coordinatesHomeomorphism.forward v))) (vector v);
+\definition fromSquared[w: Total.Vector]: Native.squared (coordinatesHomeomorphism.backward w) = Standard.normSquared w :=
+  trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (toSquared (coordinatesHomeomorphism.backward w)))
+    (congr!{{Total.Vector} {R.Real}} Standard.normSquared _ _ (Coordinates.frame.rightInverse w));
+\import thom_spaces.Thom[].Levels[A := Native.Vector, B := Total.Vector, source := Bundles.coordinateTopology ambient, target := Standard.topology,
+  q := Native.squared, r := Standard.normSquared, h := coordinatesHomeomorphism, forwardSquared := toSquared, backwardSquared := fromSquared] \as Levels;
+\import topology.Homeomorphism[A := Hopf.Sphere, B := Spheres.Carrier sphereDimension] \as SphereHome;
+\definition native: SphereHome.Homeomorphism[Hopf.sphereTopology, Spheres.topology sphereDimension] := Levels.sphereHomeomorphism;
+\definition hopf: topology.Homeomorphism[A := Spheres.Carrier sphereDimension, B := RealDisk.SphereBundle].Homeomorphism[
+  Spheres.topology sphereDimension, RealDisk.sphereTopology] :=
+  topology.Homeomorphism[A := Spheres.Carrier sphereDimension, B := Hopf.Sphere].Composition[C := RealDisk.SphereBundle].compose
+    (Spheres.topology sphereDimension) Hopf.sphereTopology RealDisk.sphereTopology
+    (SphereHome.Inverse[].inverse Hopf.sphereTopology (Spheres.topology sphereDimension) native)
+    (topology.Homeomorphism[A := Hopf.Sphere, B := ComplexDisk.SphereBundle].Composition[C := RealDisk.SphereBundle].compose
+      Hopf.sphereTopology ComplexDisk.sphereTopology RealDisk.sphereTopology Hopf.homeomorphism comparison);

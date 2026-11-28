@@ -1,0 +1,46 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\definition Sphere: \Set := Spheres.Carrier Degrees.two;
+\definition sphereTopology: topology.Topology[Carrier := Sphere].Topology := Spheres.topology Degrees.two;
+\import singular_products.Cochains[A := Sphere, source := sphereTopology, R := I.Int^, ring := Integers.commutativeRing] \as SphereProduct;
+\definition coefficients: Modules.Bundle := SphereProduct.integerCoefficients;
+\import Spheres.Positive[n := Degrees.one] \as Geometry;
+\import cohomology_models.SphereCover[n := Degrees.one] \as SphereCover;
+\import singular_excision.MayerVietoris[A := Sphere].Over[source := sphereTopology].On[cover := SphereCover.cover].Reduced[] \as MayerVietoris;
+\import MayerVietoris.With[coefficients := coefficients].At[z := I.Int^::ofNat Degrees.one] \as Shift;
+\import cohomology_models.Spheres[].With[coefficients := coefficients].Reduced[] \as Spherical;
+\definition circleReduced: Spherical.cohomology Degrees.one (I.Int^::ofNat Degrees.one) :=
+  (Spherical.top Degrees.one).forward.apply I.One.specification;
+\import singular_cohomology.Cochains[A := Spheres.Carrier Degrees.one, source := Spheres.topology Degrees.one].With[coefficients := coefficients] \as CircleOrdinary;
+\definition circleGenerator: CircleOrdinary.cohomology Degrees.one := CircleOrdinary.Reduced[].Positive[n := std.Data[].Nat[].Nat^::zero].isomorphism.forward.apply circleReduced;
+\import singular_cohomology.Equivalence[A := Spheres.Carrier Degrees.one, B := Geometry.Intersection,
+  source := Spheres.topology Degrees.one, target := Geometry.intersectionTopology].Reduced[].With[coefficients := coefficients]
+  .At[z := I.Int^::ofNat Degrees.one] \as Equator;
+\definition equatorClass: _ := (Equator.isomorphism SphereCover.intersectionEquivalence).forward.apply circleReduced;
+\import SphereCover.With[coefficients := coefficients].Reduced[z := I.Int^::ofNat Degrees.one] \as Suspension;
+\definition reducedClass: Spherical.cohomology Degrees.two (I.Int^::ofNat Degrees.two) := Suspension.isomorphism.forward.apply circleReduced;
+\import singular_cohomology.Cochains[A := Sphere, source := sphereTopology].With[coefficients := coefficients] \as Ordinary;
+\definition standard: Ordinary.cohomology Degrees.two := Ordinary.Reduced[].Positive[n := Degrees.one].isomorphism.forward.apply reducedClass;
+\import cohomology_models.Spheres[].With[coefficients := coefficients].Top[n := Degrees.one] \as Model;
+\definition comparison: standard = Model.isomorphism.forward.apply I.One.specification := \refl(standard);
+\import singular_cohomology.Relative[A := Geometry.Left, source := Geometry.leftTopology, subset := Geometry.intersection] \as Local;
+\import Local.Reduced[].With[coefficients := coefficients].ConnectingContractible[].At[z := I.Int^::ofNat Degrees.one] \as LocalConnecting;
+\definition localClass: Local.With[coefficients := coefficients].At[z := I.Int^::ofNat Degrees.two].Carrier :=
+  (LocalConnecting.isomorphism SphereCover.leftContraction).forward.apply equatorClass;
+\import singular_cohomology.Relative[A := Sphere, source := sphereTopology, subset := Geometry.right] \as Global;
+\definition globalClass: Global.With[coefficients := coefficients].At[z := I.Int^::ofNat Degrees.two].Carrier := Shift.cut.backward.apply localClass;
+\import Global.Reduced[].With[coefficients := coefficients].Contractible[].At[z := I.Int^::ofNat Degrees.two] \as Forget;
+\definition fromGlobal: (Forget.isomorphism SphereCover.rightContraction).forward.apply globalClass = reducedClass := \refl(reducedClass);
+\module FromRelative;
+\module Cut;
+\module AugmentationMap(A: \Set, source: topology.Topology[Carrier := A].Topology);
+\module PairAugmentation(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A);
+\module PositiveConnecting(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A, n: std.Data[].Nat[].Nat^);
+\module PositiveForgetting(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A, n: std.Data[].Nat[].Nat^);
+\module PullCompatibility(A: \Set, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology, n: std.Data[].Nat[].Nat^, f: A -> B, regular: topology.Continuity[A := A, B := B].Continuous source target f);

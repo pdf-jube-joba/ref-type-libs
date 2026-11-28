@@ -1,0 +1,38 @@
+\import \parent.\parent.Fiber[v := v] \as Original;
+\definition BasePoint: Space := projection v;
+\definition Tautological: \Set := Line BasePoint;
+\definition DualSpace: \Set := Dual.Fiber BasePoint;
+\definition space: Linear.VectorSpace DualSpace := Dual.bundle.space BasePoint;
+\definition vector: Tautological := value v Numbers.Algebra[].field.one;
+\definition frameVector: Tautological := (toBundle v).vector;
+\definition unitVector: vector = frameVector := E.space.scalarOne v;
+\definition frame: DualSpace := Dual.At[x := BasePoint].represent frameVector;
+\import Linear.Linear[V := Numbers.Complex, W := DualSpace, source := Linear.scalarSpace, target := space] \as Forward;
+\import Linear.Dual[V := Tautological, source := lineBundle.space BasePoint] \as Functionals;
+\definition forward: Forward.Map := Forward.Map {
+  apply := \fun (a: Numbers.Complex) => (dual v a).vector,
+  preservesAdd := \fun (a, b: Numbers.Complex) => space.scalarAdd a b frame,
+  preservesScale := \fun (a, b: Numbers.Complex) => space.scalarAssoc a b frame
+};
+\definition backward: _ := Functionals.evaluate vector;
+\definition evaluations[w: Tautological]: frame w = Original.backward.apply w := \refl(E.dot v w);
+\definition normalized: frame vector = Numbers.Algebra[].field.one := scaledDot v Numbers.Algebra[].field.one;
+\definition left[a: Numbers.Complex]: backward.apply (forward.apply a) = a :=
+  trans!{Numbers.Complex} _ _ _ (congr!{Numbers.Complex Numbers.Complex} (C.mul a) _ _ normalized) (ComplexLaws.mulOneRight a);
+\definition reconstructed[w: Tautological]: (lineBundle.space BasePoint).smul (Original.backward.apply w) vector = w :=
+  trans!{Tautological} _ _ _
+    (congr!{Tautological Tautological} ((lineBundle.space BasePoint).smul (Original.backward.apply w)) _ _ unitVector)
+    (Original.right w);
+\definition onVector[f: DualSpace][w: Tautological]: (forward.apply (backward.apply f)) w = f w :=
+  trans!{Numbers.Complex} _ _ _
+    (congr!{Numbers.Complex Numbers.Complex} (C.mul (backward.apply f)) _ _ (evaluations w))
+    (trans!{Numbers.Complex} _ _ _ (ComplexLaws.mulComm (backward.apply f) (Original.backward.apply w))
+      (trans!{Numbers.Complex} _ _ _
+        (sym!{Numbers.Complex} _ _ ((Functionals.toMap f).preservesScale (Original.backward.apply w) vector))
+        (congr!{Tautological Numbers.Complex} f _ _ (reconstructed w))));
+\definition right[f: DualSpace]: forward.apply (backward.apply f) = f :=
+  Functionals.ext _ _ (onVector f);
+\import Linear.Isomorphism[V := Numbers.Complex, W := DualSpace, source := Linear.scalarSpace, target := space] \as Isos;
+\definition isomorphism: Isos.Isomorphism := Isos.Isomorphism {
+  forward := forward, backward := backward, leftInverse := left, rightInverse := right
+};

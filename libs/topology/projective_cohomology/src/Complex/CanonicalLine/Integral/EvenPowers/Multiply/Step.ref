@@ -1,0 +1,49 @@
+\definition raw: N.Nat^ := Nat.add (d p) (d q);
+\definition successor: N.Nat^ := N.Nat^::succ q;
+\definition predecessorDegree: N.Nat^ := d (total q);
+\definition afterRaw: N.Nat^ := Nat.add raw Degrees.two;
+\definition afterRight: N.Nat^ := Nat.add (d p) (d successor);
+\definition afterLeft: N.Nat^ := next (total q);
+\definition goal: N.Nat^ := d (total successor);
+\definition rightDegree: afterRaw = afterRight := congr!{N.Nat^ N.Nat^} (Nat.add (d p)) _ _ (castLaw q);
+\definition leftDegree: afterRaw = afterLeft :=
+  congr!{N.Nat^ N.Nat^} (\fun (t: N.Nat^) => Nat.add t Degrees.two) _ _ (Degrees.doubleAdd p q);
+\definition finishRight: afterRight = goal := Degrees.doubleAdd p successor;
+\definition finishLeft: afterLeft = goal := castLaw (total q);
+\definition pair: H.Group raw := H.Cup[p := d p, q := d q].apply (power p) (power q);
+\definition inner: H.Group (next q) := H.Cup[p := d q, q := Degrees.two].apply (power q) generator;
+\definition nested: H.Group afterRaw := H.Cup[p := d p, q := next q].apply (power p) inner;
+\definition joined: H.Group afterRaw := H.Cup[p := raw, q := Degrees.two].apply pair generator;
+\definition rightLaw:
+  CastDegree.cast H.Group afterRaw afterRight rightDegree nested =
+  H.Cup[p := d p, q := d successor].apply (power p) (power successor) :=
+  trans!{{H.Group afterRight}} _ _ _
+    (sym!{{H.Group afterRight}} _ _
+      (CastDegree.reindex H.Group (Nat.add (d p)) (next q) (d successor) (castLaw q) nested))
+    (CastDegree.natural H.Group (\fun (m: N.Nat^) => H.Group (Nat.add (d p) m))
+      (\fun (m: N.Nat^)(v: H.Group m) => H.Cup[p := d p, q := m].apply (power p) v)
+      (next q) (d successor) (castLaw q) inner);
+\definition associate: joined = nested :=
+  trans!{{H.Group afterRaw}} _ _ _
+    (H.Associativity[p := d p, q := d q, r := Degrees.two].law (power p) (power q) generator)
+    (CastDegree.castRefl H.Group afterRaw nested);
+\definition leftLaw:
+  CastDegree.cast H.Group afterRaw afterLeft leftDegree joined =
+  H.Cup[p := predecessorDegree, q := Degrees.two].apply (cup q (power p) (power q)) generator :=
+  trans!{{H.Group afterLeft}} _ _ _
+    (sym!{{H.Group afterLeft}} _ _
+      (CastDegree.reindex H.Group (\fun (t: N.Nat^) => Nat.add t Degrees.two) raw predecessorDegree (Degrees.doubleAdd p q) joined))
+    (CastDegree.natural H.Group (\fun (m: N.Nat^) => H.Group (Nat.add m Degrees.two))
+      (\fun (m: N.Nat^)(v: H.Group m) => H.Cup[p := m, q := Degrees.two].apply v generator)
+      raw predecessorDegree (Degrees.doubleAdd p q) pair);
+\definition law[previous: Law q]: Law successor :=
+  eq_reason_in!{{H.Group goal} _
+    "=" _ "by" { congr!{{H.Group afterRight} {H.Group goal}} (CastDegree.cast H.Group afterRight goal finishRight) _ _
+      (sym!{{H.Group afterRight}} _ _ rightLaw) }
+    "=" _ "by" { CastDegree.castComposition H.Group afterRaw afterRight goal rightDegree finishRight nested }
+    "=" _ "by" { congr!{{H.Group afterRaw} {H.Group goal}}
+      (CastDegree.cast H.Group afterRaw goal (trans!{N.Nat^} _ _ _ leftDegree finishLeft)) _ _ (sym!{{H.Group afterRaw}} _ _ associate) }
+    "=" _ "by" { sym!{{H.Group goal}} _ _ (CastDegree.castComposition H.Group afterRaw afterLeft goal leftDegree finishLeft joined) }
+    "=" _ "by" { congr!{{H.Group afterLeft} {H.Group goal}} (CastDegree.cast H.Group afterLeft goal finishLeft) _ _ leftLaw }
+    "=" _ "by" { congr!{{H.Group predecessorDegree} {H.Group goal}} (advance (total q)) _ _ previous }
+  };

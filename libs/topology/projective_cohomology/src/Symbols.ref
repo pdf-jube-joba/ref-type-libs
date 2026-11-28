@@ -1,0 +1,29 @@
+\import std.Data[].Nat[] \as N;
+\import \root.Degrees[] \as Degrees;
+\import N.Basic[].Prop[] \as Order;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\import grassmannian_cells.Symbols[n := n, k := Degrees.one] \as Schubert;
+\definition Symbol: \Set := Schubert.Symbol;
+\definition singleton[i: Fin.Fin Degrees.one]: i = Fin.zero N.Nat^::zero :=
+  Order.leAntisym i N.Nat^::zero (Order.succLeOfLt Degrees.one i (Fin.bound Degrees.one i)) (Order.zeroLe i);
+\definition symbol[i: Fin.Fin n]: Schubert.Symbol :=
+  \into[Schubert.Data](Schubert.Data { pivot := \fun (_: Fin.Fin Degrees.one) => i }, Schubert.Symbol) \by {
+    \fun (a, b: Fin.Fin Degrees.one)(less: Order.Lt a b) =>
+      Logic.falseElim _ (Order.ltIrrefl a
+        (\idelim b = a \with c: N.Nat^ => Order.Lt a c \by {
+          base: less,
+          equality: trans!{N.Nat^} b (Fin.zero N.Nat^::zero) a (singleton b) (sym!{N.Nat^} a (Fin.zero N.Nat^::zero) (singleton a))
+        }))
+  };
+\definition pivot[s: Schubert.Symbol]: Fin.Fin n := s.pivot (Fin.zero N.Nat^::zero);
+\definition rightInverse[i: Fin.Fin n]: pivot (symbol i) = i := \refl(i);
+\definition leftInverse[s: Schubert.Symbol]: symbol (pivot s) = s :=
+  Schubert.ext _ _ (\fun (i: Fin.Fin Degrees.one) => congr!{{Fin.Fin Degrees.one} {Fin.Fin n}} s.pivot _ _ (sym!{{Fin.Fin Degrees.one}} _ _ (singleton i)));
+\definition realDegree[s: Schubert.Symbol]: Schubert.realDimension s = pivot s := \refl(pivot s);
+\definition complexDegree[s: Schubert.Symbol]: Schubert.complexDimension s = N.Basic[].Def[].add (pivot s) (pivot s) :=
+  \refl(N.Basic[].Def[].add (pivot s) (pivot s));

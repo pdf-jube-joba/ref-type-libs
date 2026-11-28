@@ -1,0 +1,57 @@
+\import Source.ModTwo[] \as OldThom;
+\import TargetLine.ModTwo[] \as NewThom;
+\import OldThom.Normalized[] \as OldClass;
+\import NewThom.Normalized[] \as NewClass;
+\import cohomology_thom.RelativePullback[].On[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary, R := Two.Carrier, ring := Two.commutativeRing]
+  .To[B := TargetDisk.DiskBundle, target := TargetDisk.diskTopology, part := TargetDisk.Boundary].Along[f := pairMap].Degree[n := Degrees.one] \as Pull;
+\definition normalized: OldClass.Normalized (Pull.map.apply NewClass.thomClass) :=
+  \fun (x: Space) => \parent.Fiber[x := x].Naturality[].generates NewClass.thomClass
+    ((\bysub(NewRelative.Class, { u: NewRelative.Class \where NewClass.Normalized u }, NewClass.thomClass)) (map x));
+\definition classLaw: Pull.map.apply NewClass.thomClass = OldClass.thomClass :=
+  OldClass.normalizedClassUnique (\into[OldRelative.Class](Pull.map.apply NewClass.thomClass, OldClass.normalizedClasses) \by { normalized }) OldClass.thomClass;
+\import OldProduct.Cohomology[] \as H;
+\import NewProduct.Cohomology[] \as TargetH;
+\import H.Pullback[B := Target.Space, target := Target.topology] \as BasePull;
+\import singular_products.Cochains[A := Disk.DiskBundle, source := Disk.diskTopology, R := Two.Carrier, ring := Two.commutativeRing].Cohomology[] \as DiskH;
+\import H.Pullback[B := Disk.DiskBundle, target := Disk.diskTopology] \as Section;
+\import singular_cap.CochainPair[A := TargetDisk.DiskBundle, source := TargetDisk.diskTopology, subset := TargetDisk.Boundary,
+  R := Two.Carrier, ring := Two.commutativeRing].Comparison[n := Degrees.one].Cohomology[] \as Forget;
+\import singular_cohomology.Maps[A := Space, B := Disk.DiskBundle, source := topology, target := Disk.diskTopology]
+  .Composition[C := TargetDisk.DiskBundle, final := TargetDisk.diskTopology].Coefficients[M := OldProduct.integerCoefficients] \as First;
+\import singular_cohomology.Maps[A := Space, B := Target.Space, source := topology, target := Target.topology]
+  .Composition[C := TargetDisk.DiskBundle, final := TargetDisk.diskTopology].Coefficients[M := OldProduct.integerCoefficients] \as Second;
+\import singular_products.Cochains[A := TargetDisk.DiskBundle, source := TargetDisk.diskTopology, R := Two.Carrier, ring := Two.commutativeRing].Cohomology[] \as TargetDiskH;
+\import H.Pullback[B := TargetDisk.DiskBundle, target := TargetDisk.diskTopology] \as Direct;
+\import topology.Continuity[A := Space, B := TargetDisk.DiskBundle] \as Regular;
+\definition Continuous[f: Space -> TargetDisk.DiskBundle]: \Prop := Regular.Continuous topology TargetDisk.diskTopology f;
+\definition equalPullback[f, g: Space -> TargetDisk.DiskBundle][fc: Continuous f][gc: Continuous g][a: TargetDiskH.Group Degrees.one]:
+  f = g -> Direct.apply Degrees.one f fc a = Direct.apply Degrees.one g gc a :=
+  \fun (same: f = g) => (\idelim f = g \with h: (Space -> TargetDisk.DiskBundle) =>
+    \forall (hc: Continuous h) -> Direct.apply Degrees.one f fc a = Direct.apply Degrees.one h hc a \by {
+      base: \fun (hc: Continuous f) => \refl(Direct.apply Degrees.one f fc a), equality: same
+    }) gc;
+\definition eulerPull[u: NewRelative.Class]: OldRelative.euler (Pull.map.apply u) = BasePull.apply Degrees.one map continuous (NewRelative.euler u) :=
+  trans!{{H.Group Degrees.one}} _ _ _
+    (congr!{{DiskH.Group Degrees.one} {H.Group Degrees.one}} (Section.apply Degrees.one Disk.zeroSection Disk.zeroSectionContinuous) _ _ (Pull.Forget[].law u))
+    (trans!{{H.Group Degrees.one}} _ _ _
+      (sym!{{H.Group Degrees.one}} _ _ (First.onCohomology Disk.zeroSection Disk.zeroSectionContinuous diskMap diskContinuous Degrees.one (Forget.map.apply u)))
+      (trans!{{H.Group Degrees.one}} _ _ _
+        (equalPullback _ _
+          (topology.Composition[A := Space, B := Disk.DiskBundle, C := TargetDisk.DiskBundle].composeContinuous
+            topology Disk.diskTopology TargetDisk.diskTopology Disk.zeroSection diskMap Disk.zeroSectionContinuous diskContinuous)
+          (topology.Composition[A := Space, B := Target.Space, C := TargetDisk.DiskBundle].composeContinuous
+            topology Target.topology TargetDisk.diskTopology map TargetDisk.zeroSection continuous TargetDisk.zeroSectionContinuous)
+          (Forget.map.apply u) (\axiom:funext((\fun (x: Space) => diskMap (Disk.zeroSection x)), (\fun (x: Space) => TargetDisk.zeroSection (map x)), section)))
+        (Second.onCohomology map continuous TargetDisk.zeroSection TargetDisk.zeroSectionContinuous Degrees.one (Forget.map.apply u))));
+\definition generatorLaw: BasePull.apply Degrees.one map continuous NewThom.Euler[].generator = OldThom.Euler[].generator :=
+  trans!{{H.Group Degrees.one}} _ _ _ (sym!{{H.Group Degrees.one}} _ _ (eulerPull NewClass.thomClass))
+    (congr!{{OldRelative.Class} {H.Group Degrees.one}} OldRelative.euler _ _ classLaw);
+\definition powerLaw: \forall (k: N.Nat^) -> BasePull.apply k map continuous (NewThom.Euler[].power k) = OldThom.Euler[].power k :=
+  \induction (k: N.Nat^) \return BasePull.apply k map continuous (NewThom.Euler[].power k) = OldThom.Euler[].power k \with {
+    | zero: BasePull.Unit[].law map continuous
+    | succ: \fun (k: N.Nat^)(previous: _) =>
+      trans!{{H.Group (N.Nat^::succ k)}} _ _ _
+        (BasePull.Cup[p := k, q := Degrees.one].law map continuous (NewThom.Euler[].power k) NewThom.Euler[].generator)
+        (congr!{{H.Group k} {H.Group Degrees.one} {H.Group (N.Nat^::succ k)}}
+          H.Cup[p := k, q := Degrees.one].apply _ _ _ _ previous generatorLaw)
+  };

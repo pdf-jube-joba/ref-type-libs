@@ -1,0 +1,57 @@
+\import N.Basic[].Def[] \as Nat;
+\import real.Analysis[] \as R;
+\import complex.Complex[] \as Numbers;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\import \root.Complex[dimension := Nat.add extra dimension] \as Target;
+\import Target.CanonicalLine[] \as TargetLine;
+\import hermitian_frames.Hermitian[] \as Hermitian;
+\import vector_bundles.Bundles[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, conjugation := Hermitian.Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar] \as Bundles;
+\import bundle_complements.Complements[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, conjugation := Hermitian.Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar] \as Complements;
+\import grassmannians.Complex[n := ambient, k := Degrees.one].Model[] \as SourceModel;
+\import grassmannians.Complex[n := Target.ambient, k := Degrees.one].Model[] \as TargetModel;
+\import Complements.Projection[X := Space, n := ambient, baseSpace := topology, P := SourceModel.projection, regular := SourceModel.regular] \as SourceUniversal;
+\import Complements.Projection[X := Target.Space, n := Target.ambient, baseSpace := Target.topology, P := TargetModel.projection, regular := TargetModel.regular] \as TargetUniversal;
+\import \root.Complex[dimension := dimension].CanonicalLine[] \as Source;
+\import linear_algebra.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, scalar := Hermitian.Complex[].scalar] \as Vectors;
+\import Vectors.Finite[n := ambient] \as E;
+\import E.Blocks[m := extra] \as Blocks;
+\import Vectors.Finite[n := extra] \as Extra;
+\import Vectors.Finite[n := Blocks.dimension] \as W;
+\definition image[x: Space][v: Line x]: Target.Line (map x) :=
+  \into[W.Vector](Blocks.inclusion.apply v, TargetUniversal.Image (map x)) \by {
+    trans!{{W.Vector}} _ _ _ (Ambient.Entries[].formula x (Blocks.inclusion.apply v))
+      (congr!{{E.Vector} {W.Vector}} Blocks.inclusion.apply _ _
+        (trans!{{E.Vector}} _ _ _ (congr!{{E.Vector} {E.Vector}} x.map.apply _ _ (Blocks.leftJoin v Extra.space.zero))
+          (\bysub(E.Vector, SourceUniversal.Image x, v))))
+  };
+\definition reconstruct[x: Space][v: Target.Line (map x)]: Blocks.inclusion.apply (x.map.apply (Blocks.left v)) = v :=
+  trans!{{W.Vector}} _ _ _ (sym!{{W.Vector}} _ _ (Ambient.Entries[].formula x v))
+    (\bysub(W.Vector, TargetUniversal.Image (map x), v));
+\definition preimage[x: Space][v: Target.Line (map x)]: Line x :=
+  \into[E.Vector](Blocks.left v, SourceUniversal.Image x) \by {
+    trans!{{E.Vector}} _ _ _
+      (sym!{{E.Vector}} _ _ (Blocks.leftJoin (x.map.apply (Blocks.left v)) Extra.space.zero))
+      (congr!{{W.Vector} {E.Vector}} Blocks.left _ _ (reconstruct x v))
+  };
+\definition leftInverse[x: Space][v: Line x]: preimage x (image x v) = v :=
+  Blocks.leftJoin v Extra.space.zero;
+\definition rightInverse[x: Space][v: Target.Line (map x)]: image x (preimage x v) = v :=
+  trans!{{W.Vector}} _ _ _
+    (congr!{{E.Vector} {W.Vector}} Blocks.inclusion.apply _ _
+      (sym!{{E.Vector}} _ _ (\bysub(E.Vector, SourceUniversal.Image x, preimage x v))))
+    (reconstruct x v);
+\definition dotLaw[v, w: E.Vector]: W.dot (Blocks.inclusion.apply v) (Blocks.inclusion.apply w) = E.dot v w :=
+  trans!{Numbers.Complex} _ _ _ (Blocks.dotIncluded (Blocks.inclusion.apply v) w)
+    (congr!{{E.Vector} {Numbers.Complex}} (\fun (a: E.Vector) => E.dot a w) _ _ (Blocks.leftJoin v Extra.space.zero));
+\definition norm[v: E.Vector]: W.squared (Blocks.inclusion.apply v) = E.squared v :=
+  trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (W.squaredFormula (Blocks.inclusion.apply v)))
+    (trans!{R.Real} _ _ _
+      (congr!{Numbers.Complex R.Real} Hermitian.Complex[].scalar.realPart _ _ (dotLaw v v))
+      (E.squaredFormula v));
+\module Total;
+\module At(x: Space);

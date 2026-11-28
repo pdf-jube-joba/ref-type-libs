@@ -1,0 +1,22 @@
+\definition value[v: Sphere][a: Numbers.Complex]: Line (projection v) :=
+  \into[E.Vector](evaluated v a, Universal.Image (projection v)) \by {
+    trans!{{E.Vector}} _ _ _ ((Model.projection (projection v)).map.preservesScale a v)
+      (congr!{{E.Vector} {E.Vector}} (E.space.smul a) _ _ (fixed v))
+  };
+\definition tautological[v: Sphere][a: Numbers.Complex]: Family.Point := Family.include (projection v) (value v a);
+\definition tautologicalAction[z: Circle.Carrier][v: Sphere][a: Numbers.Complex]:
+  tautological (action z v) (C.mul (Circle.inverse z) a) = tautological v a :=
+  Family.ext _ _ (sameLine z v)
+    (trans!{{E.Vector}} _ _ _ (castVector _ _ (sameLine z v) (value (action z v) (C.mul (Circle.inverse z) a))) (tautologicalOrbit z v a));
+\definition coefficient[v: Sphere][p: Family.Point]: Numbers.Complex := E.dot v p.vector;
+\definition reconstructValue[v: Sphere][p: Family.Point][same: projection v = p.base]: evaluated v (coefficient v p) = p.vector :=
+  trans!{{E.Vector}} _ _ _
+    (congr!{Space {E.Vector}} (\fun (x: Space) => (Model.projection x).map.apply p.vector) _ _ same)
+    (\bysub(E.Vector, Universal.Image p.base, p.vector));
+\definition onto[p: Family.Point]: \exists (v: Sphere \where tautological v (coefficient v p) = p) := \block {
+  \takefrom v: \Cast[Sphere] ({ v: Sphere \where projection v = p.base }) \by surjective p.base \then
+  \let same: projection v = p.base := \bysub(Sphere, { w: Sphere \where projection w = p.base }, v) \then
+  \return std.Logic[].Proposition[].existsIntro[Sphere, { v: Sphere \where tautological v (coefficient v p) = p }] v
+    (Family.ext _ _ same (trans!{{E.Vector}} _ _ _ (castVector _ _ same (value v (coefficient v p))) (reconstructValue v p same)))
+};
+\module Product;

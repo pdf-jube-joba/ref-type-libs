@@ -1,0 +1,7 @@
+\import Geometry.ModTwo[n := Degrees.one, constantRank := rank, complex := cw] \as Chosen;
+\definition class: Relative.Class := Chosen.class;
+\definition euler: H.Group Degrees.one := Chosen.euler;
+\module Cup(p: N.Nat^) {
+  \definition isomorphism: _ := Chosen.Degree[p := p].isomorphism;
+  \definition law: _ := Chosen.Degree[p := p].zeroSection;
+}

@@ -1,0 +1,112 @@
+\import algebraic_topology.Interval[] \as Interval;
+\import algebraic_topology.Cylinder[A := Carrier] \as Cylinder;
+\import algebraic_topology.Cylinder[A := Disk.SphereBundle] \as SphereCylinder;
+\import algebraic_topology.Homotopy[A := Carrier, B := Carrier] \as Homotopy;
+\import topological_constructions.Product[A := Interval.Carrier, B := Disk.SphereBundle].Universal[X := Cylinder.Carrier] \as Into;
+\import std.Logic[].Proposition[] \as Logic;
+\use Equality.eq_reason_in;
+\definition sphere[p: Disk.SphereBundle]: Carrier := \into[Disk.DiskBundle](Disk.sphereInclusion p, subset) \by {
+  D.leLtTrans R.zero R.zero (Disk.norm p) (D.leRefl R.zero)
+    (\idelim R.one = Disk.norm p \with a: R.Real => D.Lt R.zero a \by {
+      base: R.Estimates[].Product[].onePositive, equality: sym!{R.Real} _ _ (Disk.sphereNorm p)
+    })
+};
+\definition sphereContinuous: topology.Continuity[A := Disk.SphereBundle, B := Carrier].Continuous Disk.sphereTopology topology sphere :=
+  topology.Continuity[A := Disk.SphereBundle, B := Disk.DiskBundle].Corestriction[S := subset].corestrictContinuous
+    Disk.sphereTopology Disk.diskTopology sphere Disk.sphereInclusionContinuous;
+\definition fixed[p: Disk.SphereBundle]: normalize (sphere p) = p :=
+  eq_reason_in!{{Family.Point} _
+    "=" _ "by" { sym!{{Family.Point}} _ _ (Disk.scaleOne (normalize (sphere p))) }
+    "=" _ "by" { congr!{R.Real {Family.Point}} (\fun (a: R.Real) => Disk.scale a (normalize (sphere p))) _ _ (sym!{R.Real} _ _ (Disk.sphereNorm p)) }
+    "=" _ "by" { Disk.recover p (positive (sphere p)) }
+  };
+\definition bounds[t: Interval.Carrier]: Logic.And[D.Le R.zero t, D.Le t R.one] :=
+  \bysub(R.Real, metric_spaces.RealLine[].ClosedInterval R.zero R.one, t);
+\definition remainder[p: Carrier]: R.Real := R.sub R.one (norm p);
+\definition remainderNonnegative[p: Carrier]: D.Le R.zero (remainder p) := R.Distance[].subNonnegative R.one (norm p) (Disk.Radial[].diskNorm p);
+\definition interpolate[t: Interval.Carrier][p: Carrier]: R.Real := R.add (norm p) (R.mul (remainder p) t);
+\definition interpolatePositive[t: Interval.Carrier][p: Carrier]: D.Lt R.zero (interpolate t p) :=
+  D.ltLeTrans R.zero (norm p) (interpolate t p) (positive p)
+    (R.Distance[].leAddOfNonnegative (norm p) (R.mul (remainder p) t)
+      (Laws.fieldMulNonnegative (remainder p) t (remainderNonnegative p) (bounds t).left));
+\definition interpolateBound[t: Interval.Carrier][p: Carrier]: D.Le (interpolate t p) R.one :=
+  D.leReplaceRight (interpolate t p) (R.add (norm p) (R.mul (remainder p) R.one)) R.one
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (R.add (norm p)) _ _ (R.Algebra[].mulOneRight (remainder p))) (R.Estimates[].addSubCancel R.one (norm p)))
+    (Laws.addMonotoneLeft _ _ (norm p) (R.Estimates[].mulMonotone (remainder p) t R.one (remainderNonnegative p) (bounds t).right));
+\definition radius[p: Cylinder.Carrier]: Interval.Carrier :=
+  \into[R.Real](interpolate (Cylinder.time p) (Cylinder.point p), metric_spaces.RealLine[].ClosedInterval R.zero R.one) \by {
+    Logic.And[_, _]::# (D.Order[].leOfLt _ _ (interpolatePositive (Cylinder.time p) (Cylinder.point p)))
+      (interpolateBound (Cylinder.time p) (Cylinder.point p))
+  };
+\definition source: topology.Topology[Carrier := Cylinder.Carrier].Topology := Cylinder.topology topology;
+\import metric_spaces.RealFunctions[A := Cylinder.Carrier] \as Functions;
+\definition baseRadius[p: Cylinder.Carrier]: R.Real := norm (Cylinder.point p);
+\definition baseRadiusContinuous: Functions.Continuous source baseRadius :=
+  topology.Composition[A := Cylinder.Carrier, B := Carrier, C := R.Real].composeContinuous source topology metric_spaces.RealLine[].topology
+    Cylinder.point norm (Cylinder.pointContinuous topology) normContinuous;
+\definition time[p: Cylinder.Carrier]: R.Real := Cylinder.time p;
+\definition timeContinuous: Functions.Continuous source time :=
+  topology.Composition[A := Cylinder.Carrier, B := Interval.Carrier, C := R.Real].composeContinuous source Interval.topology metric_spaces.RealLine[].topology
+    Cylinder.time (\fun (t: Interval.Carrier) => t) (Cylinder.timeContinuous topology) Interval.inclusionContinuous;
+\definition radiusContinuous: topology.Continuity[A := Cylinder.Carrier, B := Interval.Carrier].Continuous source Interval.topology radius :=
+  topology.Continuity[A := Cylinder.Carrier, B := R.Real].Corestriction[S := metric_spaces.RealLine[].ClosedInterval R.zero R.one].corestrictContinuous
+    source metric_spaces.RealLine[].topology radius
+    (Functions.sumContinuous source baseRadius (\fun (p: Cylinder.Carrier) => R.mul (remainder (Cylinder.point p)) (time p)) baseRadiusContinuous
+      (Functions.Product[].continuous source (\fun (p: Cylinder.Carrier) => remainder (Cylinder.point p)) time
+        (Functions.subContinuous source (\fun (_: Cylinder.Carrier) => R.one) baseRadius (Functions.constantContinuous source R.one) baseRadiusContinuous)
+        timeContinuous));
+\definition spherePart[p: Cylinder.Carrier]: Disk.SphereBundle := normalize (Cylinder.point p);
+\definition spherePartContinuous: topology.Continuity[A := Cylinder.Carrier, B := Disk.SphereBundle].Continuous source Disk.sphereTopology spherePart :=
+  topology.Composition[A := Cylinder.Carrier, B := Carrier, C := Disk.SphereBundle].composeContinuous source topology Disk.sphereTopology
+    Cylinder.point normalize (Cylinder.pointContinuous topology) continuous;
+\definition parametrized[p: Cylinder.Carrier]: SphereCylinder.Carrier := SphereCylinder.at (radius p) (spherePart p);
+\definition parametrizedContinuous: topology.Continuity[A := Cylinder.Carrier, B := SphereCylinder.Carrier].Continuous source (SphereCylinder.topology Disk.sphereTopology) parametrized :=
+  Into.pairContinuous source Interval.topology Disk.sphereTopology radius spherePart radiusContinuous spherePartContinuous;
+\definition at[p: Cylinder.Carrier]: Disk.DiskBundle := Disk.CylinderModel[].scaled (parametrized p);
+\definition atContinuous: topology.Continuity[A := Cylinder.Carrier, B := Disk.DiskBundle].Continuous source Disk.diskTopology at :=
+  topology.Composition[A := Cylinder.Carrier, B := SphereCylinder.Carrier, C := Disk.DiskBundle].composeContinuous
+    source (SphereCylinder.topology Disk.sphereTopology) Disk.diskTopology parametrized Disk.CylinderModel[].scaled
+    parametrizedContinuous Disk.CylinderModel[].scaledContinuous;
+\definition atNorm[p: Cylinder.Carrier]: Disk.norm (at p) = radius p :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { Disk.normScale (radius p) (bounds (radius p)).left (spherePart p) }
+    "=" _ "by" { congr!{R.Real R.Real} (R.mul (radius p)) _ _ (Disk.sphereNorm (spherePart p)) }
+    "=" _ "by" { R.Algebra[].mulOneRight (radius p) }
+  };
+\definition family[p: Cylinder.Carrier]: Carrier := \into[Disk.DiskBundle](at p, subset) \by {
+  \idelim radius p = Disk.norm (at p) \with r: R.Real => D.Lt R.zero r \by {
+    base: interpolatePositive (Cylinder.time p) (Cylinder.point p), equality: sym!{R.Real} _ _ (atNorm p)
+  }
+};
+\definition familyContinuous: topology.Continuity[A := Cylinder.Carrier, B := Carrier].Continuous source topology family :=
+  topology.Continuity[A := Cylinder.Carrier, B := Disk.DiskBundle].Corestriction[S := subset].corestrictContinuous
+    source Disk.diskTopology family atContinuous;
+\definition start[p: Carrier]: family (Cylinder.at Interval.start p) = p :=
+  trans!{{Family.Point}} _ _ _ (congr!{R.Real {Family.Point}} (\fun (a: R.Real) => Disk.scale a (normalize p)) _ _
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (R.add (norm p)) _ _ (Laws.fieldMulZeroRight (remainder p))) (Laws.addZeroRight (norm p))))
+    (Disk.recover p (positive p));
+\definition end[p: Carrier]: family (Cylinder.at Interval.end p) = sphere (normalize p) :=
+  trans!{{Family.Point}} _ _ _ (congr!{R.Real {Family.Point}} (\fun (a: R.Real) => Disk.scale a (normalize p)) _ _
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (R.add (norm p)) _ _ (R.Algebra[].mulOneRight (remainder p))) (R.Estimates[].addSubCancel R.one (norm p))))
+    (Disk.scaleOne (normalize p));
+\definition homotopy: Homotopy.Homotopy[topology, topology, (\fun (p: Carrier) => p), (\fun (p: Carrier) => sphere (normalize p))] :=
+  \into[Homotopy.Family](family, Homotopy.Homotopy[topology, topology, (\fun (p: Carrier) => p), (\fun (p: Carrier) => sphere (normalize p))]) \by {
+    Homotopy.Laws[topology, topology, (\fun (p: Carrier) => p), (\fun (p: Carrier) => sphere (normalize p)), family] {
+      continuous := familyContinuous, start := start, end := end
+    }
+  };
+\import algebraic_topology.HomotopyEquivalence[A := Disk.SphereBundle, B := Carrier] \as Equivalence;
+\import algebraic_topology.Homotopy[A := Disk.SphereBundle, B := Disk.SphereBundle] \as SphereHomotopy;
+\definition equivalence: Equivalence.Equivalence[Disk.sphereTopology, topology] :=
+  Equivalence.Equivalence[Disk.sphereTopology, topology] {
+    forward := sphere, backward := normalize, forwardContinuous := sphereContinuous, backwardContinuous := continuous,
+    leftInverse := \idelim (\fun (p: Disk.SphereBundle) => p) = (\fun (p: Disk.SphereBundle) => normalize (sphere p))
+      \with f: (Disk.SphereBundle -> Disk.SphereBundle) => SphereHomotopy.Homotopic[Disk.sphereTopology, Disk.sphereTopology, f, (\fun (p: Disk.SphereBundle) => p)] \by {
+        base: SphereHomotopy.reflexive Disk.sphereTopology Disk.sphereTopology (\fun (p: Disk.SphereBundle) => p)
+          (topology.Maps[A := Disk.SphereBundle, B := Disk.SphereBundle].Identity[].continuous Disk.sphereTopology),
+        equality: \axiom:funext((\fun (p: Disk.SphereBundle) => p), (\fun (p: Disk.SphereBundle) => normalize (sphere p)),
+          \fun (p: Disk.SphereBundle) => sym!{{Disk.SphereBundle}} _ _ (fixed p))
+      },
+    rightInverse := Homotopy.symmetric topology topology (\fun (p: Carrier) => p) (\fun (p: Carrier) => sphere (normalize p))
+      (\exact(homotopy, Homotopy.Homotopy[topology, topology, (\fun (p: Carrier) => p), (\fun (p: Carrier) => sphere (normalize p))]))
+  };

@@ -1,0 +1,45 @@
+\import algebra.Two[] \as Two;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Proposition[] \as Logic;
+\import N.Basic[].Prop[] \as Order;
+\import Plane.ModTwo[] \as ModelRing;
+\import Projective.Ring[] \as Ring;
+\import singular_products.Cochains[A := Plane.Carrier, source := Plane.topology, R := Two.Carrier, ring := Two.commutativeRing] \as Product;
+\import singular_products.Cochains[A := Projective.Space, source := Projective.topology, R := Two.Carrier, ring := Two.commutativeRing] \as GrassmannianProduct;
+\import Product.Cohomology[] \as H;
+\import GrassmannianProduct.Cohomology[] \as GrassmannianH;
+\import H.Pullback[B := Projective.Space, target := Projective.topology] \as Pull;
+\import algebraic_topology.HomotopyEquivalence[A := Plane.Carrier, B := Projective.Space] \as Homotopy;
+\definition equivalent: Homotopy.Equivalence[Plane.topology, Projective.topology] :=
+  Homotopy.fromHomeomorphism Plane.topology Projective.topology homeomorphism;
+\definition regular: _ := (Homotopy.laws Plane.topology Projective.topology equivalent).forwardContinuous;
+\import singular_cohomology.Equivalence[A := Plane.Carrier, B := Projective.Space, source := Plane.topology, target := Projective.topology]
+  .With[coefficients := Product.integerCoefficients] \as Compare;
+\import singular_cohomology.Cochains[A := Plane.Carrier, source := Plane.topology].With[coefficients := Product.integerCoefficients] \as ModelCochains;
+\import singular_cohomology.Cochains[A := Projective.Space, source := Projective.topology].With[coefficients := Product.integerCoefficients] \as GrassmannianCochains;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\module Degree(k: N.Nat^) {
+  \definition pulled: H.Group k := Pull.apply k homeomorphism.forward regular (Ring.power k);
+  \definition comparison: _ := Compare.At[n := k].isomorphism equivalent;
+  \import Abelian.Hom[V := H.Group k, W := GrassmannianH.Group k,
+    source := ModelCochains.cohomologySpace k, target := GrassmannianCochains.cohomologySpace k] \as Maps;
+  \definition nonzero[bound: Order.Le k Degrees.two]: Logic.Not (pulled = (H.moduleSpace k).zero) :=
+    \fun (same: _) => Ring.nonzero k bound
+      (trans!{{GrassmannianH.Group k}} _ _ _
+        (sym!{{GrassmannianH.Group k}} _ _ (comparison.rightInverse (Ring.power k)))
+        (trans!{{GrassmannianH.Group k}} _ _ _
+          (congr!{{H.Group k} {GrassmannianH.Group k}} comparison.forward.apply _ _ same)
+          (Maps.zeroPreserved comparison.forward)));
+}
+\definition unitLaw: Pull.apply N.Nat^::zero homeomorphism.forward regular (Ring.power N.Nat^::zero) = H.Unit[].class :=
+  Pull.Unit[].law homeomorphism.forward regular;
+\import Plane.BinaryClassification[V := H.Group Degrees.one, space := ModelCochains.cohomologySpace Degrees.one] \as First;
+\definition firstLaw: Pull.apply Degrees.one homeomorphism.forward regular Ring.generator = ModelRing.u :=
+  trans!{{H.Group Degrees.one}} _ _ _
+    (congr!{{GrassmannianH.Group Degrees.one} {H.Group Degrees.one}} (Pull.apply Degrees.one homeomorphism.forward regular) _ _
+      (sym!{{GrassmannianH.Group Degrees.one}} _ _ Ring.firstPower))
+    (First.unique ModelRing.degreeOne _ _ (Degree[k := Degrees.one].nonzero (Order.leSelfSucc Degrees.one)) ModelRing.uNonzero);
+\import Plane.BinaryClassification[V := H.Group Degrees.two, space := ModelCochains.cohomologySpace Degrees.two] \as Second;
+\definition secondLaw: Pull.apply Degrees.two homeomorphism.forward regular (Ring.power Degrees.two) = ModelRing.v :=
+  Second.unique ModelRing.degreeTwo _ _ (Degree[k := Degrees.two].nonzero (Order.leRefl Degrees.two)) ModelRing.vNonzero;

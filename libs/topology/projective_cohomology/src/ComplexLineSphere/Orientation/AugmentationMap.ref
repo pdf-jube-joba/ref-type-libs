@@ -1,0 +1,38 @@
+\import std.Data[].Nat[] \as N;
+\import chain_complexes.Chain[] \as ChainDegrees;
+\import ChainDegrees.Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import singular_cohomology.Chains[A := A, source := source] \as Native;
+\import Native.Reduced[] \as Reduced;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring].ZeroExtension[C := Native.complex] \as Ordinary;
+\definition component: \forall (z: I.Int^) -> Modules.Hom[V := Reduced.Carrier z, W := Ordinary.Carrier z,
+  source := Reduced.space z, target := Ordinary.space z].Map :=
+  \induction (z: I.Int^) \return Modules.Hom[V := Reduced.Carrier z, W := Ordinary.Carrier z,
+    source := Reduced.space z, target := Ordinary.space z].Map \with {
+    | ofNat: \fun (n: N.Nat^) => Ordinary.Positive[n := n].forward
+    | negSucc: \fun (n: N.Nat^) => Modules.Hom[V := Reduced.Carrier (I.Int^::negSucc n), W := Ordinary.Carrier (I.Int^::negSucc n),
+      source := Reduced.space (I.Int^::negSucc n), target := Ordinary.space (I.Int^::negSucc n)].zeroMap
+  };
+\definition apply[z: I.Int^][x: Reduced.Carrier z]: Ordinary.Carrier z := (component z).apply x;
+\definition boundaryLaw: \forall (z: I.Int^)(x: Reduced.Carrier z) -> Ordinary.complex.differential.apply z (apply z x) =
+  apply (ChainDegrees.previous z) (Reduced.complex.differential.apply z x) :=
+  \induction (z: I.Int^) \return \forall (x: Reduced.Carrier z) -> Ordinary.complex.differential.apply z (apply z x) =
+    apply (ChainDegrees.previous z) (Reduced.complex.differential.apply z x) \with {
+    | ofNat: \induction (n: N.Nat^) \return \forall (x: Reduced.Carrier (I.Int^::ofNat n)) ->
+        Ordinary.complex.differential.apply (I.Int^::ofNat n) (apply (I.Int^::ofNat n) x) =
+          apply (ChainDegrees.previous (I.Int^::ofNat n)) (Reduced.complex.differential.apply (I.Int^::ofNat n) x) \with {
+      | zero: \fun (x: Reduced.Carrier (I.Int^::ofNat N.Nat^::zero)) => \refl((Ordinary.space (I.Int^::negSucc N.Nat^::zero)).zero)
+      | succ: \fun (n: N.Nat^)(previous: _)(x: Reduced.Carrier (I.Int^::ofNat (N.Nat^::succ n))) =>
+          \refl(Ordinary.Positive[n := n].intro ((Native.boundary n).apply x))
+    }
+    | negSucc: \fun (n: N.Nat^)(x: Reduced.Carrier (I.Int^::negSucc n)) => \refl((Ordinary.space (I.Int^::negSucc (N.Nat^::succ n))).zero)
+  };
+\import Chains.Map[C := Reduced.complex, D := Ordinary.complex] \as Maps;
+\definition map: Maps.Map := Maps.Map {
+  apply := apply, addition := \fun (z: I.Int^) => (component z).addition,
+  scalar := \fun (z: I.Int^) => (component z).scalar, commutes := boundaryLaw
+};
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Modules.End[V := coefficients.Carrier, space := coefficients.space] \as Scalar;
+\import Hom.IntegerMapping[P := Reduced.complex, Q := Ordinary.complex, N := coefficients, L := coefficients]
+  .On[f := map, u := Scalar.identity] \as Pull;
+\definition cochains: _ := Pull.map;

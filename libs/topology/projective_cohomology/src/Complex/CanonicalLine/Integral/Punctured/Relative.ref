@@ -1,0 +1,31 @@
+\import singular_cohomology.Relative[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary] \as SpherePair;
+\import singular_cohomology.Relative[A := Disk.DiskBundle, source := Disk.diskTopology, subset := subset] \as PuncturedPair;
+\import SpherePair.Maps[B := Disk.DiskBundle].Over[target := Disk.diskTopology, targetSubset := subset] \as Pairs;
+\import topology.Topology[Carrier := Disk.DiskBundle].Subspace[S := Disk.Boundary] \as SphereBoundary;
+\definition from: topology.Topology[Carrier := SpherePair.SubspaceCarrier].Topology := SphereBoundary.topology Disk.diskTopology;
+\definition contained[v: SpherePair.SubspaceCarrier]: \In[Disk.DiskBundle] subset v := \block {
+  \let w: Disk.SphereBundle := Raw.Sphere[].homeomorphism.backward v \then
+  \return positive (\parent.Retraction[].sphere w)
+};
+\definition identity[p: Disk.DiskBundle]: Disk.DiskBundle := p;
+\definition identityContinuous: topology.Continuity[A := Disk.DiskBundle, B := Disk.DiskBundle].Continuous Disk.diskTopology Disk.diskTopology identity :=
+  topology.Maps[A := Disk.DiskBundle, B := Disk.DiskBundle].Identity[].continuous Disk.diskTopology;
+\definition map: Pairs.Map := \into[Disk.DiskBundle -> Disk.DiskBundle](identity, Pairs.Map) \by {
+  Pairs.Laws[identity] { continuous := identityContinuous, contained := contained }
+};
+\import Pairs.On[f := map] \as Map;
+\import Map.Integer[].With[coefficients := Product.integerCoefficients] \as Pull;
+\import algebraic_topology.HomotopyEquivalence[A := Disk.SphereBundle, B := SpherePair.SubspaceCarrier] \as SphereEquivalence;
+\import algebraic_topology.HomotopyEquivalence[A := SpherePair.SubspaceCarrier, B := Disk.SphereBundle].Composition[C := Carrier] \as Compose;
+\definition equivalence: _ := Compose.compose from Disk.sphereTopology topology
+  (SphereEquivalence.Inverse[].inverse Disk.sphereTopology from Raw.Sphere[].equivalence)
+  (\parent.Retraction[].equivalence);
+\import singular_cohomology.Equivalence[A := SpherePair.SubspaceCarrier, B := Carrier, source := from, target := topology]
+  .Integer[e := equivalence].With[coefficients := Product.integerCoefficients] \as Boundaries;
+\module InDegree(z: I.Int^);
+\import \parent.\parent.Canonical[] \as Canonical;
+\definition degreeTwo: I.Int^ := I.Int^::ofNat Degrees.two;
+\definition thomClass: PuncturedPair.With[coefficients := Product.integerCoefficients].At[z := degreeTwo].Carrier :=
+  (InDegree[z := degreeTwo].isomorphism).backward.apply Canonical.thomClass;
+\definition thomLaw: (InDegree[z := degreeTwo].isomorphism).forward.apply thomClass = Canonical.thomClass :=
+  (InDegree[z := degreeTwo].isomorphism).rightInverse Canonical.thomClass;

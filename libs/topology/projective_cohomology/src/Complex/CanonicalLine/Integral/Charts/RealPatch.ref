@@ -1,0 +1,8 @@
+\import bundle_operations.Operations[].Scalars[] \as Scalars;
+\import Scalars.Realification[X := Space, F := Line, source := lineBundle] \as Realify;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].Family[X := Space, F := Line].With[data := Realification.bundle] \as RealCharts;
+\definition Chart: \Set := RealCharts.Chart;
+\definition nativeChart: Native.Chart := chart U Degrees.one frames;
+\definition realChart: Chart := Realify.In[c := nativeChart].trivialization;
+\definition realRank: realChart.dimension = Degrees.two := \refl(Degrees.two);

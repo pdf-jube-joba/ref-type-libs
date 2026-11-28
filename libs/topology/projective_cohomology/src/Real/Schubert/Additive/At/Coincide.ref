@@ -1,0 +1,22 @@
+\definition evaluate[h: Raw]: Two.Carrier := Basis.cochainBasis.backward.apply h;
+\definition cycleClass[h: CellH.Closed]: CellH.Cohomology := CellH.classOf h;
+\definition ambient[h: CellH.Closed]: Raw := h;
+\definition liftEq[a, b: CellH.Closed][same: ambient a = ambient b]: cycleClass a = cycleClass b :=
+  (\idelim ambient a = ambient b \with q: Raw =>
+    \forall (closed: Cellular.integerCochain.differential.apply z q = (Cellular.integerCochain.family.space (Integer.next z)).zero) ->
+      cycleClass a = CellH.classOf (CellH.cycle q closed) \by {
+        base: \fun (closed: _) => \refl(cycleClass a), equality: same
+      }) (\bysub(Raw, CellH.cycles.carrier, b));
+\definition detected[a, b: CellH.Closed][same: evaluate a = evaluate b]: cycleClass a = cycleClass b :=
+  liftEq a b (trans!{Raw} _ _ _ (sym!{Raw} _ _ (Basis.cochainBasis.rightInverse a))
+    (trans!{Raw} _ _ _ (congr!{Two.Carrier Raw} Basis.cochainBasis.forward.apply _ _ same) (Basis.cochainBasis.rightInverse b)));
+\definition zero[h: CellH.Closed][same: evaluate h = Two.zero]: cycleClass h = CellH.cohomologySpace.zero :=
+  trans!{CellH.Cohomology} _ _ _ (detected h CellH.cycleSpace.zero (trans!{Two.Carrier} _ _ _ same
+    (sym!{Two.Carrier} _ _ (Coordinate.zeroPreserved Basis.cochainBasis.backward)))) (Quotient.zeroPreserved CellH.classLinear);
+\definition one[h: CellH.Closed]: Logic.Not (cycleClass h = CellH.cohomologySpace.zero) -> evaluate h = Two.one :=
+  \fun (nonzero: _) => B.cases (\fun (a: Two.Carrier) => evaluate h = a -> evaluate h = Two.one)
+    (\fun (same: evaluate h = Two.zero) => Logic.falseElim _ (nonzero (zero h same)))
+    (\fun (same: evaluate h = Two.one) => same) (evaluate h) (\refl(evaluate h));
+\definition law: Logic.Not (cycleClass x = CellH.cohomologySpace.zero) -> Logic.Not (cycleClass y = CellH.cohomologySpace.zero) -> cycleClass x = cycleClass y :=
+  \fun (xNonzero: _)(yNonzero: _) => detected x y
+    (trans!{Two.Carrier} _ _ _ (one x xNonzero) (sym!{Two.Carrier} _ _ (one y yNonzero)));

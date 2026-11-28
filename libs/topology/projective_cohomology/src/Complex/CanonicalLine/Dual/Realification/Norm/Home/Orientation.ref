@@ -1,0 +1,43 @@
+\import std.Data[].Bool[] \as B;
+\import \root.Complex[dimension := dimension].CanonicalLine[].Integral[].Orientation[] \as CanonicalOrientation;
+\import OldGeometry.Local[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as OldRank;
+\import NewGeometry.Local[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as NewRank;
+\import NewRank.Orientation[] \as NewOrientation;
+\definition opposite[x: Space]: OldRank.FiberClass x := (OldRank.Fiber[x := x].space).neg (CanonicalOrientation.fiber x);
+\definition fiber[x: Space]: NewRank.FiberClass x := (\parent.Fiber[x := x].isomorphism).backward.apply (opposite x);
+\module At(x: Space, c: Charts.LocalChart[x]) {
+  \import \parent.\parent.\parent.Chart[x := x, c := c] \as Chart;
+  \import \parent.\parent.Fiber[x := x] \as FiberHome;
+  \import FiberHome.Compare[c := c].Relative[] \as Comparison;
+  \import Charts.Patch[U := c.domain, frames := c.frames] \as OldPatch;
+  \definition oldLocal: OldRank.FiberClass x := OldPatch.fiberClass Chart.point;
+  \definition oldNormalized: oldLocal = CanonicalOrientation.fiber x :=
+    CanonicalOrientation.unique x (CanonicalOrientation.localClass x c) (CanonicalOrientation.chosen x);
+  \definition forward[u: NewRank.FiberClass x]: OldRank.FiberClass x := (FiberHome.isomorphism).forward.apply u;
+  \definition comparison: forward (Chart.fiberClass Chart.point) = forward (fiber x) :=
+    trans!{{OldRank.FiberClass x}} _ _ _ Comparison.signed
+      (trans!{{OldRank.FiberClass x}} _ _ _
+        (congr!{{OldRank.FiberClass x} {OldRank.FiberClass x}} (OldRank.Fiber[x := x].space).neg _ _ oldNormalized)
+        (sym!{{OldRank.FiberClass x}} _ _ ((FiberHome.isomorphism).rightInverse (opposite x))));
+  \definition normalized: Chart.fiberClass Chart.point = fiber x :=
+    trans!{{NewRank.FiberClass x}} _ _ _ (sym!{{NewRank.FiberClass x}} _ _ ((FiberHome.isomorphism).leftInverse (Chart.fiberClass Chart.point)))
+      (trans!{{NewRank.FiberClass x}} _ _ _
+        (congr!{{OldRank.FiberClass x} {NewRank.FiberClass x}} (FiberHome.isomorphism).backward.apply _ _ comparison)
+        ((FiberHome.isomorphism).leftInverse (fiber x)));
+}
+\module Local(x: Space, c: Charts.LocalChart[x]) {
+  \import \parent.\parent.\parent.Chart[x := x, c := c] \as Chart;
+  \definition orientation: NewOrientation.LocalOrientation[x, fiber] := NewOrientation.LocalOrientation[x, fiber] {
+    chart := Chart.real, contains := c.contains, rank := Chart.frameRank, reverse := B.Bool^::false,
+    normalized := \fun (y: \Cast[Space] c.domain) => \parent.At[x := y,
+      c := Charts.LocalChart[y] { domain := c.domain, contains := \bysub(Space, c.domain, y), frames := c.frames }].normalized
+  };
+}
+\definition orientation: NewOrientation.SignedOrientation := NewOrientation.SignedOrientation {
+  fiber := fiber,
+  locally := \block {
+    \fun (x: Space) \then
+    \takefrom c: Charts.LocalChart[x] \by Charts.existsAt x \then
+    \return \exact(Local[x := x, c := c].orientation, NewOrientation.LocalOrientation[x, fiber])
+  }
+};

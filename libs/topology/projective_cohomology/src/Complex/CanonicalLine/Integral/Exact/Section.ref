@@ -1,0 +1,49 @@
+\import Geometry.Additive[coefficients := Product.integerCoefficients].Degree[z := z] \as PairDegree;
+\import singular_cohomology.Cochains[A := Space, source := topology].With[coefficients := Product.integerCoefficients].Integer[].At[n := degree] \as BaseDegree;
+\import Raw.Natural[t := degree] \as Natural;
+\import Geometry.Coefficients[R := I.Int^, ring := Integers.commutativeRing].Degree[n := degree] \as Cohomology;
+\definition toBase[b: (Raw.disk z).Carrier]: H.Group degree := BaseDegree.isomorphism.forward.apply (PairDegree.diskComparison.forward.apply b);
+\definition toDisk[a: H.Group degree]: (Raw.disk z).Carrier :=
+  PairDegree.diskComparison.backward.apply (BaseDegree.isomorphism.backward.apply a);
+\definition leftDisk[b: (Raw.disk z).Carrier]: toDisk (toBase b) = b :=
+  trans!{{(Raw.disk z).Carrier}} _ _ _
+    (congr!{{(Raw.base z).Carrier} {(Raw.disk z).Carrier}} PairDegree.diskComparison.backward.apply _ _
+      (BaseDegree.isomorphism.leftInverse (PairDegree.diskComparison.forward.apply b)))
+    (PairDegree.diskComparison.leftInverse b);
+\definition rightDisk[a: H.Group degree]: toBase (toDisk a) = a :=
+  trans!{{H.Group degree}} _ _ _
+    (congr!{{(Raw.base z).Carrier} {H.Group degree}} BaseDegree.isomorphism.forward.apply _ _
+      (PairDegree.diskComparison.rightInverse (BaseDegree.isomorphism.backward.apply a)))
+    (BaseDegree.isomorphism.rightInverse a);
+\definition recover[bound: Basic.Le (N.Nat^::succ k) dimension][a: H.Group degree]: Cohomology.Class :=
+  (\parent.\parent.Exact[k := k].isomorphism bound).backward.apply (toDisk a);
+\definition left[bound: Basic.Le (N.Nat^::succ k) dimension][u: Cohomology.Class]:
+  recover bound (Cohomology.euler u) = u :=
+  trans!{{Cohomology.Class}} _ _ _
+    (congr!{{H.Group degree} {Cohomology.Class}} (recover bound) _ _ (sym!{{H.Group degree}} _ _ (Natural.law u)))
+    (trans!{{Cohomology.Class}} _ _ _
+      (congr!{{(Raw.disk z).Carrier} {Cohomology.Class}} (\parent.\parent.Exact[k := k].isomorphism bound).backward.apply _ _ (leftDisk (forget.apply u)))
+      ((\parent.\parent.Exact[k := k].isomorphism bound).leftInverse u));
+\definition right[bound: Basic.Le (N.Nat^::succ k) dimension][a: H.Group degree]:
+  Cohomology.euler (recover bound a) = a :=
+  trans!{{H.Group degree}} _ _ _ (sym!{{H.Group degree}} _ _ (Natural.law (recover bound a)))
+    (trans!{{H.Group degree}} _ _ _
+      (congr!{{(Raw.disk z).Carrier} {H.Group degree}} toBase _ _
+        ((\parent.\parent.Exact[k := k].isomorphism bound).rightInverse (toDisk a)))
+      (rightDisk a));
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := I.Int^, ring := Rings.commutativeRingAsRing I.Int^ Integers.commutativeRing] \as Modules;
+\import Modules.Isomorphism[V := Cohomology.Class, W := H.Group degree, source := Cohomology.space, target := H.moduleSpace degree]
+  .OfBijective[f := Cohomology.zeroSection] \as Iso;
+\definition injective[bound: Basic.Le (N.Nat^::succ k) dimension]: Iso.Injective :=
+  \fun (u, v: Cohomology.Class)(same: Cohomology.euler u = Cohomology.euler v) =>
+    trans!{{Cohomology.Class}} _ _ _ (sym!{{Cohomology.Class}} _ _ (left bound u))
+      (trans!{{Cohomology.Class}} _ _ _
+        (congr!{{H.Group degree} {Cohomology.Class}} (recover bound) _ _ same)
+        (left bound v));
+\import std.Logic[].Proposition[] \as Logic;
+\definition onto[bound: Basic.Le (N.Nat^::succ k) dimension]: Iso.Onto :=
+  \fun (a: H.Group degree) => Logic.existsIntro[Cohomology.Class, { u: Cohomology.Class \where Cohomology.euler u = a }]
+    (recover bound a) (right bound a);
+\definition isomorphism[bound: Basic.Le (N.Nat^::succ k) dimension]: _ :=
+  Iso.isomorphism (injective bound) (onto bound);

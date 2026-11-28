@@ -1,0 +1,14 @@
+\import \parent.\parent.Exact[k := k] \as Exact;
+\definition p: N.Nat^ := Degrees.double k;
+\definition q: N.Nat^ := Exact.degree;
+\import Geometry.Coefficients[R := I.Int^, ring := Integers.commutativeRing].Degree[n := q] \as Relative;
+\import Thom.Degree[p := p] \as Product;
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := I.Int^, ring := Rings.commutativeRingAsRing I.Int^ Integers.commutativeRing] \as Modules;
+\import Modules.Isomorphism[V := H.Group p, W := Relative.Class, source := H.moduleSpace p, target := Relative.space]
+  .Composition[U := H.Group q, final := H.moduleSpace q] \as Compose;
+\definition isomorphism[bound: Basic.Le (N.Nat^::succ k) dimension]: _ :=
+  Compose.compose (Exact.Section[].isomorphism bound) Product.isomorphism;
+\definition law[bound: Basic.Le (N.Nat^::succ k) dimension][a: H.Group p]:
+  (isomorphism bound).forward.apply a = H.Cup[p := p, q := Degrees.two].apply a euler :=
+  Product.zeroSection a;

@@ -1,0 +1,30 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import \parent.\parent.Thom[cw := cw] \as Class;
+\import \parent.\parent.Boundary[] \as Boundary;
+\import \root.Real[dimension := dimension].CanonicalLine[].Hopf[].Standard[] \as Standard;
+\import \root.ZeroDegree[X := Space, space := topology, K := Two.Carrier, ring := Two.commutativeRing] \as Unit;
+\module Positive(p: N.Nat^);
+\definition connectingZero: \forall (p: N.Nat^) -> Order.Le (N.Nat^::succ p) dimension ->
+  \parent.\parent.Forget[p := p].ConnectingZero :=
+  \induction (p: N.Nat^) \return Order.Le (N.Nat^::succ p) dimension -> \parent.\parent.Forget[p := p].ConnectingZero \with {
+    | zero: \fun (bound: _) => Boundary.Zero[].connectingZero (Order.ltOfSuccLe dimension N.Nat^::zero bound)
+    | succ: \fun (p: N.Nat^)(previous: _)(bound: _) => \parent.Nonvanishing[cw := cw].Positive[p := p].connectingZero bound
+  };
+\module Step(p: N.Nat^);
+\definition Nonzero[k: N.Nat^]: \Prop := Order.Le k dimension -> Logic.Not (power k = (H.moduleSpace k).zero);
+\definition initial: Nonzero N.Nat^::zero :=
+  \fun (bound: Order.Le N.Nat^::zero dimension) => Unit.unitNonzero (Disk.sphereProjection Standard.bundlePoint) Two.nontrivial;
+\definition successor[k: N.Nat^][previous: Nonzero k]: Nonzero (N.Nat^::succ k) :=
+  \fun (bound: Order.Le (N.Nat^::succ k) dimension)
+    (same: power (N.Nat^::succ k) = (H.moduleSpace (N.Nat^::succ k)).zero) =>
+    previous (Order.leTrans k (N.Nat^::succ k) dimension (Order.leSelfSucc k) bound)
+      (Step[p := k].injective bound (power k) (H.moduleSpace k).zero
+        (trans!{{H.Group (N.Nat^::succ k)}} (Step[p := k].multiply (power k))
+          (H.moduleSpace (N.Nat^::succ k)).zero (Step[p := k].multiply (H.moduleSpace k).zero) same
+          (sym!{{H.Group (N.Nat^::succ k)}} (Step[p := k].multiply (H.moduleSpace k).zero)
+            (H.moduleSpace (N.Nat^::succ k)).zero Step[p := k].zero)));
+\definition nonzero: \forall (k: N.Nat^) -> Nonzero k :=
+  \induction (k: N.Nat^) \return Nonzero k \with {
+    | zero: initial
+    | succ: \fun (k: N.Nat^)(previous: Nonzero k) => successor k previous
+  };

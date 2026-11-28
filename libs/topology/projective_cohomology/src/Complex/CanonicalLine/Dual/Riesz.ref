@@ -1,0 +1,29 @@
+\import Bundles.Family[X := Space, F := Line] \as Source;
+\import Bundles.Family[X := Space, F := Fiber] \as Target;
+\definition forward[p: Source.Point]: Target.Point := Target.include p.base (\parent.At[x := p.base].represent p.vector);
+\import bundle_operations.Operations[].Evaluations[K := Numbers.Complex, X := Space, E := Target.Point, I := Dual.Section,
+  scalarSpace := Hermitian.Complex[].topological.space, baseSpace := topology, projection := Target.projection,
+  domains := Dual.domains, open := (\fun (s: Dual.Section) => s.open), evaluate := Dual.evaluate] \as Evaluations;
+\import Evaluations.Universal[A := Source.Point] \as Regular;
+\module On(s: Dual.Section);
+\definition continuous: topology.Continuity[A := Source.Point, B := Target.Point].Continuous lineBundle.totalSpace bundle.totalSpace forward :=
+  Regular.continuous lineBundle.totalSpace forward Bundle.projectionContinuous (\fun (s: Dual.Section) => On[s := s].continuous);
+\definition backward[p: Target.Point]: Source.Point := Source.include p.base (\parent.At[x := p.base].inverse p.vector);
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\import Equality.Transport[A := Space] \as Transport;
+\definition leftInverse[p: Source.Point]: backward (forward p) = p :=
+  Source.ext (backward (forward p)) p (\refl(p.base))
+    (trans!{{Line p.base}} _ _ _ (Transport.castRefl Line p.base (backward (forward p)).vector)
+      (\parent.At[x := p.base].leftInverse p.vector));
+\definition rightInverse[p: Target.Point]: forward (backward p) = p :=
+  Target.ext (forward (backward p)) p (\refl(p.base))
+    (trans!{{Fiber p.base}} _ _ _ (Transport.castRefl Fiber p.base (forward (backward p)).vector)
+      (\parent.At[x := p.base].rightInverse p.vector));
+\module Inverse;
+\import topology.Homeomorphism[A := Source.Point, B := Target.Point] \as Home;
+\definition homeomorphism: Home.Homeomorphism[lineBundle.totalSpace, bundle.totalSpace] :=
+  Home.Homeomorphism[lineBundle.totalSpace, bundle.totalSpace] {
+    forward := forward, backward := backward, forwardContinuous := continuous, backwardContinuous := Inverse[].continuous,
+    leftInverse := leftInverse, rightInverse := rightInverse
+  };

@@ -1,0 +1,14 @@
+\import algebraic_topology.HomotopyEquivalence[A := Disk.DiskBundle, B := Disk.DiskBundle] \as Equivalence;
+\import algebraic_topology.Homotopy[A := Disk.DiskBundle, B := Disk.DiskBundle] \as Homotopy;
+\definition wholeEquivalence: Equivalence.Equivalence[Disk.diskTopology, Disk.diskTopology] :=
+  Equivalence.Equivalence[Disk.diskTopology, Disk.diskTopology] {
+    forward := identity, backward := identity, forwardContinuous := identityContinuous, backwardContinuous := identityContinuous,
+    leftInverse := Homotopy.reflexive Disk.diskTopology Disk.diskTopology identity identityContinuous,
+    rightInverse := Homotopy.reflexive Disk.diskTopology Disk.diskTopology identity identityContinuous
+  };
+\import singular_cohomology.Equivalence[A := Disk.DiskBundle, B := Disk.DiskBundle, source := Disk.diskTopology, target := Disk.diskTopology]
+  .Integer[e := wholeEquivalence].With[coefficients := Product.integerCoefficients] \as Whole;
+\import Pull.Naturality[].Comparison[] \as Comparison;
+\definition subspaceQuasi: Comparison.SubspaceQuasi := \fun (k: I.Int^) => Boundaries.At[z := k].bijective;
+\definition wholeQuasi: Comparison.WholeQuasi := \fun (k: I.Int^) => Whole.At[z := k].bijective;
+\definition isomorphism: _ := Comparison.At[z := z].isomorphism subspaceQuasi wholeQuasi;

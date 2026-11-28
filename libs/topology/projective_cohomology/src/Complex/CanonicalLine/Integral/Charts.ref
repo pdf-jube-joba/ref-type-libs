@@ -1,0 +1,49 @@
+\import Bundles.Family[X := Space, F := Line].With[data := lineBundle] \as Native;
+\import topology.Topology[Carrier := Space] \as Base;
+\definition Frames[U: \Pow Space][k: N.Nat^]: \Set := \forall (x: \Cast[Space] U) -> Native.Frame k x;
+\definition data[U: \Pow Space][k: N.Nat^][f: Frames U k]: Native.ChartData :=
+  Native.ChartData { domain := U, dimension := k, frame := f };
+\definition Valid[U: \Pow Space][k: N.Nat^]: \Pow (Frames U k) :=
+  { f: Frames U k \where Native.In[c := data U k f].Laws };
+\definition At[U: \Pow Space][k: N.Nat^]: \Set := \Cast[Frames U k] (Valid U k);
+\definition chart[U: \Pow Space][k: N.Nat^][f: At U k]: Native.Chart :=
+  \into[Native.ChartData](data U k f, Native.Chart) \by {
+    \bysub(Frames U k, Valid U k, f)
+  };
+\definition eta: \forall (c: Native.ChartData) -> data c.domain c.dimension c.frame = c :=
+  \induction (c: Native.ChartData) \return data c.domain c.dimension c.frame = c \with {
+    | # : \fun (U: \Pow Space)(k: N.Nat^)(f: Frames U k) => \refl(data U k f)
+  };
+\definition fromNative[c: Native.Chart]: At c.domain c.dimension :=
+  \into[Frames c.domain c.dimension](c.frame, Valid c.domain c.dimension) \by {
+    \idelim c = data c.domain c.dimension c.frame \with d: Native.ChartData => Native.In[c := d].Laws \by {
+      base: \bysub(Native.ChartData, Native.Chart, c),
+      equality: sym!{Native.ChartData} _ _ (eta c)
+    }
+  };
+\definition rankOne[U: \Pow Space][k: N.Nat^][same: k = Degrees.one][f: At U k]: At U Degrees.one :=
+  \idelim k = Degrees.one \with j: N.Nat^ => At U j \by { base: f, equality: same };
+\structure LocalChart[x: Space]: \Set := {
+  domain: \Pow Space,
+  contains: Base.Member domain x,
+  frames: At domain Degrees.one
+};
+\definition existsAt: \forall (x: Space) -> \exists LocalChart[x] := \block {
+  \fun (x: Space) \then
+  \takefrom c: \Cast[Native.Chart] ({ c: Native.Chart \where Base.Member c.domain x }) \by Bundle.locallyTrivial x \then
+  \let inside: Base.Member c.domain x := \bysub(Native.Chart, { c: Native.Chart \where Base.Member c.domain x }, c) \then
+  \let point: \Cast[Space] c.domain := \into[Space](x, c.domain) \by { inside } \then
+  \let same: c.dimension = Degrees.one := trans!{N.Nat^} _ _ _
+    (sym!{N.Nat^} _ _ (Bundle.rankFrame x c.dimension (c.frame point))) (rank x) \then
+  \return \exact(LocalChart[x] {
+    domain := c.domain,
+    contains := inside,
+    frames := rankOne c.domain c.dimension same (fromNative c)
+  }, LocalChart[x])
+};
+\module Transition(x: Space, source, target: Native.Frame Degrees.one x);
+\module Patch(U: \Pow Space, frames: At U Degrees.one);
+\module Compatibility(U, V: \Pow Space, first: At U Degrees.one, second: At V Degrees.one, x: Space,
+  inFirst: Base.Member U x, inSecond: Base.Member V x);
+\module RealPatch(U: \Pow Space, frames: At U Degrees.one);
+\module ScalarCoordinates;

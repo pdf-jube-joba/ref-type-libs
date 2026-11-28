@@ -1,0 +1,28 @@
+\import \parent.\parent.\parent.PlaneDisk[] \as PlaneDisk;
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := Degrees.two] \as TargetDisk;
+\import singular_cohomology.Relative[A := Actual.Carrier, source := Actual.topology, subset := Actual.boundary] \as Source;
+\import singular_cohomology.Relative[A := TargetDisk.DiskCarrier, source := TargetDisk.diskTopology, subset := TargetDisk.boundary] \as Target;
+\import Source.Homeomorphism[B := TargetDisk.DiskCarrier].Over[target := TargetDisk.diskTopology, targetSubset := TargetDisk.boundary] \as PairHomeomorphisms;
+\import Source.Maps[B := TargetDisk.DiskCarrier].Over[target := TargetDisk.diskTopology, targetSubset := TargetDisk.boundary] \as PairMaps;
+\import Geometry.Chart[c := First.realChart].Fiber[x := p] \as OldChart;
+\import Geometry.Chart[c := Second.realChart].Fiber[x := q] \as NewChart;
+\definition oldMap: PairMaps.Map := PairHomeomorphisms.forwardMap OldChart.fiberPair;
+\definition newMap: PairMaps.Map := PairHomeomorphisms.forwardMap NewChart.fiberPair;
+\import PairMaps.On[f := oldMap] \as OldMap;
+\import PairMaps.On[f := newMap] \as NewMap;
+\import PlaneDisk.Comparison[A := Actual.Carrier, source := Actual.topology, subset := Actual.boundary, f := oldMap, g := newMap] \as Comparison;
+\definition degreeTwo: I.Int^ := I.Int^::ofNat Degrees.two;
+\import Source.With[coefficients := Product.integerCoefficients] \as SourceGroups;
+\import Target.With[coefficients := Product.integerCoefficients] \as TargetGroups;
+\import OldMap.Integer[].With[coefficients := Product.integerCoefficients] \as OldPull;
+\import NewMap.Integer[].With[coefficients := Product.integerCoefficients] \as NewPull;
+\module Boundary;
+\definition samePull[u: TargetGroups.At[z := degreeTwo].Carrier]:
+  OldPull.At[z := degreeTwo].induced.apply u = NewPull.At[z := degreeTwo].induced.apply u :=
+  Comparison.samePull Boundary[].homotopic u;
+\import cohomology_thom.LocalDisk[].Point[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as Model;
+\definition classLaw: First.fiberClass p = Second.fiberClass q :=
+  trans!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ _ Old.comparison
+    (trans!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ _ (samePull Model.generator)
+      (sym!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ New.comparison));

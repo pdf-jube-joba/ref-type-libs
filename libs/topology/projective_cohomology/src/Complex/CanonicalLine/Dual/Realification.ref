@@ -1,0 +1,67 @@
+\import \parent.Embedding[] \as Embedding;
+\import \parent.Riesz[] \as Riesz;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import bundle_operations.Operations[].Scalars[] \as Scalars;
+\import Scalars.Realification[X := Space, F := Fiber, source := bundle] \as Underlying;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as BundlesR;
+\import BundlesR.Family[X := Space, F := Fiber] \as Family;
+\definition underlying: Family.Bundle := Underlying.bundle;
+\import Bundles.Trivial[X := Space, n := ambient, baseSpace := topology] \as Trivial;
+\definition ambientFamily[x: Space]: \Set := Vector.Vector;
+\import Scalars.Realification[X := Space, F := ambientFamily, source := Trivial.bundle] \as UnderlyingAmbient;
+\import Underlying.Maps[Y := Space, G := ambientFamily, target := Trivial.bundle, f := \fun (x: Space) => x] \as Intro;
+\import Scalars.RealCoordinates[n := ambient] \as Coordinates;
+\definition realDimension: N.Nat^ := Coordinates.dimension;
+\import BundlesR.Trivial[X := Space, n := realDimension, baseSpace := topology] \as TrivialR;
+\import BundlesR.Morphisms[X := Space, Y := Space, F := Fiber, G := \fun (x: Space) => BundlesR.Vector realDimension,
+  source := underlying, target := TrivialR.bundle, f := \fun (x: Space) => x] \as Into;
+\import linear_algebra.Commutative[K := R.Real, scalarRing := Fields.fieldAsCommutativeRing R.Real R.Algebra[].field] \as LinearR;
+\module At(x: Space) {
+  \import LinearR.Linear[V := Vector.Vector, W := BundlesR.Vector realDimension,
+    source := UnderlyingAmbient.bundle.space x, target := BundlesR.coordinates realDimension]
+    .Composition[U := Fiber x, domain := underlying.space x] \as Composition;
+  \definition map: _ := Composition.compose Coordinates.frame.forward ((Intro.map Embedding.map).fiber x);
+}
+\definition data: Into.Data := Into.Data { fiber := \fun (x: Space) => At[x := x].map };
+\definition fromNative[p: Family.Point]: Vector.Vector := Embedding.total (Underlying.backward p);
+\definition nativeContinuous: topology.Continuity[A := Family.Point, B := Vector.Vector].Continuous underlying.totalSpace (Bundles.coordinateTopology ambient) fromNative :=
+  topology.Composition[A := Family.Point, B := Bundles.Family[X := Space, F := Fiber].Point, C := Vector.Vector].composeContinuous
+    underlying.totalSpace bundle.totalSpace (Bundles.coordinateTopology ambient) Underlying.backward Embedding.total Underlying.backwardContinuous Embedding.continuous;
+\definition coordinates[p: Family.Point]: BundlesR.Vector realDimension := Coordinates.frame.forward.apply (fromNative p);
+\definition coordinatesContinuous: topology.Continuity[A := Family.Point, B := BundlesR.Vector realDimension].Continuous
+  underlying.totalSpace (BundlesR.coordinateTopology realDimension) coordinates :=
+  topology.Composition[A := Family.Point, B := Vector.Vector, C := BundlesR.Vector realDimension].composeContinuous
+    underlying.totalSpace (Bundles.coordinateTopology ambient) (BundlesR.coordinateTopology realDimension)
+    fromNative Coordinates.frame.forward.apply nativeContinuous Coordinates.Topology[].forwardContinuous;
+\import bundle_complements.Complements[].Over[K := R.Real, field := R.Algebra[].field,
+  conjugation := Hermitian.Real[].scalar, scalar := vector_bundles.Bundles[].Real[].scalar] \as Complements;
+\import Complements.TrivialMaps[X := Space, n := realDimension, baseSpace := topology].Into[Y := Family.Point, source := underlying.totalSpace] \as Regular;
+\definition mapInto: Into.Map := \into[Into.Data](data, Into.Map) \by {
+  Regular.continuous Family.projection coordinates Family.Of[bundle := underlying].projectionContinuous coordinatesContinuous
+};
+\import Complements.For[X := Space, F := Fiber, bundle := underlying] \as Metrics;
+\definition embedding: Metrics.Embedding := Metrics.Embedding {
+  dimension := realDimension, map := mapInto,
+  injective := \fun (x: Space)(f, g: Fiber x)(same: _) => Embedding.injective x f g
+    (trans!{{Vector.Vector}} _ _ _ (sym!{{Vector.Vector}} _ _ (Coordinates.frame.leftInverse (Embedding.coordinates x f)))
+      (trans!{{Vector.Vector}} _ _ _
+        (congr!{{BundlesR.Vector realDimension} {Vector.Vector}} Coordinates.frame.backward.apply _ _ same)
+        (Coordinates.frame.leftInverse (Embedding.coordinates x g))))
+};
+\definition metric: Metrics.Metric := Metrics.FromEmbedding[embedding := embedding].metric;
+\import \parent.\parent.Realification[] \as Canonical;
+\import Scalars.Realification[X := Space, F := Line, source := lineBundle] \as CanonicalUnderlying;
+\import BundlesR.Family[X := Space, F := Line] \as Original;
+\definition transform[p: Original.Point]: Family.Point := Underlying.forward (Riesz.forward (CanonicalUnderlying.backward p));
+\definition transformContinuous: topology.Continuity[A := Original.Point, B := Family.Point].Continuous Canonical.bundle.totalSpace underlying.totalSpace transform :=
+  topology.Composition[A := Original.Point, B := Bundles.Family[X := Space, F := Fiber].Point, C := Family.Point].composeContinuous
+    Canonical.bundle.totalSpace bundle.totalSpace underlying.totalSpace (\fun (p: Original.Point) => Riesz.forward (CanonicalUnderlying.backward p)) Underlying.forward
+    (topology.Composition[A := Original.Point, B := Bundles.Family[X := Space, F := Line].Point, C := Bundles.Family[X := Space, F := Fiber].Point].composeContinuous
+      Canonical.bundle.totalSpace lineBundle.totalSpace bundle.totalSpace CanonicalUnderlying.backward Riesz.forward CanonicalUnderlying.backwardContinuous Riesz.continuous)
+    Underlying.forwardContinuous;
+\module Norm;

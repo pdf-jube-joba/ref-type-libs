@@ -1,0 +1,31 @@
+\import Raw.Sphere[] \as Sphere;
+\import \root.Real[dimension := dimension].CanonicalLine[].Hopf[].Standard[] \as Standard;
+\import topology.Topology[Carrier := Disk.DiskBundle].Subspace[S := Disk.Boundary] \as BoundarySpace;
+\import algebraic_topology.PathComponent[A := Disk.SphereBundle, source := Disk.sphereTopology] \as Paths;
+\import algebraic_topology.PathComponent[A := BoundarySpace.CarrierSet, source := BoundarySpace.topology Disk.diskTopology] \as BoundaryPaths;
+\definition compactSphere: _ := Sphere.homeomorphism;
+\import topology.Homeomorphism[A := Disk.SphereBundle, B := BoundarySpace.CarrierSet] \as Compare;
+\definition continuous: _ := (Compare.laws Disk.sphereTopology (BoundarySpace.topology Disk.diskTopology) compactSphere).forwardContinuous;
+\definition connected[positive: Order.Lt N.Nat^::zero dimension]: BoundaryPaths.PathConnected :=
+  \fun (x, y: BoundarySpace.CarrierSet) =>
+    \idelim compactSphere.forward (compactSphere.backward y) = y \with q: BoundarySpace.CarrierSet =>
+      BoundaryPaths.Related x q \by {
+        base: \idelim compactSphere.forward (compactSphere.backward x) = x \with q: BoundarySpace.CarrierSet =>
+          BoundaryPaths.Related q (compactSphere.forward (compactSphere.backward y)) \by {
+            base: Paths.Maps[B := BoundarySpace.CarrierSet, target := BoundarySpace.topology Disk.diskTopology].preserves
+              compactSphere.forward continuous (compactSphere.backward x) (compactSphere.backward y)
+              (Standard.connected positive (compactSphere.backward x) (compactSphere.backward y)),
+            equality: (Compare.laws Disk.sphereTopology (BoundarySpace.topology Disk.diskTopology) compactSphere).rightInverse x
+          },
+        equality: (Compare.laws Disk.sphereTopology (BoundarySpace.topology Disk.diskTopology) compactSphere).rightInverse y
+      };
+\definition point: BoundarySpace.CarrierSet := compactSphere.forward Standard.bundlePoint;
+
+\module Positive(p: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat (N.Nat^::succ p);
+  \import Abelian.Isomorphism[V := (Raw.boundary z).Carrier, W := (Sphere.group z).Carrier,
+    source := (Raw.boundary z).space, target := (Sphere.group z).space].Vanishing[] \as Transfer;
+  \definition zero[bound: Order.Lt (N.Nat^::succ p) dimension]: _ :=
+    Transfer.sourceZero (Sphere.isomorphism z) (Standard.Below[k := p].zero bound);
+}
+\module Zero;

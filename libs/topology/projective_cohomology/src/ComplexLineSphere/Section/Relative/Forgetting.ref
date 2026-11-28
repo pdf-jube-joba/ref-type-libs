@@ -1,0 +1,42 @@
+\import singular_products.Cochains[A := Projective.Space, source := Projective.topology, R := I.Int^, ring := Integers.commutativeRing] \as ProjectiveProduct;
+\import singular_products.Cochains[A := Disk.DiskBundle, source := Disk.diskTopology, R := I.Int^, ring := Integers.commutativeRing].Cohomology[] \as Total;
+\import singular_products.Cochains[A := Sphere, source := sphereTopology, R := I.Int^, ring := Integers.commutativeRing].Cohomology[] \as H;
+\import H.Pullback[B := Disk.DiskBundle, target := Disk.diskTopology] \as SectionPull;
+\import H.Pullback[B := Projective.Space, target := Projective.topology] \as ModelPull;
+\import LineBundle.Integral[].Canonical[] \as Canonical;
+\import Punctured.Relative[] \as Relative;
+\import singular_cap.CochainPair[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary,
+  R := I.Int^, ring := Integers.commutativeRing].Comparison[n := Degrees.two].Cohomology[] \as OldForget;
+\import singular_cap.CochainPair[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Punctured.subset,
+  R := I.Int^, ring := Integers.commutativeRing].Comparison[n := Degrees.two].Cohomology[] \as NewForget;
+\import singular_cap.CochainPair[A := Sphere, source := sphereTopology, subset := Base.right,
+  R := I.Int^, ring := Integers.commutativeRing].Comparison[n := Degrees.two].Cohomology[] \as SphereForget;
+\import cohomology_thom.RelativePullback[].On[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary, R := I.Int^, ring := Integers.commutativeRing]
+  .To[B := Disk.DiskBundle, target := Disk.diskTopology, part := Punctured.subset].Along[f := Relative.map].Degree[n := Degrees.two] \as Change;
+\import singular_cohomology.Identity[A := Disk.DiskBundle, source := Disk.diskTopology] \as Identity;
+\definition thomForget: NewForget.map.apply Relative.thomClass = OldForget.map.apply Canonical.thomClass :=
+  eq_reason_in!{{Total.Group Degrees.two} _
+    "=" _ "by" { sym!{{Total.Group Degrees.two}} _ _
+      (Identity.Coefficients[M := ProjectiveProduct.integerCoefficients].At[n := Degrees.two].cohomologyIdentity (NewForget.map.apply Relative.thomClass)) }
+    "=" _ "by" { sym!{{Total.Group Degrees.two}} _ _ (Change.Forget[].law Relative.thomClass) }
+    "=" _ "by" { congr!{_ {Total.Group Degrees.two}} OldForget.map.apply _ _ Relative.thomLaw }
+  };
+\definition zeroAfter[s: Sphere]: Disk.DiskBundle := Disk.zeroSection (onSphere s);
+\import algebraic_topology.Homotopy[A := Disk.DiskBundle, B := Disk.DiskBundle] \as Contraction;
+\import algebraic_topology.Homotopy[A := Sphere, B := Disk.DiskBundle] \as Homotopy;
+\definition modelContinuous: topology.Continuity[A := Sphere, B := Projective.Space].Continuous sphereTopology Projective.topology onSphere := homeomorphism.backwardContinuous;
+\definition homotopy: Homotopy.Homotopy[sphereTopology, Disk.diskTopology, sphereSection, zeroAfter] :=
+  Contraction.Composition[C := Sphere].precompose sphereTopology Disk.diskTopology Disk.diskTopology
+    (\fun (p: Disk.DiskBundle) => p) (\fun (p: Disk.DiskBundle) => Disk.zeroSection (Disk.diskProjection p))
+    Disk.Contraction[].homotopy sphereSection sphereContinuous;
+\import singular_cohomology.Homotopy[A := Sphere, B := Disk.DiskBundle, source := sphereTopology, target := Disk.diskTopology]
+  .Coefficients[M := ProjectiveProduct.integerCoefficients] \as HomotopyPull;
+\import singular_cohomology.Maps[A := Sphere, B := Projective.Space, source := sphereTopology, target := Projective.topology]
+  .Composition[C := Disk.DiskBundle, final := Disk.diskTopology].Coefficients[M := ProjectiveProduct.integerCoefficients] \as Compose;
+\definition law: SphereForget.map.apply class = ModelPull.apply Degrees.two onSphere modelContinuous Canonical.generator :=
+  eq_reason_in!{{H.Group Degrees.two} _
+    "=" _ "by" { Pull.Forget[].law Relative.thomClass }
+    "=" _ "by" { congr!{{Total.Group Degrees.two} {H.Group Degrees.two}} (SectionPull.apply Degrees.two sphereSection sphereContinuous) _ _ thomForget }
+    "=" _ "by" { sym!{{H.Group Degrees.two}} _ _ (HomotopyPull.onCohomology sphereSection zeroAfter homotopy Degrees.two (OldForget.map.apply Canonical.thomClass)) }
+    "=" _ "by" { Compose.onCohomology onSphere modelContinuous Disk.zeroSection Disk.zeroSectionContinuous Degrees.two (OldForget.map.apply Canonical.thomClass) }
+  };

@@ -1,0 +1,15 @@
+\import topology.Topology[Carrier := Ends.Point].Subspace[S := Cover.remaining] \as Remainder;
+\definition remainderTopology: topology.Topology[Carrier := Cover.Remaining].Topology := Remainder.topology Ends.discrete;
+\import LeftPair.Homeomorphism[B := Cover.Remaining].Over[target := remainderTopology, targetSubset := Cover.trace] \as RemainderPairs;
+\definition first: _ := RemainderPairs.forwardMap Cover.pairHomeomorphism;
+\import singular_excision.Excision[A := Ends.Point].Over[source := Ends.discrete].On[pair := Cover.excision].Chains[].Ordinary[] \as Removed;
+\definition second: _ := Removed.inclusion;
+\import LeftPair.Maps[B := Cover.Remaining].Over[target := remainderTopology, targetSubset := Cover.trace] \as Before;
+\import Before.Composition[C := Ends.Point].Over[final := Ends.discrete, finalSubset := Model.right] \as Composite;
+\definition inclusion: _ := Composite.compose first second;
+\definition onPoint[s: LeftSpace.CarrierSet]: inclusion s = s := \refl(s);
+\import LeftPair.Maps[B := Ends.Point].Over[target := Ends.discrete, targetSubset := Model.right] \as Inclusions;
+\import Inclusions.On[f := inclusion].Integer[] \as Pair;
+\import Pair.With[coefficients := coefficients] \as Pull;
+\definition law[u: GlobalGroup.Carrier]: Shift.cut.forward.apply u = Pull.At[z := degree].induced.apply u :=
+  sym!{Relative.Cohomology} _ _ (Composite.On[f := first, g := second].With[coefficients := coefficients].law degree u);

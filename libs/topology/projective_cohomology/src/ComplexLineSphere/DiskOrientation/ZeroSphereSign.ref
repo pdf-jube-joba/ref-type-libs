@@ -1,0 +1,91 @@
+\import std.Data[].Nat[] \as N;
+\import cohomology_models.ZeroSphere[] \as Model;
+\import Model.Reduced[] \as Native;
+\import Spheres.Zero[] \as Ends;
+\import topology.Topology[Carrier := Ends.Point].Subspace[S := Model.left] \as LeftSpace;
+\import topology.Topology[Carrier := Ends.Point].Subspace[S := Model.right] \as RightSpace;
+\definition leftTopology: topology.Topology[Carrier := LeftSpace.CarrierSet].Topology := LeftSpace.topology Ends.discrete;
+\definition rightTopology: topology.Topology[Carrier := RightSpace.CarrierSet].Topology := RightSpace.topology Ends.discrete;
+\import algebraic_topology.Contraction[A := LeftSpace.CarrierSet, source := leftTopology].Singleton[a := Model.leftPoint] \as LeftContraction;
+\import algebraic_topology.Contraction[A := RightSpace.CarrierSet, source := rightTopology].Singleton[a := Model.rightPoint] \as RightContraction;
+\import singular_products.Cochains[A := Ends.Point, source := Ends.discrete, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\definition coefficients: Modules.Bundle := Product.integerCoefficients;
+\definition below: I.Int^ := I.Int^::negSucc N.Nat^::zero;
+\definition degree: I.Int^ := I.Int^::ofNat N.Nat^::zero;
+\import Native.With[coefficients := coefficients] \as Reduced;
+\import singular_excision.MayerVietoris[A := Ends.Point].Over[source := Ends.discrete].On[cover := Model.cover].Reduced[] \as Cover;
+\import topology.Topology[Carrier := LeftSpace.CarrierSet].Subspace[S := Cover.intersection] \as Intersection;
+\definition intersectionTopology: topology.Topology[Carrier := Cover.Intersection].Topology := Intersection.topology leftTopology;
+\import singular_cohomology.Calculations[A := Cover.Intersection, source := intersectionTopology]
+  .ReducedEmpty[].With[coefficients := coefficients].NegativeOne[] \as Empty;
+\import Cover.With[coefficients := coefficients].At[z := below] \as Shift;
+\import singular_cohomology.Relative[A := LeftSpace.CarrierSet, source := leftTopology,
+  subset := Cover.intersection] \as LeftPair;
+\import LeftPair.Reduced[].With[coefficients := coefficients] \as Local;
+\import Local.ConnectingContractible[].At[z := below] \as LocalConnecting;
+\import singular_cohomology.Chains[A := LeftSpace.CarrierSet, source := leftTopology] \as LeftChains;
+\import singular_cohomology.Chains[A := Cover.Intersection, source := intersectionTopology].Reduced[] \as IntersectionReduced;
+\import LeftChains.Reduced[] \as Augmented;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.Integer[P := IntersectionReduced.complex, N := coefficients] \as LocalSubspace;
+\import Hom.Integer[P := Augmented.complex, N := coefficients] \as LocalWhole;
+\import LeftPair.With[coefficients := coefficients] \as LocalRelative;
+\import Cochains.At[C := LocalSubspace.complex, z := below] \as Source;
+\import Cochains.At[C := LocalRelative.complex, z := degree] \as Relative;
+\import Cochains.ShortExact[A := LocalRelative.complex, B := LocalWhole.complex, C := LocalSubspace.complex].At[s := Local.sequence, k := below] \as Change;
+\import commutative_algebra.Modules[R := I.Int^, ring := Integers.commutativeRing].ScalarHom[N := coefficients] \as Scalars;
+\definition emptyValue: LocalSubspace.Carrier below := Scalars.value Integers.ring.one;
+\definition lower: Source.Closed := Source.cycle emptyValue (Empty.currentZero Native.empty emptyValue);
+\definition lift: LocalWhole.Carrier below := emptyValue;
+\import Modules.Hom[V := I.Int^, W := I.Int^, source := Modules.scalarModule, target := coefficients.space] \as ScalarMaps;
+\definition lifted: Local.sequence.projection.apply below lift = lower := ScalarMaps.ext _ _ (\fun (a: I.Int^) => \refl(lift.apply a));
+\definition localClass: Relative.Cohomology := Change.connecting.apply (Source.classOf lower);
+\definition localGenerator: (LocalConnecting.isomorphism (LeftContraction.contraction Model.leftUnique)).forward.apply (Source.classOf lower) = localClass :=
+  LocalConnecting.onForward (LeftContraction.contraction Model.leftUnique) (Source.classOf lower);
+\definition emptyGenerator: (Empty.isomorphism Native.empty).forward.apply Integers.ring.one = Source.classOf lower := \refl(Source.classOf lower);
+\definition upper: LocalWhole.Carrier degree := LocalWhole.complex.differential.apply below lift;
+\definition killed: Local.sequence.projection.apply degree upper = (LocalSubspace.space degree).zero :=
+  trans!{{LocalSubspace.Carrier degree}} _ _ _
+    (sym!{{LocalSubspace.Carrier degree}} _ _ (Local.sequence.projection.commutes below lift))
+    (trans!{{LocalSubspace.Carrier degree}} _ _ _
+      (congr!{{LocalSubspace.Carrier below} {LocalSubspace.Carrier degree}} (LocalSubspace.complex.differential.apply below) _ _ lifted)
+      (\bysub(LocalSubspace.Carrier below, Source.cycles.carrier, lower)));
+\definition InverseImages: \Pow (LocalRelative.Carrier degree) := { c: LocalRelative.Carrier degree \where Local.sequence.inclusion.apply degree c = upper };
+\definition existsImage: \exists (\Cast[LocalRelative.Carrier degree] InverseImages) := Local.sequence.kernelImage degree upper killed;
+\definition uniqueImage[a, b: \Cast[LocalRelative.Carrier degree] InverseImages]: a = b :=
+  Local.sequence.injective degree _ _ (trans!{{LocalWhole.Carrier degree}} _ _ _
+    (\bysub(LocalRelative.Carrier degree, InverseImages, a)) (sym!{{LocalWhole.Carrier degree}} _ _ (\bysub(LocalRelative.Carrier degree, InverseImages, b))));
+\definition image: \Cast[LocalRelative.Carrier degree] InverseImages := \choice (\Cast[LocalRelative.Carrier degree] InverseImages) \by { existence: existsImage, uniqueness: uniqueImage };
+\definition imageLaw: Local.sequence.inclusion.apply degree image = upper := \bysub(LocalRelative.Carrier degree, InverseImages, image);
+\definition closed: Relative.Closed := Relative.cycle image (Change.lowerClosed lift image imageLaw);
+\definition representation: localClass = Relative.classOf closed :=
+  trans!{Relative.Cohomology} _ _ _ (Change.onClass lower)
+    (Change.onLift lower lift image lifted imageLaw (\bysub(LocalRelative.Carrier degree, Relative.cycles.carrier, closed)));
+\import LeftChains.Augmentation[] \as Augmentation;
+\import singular_cohomology.Simplices[A := LeftSpace.CarrierSet, source := leftTopology] \as LeftSimplices;
+\definition value[sigma: LeftSimplices.Carrier N.Nat^::zero]:
+  (Local.sequence.inclusion.apply degree image).apply (LeftChains.generator N.Nat^::zero sigma) = Integers.ring.one :=
+  trans!{I.Int^} _ _ _
+    (congr!{{LocalWhole.Carrier degree} I.Int^}
+      (\fun (u: LocalWhole.Carrier degree) => u.apply (LeftChains.generator N.Nat^::zero sigma)) _ _ imageLaw)
+    (trans!{I.Int^} _ _ _ (LocalWhole.Cohomology[z := degree].priorOnElement lift (LeftChains.generator N.Nat^::zero sigma))
+      (trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} lift.apply _ _ (Augmentation.onGenerator sigma))
+        (Scalars.rightInverse Integers.ring.one)));
+\import singular_cohomology.Relative[A := Ends.Point, source := Ends.discrete, subset := Model.right] \as Global;
+\import Global.With[coefficients := coefficients].At[z := degree] \as GlobalGroup;
+\definition globalClass: GlobalGroup.Carrier := Shift.cut.backward.apply localClass;
+\definition restricted: Shift.cut.forward.apply globalClass = localClass := Shift.cut.rightInverse localClass;
+\import Global.Reduced[].With[coefficients := coefficients].Contractible[].At[z := degree] \as GlobalForget;
+\definition discreteGenerator: _ := (GlobalForget.isomorphism (RightContraction.contraction Model.rightUnique)).forward.apply globalClass;
+\import singular_cohomology.Chains[A := Ends.Point, source := Ends.discrete].Reduced[].With[coefficients := coefficients].At[z := degree] \as Discrete;
+\import singular_cohomology.Chains[A := Spheres.Carrier N.Nat^::zero, source := Spheres.topology N.Nat^::zero].Reduced[].With[coefficients := coefficients].At[z := degree] \as SphereGroup;
+\import singular_cohomology.Equivalence[A := Ends.Point, B := Spheres.Carrier N.Nat^::zero, source := Ends.discrete, target := Spheres.topology N.Nat^::zero]
+  .Reduced[].With[coefficients := coefficients].At[z := degree] \as ModelComparison;
+\definition standard: SphereGroup.Carrier := (Reduced.Zero[].isomorphism).forward.apply Integers.ring.one;
+\definition sphericalGenerator: standard = (ModelComparison.isomorphism Native.equivalence).forward.apply discreteGenerator :=
+  congr!{{Discrete.Carrier} {SphereGroup.Carrier}} (ModelComparison.isomorphism Native.equivalence).forward.apply _ _
+    (congr!{{Source.Cohomology} {Discrete.Carrier}}
+      (Shift.isomorphism (LeftContraction.contraction Model.leftUnique) (RightContraction.contraction Model.rightUnique)).forward.apply _ _ emptyGenerator);
+\module Cut;
+\module Representative;
+\module DiscreteRepresentative;

@@ -1,0 +1,29 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import N.Basic[].Prop[] \as Order;
+\import singular_products.Cochains[A := Space, source := topology, R := algebra.Two[].Carrier, ring := algebra.Two[].commutativeRing] \as Product;
+\import singular_cohomology.Cochains[A := Space, source := topology].With[coefficients := Product.integerCoefficients].Integer[] \as Groups;
+\definition maximum: N.Nat^ := dimension;
+\definition Vanishes[k: N.Nat^]: \Prop :=
+  \forall (a: Groups.cohomology (I.Int^::ofNat k)) -> a = (Groups.cohomologySpace (I.Int^::ofNat k)).zero;
+\definition above[k: N.Nat^]: Order.Lt maximum k -> Vanishes k := \block {
+  \fun (bound: Order.Lt maximum k)(a: Groups.cohomology (I.Int^::ofNat k)) \then
+  \takefrom choices: SchubertData \by schubertDataExists \then
+  \return \parent.Schubert[disks := choices.disks, symbols := choices.symbols, exhaustive := choices.exhaustive]
+    .Additive[].Degree[k := k].above bound a
+};
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\definition index[k: N.Nat^][bound: Order.Le k dimension]: Fin.Fin ambient :=
+  \into[N.Nat^](k, Fin.Fin ambient) \by { Order.ltOfSuccLe ambient k (Order.leSuccSucc k dimension bound) };
+\module Unique(k: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat k;
+  \definition uniqueNonzero: Order.Le k dimension -> \forall (a, b: Groups.cohomology z) ->
+    Logic.Not (a = (Groups.cohomologySpace z).zero) -> Logic.Not (b = (Groups.cohomologySpace z).zero) -> a = b := \block {
+      \fun (bound: Order.Le k dimension)(a, b: Groups.cohomology z)(aNonzero: _)(bNonzero: _) \then
+      \takefrom choices: SchubertData \by schubertDataExists \then
+      \return \parent.\parent.Schubert[disks := choices.disks, symbols := choices.symbols, exhaustive := choices.exhaustive]
+        .Additive[].At[i := index k bound].uniqueNonzero a b aNonzero bNonzero
+    };
+}
+\module Ordinary(k: N.Nat^);

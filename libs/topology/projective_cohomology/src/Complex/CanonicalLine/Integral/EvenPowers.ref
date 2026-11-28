@@ -1,0 +1,20 @@
+\import Equality.Transport[A := N.Nat^] \as CastDegree;
+\definition d[k: N.Nat^]: N.Nat^ := Degrees.double k;
+\definition next[k: N.Nat^]: N.Nat^ := N.Nat^::succ (N.Nat^::succ (d k));
+\definition castLaw[k: N.Nat^]: next k = d (N.Nat^::succ k) := sym!{N.Nat^} _ _ (Degrees.doubleSucc k);
+\definition advance[k: N.Nat^][u: H.Group (d k)]: H.Group (d (N.Nat^::succ k)) :=
+  CastDegree.cast H.Group (next k) (d (N.Nat^::succ k)) (castLaw k) (H.Cup[p := d k, q := Degrees.two].apply u generator);
+\definition power: \forall (k: N.Nat^) -> H.Group (d k) :=
+  \induction (k: N.Nat^) \return H.Group (d k) \with {
+    | zero: H.Unit[].class
+    | succ: \fun (k: N.Nat^)(u: H.Group (d k)) => advance k u
+  };
+\definition first: power Degrees.one = generator :=
+  trans!{{H.Group Degrees.two}} _ _ _
+    (congr!{{H.Group Degrees.two} {H.Group Degrees.two}}
+      (CastDegree.cast H.Group Degrees.two Degrees.two (castLaw N.Nat^::zero)) _ _
+      (trans!{{H.Group Degrees.two}} _ _ _ (H.Unit[].Left[p := Degrees.two].law generator)
+        (CastDegree.castRefl H.Group Degrees.two generator)))
+    (CastDegree.castRefl H.Group Degrees.two generator);
+\definition monomial[k: N.Nat^][a: I.Int^]: H.Group (d k) := (H.moduleSpace (d k)).smul a (power k);
+\module Multiply(p: N.Nat^);

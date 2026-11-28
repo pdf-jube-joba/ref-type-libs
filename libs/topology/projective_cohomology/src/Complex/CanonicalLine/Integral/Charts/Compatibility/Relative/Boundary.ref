@@ -1,0 +1,34 @@
+\import Circle.Coordinates[] \as CircleCoordinates;
+\import Circle.Translations[] \as Rotations;
+\import algebraic_topology.PathComponent[A := Circle.Carrier, source := Circle.topology] \as Paths;
+\import algebraic_topology.Homotopy[A := CircleCoordinates.Sphere, B := CircleCoordinates.Sphere] \as CircleHomotopies;
+\import algebraic_topology.Homotopy[A := Source.SubspaceCarrier, B := CircleCoordinates.Sphere] \as SphereHomotopies;
+\import algebraic_topology.Homotopy[A := Source.SubspaceCarrier, B := Target.SubspaceCarrier] \as Homotopies;
+\definition turned[v: Source.SubspaceCarrier]: CircleCoordinates.Sphere := Rotations.apply Phase.unit (Old.direction v);
+\definition directionLaw[v: Source.SubspaceCarrier]: New.direction v = turned v :=
+  trans!{{CircleCoordinates.Sphere}} _ _ _ (sym!{{CircleCoordinates.Sphere}} _ _ (CircleCoordinates.leftInverse (New.direction v)))
+    (congr!{{Circle.Carrier} {CircleCoordinates.Sphere}} CircleCoordinates.backward _ _ (boundaryRotation v));
+\definition start[v: Source.SubspaceCarrier]: Target.SubspaceCarrier := PlaneDisk.boundaryPoint (Old.direction v);
+\definition end[v: Source.SubspaceCarrier]: Target.SubspaceCarrier := PlaneDisk.boundaryPoint (turned v);
+\definition endLaw[v: Source.SubspaceCarrier]: end v = NewMap.restriction v :=
+  congr!{{CircleCoordinates.Sphere} {Target.SubspaceCarrier}} PlaneDisk.boundaryPoint _ _
+    (sym!{{CircleCoordinates.Sphere}} _ _ (directionLaw v));
+\definition homotopic: Homotopies.Homotopic[Old.boundaryTopology, PlaneDisk.boundaryTopology, OldMap.restriction, NewMap.restriction] := \block {
+  \takefrom path: Paths.Path Circle.identity Phase.unit \by Rotations.connected Circle.identity Phase.unit \then
+  \let onSphere: SphereHomotopies.Homotopy[Old.boundaryTopology, CircleCoordinates.sphereTopology, Old.direction, turned] :=
+    CircleHomotopies.Composition[C := Source.SubspaceCarrier].precompose
+      Old.boundaryTopology CircleCoordinates.sphereTopology CircleCoordinates.sphereTopology (\fun (v: CircleCoordinates.Sphere) => v)
+      (Rotations.apply Phase.unit) (Rotations.homotopy Phase.unit path) Old.direction Old.directionContinuous \then
+  \let h: Homotopies.Homotopy[Old.boundaryTopology, PlaneDisk.boundaryTopology, start, end] :=
+    SphereHomotopies.Composition[C := Target.SubspaceCarrier].postcompose Old.boundaryTopology CircleCoordinates.sphereTopology PlaneDisk.boundaryTopology
+      Old.direction turned onSphere PlaneDisk.boundaryPoint PlaneDisk.boundaryPointContinuous \then
+  \let laws: Homotopies.Laws[Old.boundaryTopology, PlaneDisk.boundaryTopology, start, end, h] :=
+    Homotopies.laws Old.boundaryTopology PlaneDisk.boundaryTopology start end h \then
+  \return \exact(\into[Homotopies.Family](h, Homotopies.Homotopy[Old.boundaryTopology, PlaneDisk.boundaryTopology, OldMap.restriction, NewMap.restriction]) \by {
+    Homotopies.Laws[Old.boundaryTopology, PlaneDisk.boundaryTopology, OldMap.restriction, NewMap.restriction, h] {
+      continuous := laws.continuous,
+      start := laws.start,
+      end := \fun (v: Source.SubspaceCarrier) => trans!{{Target.SubspaceCarrier}} _ _ _ (laws.end v) (endLaw v)
+    }
+  }, Homotopies.Homotopy[Old.boundaryTopology, PlaneDisk.boundaryTopology, OldMap.restriction, NewMap.restriction])
+};

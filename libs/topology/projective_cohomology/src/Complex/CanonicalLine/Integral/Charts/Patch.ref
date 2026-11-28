@@ -1,0 +1,13 @@
+\import \parent.RealPatch[U := U, frames := frames] \as GeometryPatch;
+\definition nativeChart: Native.Chart := GeometryPatch.nativeChart;
+\definition realChart: GeometryPatch.Chart := GeometryPatch.realChart;
+\definition realRank: realChart.dimension = Degrees.two := GeometryPatch.realRank;
+\import Geometry.Local[K := I.Int^, ring := Integers.commutativeRing] \as Local;
+\import Local.Rank[n := Degrees.two] \as Rank;
+\import Rank.On[U := U] \as On;
+\import Local.Chart[c := realChart].Rank[n := Degrees.two, same := realRank] \as Model;
+\definition class: _ := Model.model.thomClass;
+\definition fiberClass[x: \Cast[Space] U]: Rank.FiberClass x := (On.restriction x).apply class;
+\definition generates[x: \Cast[Space] U]: Rank.Fiber[x := x].Generator (fiberClass x) :=
+  Model.Fiber[x := x].positive;
+\module AtPoint(x: \Cast[Space] U);

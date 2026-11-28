@@ -1,0 +1,31 @@
+\import OldGeometry.Fiber[x := x] \as Source;
+\import NewGeometry.Fiber[x := x] \as Target;
+\definition forward[p: Source.Carrier]: Target.Carrier := \into[New.DiskBundle](diskMap p, Target.subset) \by { \bysub(Old.DiskBundle, Source.subset, p) };
+\definition backward[p: Target.Carrier]: Source.Carrier := \into[Old.DiskBundle](inverseDisk p, Source.subset) \by { \bysub(New.DiskBundle, Target.subset, p) };
+\definition forwardContinuous: topology.Continuity[A := Source.Carrier, B := Target.Carrier].Continuous Source.topology Target.topology forward :=
+  topology.Continuity[A := Source.Carrier, B := New.DiskBundle].Corestriction[S := Target.subset].corestrictContinuous
+    Source.topology New.diskTopology forward
+    (topology.Composition[A := Source.Carrier, B := Old.DiskBundle, C := New.DiskBundle].composeContinuous
+      Source.topology Old.diskTopology New.diskTopology Source.inclusion diskMap Source.continuous diskContinuous);
+\definition backwardContinuous: topology.Continuity[A := Target.Carrier, B := Source.Carrier].Continuous Target.topology Source.topology backward :=
+  topology.Continuity[A := Target.Carrier, B := Old.DiskBundle].Corestriction[S := Source.subset].corestrictContinuous
+    Target.topology Old.diskTopology backward
+    (topology.Composition[A := Target.Carrier, B := New.DiskBundle, C := Old.DiskBundle].composeContinuous
+      Target.topology New.diskTopology Old.diskTopology Target.inclusion inverseDisk Target.continuous inverseDiskContinuous);
+\import topology.Homeomorphism[A := Source.Carrier, B := Target.Carrier] \as Homeomorphisms;
+\definition homeomorphism: Homeomorphisms.Homeomorphism[Source.topology, Target.topology] :=
+  Homeomorphisms.Homeomorphism[Source.topology, Target.topology] {
+    forward := forward, backward := backward, forwardContinuous := forwardContinuous, backwardContinuous := backwardContinuous,
+    leftInverse := \fun (p: Source.Carrier) => left p, rightInverse := \fun (p: Target.Carrier) => right p
+  };
+\import singular_cohomology.Relative[A := Source.Carrier, source := Source.topology, subset := Source.boundary].Homeomorphism[B := Target.Carrier]
+  .Over[target := Target.topology, targetSubset := Target.boundary] \as PairHomeomorphisms;
+\definition pair: PairHomeomorphisms.Data := PairHomeomorphisms.Data {
+  homeomorphism := homeomorphism,
+  forwardPreserves := \fun (p: \Cast[Source.Carrier] Source.boundary) => trans!{R.Real} _ _ _ (squared p) (\bysub(Source.Carrier, Source.boundary, p)),
+  backwardPreserves := \fun (p: \Cast[Target.Carrier] Target.boundary) => trans!{R.Real} _ _ _ (inverseSquared p) (\bysub(Target.Carrier, Target.boundary, p))
+};
+\import cohomology_thom.RelativePullback[].On[A := Source.Carrier, source := Source.topology, subset := Source.boundary, R := I.Int^, ring := Integers.commutativeRing]
+  .To[B := Target.Carrier, target := Target.topology, part := Target.boundary].Homeomorphism[data := pair].Degree[n := Degrees.two] \as Ordinary;
+\definition isomorphism: _ := Ordinary.isomorphism;
+\module Compare(c: Charts.LocalChart[x]);

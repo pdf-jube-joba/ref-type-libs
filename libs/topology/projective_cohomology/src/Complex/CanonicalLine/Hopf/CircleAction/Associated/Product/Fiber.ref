@@ -1,0 +1,22 @@
+\definition BasePoint: Space := projection v;
+\definition Tautological: \Set := Line BasePoint;
+\definition space: Linear.VectorSpace Tautological := lineBundle.space BasePoint;
+\import Linear.Linear[V := Numbers.Complex, W := Tautological, source := Linear.scalarSpace, target := space] \as Forward;
+\import Linear.Linear[V := Tautological, W := Numbers.Complex, source := space, target := Linear.scalarSpace] \as Backward;
+\definition forward: Forward.Map := Forward.Map {
+  apply := value v,
+  preservesAdd := \fun (a, b: Numbers.Complex) => E.space.scalarAdd a b v,
+  preservesScale := \fun (a, b: Numbers.Complex) => E.space.scalarAssoc a b v
+};
+\definition backward: Backward.Map := Backward.Map {
+  apply := \fun (w: Tautological) => E.dot v w,
+  preservesAdd := \fun (w, z: Tautological) => E.addRight v w z,
+  preservesScale := \fun (a: Numbers.Complex)(w: Tautological) => E.scaleRight a v w
+};
+\definition left[a: Numbers.Complex]: backward.apply (forward.apply a) = a := scaledDot v a;
+\definition right[w: Tautological]: forward.apply (backward.apply w) = w :=
+  reconstructValue v (Family.include BasePoint w) (\refl(BasePoint));
+\import Linear.Isomorphism[V := Numbers.Complex, W := Tautological, source := Linear.scalarSpace, target := space] \as Isos;
+\definition isomorphism: Isos.Isomorphism := Isos.Isomorphism {
+  forward := forward, backward := backward, leftInverse := left, rightInverse := right
+};

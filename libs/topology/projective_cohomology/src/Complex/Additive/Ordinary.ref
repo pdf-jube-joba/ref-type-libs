@@ -1,0 +1,10 @@
+\import Product.Cohomology[] \as H;
+\import Groups.At[n := k] \as Comparison;
+\import singular_cohomology.Cochains[A := Space, source := topology].With[coefficients := Product.integerCoefficients] \as Unsigned;
+\definition z: I.Int^ := I.Int^::ofNat k;
+\import Abelian.Isomorphism[V := Groups.cohomology z, W := H.Group k,
+  source := Groups.cohomologySpace z, target := Unsigned.cohomologySpace k].Vanishing[] \as Transfer;
+\definition vanishes: Vanishes k -> \forall (u: H.Group k) -> u = (H.moduleSpace k).zero :=
+  \fun (proof: Vanishes k) => Transfer.targetZero Comparison.isomorphism proof;
+\definition aboveDimension: Order.Lt maximum k -> \forall (u: H.Group k) -> u = (H.moduleSpace k).zero :=
+  \fun (bound: Order.Lt maximum k) => vanishes (above k bound);

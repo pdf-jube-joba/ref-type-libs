@@ -1,0 +1,27 @@
+\import LineBundle.Integral[].PlaneCoordinates[] \as PlaneDisk;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import singular_cellular.DiskCollar[n := Degrees.two] \as Collar;
+\import \parent.LocalPuncture[] \as OpenPuncture;
+\definition vector[p: Open.Carrier]: Plane.Disk := PlaneDisk.vector (atPoint p);
+\definition vectorContinuous: topology.Continuity[A := Open.Carrier, B := Plane.Disk].Continuous Open.topology Plane.diskTopology vector :=
+  topology.Composition[A := Open.Carrier, B := PointDisk.DiskCarrier, C := Plane.Disk].composeContinuous
+    Open.topology PointDisk.diskTopology Plane.diskTopology atPoint PlaneDisk.vector atPointContinuous PlaneDisk.vectorContinuous;
+\definition dotNonzero[p: OpenPuncture.Point]: \In[Plane.Disk] Collar.punctured (vector p) :=
+  \fun (zero: Plane.normSquared (vector p) = R.zero) => D.Order[].ltNotEq _ _ (\bysub(Open.Carrier, OpenPuncture.subset, p))
+    (sym!{R.Real} _ _
+      (trans!{R.Real} _ _ _
+        (congr!{R.Real R.Real} R.SquareRoot[].sqrt _ _ (trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (preservesSquared p)) zero))
+        R.SquareRoot[].sqrtZero));
+\definition sphereBoundary: \Pow Plane.Disk := { v: Plane.Disk \where Plane.normSquared v = R.one };
+\definition boundary[p: OpenPuncture.BoundaryPoint]: \In[Plane.Disk] sphereBoundary (vector p) :=
+  trans!{R.Real} _ _ _ (preservesSquared p) (\bysub(Open.Carrier, Open.boundary, p));
+\import singular_cohomology.Relative[A := Open.Carrier, source := Open.topology, subset := Open.boundary] \as Shell;
+\import singular_cohomology.Relative[A := Open.Carrier, source := Open.topology, subset := OpenPuncture.subset] \as Local;
+\import Shell.Maps[B := Plane.Disk].Over[target := Plane.diskTopology, targetSubset := sphereBoundary] \as BoundaryMaps;
+\import Local.Maps[B := Plane.Disk].Over[target := Plane.diskTopology, targetSubset := Collar.punctured] \as OpenMaps;
+\definition boundaryMap: BoundaryMaps.Map := \into[Open.Carrier -> Plane.Disk](vector, BoundaryMaps.Map) \by {
+  BoundaryMaps.Laws[vector] { continuous := vectorContinuous, contained := boundary }
+};
+\definition punctureMap: OpenMaps.Map := \into[Open.Carrier -> Plane.Disk](vector, OpenMaps.Map) \by {
+  OpenMaps.Laws[vector] { continuous := vectorContinuous, contained := dotNonzero }
+};

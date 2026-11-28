@@ -1,0 +1,10 @@
+\import \parent.\parent.EvenPowers[generator := euler] \as Terms;
+\import Equality.Transport[A := N.Nat^] \as CastDegree;
+\definition d: N.Nat^ -> N.Nat^ := Terms.d;
+\definition next: N.Nat^ -> N.Nat^ := Terms.next;
+\definition castLaw: _ := Terms.castLaw;
+\definition advance: _ := Terms.advance;
+\definition power: _ := Terms.power;
+\definition monomial: _ := Terms.monomial;
+\module Step(k: N.Nat^);
+\module Basis;

@@ -1,0 +1,29 @@
+\import topology.Topology[Carrier := Sphere].Subspace[S := Reduced.remaining] \as Remainder;
+\definition remainderTopology: topology.Topology[Carrier := Reduced.Remaining].Topology := Remainder.topology source;
+\import LeftPair.Homeomorphism[B := Reduced.Remaining].Over[target := remainderTopology, targetSubset := Reduced.trace] \as Pairs;
+\definition first: _ := Pairs.forwardMap Reduced.pairHomeomorphism;
+\import singular_excision.Excision[A := Sphere].Over[source := source].On[pair := Reduced.excision].Chains[].Ordinary[] \as Removed;
+\definition second: _ := Removed.inclusion;
+\import LeftPair.Maps[B := Reduced.Remaining].Over[target := remainderTopology, targetSubset := Reduced.trace]
+  .Composition[C := Sphere].Over[final := source, finalSubset := Geometry.right] \as Composite;
+\definition inclusion: _ := Composite.compose first second;
+\import LeftPair.Maps[B := Sphere].Over[target := source, targetSubset := Geometry.right].On[f := inclusion].Integer[]
+  .With[coefficients := coefficients] \as CutPull;
+\import singular_subdivision.OpenCover[A := Sphere, source := source].On[cover := Cover.openCover] \as Subdivision;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Nonnegative;
+\import Nonnegative.Map[C := SmallChains.complex, D := WholeChains.complex].ZeroExtension[f := SmallChains.inclusion] \as SmallInclusion;
+\import Hom.IntegerMapping[P := SmallExtension.complex, Q := WholeExtension.complex, N := coefficients, L := coefficients]
+  .On[f := SmallInclusion.map, u := Modules.End[V := I.Int^, space := coefficients.space].identity] \as SmallPull;
+\definition smallForget[k: N.Nat^][q: WholeRelative.Carrier (I.Int^::ofNat k)]: SmallHom.Carrier (I.Int^::ofNat k) :=
+  SmallPull.map.apply (I.Int^::ofNat k) (WholeExact.inclusion.apply (I.Int^::ofNat k) q);
+\module Coordinates(k: N.Nat^);
+\definition onCochain[k: N.Nat^][q: WholeRelative.Carrier (I.Int^::ofNat k)]: Supported.map.apply (I.Int^::ofNat k) (CutPull.pullback.apply (I.Int^::ofNat k) q) = smallForget k q :=
+  Coordinates[k := k].law q;
+\definition cutLaw[k: N.Nat^][u: WholeRelative.At[z := I.Int^::ofNat (N.Nat^::succ k)].Carrier]:
+  Reduced.With[coefficients := coefficients].At[z := I.Int^::ofNat k].cut.forward.apply u =
+  CutPull.At[z := I.Int^::ofNat (N.Nat^::succ k)].induced.apply u :=
+  sym!{{LeftRelative.At[z := I.Int^::ofNat (N.Nat^::succ k)].Carrier}} _ _
+    (Composite.On[f := first, g := second].With[coefficients := coefficients].law (I.Int^::ofNat (N.Nat^::succ k)) u);
+\definition pullback: Cochains.Map[C := WholeRelative.complex, D := LeftRelative.complex].Map := CutPull.pullback;
+\definition smallPullback: Cochains.Map[C := WholeHom.complex, D := SmallHom.complex].Map := SmallPull.map;
+\definition onCohomology[z: I.Int^]: _ := CutPull.At[z := z].induced;

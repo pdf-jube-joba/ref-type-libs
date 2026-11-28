@@ -1,0 +1,47 @@
+\import singular_products.Cochains[A := Point.Carrier, source := Point.topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\definition coefficients: Modules.Bundle := Product.integerCoefficients;
+\definition degree: I.Int^ := I.Int^::ofNat n;
+\definition next: I.Int^ := I.Int^::ofNat (N.Nat^::succ n);
+\import NativePair.With[coefficients := coefficients].At[z := next] \as NativeOutput;
+\import PointPair.With[coefficients := coefficients].At[z := next] \as PointOutput;
+\import BoxPair.With[coefficients := coefficients].At[z := next] \as BoxOutput;
+\import CylinderPair.With[coefficients := coefficients].At[z := next] \as CylinderOutput;
+\import NativePair.With[coefficients := coefficients].PairSequence[].LongExact[z := degree] \as NativeDelta;
+\import PointPair.With[coefficients := coefficients].PairSequence[].LongExact[z := degree] \as PointDelta;
+\import BoxPair.With[coefficients := coefficients].PairSequence[].LongExact[z := degree] \as BoxDelta;
+\import CylinderPair.With[coefficients := coefficients].PairSequence[].LongExact[z := degree] \as CylinderDelta;
+\import NativeForward.Integer[].With[coefficients := coefficients] \as NativePull;
+\import RoundForward.Integer[].With[coefficients := coefficients] \as PointPull;
+\import CylinderForward.Integer[].With[coefficients := coefficients] \as BoxPull;
+\import singular_cohomology.Maps[A := NativePair.SubspaceCarrier, B := PointPair.SubspaceCarrier, source := nativeTopology, target := pointTopology]
+  .Coefficients[M := coefficients, L := coefficients].Integer[f := NativeForward.restriction, continuous := NativeForward.restrictionContinuous,
+    coefficientMap := Modules.End[V := I.Int^, space := coefficients.space].identity].At[n := n] \as NativeBoundaryPull;
+\import singular_cohomology.Maps[A := PointPair.SubspaceCarrier, B := BoxPair.SubspaceCarrier, source := pointTopology, target := boxTopology]
+  .Coefficients[M := coefficients, L := coefficients].Integer[f := RoundForward.restriction, continuous := RoundForward.restrictionContinuous,
+    coefficientMap := Modules.End[V := I.Int^, space := coefficients.space].identity].At[n := n] \as RoundBoundaryPull;
+\import singular_cohomology.Maps[A := BoxPair.SubspaceCarrier, B := CylinderPair.SubspaceCarrier, source := boxTopology, target := cylinderTopology]
+  .Coefficients[M := coefficients, L := coefficients].Integer[f := CylinderForward.restriction, continuous := CylinderForward.restrictionContinuous,
+    coefficientMap := Modules.End[V := I.Int^, space := coefficients.space].identity].At[n := n] \as CylinderBoundaryPull;
+\import singular_cohomology.Cochains[A := NativePair.SubspaceCarrier, source := nativeTopology].With[coefficients := coefficients].Integer[] \as NativeBoundaryTheory;
+\import singular_cohomology.Cochains[A := PointPair.SubspaceCarrier, source := pointTopology].With[coefficients := coefficients].Integer[] \as PointBoundaryTheory;
+\import singular_cohomology.Cochains[A := BoxPair.SubspaceCarrier, source := boxTopology].With[coefficients := coefficients].Integer[] \as BoxBoundaryTheory;
+\import singular_cohomology.Cochains[A := CylinderPair.SubspaceCarrier, source := cylinderTopology].With[coefficients := coefficients].Integer[] \as CylinderBoundaryTheory;
+\definition boxFromBoundary[u: CylinderBoundaryTheory.cohomology degree]: BoxBoundaryTheory.cohomology degree := CylinderBoundaryPull.induced.apply u;
+\definition pointFromBoundary[u: CylinderBoundaryTheory.cohomology degree]: PointBoundaryTheory.cohomology degree :=
+  RoundBoundaryPull.induced.apply (CylinderBoundaryPull.induced.apply u);
+\definition pointFromRelative[u: CylinderOutput.Carrier]: PointOutput.Carrier :=
+  PointPull.At[z := next].induced.apply (BoxPull.At[z := next].induced.apply u);
+\definition fromBoundary[u: CylinderBoundaryTheory.cohomology degree]: NativeBoundaryTheory.cohomology degree :=
+  NativeBoundaryPull.induced.apply (pointFromBoundary u);
+\definition fromRelative[u: CylinderOutput.Carrier]: NativeOutput.Carrier :=
+  NativePull.At[z := next].induced.apply (pointFromRelative u);
+\definition pointLaw[u: CylinderBoundaryTheory.cohomology degree]: PointDelta.connecting.apply (pointFromBoundary u) =
+  pointFromRelative (CylinderDelta.connecting.apply u) :=
+  trans!{PointOutput.Carrier} _ _ _ (PointPull.Naturality[].At[z := degree].connectingNaturality (CylinderBoundaryPull.induced.apply u))
+    (congr!{BoxOutput.Carrier PointOutput.Carrier} PointPull.At[z := next].induced.apply _ _
+      (BoxPull.Naturality[].At[z := degree].connectingNaturality u));
+\definition law[u: CylinderBoundaryTheory.cohomology degree]: NativeDelta.connecting.apply (fromBoundary u) =
+  fromRelative (CylinderDelta.connecting.apply u) :=
+  trans!{NativeOutput.Carrier} _ _ _ (NativePull.Naturality[].At[z := degree].connectingNaturality (pointFromBoundary u))
+    (congr!{PointOutput.Carrier NativeOutput.Carrier} NativePull.At[z := next].induced.apply _ _ (pointLaw u));
+\definition CylinderClass: \Set := CylinderOutput.Carrier;

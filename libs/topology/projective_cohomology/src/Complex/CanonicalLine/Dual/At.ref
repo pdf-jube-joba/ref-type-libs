@@ -1,0 +1,43 @@
+\import Linear.Dual[V := Line x, source := lineBundle.space x] \as Functionals;
+\import Linear.Linear[V := Line x, W := Numbers.Complex, source := lineBundle.space x, target := Linear.scalarSpace] \as Maps;
+\definition represent[v: Line x]: Fiber x := Functionals.fromMap (Maps.Map {
+  apply := \fun (w: Line x) => Vector.dot v w,
+  preservesAdd := \fun (w, z: Line x) => Vector.addRight v w z,
+  preservesScale := \fun (a: Numbers.Complex)(w: Line x) => Vector.scaleRight a v w
+});
+\definition additive[v, w: Line x]:
+  represent ((lineBundle.space x).add v w) = (bundle.space x).add (represent v) (represent w) :=
+  Functionals.ext (represent ((lineBundle.space x).add v w)) ((bundle.space x).add (represent v) (represent w))
+    (\fun (z: Line x) => Dot.addLeft v w z);
+\definition conjugateLinear[a: Numbers.Complex][v: Line x]:
+  represent ((lineBundle.space x).smul a v) = (bundle.space x).smul (Arithmetic.conj a) (represent v) :=
+  Functionals.ext (represent ((lineBundle.space x).smul a v)) ((bundle.space x).smul (Arithmetic.conj a) (represent v))
+    (\fun (z: Line x) => Dot.scaleLeft a v z);
+\import \parent.\parent.Hopf[].AtLine[x := x] \as UnitBasis;
+\import std.Logic[].Equality[] \as Equal;
+\use Equal.congr;
+\use Equal.sym;
+\use Equal.trans;
+\use Equal.eq_reason_in;
+\module With(frame: UnitBasis.Frame);
+\definition exists[f: Fiber x]: \exists (v: Line x \where represent v = f) := \block {
+  \takefrom frame: UnitBasis.Frame \by UnitBasis.frameExists \then
+  \return std.Logic[].Proposition[].existsIntro[Line x, { v: Line x \where represent v = f }]
+    (With[frame := frame].candidate f) (With[frame := frame].represented f)
+};
+\definition injective[v, w: Line x]: represent v = represent w -> v = w := \block {
+  \fun (same: represent v = represent w) \then
+  \takefrom frame: UnitBasis.Frame \by UnitBasis.frameExists \then
+  \return With[frame := frame].injective v w same
+};
+\definition Preimage[f: Fiber x]: \Set := \Cast[Line x] ({ v: Line x \where represent v = f });
+\definition inverse[f: Fiber x]: Preimage f := \choice Preimage f \by {
+  existence: exists f,
+  uniqueness: \fun (v, w: Preimage f) => injective v w
+    (trans!{{Fiber x}} _ _ _ (\bysub(Line x, { u: Line x \where represent u = f }, v))
+      (sym!{{Fiber x}} _ _ (\bysub(Line x, { u: Line x \where represent u = f }, w))))
+};
+\definition rightInverse[f: Fiber x]: represent (inverse f) = f :=
+  \bysub(Line x, { u: Line x \where represent u = f }, inverse f);
+\definition leftInverse[v: Line x]: inverse (represent v) = v :=
+  injective (inverse (represent v)) v (rightInverse (represent v));

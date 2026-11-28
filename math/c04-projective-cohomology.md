@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Primary implementation: `projective_cohomology`.
+- Primary implementation: [`projective_cohomology`](../libs/topology/projective_cohomology/README.md).
 - Construct cellular-chain/singular-cohomology comparisons for finite-dimensional real and complex projective spaces.
 - Compute integral complex-projective and mod 2 real-projective cohomology rings using canonical-line-bundle generators and their powers.
 - Prove comparisons/signs for dimension inclusions, dual and Hopf line bundles, and existing real-projective-plane/sphere models.

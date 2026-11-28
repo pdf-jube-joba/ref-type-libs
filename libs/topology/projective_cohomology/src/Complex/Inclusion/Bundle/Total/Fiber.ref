@@ -1,0 +1,93 @@
+\import OldGeometry.Fiber[x := x] \as Old;
+\import NewGeometry.Fiber[x := map x] \as New;
+\definition toFiber[p: Old.Carrier]: New.Carrier :=
+  \into[TargetDisk.DiskBundle](diskMap p, New.subset) \by {
+    congr!{Space {Target.Space}} map _ _ (\bysub(Disk.DiskBundle, Old.subset, p))
+  };
+\definition targetVector[p: New.Carrier]: Target.Line (map x) :=
+  \into[W.Vector](p.vector, TargetUniversal.Image (map x)) \by {
+    \idelim p.base = map x \with y: Target.Space => (y.map).apply p.vector = p.vector \by {
+      base: \bysub(W.Vector, TargetUniversal.Image p.base, p.vector),
+      equality: \bysub(TargetDisk.DiskBundle, New.subset, p)
+    }
+  };
+\definition backwardPoint[p: New.Carrier]: Family.Point := Family.include x (preimage x (targetVector p));
+\definition backwardSquared[p: New.Carrier]: Disk.squared (backwardPoint p) = TargetDisk.squared p :=
+  trans!{R.Real} _ _ _ (OldReal.Norm[].squared (backwardPoint p))
+    (trans!{R.Real} _ _ _ (Source.Hopf[].squared (OldUnderlying.backward (backwardPoint p)))
+      (trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (norm (preimage x (targetVector p))))
+        (trans!{R.Real} _ _ _ (congr!{{W.Vector} {R.Real}} W.squared _ _ (rightInverse x (targetVector p)))
+          (trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (TargetLine.Hopf[].squared (NewUnderlying.backward p)))
+            (sym!{R.Real} _ _ (NewReal.Norm[].squared p))))));
+\definition backwardDisk[p: New.Carrier]: Disk.DiskBundle :=
+  \into[Family.Point](backwardPoint p, Disk.ClosedBall) \by {
+    Order.leReplaceLeft (TargetDisk.squared p) (Disk.squared (backwardPoint p)) R.one
+      (sym!{R.Real} _ _ (backwardSquared p)) (\bysub(TargetFamily.Point, TargetDisk.ClosedBall, p))
+  };
+\definition fromFiber[p: New.Carrier]: Old.Carrier :=
+  \into[Disk.DiskBundle](backwardDisk p, Old.subset) \by { \refl(x) };
+\definition left[p: Old.Carrier]: fromFiber (toFiber p) = p :=
+  Family.ext _ _ (sym!{Space} _ _ (\bysub(Disk.DiskBundle, Old.subset, p)))
+    (trans!{{E.Vector}} _ _ _ (Source.Hopf[].castVector _ _ _ (fromFiber (toFiber p)).vector)
+      (Blocks.leftJoin p.vector Extra.space.zero));
+\definition right[p: New.Carrier]: toFiber (fromFiber p) = p :=
+  TargetFamily.ext _ _ (sym!{{Target.Space}} _ _ (\bysub(TargetDisk.DiskBundle, New.subset, p)))
+    (trans!{{W.Vector}} _ _ _ (TargetLine.Hopf[].castVector _ _ _ (toFiber (fromFiber p)).vector)
+      (rightInverse x (targetVector p)));
+\definition toContinuous: topology.Continuity[A := Old.Carrier, B := New.Carrier].Continuous Old.topology New.topology toFiber :=
+  topology.Continuity[A := Old.Carrier, B := TargetDisk.DiskBundle].Corestriction[S := New.subset].corestrictContinuous
+    Old.topology TargetDisk.diskTopology toFiber
+    (topology.Composition[A := Old.Carrier, B := Disk.DiskBundle, C := TargetDisk.DiskBundle].composeContinuous
+      Old.topology Disk.diskTopology TargetDisk.diskTopology Old.inclusion diskMap Old.continuous diskContinuous);
+\import TargetLine.Realification[] \as TargetCoordinates;
+\definition targetPoint[p: New.Carrier]: TargetFamily.Point := p;
+\definition targetPointContinuous: topology.Continuity[A := New.Carrier, B := TargetFamily.Point].Continuous
+  New.topology NewReal.bundle.totalSpace targetPoint :=
+  topology.Composition[A := New.Carrier, B := TargetDisk.DiskBundle, C := TargetFamily.Point].composeContinuous
+    New.topology TargetDisk.diskTopology NewReal.bundle.totalSpace New.inclusion
+    (\fun (p: TargetDisk.DiskBundle) => p) New.continuous
+    (topology.Continuity[A := TargetDisk.DiskBundle, B := TargetFamily.Point].Corestriction[S := TargetDisk.ClosedBall]
+      .inclusionContinuous NewReal.bundle.totalSpace);
+\definition targetCoordinate[p: New.Carrier]: W.Vector := p.vector;
+\definition targetCoordinateContinuous: topology.Continuity[A := New.Carrier, B := W.Vector].Continuous
+  New.topology (Bundles.coordinateTopology Blocks.dimension) targetCoordinate :=
+  topology.Composition[A := New.Carrier, B := TargetFamily.Point, C := W.Vector].composeContinuous
+    New.topology NewReal.bundle.totalSpace (Bundles.coordinateTopology Blocks.dimension) targetPoint
+    TargetCoordinates.nativeCoordinates targetPointContinuous TargetCoordinates.nativeContinuous;
+\definition nativeBackward[p: New.Carrier]: Native.Point := Native.include x (preimage x (targetVector p));
+\definition nativeBackwardContinuous: topology.Continuity[A := New.Carrier, B := Native.Point].Continuous
+  New.topology lineBundle.totalSpace nativeBackward :=
+  SourceUniversal.Universal[Y := New.Carrier, source := New.topology].continuous nativeBackward
+    (topology.Maps[A := New.Carrier, B := Space].constantContinuous New.topology topology x)
+    (topology.Composition[A := New.Carrier, B := W.Vector, C := E.Vector].composeContinuous
+      New.topology (Bundles.coordinateTopology Blocks.dimension) (Bundles.coordinateTopology ambient)
+      targetCoordinate CoordTopology.first targetCoordinateContinuous CoordTopology.firstRegular);
+\definition backwardPointContinuous: topology.Continuity[A := New.Carrier, B := Family.Point].Continuous
+  New.topology OldReal.bundle.totalSpace backwardPoint :=
+  topology.Composition[A := New.Carrier, B := Native.Point, C := Family.Point].composeContinuous
+    New.topology lineBundle.totalSpace OldReal.bundle.totalSpace nativeBackward OldUnderlying.forward
+    nativeBackwardContinuous OldUnderlying.forwardContinuous;
+\definition fromContinuous: topology.Continuity[A := New.Carrier, B := Old.Carrier].Continuous New.topology Old.topology fromFiber :=
+  topology.Continuity[A := New.Carrier, B := Disk.DiskBundle].Corestriction[S := Old.subset].corestrictContinuous
+    New.topology Disk.diskTopology fromFiber
+    (topology.Continuity[A := New.Carrier, B := Family.Point].Corestriction[S := Disk.ClosedBall].corestrictContinuous
+      New.topology OldReal.bundle.totalSpace backwardDisk backwardPointContinuous);
+\import topology.Homeomorphism[A := Old.Carrier, B := New.Carrier] \as Home;
+\definition homeomorphism: Home.Homeomorphism[Old.topology, New.topology] :=
+  Home.Homeomorphism[Old.topology, New.topology] {
+    forward := toFiber, backward := fromFiber, forwardContinuous := toContinuous, backwardContinuous := fromContinuous,
+    leftInverse := left, rightInverse := right
+  };
+\import singular_cohomology.Relative[A := Old.Carrier, source := Old.topology, subset := Old.boundary]
+  .Homeomorphism[B := New.Carrier].Over[target := New.topology, targetSubset := New.boundary] \as Pairs;
+\definition comparison: Pairs.Data := Pairs.Data {
+  homeomorphism := homeomorphism,
+  forwardPreserves := \fun (p: \Cast[Old.Carrier] Old.boundary) =>
+    trans!{R.Real} _ _ _ (squared p) (\bysub(Old.Carrier, Old.boundary, p)),
+  backwardPreserves := \fun (p: \Cast[New.Carrier] New.boundary) =>
+    trans!{R.Real} _ _ _ (backwardSquared p) (\bysub(New.Carrier, New.boundary, p))
+};
+\import Source.Integral[].Charts[] \as OldCharts;
+\import TargetLine.Integral[].Charts[] \as NewCharts;
+\module Charts(old: OldCharts.LocalChart[x], new: NewCharts.LocalChart[map x]);
+\module Naturality;

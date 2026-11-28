@@ -1,0 +1,18 @@
+\import \parent.Orbits[] \as Fibers;
+\import topological_constructions.RelationQuotient[A := Carrier, relation := Fibers.Related] \as Quotient;
+\definition laws: Quotient.Laws := Quotient.Laws {
+  refl := \fun (p: Carrier) => Fibers.related p p (\refl(evaluateDual p)),
+  sym := \fun (p, q: Carrier)(same: Fibers.Related p q) => Fibers.related q p
+    (sym!{{DualFamily.Point}} _ _ (Fibers.equal p q same)),
+  trans := \fun (p, q, r: Carrier)(first: Fibers.Related p q)(second: Fibers.Related q r) => Fibers.related p r
+    (trans!{{DualFamily.Point}} _ _ _ (Fibers.equal p q first) (Fibers.equal q r second))
+};
+\import Quotient.Classification[B := DualFamily.Point, q := evaluateDual] \as Classification;
+\import topology.Homeomorphism[A := Quotient.Carrier, B := DualFamily.Point] \as Homeomorphisms;
+\definition homeomorphism: Homeomorphisms.Homeomorphism[Quotient.topology topology, Dual.bundle.totalSpace] :=
+  Classification.homeomorphism topology Dual.bundle.totalSpace laws Fibers.equal Fibers.related \parent.FinalTopology[].quotient;
+\import Quotient.Descent[C := DualFamily.Point] \as Descent;
+\definition onRepresentative[p: Carrier]: homeomorphism.forward (Quotient.class p) = evaluateDual p :=
+  Descent.onClass laws evaluateDual Fibers.equal p;
+\definition over[p: Carrier]: (homeomorphism.forward (Quotient.class p)).base = projection (frame p) :=
+  congr!{{DualFamily.Point} Space} DualFamily.projection _ _ (onRepresentative p);

@@ -1,0 +1,24 @@
+\import real.Analysis[] \as R;
+\import dedekind_reals.DedekindReal[] \as D;
+\import complex.Complex[] \as C;
+\import sphere_maps.Circle[] \as Circle;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import Plane.Splitting[] \as Splitting;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\definition point: Spheres.Carrier Degrees.two := Splitting.equator w;
+\definition nonnegative: D.Le R.zero (Splitting.head point) :=
+  D.leReplaceRight R.zero R.zero (Splitting.head point) (sym!{R.Real} _ _ (Splitting.equatorHead w)) (D.leRefl R.zero);
+\definition nonpositive: D.Le (Splitting.head point) R.zero :=
+  D.leReplaceLeft R.zero (Splitting.head point) R.zero (sym!{R.Real} _ _ (Splitting.equatorHead w)) (D.leRefl R.zero);
+\import bott_product.Bott[].ProjectiveLine[].SphereLine[] \as Pulled;
+\import Pulled.Transition[s := point, positive := nonnegative, negative := nonpositive] \as Transition;
+\import Pulled.FirstFrame[s := point, positive := nonnegative] \as First;
+\import Pulled.SecondFrame[s := point, negative := nonpositive] \as Second;
+\definition coefficient: Transition.z = Circle.Coordinates[].forward w :=
+  congr!{{Plane.Coordinate} {C.Complex}} Circle.Coordinates[].ambientForward _ _ (Splitting.equatorTail w);
+\definition transition[v: Pulled.LineFiber point]: Second.decode v = C.Def[].mul (Circle.inverse (Circle.Coordinates[].forward w)) (First.decode v) :=
+  trans!{C.Complex} _ _ _ (Transition.equation v)
+    (congr!{C.Complex C.Complex} (\fun (z: C.Complex) => C.Def[].mul (C.Def[].conj z) (First.decode v)) _ _ coefficient);

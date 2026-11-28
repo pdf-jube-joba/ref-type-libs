@@ -1,0 +1,28 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import LineBundle.Integral[].Charts[] \as Charts;
+\import LineBundle.Integral[].Canonical[] \as Canonical;
+\import LineBundle.Integral[].Orientation[] \as Orientation;
+\import \parent.Trivialization[] \as NativeChart;
+\definition frames: Charts.At domain Degrees.one := Charts.fromNative NativeChart.chart;
+\import Charts.Patch[U := domain, frames := frames] \as Patch;
+\import cohomology_thom.Thom[].Real[].For[X := Projective.Space, F := Projective.Line, bundle := Realification.bundle].With[metric := Realification.metric] \as Geometry;
+\import Geometry.Local[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as Rank;
+\import Rank.On[U := domain] \as On;
+\import Geometry.Local[K := I.Int^, ring := Integers.commutativeRing].Chart[c := Patch.realChart].Rank[n := Degrees.two, same := Patch.realRank] \as Standard;
+\import singular_products.Cochains[A := Projective.Space, source := Projective.topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\definition z: I.Int^ := I.Int^::ofNat Degrees.two;
+\import Geometry.Domain[U := domain].Additive[coefficients := Product.integerCoefficients, z := z] \as Local;
+\import Geometry.Coefficients[R := I.Int^, ring := Integers.commutativeRing].Degree[n := Degrees.two] \as Original;
+\definition restricted: Local.Class := Local.restriction.apply Canonical.thomClass;
+\definition normalization[x: Point]: (On.restriction x).apply restricted = Orientation.fiber x :=
+  trans!{{Rank.FiberClass x}} _ _ _ (Geometry.Domain[U := domain].Fiber[x := x].With[coefficients := Product.integerCoefficients, z := z].law Canonical.thomClass)
+    ((\bysub(Original.Class, Canonical.normalizedClasses, Canonical.thomClass)) x);
+\definition witness[x: Point]: Charts.LocalChart[x] := Charts.LocalChart[x] {
+  domain := domain, contains := \bysub(Projective.Space, domain, x), frames := frames
+};
+\definition chartNormalization[x: Point]: Patch.fiberClass x = Orientation.fiber x :=
+  Orientation.unique x (Orientation.localClass x (witness x)) (Orientation.chosen x);
+\definition agrees: restricted = Patch.class :=
+  Standard.detected restricted Patch.class (\fun (x: Point) => trans!{{Rank.FiberClass x}} _ _ _ (normalization x)
+    (sym!{{Rank.FiberClass x}} _ _ (chartNormalization x)));

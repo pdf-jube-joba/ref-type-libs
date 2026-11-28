@@ -1,0 +1,71 @@
+\import topology.Topology[Carrier := Open.Carrier] \as OpenSpace;
+\definition subset: \Pow Open.Carrier := { p: Open.Carrier \where D.Lt R.zero (Disk.norm p) };
+\import OpenSpace.Subspace[S := subset] \as PuncturedOpen;
+\definition Point: \Set := PuncturedOpen.CarrierSet;
+\definition topology: topology.Topology[Carrier := Point].Topology := PuncturedOpen.topology Open.topology;
+\definition global[p: Point]: Punctured.Carrier := \into[Disk.DiskBundle](p, Punctured.subset) \by {
+  \bysub(Open.Carrier, subset, p)
+};
+\definition globalContinuous: topology.Continuity[A := Point, B := Punctured.Carrier].Continuous topology Punctured.topology global :=
+  topology.Continuity[A := Point, B := Disk.DiskBundle].Corestriction[S := Punctured.subset].corestrictContinuous
+    topology Disk.diskTopology global
+    (topology.Composition[A := Point, B := Open.Carrier, C := Disk.DiskBundle].composeContinuous
+      topology Open.topology Disk.diskTopology (\fun (p: Point) => p) Open.inclusion
+      (topology.Continuity[A := Point, B := Open.Carrier].Corestriction[S := subset].inclusionContinuous Open.topology)
+      Open.inclusionContinuous);
+\import OpenSpace.Subspace[S := Open.boundary] \as Boundary;
+\definition BoundaryPoint: \Set := Boundary.CarrierSet;
+\definition boundaryTopology: topology.Topology[Carrier := BoundaryPoint].Topology := Boundary.topology Open.topology;
+\import LineBundle.Integral[].Punctured[].Retraction[] \as Retraction;
+\definition positive[p: BoundaryPoint]: D.Lt R.zero (Disk.norm p) :=
+  \idelim R.one = Disk.norm p \with r: R.Real => D.Lt R.zero r \by {
+    base: R.Estimates[].Product[].onePositive,
+    equality: sym!{R.Real} _ _ (Disk.sphereNorm (\into[Family.Point](p, Disk.UnitSphere) \by {
+      \bysub(Open.Carrier, Open.boundary, p)
+    }))
+  };
+\definition include[p: BoundaryPoint]: Point := \into[Open.Carrier](p, subset) \by { positive p };
+\definition includeContinuous: topology.Continuity[A := BoundaryPoint, B := Point].Continuous boundaryTopology topology include :=
+  topology.Continuity[A := BoundaryPoint, B := Open.Carrier].Corestriction[S := subset].corestrictContinuous boundaryTopology Open.topology include
+    (topology.Continuity[A := BoundaryPoint, B := Open.Carrier].Corestriction[S := Open.boundary].inclusionContinuous Open.topology);
+\definition normalized[p: Point]: Disk.SphereBundle := Punctured.normalize (global p);
+\definition normalizedContinuous: topology.Continuity[A := Point, B := Disk.SphereBundle].Continuous topology Disk.sphereTopology normalized :=
+  topology.Composition[A := Point, B := Punctured.Carrier, C := Disk.SphereBundle].composeContinuous
+    topology Punctured.topology Disk.sphereTopology global Punctured.normalize globalContinuous Punctured.continuous;
+\definition normalizedDisk[p: Point]: Disk.DiskBundle := Disk.sphereInclusion (normalized p);
+\definition normalizeInChart[p: Point]: Open.Carrier := \into[Disk.DiskBundle](normalizedDisk p, Open.domain) \by {
+  \bysub(Disk.DiskBundle, Open.domain, p)
+};
+\definition normalizeInChartContinuous: topology.Continuity[A := Point, B := Open.Carrier].Continuous topology Open.topology normalizeInChart :=
+  topology.Continuity[A := Point, B := Disk.DiskBundle].Corestriction[S := Open.domain].corestrictContinuous
+    topology Disk.diskTopology normalizeInChart
+    (topology.Composition[A := Point, B := Disk.SphereBundle, C := Disk.DiskBundle].composeContinuous
+      topology Disk.sphereTopology Disk.diskTopology normalized Disk.sphereInclusion normalizedContinuous Disk.sphereInclusionContinuous);
+\definition retraction[p: Point]: BoundaryPoint := \into[Open.Carrier](normalizeInChart p, Open.boundary) \by {
+  \bysub(Family.Point, Disk.UnitSphere, normalized p)
+};
+\definition retractionContinuous: topology.Continuity[A := Point, B := BoundaryPoint].Continuous topology boundaryTopology retraction :=
+  topology.Continuity[A := Point, B := Open.Carrier].Corestriction[S := Open.boundary].corestrictContinuous
+    topology Open.topology retraction normalizeInChartContinuous;
+\definition fixed[p: BoundaryPoint]: retraction (include p) = p :=
+  Retraction.fixed (\into[Family.Point](p, Disk.UnitSphere) \by { \bysub(Open.Carrier, Open.boundary, p) });
+\module Motion;
+\import algebraic_topology.HomotopyEquivalence[A := BoundaryPoint, B := Point] \as Equivalence;
+\import algebraic_topology.Homotopy[A := BoundaryPoint, B := BoundaryPoint] \as BoundaryHomotopy;
+\import algebraic_topology.Homotopy[A := Point, B := Point] \as PunctureHomotopy;
+\definition boundaryRoundTrip[p: BoundaryPoint]: BoundaryPoint := retraction (include p);
+\definition leftInverse: BoundaryHomotopy.Homotopic[boundaryTopology, boundaryTopology, boundaryRoundTrip, (\fun (p: BoundaryPoint) => p)] :=
+  \idelim (\fun (p: BoundaryPoint) => p) = boundaryRoundTrip \with f: (BoundaryPoint -> BoundaryPoint) =>
+    BoundaryHomotopy.Homotopic[boundaryTopology, boundaryTopology, f, (\fun (p: BoundaryPoint) => p)] \by {
+      base: BoundaryHomotopy.reflexive boundaryTopology boundaryTopology (\fun (p: BoundaryPoint) => p)
+        (topology.Maps[A := BoundaryPoint, B := BoundaryPoint].Identity[].continuous boundaryTopology),
+      equality: \axiom:funext((\fun (p: BoundaryPoint) => p), boundaryRoundTrip,
+        \fun (p: BoundaryPoint) => sym!{BoundaryPoint} _ _ (fixed p))
+    };
+\definition equivalence: Equivalence.Equivalence[boundaryTopology, topology] :=
+  Equivalence.Equivalence[boundaryTopology, topology] {
+    forward := include, backward := retraction, forwardContinuous := includeContinuous, backwardContinuous := retractionContinuous,
+    leftInverse := leftInverse,
+    rightInverse := \exact(PunctureHomotopy.reverse topology topology (\fun (p: Point) => p) Motion[].composition Motion[].homotopy,
+      PunctureHomotopy.Homotopy[topology, topology, Motion[].composition, (\fun (p: Point) => p)])
+  };

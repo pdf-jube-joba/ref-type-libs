@@ -1,0 +1,24 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as R;
+\import hermitian_frames.Hermitian[] \as Hermitian;
+\import Projective.CanonicalLine[] \as LineBundle;
+\import LineBundle.Realification[] \as Realification;
+\import bott_product.Bott[].ProjectiveLine[].SphereLine[] \as StandardHopf;
+\definition Sphere: \Set := Spheres.Carrier Degrees.two;
+\definition sphereTopology: topology.Topology[Carrier := Sphere].Topology := Spheres.topology Degrees.two;
+\definition onSphere[s: Sphere]: Projective.Space := homeomorphism.backward s;
+\definition continuous: topology.Continuity[A := Sphere, B := Projective.Space].Continuous sphereTopology Projective.topology onSphere := homeomorphism.backwardContinuous;
+\definition Fiber[s: Sphere]: \Set := Projective.Line (onSphere s);
+\import bundle_operations.Operations[].Scalars[] \as Scalars;
+\import Scalars.Realification[X := Projective.Space, F := Projective.Line, source := Projective.lineBundle] \as Native;
+\import Scalars.Realification[X := Sphere, F := Fiber, source := StandardHopf.lineBundle] \as RealHopf;
+\import Native.Pullback[Y := Sphere, baseSpace := sphereTopology, f := onSphere, regular := continuous] \as Comparison;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as RealBundles;
+\import RealBundles.Isomorphisms[X := Sphere, F := Fiber, G := Fiber, source := Comparison.firstBundle, target := RealHopf.bundle] \as Isomorphisms;
+\definition bundleComparison: Isomorphisms.Isomorphism := Comparison.isomorphism;
+\definition onFiber[s: Sphere][v: Fiber s]: (bundleComparison.forward.fiber s).apply v = v := Comparison.onFiber s v;

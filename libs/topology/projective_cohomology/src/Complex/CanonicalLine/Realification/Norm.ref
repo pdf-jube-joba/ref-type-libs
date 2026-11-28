@@ -1,0 +1,43 @@
+\import std.Data[].FinSet[] \as Fin;
+\import R.FiniteSums[] \as Sums;
+\import complex.Complex[] \as C;
+\import C.Def[] \as ComplexArithmetic;
+\import C.Prop[] \as Laws;
+\import linear_algebra.Hermitian[].Over[K := R.Real, field := R.Algebra[].field, scalar := Hermitian.Real[].scalar] \as RealVectors;
+\import RealVectors.Finite[n := ambient] \as Real;
+\import Real.Blocks[m := ambient] \as Blocks;
+\import RealVectors.Finite[n := realDimension ambient] \as Total;
+\import linear_algebra.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, scalar := Hermitian.Complex[].scalar].Finite[n := ambient] \as Native;
+\definition first[v: Native.Vector]: Real.Vector := \fun (i: Fin.Fin ambient) => C.re (v i);
+\definition second[v: Native.Vector]: Real.Vector := \fun (i: Fin.Fin ambient) => C.im (v i);
+\definition coordinateNorm[z: C.Complex]: ComplexArithmetic.normSq z =
+  (Hermitian.Complex[].scalar).realPart (Numbers.Algebra[].field.mul ((Hermitian.Complex[].scalar).conjugate z) z) :=
+  sym!{R.Real} _ _ (congr!{C.Complex R.Real} C.re _ _ (Laws.conjMulSelf z));
+\definition vector[v: Native.Vector]: Total.squared (Coordinates.frame.forward.apply v) = Native.squared v := \block {
+  \let f: Fin.Fin (realDimension ambient) -> R.Real :=
+    \fun (i: Fin.Fin (realDimension ambient)) => R.mul (Coordinates.frame.forward.apply v i) (Coordinates.frame.forward.apply v i) \then
+  \return trans!{R.Real} _ _ _ (Sums.blocks ambient ambient f)
+    (trans!{R.Real} _ _ _
+      (congr!{R.Real R.Real R.Real} R.add _ _ _ _
+        (Sums.congruent ambient _ _ (\fun (i: Fin.Fin ambient) =>
+          congr!{R.Real R.Real} (\fun (a: R.Real) => R.mul a a) _ _
+            (congr!{{Real.Vector} {R.Real}} (\fun (u: Real.Vector) => u i) _ _ (Blocks.leftJoin (first v) (second v)))))
+        (Sums.congruent ambient _ _ (\fun (i: Fin.Fin ambient) =>
+          congr!{R.Real R.Real} (\fun (a: R.Real) => R.mul a a) _ _
+            (congr!{{Real.Vector} {R.Real}} (\fun (u: Real.Vector) => u i) _ _ (Blocks.rightJoin (first v) (second v))))))
+      (trans!{R.Real} _ _ _
+        (sym!{R.Real} _ _ (Sums.addition ambient
+          (\fun (i: Fin.Fin ambient) => R.mul (first v i) (first v i))
+          (\fun (i: Fin.Fin ambient) => R.mul (second v i) (second v i))))
+        (Sums.congruent ambient _ _ (\fun (i: Fin.Fin ambient) => coordinateNorm (v i)))))
+};
+\import thom_spaces.Thom[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].For[X := Space, F := Line, bundle := bundle].With[metric := metric] \as RealDisk;
+\import \parent.\parent.Hopf[] \as Hopf;
+\import thom_spaces.Thom[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, conjugation := Hermitian.Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar].For[X := Space, F := Line, bundle := lineBundle]
+  .With[metric := \root.Complex[dimension := dimension].CanonicalLine[].metric] \as ComplexDisk;
+\definition squared[p: Family.Point]: RealDisk.squared p = ComplexDisk.squared (Realify.backward p) :=
+  trans!{R.Real} _ _ _ (Total.squaredFormula (coordinates p))
+    (trans!{R.Real} _ _ _ (vector (nativeCoordinates p)) (sym!{R.Real} _ _ (Hopf.squared (Realify.backward p))));
+\module Sphere;

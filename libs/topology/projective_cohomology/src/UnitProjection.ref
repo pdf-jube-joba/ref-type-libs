@@ -1,0 +1,25 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import \root.Degrees[] \as Degrees;
+\import \root.Symbols[n := n] \as Indices;
+\import linear_algebra.Hermitian[].Over[K := K, field := field, scalar := scalar] \as Geometry;
+\import linear_algebra.Commutative[K := K, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing K field] \as Linear;
+\import Geometry.Finite[n := n] \as E;
+\import Geometry.Finite[n := Degrees.one] \as Domain;
+\import Geometry.Inner[V := E.Vector, space := E.space].Of[h := E.form] \as Inner;
+\import hermitian_frames.Hermitian[].Over[K := K, field := field, scalar := scalar, topological := topological].At[n := n] \as Ambient;
+\import Linear.Laws[V := E.Vector, space := E.space] \as Vector;
+\definition index: Fin.Fin Degrees.one := Fin.zero N.Nat^::zero;
+\definition constant[a: K]: Domain.Vector := \fun (_: Fin.Fin Degrees.one) => a;
+\definition constantLaw[v: Domain.Vector]: constant (v index) = v :=
+  \axiom:funext(constant (v index), v, \fun (i: Fin.Fin Degrees.one) => congr!{{Fin.Fin Degrees.one} K} v _ _ (sym!{{Fin.Fin Degrees.one}} _ _ (Indices.singleton i)));
+\module At(v: E.Vector, unit: E.dot v v = field.one);
+\module Family(X: \Set, space: topology.Topology[Carrier := X].Topology, v: X -> E.Vector,
+  unit: \forall (x: X) -> E.dot (v x) (v x) = field.one,
+  continuous: Ambient.Families[X := X].Continuous space v);

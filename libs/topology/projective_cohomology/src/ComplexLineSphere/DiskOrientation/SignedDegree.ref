@@ -1,0 +1,22 @@
+\import singular_cohomology.Chains[A := A, source := source] \as NativeChains;
+\import singular_cohomology.Simplices[A := A, source := source] \as Simplices;
+\import singular_cohomology.Cochains[A := A, source := source].With[coefficients := coefficients] \as Native;
+\import Native.Integer[] \as Signed;
+\import chain_complexes.Cochain[].Over[R := I.Int^, ring := Integers.ring] \as CochainsOnNatural;
+\import CochainsOnNatural.ZeroExtension[C := Native.complex] \as ExtendedSource;
+\import Nonnegative.ZeroExtension[C := NativeChains.complex] \as ExtendedChains;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.ZeroExtension[P := NativeChains.complex, N := coefficients].Positive[n := n] \as Comparison;
+\import Hom.Integer[P := ExtendedChains.complex, N := coefficients] \as SignedMaps;
+\definition degree: I.Int^ := I.Int^::ofNat n;
+\definition Term: \Set := Signed.Carrier degree;
+\definition extend[h: Native.Carrier n]: Term := Comparison.to (ExtendedSource.Positive[n := n].intro h);
+\definition restrict[h: Term]: Native.Carrier n := Comparison.from h;
+\definition value[h: Term][x: NativeChains.Carrier n]: coefficients.Carrier := (restrict h).apply x;
+\definition onExtend[h: Native.Carrier n][x: NativeChains.Carrier n]: value (extend h) x = h.apply x := \refl(h.apply x);
+\definition ext[h, j: Term][same: \forall (x: NativeChains.Carrier n) -> value h x = value j x]: h = j :=
+  SignedMaps.At[z := degree].ext h j (\fun (x: ExtendedChains.Carrier degree) => same x);
+\import Modules.Free[Generators := Simplices.Carrier n].To[W := coefficients.Carrier, target := coefficients.space] \as Free;
+\definition fromGenerators[h, j: Term][same: \forall (s: Simplices.Carrier n) -> value h (NativeChains.generator n s) = value j (NativeChains.generator n s)]: h = j :=
+  ext h j (\fun (x: NativeChains.Carrier n) => congr!{{Native.Carrier n} {coefficients.Carrier}}
+    (\fun (u: Native.Carrier n) => u.apply x) _ _ (Free.ext (restrict h) (restrict j) same));

@@ -1,0 +1,17 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\definition Sphere: \Set := Spheres.Carrier Degrees.two;
+\definition sphereTopology: topology.Topology[Carrier := Sphere].Topology := Spheres.topology Degrees.two;
+\import \parent.Nonzero[] \as Nonzero;
+\definition remaining[s: \Cast[Sphere] Base.right]: D.Lt R.zero (R.sub R.one (height s)) := Nonzero.remaining s;
+\definition squaredPositive[s: \Cast[Sphere] Base.right]: D.Lt R.zero (Disk.squared (sphereSection s)) := Nonzero.squaredPositive s;
+\definition positive[s: \Cast[Sphere] Base.right]: D.Lt R.zero (Disk.norm (sphereSection s)) := Nonzero.positive s;
+\import singular_cohomology.Relative[A := Sphere, source := sphereTopology, subset := Base.right].Maps[B := Disk.DiskBundle]
+  .Over[target := Disk.diskTopology, targetSubset := Punctured.subset] \as Pairs;
+\definition pair: Pairs.Map := \into[Sphere -> Disk.DiskBundle](sphereSection, Pairs.Map) \by {
+  Pairs.Laws[sphereSection] { continuous := sphereContinuous, contained := positive }
+};
+\import cohomology_thom.RelativePullback[].On[A := Sphere, source := sphereTopology, subset := Base.right, R := I.Int^, ring := Integers.commutativeRing]
+  .To[B := Disk.DiskBundle, target := Disk.diskTopology, part := Punctured.subset].Along[f := pair].Degree[n := Degrees.two] \as Pull;
+\definition class: _ := Pull.map.apply Punctured.Relative[].thomClass;
+\module Forgetting;

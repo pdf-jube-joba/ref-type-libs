@@ -1,0 +1,22 @@
+\import singular_cohomology.Relative[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary] \as Pair;
+\import Pair.With[coefficients := Singular.integerCoefficients] \as Cochains;
+\import PairSequence.LongExact[z := I.Int^::ofNat N.Nat^::zero] \as Sequence;
+\import \root.ZeroDegree[X := BoundarySpace.CarrierSet, space := BoundarySpace.topology Disk.diskTopology, K := Two.Carrier, ring := Two.commutativeRing]
+  .Along[Y := Disk.DiskBundle, target := Disk.diskTopology, f := Pair.inclusion, continuous := Pair.inclusionContinuous] \as Pull;
+\definition z: I.Int^ := I.Int^::ofNat N.Nat^::zero;
+\definition next: I.Int^ := I.Int^::ofNat Degrees.one;
+\definition restrict: Abelian.MapBetween (Raw.disk z) (Raw.boundary z) :=
+  Geometry.Additive[coefficients := Singular.integerCoefficients].Degree[z := z].sphereRestriction;
+\definition restrictionLaw[a: (Raw.disk z).Carrier]: restrict.apply a = Pull.map.apply a :=
+  \refl(restrict.apply a);
+\definition connectingZero: Order.Lt N.Nat^::zero dimension ->
+  \forall (a: (Raw.boundary z).Carrier) -> Sequence.connecting.apply a = (Raw.relative next).space.zero := \block {
+    \fun (bound: Order.Lt N.Nat^::zero dimension)(a: (Raw.boundary z).Carrier) \then
+    \takefrom b: \Cast[(Raw.disk z).Carrier] ({ b: (Raw.disk z).Carrier \where Pull.map.apply b = a }) \by
+      Pull.onto (connected bound) point a \then
+    \return \idelim restrict.apply b = a \with q: (Raw.boundary z).Carrier => Sequence.connecting.apply q = (Raw.relative next).space.zero \by {
+      base: Sequence.projectionConnectingZero b,
+      equality: trans!{{(Raw.boundary z).Carrier}} _ _ _ (restrictionLaw b)
+        (\bysub((Raw.disk z).Carrier, { b: (Raw.disk z).Carrier \where Pull.map.apply b = a }, b))
+    }
+  };

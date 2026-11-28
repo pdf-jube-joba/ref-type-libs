@@ -1,0 +1,52 @@
+\import \parent.Orientation[] \as Orientation;
+\import Geometry.Coefficients[R := I.Int^, ring := Integers.commutativeRing].Degree[n := Degrees.two] \as Relative;
+\definition restriction[x: Space]: _ :=
+  Geometry.Fiber[x := x].Additive[coefficients := Product.integerCoefficients, z := I.Int^::ofNat Degrees.two].restriction;
+\definition Normalized[u: Relative.Class]: \Prop :=
+  \forall (x: Space) -> (restriction x).apply u = Orientation.fiber x;
+\definition normalizedClasses: \Pow Relative.Class := { u: Relative.Class \where Normalized u };
+\definition NormalizedClass: \Set := \Cast[Relative.Class] normalizedClasses;
+\definition underlying[u: NormalizedClass]: Relative.Class := u;
+\module At(cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]) {
+  \import Geometry.Oriented[K := I.Int^, ring := Integers.commutativeRing, n := Degrees.two, orientation := Orientation.orientation, complex := cw] \as Thom;
+  \definition witness: NormalizedClass := \into[Relative.Class](Thom.class, normalizedClasses) \by { Thom.normalized };
+  \definition equal[u: NormalizedClass]: underlying u = Thom.class :=
+    Thom.uniqueNormalized u (\bysub(Relative.Class, normalizedClasses, u));
+}
+\definition exists: \exists NormalizedClass := \block {
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return \exact(At[cw := cw].witness, NormalizedClass)
+};
+\definition unique: \forall (u, v: NormalizedClass) -> u = v := \block {
+  \fun (u, v: NormalizedClass) \then
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return trans!{{Relative.Class}} _ _ _ (At[cw := cw].equal u)
+    (sym!{{Relative.Class}} _ _ (At[cw := cw].equal v))
+};
+\definition thomClass: NormalizedClass := \choice NormalizedClass \by { existence: exists, uniqueness: unique };
+\definition generator: H.Group Degrees.two := Relative.euler thomClass;
+\module Compare(cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]) {
+  \import \parent.\parent.Oriented[orientation := Orientation.orientation, cw := cw] \as WithCW;
+  \definition euler: WithCW.euler = generator :=
+    congr!{{Relative.Class} {H.Group Degrees.two}} Relative.euler _ _
+      (sym!{{Relative.Class}} _ _ (\parent.At[cw := cw].equal thomClass));
+}
+\import \parent.EvenPowers[generator := generator] \as Terms;
+\definition power: _ := Terms.power;
+\definition first: power Degrees.one = generator := Terms.first;
+\definition monomial: _ := Terms.monomial;
+\module Basis(k: N.Nat^);
+\module Product(p, q: N.Nat^) {
+  \definition total: N.Nat^ := Nat.add p q;
+  \definition cup: _ := Terms.Multiply[p := p].cup q;
+  \definition multiply: _ := Terms.Multiply[p := p].Monomials[q := q].law;
+  \import \root.Complex[dimension := dimension].Additive[].Ordinary[k := Terms.d total] \as Vanishing;
+  \definition truncated[bound: Basic.Lt dimension total][a: H.Group (Terms.d p)][b: H.Group (Terms.d q)]:
+    cup a b = (H.moduleSpace (Terms.d total)).zero :=
+    Vanishing.aboveDimension (Degrees.doubleStrict dimension total bound) (cup a b);
+}
+\import \root.Complex[dimension := dimension].Additive[] \as Additive;
+\definition odd[i: N.Nat^]: \forall (u: H.Group (N.Nat^::succ (Terms.d i))) -> u = (H.moduleSpace (N.Nat^::succ (Terms.d i))).zero :=
+  Additive.Ordinary[k := N.Nat^::succ (Terms.d i)].vanishes (Additive.odd i);
+\definition powerAbove[k: N.Nat^][bound: Basic.Lt dimension k]: power k = (H.moduleSpace (Terms.d k)).zero :=
+  Additive.Ordinary[k := Terms.d k].aboveDimension (Degrees.doubleStrict dimension k bound) (power k);

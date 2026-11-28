@@ -1,0 +1,35 @@
+\import algebraic_topology.Interval[] \as Interval;
+\import algebraic_topology.Cylinder[A := Point] \as Cylinder;
+\import algebraic_topology.Cylinder[A := Punctured.Carrier] \as GlobalCylinder;
+\definition source: topology.Topology[Carrier := Cylinder.Carrier].Topology := Cylinder.topology topology;
+\definition intoGlobal[p: Cylinder.Carrier]: GlobalCylinder.Carrier := GlobalCylinder.at (Cylinder.time p) (global (Cylinder.point p));
+\definition intoGlobalContinuous: topology.Continuity[A := Cylinder.Carrier, B := GlobalCylinder.Carrier].Continuous source (GlobalCylinder.topology Punctured.topology) intoGlobal :=
+  topological_constructions.Product[A := Interval.Carrier, B := Punctured.Carrier].Universal[X := Cylinder.Carrier].pairContinuous
+    source Interval.topology Punctured.topology Cylinder.time (\fun (p: Cylinder.Carrier) => global (Cylinder.point p))
+    (Cylinder.timeContinuous topology)
+    (topology.Composition[A := Cylinder.Carrier, B := Point, C := Punctured.Carrier].composeContinuous
+      source topology Punctured.topology Cylinder.point global (Cylinder.pointContinuous topology) globalContinuous);
+\definition inDisk[p: Cylinder.Carrier]: Disk.DiskBundle := Retraction.at (intoGlobal p);
+\definition diskContinuous: topology.Continuity[A := Cylinder.Carrier, B := Disk.DiskBundle].Continuous source Disk.diskTopology inDisk :=
+  topology.Composition[A := Cylinder.Carrier, B := GlobalCylinder.Carrier, C := Disk.DiskBundle].composeContinuous
+    source (GlobalCylinder.topology Punctured.topology) Disk.diskTopology intoGlobal Retraction.at intoGlobalContinuous Retraction.atContinuous;
+\definition local[p: Cylinder.Carrier]: Open.Carrier := \into[Disk.DiskBundle](inDisk p, Open.domain) \by {
+  \bysub(Disk.DiskBundle, Open.domain, Cylinder.point p)
+};
+\definition localContinuous: topology.Continuity[A := Cylinder.Carrier, B := Open.Carrier].Continuous source Open.topology local :=
+  topology.Continuity[A := Cylinder.Carrier, B := Disk.DiskBundle].Corestriction[S := Open.domain].corestrictContinuous source Disk.diskTopology local diskContinuous;
+\definition family[p: Cylinder.Carrier]: Point := \into[Open.Carrier](local p, subset) \by {
+  Punctured.positive (Retraction.family (intoGlobal p))
+};
+\definition continuous: topology.Continuity[A := Cylinder.Carrier, B := Point].Continuous source topology family :=
+  topology.Continuity[A := Cylinder.Carrier, B := Open.Carrier].Corestriction[S := subset].corestrictContinuous source Open.topology family localContinuous;
+\import algebraic_topology.Homotopy[A := Point, B := Point] \as Homotopies;
+\definition composition[p: Point]: Point := include (retraction p);
+\definition homotopy: Homotopies.Homotopy[topology, topology, (\fun (p: Point) => p), composition] :=
+  \into[Homotopies.Family](family, Homotopies.Homotopy[topology, topology, (\fun (p: Point) => p), composition]) \by {
+    Homotopies.Laws[topology, topology, (\fun (p: Point) => p), composition, family] {
+      continuous := continuous,
+      start := \fun (p: Point) => Retraction.start (global p),
+      end := \fun (p: Point) => Retraction.end (global p)
+    }
+  };

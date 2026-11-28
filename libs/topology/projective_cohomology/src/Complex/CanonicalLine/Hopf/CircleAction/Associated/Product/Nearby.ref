@@ -1,0 +1,25 @@
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import metric_spaces.RealLine[] \as RealLine;
+\definition point[x: Space]: Family.Point := Family.include x (Universal.At[x := x].project.apply v);
+\definition coordinates[x: Space]: E.Vector := (point x).vector;
+\definition coordinatesContinuous: topology.Continuity[A := Space, B := E.Vector].Continuous lineBundle.baseSpace (Bundles.coordinateTopology ambient) coordinates :=
+  topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].Universal[A := Space].continuous
+    lineBundle.baseSpace Hermitian.Complex[].topological.space coordinates (\fun (i: Fin.Fin ambient) => Model.regular v i);
+\definition pointContinuous: topology.Continuity[A := Space, B := Family.Point].Continuous lineBundle.baseSpace lineBundle.totalSpace point :=
+  Universal.Universal[Y := Space, source := lineBundle.baseSpace].continuous point
+    (topology.Maps[A := Space, B := Space].Identity[].continuous lineBundle.baseSpace) coordinatesContinuous;
+\definition norm[x: Space]: R.Real := Disk.norm (point x);
+\definition normContinuous: metric_spaces.RealFunctions[A := Space].Continuous lineBundle.baseSpace norm :=
+  topology.Composition[A := Space, B := Family.Point, C := R.Real].composeContinuous
+    lineBundle.baseSpace lineBundle.totalSpace RealLine.topology point Disk.norm pointContinuous Disk.normContinuous;
+\definition domain: \Pow Space := { x: Space \where D.Lt R.zero (norm x) };
+\definition domainOpen: topology.Topology[Carrier := Space].IsOpenIn lineBundle.baseSpace domain :=
+  normContinuous (RealLine.Rays[].Above R.zero) (RealLine.Rays[].aboveOpen R.zero);
+\definition center: point (projection v) = toBundle v := Family.ext _ _ (\refl(projection v))
+  (trans!{{E.Vector}} _ _ _ (castVector _ _ (\refl(projection v)) (point (projection v)).vector) (fixed v));
+\definition normCenter: norm (projection v) = R.one :=
+  trans!{R.Real} _ _ _ (congr!{{Family.Point} {R.Real}} Disk.norm _ _ center) (Disk.sphereNorm (toBundle v));
+\definition member: \In[Space] domain (projection v) :=
+  D.ltReplaceRight R.zero R.one (norm (projection v)) (sym!{R.Real} _ _ normCenter) R.Estimates[].Product[].onePositive;
+\module Frame;

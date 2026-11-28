@@ -1,0 +1,123 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import Cells.Filtration[].CellInteriors[n := n] \as Interiors;
+\import Cells.Layer[n := n].Basis[] \as Basis;
+\import Abelian.DirectSum[Index := Interiors.Index, family := Basis.scalars] \as Sum;
+\import Sum.FiniteSupport[] \as Coordinates;
+\import Abelian.Product[Index := Interiors.Index, family := Basis.scalars] \as Product;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\definition Empty: \Prop := \forall (cell: Interiors.Index) -> Logic.False;
+\definition emptySum[empty: Empty]: \forall (x: Sum.Carrier) -> x = Sum.space.zero :=
+  \fun (x: Sum.Carrier) => Coordinates.injective x Sum.space.zero
+    (trans!{Product.Carrier} _ _ _
+      (\axiom:funext(Coordinates.coordinates x, Product.zero,
+        \fun (cell: Interiors.Index) => Logic.falseElim _ (empty cell)))
+      (sym!{Product.Carrier} _ _ Coordinates.coordinatesZero));
+\import Abelian.Isomorphism[V := Sum.Carrier, W := chain.family.Carrier n,
+  source := Sum.space, target := chain.family.space n].Vanishing[] \as ChainComparison;
+\definition chainZero[empty: Empty]: \forall (x: chain.family.Carrier n) -> x = (chain.family.space n).zero :=
+  ChainComparison.targetZero Basis.isomorphism (emptySum empty);
+\definition integerZero[empty: Empty]: \forall (x: integerChain.family.Carrier z) -> x = (integerChain.family.space z).zero :=
+  \fun (x: integerChain.family.Carrier z) => chainZero empty x;
+\definition cochainZero[empty: Empty]: \forall (h: Hom.Carrier z) -> h = (Hom.space z).zero :=
+  \fun (h: Hom.Carrier z) => Hom.At[z := z].ext h (Hom.space z).zero
+    (\fun (x: integerChain.family.Carrier z) =>
+      trans!{K} _ _ _ (congr!{{integerChain.family.Carrier z} K} h.apply _ _ (integerZero empty x))
+        (Hom.At[z := z].zeroPreserved h));
+\import Cochains.At[C := integerCochain, z := z] \as Cohomology;
+\import Abelian.Hom[V := Cohomology.Closed, W := Cohomology.Cohomology, source := Cohomology.cycleSpace, target := Cohomology.cohomologySpace] \as Quotient;
+\definition cohomologyZero[empty: Empty]: \forall (a: Cohomology.Cohomology) -> a = Cohomology.cohomologySpace.zero :=
+  Cohomology.classInduction (\fun (a: Cohomology.Cohomology) => a = Cohomology.cohomologySpace.zero)
+    (\fun (h: Cohomology.Closed) =>
+      (\idelim (Hom.space z).zero = h \with c: Hom.Carrier z =>
+        \forall (closed: Hom.apply z c = (Hom.space (Hom.next z)).zero) ->
+          Cohomology.classOf (Cohomology.cycle c closed) = Cohomology.cohomologySpace.zero \by {
+            base: \fun (closed: _) => Quotient.zeroPreserved Cohomology.classLinear,
+            equality: sym!{{Hom.Carrier z}} _ _ (cochainZero empty h)
+          }) (Hom.Cohomology[z := z].closed h));
+\module Singleton(cell: Interiors.Index, unique: \forall (other: Interiors.Index) -> other = cell) {
+  \import Sum.Single[point := cell] \as Coordinate;
+  \definition freeBasis: _ := Coordinate.isomorphism
+    (\fun (other: Interiors.Index)(different: Logic.Not (other = cell))(x: I.Int^) => Logic.falseElim _ (different (unique other)));
+  \import Abelian.Isomorphism[V := Sum.Carrier, W := I.Int^, source := Sum.space, target := Abelian.scalarModule].Inverse[] \as Reverse;
+  \import Abelian.Isomorphism[V := I.Int^, W := Sum.Carrier, source := Abelian.scalarModule, target := Sum.space]
+    .Composition[U := chain.family.Carrier n, final := chain.family.space n] \as ViaSum;
+  \definition basis: _ := ViaSum.compose Basis.isomorphism (Reverse.inverse freeBasis);
+  \import Abelian.Isomorphism[V := I.Int^, W := chain.family.Carrier n, source := Abelian.scalarModule, target := chain.family.space n]
+    .Composition[U := integerChain.family.Carrier z, final := integerChain.family.space z] \as ViaExtension;
+  \definition integerBasis: _ := ViaExtension.compose Extension.Positive[n := n].isomorphism basis;
+
+  \import Hom.At[z := z] \as Raw;
+  \definition coeff: Abelian.Space K := Singular.integerCoefficients.space;
+  \definition generator: integerChain.family.Carrier z := integerBasis.forward.apply Integers.ring.one;
+  \import Abelian.Hom[V := Raw.Carrier, W := K, source := Raw.space, target := coeff] \as Evaluation;
+  \definition evaluate: Evaluation.Map := Evaluation.Map {
+    apply := \fun (h: Raw.Carrier) => h.apply generator,
+    addition := \fun (h, g: Raw.Carrier) => \refl(coeff.add (h.apply generator) (g.apply generator)),
+    scalar := \fun (a: I.Int^)(h: Raw.Carrier) => \refl(coeff.smul a (h.apply generator))
+  };
+  \import Abelian.Hom[V := K, W := Raw.Carrier, source := coeff, target := Raw.space] \as FromCoefficient;
+  \import Abelian.Hom[V := integerChain.family.Carrier z, W := K, source := integerChain.family.space z, target := coeff] \as Linear;
+  \definition realize[a: K]: Linear.Map := Linear.Map {
+    apply := \fun (x: integerChain.family.Carrier z) => coeff.smul (integerBasis.backward.apply x) a,
+    addition := \fun (x, y: integerChain.family.Carrier z) => trans!{K} _ _ _
+      (congr!{I.Int^ K} (\fun (k: I.Int^) => coeff.smul k a) _ _ (integerBasis.backward.addition x y))
+      (coeff.scalarAdd (integerBasis.backward.apply x) (integerBasis.backward.apply y) a),
+    scalar := \fun (r: I.Int^)(x: integerChain.family.Carrier z) => trans!{K} _ _ _
+      (congr!{I.Int^ K} (\fun (k: I.Int^) => coeff.smul k a) _ _ (integerBasis.backward.scalar r x))
+      (coeff.scalarAssoc r (integerBasis.backward.apply x) a)
+  };
+  \definition fromCoefficient: FromCoefficient.Map := FromCoefficient.Map {
+    apply := realize,
+    addition := \fun (a, b: K) => Raw.ext _ _ (\fun (x: integerChain.family.Carrier z) => coeff.vectorAdd (integerBasis.backward.apply x) a b),
+    scalar := \fun (r: I.Int^)(a: K) => Raw.ext _ _ (\fun (x: integerChain.family.Carrier z) =>
+      trans!{K} _ _ _ (sym!{K} _ _ (coeff.scalarAssoc (integerBasis.backward.apply x) r a))
+        (trans!{K} _ _ _
+          (congr!{I.Int^ K} (\fun (k: I.Int^) => coeff.smul k a) _ _
+            (Integers.commutativeRing.mulCommutative (integerBasis.backward.apply x) r))
+          (coeff.scalarAssoc r (integerBasis.backward.apply x) a)))
+  };
+  \definition coordinate[x: integerChain.family.Carrier z]: (integerChain.family.space z).smul (integerBasis.backward.apply x) generator = x :=
+    trans!{{integerChain.family.Carrier z}} _ _ _
+      (sym!{{integerChain.family.Carrier z}} _ _ (integerBasis.forward.scalar (integerBasis.backward.apply x) Integers.ring.one))
+      (trans!{{integerChain.family.Carrier z}} _ _ _
+        (congr!{I.Int^ {integerChain.family.Carrier z}} integerBasis.forward.apply _ _
+          ((Integers.ring.semiring.multiplicative).rightIdentity (integerBasis.backward.apply x)))
+        (integerBasis.rightInverse x));
+  \import Abelian.Isomorphism[V := K, W := Raw.Carrier, source := coeff, target := Raw.space] \as CochainBasis;
+  \definition cochainBasis: CochainBasis.Isomorphism := CochainBasis.Isomorphism {
+    forward := fromCoefficient, backward := evaluate,
+    leftInverse := \fun (a: K) => trans!{K} _ _ _
+      (congr!{I.Int^ K} (\fun (k: I.Int^) => coeff.smul k a) _ _ (integerBasis.leftInverse Integers.ring.one))
+      (coeff.scalarOne a),
+    rightInverse := \fun (h: Raw.Carrier) => Raw.ext _ _ (\fun (x: integerChain.family.Carrier z) => trans!{K} _ _ _
+      (sym!{K} _ _ (h.scalar (integerBasis.backward.apply x) generator))
+      (congr!{{integerChain.family.Carrier z} K} h.apply _ _ (coordinate x)))
+  };
+
+  \import Cochains.At[C := integerCochain, z := z].ZeroDifferentials[] \as ClosedBasis;
+  \import Abelian.Isomorphism[V := K, W := Raw.Carrier, source := coeff, target := Raw.space]
+    .Composition[U := Cohomology.Cohomology, final := Cohomology.cohomologySpace] \as IntoCohomology;
+  \import chain_complexes.Integer[] \as Degrees;
+  \import Abelian.Hom[V := Hom.Carrier (Degrees.previous z), W := Hom.Carrier z,
+    source := Hom.space (Degrees.previous z), target := Hom.space z] \as Prior;
+  \definition cohomologyBasis[nextZero: \forall (f: Hom.Carrier (Degrees.next z)) -> f = (Hom.space (Degrees.next z)).zero]
+    [previousZero: \forall (f: Hom.Carrier (Degrees.previous z)) -> f = (Hom.space (Degrees.previous z)).zero]: _ :=
+    IntoCohomology.compose (ClosedBasis.isomorphism
+      (\fun (f: Raw.Carrier) => nextZero (Cohomology.differential.apply f))
+      (\fun (f: Hom.Carrier (Degrees.previous z)) => trans!{{Raw.Carrier}} _ _ _
+        (congr!{{Hom.Carrier (Degrees.previous z)} {Raw.Carrier}} Cohomology.prior.apply _ _ (previousZero f))
+        (Prior.zeroPreserved Cohomology.prior))) cochainBasis;
+
+}
+\import singular_cohomology.Cochains[A := X, source := space].With[coefficients := Singular.integerCoefficients].Integer[] \as SingularInteger;
+\import Abelian.Isomorphism[V := SingularInteger.cohomology z, W := Cohomology.Cohomology, source := SingularInteger.cohomologySpace z,
+  target := Cohomology.cohomologySpace].Vanishing[] \as Transport;
+\definition singularZero: Empty -> \forall (a: SingularInteger.cohomology z) -> a = (SingularInteger.cohomologySpace z).zero := \block {
+  \fun (empty: Empty)(a: SingularInteger.cohomology z) \then
+  \takefrom selection: Representatives.Selection \by representativesExist \then
+  \return Transport.sourceZero \parent.With[selection := selection].Degree[z := z].comparison (cohomologyZero empty) a
+};

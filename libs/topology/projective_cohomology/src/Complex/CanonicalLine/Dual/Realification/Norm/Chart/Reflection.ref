@@ -1,0 +1,77 @@
+\import \parent.TargetFiber[y := point] \as Target;
+\import Target.Angular[] \as TargetAngle;
+\import sphere_maps.Circle[] \as Circle;
+\import Numbers.Absolute[] \as Absolute;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import \parent.\parent.\parent.\parent.At[x := x] \as RieszFiber;
+\definition unitDual[w: Line x][unit: SourceAngle.squared w = R.one]: TargetAngle.squared (RieszFiber.represent w) = R.one :=
+  trans!{R.Real} _ _ _ (squared (Original.include x w)) unit;
+\definition source[w: Line x][unit: SourceAngle.squared w = R.one]: Circle.Carrier := SourceFiber.angle (SourceAngle.fromUnit w unit);
+\definition target[w: Line x][unit: SourceAngle.squared w = R.one]: Circle.Carrier := Target.angle (TargetAngle.fromUnit (RieszFiber.represent w) (unitDual w unit));
+\definition coeff[w: Line x]: R.Real := SourceAngle.scale w;
+\definition reciprocal[w: Line x]: R.Real := Laws.fieldInv (coeff w);
+\definition sourceNonzero[w: Line x][unit: SourceAngle.squared w = R.one]: std.Logic[].Proposition[].Not (coeff w = R.zero) :=
+  \fun (vanishes: _) => R.Algebra[].field.nontrivial (eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (Laws.fieldMulZeroLeft R.zero) }
+    "=" _ "by" { sym!{R.Real} _ _ (Phase.realNorm R.zero) }
+    "=" _ "by" { congr!{Numbers.Complex R.Real} C.normSq _ _ (sym!{Numbers.Complex} _ _
+      (eq_reason_in!{Numbers.Complex _
+        "=" _ "by" { SourceAngle.formula w unit }
+        "=" _ "by" { congr!{R.Real Numbers.Complex} (\fun (r: R.Real) => C.mul (C.ofReal r) (SourceAngle.value w)) _ _ vanishes }
+        "=" _ "by" { ComplexLaws.mulZeroLeft (SourceAngle.value w) }
+      })) }
+    "=" _ "by" { Circle.norm (source w unit) }
+  });
+\definition realConjugate[a: R.Real]: C.conj (C.ofReal a) = C.ofReal a :=
+  ComplexLaws.ext _ _ (\refl(a)) Laws.negZero;
+\definition sourceInverse[w: Line x][unit: SourceAngle.squared w = R.one]:
+  Circle.inverse (source w unit) = C.mul (C.ofReal (coeff w)) (C.conj (SourceAngle.value w)) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} C.conj _ _ (SourceAngle.formula w unit) }
+    "=" _ "by" { ComplexLaws.conjMul (C.ofReal (coeff w)) (SourceAngle.value w) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (a: Numbers.Complex) => C.mul a (C.conj (SourceAngle.value w))) _ _ (realConjugate (coeff w)) }
+  };
+\definition recover[w: Line x][unit: SourceAngle.squared w = R.one]:
+  C.mul (C.ofReal (reciprocal w)) (Circle.inverse (source w unit)) = C.conj (SourceAngle.value w) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.ofReal (reciprocal w))) _ _ (sourceInverse w unit) }
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (ComplexLaws.mulAssoc (C.ofReal (reciprocal w)) (C.ofReal (coeff w)) (C.conj (SourceAngle.value w))) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (a: Numbers.Complex) => C.mul a (C.conj (SourceAngle.value w))) _ _ (ComplexLaws.ofRealMul (reciprocal w) (coeff w)) }
+    "=" _ "by" { congr!{R.Real Numbers.Complex} (\fun (a: R.Real) => C.mul (C.ofReal a) (C.conj (SourceAngle.value w))) _ _
+      (Laws.fieldInverseNonzero (coeff w) (sourceNonzero w unit)) }
+    "=" _ "by" { ComplexLaws.mulOneLeft (C.conj (SourceAngle.value w)) }
+  };
+\definition targetScale[w: Line x]: R.Real := TargetAngle.scale (RieszFiber.represent w);
+\definition ratio[w: Line x]: R.Real := R.mul (targetScale w) (R.mul lambda (reciprocal w));
+\definition ratioNonnegative[w: Line x]: D.Le R.zero (ratio w) :=
+  Laws.fieldMulNonnegative (targetScale w) (R.mul lambda (reciprocal w)) (TargetAngle.nonnegative (RieszFiber.represent w))
+    (Laws.fieldMulNonnegative lambda (reciprocal w) lambdaNonnegative (SourceAngle.inverseNonnegative (coeff w) (SourceAngle.nonnegative w)));
+\definition formula[w: Line x][unit: SourceAngle.squared w = R.one]:
+  target w unit = C.mul (C.ofReal (ratio w)) (Circle.inverse (source w unit)) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { TargetAngle.formula (RieszFiber.represent w) (unitDual w unit) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.ofReal (targetScale w))) _ _ (coordinateFormula w) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (a: Numbers.Complex) => C.mul (C.ofReal (targetScale w)) (C.mul (C.ofReal lambda) a)) _ _
+      (sym!{Numbers.Complex} _ _ (recover w unit)) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.ofReal (targetScale w))) _ _
+      (sym!{Numbers.Complex} _ _ (ComplexLaws.mulAssoc (C.ofReal lambda) (C.ofReal (reciprocal w)) (Circle.inverse (source w unit)))) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (a: Numbers.Complex) => C.mul (C.ofReal (targetScale w)) (C.mul a (Circle.inverse (source w unit)))) _ _
+      (ComplexLaws.ofRealMul lambda (reciprocal w)) }
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (ComplexLaws.mulAssoc (C.ofReal (targetScale w)) (C.ofReal (R.mul lambda (reciprocal w))) (Circle.inverse (source w unit))) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (a: Numbers.Complex) => C.mul a (Circle.inverse (source w unit))) _ _
+      (ComplexLaws.ofRealMul (targetScale w) (R.mul lambda (reciprocal w))) }
+  };
+\definition unitRatio[w: Line x][unit: SourceAngle.squared w = R.one]: R.one = ratio w :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (Phase.unitAbs (target w unit)) }
+    "=" _ "by" { congr!{Numbers.Complex R.Real} Absolute.abs _ _ (formula w unit) }
+    "=" _ "by" { Absolute.multiplicative (C.ofReal (ratio w)) (Circle.inverse (source w unit)) }
+    "=" _ "by" { congr!{R.Real R.Real R.Real} R.mul _ _ _ _ (Phase.realAbs (ratio w) (ratioNonnegative w)) (Phase.unitAbs (Circle.inverse (source w unit))) }
+    "=" _ "by" { R.Algebra[].mulOneRight (ratio w) }
+  };
+\definition inverseLaw[w: Line x][unit: SourceAngle.squared w = R.one]: target w unit = Circle.inverse (source w unit) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { formula w unit }
+    "=" _ "by" { congr!{R.Real Numbers.Complex} (\fun (a: R.Real) => C.mul (C.ofReal a) (Circle.inverse (source w unit))) _ _ (sym!{R.Real} _ _ (unitRatio w unit)) }
+    "=" _ "by" { ComplexLaws.mulOneLeft (Circle.inverse (source w unit)) }
+  };

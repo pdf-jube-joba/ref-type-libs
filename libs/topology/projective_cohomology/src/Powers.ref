@@ -1,0 +1,16 @@
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import singular_products.Cochains[A := X, source := space, R := K, ring := ring].Cohomology[] \as Cohomology;
+\definition grading: N.Nat^ -> N.Nat^ := \induction (k: N.Nat^) \return N.Nat^ \with {
+  | zero: N.Nat^::zero
+  | succ: \fun (k: N.Nat^)(previous: N.Nat^) => Nat.add previous degree
+};
+\definition power: \forall (k: N.Nat^) -> Cohomology.Group (grading k) :=
+  \induction (k: N.Nat^) \return Cohomology.Group (grading k) \with {
+    | zero: Cohomology.Unit[].class
+    | succ: \fun (k: N.Nat^)(previous: Cohomology.Group (grading k)) =>
+      Cohomology.Cup[p := grading k, q := degree].apply previous generator
+  };
+\module Pullback(Y: \Set, target: topology.Topology[Carrier := Y].Topology,
+  f: X -> Y, continuous: topology.Continuity[A := X, B := Y].Continuous space target f,
+  other: singular_products.Cochains[A := Y, source := target, R := K, ring := ring].Cohomology[].Group degree);

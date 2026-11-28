@@ -1,0 +1,14 @@
+\import Bundles.Family[X := Space, F := Line] \as ComplexFamily;
+\use std.Logic[].Equality[].congr;
+\definition realSquared[p: ComplexFamily.Point]: RealDisk.squared (Realify.forward p) = ComplexDisk.squared p :=
+  trans!{R.Real} _ _ _ (squared (Realify.forward p))
+    (congr!{{ComplexFamily.Point} {R.Real}} ComplexDisk.squared _ _ (Realify.inverseLaws.leftInverse p));
+\definition complexSquared[p: Family.Point]: ComplexDisk.squared (Realify.backward p) = RealDisk.squared p :=
+  sym!{R.Real} _ _ (squared p);
+\import thom_spaces.Thom[].Levels[A := ComplexFamily.Point, B := Family.Point, source := lineBundle.totalSpace,
+  target := bundle.totalSpace, q := ComplexDisk.squared, r := RealDisk.squared,
+  h := Realify.homeomorphism, forwardSquared := realSquared, backwardSquared := complexSquared] \as Levels;
+\definition comparison: _ := Levels.sphereHomeomorphism;
+\definition overBase[p: ComplexDisk.SphereBundle]:
+  RealDisk.sphereProjection (comparison.forward p) = ComplexDisk.sphereProjection p := \refl(p.base);
+\module Standard;

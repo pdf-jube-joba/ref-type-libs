@@ -1,0 +1,60 @@
+\import std.Data[].Nat[] \as N;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as NativeChains;
+\import singular_cohomology.Chains[A := A, source := source] \as Domain;
+\import singular_cohomology.Chains[A := B, source := target] \as Codomain;
+\import NativeChains.ZeroExtension[C := Domain.complex] \as DomainOrd;
+\import NativeChains.ZeroExtension[C := Codomain.complex] \as CodomainOrd;
+\import Domain.Reduced[] \as DomainRed;
+\import Codomain.Reduced[] \as CodomainRed;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.Integer[P := DomainOrd.complex, N := coefficients] \as DomainOrdinary;
+\import Hom.Integer[P := CodomainOrd.complex, N := coefficients] \as CodomainOrdinary;
+\import Hom.Integer[P := DomainRed.complex, N := coefficients] \as DomainReduced;
+\import Hom.Integer[P := CodomainRed.complex, N := coefficients] \as CodomainReduced;
+\import Cochains.At[C := DomainOrdinary.complex, z := z] \as DomainOrdH;
+\import Cochains.At[C := CodomainOrdinary.complex, z := z] \as CodomainOrdH;
+\import Cochains.At[C := DomainReduced.complex, z := z] \as DomainRedH;
+\import Cochains.At[C := CodomainReduced.complex, z := z] \as CodomainRedH;
+\import Cochains.Map[C := CodomainOrdinary.complex, D := DomainOrdinary.complex].At[k := z] \as OrdinaryPull;
+\import Cochains.Map[C := CodomainReduced.complex, D := DomainReduced.complex].At[k := z] \as ReducedPull;
+\import Modules.End[V := coefficients.Carrier, space := coefficients.space] \as Scalars;
+\import singular_cohomology.Maps[A := A, B := B, source := source, target := target] \as Maps;
+\import Maps.Coefficients[M := coefficients, L := coefficients].Integer[f := f, continuous := regular, coefficientMap := Scalars.identity] \as Ordinary;
+\import Hom.IntegerMapping[P := DomainRed.complex, Q := CodomainRed.complex, N := coefficients, L := coefficients]
+  .On[f := (Maps.Reduced[].map f regular), u := Scalars.identity] \as Reduced;
+\definition ordinaryClosed[h: CodomainOrdH.Closed]: DomainOrdH.Closed := (OrdinaryPull.cyclesMap Ordinary.signedMap).apply h;
+\definition reducedClosed[h: CodomainRedH.Closed]: DomainRedH.Closed := (ReducedPull.cyclesMap Reduced.map).apply h;
+\import \root.ComplexLineSphere[].Orientation[].AugmentationMap[A := A, source := source] \as DomainAugmentation;
+\import \root.ComplexLineSphere[].Orientation[].AugmentationMap[A := B, source := target] \as CodomainAugmentation;
+\import Cochains.Map[C := DomainOrdinary.complex, D := DomainReduced.complex].At[k := z] \as OnDomain;
+\import Cochains.Map[C := CodomainOrdinary.complex, D := CodomainReduced.complex].At[k := z] \as OnCodomain;
+\import Hom.IntegerMapping[P := DomainRed.complex, Q := DomainOrd.complex, N := coefficients, L := coefficients]
+  .On[f := DomainAugmentation.map, u := Scalars.identity] \as ToDomain;
+\import Hom.IntegerMapping[P := CodomainRed.complex, Q := CodomainOrd.complex, N := coefficients, L := coefficients]
+  .On[f := CodomainAugmentation.map, u := Scalars.identity] \as ToCodomain;
+\definition liftRight[h: CodomainOrdH.Closed]: CodomainRedH.Closed := (OnCodomain.cyclesMap ToCodomain.map).apply h;
+\definition liftLeft[h: DomainOrdH.Closed]: DomainRedH.Closed := (OnDomain.cyclesMap ToDomain.map).apply h;
+\definition values[h: CodomainOrdH.Closed][x: Domain.Carrier n]:
+  (Reduced.map.apply z (ToCodomain.map.apply z h)).apply x =
+    (ToDomain.map.apply z (Ordinary.signedMap.apply z h)).apply x := \block {
+  \let cochain: CodomainOrdinary.Carrier z := h \then
+  \return \refl(cochain.apply (CodomainOrd.Positive[n := n].intro ((Maps.push f regular).apply n x)))
+};
+\definition onCochains[h: CodomainOrdH.Closed]:
+  Reduced.map.apply z (ToCodomain.map.apply z h) = ToDomain.map.apply z (Ordinary.signedMap.apply z h) :=
+    DomainReduced.At[z := z].ext _ _ (\fun (x: Domain.Carrier n) => values h x);
+\definition onCycles[h: CodomainOrdH.Closed]: reducedClosed (liftRight h) = liftLeft (ordinaryClosed h) :=
+  (\idelim Reduced.map.apply z (ToCodomain.map.apply z h) = ToDomain.map.apply z (Ordinary.signedMap.apply z h)
+    \with v: DomainReduced.Carrier z =>
+      \forall (closed: DomainReduced.complex.differential.apply z v = (DomainReduced.space (Degree.next z)).zero) ->
+        reducedClosed (liftRight h) = DomainRedH.cycle v closed \by {
+    base: \fun (closed: _) => \refl(reducedClosed (liftRight h)), equality: onCochains h
+  }) (\bysub(DomainReduced.Carrier z, DomainRedH.cycles.carrier, liftLeft (ordinaryClosed h)));
+\definition reduced[h: CodomainRedH.Cohomology]: DomainRedH.Cohomology := (ReducedPull.induced Reduced.map).apply h;
+\definition law[h: CodomainOrdH.Closed]: reduced (CodomainRedH.classOf (liftRight h)) = DomainRedH.classOf (liftLeft (ordinaryClosed h)) :=
+  trans!{DomainRedH.Cohomology} _ _ _ (ReducedPull.onClass Reduced.map (liftRight h))
+    (congr!{DomainRedH.Closed DomainRedH.Cohomology} DomainRedH.classOf _ _ (onCycles h));
+\definition ordinary[h: CodomainOrdH.Cohomology]: DomainOrdH.Cohomology := (OrdinaryPull.induced Ordinary.signedMap).apply h;
+\definition ordinaryLaw[h: CodomainOrdH.Closed]: ordinary (CodomainOrdH.classOf h) = DomainOrdH.classOf (ordinaryClosed h) :=
+  OrdinaryPull.onClass Ordinary.signedMap h;

@@ -1,0 +1,29 @@
+\import std.Data[].Bool[] \as B;
+\import BinaryModules.Hom[V := Two.Carrier, W := H.Group k, source := BinaryModules.scalarModule, target := H.moduleSpace k] \as Maps;
+\import BinaryModules.Laws[V := H.Group k, space := H.moduleSpace k] \as Scalars;
+\definition linear: Maps.Map := Maps.Map {
+  apply := monomial k,
+  addition := \fun (a, b: Two.Carrier) => (H.moduleSpace k).scalarAdd a b (power k),
+  scalar := \fun (a, b: Two.Carrier) => (H.moduleSpace k).scalarAssoc a b (power k)
+};
+\definition zero: monomial k Two.zero = (H.moduleSpace k).zero := Scalars.zeroScale (power k);
+\definition one: monomial k Two.one = power k := (H.moduleSpace k).scalarOne (power k);
+\definition zeroKernel[bound: Order.Le k dimension]: \forall (a: Two.Carrier) ->
+  monomial k a = (H.moduleSpace k).zero -> a = Two.zero :=
+  B.cases (\fun (a: Two.Carrier) => monomial k a = (H.moduleSpace k).zero -> a = Two.zero)
+    (\fun (same: _) => \refl(Two.zero))
+    (\fun (killed: _) => Logic.falseElim _ (nonzero k bound
+      (trans!{{H.Group k}} _ _ _ (sym!{{H.Group k}} _ _ one) killed)));
+\definition onto[bound: Order.Le k dimension]: \forall (x: H.Group k) -> \exists (a: Two.Carrier \where monomial k a = x) :=
+  \fun (x: H.Group k) => either!{{(\parent.Degree[k := k].classes bound x)}
+    {\exists (a: Two.Carrier \where monomial k a = x)}
+    {\fun (same: x = (H.moduleSpace k).zero) =>
+      Logic.existsIntro[Two.Carrier, { a: Two.Carrier \where monomial k a = x }] Two.zero
+        (trans!{{H.Group k}} _ _ _ zero (sym!{{H.Group k}} _ _ same))}
+    {\fun (same: x = power k) =>
+      Logic.existsIntro[Two.Carrier, { a: Two.Carrier \where monomial k a = x }] Two.one
+        (trans!{{H.Group k}} _ _ _ one (sym!{{H.Group k}} _ _ same))}
+  };
+\import BinaryModules.Isomorphism[V := Two.Carrier, W := H.Group k, source := BinaryModules.scalarModule, target := H.moduleSpace k] \as Iso;
+\definition isomorphism[bound: Order.Le k dimension]: Iso.Isomorphism :=
+  Iso.OfBijective[f := linear].isomorphism (Maps.injectiveOfZeroKernel linear (zeroKernel bound)) (onto bound);

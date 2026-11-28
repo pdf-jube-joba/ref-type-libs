@@ -1,0 +1,22 @@
+\import algebra.Two[] \as Two;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.trans;
+\import singular_products.Cochains[A := Space, source := topology, R := Two.Carrier, ring := Two.commutativeRing] \as Singular;
+\import Singular.Cohomology[] \as H;
+\import cohomology_thom.Thom[].Real[].For[X := Space, F := Line, bundle := lineBundle].With[metric := metric] \as Geometry;
+\import Geometry.Coefficients[R := Two.Carrier, ring := Two.commutativeRing].Degree[n := Degrees.one] \as Relative;
+\module Thom(cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]);
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import N.Basic[].Prop[] \as Order;
+\import thom_spaces.Thom[].Over[K := Numbers.Real, field := Numbers.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].For[X := Space, F := Line, bundle := lineBundle].With[metric := metric] \as Disk;
+\import Geometry.Coefficients[R := Two.Carrier, ring := Two.commutativeRing].SphereSequence[] \as Raw;
+\import singular_cohomology.Relative[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary].With[coefficients := Singular.integerCoefficients].PairSequence[] \as PairSequence;
+\module Boundary;
+\module Forget(p: N.Nat^);
+\module Normalized;
+\module Euler;

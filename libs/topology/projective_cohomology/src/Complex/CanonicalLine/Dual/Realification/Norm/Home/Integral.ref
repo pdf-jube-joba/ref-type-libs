@@ -1,0 +1,46 @@
+\import \parent.Orientation[] \as Orientation;
+\import Product.Cohomology[] \as H;
+\import NewGeometry.Coefficients[R := I.Int^, ring := Integers.commutativeRing].Degree[n := Degrees.two] \as Relative;
+\definition restriction[x: Space]: _ :=
+  NewGeometry.Fiber[x := x].Additive[coefficients := Product.integerCoefficients, z := I.Int^::ofNat Degrees.two].restriction;
+\definition Normalized[u: Relative.Class]: \Prop :=
+  \forall (x: Space) -> (restriction x).apply u = Orientation.fiber x;
+\definition normalizedClasses: \Pow Relative.Class := { u: Relative.Class \where Normalized u };
+\definition NormalizedClass: \Set := \Cast[Relative.Class] normalizedClasses;
+\definition underlying[u: NormalizedClass]: Relative.Class := u;
+\module At(cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]) {
+  \import NewGeometry.Oriented[K := I.Int^, ring := Integers.commutativeRing, n := Degrees.two, orientation := Orientation.orientation, complex := cw] \as Thom;
+  \definition witness: NormalizedClass := \into[Relative.Class](Thom.class, normalizedClasses) \by { Thom.normalized };
+  \definition equal[u: NormalizedClass]: underlying u = Thom.class :=
+    Thom.uniqueNormalized u (\bysub(Relative.Class, normalizedClasses, u));
+}
+\definition exists: \exists NormalizedClass := \block {
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return \exact(At[cw := cw].witness, NormalizedClass)
+};
+\definition unique: \forall (u, v: NormalizedClass) -> u = v := \block {
+  \fun (u, v: NormalizedClass) \then
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return trans!{{Relative.Class}} _ _ _ (At[cw := cw].equal u)
+    (sym!{{Relative.Class}} _ _ (At[cw := cw].equal v))
+};
+\definition thomClass: NormalizedClass := \choice NormalizedClass \by { existence: exists, uniqueness: unique };
+\definition generator: H.Group Degrees.two := Relative.euler thomClass;
+\import \root.Complex[dimension := dimension].CanonicalLine[].Integral[].Canonical[] \as CanonicalClass;
+\import \root.Complex[dimension := dimension].CanonicalLine[].Integral[].Orientation[] \as CanonicalOrientation;
+\import OldGeometry.Coefficients[R := I.Int^, ring := Integers.commutativeRing].Degree[n := Degrees.two] \as OriginalRelative;
+\import cohomology_thom.RelativePullback[].On[A := Old.DiskBundle, source := Old.diskTopology, subset := Old.Boundary, R := I.Int^, ring := Integers.commutativeRing]
+  .To[B := New.DiskBundle, target := New.diskTopology, part := New.Boundary].Along[f := map].Degree[n := Degrees.two] \as Pull;
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := I.Int^, ring := Rings.commutativeRingAsRing I.Int^ Integers.commutativeRing] \as Modules;
+\import Modules.Laws[V := OriginalRelative.Class, space := OriginalRelative.space] \as RelativeLaws;
+\import algebra.Group[].Of[Carrier := OriginalRelative.Class, group := RelativeLaws.additive] \as RelativeGroup;
+\module Fiber(x: Space);
+\definition oppositePull: CanonicalClass.Normalized ((OriginalRelative.space).neg (Pull.map.apply thomClass)) :=
+  \fun (x: Space) => Fiber[x := x].normalized;
+\definition classSign: Pull.map.apply thomClass = (OriginalRelative.space).neg CanonicalClass.thomClass :=
+  trans!{{OriginalRelative.Class}} _ _ _ (sym!{{OriginalRelative.Class}} _ _ (RelativeGroup.negNeg (Pull.map.apply thomClass)))
+    (congr!{{OriginalRelative.Class} {OriginalRelative.Class}} (OriginalRelative.space).neg _ _
+      (CanonicalClass.unique (\into[OriginalRelative.Class]((OriginalRelative.space).neg (Pull.map.apply thomClass), CanonicalClass.normalizedClasses) \by { oppositePull })
+        CanonicalClass.thomClass));
+\module Euler;
