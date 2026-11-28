@@ -65,3 +65,7 @@
         (\fun (b: New.totalFamily.Carrier (I.Int^::ofNat p)) => Target.cup b (lift q u))
         _ _ (projectionLaw (I.Int^::ofNat p) a));
 }
+
+\import std.Data[].FinSet[] \as Finite;
+\module FiniteComparison(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> OldProduct.Cohomology[].Group (degree i));

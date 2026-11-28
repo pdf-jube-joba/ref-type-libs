@@ -50,3 +50,5 @@
       (congr!{{H.Group p} {H.Group q} {H.Group n}} Cup.apply _ _ _ _ (leftRestriction p a) (rightRestriction q b));
 }
 \module Positive(p: N.Nat^);
+
+\module Zero;

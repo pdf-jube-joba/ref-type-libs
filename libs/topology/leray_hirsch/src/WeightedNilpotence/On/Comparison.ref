@@ -1,0 +1,47 @@
+\import Modules.End[V := Product.Carrier, space := Product.space] \as Identity;
+\import Hom.Composition[U := Product.Carrier, domain := Product.space] \as Compose;
+\import Iso.Composition[U := Product.Carrier, final := Product.space] \as Combine;
+\definition normalized: Hom.Map := Compose.compose diagonal.backward actual;
+\definition defect: Hom.Map := Hom.plus Identity.identity (Hom.negative normalized);
+\import \parent.With[t := defect] \as Graded;
+\import \root.NilpotentComparison[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].On[V := Product.Carrier, space := Product.space].With[t := defect] \as Nilpotent;
+\definition DiagonalInverse: \Prop := \forall (i: Index)(x, y: Product.Carrier) ->
+  (\forall (j: Index) -> degree j = degree i -> x j = y j) -> diagonal.backward.apply x i = diagonal.backward.apply y i;
+\definition LeadingTerms: \Prop := \forall (i: Index)(x: Product.Carrier) ->
+  (\forall (j: Index) -> Nat.Lt (degree i) (degree j) -> x j = (family.space j).zero) ->
+  actual.apply x i = diagonal.forward.apply x i;
+\import Modules.Laws[V := Product.Carrier, space := Product.space] \as ProductLaws;
+\import algebra.Group[].Of[Carrier := Product.Carrier, group := ProductLaws.additive] \as Additive;
+\module At(i: Index) {
+  \import Modules.Laws[V := family.Carrier i, space := family.space i] \as Laws;
+  \definition zero[x: Product.Carrier][same: normalized.apply x i = x i]: defect.apply x i = (family.space i).zero :=
+    trans!{{family.Carrier i}} _ _ _
+      (congr!{{family.Carrier i} {family.Carrier i}} (\fun (v: family.Carrier i) => (family.space i).add (x i) ((family.space i).neg v))
+        _ _ same)
+      (Laws.inverseRight (x i));
+}
+\definition decreases[diagonalInverse: DiagonalInverse][upper: LeadingTerms]: Graded.Decreases :=
+  \fun (i: Index)(x: Product.Carrier)(above: \forall (j: Index) -> Nat.Lt (degree i) (degree j) -> x j = (family.space j).zero) =>
+    At[i := i].zero x
+      (trans!{{family.Carrier i}} _ _ _
+        (diagonalInverse i (actual.apply x) (diagonal.forward.apply x)
+          (\fun (j: Index)(same: degree j = degree i) => upper j x (\fun (k: Index)(higher: Nat.Lt (degree j) (degree k)) =>
+            above k (\idelim degree j = degree i \with a: N.Nat^ => Nat.Lt a (degree k) \by { base: higher, equality: same }))))
+        (congr!{{Product.Carrier} {family.Carrier i}} (\fun (v: Product.Carrier) => v i) _ _ (diagonal.leftInverse x)));
+\definition normalizedEquality: \forall (x: Product.Carrier) -> Nilpotent.perturbation.apply x = normalized.apply x :=
+  \fun (x: Product.Carrier) => Additive.subtractDifference x (normalized.apply x);
+\definition reconstructed: \forall (x: Product.Carrier) -> diagonal.forward.apply (Nilpotent.perturbation.apply x) = actual.apply x :=
+  \fun (x: Product.Carrier) => trans!{{Product.Carrier}} _ _ _
+    (congr!{{Product.Carrier} {Product.Carrier}} diagonal.forward.apply _ _ (normalizedEquality x))
+    (diagonal.rightInverse (actual.apply x));
+\module Proved(diagonalInverse: DiagonalInverse, upper: LeadingTerms) {
+  \definition inverse: _ := Combine.compose diagonal (Graded.isomorphism (decreases diagonalInverse upper));
+  \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+    forward := actual, backward := inverse.backward,
+    leftInverse := \fun (x: Product.Carrier) => trans!{{Product.Carrier}} _ _ _
+      (congr!{{Product.Carrier} {Product.Carrier}} inverse.backward.apply _ _ (sym!{{Product.Carrier}} _ _ (reconstructed x)))
+      (inverse.leftInverse x),
+    rightInverse := \fun (x: Product.Carrier) => trans!{{Product.Carrier}} _ _ _
+      (sym!{{Product.Carrier}} _ _ (reconstructed (inverse.backward.apply x))) (inverse.rightInverse x),
+  };
+}

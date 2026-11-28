@@ -30,3 +30,8 @@
         (\fun (b: New.totalFamily.Carrier (I.Int^::ofNat p)) => Target.cup b ((TargetCoefficients.absolute q).apply u))
         _ _ (projectionLaw (I.Int^::ofNat p) a));
 }
+
+\import std.Data[].FinSet[] \as Finite;
+\module Shift(q: N.Nat^, u: TotalCohomology.Group q);
+\module FiniteComparison(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

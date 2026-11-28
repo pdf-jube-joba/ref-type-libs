@@ -1,0 +1,66 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\definition point: LocalBase.CarrierSet := \into[X](x, U) \by { belongs };
+\definition fiberPart: \Pow E := { e: E \where projection e = x };
+\import Total.Subspace[S := fiberPart] \as FiberSpace;
+\definition Carrier: \Set := FiberSpace.CarrierSet;
+\definition topology: _ := FiberSpace.topology total;
+\definition inclusion[e: Carrier]: LocalTotal.CarrierSet :=
+  \into[E](e, preimage U) \by {
+    \idelim x = projection e \with y: X => Base.Member U y \by { base: belongs, equality: sym!{X} _ _ (\bysub(E, fiberPart, e)) }
+  };
+\import topology.Continuity[A := Carrier, B := E].Corestriction[S := preimage U] \as IntoChart;
+\import topology.Continuity[A := Carrier, B := E].Corestriction[S := fiberPart] \as IntoSpace;
+\definition inclusionContinuous: _ := IntoChart.corestrictContinuous topology total inclusion (IntoSpace.inclusionContinuous total);
+\import topology.Homeomorphism[A := LocalTotal.CarrierSet, B := Product.CarrierSet] \as OldGeometry;
+\import topology.Homeomorphism[A := Carrier, B := F] \as Geometry;
+\import Product.Maps[] \as Projections;
+\definition chartPoint[e: Carrier]: Product.CarrierSet := chart.coordinates.forward (inclusion e);
+\definition forward[e: Carrier]: F := Pair.second LocalBase.CarrierSet F (chartPoint e);
+\import topology.Composition[A := Carrier, B := LocalTotal.CarrierSet, C := Product.CarrierSet] \as ChartCompose;
+\import topology.Composition[A := Carrier, B := Product.CarrierSet, C := F] \as Forward;
+\definition forwardContinuous: _ := Forward.composeContinuous topology chartTarget fiber chartPoint (Pair.second LocalBase.CarrierSet F)
+  (ChartCompose.composeContinuous topology (LocalTotal.topology total) chartTarget inclusion chart.coordinates.forward inclusionContinuous
+    (OldGeometry.laws (LocalTotal.topology total) chartTarget chart.coordinates).forwardContinuous)
+  (Projections.secondContinuous (LocalBase.topology base) fiber);
+\definition fiberMap[y: F]: Product.CarrierSet := Pair.pair LocalBase.CarrierSet F point y;
+\import Product.Universal[X := F] \as IntoProduct;
+\definition fiberContinuous: _ := IntoProduct.pairContinuous fiber (LocalBase.topology base) fiber (\fun (y: F) => point) (\fun (y: F) => y)
+  (topology.Maps[A := F, B := LocalBase.CarrierSet].constantContinuous fiber (LocalBase.topology base) point)
+  (topology.Maps[A := F, B := F].Identity[].continuous fiber);
+\definition inverseOverBase[y: Product.CarrierSet]: projection (chart.coordinates.backward y) = basePoint y :=
+  \parent.Paired[subset := U, chart := chart].inverseOverBase y;
+\definition inverseValue[y: F]: LocalTotal.CarrierSet := chart.coordinates.backward (fiberMap y);
+\definition backward[y: F]: Carrier := \into[E](inverseValue y, fiberPart) \by { inverseOverBase (fiberMap y) };
+\import topology.Composition[A := F, B := Product.CarrierSet, C := LocalTotal.CarrierSet] \as InverseCompose;
+\import topology.Composition[A := F, B := LocalTotal.CarrierSet, C := E] \as IntoAmbient;
+\import topology.Continuity[A := LocalTotal.CarrierSet, B := E].Corestriction[S := preimage U] \as ToTotal;
+\import topology.Continuity[A := F, B := E].Corestriction[S := fiberPart] \as ToFiber;
+\definition backwardContinuous: _ := ToFiber.corestrictContinuous fiber total backward
+  (IntoAmbient.composeContinuous fiber (LocalTotal.topology total) total inverseValue (\fun (e: LocalTotal.CarrierSet) => e)
+    (InverseCompose.composeContinuous fiber chartTarget (LocalTotal.topology total) fiberMap chart.coordinates.backward fiberContinuous
+      (OldGeometry.laws (LocalTotal.topology total) chartTarget chart.coordinates).backwardContinuous)
+    (ToTotal.inclusionContinuous total));
+\import Pair.Prop[A := LocalBase.CarrierSet, B := F] \as Pairs;
+\import singular_cellular_algebra.Algebra[].Refinement[A := X, S := U] \as BaseEq;
+\import singular_cellular_algebra.Algebra[].Refinement[A := E, S := fiberPart] \as FiberEq;
+\definition compatibility: \forall (e: Carrier) -> fiberMap (forward e) = chartPoint e :=
+  \fun (e: Carrier) => Pairs.ext (fiberMap (forward e)) (chartPoint e)
+    (BaseEq.ext point (Pair.first LocalBase.CarrierSet F (chartPoint e))
+      (sym!{X} _ _ (trans!{X} _ _ _ (chart.overBase (inclusion e)) (\bysub(E, fiberPart, e)))))
+    (\refl(forward e));
+\definition leftInverse: \forall (e: Carrier) -> backward (forward e) = e :=
+  \fun (e: Carrier) => FiberEq.ext (backward (forward e)) e (trans!{E} _ _ _
+    (congr!{Product.CarrierSet E} (\fun (u: Product.CarrierSet) => chart.coordinates.backward u) _ _ (compatibility e))
+    (congr!{LocalTotal.CarrierSet E} (\fun (u: LocalTotal.CarrierSet) => u)
+      (chart.coordinates.backward (chartPoint e)) (inclusion e)
+      ((OldGeometry.laws (LocalTotal.topology total) chartTarget chart.coordinates).leftInverse (inclusion e))));
+\definition rightInverse: \forall (y: F) -> forward (backward y) = y :=
+  \fun (y: F) => congr!{Product.CarrierSet F} (Pair.second LocalBase.CarrierSet F) _ _
+    ((OldGeometry.laws (LocalTotal.topology total) chartTarget chart.coordinates).rightInverse (fiberMap y));
+\definition homeomorphism: Geometry.Homeomorphism[topology, fiber] := Geometry.Homeomorphism[topology, fiber] {
+  forward := forward, backward := backward, leftInverse := leftInverse, rightInverse := rightInverse,
+  forwardContinuous := forwardContinuous, backwardContinuous := backwardContinuous,
+};

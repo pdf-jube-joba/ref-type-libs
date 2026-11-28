@@ -1,0 +1,10 @@
+\definition projectionSquare: \forall (p: Carrier) -> projection (totalMap p) = f (baseMap p) :=
+  \fun (p: Carrier) => sym!{X} _ _ (square p);
+\import Old.Along[Y := Y, Z := Carrier, newBase := source, newTotal := topology, newPart := basePart,
+  newProjection := baseMap, newContinuous := baseContinuous, baseMap := basePairMap, totalMap := totalPairMap,
+  square := projectionSquare] \as Along;
+\import Along.FiniteComparison[count := count, degree := degree, classes := classes] \as Natural;
+\module At(z: I.Int^) {
+  \definition map: _ := Natural.At[z := z].map;
+  \definition law: _ := Natural.At[z := z].law;
+}

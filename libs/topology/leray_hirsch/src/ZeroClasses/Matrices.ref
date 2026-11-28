@@ -1,0 +1,66 @@
+\import \parent.Ring[] \as ScalarRing;
+\import std.Data[].FinSet[] \as Finite;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Alg[].Ring[] \as Rings;
+\definition Index: \Set := Finite.Fin count;
+\import commutative_algebra.Modules[R := Carrier, ring := ScalarRing.ordinary].Matrix[m := count, n := count] \as ClassesMatrix;
+\import commutative_algebra.Modules[R := K, ring := ring].Matrix[m := count, n := count] \as PointMatrix;
+\import ClassesMatrix.Invertible[] \as ClassesInverse;
+\import PointMatrix.Invertible[] \as PointInverse;
+\import ClassesMatrix.Composition[k := count] \as ClassesProduct;
+\import PointMatrix.Composition[k := count] \as PointProduct;
+\import ClassesMatrix.End[] \as ClassesUnit;
+\import PointMatrix.End[] \as PointUnit;
+\definition evaluateMatrix[a: ClassesMatrix.Matrix][x: A]: PointMatrix.Matrix :=
+  \fun (i, j: Index) => evaluate (a i j) x;
+\definition components[a: ClassesMatrix.Matrix][c: PathComponents]: PointMatrix.Matrix :=
+  \fun (i, j: Index) => Functions.isomorphism.backward.apply (a i j) c;
+\definition assemble[a: PathComponents -> PointMatrix.Matrix]: ClassesMatrix.Matrix :=
+  \fun (i, j: Index) => assign (\fun (c: PathComponents) => a c i j);
+\definition onAssembled: \forall (a: PathComponents -> PointMatrix.Matrix)(x: A) -> evaluateMatrix (assemble a) x = a (componentOf x) :=
+  \fun (a: PathComponents -> PointMatrix.Matrix)(x: A) =>
+    \axiom:funext(evaluateMatrix (assemble a) x, a (componentOf x),
+      \fun (i: Index) => \axiom:funext(evaluateMatrix (assemble a) x i, a (componentOf x) i,
+        \fun (j: Index) => onAssigned (\fun (c: PathComponents) => a c i j) x));
+\definition detectedMatrix: \forall (a, b: ClassesMatrix.Matrix) ->
+  (\forall (x: A) -> evaluateMatrix a x = evaluateMatrix b x) -> a = b :=
+  \fun (a, b: ClassesMatrix.Matrix)(e: \forall (x: A) -> evaluateMatrix a x = evaluateMatrix b x) =>
+    \axiom:funext(a, b, \fun (i: Index) => \axiom:funext(a i, b i,
+      \fun (j: Index) => detected (a i j) (b i j)
+        (\fun (x: A) => congr!{PointMatrix.Matrix K} (\fun (m: PointMatrix.Matrix) => m i j) _ _ (e x))));
+\definition h0: Rings.Ring[Carrier] := Rings.commutativeRingAsRing Carrier ScalarRing.ordinary;
+\import module_theory.Module[].Over[R := Carrier, ring := h0] \as H0;
+\import H0.Coordinates[I := Index].Kronecker[] \as ClassDelta;
+\import Modules.Coordinates[I := Index].Kronecker[] \as PointDelta;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\definition unitAt: \forall (x: A)(i, j: Index) -> evaluateMatrix ClassesUnit.identity x i j = PointUnit.identity i j :=
+  \fun (x: A)(i, j: Index) => either!{{Classical.excludedMiddle (i = j)} {_}
+    {\fun (eq: i = j) => eq_reason_in!{K _
+      "=" _ "by" { congr!{Carrier K} (\fun (c: Carrier) => evaluate c x) _ _ (ClassDelta.equal i j eq) }
+      "=" _ "by" { onOne x }
+      "=" _ "by" { sym!{K} _ _ (PointDelta.equal i j eq) }
+    }}
+    {\fun (neq: Logic.Not (i = j)) => eq_reason_in!{K _
+      "=" _ "by" { congr!{Carrier K} (\fun (c: Carrier) => evaluate c x) _ _ (ClassDelta.different i j neq) }
+      "=" _ "by" { onZero x }
+      "=" _ "by" { sym!{K} _ _ (PointDelta.different i j neq) }
+    }}
+  };
+\definition unit: \forall (x: A) -> evaluateMatrix ClassesUnit.identity x = PointUnit.identity :=
+  \fun (x: A) => \axiom:funext(evaluateMatrix ClassesUnit.identity x, PointUnit.identity,
+    \fun (i: Index) => \axiom:funext(evaluateMatrix ClassesUnit.identity x i, PointUnit.identity i, unitAt x i));
+\import Modules.Sums[I := Index].Vector[V := Carrier, space := Groups.moduleSpace zero].Mapping[W := K, target := Modules.scalarModule] \as EvalSums;
+\import Modules.Sums[I := Index].Prop[] \as Sums;
+\definition product: \forall (a, b: ClassesMatrix.Matrix)(x: A) ->
+  evaluateMatrix (ClassesProduct.product a b) x = PointProduct.product (evaluateMatrix a x) (evaluateMatrix b x) :=
+  \fun (a, b: ClassesMatrix.Matrix)(x: A) => \axiom:funext(evaluateMatrix (ClassesProduct.product a b) x,
+    PointProduct.product (evaluateMatrix a x) (evaluateMatrix b x),
+    \fun (i: Index) => \axiom:funext(evaluateMatrix (ClassesProduct.product a b) x i,
+      PointProduct.product (evaluateMatrix a x) (evaluateMatrix b x) i,
+      \fun (j: Index) => trans!{K} _ _ _
+        (EvalSums.law (linear x) (Finite.elements count) (\fun (k: Index) => mul (a i k) (b k j)))
+        (Sums.congruent (Finite.elements count) (\fun (k: Index) => evaluate (mul (a i k) (b k j)) x)
+          (\fun (k: Index) => scalars.mul (evaluate (a i k) x) (evaluate (b k j) x))
+          (\fun (k: Index) => onProducts (a i k) (b k j) x))));
+\module With(a: ClassesMatrix.Matrix);

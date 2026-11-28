@@ -1,0 +1,31 @@
+\definition zero: N.Nat^ := N.Nat^::zero;
+\import \root.ZeroClasses[A := X, source := base, K := K, ring := ring] \as B0;
+\import \root.ZeroClasses[A := F, source := fiber, K := K, ring := ring] \as F0;
+\import cohomology_thom.ZeroEvaluation[A := X, source := base, K := K, ring := ring]
+  .Along[B := F, target := fiber, f := constant, regular := constantContinuous] \as Pullback;
+\definition scalars: std.Alg[].Ring[].Ring[K] := std.Alg[].Ring[].commutativeRingAsRing K ring;
+\definition evaluatedConstant: \forall (a: B.Group zero) ->
+  ToConstant.apply zero constant constantContinuous a = (H.moduleSpace zero).smul (B0.evaluate a x) F0.one :=
+  \fun (a: B.Group zero) => F0.detected _ _ (\fun (y: F) => eq_reason_in!{K _
+    "=" _ "by" { Pullback.law a y }
+    "=" _ "by" { sym!{K} _ _ (scalars.semiring.multiplicative.rightIdentity (B0.evaluate a x)) }
+    "=" _ "by" { congr!{K K} (scalars.mul (B0.evaluate a x)) _ _ (sym!{K} _ _ (F0.onOne y)) }
+    "=" _ "by" { sym!{K} _ _ (F0.onScalars (B0.evaluate a x) F0.one y) }
+  });
+\module At(q: N.Nat^) {
+  \import \parent.\parent.Degree[p := zero, q := q] \as Law;
+  \import External.Cohomology[p := zero, q := q] \as ExternalProduct;
+  \import H.Cup[p := zero, q := q] \as Cup;
+  \import H.Unit[].Left[p := q] \as Unit;
+  \import singular_cohomology.Simplices[A := F, source := fiber].CutLeftUnit[p := q] \as Degree;
+  \import H.DegreeTransport[] \as Degrees;
+  \definition law: \forall (a: B.Group zero)(b: H.Group q) ->
+    restrict ExternalProduct.total (ExternalProduct.apply a b) =
+    (H.moduleSpace ExternalProduct.total).smul (B0.evaluate a x) (Degrees.apply q ExternalProduct.total Degree.same b) :=
+    \fun (a: B.Group zero)(b: H.Group q) => eq_reason_in!{{H.Group ExternalProduct.total} _
+      "=" _ "by" { Law.law a b }
+      "=" _ "by" { congr!{{H.Group zero} {H.Group ExternalProduct.total}} (\fun (v: H.Group zero) => Cup.apply v b) _ _ (evaluatedConstant a) }
+      "=" _ "by" { Cup.bilinear.scaleLeft (B0.evaluate a x) F0.one b }
+      "=" _ "by" { congr!{{H.Group ExternalProduct.total} {H.Group ExternalProduct.total}} ((H.moduleSpace ExternalProduct.total).smul (B0.evaluate a x)) _ _ (Unit.law b) }
+    };
+}

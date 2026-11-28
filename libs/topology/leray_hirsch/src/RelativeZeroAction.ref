@@ -1,0 +1,38 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\import Equality.Transport[A := N.Nat^] \as Cast;
+\import \root.ZeroClasses[A := A, source := source, K := K, ring := ring] \as Scalars;
+\import \root.RelativeCupLaws[A := A, source := source, subset := subset, K := K, ring := ring] \as Relative;
+\import std.Alg[].Ring[] \as Rings;
+\definition coefficientRing: Rings.Ring[Scalars.Carrier] := Rings.commutativeRingAsRing Scalars.Carrier Scalars.Ring[].ordinary;
+\import module_theory.Module[].Over[R := K, ring := Rings.commutativeRingAsRing K ring] \as KModules;
+\import module_theory.Module[].Over[R := Scalars.Carrier, ring := coefficientRing] \as Modules;
+\module At(p: N.Nat^) {
+  \import singular_cap.CochainPair[A := A, source := source, subset := subset, R := K, ring := ring] \as RelativeCup;
+  \import RelativeCup.Cohomology[p := p, q := N.Nat^::zero].Left[] \as Cup;
+  \import Relative.Associativity[p := p, q := N.Nat^::zero, r := N.Nat^::zero] \as Assoc;
+  \import Relative.Unit[p := p] \as Unit;
+  \definition Carrier: \Set := Relative.classes p;
+  \import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Product;
+  \import singular_cohomology.Relative[A := A, source := source, subset := subset]
+    .OverRing[R := K, ring := ring].With[coefficients := Product.coefficients] \as Pair;
+  \definition original: KModules.Space Carrier := Pair.cohomologySpace p;
+  \definition act[b: Scalars.Carrier][a: Carrier]: Carrier := Cup.apply a b;
+  \definition associativity: \forall (a, b: Scalars.Carrier)(x: Carrier) -> act (Scalars.mul a b) x = act a (act b x) :=
+    \fun (a, b: Scalars.Carrier)(x: Carrier) => trans!{Carrier} _ _ _
+      (congr!{{Scalars.Carrier} Carrier} (\fun (c: Scalars.Carrier) => act c x) _ _ (Scalars.Ring[].commutative a b))
+      (trans!{Carrier} _ _ _
+        (sym!{Carrier} _ _ (Cast.castRefl Relative.classes p (act (Scalars.mul b a) x)))
+        (sym!{Carrier} _ _ (Assoc.law x b a)));
+  \definition space: Modules.Space Carrier := Rings.RingModule[Scalars.Carrier, Carrier, coefficientRing] {
+    zero := original.zero, add := original.add, neg := original.neg, smul := act,
+    additive := original.additive,
+    scalarOne := Unit.law, scalarAssoc := associativity,
+    scalarAdd := \fun (a, b: Scalars.Carrier)(x: Carrier) => Cup.bilinear.addRight x a b,
+    vectorAdd := \fun (a: Scalars.Carrier)(x, y: Carrier) => Cup.bilinear.addLeft x y a,
+  };
+}

@@ -32,4 +32,7 @@
     source := totalFamily.space output, target := totalFamily.space z]
     .Composition[U := baseFamily.Carrier input, domain := baseFamily.space input] \as Compose;
   \definition linear: _ := Compose.compose (Reindex.At[m := output, n := z, same := Degrees.shiftUnshift q z].map) (map input);
+  \module Rebased(d: I.Int^, same: d = input);
+  \module Native(p: N.Nat^, same: I.Int^::ofNat p = input);
+  \module Below(p: N.Nat^, same: I.Int^::negSucc p = input);
 }

@@ -1,0 +1,27 @@
+\import Base.Subspace[S := S].Inside[U := V] \as NestedBase;
+\import Total.Subspace[S := preimage S].Inside[U := preimage V] \as NestedTotal;
+\definition totalContained: Total.Subset (preimage S) (preimage V) :=
+  \fun (e: E)(m: Base.Member S (projection e)) => contained (projection e) m;
+\definition baseHomeomorphism: _ := NestedBase.homeomorphism base contained;
+\definition totalHomeomorphism: _ := NestedTotal.homeomorphism total totalContained;
+\import \parent.\parent.Restriction[V := S] \as Outer;
+\import Local.Restriction[V := NestedBase.nested] \as Nested;
+\import singular_cohomology.Relative[A := Outer.BaseCarrier, source := Outer.baseTopology, subset := Outer.basePart] \as SourceBasePair;
+\import singular_cohomology.Relative[A := Outer.TotalCarrier, source := Outer.totalTopology, subset := Outer.totalPart] \as SourceTotalPair;
+\import singular_cohomology.Relative[A := Nested.BaseCarrier, source := Nested.baseTopology, subset := Nested.basePart] \as TargetBasePair;
+\import singular_cohomology.Relative[A := Nested.TotalCarrier, source := Nested.totalTopology, subset := Nested.totalPart] \as TargetTotalPair;
+\import SourceBasePair.Homeomorphism[B := Nested.BaseCarrier].Over[target := Nested.baseTopology, targetSubset := Nested.basePart] \as BaseMaps;
+\import SourceTotalPair.Homeomorphism[B := Nested.TotalCarrier].Over[target := Nested.totalTopology, targetSubset := Nested.totalPart] \as TotalMaps;
+\definition baseData: BaseMaps.Data := BaseMaps.Data {
+  homeomorphism := baseHomeomorphism,
+  forwardPreserves := \fun (x: SourceBasePair.SubspaceCarrier) => \bysub(Outer.BaseCarrier, Outer.basePart, x),
+  backwardPreserves := \fun (x: TargetBasePair.SubspaceCarrier) => \bysub(Nested.BaseCarrier, Nested.basePart, x),
+};
+\definition totalData: TotalMaps.Data := TotalMaps.Data {
+  homeomorphism := totalHomeomorphism,
+  forwardPreserves := \fun (x: SourceTotalPair.SubspaceCarrier) => \bysub(Outer.TotalCarrier, Outer.totalPart, x),
+  backwardPreserves := \fun (x: TargetTotalPair.SubspaceCarrier) => \bysub(Nested.TotalCarrier, Nested.totalPart, x),
+};
+\definition projectionSquare: \forall (x: Outer.TotalCarrier) ->
+  Nested.project (TotalMaps.forwardMap totalData x) = BaseMaps.forwardMap baseData (Outer.project x) :=
+  \fun (x: Outer.TotalCarrier) => \refl(Nested.project (TotalMaps.forwardMap totalData x));

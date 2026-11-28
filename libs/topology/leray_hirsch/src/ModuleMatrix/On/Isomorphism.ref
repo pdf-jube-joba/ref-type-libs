@@ -1,0 +1,17 @@
+\import Modules.Isomorphism[V := Vectors.Carrier, W := Vectors.Carrier, source := Vectors.space, target := Vectors.space] \as Iso;
+\import \parent.With[a := b, b := a] \as Reverse;
+\import \parent.With[a := a, b := b] \as Forward;
+\definition isomorphism[left: Matrices.product b a = MatrixIdentity.identity][right: Matrices.product a b = MatrixIdentity.identity]:
+  Iso.Isomorphism := Iso.Isomorphism {
+    forward := linear a, backward := linear b,
+    leftInverse := \fun (x: Vectors.Carrier) => eq_reason_in!{{Vectors.Carrier} _
+      "=" _ "by" { sym!{{Vectors.Carrier}} _ _ (Reverse.law x) }
+      "=" _ "by" { congr!{{Square.Matrix} {Vectors.Carrier}} (\fun (m: Square.Matrix) => apply m x) _ _ left }
+      "=" _ "by" { identity x }
+    },
+    rightInverse := \fun (x: Vectors.Carrier) => eq_reason_in!{{Vectors.Carrier} _
+      "=" _ "by" { sym!{{Vectors.Carrier}} _ _ (Forward.law x) }
+      "=" _ "by" { congr!{{Square.Matrix} {Vectors.Carrier}} (\fun (m: Square.Matrix) => apply m x) _ _ right }
+      "=" _ "by" { identity x }
+    },
+  };

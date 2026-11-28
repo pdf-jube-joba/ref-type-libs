@@ -1,0 +1,28 @@
+\import Modules.Hom[V := R, W := V, source := Modules.scalarModule, target := space] \as Map;
+\import Modules.Sums[I := Index].Vector[V := R, space := Modules.scalarModule].Mapping[W := V, target := space] \as Scalars;
+\definition at[v: V]: Map.Map := Map.Map {
+  apply := \fun (r: R) => space.smul r v,
+  addition := \fun (r, s: R) => space.scalarAdd r s v,
+  scalar := \fun (r, s: R) => space.scalarAssoc r s v,
+};
+\definition expanded[x: Vectors.Carrier][i, j, k: Index]: V :=
+  space.smul (scalars.mul (a i k) (b k j)) (x j);
+\definition inner[x: Vectors.Carrier][i, k: Index]:
+  Values.sum (Finite.elements count) (\fun (j: Index) => expanded x i j k) = space.smul (a i k) (apply b x k) :=
+  trans!{V} _ _ _
+    (Values.congruent (Finite.elements count) (\fun (j: Index) => expanded x i j k)
+      (\fun (j: Index) => space.smul (a i k) (space.smul (b k j) (x j)))
+      (\fun (j: Index) => space.scalarAssoc (a i k) (b k j) (x j)))
+    (Values.scalar (Finite.elements count) (a i k) (\fun (j: Index) => space.smul (b k j) (x j)));
+\definition point: \forall (x: Vectors.Carrier)(i: Index) ->
+  apply (Matrices.product a b) x i = apply a (apply b x) i :=
+  \fun (x: Vectors.Carrier)(i: Index) => trans!{V} _ _ _
+    (Values.congruent (Finite.elements count) (\fun (j: Index) => space.smul (Matrices.product a b i j) (x j))
+      (\fun (j: Index) => Values.sum (Finite.elements count) (expanded x i j))
+      (\fun (j: Index) => Scalars.law (at (x j)) (Finite.elements count) (\fun (k: Index) => scalars.mul (a i k) (b k j))))
+    (trans!{V} _ _ _
+      (Values.exchange (Finite.elements count) (Finite.elements count) (expanded x i))
+      (Values.congruent (Finite.elements count) (\fun (k: Index) => Values.sum (Finite.elements count) (\fun (j: Index) => expanded x i j k))
+        (\fun (k: Index) => space.smul (a i k) (apply b x k)) (inner x i)));
+\definition law: \forall (x: Vectors.Carrier) -> apply (Matrices.product a b) x = apply a (apply b x) :=
+  \fun (x: Vectors.Carrier) => Vectors.ext _ _ (point x);

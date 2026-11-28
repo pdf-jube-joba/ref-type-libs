@@ -1,0 +1,14 @@
+\import \parent.Rebased[d := I.Int^::ofNat p, same := same] \as Rebased;
+\import \parent.\parent.Positive[p := p] \as Positive;
+\import \parent.\parent.\parent.Component[p := p, q := q] \as Component;
+\import Equality.Transport[A := I.Int^] \as Cast;
+\use Equality.trans;
+\use Equality.congr;
+\definition resultDegree: I.Int^ := I.Int^::ofNat Component.degree;
+\definition resultSame: resultDegree = z := trans!{I.Int^} resultDegree Rebased.rangeDegree z Positive.regrade Rebased.rangeSame;
+\definition raw[x: baseFamily.Carrier input]: Component.Domain := Rebased.raw x;
+\definition law: \forall (x: baseFamily.Carrier input) ->
+  linear.apply x = Cast.cast totalFamily.Carrier resultDegree z resultSame (Component.apply u (raw x)) :=
+  \fun (x: baseFamily.Carrier input) => trans!{{totalFamily.Carrier z}} _ _ _ (Rebased.law x)
+    (Cast.castComposition totalFamily.Carrier resultDegree Rebased.rangeDegree z Positive.regrade Rebased.rangeSame
+      (Component.apply u (raw x)));

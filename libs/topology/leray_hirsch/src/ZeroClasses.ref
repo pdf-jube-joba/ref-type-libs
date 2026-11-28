@@ -62,3 +62,50 @@
     (\fun (a: H.CycleCarrier) => H.classInduction (\fun (b: Carrier) => \forall (x: A) ->
       evaluate (mul (H.classOf a) b) x = scalars.mul (evaluate (H.classOf a) x) (evaluate b x)) (onCycleProducts a));
 \definition detected: \forall (a, b: Carrier) -> (\forall (x: A) -> evaluate a x = evaluate b x) -> a = b := C03.detected;
+
+\import singular_cohomology.Cochains[A := A, source := source].OverRing[R := K, ring := ring].With[coefficients := Product.coefficients] \as Native;
+\import chain_complexes.Cochain[].Over[R := K, ring := scalars].At[C := Native.complex, k := zero] \as Hk;
+\definition onCycleScalars: \forall (r: K)(a: Hk.CycleCarrier)(x: A) ->
+  evaluate ((Groups.moduleSpace zero).smul r (Hk.classOf a)) x = scalars.mul r (evaluate (Hk.classOf a) x) :=
+  \fun (r: K)(a: Hk.CycleCarrier)(x: A) => eq_reason_in!{K _
+    "=" _ "by" { congr!{Carrier K} (\fun (c: Carrier) => evaluate c x) _ _
+      (sym!{Carrier} _ _ (Hk.classLinear.scalar r a)) }
+    "=" _ "by" { C03.onClasses (Hk.cycleSpace.smul r a) x }
+    "=" _ "by" { Native.scalarValue zero r a (Chains.generator zero (Point.constant x)) }
+    "=" _ "by" { congr!{K K} (scalars.mul r) _ _ (sym!{K} _ _ (C03.onClasses a x)) }
+  };
+\definition onScalars: \forall (r: K)(a: Carrier)(x: A) ->
+  evaluate ((Groups.moduleSpace zero).smul r a) x = scalars.mul r (evaluate a x) :=
+  \fun (r: K) => Hk.classInduction
+    (\fun (a: Carrier) => \forall (x: A) -> evaluate ((Groups.moduleSpace zero).smul r a) x = scalars.mul r (evaluate a x))
+    (onCycleScalars r);
+\definition onCycleAdditions: \forall (a, b: Hk.CycleCarrier)(x: A) ->
+  evaluate ((Groups.moduleSpace zero).add (Hk.classOf a) (Hk.classOf b)) x =
+  scalars.add (evaluate (Hk.classOf a) x) (evaluate (Hk.classOf b) x) :=
+  \fun (a, b: Hk.CycleCarrier)(x: A) => eq_reason_in!{K _
+    "=" _ "by" { congr!{Carrier K} (\fun (c: Carrier) => evaluate c x) _ _
+      (sym!{Carrier} _ _ (Hk.classLinear.addition a b)) }
+    "=" _ "by" { C03.onClasses (Hk.cycleSpace.add a b) x }
+    "=" _ "by" { congr!{K K K} scalars.add _ _ _ _
+      (sym!{K} _ _ (C03.onClasses a x)) (sym!{K} _ _ (C03.onClasses b x)) }
+  };
+\definition onAdditions: \forall (a, b: Carrier)(x: A) ->
+  evaluate ((Groups.moduleSpace zero).add a b) x = scalars.add (evaluate a x) (evaluate b x) :=
+  Hk.classInduction (\fun (a: Carrier) => \forall (b: Carrier)(x: A) ->
+    evaluate ((Groups.moduleSpace zero).add a b) x = scalars.add (evaluate a x) (evaluate b x))
+    (\fun (a: Hk.CycleCarrier) => Hk.classInduction (\fun (b: Carrier) => \forall (x: A) ->
+      evaluate ((Groups.moduleSpace zero).add (Hk.classOf a) b) x = scalars.add (evaluate (Hk.classOf a) x) (evaluate b x))
+      (onCycleAdditions a));
+\import module_theory.Module[].Over[R := K, ring := scalars] \as Modules;
+\import Modules.Hom[V := Carrier, W := K, source := Groups.moduleSpace zero, target := Modules.scalarModule] \as Linear;
+\definition linear[x: A]: Linear.Map := Linear.Map {
+  apply := \fun (a: Carrier) => evaluate a x,
+  addition := \fun (a, b: Carrier) => onAdditions a b x,
+  scalar := \fun (r: K)(a: Carrier) => onScalars r a x,
+};
+\definition onZero: \forall (x: A) -> evaluate (Groups.moduleSpace zero).zero x = scalars.zero :=
+  \fun (x: A) => Linear.zeroPreserved (linear x);
+
+\module Ring;
+
+\module Matrices(count: N.Nat^);

@@ -1,0 +1,64 @@
+\import std.Alg[].Alg[] \as Alg;
+\import std.Alg[].Monoid[] \as Monoid;
+\import std.Alg[].Ring[] \as Rings;
+\definition space: Modules.Space Carrier := Groups.moduleSpace zero;
+\definition raw: Rings.CommutativeRingData[Carrier] := Rings.CommutativeRingData[Carrier] {
+  base := Rings.RingData[Carrier] { zero := space.zero, one := one, add := space.add, mul := mul, neg := space.neg },
+};
+\import Modules.Laws[V := Carrier, space := space] \as Group;
+\definition associative: \forall (a, b, c: Carrier) -> mul (mul a b) c = mul a (mul b c) :=
+  \fun (a, b, c: Carrier) => detected _ _ (\fun (x: A) => eq_reason_in!{K _
+    "=" _ "by" { onProducts (mul a b) c x }
+    "=" _ "by" { congr!{K K} (\fun (r: K) => scalars.mul r (evaluate c x)) _ _ (onProducts a b x) }
+    "=" _ "by" { scalars.semiring.multiplicative.associative (evaluate a x) (evaluate b x) (evaluate c x) }
+    "=" _ "by" { congr!{K K} (scalars.mul (evaluate a x)) _ _ (sym!{K} _ _ (onProducts b c x)) }
+    "=" _ "by" { sym!{K} _ _ (onProducts a (mul b c) x) }
+  });
+\definition leftIdentity: \forall (a: Carrier) -> mul one a = a :=
+  \fun (a: Carrier) => detected _ _ (\fun (x: A) => eq_reason_in!{K _
+    "=" _ "by" { onProducts one a x }
+    "=" _ "by" { congr!{K K} (\fun (r: K) => scalars.mul r (evaluate a x)) _ _ (onOne x) }
+    "=" _ "by" { scalars.semiring.multiplicative.leftIdentity (evaluate a x) }
+  });
+\definition rightIdentity: \forall (a: Carrier) -> mul a one = a :=
+  \fun (a: Carrier) => detected _ _ (\fun (x: A) => eq_reason_in!{K _
+    "=" _ "by" { onProducts a one x }
+    "=" _ "by" { congr!{K K} (scalars.mul (evaluate a x)) _ _ (onOne x) }
+    "=" _ "by" { scalars.semiring.multiplicative.rightIdentity (evaluate a x) }
+  });
+\definition commutative: \forall (a, b: Carrier) -> mul a b = mul b a :=
+  \fun (a, b: Carrier) => detected _ _ (\fun (x: A) => eq_reason_in!{K _
+    "=" _ "by" { onProducts a b x }
+    "=" _ "by" { ring.mulCommutative (evaluate a x) (evaluate b x) }
+    "=" _ "by" { sym!{K} _ _ (onProducts b a x) }
+  });
+\import Modules.Hom[V := Carrier, W := Carrier, source := space, target := space] \as Maps;
+\definition leftMap[b: Carrier]: Maps.Map := Maps.Map {
+  apply := \fun (a: Carrier) => mul a b,
+  addition := \fun (a, c: Carrier) => Cup.bilinear.addLeft a c b,
+  scalar := \fun (r: K)(a: Carrier) => Cup.bilinear.scaleLeft r a b,
+};
+\definition rightMap[a: Carrier]: Maps.Map := Maps.Map {
+  apply := mul a,
+  addition := Cup.bilinear.addRight a,
+  scalar := \fun (r: K)(b: Carrier) => Cup.bilinear.scaleRight r a b,
+};
+\definition ordinary: Rings.CommutativeRing[Carrier] := \into[Rings.CommutativeRingData[Carrier]](raw, Rings.CommutativeRing[Carrier]) \by {
+  Rings.CommutativeRingLaws[Carrier, raw] {
+    ring := Rings.RingLaws[Carrier, raw.base] {
+      semiring := Alg.SemiringLaws[Carrier, Rings.ringSemiring Carrier raw.base] {
+        additive := Monoid.CommutativeMonoidLaws[Carrier, Monoid.CommutativeMonoidData[Carrier]::# (Alg.groupMonoid Carrier Group.additive.base)] {
+          monoid := Group.additive.group.monoid, commutative := Group.additive.commutative,
+        },
+        multiplicative := Monoid.MonoidLaws[Carrier, Monoid.MonoidData[Carrier]::# one mul] {
+          leftIdentity := leftIdentity, rightIdentity := rightIdentity, associative := associative,
+        },
+        leftDistributive := Cup.bilinear.addRight, rightDistributive := \fun (a, b, c: Carrier) => Cup.bilinear.addLeft a b c,
+        zeroAbsorbsLeft := \fun (a: Carrier) => Maps.zeroPreserved (leftMap a),
+        zeroAbsorbsRight := \fun (a: Carrier) => Maps.zeroPreserved (rightMap a),
+      },
+      additiveInverse := Group.inverseLeft,
+    },
+    mulCommutative := commutative,
+  }
+};

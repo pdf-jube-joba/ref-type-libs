@@ -1,4 +1,4 @@
-\import \root.NilpotentComparison[K := K, ring := scalars].On[V := Product.Carrier, space := Product.space].With[t := t] \as Nilpotent;
+\import \root.NilpotentComparison[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].On[V := Product.Carrier, space := Product.space].With[t := t] \as Nilpotent;
 \definition Filtered[n: N.Nat^][x: Product.Carrier]: \Prop := \forall (i: Index) -> Nat.Le n (degree i) -> x i = (family.space i).zero;
 \definition Decreases: \Prop := \forall (i: Index)(x: Product.Carrier) ->
   (\forall (j: Index) -> Nat.Lt (degree i) (degree j) -> x j = (family.space j).zero) -> t.apply x i = (family.space i).zero;

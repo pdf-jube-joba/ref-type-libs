@@ -1,0 +1,24 @@
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import Equality.Transport[A := I.Int^] \as Cast;
+\definition castBase[x: baseFamily.Carrier d]: baseFamily.Carrier input := Cast.cast baseFamily.Carrier d input same x;
+\definition rangeDegree: I.Int^ := Degrees.shift q d;
+\definition rangeSame: rangeDegree = z := trans!{I.Int^} rangeDegree output z
+  (congr!{I.Int^ I.Int^} (Degrees.shift q) d input same) (Degrees.shiftUnshift q z);
+\import \root.Transport[K := K, ring := ring].Arrow[Index := I.Int^, F := baseFamily.Carrier, G := totalFamily.Carrier,
+  advance := (Degrees.shift q), apply := (\fun (k: I.Int^)(a: baseFamily.Carrier k) => (map k).apply a)] \as Arrow;
+\definition formula: \forall (x: baseFamily.Carrier d) ->
+  linear.apply (castBase x) = Cast.cast totalFamily.Carrier rangeDegree z rangeSame ((map d).apply x) :=
+  \fun (x: baseFamily.Carrier d) => trans!{{totalFamily.Carrier z}} _ _ _
+    (congr!{{totalFamily.Carrier output} {totalFamily.Carrier z}} (Cast.cast totalFamily.Carrier output z (Degrees.shiftUnshift q z)) _ _
+      (Arrow.compare d input rangeDegree same (\refl(rangeDegree)) x ((map d).apply x)
+        (sym!{{totalFamily.Carrier rangeDegree}} _ _ (Cast.castRefl totalFamily.Carrier rangeDegree ((map d).apply x)))))
+    (Cast.castComposition totalFamily.Carrier rangeDegree output z _ (Degrees.shiftUnshift q z) ((map d).apply x));
+\definition raw[x: baseFamily.Carrier input]: baseFamily.Carrier d := Cast.cast baseFamily.Carrier input d (sym!{I.Int^} d input same) x;
+\definition law: \forall (x: baseFamily.Carrier input) ->
+  linear.apply x = Cast.cast totalFamily.Carrier rangeDegree z rangeSame ((map d).apply (raw x)) :=
+  \fun (x: baseFamily.Carrier input) => trans!{{totalFamily.Carrier z}} _ _ _
+    (congr!{{baseFamily.Carrier input} {totalFamily.Carrier z}} linear.apply _ _
+      (sym!{{baseFamily.Carrier input}} _ _ (Cast.castInverse baseFamily.Carrier input d (sym!{I.Int^} d input same) x)))
+    (formula (raw x));

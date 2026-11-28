@@ -82,3 +82,16 @@
 
 \module WeightedNilpotence(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
   count: std.Data[].Nat[].Nat^, degree: std.Data[].FinSet[].Fin count -> std.Data[].Nat[].Nat^);
+
+\module AbsoluteHomeomorphism(A, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], homeomorphism: topology.Homeomorphism[A := A, B := B].Homeomorphism[source, target]);
+
+\module PairHomeomorphism(A, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology,
+  part: \Pow A, boundary: \Pow B, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
+  data: singular_cohomology.Relative[A := A, source := source, subset := part].Homeomorphism[B := B]
+    .Over[target := target, targetSubset := boundary].Data);
+
+\module RelativeZeroAction(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ModuleMatrix(R: \Set, ring: std.Alg[].Ring[].CommutativeRing[R], count: std.Data[].Nat[].Nat^);

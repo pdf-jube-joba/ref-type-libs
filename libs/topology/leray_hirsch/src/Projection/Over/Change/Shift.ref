@@ -1,0 +1,51 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Z;
+\import TotalPair.With[coefficients := TotalProduct.integerCoefficients] \as OldInteger;
+\import singular_products.Cochains[A := E, source := total, R := L, ring := targetRing] \as NewTotalProduct;
+\import TotalPair.With[coefficients := NewTotalProduct.integerCoefficients] \as NewInteger;
+\import Equality.Transport[A := I.Int^] \as Transport;
+\import \parent.\parent.Shifted[q := q, u := u] \as Input;
+\import New.Shifted[q := q, u := (TargetCoefficients.absolute q).apply u] \as Output;
+\definition DegreeLaw[z: I.Int^]: \Prop := \forall (a: baseFamily.Carrier z) ->
+  (TargetCoefficients.relative (Degrees.shift q z)).apply ((Input.map z).apply a) =
+    (Output.map z).apply ((SourceCoefficients.relative z).apply a);
+\module Native(p: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat p;
+  \import \parent.\parent.Degree[p := p, q := q] \as Formula;
+  \import \parent.\parent.\parent.Component[p := p, q := q] \as Source;
+  \definition n: I.Int^ := I.Int^::ofNat Source.degree;
+  \definition to: I.Int^ := Degrees.shift q z;
+  \definition eq: n = to := sym!{I.Int^} _ _ (Degrees.natural q p);
+  \definition law: DegreeLaw z := \fun (a: baseFamily.Carrier z) => trans!{{New.totalFamily.Carrier to}} _ _ _
+    (sym!{{New.totalFamily.Carrier to}} _ _
+      (Transport.natural totalFamily.Carrier New.totalFamily.Carrier (\fun (k: I.Int^) => (TargetCoefficients.relative k).apply) n to eq (Source.apply u a)))
+    (congr!{{New.totalFamily.Carrier n} {New.totalFamily.Carrier to}} (Transport.cast New.totalFamily.Carrier n to eq) _ _ (Formula.law u a));
+}
+\module Negative(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::negSucc n;
+  \definition to: I.Int^ := Degrees.shift q z;
+  \import Z.Hom[V := totalFamily.Carrier to, W := New.totalFamily.Carrier to,
+    source := (OldInteger.At[z := to].space), target := (NewInteger.At[z := to].space)] \as Maps;
+  \definition law: DegreeLaw z := \fun (a: baseFamily.Carrier z) => Maps.zeroPreserved (TargetCoefficients.relative to);
+}
+\definition onInput: \forall (z: I.Int^) -> DegreeLaw z :=
+  \induction (z: I.Int^) \return DegreeLaw z \with {
+    | ofNat: \fun (p: N.Nat^) => Native[p := p].law
+    | negSucc: \fun (n: N.Nat^) => Negative[n := n].law
+  };
+\module At(z: I.Int^) {
+  \definition d: I.Int^ := Degrees.unshift q z;
+  \definition raw: I.Int^ := Degrees.shift q d;
+  \definition eq: raw = z := Degrees.shiftUnshift q z;
+  \definition law: \forall (a: baseFamily.Carrier d) ->
+    (TargetCoefficients.relative z).apply (Input.To[z := z].linear.apply a) =
+      Output.To[z := z].linear.apply ((SourceCoefficients.relative d).apply a) :=
+    \fun (a: baseFamily.Carrier d) => trans!{{New.totalFamily.Carrier z}} _ _ _
+      (sym!{{New.totalFamily.Carrier z}} _ _
+        (Transport.natural totalFamily.Carrier New.totalFamily.Carrier (\fun (k: I.Int^) => (TargetCoefficients.relative k).apply) raw z eq ((Input.map d).apply a)))
+      (congr!{{New.totalFamily.Carrier raw} {New.totalFamily.Carrier z}} (Transport.cast New.totalFamily.Carrier raw z eq) _ _ (onInput d a));
+}
