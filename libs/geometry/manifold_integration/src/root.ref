@@ -11,3 +11,4 @@
 \module Orthant(n: std.Data[].Nat[].Nat^);
 \module Permute(n: std.Data[].Nat[].Nat^, p: std.Data[].FinSet[].Permutations[n := n].Permutation);
 \module Rectangle(horizontal, vertical: integration.Real[].Interval);
+\module CornerChart(n: std.Data[].Nat[].Nat^);

@@ -23,3 +23,5 @@
   \into[Carrier -> Real.Real](f, Coefficient) \by { continuous };
 \module Of(f: Coefficient);
 \module Difference(left, right: Coefficient);
+\module Partition(k: std.Data[].Nat[].Nat^, f: Coefficient, weight: std.Data[].FinSet[].Fin k -> Coefficient,
+  total: \forall (x: Carrier) -> Real.FiniteSums[].sum k (\fun (i: std.Data[].FinSet[].Fin k) => weight i x) = Real.one);

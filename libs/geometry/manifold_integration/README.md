@@ -18,6 +18,8 @@ Compactly supported top forms are integrated in Euclidean coordinates by taking 
 | Interval.On.Simplex.stokes | Integrate pullbacks along smooth singular paths into a Euclidean open set and compare with the signed endpoint coboundary |
 | Interval.On.Path.To.Along.Of.stokes | Compare the integral and endpoint coboundary for a smooth singular path in a smooth manifold |
 | Region.On.Of | Integrate continuous coefficients on compact Euclidean regions by their zero extensions |
+| Region.On.Partition.law | Integrate a finite partition of a coefficient with weights normalized on the compact region |
+| CornerChart.On.Within | Integrate a top-form coefficient restricted to a compact region of a G03 quadrant chart |
 | Interval.Box.Of.integral | Compare the compact region integral on a closed interval with its Riemann integral |
 | Cylinder.Over.Of.Sections.integralLaw | Integrate one coordinate first on a compact product region using Lebesgue Fubini |
 | Cylinder.Over.In.Vertical.theorem | Integrate a normal partial derivative on a compact product region and obtain the upper trace minus the lower trace |
@@ -33,6 +35,8 @@ Compactly supported top forms are integrated in Euclidean coordinates by taking 
 The interval API uses an open neighborhood of the parameter interval and allows the unit interval for singular paths. The path API takes a smooth extension to that neighborhood. Its signed endpoints are the terminal vertex with coefficient \(+1\) and the initial vertex with coefficient \(-1\).
 
 The global integral applies to smooth manifolds without boundary. The input includes an oriented chart cover and a compact carrier outside which the form vanishes. The partition construction uses compactly supported G01 bump functions and requires normalization only on the carrier.
+
+The quadrant chart integral takes a smooth form on the ambient open set. Its value depends only on the coefficient restricted to the compact region of the quadrant.
 
 Stokes for arbitrary compact manifolds with boundary or corners and the higher-dimensional smooth singular cochain map remain open.
 

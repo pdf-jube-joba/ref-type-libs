@@ -1,0 +1,37 @@
+\import std.Data[].FinSet[] \as Fin;
+\import Real.FiniteSums[] \as Sums;
+\import Real.Algebra[] \as Algebra;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\import Functions.Product[] \as Multiplication;
+\import lp_spaces.On[A := E.Point, mu := Lebesgue.measure].One[].Norm[] \as Equality;
+\import \root.FiniteIntegral[A := E.Point, mu := Lebesgue.measure] \as FiniteSum;
+\import \parent.Of[f := f] \as Original;
+\definition weighted[i: Fin.Fin k]: Coefficient := coefficient (\fun (x: Carrier) => Real.mul (f x) (weight i x))
+  (Multiplication.continuous topology f (weight i) Original.continuous (\bysub(Carrier -> Real.Real, Coefficient, weight i)));
+\definition representatives[i: Fin.Fin k]: J.Representatives := \parent.Of[f := weighted i].representative;
+\definition sum: J.Representatives := FiniteSum.representative k representatives;
+\definition inside[x: Carrier]: sum x = Original.representative x :=
+  trans!{Real.Real} _ _ _ (FiniteSum.pointwise k representatives x)
+    (trans!{Real.Real} _ _ _
+      (Sums.congruent k (\fun (i: Fin.Fin k) => representatives i x) (\fun (i: Fin.Fin k) => Real.mul (f x) (weight i x))
+        (\fun (i: Fin.Fin k) => \parent.Of[f := weighted i].inside x))
+      (trans!{Real.Real} _ _ _
+        (Sums.scalar k (f x) (\fun (i: Fin.Fin k) => weight i x))
+        (trans!{Real.Real} _ _ _
+          (congr!{Real.Real Real.Real} (Real.mul (f x)) _ _ (total x))
+          (trans!{Real.Real} _ _ _ (Algebra.mulOneRight (f x)) (sym!{Real.Real} _ _ (Original.inside x))))));
+\definition outside[x: E.Point]: Logic.Not (Sets.Member K x) -> sum x = Original.representative x :=
+  \fun (absent: _) => trans!{Real.Real} _ _ _ (FiniteSum.pointwise k representatives x)
+    (trans!{Real.Real} _ _ _
+      (Sums.congruent k (\fun (i: Fin.Fin k) => representatives i x) (\fun (i: Fin.Fin k) => Real.zero)
+        (\fun (i: Fin.Fin k) => \parent.Of[f := weighted i].outside x absent))
+      (trans!{Real.Real} _ _ _ (Sums.zeroSum k) (sym!{Real.Real} _ _ (Original.outside x absent))));
+\definition pointwise[x: E.Point]: sum x = Original.representative x :=
+  Logic.orElim (Sets.Member K x) (Logic.Not (Sets.Member K x)) (sum x = Original.representative x)
+    (Classical.excludedMiddle (Sets.Member K x))
+    (\fun (member: Sets.Member K x) => inside (\into[E.Point](x, K) \by { member }))
+    (outside x);
+\definition weightedIntegral: Real.Real := Sums.sum k (\fun (i: Fin.Fin k) => J.integral (representatives i));
+\definition law: weightedIntegral = Original.integral :=
+  trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ (FiniteSum.integral k representatives))
+    (Equality.integralPointwise sum Original.representative pointwise);
