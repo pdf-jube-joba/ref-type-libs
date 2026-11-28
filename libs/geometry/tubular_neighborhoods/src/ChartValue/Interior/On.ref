@@ -1,0 +1,6 @@
+\import boundary_manifolds.SmoothMap[n := r,m := n].Between[M := M,N := ambient] \as CornerMaps;
+\import boundary_manifolds.Interior[n := r].Of[M := M] \as Interior;
+\import Interior.Build[] \as Build;
+\import manifolds.Dimension[n := r].Smooth[] \as Ordinary;
+\definition source: Ordinary.Manifold := Build.manifold;
+\module Of(f: CornerMaps.Map);

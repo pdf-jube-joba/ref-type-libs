@@ -1,0 +1,37 @@
+\import manifolds.SmoothMap[n := r,m := n].Between[M := source,N := Euclidean.smoothManifold] \as SmoothMaps;
+\import Corners.Chart[M := M.Point,space := M.space] \as OldCharts;
+\import manifolds.Dimension[n := r].Chart[M := source.Point,space := source.space] \as SourceCharts;
+\import manifolds.Dimension[n := r].Atlas[M := source.Point,space := source.space] \as SourceAtlas;
+\import manifolds.Dimension[n := n].Chart[M := Euclidean.smoothManifold.Point,space := Euclidean.smoothManifold.space] \as TargetCharts;
+\import manifolds.Dimension[n := n].Atlas[M := Euclidean.smoothManifold.Point,space := Euclidean.smoothManifold.space] \as TargetAtlas;
+\definition function[x: source.Point]: Euclidean.smoothManifold.Point := CornerMaps.apply f x;
+\definition toFree: topology.Continuity[A := source.Point,B := Free.Point].Continuous source.space Free.topology
+  (\fun (x: source.Point) => CornerMaps.apply f x) :=
+  topology.Continuity[A := M.Point,B := Free.Point].Restriction[S := Interior.points].restrictContinuous M.space Free.topology (CornerMaps.apply f) f.continuous;
+\definition continuous: SmoothMaps.ContinuousMap :=
+  \into[SmoothMaps.Data](SmoothMaps.Data { apply := function },SmoothMaps.ContinuousMap) \by {
+    topology.Composition[A := source.Point,B := Free.Point,C := Euclidean.smoothManifold.Point].composeContinuous
+      source.space Free.topology Euclidean.smoothManifold.space (\fun (x: source.Point) => CornerMaps.apply f x) (\fun (y: Free.Point) => y)
+      toFree (Model.Topology[C := Model.unconstrained,U := Open.whole].ambient)
+  };
+\import manifolds.SmallAtlasSmoothMap[n := r,m := n].Between[M := source,N := Euclidean.smoothManifold] \as Small;
+\definition sourceAtlas: Small.SourceAtlas := \into[SourceAtlas.Atlas](Build.atlas,Small.SourceAtlas) \by {
+  \fun (c: SourceCharts.Chart)(member: _) => SourceAtlas.includedInSaturation Build.atlas c member
+};
+\definition targetAtlas: Small.TargetAtlas := \into[TargetAtlas.Atlas](Euclidean.atlas,Small.TargetAtlas) \by {
+  \fun (c: TargetCharts.Chart)(member: _) => TargetAtlas.includedInSaturation Euclidean.atlas c member
+};
+\import Small.On[source := sourceAtlas,target := targetAtlas].Of[f := continuous] \as Construct;
+\module In(c: Interior.Chart);
+\definition chartwise: Construct.InSmallAtlas := \block {
+  \fun (a: \Cast[SourceCharts.Chart] sourceAtlas.charts)(b: \Cast[TargetCharts.Chart] targetAtlas.charts) \then
+  \takefrom c: \Cast[Interior.Chart] ({ c: Interior.Chart \where a = Interior.In[c := c].chart }) \by
+    \bysub(SourceCharts.Chart,sourceAtlas.charts,a) \then
+  \return \idelim Interior.In[c := c].chart = a \with v: SourceCharts.Chart => SmoothMaps.Coordinates[f := continuous,left := v,right := b].Smooth \by {
+    base: \idelim Euclidean.standard = b \with w: TargetCharts.Chart => SmoothMaps.Coordinates[f := continuous,left := Interior.In[c := c].chart,right := w].Smooth \by {
+      base: In[c := c].smooth, equality: sym!{{TargetCharts.Chart}} _ _ (\bysub(TargetCharts.Chart,targetAtlas.charts,b))
+    },
+    equality: sym!{{SourceCharts.Chart}} _ _ (\bysub(Interior.Chart,{ c: Interior.Chart \where a = Interior.In[c := c].chart },c))
+  }
+};
+\definition map: SmoothMaps.Map := Construct.value chartwise;

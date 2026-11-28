@@ -1,0 +1,30 @@
+\definition domain: SourceOpen.OpenSet := SourceOpen.intersection extension.neighborhood Coordinates.domain;
+\definition left: SourceOpen.Included domain extension.neighborhood := SourceOpen.intersectionLeft extension.neighborhood Coordinates.domain;
+\definition right: SourceOpen.Included domain Coordinates.domain := SourceOpen.intersectionRight extension.neighborhood Coordinates.domain;
+\definition parameter[v: SourceOpen.Carrier domain]: SourceModel.Carrier c.constraints extension.neighborhood :=
+  \into[SourceOpen.Carrier extension.neighborhood](SourceOpen.inclusion domain extension.neighborhood left v,
+    SourceModel.region c.constraints extension.neighborhood) \by {
+    \bysub(SourceOpen.Carrier c.image,SourceModel.region c.constraints c.image,
+      Restricted.coordinateInput (Coordinates.leftCoordinate (SourceOpen.inclusion domain Coordinates.domain right v)))
+  };
+\definition value[v: SourceOpen.Carrier domain]: R.Real :=
+  Calculus.apply extension.neighborhood Open.whole extension.map (SourceOpen.inclusion domain extension.neighborhood left v) i;
+\definition agrees[v: SourceOpen.Carrier domain]: value v = scalar i (SourceOpen.inclusion domain Coordinates.domain right v) :=
+  congr!{{Model.Point} {R.Real}} (\fun (w: Model.Point) => w i) _ _ (extension.agrees (parameter v));
+\definition rawCoordinate: (Corner.source \of SourceModel.Point) = (u \of SourceModel.Point) :=
+  congr!{{SourceOpen.Carrier Restricted.image} {SourceModel.Point}} (\fun (v: SourceOpen.Carrier Restricted.image) => v) _ _
+    (Restricted.rightInverse (Coordinates.leftCoordinate u));
+\definition inside: \In[SourceModel.Point] domain.points u := Logic.And[_, _]::#
+  (\idelim (Corner.source \of SourceModel.Point) = (u \of SourceModel.Point) \with v: SourceModel.Point =>
+    \In[SourceModel.Point] extension.neighborhood.points v \by { base: extension.contains,equality: rawCoordinate })
+  (\bysub(SourceModel.Point,Coordinates.domain.points,u));
+\definition patch: Local.Patch := Local.Patch {
+  domain := domain,included := right,
+  smooth := \idelim value = SourceOpen.restrict domain Coordinates.domain right (scalar i) \with g: SourceOpen.ScalarFunction domain =>
+    SourceOpen.Smooth[].SmoothOn domain g \by {
+      base: SourceOpen.Restriction[].localSmooth domain extension.neighborhood left
+        (\fun (v: SourceOpen.Carrier extension.neighborhood) => Calculus.apply extension.neighborhood Open.whole extension.map v i) (extension.map.smooth i),
+      equality: \axiom:funext(value,(SourceOpen.restrict domain Coordinates.domain right (scalar i)),agrees)
+    },
+};
+\definition local: \exists \Cast[Local.Patch] (Local.Patches u) := Logic.existsIntro[Local.Patch,Local.Patches u] patch inside;

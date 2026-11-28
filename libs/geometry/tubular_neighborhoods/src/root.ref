@@ -9,3 +9,4 @@
 \module Examples;
 \module HalfSpaceCoordinates(p: std.Data[].Nat[].Nat^);
 \module ReflectedDouble(n: std.Data[].Nat[].Nat^);
+\module ChartValue(n: std.Data[].Nat[].Nat^);

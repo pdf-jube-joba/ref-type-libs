@@ -48,3 +48,5 @@
       Half.manifold.space Height.halfLine.space LineTopology.topology HalfProduct.second (\fun (t: Height.halfLine.Point) => t)
       (PairSpace.Maps[].secondContinuous HalfEuclidean.manifold.space Height.halfLine.space)
       (LineModel.Topology[C := Height.constraints,U := LineOpen.whole].ambient));
+\module Standard;
+\module ProductChart(constraints: LineModel.Constraints,domain: LineOpen.OpenSet);

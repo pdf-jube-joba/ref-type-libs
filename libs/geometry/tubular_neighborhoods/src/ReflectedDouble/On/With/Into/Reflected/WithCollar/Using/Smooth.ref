@@ -1,0 +1,48 @@
+\import \root.ChartValue[n := Half.dimension] \as Values;
+\import boundary_manifolds.Dimension[n := Half.dimension].Quadrant[C := Model.unconstrained,U := Open.whole] \as Free;
+\import Stage.Image[].Compact[leftCompact := compact,rightCompact := compact].Cover[] \as Cover;
+\import Cover.Mapping[m := Half.dimension].Into[P := Values.ambient] \as Local;
+\import manifold_gluing.InteriorInclusion[n := dimension].On[M := B] \as Inside;
+\import \root.HalfSpaceCoordinates[p := p].Standard[] \as Standard;
+\import boundary_manifolds.MapComposition[n := dimension,m := dimension,l := Half.dimension].Between[M := Inside.manifold,N := B,P := Half.manifold].Of[f := Inside.map,g := f] \as InteriorMap;
+\import boundary_manifolds.MapComposition[n := dimension,m := Half.dimension,l := Half.dimension].Between[M := Inside.manifold,N := Half.manifold,P := Values.ambient]
+  .Of[f := InteriorMap.map,g := Standard.map] \as Left;
+\import boundary_manifolds.QuadrantMap[n := Half.dimension,m := Half.dimension].Of[C := Model.unconstrained,D := Model.unconstrained,
+  U := Open.whole,V := Open.whole,f := Reflection.map,
+  preserves := \fun (v: Free.Point) => Model.unconstrainedNonnegative (Target.reflect v)] \as Flip;
+\import boundary_manifolds.MapComposition[n := dimension,m := Half.dimension,l := Half.dimension].Between[M := Inside.manifold,N := Values.ambient,P := Values.ambient]
+  .Of[f := Left.map,g := Flip.map] \as Right;
+\import manifold_gluing.ProductMaps[n := p,m := One.dimension].Of[M := HalfEuclidean.manifold,N := compact_embeddings.Neat[n := p].halfLine] \as TargetProjections;
+\import boundary_manifolds.MapComposition[n := n,m := dimension,l := Half.dimension].Between[M := BoundaryModel.manifold,N := B,P := Half.manifold]
+  .Of[f := BoundaryModel.map,g := f] \as BoundaryMap;
+\import boundary_manifolds.MapComposition[n := n,m := Half.dimension,l := p].Between[M := BoundaryModel.manifold,N := Half.manifold,P := HalfEuclidean.manifold]
+  .Of[f := BoundaryMap.map,g := TargetProjections.First[].map] \as Trace;
+\import manifold_gluing.ProductMaps[n := n,m := One.dimension].Of[M := BoundaryModel.manifold,N := Signed.manifold] \as SeamProjections;
+\import boundary_manifolds.MapComposition[n := dimension,m := n,l := p].Between[M := SignedProduct.manifold,N := BoundaryModel.manifold,P := HalfEuclidean.manifold]
+  .Of[f := SeamProjections.First[].map,g := Trace.map] \as Horizontal;
+\import manifold_gluing.ProductMaps[n := p,m := One.dimension].Of[M := HalfEuclidean.manifold,N := Signed.manifold]
+  .Pairing[p := dimension].From[P := SignedProduct.manifold].Using[f := Horizontal.map,g := SeamProjections.Second[].map] \as Pairing;
+\import \root.HalfSpaceCoordinates[p := p].ProductChart[constraints := LineModel.unconstrained,domain := Signed.domain] \as SignedCoordinates;
+\import boundary_manifolds.MapComposition[n := dimension,m := Half.dimension,l := Half.dimension].Between[
+  M := SignedProduct.manifold,N := SignedCoordinates.manifold,P := Values.ambient].Of[f := Pairing.map,g := SignedCoordinates.map] \as Along;
+\definition function[y: Seam.Point]: Free.Point :=
+  \into[Target.AmbientPoint](value y,Model.region Model.unconstrained Open.whole) \by { Model.unconstrainedNonnegative (value y) };
+\definition regular: topology.Continuity[A := Seam.Point,B := Free.Point].Continuous Seam.topology Free.topology function :=
+  topology.Continuity[A := Seam.Point,B := Target.AmbientPoint].Corestriction[S := Model.region Model.unconstrained Open.whole]
+    .corestrictContinuous Seam.topology Target.ambient function continuous;
+\definition leftAgrees[x: Inside.manifold.Point]: function (left x) = Left.map.apply x :=
+  Model.equality Model.unconstrained Open.whole (function (left x)) (Left.map.apply x)
+    (inCoordinates (value (left x)) (positive x) (onLeft x));
+\definition rightAgrees[x: Inside.manifold.Point]: function (right x) = Right.map.apply x :=
+  Model.equality Model.unconstrained Open.whole (function (right x)) (Right.map.apply x)
+    (inCoordinates (value (right x)) (negative x) (onRight x));
+\definition seamAgrees[q: SignedProduct.Point]: function (Stage.apply q) = Along.map.apply q :=
+  Model.equality Model.unconstrained Open.whole (function (Stage.apply q)) (Along.map.apply q) (agreesInCollar q);
+\import Local.Of[f := function,continuous := regular,left := Left.map,right := Right.map,seam := Along.map,
+  agreesLeft := leftAgrees,agreesRight := rightAgrees,agreesSeam := seamAgrees] \as Constructed;
+\definition map: boundary_manifolds.SmoothMap[n := dimension,m := Half.dimension].Between[M := Gluing.manifold double,N := Values.ambient].Map := Constructed.map;
+\definition formula[y: Seam.Point]: (map.apply y \of Model.Point) = (value y \of Model.Point) := \refl(value y \of Model.Point);
+\import Values.Interior[r := dimension].On[M := Gluing.manifold double].Of[f := map] \as OrdinaryMap;
+\import manifolds.Dimension[n := Half.dimension].Examples[].Euclidean[] \as Euclidean;
+\definition ordinaryMap: manifolds.SmoothMap[n := dimension,m := Half.dimension].Between[M := ordinary,N := Euclidean.smoothManifold].Map := OrdinaryMap.map;
+\definition ordinaryFormula[x: ordinary.Point]: ordinaryMap.apply x = (ordinaryValue x \of Model.Point) := formula x;

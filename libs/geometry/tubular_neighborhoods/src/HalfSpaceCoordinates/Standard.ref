@@ -1,0 +1,4 @@
+\import \parent.ProductChart[constraints := Height.constraints,domain := LineOpen.whole] \as Product;
+\import \root.ChartValue[n := Half.dimension] \as Values;
+\definition map: boundary_manifolds.SmoothMap[n := Half.dimension,m := Half.dimension].Between[M := Half.manifold,N := Values.ambient].Map := Product.map;
+\definition formula[x: Half.manifold.Point]: (map.apply x \of Model.Point) = Half.value x := Product.formula x;

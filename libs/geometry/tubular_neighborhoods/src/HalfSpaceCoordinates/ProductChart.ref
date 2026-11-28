@@ -1,0 +1,34 @@
+\import boundary_manifolds.Dimension[n := p] \as Horizontal;
+\import boundary_manifolds.Dimension[n := One.dimension].Quadrant[C := constraints,U := domain] \as Ray;
+\import boundary_manifolds.Product[n := p,m := One.dimension].Of[M := HalfEuclidean.manifold,N := Ray.manifold] \as Product;
+\import calculus.Blocks[n := p,m := One.dimension] \as Blocks;
+\import boundary_manifolds.Dimension[n := Half.dimension] \as Models;
+\definition manifold: Models.Manifold := Product.manifold;
+\import manifolds.Dimension[n := p].Chart[M := HalfOrdinary.smoothManifold.Point,space := HalfOrdinary.smoothManifold.space] \as OldCharts;
+\import manifolds.Dimension[n := p].Atlas[M := HalfOrdinary.smoothManifold.Point,space := HalfOrdinary.smoothManifold.space] \as OldAtlas;
+\definition horizontalStandard: HalfEuclidean.OldChart :=
+  \into[OldCharts.Chart](HalfOrdinary.standard,HalfEuclidean.OldChart) \by {
+    OldAtlas.includedInSaturation HalfOrdinary.atlas HalfOrdinary.standard (\refl(HalfOrdinary.standard))
+  };
+\import topology.Topology[Carrier := HalfOrdinary.smoothManifold.Point] \as HorizontalSpace;
+\import boundary_manifolds.Ambient[n := p].Over[M := HalfOrdinary.smoothManifold,S := HorizontalSpace.Whole] \as Adapt;
+\import Adapt.On[patch := HalfEuclidean.InChart[c := horizontalStandard].patch] \as Left;
+\import Horizontal.Chart[M := HalfEuclidean.manifold.Point,space := HalfEuclidean.manifold.space] \as LeftCharts;
+\definition first: Product.LeftChart := \into[LeftCharts.Chart](Left.chart,Product.LeftChart) \by {
+  Logic.existsIntro[Adapt.Adapted,{ a: Adapt.Adapted \where Left.chart = Adapt.On[patch := a].chart }]
+    HalfEuclidean.InChart[c := horizontalStandard].patch (\refl(Left.chart))
+};
+\import boundary_manifolds.Dimension[n := One.dimension].Chart[M := Ray.Point,space := Ray.topology] \as RightCharts;
+\definition second: Product.RightChart := \into[RightCharts.Chart](Ray.chart,Product.RightChart) \by { \refl(Ray.chart) };
+\import std.Data[].Pair[] \as Pair;
+\definition index: Product.Index := Pair.pair Product.LeftChart Product.RightChart first second;
+\import boundary_manifolds.Dimension[n := Half.dimension].Chart[M := manifold.Point,space := manifold.space] \as Charts;
+\definition chart: Charts.Chart := Product.chart index;
+\definition member: \In[Charts.Chart] manifold.atlas.charts chart :=
+  Logic.existsIntro[Product.Index,{ i: Product.Index \where chart = Product.chart i }] index (\refl(chart));
+\definition covers[x: manifold.Point]: Charts.Contains chart x :=
+  Logic.And[_, _]::# (\refl(Product.first x)) (\refl(Product.second x));
+\import \root.ChartValue[n := Half.dimension] \as Values;
+\import Values.On[M := manifold].From[chart := chart,member := member,covers := covers] \as Coordinates;
+\definition map: boundary_manifolds.SmoothMap[n := Half.dimension,m := Half.dimension].Between[M := manifold,N := Values.ambient].Map := Coordinates.map;
+\definition formula[x: manifold.Point]: (map.apply x \of Model.Point) = Blocks.join (Product.first x) (Product.second x) := \refl(Blocks.join (Product.first x) (Product.second x));

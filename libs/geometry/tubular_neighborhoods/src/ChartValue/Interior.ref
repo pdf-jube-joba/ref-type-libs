@@ -1,0 +1,12 @@
+\import boundary_manifolds.Dimension[n := r] \as Corners;
+\import boundary_manifolds.Model[n := r] \as SourceModel;
+\import calculus.Real[].Multivariable[n := r].Open[] \as SourceOpen;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import std.Data[].FinSet[] \as Fin;
+\import real.Analysis[] \as R;
+\import manifolds.Dimension[n := n].Examples[].Euclidean[] \as Euclidean;
+\module On(M: Corners.Manifold);

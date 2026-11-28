@@ -1,0 +1,2 @@
+\import boundary_manifolds.Dimension[n := n].Chart[M := M.Point,space := M.space] \as Charts;
+\module From(chart: Charts.Chart,member: \In[Charts.Chart] M.atlas.charts chart,covers: \forall (x: M.Point) -> Charts.Contains chart x);
