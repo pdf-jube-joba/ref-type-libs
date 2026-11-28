@@ -1,0 +1,47 @@
+\import std.Data[].FinSet[] \as Fin;
+\import Real.FiniteSums[] \as Sums;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\import topology.Topology[Carrier := M.Point] \as Sets;
+\import functional_analysis.Support[A := M.Point] \as Support;
+\structure Piece: \Set := {
+  chart: Forms.Chart,
+  positive: \In[Forms.Chart] orientation.positive chart,
+  weight: Functions.Smooth,
+  compact: Sets.IsCompactIn M.space (Functions.support weight),
+  within: Sets.Subset (Functions.support weight) chart.domain,
+};
+\structure Partition: \Set := {
+  size: N.Nat^,
+  pieces: Fin.Fin size -> Piece,
+  total: \forall (x: M.Point) -> Sets.Member K x -> Sums.sum size (\fun (i: Fin.Fin size) => (pieces i).weight x) = Real.one,
+};
+\module PieceIntegral(piece: Piece);
+\definition sum[partition: Partition]: Real.Real :=
+  Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => PieceIntegral[piece := partition.pieces i].integral);
+\module Compare(left, right: Partition);
+\module Expand(piece: Piece, partition: Partition);
+\module Make;
+\definition exists: \exists Partition := Make[].exists;
+\definition Values: \Pow Real.Real := { r: Real.Real \where \exists (p: Partition \where r = sum p) };
+\definition Integral: \Set := \Cast[Real.Real] Values;
+\definition existsValue: \exists Integral := \block {
+  \takefrom p: Partition \by exists \then
+  \return Logic.existsIntro[Real.Real, Values] (sum p)
+    (Logic.existsIntro[Partition, { q: Partition \where sum p = sum q }] p (\refl(sum p)))
+};
+\definition unique: \forall (a, b: Integral) -> a = b := \block {
+  \fun (a, b: Integral) \then
+  \takefrom p: \Cast[Partition] ({ p: Partition \where a = sum p }) \by \bysub(Real.Real, Values, a) \then
+  \takefrom q: \Cast[Partition] ({ q: Partition \where b = sum q }) \by \bysub(Real.Real, Values, b) \then
+  \return boundary_manifolds.Refinement[A := Real.Real].equality Values a b
+    (trans!{Real.Real} a (sum p) b
+      (\bysub(Partition, { p: Partition \where a = sum p }, p))
+      (trans!{Real.Real} (sum p) (sum q) b Compare[left := p, right := q].independent
+        (sym!{Real.Real} b (sum q) (\bysub(Partition, { q: Partition \where b = sum q }, q)))))
+};
+\definition integral: Integral := \choice Integral \by { existence: existsValue, uniqueness: unique };
+\definition evaluates[p: Partition]: (integral \of Real.Real) = sum p :=
+  congr!{Integral Real.Real} (\fun (z: Integral) => z) _ _
+    (unique integral (\into[Real.Real](sum p, Values) \by {
+      Logic.existsIntro[Partition, { q: Partition \where sum p = sum q }] p (\refl(sum p))
+    }));

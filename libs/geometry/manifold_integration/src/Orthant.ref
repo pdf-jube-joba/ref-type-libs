@@ -1,0 +1,40 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\import real.Analysis[] \as Real;
+\import Real.Algebra[] \as Algebra;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import calculus.Real[].OneDimension[] \as One;
+\import Fin.Sum[m := n, n := One.dimension] \as Indices;
+\definition dimension: N.Nat^ := Indices.total;
+\definition normal: Fin.Fin dimension := Indices.right One.index;
+\import boundary_manifolds.Model[n := dimension] \as Model;
+\import boundary_manifolds.Dimension[n := dimension] \as AmbientModels;
+\import boundary_manifolds.Dimension[n := n] \as FaceModels;
+\import calculus.Real[].Multivariable[n := dimension].Open[] \as Open;
+\import calculus.Blocks[n := n, m := One.dimension] \as Blocks;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\import Spaces.Coordinates[I := Fin.Fin dimension] \as Vectors;
+\import Vectors.Kronecker[] \as Kronecker;
+\import Spaces.FiniteCoordinates[n := dimension] \as Basis;
+\import Spaces.Multilinear[V := Model.Point, space := Vectors.space] \as Multilinear;
+\import Multilinear.Alternating[] \as Forms;
+\import manifold_gluing.BoundarySigns[n := n].On[V := Model.Point, space := Vectors.space] \as Signs;
+\definition inwardNormal: Model.Point := Basis.vectors normal;
+\definition outwardNormal: Model.Point := Vectors.space.neg inwardNormal;
+\definition normalValue: inwardNormal normal = Real.one := Kronecker.self normal;
+\definition outwardValue: outwardNormal normal = Real.neg Real.one :=
+  congr!{Real.Real Real.Real} Real.neg _ _ normalValue;
+\definition normalNonnegative[i: Fin.Fin dimension]: R.Le Real.zero (inwardNormal i) :=
+  Logic.orElim (normal = i) (Logic.Not (normal = i)) (R.Le Real.zero (inwardNormal i))
+    (Classical.excludedMiddle (normal = i))
+    (\fun (same: normal = i) => R.leReplaceRight Real.zero Real.one (inwardNormal i)
+      (sym!{Real.Real} _ _ (Kronecker.equal normal i same)) Laws.oneNonnegative)
+    (\fun (different: Logic.Not (normal = i)) => R.leReplaceRight Real.zero Real.zero (inwardNormal i)
+      (sym!{Real.Real} _ _ (Kronecker.different normal i different)) (R.leRefl Real.zero));
+\module In(C: Model.Constraints, U: Open.OpenSet, selected: \In[Fin.Fin dimension] C normal);

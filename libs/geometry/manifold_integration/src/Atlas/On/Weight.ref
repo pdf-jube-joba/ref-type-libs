@@ -1,0 +1,18 @@
+\import std.Data[].FinSet[] \as Fin;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\import Open.Smooth[] \as Smooth;
+\definition local[c: Forms.Chart]: Smooth.SmoothFunction c.image :=
+  \into[Open.ScalarFunction c.image]((\fun (x: Open.Carrier c.image) => weight (Charts.point c x)), Smooth.SmoothFunction c.image) \by {
+    Functions.regular weight c
+  };
+\definition family[c: Forms.Chart]: LocalForms.On[U := c.image].Form n :=
+  LocalForms.On[U := c.image].At[k := n].multiply (local c) (omega c);
+\module Pair(left, right: Forms.Chart);
+\definition compatible: Forms.Compatible n family :=
+  \fun (left, right: Forms.Chart) => Pair[left := left, right := right].agrees;
+\definition form: Forms.Form n :=
+  \into[Forms.Family n](family, { eta: Forms.Family n \where Forms.Compatible n eta }) \by { compatible };
+\definition coefficient[c: Forms.Chart][x: Open.Carrier c.image]:
+  change_of_variables.Euclidean[n := n].TopCoordinates[U := c.image].coefficient (form c) x =
+  Real.mul (weight (Charts.point c x)) (change_of_variables.Euclidean[n := n].TopCoordinates[U := c.image].coefficient (omega c) x) :=
+  \refl(Real.mul (weight (Charts.point c x)) (change_of_variables.Euclidean[n := n].TopCoordinates[U := c.image].coefficient (omega c) x));

@@ -1,0 +1,2 @@
+\import manifolds.Dimension[n := m].Smooth[] \as Target;
+\module To(target: Target.Manifold);

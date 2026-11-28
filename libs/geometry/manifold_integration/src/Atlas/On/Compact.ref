@@ -1,0 +1,7 @@
+\import topology.Topology[Carrier := M.Point] \as Sets;
+\import Sets.Subspace[S := K] \as Carrier;
+\import Carrier.Properties[] \as CarrierProperties;
+\definition Contains[chart: Forms.Chart]: \Prop := Sets.Subset K chart.domain;
+\definition Vanishes: \Prop := Vanishing omega K;
+\module In(chart: Forms.Chart, contains: Contains chart, vanishes: Vanishes);
+\module Compare(left, right: Forms.Chart, onLeft: Contains left, onRight: Contains right, vanishes: Vanishes);

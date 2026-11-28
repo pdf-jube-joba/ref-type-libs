@@ -1,0 +1,70 @@
+\import topology.Topology[Carrier := Model.Point] \as ModelSets;
+\import topological_algebra.Euclidean[].Dimension[n := n].Topology[] \as ModelTopology;
+\import topology.Topology[Carrier := Carrier.CarrierSet] \as LocalSets;
+\import topology.Maps[A := Carrier.CarrierSet, B := Model.Point] \as Image;
+\import functional_analysis.Support[A := Model.Point] \as Support;
+\import change_of_variables.Euclidean[n := n] \as Change;
+\import Change.TopCoordinates[U := chart.image] \as Coordinates;
+\import Change.Localization[U := chart.image] \as Localization;
+\import smooth_partitions.Euclidean[n := n] \as Smooth;
+\import Smooth.ZeroExtension[U := chart.image, f := Coordinates.coefficient (omega chart)] \as Extension;
+\import Integration.Chart[U := chart.image] \as ChartIntegral;
+\import topology.Homeomorphism[A := Charts.LocalPoint chart, B := Open.Carrier chart.image] \as Homeomorphism;
+\definition localPoint[x: Carrier.CarrierSet]: Charts.LocalPoint chart :=
+  \into[M.Point](x, chart.domain) \by { contains x (\bysub(M.Point, K, x)) };
+\definition coordinate[x: Carrier.CarrierSet]: Model.Point := Charts.coordinate chart (localPoint x);
+\definition localContinuous: topology.Continuity[A := Carrier.CarrierSet, B := Charts.LocalPoint chart].Continuous
+  (Carrier.topology M.space) (Charts.domainTopology chart.domain) localPoint :=
+  topology.Continuity[A := Carrier.CarrierSet, B := M.Point].Corestriction[S := chart.domain].corestrictContinuous (Carrier.topology M.space) M.space localPoint
+    (topology.Continuity[A := Carrier.CarrierSet, B := M.Point].Corestriction[S := K].inclusionContinuous M.space);
+\definition coordinateContinuous: topology.Continuity[A := Carrier.CarrierSet, B := Model.Point].Continuous
+  (Carrier.topology M.space) ModelTopology.topology coordinate :=
+  topology.Composition[A := Carrier.CarrierSet, B := Open.Carrier chart.image, C := Model.Point].composeContinuous
+    (Carrier.topology M.space) (Charts.imageTopology chart.image) ModelTopology.topology
+    (\fun (x: Carrier.CarrierSet) => Charts.coordinate chart (localPoint x)) (\fun (y: Open.Carrier chart.image) => y)
+    (topology.Composition[A := Carrier.CarrierSet, B := Charts.LocalPoint chart, C := Open.Carrier chart.image].composeContinuous
+      (Carrier.topology M.space) (Charts.domainTopology chart.domain) (Charts.imageTopology chart.image)
+      localPoint (Charts.coordinate chart) localContinuous
+      (Homeomorphism.laws (Charts.domainTopology chart.domain) (Charts.imageTopology chart.image) chart.coordinates).forwardContinuous)
+    (topology.Continuity[A := Open.Carrier chart.image, B := Model.Point].Corestriction[S := chart.image.points].inclusionContinuous ModelTopology.topology);
+\definition image: \Pow Model.Point := Image.Image coordinate LocalSets.Whole;
+\definition imageCompact: ModelSets.IsCompactIn ModelTopology.topology image :=
+  topology.Compactness[A := Carrier.CarrierSet, B := Model.Point].continuousImage
+    (Carrier.topology M.space) ModelTopology.topology coordinate coordinateContinuous LocalSets.Whole
+    (CarrierProperties.compact M.space compact);
+\definition imageClosed: ModelSets.IsClosedIn ModelTopology.topology image :=
+  ModelSets.Compactness[].compactClosed ModelTopology.topology ModelTopology.hausdorff image imageCompact;
+\definition imageWithin: ModelSets.Subset image chart.image.points :=
+  \fun (a: Model.Point)(member: ModelSets.Member image a) =>
+    Image.imageElim coordinate LocalSets.Whole a (ModelSets.Member chart.image.points a)
+      (\fun (x: Carrier.CarrierSet)(whole: _)(same: coordinate x = a) =>
+        \idelim coordinate x = a \with y: Model.Point => ModelSets.Member chart.image.points y \by {
+          base: \bysub(Model.Point, chart.image.points, Charts.coordinate chart (localPoint x)), equality: same
+        }) member;
+\definition chartOutside[a: Open.Carrier chart.image]: Logic.Not (ModelSets.Member image a) -> Logic.Not (Sets.Member K (Charts.point chart a)) :=
+  \fun (outside: _)(member: _) => \block {
+    \let x: Carrier.CarrierSet := \into[M.Point](Charts.point chart a, K) \by { member } \then
+    \let same: coordinate x = (a \of Model.Point) := Charts.Of[chart := chart].coordinatePoint a \then
+    \return outside (\idelim coordinate x = (a \of Model.Point) \with y: Model.Point => ModelSets.Member image y \by {
+      base: Image.imageMember coordinate LocalSets.Whole x (\refl(x)), equality: same
+    })
+  };
+\import std.Logic[].Classical[] \as Classical;
+\definition zeroOutside[a: Model.Point]: Logic.Not (ModelSets.Member image a) -> Extension.value a = Real.zero :=
+  \fun (outside: _) => Logic.orElim (ModelSets.Member chart.image.points a) (Logic.Not (ModelSets.Member chart.image.points a))
+    (Extension.value a = Real.zero) (Classical.excludedMiddle (ModelSets.Member chart.image.points a))
+    (\fun (inside: ModelSets.Member chart.image.points a) => \block {
+      \let x: Open.Carrier chart.image := \into[Model.Point](a, chart.image.points) \by { inside } \then
+      \return trans!{Real.Real} _ _ _ (Extension.inside x) (vanishes chart x (chartOutside x outside))
+    })
+    (Extension.outside a);
+\definition inImage: ModelSets.Subset (Smooth.support Extension.value) image :=
+  Support.supportWithinClosed ModelTopology.topology Extension.value image imageClosed zeroOutside;
+\definition supported: ChartIntegral.Supported (omega chart) :=
+  Localization.Conditions[Coordinates.coefficient (omega chart)] {
+    smooth := \bysub(Open.ScalarFunction chart.image, Open.Smooth[].SmoothFunction chart.image, Coordinates.coefficient (omega chart)),
+    compact := Support.compactSupportWithin ModelTopology.topology Extension.value image imageCompact inImage,
+    within := \fun (a: Model.Point)(member: _) => imageWithin a (inImage a member),
+  };
+\definition integral: Real.Real := ChartIntegral.integral (omega chart) supported;
+\module Overlap(other: Forms.Chart, alsoContains: Contains other);

@@ -1,0 +1,22 @@
+\import Target.Of[f := f] \as Original;
+\definition pullback: Source.Coefficient := Source.coefficient (\fun (x: Source.Carrier) => f (transport x))
+  (topology.Composition[A := Source.Carrier, B := Target.Carrier, C := Real.Real].composeContinuous
+    Source.topology Target.topology Line.topology transport f continuous Original.continuous);
+\import Source.Of[f := pullback] \as SourceIntegral;
+\import E.MeasureConstruction[] \as Measure;
+\import functional_analysis.Measure[A := E.Point].Integral[mu := Measure.measure] \as Integral;
+\import product_integration.MeasureMap[A := E.Point, B := E.Point, source := Measure.measure, target := Measure.measure].On[map := Permutation.Integration[].map].RealFunction[f := Original.representative] \as Transport;
+\import lp_spaces.On[A := E.Point, mu := Measure.measure].One[].Norm[] \as Equality;
+\definition pointwise[x: E.Point]: SourceIntegral.representative x = Transport.representative x :=
+  Logic.orElim (Sets.Member S x) (Logic.Not (Sets.Member S x)) (SourceIntegral.representative x = Transport.representative x)
+    (Classical.excludedMiddle (Sets.Member S x))
+    (\fun (member: Sets.Member S x) => \block {
+      \let s: Source.Carrier := \into[E.Point](x, S) \by { member } \then
+      \return trans!{Real.Real} _ _ _ (SourceIntegral.inside s) (sym!{Real.Real} _ _ (Original.inside (transport s)))
+    })
+    (\fun (absent: Logic.Not (Sets.Member S x)) => trans!{Real.Real} _ _ _ (SourceIntegral.outside x absent)
+      (sym!{Real.Real} _ _ (Original.outside (point x) (\fun (inside: Sets.Member T (point x)) => absent ((within x).rtl inside)))));
+\definition sourceIntegral: Real.Real := SourceIntegral.integral;
+\definition targetIntegral: Real.Real := Original.integral;
+\definition invariant: sourceIntegral = targetIntegral :=
+  trans!{Real.Real} _ _ _ (Equality.integralPointwise SourceIntegral.representative Transport.representative pointwise) Transport.integral;

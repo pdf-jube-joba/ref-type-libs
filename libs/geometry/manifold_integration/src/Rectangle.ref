@@ -1,0 +1,69 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\import real.Analysis[] \as Real;
+\import calculus.Real[].OneDimension[] \as One;
+\import Fin.Sum[m := One.dimension, n := One.dimension] \as Indices;
+\definition dimension: N.Nat^ := Indices.total;
+\import calculus.Blocks[n := One.dimension, m := One.dimension] \as Blocks;
+\import euclidean_measure.Euclidean[n := dimension] \as E;
+\import euclidean_measure.Euclidean[n := One.dimension] \as Axis;
+\import topology.Topology[Carrier := E.Point] \as Sets;
+\import topology.Topology[Carrier := Axis.Point] \as AxisSets;
+\import calculus.Real[].Multivariable[n := dimension].Open[] \as Open;
+\import Open.Whole[] \as Whole;
+\import Open.Smooth[] \as Smooth;
+\import Smooth.Derivative[] \as Partial;
+\import \root.Interval[interval := horizontal].Box[] \as X;
+\import \root.Interval[interval := vertical].Box[] \as Y;
+\import \root.Cylinder[n := One.dimension, interval := vertical].Over[K := X.points, compact := X.compact] \as YDirection;
+\import \root.Cylinder[n := One.dimension, interval := horizontal].Over[K := Y.points, compact := Y.compact] \as XDirection;
+\definition xIndex: Fin.Fin dimension := Indices.left One.index;
+\definition yIndex: Fin.Fin dimension := Indices.right One.index;
+\import Fin.Permutations[n := dimension] \as P;
+\definition swap: P.Swap := P.Swap { first := xIndex, second := yIndex };
+\definition permutation: P.Permutation := P.Operations[].transposition swap;
+\import Fin.Transposition[n := dimension, a := xIndex, b := yIndex] \as Transform;
+\import \root.Permute[n := dimension, p := permutation] \as Rotate;
+\definition first[p: E.Point]: Blocks.left (Rotate.point p) = Blocks.right p :=
+  \axiom:funext(Blocks.left (Rotate.point p), Blocks.right p, \fun (i: One.Index) => trans!{Real.Real} _ _ _
+    (congr!{{Fin.Fin dimension} Real.Real} p _ _ (trans!{{Fin.Fin dimension}} _ _ _
+      (congr!{{One.Index} {Fin.Fin dimension}} (\fun (j: One.Index) => Transform.apply (Indices.left j)) _ _ (Fin.singletonValue i))
+      Transform.onFirst))
+    (congr!{{Fin.Fin dimension} Real.Real} p _ _ (congr!{{One.Index} {Fin.Fin dimension}} Indices.right _ _ (sym!{{One.Index}} _ _ (Fin.singletonValue i)))));
+\definition second[p: E.Point]: Blocks.right (Rotate.point p) = Blocks.left p :=
+  \axiom:funext(Blocks.right (Rotate.point p), Blocks.left p, \fun (i: One.Index) => trans!{Real.Real} _ _ _
+    (congr!{{Fin.Fin dimension} Real.Real} p _ _ (trans!{{Fin.Fin dimension}} _ _ _
+      (congr!{{One.Index} {Fin.Fin dimension}} (\fun (j: One.Index) => Transform.apply (Indices.right j)) _ _ (Fin.singletonValue i))
+      Transform.onSecond))
+    (congr!{{Fin.Fin dimension} Real.Real} p _ _ (congr!{{One.Index} {Fin.Fin dimension}} Indices.left _ _ (sym!{{One.Index}} _ _ (Fin.singletonValue i)))));
+\definition membership[p: E.Point]: Logic.PropEquiv[Sets.Member XDirection.domain p, Sets.Member YDirection.domain (Rotate.point p)] :=
+  Logic.PropEquiv[_, _] {
+    ltr := \fun (member: Sets.Member XDirection.domain p) => Logic.And[_, _]::#
+      (\idelim Blocks.right p = Blocks.left (Rotate.point p) \with a: Axis.Point => AxisSets.Member X.points a \by {
+        base: member.right, equality: sym!{{Axis.Point}} _ _ (first p)
+      })
+      (\idelim Blocks.left p = Blocks.right (Rotate.point p) \with a: Axis.Point => AxisSets.Member Y.points a \by {
+        base: member.left, equality: sym!{{Axis.Point}} _ _ (second p)
+      }),
+    rtl := \fun (member: Sets.Member YDirection.domain (Rotate.point p)) => Logic.And[_, _]::#
+      (\idelim Blocks.right (Rotate.point p) = Blocks.left p \with a: Axis.Point => AxisSets.Member Y.points a \by {
+        base: member.right, equality: second p
+      })
+      (\idelim Blocks.left (Rotate.point p) = Blocks.right p \with a: Axis.Point => AxisSets.Member X.points a \by {
+        base: member.left, equality: first p
+      }),
+  };
+\definition within[K: \Pow E.Point]: Sets.Subset K Open.whole.points := \fun (p: E.Point)(inside: _) => \refl(p);
+\import YDirection.In[U := Open.whole, included := within YDirection.domain] \as Vertical;
+\import XDirection.In[U := Open.whole, included := within XDirection.domain] \as Horizontal;
+\definition points: \Pow E.Point := YDirection.domain;
+\import \root.Region[n := dimension].On[K := points, compact := YDirection.compactDomain] \as Region;
+\import \root.Region[n := dimension].On[K := XDirection.domain, compact := XDirection.compactDomain] \as FlippedRegion;
+\import Rotate.Between[S := XDirection.domain, T := points, sourceCompact := XDirection.compactDomain, targetCompact := YDirection.compactDomain, within := membership] \as Transport;
+\module Of(p, q: Smooth.SmoothFunction Open.whole);
+\module Signs;
+\module Differential(omega: euclidean_forms.Euclidean[n := dimension].On[U := Open.whole].Form One.dimension);

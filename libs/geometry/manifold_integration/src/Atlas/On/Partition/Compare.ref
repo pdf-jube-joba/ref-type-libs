@@ -1,0 +1,52 @@
+\module At(i: Fin.Fin left.size, j: Fin.Fin right.size) {
+  \import \parent.\parent.Expand[piece := left.pieces i, partition := right].At[i := j] \as Left;
+  \import \parent.\parent.Expand[piece := right.pieces j, partition := left].At[i := i] \as Right;
+  \definition reorder: Left.product = Right.product :=
+    \axiom:funext(Left.product, Right.product, \fun (x: M.Point) =>
+      Laws.fieldMulComm ((left.pieces i).weight x) ((right.pieces j).weight x));
+  \definition localized[f: Functions.Smooth][compact: Sets.IsCompactIn M.space (Functions.support f)][within: Sets.Subset (Functions.support f) (right.pieces j).chart.domain]: Real.Real :=
+    \parent.\parent.PieceIntegral[piece := Piece { chart := (right.pieces j).chart, positive := (right.pieces j).positive, weight := f, compact := compact, within := within }].integral;
+  \definition second: Left.otherIntegral = Right.integral :=
+    (\idelim Left.product = Right.product \with f: Functions.Smooth =>
+      \forall (compact: Sets.IsCompactIn M.space (Functions.support f))(within: Sets.Subset (Functions.support f) (right.pieces j).chart.domain) ->
+        Left.otherIntegral = localized f compact within \by {
+          base: \fun (compact: Sets.IsCompactIn M.space (Functions.support Left.product))(within: Sets.Subset (Functions.support Left.product) (right.pieces j).chart.domain) =>
+            \refl(Left.otherIntegral),
+          equality: reorder
+        }) Right.compact Right.onLeft;
+  \definition law: Left.integral = Right.integral :=
+    trans!{Real.Real} Left.integral Left.otherIntegral Right.integral Left.swapChart second;
+}
+\definition exchange: \forall (p, q: N.Nat^)(f: Fin.Fin p -> Fin.Fin q -> Real.Real) ->
+  Sums.sum p (\fun (i: Fin.Fin p) => Sums.sum q (f i)) = Sums.sum q (\fun (j: Fin.Fin q) => Sums.sum p (\fun (i: Fin.Fin p) => f i j)) :=
+  \induction (p: N.Nat^) \return \forall (q: N.Nat^)(f: Fin.Fin p -> Fin.Fin q -> Real.Real) ->
+    Sums.sum p (\fun (i: Fin.Fin p) => Sums.sum q (f i)) = Sums.sum q (\fun (j: Fin.Fin q) => Sums.sum p (\fun (i: Fin.Fin p) => f i j)) \with {
+    | zero: \fun (q: N.Nat^)(f: Fin.Fin N.Nat^::zero -> Fin.Fin q -> Real.Real) => sym!{Real.Real} _ _ (Sums.zeroSum q)
+    | succ: \fun (p: N.Nat^)(previous: _)(q: N.Nat^)(f: Fin.Fin (N.Nat^::succ p) -> Fin.Fin q -> Real.Real) =>
+      trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} (Real.add (Sums.sum q (f (Fin.zero p)))) _ _ (previous q (\fun (i: Fin.Fin p) => f (Fin.succ p i))))
+        (sym!{Real.Real} _ _ (Sums.addition q (f (Fin.zero p)) (\fun (j: Fin.Fin q) => Sums.sum p (\fun (i: Fin.Fin p) => f (Fin.succ p i) j))))
+  };
+\definition first[i: Fin.Fin left.size][j: Fin.Fin right.size]: Real.Real :=
+  \parent.Expand[piece := left.pieces i, partition := right].At[i := j].integral;
+\definition second[i: Fin.Fin left.size][j: Fin.Fin right.size]: Real.Real :=
+  \parent.Expand[piece := right.pieces j, partition := left].At[i := i].integral;
+\definition independent: sum left = sum right :=
+  eq_reason_in!{Real.Real _
+    "=" { Sums.sum left.size (\fun (i: Fin.Fin left.size) => Sums.sum right.size (first i)) } "by" {
+      Sums.congruent left.size (\fun (i: Fin.Fin left.size) => \parent.PieceIntegral[piece := left.pieces i].integral)
+        (\fun (i: Fin.Fin left.size) => Sums.sum right.size (first i))
+        (\fun (i: Fin.Fin left.size) => \parent.Expand[piece := left.pieces i, partition := right].integral) }
+    "=" { Sums.sum right.size (\fun (j: Fin.Fin right.size) => Sums.sum left.size (\fun (i: Fin.Fin left.size) => first i j)) } "by" {
+      exchange left.size right.size first }
+    "=" { Sums.sum right.size (\fun (j: Fin.Fin right.size) => Sums.sum left.size (\fun (i: Fin.Fin left.size) => second i j)) } "by" {
+      Sums.congruent right.size
+        (\fun (j: Fin.Fin right.size) => Sums.sum left.size (\fun (i: Fin.Fin left.size) => first i j))
+        (\fun (j: Fin.Fin right.size) => Sums.sum left.size (\fun (i: Fin.Fin left.size) => second i j))
+        (\fun (j: Fin.Fin right.size) => Sums.congruent left.size (\fun (i: Fin.Fin left.size) => first i j)
+          (\fun (i: Fin.Fin left.size) => second i j) (\fun (i: Fin.Fin left.size) => At[i := i, j := j].law)) }
+    "=" _ "by" {
+      Sums.congruent right.size (\fun (j: Fin.Fin right.size) => Sums.sum left.size (\fun (i: Fin.Fin left.size) => second i j))
+        (\fun (j: Fin.Fin right.size) => \parent.PieceIntegral[piece := right.pieces j].integral)
+        (\fun (j: Fin.Fin right.size) => sym!{Real.Real} _ _ (\parent.Expand[piece := right.pieces j, partition := left].integral)) }
+  };

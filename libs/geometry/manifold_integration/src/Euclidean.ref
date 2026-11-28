@@ -1,0 +1,18 @@
+\import std.Data[].Nat[] \as N;
+\import real.Analysis[] \as Real;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import calculus.Diffeomorphism[n := n, m := n] \as Diffeomorphisms;
+\import change_of_variables.Euclidean[n := n] \as Change;
+\import euclidean_forms.Euclidean[n := n] \as Forms;
+\import lp_spaces.Euclidean[n := n] \as CompactFunctions;
+\import smooth_partitions.Euclidean[n := n] \as Supports;
+\import topology.Topology[Carrier := Change.Point] \as Sets;
+\import calculus.Maps[n := n, m := n] \as Maps;
+\import euclidean_measure.Euclidean[n := n].MeasureConstruction[] \as Lebesgue;
+\import functional_analysis.Measure[A := Change.Point].Integral[mu := Lebesgue.measure] \as Integral;
+\import lp_spaces.On[A := Change.Point, mu := Lebesgue.measure].One[].Norm[] \as IntegralEquality;
+\import topological_algebra.Euclidean[].Dimension[n := n].Topology[] \as Ambient;
+\module Chart(U: Open.OpenSet);
+\module Transition(U, V: Open.OpenSet, e: Diffeomorphisms.Diffeomorphism U V);
+\module Decomposition(family: \Pow (\Pow Change.Point), f: CompactFunctions.SmoothCompact);
+\module Restriction(U, V: Open.OpenSet, included: Open.Included U V);

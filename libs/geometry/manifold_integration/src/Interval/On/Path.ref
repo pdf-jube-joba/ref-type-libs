@@ -1,0 +1,11 @@
+\import manifolds.Dimension[n := One.dimension].Examples[].Euclidean[].Subspace[U := U] \as Parameter;
+\import manifolds.Dimension[n := One.dimension].Smooth[] \as Domain;
+\import manifolds.Dimension[n := m].Smooth[] \as Target;
+\definition domain: Domain.Manifold := Parameter.smoothManifold;
+\import differential_forms.Forms[n := One.dimension].On[M := domain] \as SourceForms;
+\import manifolds.Dimension[n := One.dimension].Atlas[M := domain.Point, space := domain.space] \as Atlas;
+\import manifolds.Dimension[n := One.dimension].Chart[M := domain.Point, space := domain.space] \as Charts;
+\definition chart: SourceForms.Chart := \into[Charts.Chart](Parameter.standard, domain.atlas.charts) \by {
+  Atlas.includedInSaturation Parameter.atlas Parameter.standard (\refl(Parameter.standard))
+};
+\module To(target: Target.Manifold);

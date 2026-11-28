@@ -1,0 +1,18 @@
+\import \root.Region[n := n].On[K := K, compact := compact] \as Region;
+\definition Point: \Set := Region.Carrier;
+\definition coordinate[x: Point]: Open.Carrier U := \into[Model.Point](x, U.points) \by { included x (\bysub(Model.Point, K, x)) };
+\definition point[x: Point]: manifold.Point := \into[Open.Carrier U](coordinate x, Model.region C U) \by { nonnegative x (\bysub(Model.Point, K, x)) };
+\definition continuous: topology.Continuity[A := Point, B := Open.Carrier U].Continuous Region.topology OpenSpace.topology coordinate :=
+  topology.Continuity[A := Point, B := Model.Point].Corestriction[S := U.points].corestrictContinuous Region.topology Euclidean.topology coordinate
+    (topology.Continuity[A := Point, B := Model.Point].Corestriction[S := K].inclusionContinuous Euclidean.topology);
+\definition value[omega: Form][x: Point]: Real.Real := Top.coefficient omega (coordinate x);
+\definition coefficient[omega: Form]: Region.Coefficient :=
+  Region.coefficient (value omega)
+    (topology.Composition[A := Point, B := Open.Carrier U, C := Real.Real].composeContinuous
+      Region.topology OpenSpace.topology Line.topology coordinate (Top.coefficient omega) continuous
+      (OpenSpace.Continuity[].topological (Top.coefficient omega)
+        (Smooth.Properties[].continuous U (Top.coefficient omega) (\bysub(Open.ScalarFunction U, Smooth.SmoothFunction U, Top.coefficient omega)))));
+\definition integral[omega: Form]: Real.Real := Region.Of[f := coefficient omega].integral;
+\definition agrees[omega, eta: Form]: (\forall (x: Point) -> value omega x = value eta x) -> integral omega = integral eta :=
+  \fun (same: _) => congr!{{Region.Coefficient} Real.Real}
+    (\fun (f: Region.Coefficient) => Region.Of[f := f].integral) _ _ (\axiom:funext(coefficient omega, coefficient eta, same));

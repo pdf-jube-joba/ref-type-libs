@@ -1,0 +1,45 @@
+\import change_of_variables.CurveRestriction[n := dimension].On[U := U, h := h, a := A04.join x interval.left, i := A04.pivot, interval := interval] \as Curve;
+\definition onSegment[t: Continuous.Point]: \In[E.Point] U.points (topological_algebra.Euclidean[].Dimension[n := dimension].Def[].replace (A04.join x interval.left) A04.pivot t) :=
+  \idelim (into x (Box.coordinate t) \of E.Point) = topological_algebra.Euclidean[].Dimension[n := dimension].Def[].replace (A04.join x interval.left) A04.pivot t
+    \with p: E.Point => \In[E.Point] U.points p \by {
+      base: included (into x (Box.coordinate t)) (contains x (Box.coordinate t)),
+      equality: sym!{{E.Point}} _ _ (A04.replaceJoin x interval.left t)
+    };
+\import Curve.With[contains := onSegment] \as Segment;
+\import Box.Of[f := Segment.derivative] \as Fiber;
+\import Interior.Section[x := x] \as Section;
+\definition pointwise[y: Axis.Point]: Section.representative y = Fiber.representative y :=
+  Logic.orElim (AxisSets.Member Box.points y) (Logic.Not (AxisSets.Member Box.points y)) (Section.representative y = Fiber.representative y)
+    (Classical.excludedMiddle (AxisSets.Member Box.points y))
+    (\fun (member: AxisSets.Member Box.points y) => \block {
+      \let p: AxisRegion.Carrier := \into[Axis.Point](y, Box.points) \by { member } \then
+      \let t: Continuous.Point := Box.parameter p \then
+      \let same: (coordinate (into x p) \of E.Point) = (Segment.point t \of E.Point) :=
+        trans!{{E.Point}} _ _ _
+          (congr!{{Axis.Point} {E.Point}} (Blocks.join x) _ _ (sym!{{Axis.Point}} _ _ (euclidean_measure.RealLine[].pointScalar y)))
+          (sym!{{E.Point}} _ _ (A04.replaceJoin x interval.left t)) \then
+      \let localSame: coordinate (into x p) = Segment.point t :=
+        boundary_manifolds.Refinement[A := E.Point].equality U.points (coordinate (into x p)) (Segment.point t) same \then
+      \return eq_reason_in!{Real.Real {Section.representative y}
+        "=" {derivative (coordinate (into x p))} "by" { Section.inside p }
+        "=" {derivative (Segment.point t)} "by" { congr!{{Open.Carrier U} Real.Real} derivative _ _ localSame }
+        "=" {Segment.derivative t} "by" { sym!{Real.Real} _ _ (Segment.derivativeAt t) }
+        "=" {Fiber.representative y} "by" { sym!{Real.Real} _ _ (Fiber.inside p) }
+      }
+    })
+    (\fun (absent: Logic.Not (AxisSets.Member Box.points y)) => trans!{Real.Real} _ _ _
+      (Section.outside y absent) (sym!{Real.Real} _ _ (Fiber.outside y absent)));
+\definition evaluation[t: Continuous.Point]: Segment.value t = h (coordinate (into x (Box.coordinate t))) :=
+  trans!{Real.Real} _ _ _ (Segment.valueAt t)
+    (congr!{{Open.Carrier U} Real.Real} h _ _
+      (boundary_manifolds.Refinement[A := E.Point].equality U.points (Segment.point t) (coordinate (into x (Box.coordinate t)))
+        (A04.replaceJoin x interval.left t)));
+\definition law: Interior.inner x = Difference.difference x :=
+  eq_reason_in!{Real.Real _
+    "=" {AxisIntegral.integral Fiber.representative} "by" { IntegralEquality.integralPointwise Section.representative Fiber.representative pointwise }
+    "=" _ "by" { Fiber.integral }
+    "=" {Real.sub (Segment.value interval.right) (Segment.value interval.left)} "by" {
+      change_of_variables.Interval[interval := interval].Fundamental[f := Segment.derivative, g := Segment.value].theorem
+        (\bysub(Real.Real -> Real.Real, Continuous.Function, Segment.value)) Segment.law }
+    "=" _ "by" { congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _ (evaluation upper) (evaluation lower) }
+  };

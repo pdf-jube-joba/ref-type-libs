@@ -1,0 +1,18 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\import real.Analysis[] \as Real;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import Open.Smooth[] \as Smoothness;
+\import Smoothness.Derivative[] \as Partial;
+\import euclidean_measure.Euclidean[n := n] \as E;
+\import topology.Topology[Carrier := E.Point] \as Sets;
+\import topological_algebra.Euclidean[].Dimension[n := n].Topology[] \as Ambient;
+\import change_of_variables.Linear[n := n].Permutation[p := p] \as Permutation;
+\definition point[x: E.Point]: E.Point := Permutation.point x;
+\module Smooth(f: Smoothness.SmoothFunction Open.whole);
+\module Between(S, T: \Pow E.Point, sourceCompact: Sets.IsCompactIn Ambient.topology S, targetCompact: Sets.IsCompactIn Ambient.topology T,
+  within: \forall (x: E.Point) -> Logic.PropEquiv[Sets.Member S x, Sets.Member T (point x)]);

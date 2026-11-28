@@ -1,0 +1,4 @@
+\import Boundary.Of[M := M] \as Atlas;
+\import Models.Chart[M := M.Point, space := M.space] \as Charts;
+\import topology.Topology[Carrier := M.Point] \as Sets;
+\module With(cover: Atlas.Cover);

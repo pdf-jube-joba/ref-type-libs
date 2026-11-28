@@ -1,0 +1,15 @@
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].sym;
+\import Change.Decomposition[family := family, f := f] \as Finite;
+\import Change.Compact[] \as Compact;
+\import smooth_partitions.Countable[A := Real.Real] \as ScalarSums;
+\definition Data: \Set := Finite.Data;
+\definition exists: Sets.IsOpenCover[Ambient.topology, family, Supports.support f] -> \exists Data :=
+  Finite.exists;
+\definition integral[data: Data]: Real.Real :=
+  ScalarSums.prefix (\fun (i: N.Nat^)(x: Real.Real) => Integral.integral (Compact.representative (data.pieces i))) Real.zero data.size;
+\definition agrees[data: Data]: Integral.integral (Compact.representative f) = integral data :=
+  Finite.Sum[data := data].theorem;
+\definition independent[left, right: Data]: integral left = integral right :=
+  trans!{Real.Real} _ _ _
+    (sym!{Real.Real} _ _ (agrees left)) (agrees right);

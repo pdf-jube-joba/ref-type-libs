@@ -1,0 +1,37 @@
+\import Forms.DegreeZero[] \as Functions;
+\import Forms.ExteriorDerivative[k := N.Nat^::zero] \as D;
+\import Forms.FunctionDifferential[] \as Evaluation;
+\import \parent.Scalar[f := f] \as Primitive;
+\import \parent.Scalar[f := Top.coefficient (D.apply (Functions.apply f))] \as Integrand;
+\import Smooth.Differential[] \as Differential;
+\import Model.Space[].Linear[] \as Linear;
+\import real.Analysis[].Algebra[] \as Algebra;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\import Spaces.FiniteCoordinates[n := One.dimension] \as Basis;
+\import Spaces.Coordinates[I := One.Index].Kronecker[] \as Kronecker;
+\definition coefficient[x: Open.Carrier U]: Top.coefficient (D.apply (Functions.apply f)) x = Partials.partial U f One.index x :=
+  eq_reason_in!{Real.Real _
+    "=" { (Differential.value U f x).apply (Basis.Top[].basisArguments One.index) } "by" {
+      Evaluation.law f x Basis.Top[].basisArguments }
+    "=" { Real.mul (Partials.partial U f One.index x) (Kronecker.delta One.index One.index) } "by" {
+      Laws.addZeroRight (Real.mul (Partials.partial U f One.index x) (Kronecker.delta One.index One.index)) }
+    "=" _ "by" { congr!{Real.Real Real.Real} (Real.mul (Partials.partial U f One.index x)) _ _ (Kronecker.self One.index) }
+    "=" _ "by" { Algebra.mulOneRight (Partials.partial U f One.index x) }
+  };
+\definition derivative[t: Real.Real]: R.Lt interval.left t -> R.Lt t interval.right ->
+  Derivatives.HasDerivativeAt Primitive.value t (Integrand.value t) :=
+  \fun (lower: _)(upper: _) => \block {
+    \let parameter: Continuous.Point := \into[Real.Real](t, Line.ClosedInterval interval.left interval.right) \by {
+      Logic.And[_, _]::# (R.Order[].leOfLt _ _ lower) (R.Order[].leOfLt _ _ upper)
+    } \then
+    \return \idelim Partials.partial U f One.index (coordinate parameter) = Integrand.value t
+      \with d: Real.Real => Derivatives.HasDerivativeAt Primitive.value t d \by {
+        base: Primitive.derivativeAt parameter,
+        equality: sym!{Real.Real} _ _ (trans!{Real.Real} _ _ _ (Integrand.agrees parameter) (coefficient (coordinate parameter)))
+      }
+  };
+\definition stokes:
+  integral (D.apply (Functions.apply f)) = Real.sub (f right) (f left) :=
+  trans!{Real.Real} _ _ _
+    (Change.Fundamental[f := Integrand.continuous, g := Primitive.value].theorem Primitive.continuousLaw derivative)
+    (congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _ (Primitive.agrees rightTime) (Primitive.agrees leftTime));

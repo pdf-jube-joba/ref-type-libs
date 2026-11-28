@@ -1,0 +1,92 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import real.Analysis[] \as Real;
+\import Real.Algebra[] \as Algebra;
+\import Real.FiniteSums[] \as Sums;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\definition dimension: N.Nat^ := N.Nat^::succ n;
+\definition one: N.Nat^ := N.Nat^::succ N.Nat^::zero;
+\import N.Basic[].Def[] \as Nat;
+\import \root.Euclidean[n := dimension] \as Integration;
+\import calculus.Real[].Multivariable[n := dimension].Open[] \as Open;
+\import Open.Whole[] \as Whole;
+\import lp_spaces.Euclidean[n := dimension] \as CompactFunctions;
+\import CompactFunctions.SmoothOperations[] \as CompactOperations;
+\import smooth_partitions.Euclidean[n := dimension] \as Smooth;
+\import euclidean_forms.Euclidean[n := dimension].On[U := Open.whole] \as Local;
+\import Local.At[k := n] \as Source;
+\import Local.At[k := Nat.add one n] \as ProductSpace;
+\import Local.At[k := dimension] \as Target;
+\import Local.ExteriorDerivative[k := n] \as D;
+\import Local.Wedge[p := one, q := n] \as Wedge;
+\import Local.Regrade[k := Nat.add one n, l := dimension] \as Degree;
+\import Local.Partial[k := dimension] \as Partial;
+\import change_of_variables.Euclidean[n := dimension] \as Change;
+\import Change.TopCoordinates[U := Open.whole] \as Top;
+\import Change.Compact[] \as Compact;
+\import topology.Topology[Carrier := Change.Point] \as Sets;
+\import topological_algebra.Euclidean[].Dimension[n := dimension].Topology[] \as Ambient;
+\import functional_analysis.Support[A := Change.Point] \as Support;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\import Spaces.Laws[V := Local.Form (Nat.add one n), space := ProductSpace.space] \as ProductLaws;
+\import Spaces.Coordinates[I := Fin.Fin dimension] \as Vectors;
+\import Spaces.Multilinear[V := Vectors.Vector, space := Vectors.space].Alternating[] \as Forms;
+\import Spaces.Exterior[V := Vectors.Vector, space := Vectors.space] \as Exterior;
+\import Spaces.Shuffle[I := Vectors.Vector] \as Shuffle;
+\import Exterior.Degrees[p := one, q := n] \as Product;
+\import Exterior.Components[k := dimension] \as Components;
+\import Spaces.FiniteCoordinateEnumeration[] \as Enumeration;
+\import Spaces.FiniteCoordinates[n := dimension].Top[] \as Basis;
+\import Local.Summation[k := dimension, I := Fin.Fin dimension] \as Evaluation;
+
+\definition wedged[i: Fin.Fin dimension][omega: Local.Form n]: Local.Form dimension :=
+  Degree.cast (Wedge.apply (D.coordinate i) omega) D.degree;
+\definition partialWedge[i: Fin.Fin dimension][omega: Local.Form n]:
+  Partial.apply i (wedged i omega) = D.term i omega :=
+  eq_reason_in!{{Local.Form dimension} _
+    "=" { Degree.cast (ProductSpace.plus
+      (Wedge.apply (Local.Partial[k := one].apply i (D.coordinate i)) omega)
+      (Wedge.apply (D.coordinate i) (Local.Partial[k := n].apply i omega))) D.degree } "by" {
+      trans!{{Local.Form dimension}} _ _ _
+        (Degree.partial i (Wedge.apply (D.coordinate i) omega) D.degree)
+        (congr!{{Local.Form (Nat.add one n)} {Local.Form dimension}} (\fun (u: Local.Form (Nat.add one n)) => Degree.cast u D.degree) _ _
+          (Wedge.partial i (D.coordinate i) omega))
+    }
+    "=" { Degree.cast (ProductSpace.plus ProductSpace.zero (Wedge.apply (D.coordinate i) (Local.Partial[k := n].apply i omega))) D.degree } "by" {
+      congr!{{Local.Form (Nat.add one n)} {Local.Form dimension}}
+        (\fun (u: Local.Form (Nat.add one n)) => Degree.cast (ProductSpace.plus u (Wedge.apply (D.coordinate i) (Local.Partial[k := n].apply i omega))) D.degree)
+        _ _ (trans!{{Local.Form (Nat.add one n)}} _ _ _
+          (congr!{{Local.Form one} {Local.Form (Nat.add one n)}} (\fun (u: Local.Form one) => Wedge.apply u omega) _ _ (D.coordinatePartial i i))
+          (Wedge.zeroLeft omega))
+    }
+    "=" _ "by" { congr!{{Local.Form (Nat.add one n)} {Local.Form dimension}} (\fun (u: Local.Form (Nat.add one n)) => Degree.cast u D.degree) _ _
+      (ProductLaws.zeroLeft (Wedge.apply (D.coordinate i) (Local.Partial[k := n].apply i omega))) }
+  };
+\definition wedgedZeroAt[i: Fin.Fin dimension][omega: Local.Form n][x: Open.Carrier Open.whole]:
+  omega x = Source.zero x -> wedged i omega x = Target.zero x :=
+  \fun (zeroAt: _) => Components.ext (wedged i omega x) (Target.zero x) (\axiom:funext(Exterior.component dimension (wedged i omega x), Exterior.component dimension (Target.zero x), \fun (args: std.Data[].List[].List[Vectors.Vector]) =>
+    eq_reason_in!{Real.Real { Exterior.component dimension (wedged i omega x) args }
+      "=" { Exterior.component (Nat.add one n) (Wedge.apply (D.coordinate i) omega x) args } "by" {
+        congr!{{Shuffle.Function} Real.Real} (\fun (f: Shuffle.Function) => f args) _ _
+          (Degree.series (Wedge.apply (D.coordinate i) omega) D.degree x) }
+      "=" { Exterior.component (Nat.add one n) (Wedge.apply (D.coordinate i) Source.zero x) args } "by" {
+        congr!{{Forms.Form n} Real.Real}
+          (\fun (u: Forms.Form n) => Exterior.component (Nat.add one n) (Product.wedge (D.coordinate i x) u) args) _ _ zeroAt }
+      "=" { Exterior.component dimension (wedged i Source.zero x) args } "by" {
+        sym!{Real.Real} _ _ (congr!{{Shuffle.Function} Real.Real}
+          (\fun (f: Shuffle.Function) => f args) _ _ (Degree.series (Wedge.apply (D.coordinate i) Source.zero) D.degree x)) }
+      "=" _ "by" { congr!{{Local.Form dimension} Real.Real}
+        (\fun (u: Local.Form dimension) => Exterior.component dimension (u x) args) _ _
+        (trans!{{Local.Form dimension}} _ _ _
+          (congr!{{Local.Form (Nat.add one n)} {Local.Form dimension}} (\fun (u: Local.Form (Nat.add one n)) => Degree.cast u D.degree) _ _
+            (Wedge.zeroRight (D.coordinate i)))
+          (Degree.zero D.degree)) }
+    }));
+\module Of(omega: Local.Form n, K: \Pow Change.Point, compact: Sets.IsCompactIn Ambient.topology K,
+  vanishes: \forall (x: Change.Point) -> Logic.Not (Sets.Member K x) -> omega (Whole.point x) = Source.zero (Whole.point x));

@@ -1,0 +1,15 @@
+\import Change.TopCoordinates[U := U] \as Coordinates;
+\import Change.Localization[U := U] \as Localization;
+\import Change.Compact[] \as Compact;
+\import euclidean_forms.Euclidean[n := n].On[U := U] \as Local;
+\use std.Logic[].Equality[].congr;
+\definition Form: \Set := Local.Form n;
+\definition Supported[omega: Form]: \Prop := Localization.Conditions[Coordinates.coefficient omega];
+\definition representative[omega: Form][supported: Supported omega]: Integral.Representatives :=
+  Localization.representative (Coordinates.coefficient omega) supported;
+\definition integral[omega: Form][supported: Supported omega]: Real.Real :=
+  Integral.integral (representative omega supported);
+\definition fromCompact[f: CompactFunctions.SmoothCompact]: Forms.On[U := Open.whole].Form n :=
+  Change.TopCoordinates[U := Open.whole].form (Compact.function f);
+\module Represented(omega: Form, f: CompactFunctions.SmoothCompact, within: Sets.Subset (Supports.support f) U.points,
+  agrees: \forall (x: Open.Carrier U) -> Coordinates.coefficient omega x = f x);

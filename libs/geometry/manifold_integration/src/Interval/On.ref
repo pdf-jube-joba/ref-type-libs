@@ -1,0 +1,29 @@
+\import Open.Analysis[] \as Analysis;
+\import Open.Smooth[] \as Smooth;
+\import Smooth.Properties[] \as Properties;
+\import Smooth.Derivative[] \as Partials;
+\import calculus.Real[].Derivative[].Def[] \as Derivatives;
+\import euclidean_forms.Euclidean[n := One.dimension].On[U := U] \as Forms;
+\import change_of_variables.Euclidean[n := One.dimension].TopCoordinates[U := U] \as Top;
+\import topology.Topology[Carrier := Continuous.Point] \as PointSets;
+\import metric_spaces.MetricSpace[Carrier := Continuous.Point] \as IntervalMetric;
+\import IntervalMetric.Topology[] \as MetricTopology;
+\import metric_spaces.RealMetric[] \as RealMetric;
+\import metric_spaces.MetricSpace[Carrier := Real.Real].Subspace[S := Line.ClosedInterval interval.left interval.right] \as Submetric;
+\import metric_spaces.RealFunctions[A := Continuous.Point] \as Functions;
+\definition leftTime: Continuous.Point := \into[Real.Real](interval.left, Line.ClosedInterval interval.left interval.right) \by {
+  Logic.And[_, _]::# (R.leRefl interval.left) interval.ordered
+};
+\definition rightTime: Continuous.Point := \into[Real.Real](interval.right, Line.ClosedInterval interval.left interval.right) \by {
+  Logic.And[_, _]::# interval.ordered (R.leRefl interval.right)
+};
+\definition coordinate[t: Continuous.Point]: Open.Carrier U :=
+  \into[Model.Point](point t, U.points) \by { within t };
+\definition left: Open.Carrier U := coordinate leftTime;
+\definition right: Open.Carrier U := coordinate rightTime;
+\module Scalar(f: Smooth.SmoothFunction U);
+\definition integral[omega: Forms.Form One.dimension]: Real.Real :=
+  Continuous.Of[f := Scalar[f := Top.coefficient omega].continuous].value;
+\module Exact(f: Smooth.SmoothFunction U);
+\module Simplex(m: N.Nat^, V: calculus.Real[].Multivariable[n := m].Open[].OpenSet, sigma: calculus.Maps[n := One.dimension, m := m].Map U V);
+\module Path(m: N.Nat^);

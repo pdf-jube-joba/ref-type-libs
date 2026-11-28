@@ -1,0 +1,78 @@
+\import \parent.PieceIntegral[piece := piece] \as Main;
+\import change_of_variables.Euclidean[n := n] \as Change;
+\import Change.TopCoordinates[U := piece.chart.image] \as Coordinates;
+\import Integration.Chart[U := piece.chart.image] \as Chart;
+\import euclidean_measure.Euclidean[n := n].MeasureConstruction[] \as Lebesgue;
+\import functional_analysis.Measure[A := Change.Point].Integral[mu := Lebesgue.measure] \as Integral;
+\import \root.FiniteIntegral[A := Change.Point, mu := Lebesgue.measure] \as Finite;
+\import lp_spaces.On[A := Change.Point, mu := Lebesgue.measure].One[].Norm[] \as IntegralEquality;
+\import topology.Topology[Carrier := Change.Point] \as ModelSets;
+\import smooth_partitions.Euclidean[n := n] \as Euclidean;
+\import Change.Localization[U := piece.chart.image] \as Localization;
+\import std.Logic[].Classical[] \as Classical;
+\module At(i: Fin.Fin partition.size);
+\definition main: Integral.Representatives := Chart.representative (Main.form piece.chart) Main.supported;
+\definition refined[i: Fin.Fin partition.size]: Integral.Representatives := At[i := i].representative;
+\definition sum: Integral.Representatives := Finite.representative partition.size refined;
+\definition original[x: Open.Carrier piece.chart.image]: Real.Real := Coordinates.coefficient (omega piece.chart) x;
+\definition factor[x: Open.Carrier piece.chart.image]: Real.Real := Real.mul (piece.weight (Charts.point piece.chart x)) (original x);
+\definition mainInside[x: Open.Carrier piece.chart.image]: main x = factor x :=
+  trans!{Real.Real} _ _ _
+    (Localization.inside (Coordinates.coefficient (Main.form piece.chart)) Main.supported x)
+    (Main.coefficient piece.chart x);
+\definition refinedInside[i: Fin.Fin partition.size][x: Open.Carrier piece.chart.image]:
+  refined i x = Real.mul ((partition.pieces i).weight (Charts.point piece.chart x)) (factor x) :=
+  At[i := i].inside x;
+\definition normalize[x: Open.Carrier piece.chart.image]:
+  Real.mul (Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x))) (factor x) = factor x :=
+  Logic.orElim (Sets.Member K (Charts.point piece.chart x)) (Logic.Not (Sets.Member K (Charts.point piece.chart x))) _
+    (Classical.excludedMiddle (Sets.Member K (Charts.point piece.chart x)))
+    (\fun (member: Sets.Member K (Charts.point piece.chart x)) => trans!{Real.Real} _ _ _
+      (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (factor x)) _ _ (partition.total (Charts.point piece.chart x) member))
+      (Laws.fieldMulOneLeft (factor x)))
+    (\fun (outside: Logic.Not (Sets.Member K (Charts.point piece.chart x))) => \block {
+      \let zero: factor x = Real.zero := trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} (Real.mul (piece.weight (Charts.point piece.chart x))) _ _ (vanishes piece.chart x outside))
+        (Laws.fieldMulZeroRight (piece.weight (Charts.point piece.chart x))) \then
+      \return eq_reason_in!{Real.Real _
+        "=" { Real.mul (Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x))) Real.zero } "by" {
+          congr!{Real.Real Real.Real} (Real.mul (Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x)))) _ _ zero }
+        "=" Real.zero "by" { Laws.fieldMulZeroRight (Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x))) }
+        "=" {factor x} "by" {sym!{Real.Real} _ _ zero}
+      }
+    });
+\definition inside[x: Open.Carrier piece.chart.image]: sum x = main x :=
+  eq_reason_in!{Real.Real _
+    "=" { Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => refined i x) } "by" { Finite.pointwise partition.size refined x }
+    "=" { Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => Real.mul ((partition.pieces i).weight (Charts.point piece.chart x)) (factor x)) } "by" {
+      Sums.congruent partition.size (\fun (i: Fin.Fin partition.size) => refined i x)
+        (\fun (i: Fin.Fin partition.size) => Real.mul ((partition.pieces i).weight (Charts.point piece.chart x)) (factor x))
+        (\fun (i: Fin.Fin partition.size) => refinedInside i x) }
+    "=" { Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => Real.mul (factor x) ((partition.pieces i).weight (Charts.point piece.chart x))) } "by" {
+      Sums.congruent partition.size (\fun (i: Fin.Fin partition.size) => Real.mul ((partition.pieces i).weight (Charts.point piece.chart x)) (factor x))
+        (\fun (i: Fin.Fin partition.size) => Real.mul (factor x) ((partition.pieces i).weight (Charts.point piece.chart x)))
+        (\fun (i: Fin.Fin partition.size) => Laws.fieldMulComm ((partition.pieces i).weight (Charts.point piece.chart x)) (factor x)) }
+    "=" { Real.mul (factor x) (Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x))) } "by" {
+      Sums.scalar partition.size (factor x) (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x)) }
+    "=" { Real.mul (Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x))) (factor x) } "by" {
+      Laws.fieldMulComm (factor x) (Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => (partition.pieces i).weight (Charts.point piece.chart x))) }
+    "=" { factor x } "by" { normalize x }
+    "=" { main x } "by" { sym!{Real.Real} _ _ (mainInside x) }
+  };
+\definition outside[x: Change.Point]: Logic.Not (ModelSets.Member piece.chart.image.points x) -> sum x = main x :=
+  \fun (exterior: _) => eq_reason_in!{Real.Real _
+    "=" { Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => refined i x) } "by" { Finite.pointwise partition.size refined x }
+    "=" { Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => Real.zero) } "by" {
+      Sums.congruent partition.size (\fun (i: Fin.Fin partition.size) => refined i x)
+        (\fun (i: Fin.Fin partition.size) => Real.zero) (\fun (i: Fin.Fin partition.size) => At[i := i].outside x exterior) }
+    "=" Real.zero "by" { Sums.zeroSum partition.size }
+    "=" { main x } "by" { sym!{Real.Real} _ _ (Localization.outside (Coordinates.coefficient (Main.form piece.chart)) Main.supported x exterior) }
+  };
+\definition pointwise[x: Change.Point]: sum x = main x :=
+  Logic.orElim (ModelSets.Member piece.chart.image.points x) (Logic.Not (ModelSets.Member piece.chart.image.points x)) (sum x = main x)
+    (Classical.excludedMiddle (ModelSets.Member piece.chart.image.points x))
+    (\fun (member: ModelSets.Member piece.chart.image.points x) => inside (\into[Change.Point](x, piece.chart.image.points) \by { member }))
+    (outside x);
+\definition integral: Main.integral = Sums.sum partition.size (\fun (i: Fin.Fin partition.size) => Integral.integral (refined i)) :=
+  trans!{Real.Real} _ _ _ (IntegralEquality.integralPointwise main sum (\fun (x: Change.Point) => sym!{Real.Real} _ _ (pointwise x)))
+    (Finite.integral partition.size refined);

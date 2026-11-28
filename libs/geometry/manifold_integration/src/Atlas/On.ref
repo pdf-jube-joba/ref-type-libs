@@ -1,0 +1,22 @@
+\import Models.Chart[M := M.Point, space := M.space] \as Charts;
+\import differential_forms.Forms[n := n].On[M := M] \as Forms;
+\module Pair(left, right: Forms.Chart);
+\structure Orientation: \Set := {
+  positive: \Pow Forms.Chart,
+  covers: \forall (x: M.Point) -> \exists (c: Forms.Chart \where Logic.And[\In[Forms.Chart] positive c, Charts.Contains c x]),
+  preserving: \forall (left, right: Forms.Chart) -> \In[Forms.Chart] positive left -> \In[Forms.Chart] positive right -> Pair[left := left, right := right].Preserving,
+};
+\import topology.Topology[Carrier := M.Point] \as BaseSets;
+\definition Vanishing[omega: Forms.Form n][K: \Pow M.Point]: \Prop :=
+  \forall (chart: Forms.Chart)(a: Open.Carrier chart.image) ->
+    Logic.Not (BaseSets.Member K (Charts.point chart a)) ->
+      change_of_variables.Euclidean[n := n].TopCoordinates[U := chart.image].coefficient (omega chart) a = Real.zero;
+\module Compact(omega: Forms.Form n, K: \Pow M.Point, compact: topology.Topology[Carrier := M.Point].IsCompactIn M.space K);
+\import smooth_partitions.Manifold[n := n].On[M := M] \as SmoothFunctions;
+\import smooth_partitions.Scalars[A := M.Point, space := M.space].Using[calculus := SmoothFunctions.calculus] \as Functions;
+\module Weight(omega: Forms.Form n, weight: Functions.Smooth);
+\module Partition(orientation: Orientation, omega: Forms.Form n, K: \Pow M.Point,
+  compact: topology.Topology[Carrier := M.Point].IsCompactIn M.space K, vanishes: Vanishing omega K);
+\module SupportComparison(orientation: Orientation, omega: Forms.Form n, left, right: \Pow M.Point,
+  leftCompact: BaseSets.IsCompactIn M.space left, rightCompact: BaseSets.IsCompactIn M.space right,
+  leftVanishes: Vanishing omega left, rightVanishes: Vanishing omega right);

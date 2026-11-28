@@ -1,0 +1,26 @@
+\import SourceRestriction.Of[omega := omega left, supported := sourceSupport] \as Left;
+\import TargetRestriction.Of[omega := omega right, supported := targetSupport] \as Right;
+\import Integration.Chart[U := Forward.domain] \as SourceOverlap;
+\definition sourceWithin: \Prop := Left.Within;
+\definition targetWithin: \Prop := Right.Within;
+\module In(onLeft: sourceWithin, onRight: targetWithin) {
+  \import Left.In[within := onLeft] \as SourceOverlapSupport;
+  \import Right.In[within := onRight] \as TargetOverlapSupport;
+  \import Transition.For[omega := TargetRestriction.apply (omega right), supported := TargetOverlapSupport.support] \as Change;
+  \definition same[orientation: Preserving]:
+    Source.integral (omega left) sourceSupport = Target.integral (omega right) targetSupport :=
+    eq_reason_in!{Real.Real _
+      "=" { SourceOverlap.integral (SourceRestriction.apply (omega left)) SourceOverlapSupport.support } "by" {
+        sym!{Real.Real} _ _ (SourceOverlapSupport.integral SourceOverlapSupport.support) }
+      "=" { SourceOverlap.integral (Transition.pullback (TargetRestriction.apply (omega right))) (Change.preservingSupport orientation) } "by" {
+        (\idelim SourceRestriction.apply (omega left) = Transition.pullback (TargetRestriction.apply (omega right))
+          \with eta: SourceOverlap.Form => \forall (valid: SourceOverlap.Supported eta) ->
+            SourceOverlap.integral (SourceRestriction.apply (omega left)) SourceOverlapSupport.support = SourceOverlap.integral eta valid \by {
+              base: \fun (valid: SourceOverlap.Supported (SourceRestriction.apply (omega left))) =>
+                \refl(SourceOverlap.integral (SourceRestriction.apply (omega left)) valid),
+              equality: agreement omega
+            }) (Change.preservingSupport orientation) }
+      "=" _ "by" { Change.preserving orientation }
+      "=" _ "by" { TargetOverlapSupport.integral TargetOverlapSupport.support }
+    };
+}
