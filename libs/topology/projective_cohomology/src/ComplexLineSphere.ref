@@ -8,3 +8,4 @@
 \module Section;
 \module PulledHopf;
 \module Orientation;
+\module DiskOrientation;

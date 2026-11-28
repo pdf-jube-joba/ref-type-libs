@@ -1,0 +1,27 @@
+\import \root.ComplexLineSphere[].Orientation[].PairAugmentation[A := Ends.Point, source := Ends.discrete, subset := Model.right].At[z := degree] \as Comparison;
+\import algebraic_topology.HomotopyEquivalence[A := Ends.Point, B := Spheres.Carrier N.Nat^::zero] \as Homotopy;
+\definition backwardContinuous: topology.Continuity[A := Spheres.Carrier N.Nat^::zero, B := Ends.Point].Continuous
+  (Spheres.topology N.Nat^::zero) Ends.discrete Native.equivalence.backward :=
+  (Homotopy.laws Ends.discrete (Spheres.topology N.Nat^::zero) Native.equivalence).backwardContinuous;
+\import \parent.\parent.\parent.NonnegativePull[A := Spheres.Carrier N.Nat^::zero, B := Ends.Point,
+  source := Spheres.topology N.Nat^::zero, target := Ends.discrete, coefficients := coefficients, n := N.Nat^::zero,
+  f := Native.equivalence.backward, regular := backwardContinuous] \as SpherePull;
+\import singular_cohomology.Chains[A := Ends.Point, source := Ends.discrete].Reduced[] \as DiscreteChains;
+\import Hom.Integer[P := DiscreteChains.complex, N := coefficients] \as Reduced;
+\import Cochains.At[C := Reduced.complex, z := degree] \as ReducedH;
+\import \root.ComplexLineSphere[].Orientation[].AugmentationMap[A := Ends.Point, source := Ends.discrete] \as Augmentation;
+\import Cochains.Map[C := Ordinary.complex, D := Reduced.complex].At[k := degree] \as Augment;
+\definition reducedDiscrete: ReducedH.Cohomology := ReducedH.classOf ((Augment.cyclesMap Augmentation.cochains).apply cycle);
+\definition discreteLaw: reducedDiscrete = discreteGenerator :=
+  trans!{ReducedH.Cohomology} _ _ _ (sym!{ReducedH.Cohomology} _ _ (Augment.onClass Augmentation.cochains cycle))
+    (trans!{ReducedH.Cohomology} _ _ _ (congr!{Absolute.Cohomology ReducedH.Cohomology} Comparison.onWhole _ _ classLaw)
+      (trans!{ReducedH.Cohomology} _ _ _ (Comparison.forgetLaw globalClass)
+        (sym!{ReducedH.Cohomology} _ _ (GlobalForget.onForward (RightContraction.contraction Model.rightUnique) globalClass))));
+\definition representative: _ := SpherePull.ordinaryClosed cycle;
+\definition standardLaw: standard = SpherePull.reduced reducedDiscrete :=
+  trans!{SphereGroup.Carrier} _ _ _ sphericalGenerator
+    (congr!{ReducedH.Cohomology {SphereGroup.Carrier}} SpherePull.reduced _ _ (sym!{ReducedH.Cohomology} _ _ discreteLaw));
+\definition representativeLaw: _ :=
+  trans!{SphereGroup.Carrier} _ _ _ (sym!{SphereGroup.Carrier} _ _ (SpherePull.law cycle))
+    (sym!{SphereGroup.Carrier} _ _ standardLaw);
+\definition ordinaryLaw: _ := SpherePull.ordinaryLaw cycle;

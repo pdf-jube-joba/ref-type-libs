@@ -1,0 +1,53 @@
+\import \parent.Representative[] \as Representatives;
+\import singular_cohomology.Zero[A := Ends.Point, source := Ends.discrete].With[coefficients := coefficients] \as Zero;
+\import singular_cohomology.Simplices[A := Ends.Point, source := Ends.discrete] \as Simplices;
+\import singular_cohomology.Cochains[A := Ends.Point, source := Ends.discrete].With[coefficients := coefficients].Integer[] \as Ordinary;
+\import Global.With[coefficients := coefficients] \as Pair;
+\import Pair.PairSequence[] \as PairOrdinary;
+\import Cochains.At[C := Pair.complex, z := degree] \as Relative;
+\import Cochains.At[C := Ordinary.complex, z := degree] \as Absolute;
+\import Cochains.Map[C := Pair.complex, D := Ordinary.complex].At[k := degree] \as Forget;
+\definition indicator: Ends.Point -> I.Int^ := \induction (p: Ends.Point) \return I.Int^ \with {
+  | positive: Integers.ring.one
+  | negative: Integers.ring.zero
+};
+\import \parent.\parent.SignedDegree[A := Ends.Point, source := Ends.discrete, coefficients := coefficients, n := N.Nat^::zero] \as Signed;
+\definition cochain: Ordinary.Carrier degree := Signed.extend (Zero.extend indicator);
+\definition specialization[u: Relative.Closed][represents: Relative.classOf u = globalClass]:
+  \forall (p: Ends.Point) -> Zero.value (Signed.restrict cochain) p = Zero.value (Signed.restrict ((Forget.cyclesMap PairOrdinary.inclusion).apply u)) p :=
+  \induction (p: Ends.Point) \return Zero.value (Signed.restrict cochain) p = Zero.value (Signed.restrict ((Forget.cyclesMap PairOrdinary.inclusion).apply u)) p \with {
+    | positive: trans!{I.Int^} _ _ _ (Zero.valueExtended indicator Ends.Point::positive) (sym!{I.Int^} _ _ (Representatives.positiveValue u represents))
+    | negative: trans!{I.Int^} _ _ _ (Zero.valueExtended indicator Ends.Point::negative) (sym!{I.Int^} _ _ (Representatives.negativeValue u))
+  };
+\definition equality[u: Relative.Closed][represents: Relative.classOf u = globalClass]: cochain = (Forget.cyclesMap PairOrdinary.inclusion).apply u :=
+  Signed.fromGenerators _ _ (\fun (s: Simplices.Carrier N.Nat^::zero) => trans!{I.Int^} _ _ _ (Zero.valueOnSimplex (Signed.restrict cochain) s)
+    (trans!{I.Int^} _ _ _ (specialization u represents (Zero.point s))
+      (sym!{I.Int^} _ _ (Zero.valueOnSimplex (Signed.restrict ((Forget.cyclesMap PairOrdinary.inclusion).apply u)) s))));
+\import std.Logic[].Proposition[] \as Logic;
+\definition represented: \exists (u: Relative.Closed \where Relative.classOf u = globalClass) :=
+  Relative.classInduction (\fun (a: Relative.Cohomology) => \exists (u: Relative.Closed \where Relative.classOf u = a))
+    (\fun (u: Relative.Closed) => Logic.existsIntro[Relative.Closed,
+      { v: Relative.Closed \where Relative.classOf v = Relative.classOf u }] u (\refl(Relative.classOf u))) globalClass;
+\definition closed: Ordinary.complex.differential.apply degree cochain = (Ordinary.space (Degree.next degree)).zero := \block {
+  \takefrom u: \Cast[Relative.Closed] ({ v: Relative.Closed \where Relative.classOf v = globalClass }) \by represented \then
+  \let law: Relative.classOf u = globalClass := \bysub(Relative.Closed, { v: Relative.Closed \where Relative.classOf v = globalClass }, u) \then
+  \let actual: Absolute.Closed := (Forget.cyclesMap PairOrdinary.inclusion).apply u \then
+  \return trans!{{Ordinary.Carrier (Degree.next degree)}} _ _ _
+    (congr!{{Ordinary.Carrier degree} {Ordinary.Carrier (Degree.next degree)}} (Ordinary.complex.differential.apply degree) _ _ (equality u law))
+    (\bysub(Ordinary.Carrier degree, Absolute.cycles.carrier, actual))
+};
+\definition cycle: Absolute.Closed := Absolute.cycle cochain closed;
+\definition sameClass[u: Absolute.Closed][same: cochain = u]: Absolute.classOf cycle = Absolute.classOf u :=
+  (\idelim cochain = u \with v: Ordinary.Carrier degree =>
+    \forall (closed: Ordinary.complex.differential.apply degree v = (Ordinary.space (Degree.next degree)).zero) ->
+      Absolute.classOf cycle = Absolute.classOf (Absolute.cycle v closed) \by {
+    base: \fun (closed: _) => \refl(Absolute.classOf cycle), equality: same
+  }) (\bysub(Ordinary.Carrier degree, Absolute.cycles.carrier, u));
+\definition classLaw: Absolute.classOf cycle = (Forget.induced PairOrdinary.inclusion).apply globalClass := \block {
+  \takefrom u: \Cast[Relative.Closed] ({ v: Relative.Closed \where Relative.classOf v = globalClass }) \by represented \then
+  \let law: Relative.classOf u = globalClass := \bysub(Relative.Closed, { v: Relative.Closed \where Relative.classOf v = globalClass }, u) \then
+  \return trans!{Absolute.Cohomology} _ _ _ (sameClass ((Forget.cyclesMap PairOrdinary.inclusion).apply u) (equality u law))
+    (trans!{Absolute.Cohomology} _ _ _ (sym!{Absolute.Cohomology} _ _ (Forget.onClass PairOrdinary.inclusion u))
+      (congr!{Relative.Cohomology Absolute.Cohomology} (Forget.induced PairOrdinary.inclusion).apply _ _ law))
+};
+\module Spherical;

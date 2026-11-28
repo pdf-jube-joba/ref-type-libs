@@ -1,0 +1,80 @@
+\import \parent.Cut[] \as Cut;
+\import LeftPair.Maps[B := Ends.Point].Over[target := Ends.discrete, targetSubset := Model.right] \as CutMaps;
+\import CutMaps.On[f := Cut.inclusion].Integer[] \as CutMap;
+\import CutMap.With[coefficients := coefficients] \as CutCoefficients;
+\import singular_cohomology.Chains[A := Ends.Point, source := Ends.discrete] \as DiscreteChains;
+\import singular_cohomology.Simplices[A := Ends.Point, source := Ends.discrete] \as DiscreteSimplices;
+\import singular_cohomology.Simplices[A := RightSpace.CarrierSet, source := rightTopology] \as RightSimplices;
+\import singular_cohomology.Chains[A := RightSpace.CarrierSet, source := rightTopology] \as RightChains;
+\import singular_cohomology.Maps[A := LeftSpace.CarrierSet, B := Ends.Point, source := leftTopology, target := Ends.discrete] \as LeftInclusion;
+\import singular_cohomology.Maps[A := RightSpace.CarrierSet, B := Ends.Point, source := rightTopology, target := Ends.discrete] \as RightInclusion;
+\import singular_cohomology.Cochains[A := Ends.Point, source := Ends.discrete].With[coefficients := coefficients].Integer[] \as DiscreteOrdinary;
+\import singular_cohomology.Cochains[A := RightSpace.CarrierSet, source := rightTopology].With[coefficients := coefficients].Integer[] \as RightOrdinary;
+\import Hom.Integer[P := LeftPair.complex, N := coefficients] \as LocalHom;
+\import Modules.Of[V := LocalRelative.Carrier degree, space := LocalRelative.space degree].Submodule[]
+  .Image[U := LocalRelative.Carrier below, source := LocalRelative.space below] \as Images;
+\import Global.With[coefficients := coefficients].PairSequence[] \as GlobalExact;
+\import LeftPair.With[coefficients := coefficients].PairSequence[] \as LeftExact;
+\import LeftPair.Reduced[].Negative[n := N.Nat^::zero] \as Negative;
+\import Modules.Laws[V := LocalRelative.Carrier degree, space := LocalRelative.space degree] \as CochainLaws;
+\import algebra.Group[].Of[Carrier := LocalRelative.Carrier degree, group := CochainLaws.additive] \as CochainGroup;
+\import Cochains.Map[C := Global.With[coefficients := coefficients].complex, D := LocalRelative.complex].At[k := degree] \as Restriction;
+\definition raw[u: GlobalGroup.Closed]: Relative.Closed := (Restriction.cyclesMap CutCoefficients.pullback).apply u;
+\definition relativePriorZero[h: LocalRelative.Carrier below]: Relative.prior.apply h = (LocalRelative.space degree).zero :=
+  LocalHom.At[z := degree].ext _ _ (\fun (v: LeftPair.Carrier degree) =>
+    trans!{I.Int^} _ _ _ (LocalHom.Cohomology[z := degree].priorOnElement h v)
+      (trans!{I.Int^} _ _ _ (congr!{{LeftPair.Carrier below} I.Int^} h.apply _ _ (Negative.zero _))
+        (LocalHom.At[z := below].zeroPreserved h)));
+\definition classesReflect[x, y: Relative.Closed][equal: Relative.classOf x = Relative.classOf y]: x = y :=
+  Images.eliminate Relative.prior (CochainGroup.difference x y) (x = y)
+    (\fun (h: LocalRelative.Carrier below)(same: Relative.prior.apply h = CochainGroup.difference x y) =>
+      CochainGroup.cancelRight (CochainGroup.neg y) x y
+        (trans!{{LocalRelative.Carrier degree}} _ _ _
+          (sym!{{LocalRelative.Carrier degree}} _ _ same)
+          (trans!{{LocalRelative.Carrier degree}} _ _ _ (relativePriorZero h)
+            (sym!{{LocalRelative.Carrier degree}} _ _ (CochainGroup.inverseRight y)))))
+    (Relative.classRelated x y equal);
+\definition representativeLaw[u: GlobalGroup.Closed][represents: GlobalGroup.classOf u = globalClass]: raw u = closed :=
+  classesReflect (raw u) closed (eq_reason_in!{{Relative.Cohomology} _
+    "=" _ "by" { sym!{{Relative.Cohomology}} _ _ (Restriction.onClass CutCoefficients.pullback u) }
+    "=" _ "by" { sym!{{Relative.Cohomology}} _ _ (Cut.law (GlobalGroup.classOf u)) }
+    "=" _ "by" { congr!{{GlobalGroup.Carrier} {Relative.Cohomology}} Shift.cut.forward.apply _ _ represents }
+    "=" _ "by" { restricted }
+    "=" _ "by" { representation }
+  });
+\import Nonnegative.ZeroExtension[C := DiscreteChains.complex] \as DiscreteExtension;
+\import Nonnegative.ZeroExtension[C := LeftChains.complex] \as LeftExtension;
+\import Nonnegative.ZeroExtension[C := RightChains.complex] \as RightExtension;
+\definition positiveSimplex: LeftSimplices.Carrier N.Nat^::zero := LeftSimplices.At[n := N.Nat^::zero].constant Model.leftPoint;
+\definition leftPoint: LeftExtension.Carrier degree := LeftExtension.Positive[n := N.Nat^::zero].intro (LeftChains.generator N.Nat^::zero positiveSimplex);
+\definition positivePoint: DiscreteExtension.Carrier degree := DiscreteExtension.Positive[n := N.Nat^::zero].intro
+  (DiscreteChains.generator N.Nat^::zero (DiscreteSimplices.At[n := N.Nat^::zero].constant Ends.Point::positive));
+\definition leftImage: (LeftInclusion.integerPush Cut.inclusion ((CutMaps.laws Cut.inclusion).continuous)).apply degree leftPoint = positivePoint :=
+  congr!{{DiscreteChains.Carrier N.Nat^::zero} {DiscreteExtension.Carrier degree}} DiscreteExtension.Positive[n := N.Nat^::zero].intro _ _
+    (LeftInclusion.At[n := N.Nat^::zero].onGenerator Cut.inclusion ((CutMaps.laws Cut.inclusion).continuous) positiveSimplex);
+\definition pairImage: CutMap.map.apply degree (LeftPair.class degree leftPoint) = Global.class degree positivePoint :=
+  trans!{{Global.Carrier degree}} _ _ _ (CutMap.At[z := degree].quotientOnClass leftPoint)
+    (congr!{{DiscreteExtension.Carrier degree} {Global.Carrier degree}} (Global.class degree) _ _ leftImage);
+\definition positiveValue[u: GlobalGroup.Closed][represents: GlobalGroup.classOf u = globalClass]:
+  (GlobalExact.inclusion.apply degree u).apply positivePoint = Integers.ring.one :=
+  eq_reason_in!{I.Int^ _
+    "=" _ "by" { sym!{I.Int^} _ _ (congr!{{Global.Carrier degree} I.Int^} u.apply _ _ pairImage) }
+    "=" _ "by" { congr!{{Relative.Closed} I.Int^} (\fun (h: Relative.Closed) => h.apply (LeftPair.class degree leftPoint)) _ _
+      (representativeLaw u represents) }
+    "=" _ "by" { sym!{I.Int^} _ _ (congr!{{Cochains.Map[C := LocalRelative.complex, D := LocalWhole.complex].Map} I.Int^}
+      (\fun (m: Cochains.Map[C := LocalRelative.complex, D := LocalWhole.complex].Map) => (m.apply degree image).apply leftPoint) _ _ Local.inclusionLaw) }
+    "=" _ "by" { value positiveSimplex }
+  };
+\definition negativeSimplex: RightSimplices.Carrier N.Nat^::zero :=
+  RightSimplices.At[n := N.Nat^::zero].constant Model.rightPoint;
+\definition rightPoint: RightExtension.Carrier degree := RightExtension.Positive[n := N.Nat^::zero].intro (RightChains.generator N.Nat^::zero negativeSimplex);
+\definition negativePoint: DiscreteExtension.Carrier degree := DiscreteExtension.Positive[n := N.Nat^::zero].intro
+  (DiscreteChains.generator N.Nat^::zero (DiscreteSimplices.At[n := N.Nat^::zero].constant Ends.Point::negative));
+\definition rightImage: Global.inclusionMap.apply degree rightPoint = negativePoint :=
+  congr!{{DiscreteChains.Carrier N.Nat^::zero} {DiscreteExtension.Carrier degree}} DiscreteExtension.Positive[n := N.Nat^::zero].intro _ _
+    (RightInclusion.At[n := N.Nat^::zero].onGenerator Global.inclusion Global.inclusionContinuous negativeSimplex);
+\definition negativeValue[u: GlobalGroup.Closed]: (GlobalExact.inclusion.apply degree u).apply negativePoint = Integers.ring.zero :=
+  trans!{I.Int^} _ _ _
+    (sym!{I.Int^} _ _ (congr!{{DiscreteExtension.Carrier degree} I.Int^} (GlobalExact.inclusion.apply degree u).apply _ _ rightImage))
+    (congr!{{RightOrdinary.Carrier degree} I.Int^}
+      (\fun (h: RightOrdinary.Carrier degree) => h.apply rightPoint) _ _ (GlobalExact.sequence.zero degree u));

@@ -44,6 +44,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `ComplexLineSphere.Section.Frame.EquatorProjection` | The projected coordinate section has complex coordinate \(x+iy\) in the northern frame on the equator |
 | `ComplexLineSphere.Orientation` | The chosen integral generator of the standard two-sphere is obtained from its northern relative generator by the excision comparison and forgetting |
 | `ComplexLineSphere.Orientation.PositiveConnecting` | The positive-degree comparison from ordinary to reduced cohomology commutes with the connecting map of a pair |
+| `ComplexLineSphere.DiskOrientation.ZeroSphereSign.DiscreteRepresentative.Spherical` | The chosen reduced integral generator of the standard zero-sphere is represented by the cocycle with values one and zero at its positive and negative points |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
 | `ZeroDegree` | Evaluation of constant classes and surjectivity of degree-zero pullback from a path-connected source |
 
