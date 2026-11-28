@@ -11,6 +11,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.Inclusion.Bundle.Total.Naturality` | The complex dimension inclusions pull back the signed Thom class, the integral Euler class, and every power |
 | `Cellular.With` | Cellular-to-singular chain equivalence, the resulting cohomology comparison, and cup products via a transferred diagonal |
 | `CanonicalLine.Hopf` | The unit sphere bundle is homeomorphic to the ambient unit sphere over the line-projection map |
+| `Complex.CanonicalLine.Hopf.CircleAction` | Unit complex scalars act continuously, freely, and transitively on the Hopf fibers |
 | `Real.CanonicalLine.Hopf.Standard` | Comparison with the standard real sphere and its intermediate-degree cohomology vanishing |
 | `Complex.CanonicalLine.Realification` | The underlying real bundle has rank two and carries a metric induced by its ambient embedding |
 | `Complex.CanonicalLine.Realification.Norm.Sphere.Standard` | The realified unit sphere bundle is homeomorphic to \(S^{2n+1}\) |

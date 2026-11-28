@@ -1,0 +1,75 @@
+\import sphere_maps.Circle[] \as Circle;
+\import Numbers.Def[] \as C;
+\import Numbers.Prop[] \as ComplexLaws;
+\use Equality.eq_reason_in;
+\import linear_algebra.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, scalar := Hermitian.Complex[].scalar]
+  .Inner[V := E.Vector, space := E.space].Of[h := E.form] \as Dot;
+\definition scale[z: Circle.Carrier][v: Sphere]: E.Vector := E.space.smul z v;
+\definition unitScaled[z: Circle.Carrier][v: Sphere]: E.dot (scale z v) (scale z v) = Numbers.Algebra[].field.one :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { Dot.scaleLeft z v (scale z v) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.conj z)) _ _ (E.scaleRight z v v) }
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (ComplexLaws.mulAssoc (C.conj z) z (E.dot v v)) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (a: Numbers.Complex) => C.mul a (E.dot v v)) _ _ (Circle.leftInverse z) }
+    "=" _ "by" { ComplexLaws.mulOneLeft (E.dot v v) }
+    "=" _ "by" { unit v }
+  };
+\definition action[z: Circle.Carrier][v: Sphere]: Sphere := \into[E.Vector](scale z v, UnitVectors) \by {
+  eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (E.squaredFormula (scale z v)) }
+    "=" _ "by" { congr!{Numbers.Complex R.Real} Numbers.re _ _ (unitScaled z v) }
+    "=" _ "by" { \refl(R.one) }
+  }
+};
+\definition identity[v: Sphere]: action Circle.identity v = v := E.space.scalarOne v;
+\definition compose[z, w: Circle.Carrier][v: Sphere]: action (Circle.multiply z w) v = action z (action w v) :=
+  E.space.scalarAssoc z w v;
+\definition fixedScaled[z: Circle.Carrier][v: Sphere]: (Model.projection (projection v)).map.apply (scale z v) = scale z v :=
+  trans!{{E.Vector}} _ _ _ ((Model.projection (projection v)).map.preservesScale z v)
+    (congr!{{E.Vector} {E.Vector}} (E.space.smul z) _ _ (fixed v));
+\definition sameLine[z: Circle.Carrier][v: Sphere]: projection (action z v) = projection v :=
+  Model.ext _ _ (sym!{Ambient.Map} _ _ (Projection.At[v := action z v, unit := unit (action z v)]
+    .Recover[P := Model.projection (projection v), hasRank := Model.rank (projection v), fixes := fixedScaled z v].law));
+\definition evaluated[v: Sphere][a: Numbers.Complex]: E.Vector := E.space.smul a v;
+\definition tautologicalOrbit[z: Circle.Carrier][v: Sphere][a: Numbers.Complex]:
+  evaluated (action z v) (C.mul (Circle.inverse z) a) = evaluated v a :=
+  eq_reason_in!{{E.Vector} _
+    "=" _ "by" { sym!{{E.Vector}} _ _ (E.space.scalarAssoc (C.mul (Circle.inverse z) a) z v) }
+    "=" _ "by" { congr!{Numbers.Complex {E.Vector}} (\fun (b: Numbers.Complex) => E.space.smul b v) _ _
+      (ComplexLaws.mulAssoc (Circle.inverse z) a z) }
+    "=" _ "by" { congr!{Numbers.Complex {E.Vector}} (\fun (b: Numbers.Complex) => E.space.smul (C.mul (Circle.inverse z) b) v) _ _
+      (ComplexLaws.mulComm a z) }
+    "=" _ "by" { congr!{Numbers.Complex {E.Vector}} (\fun (b: Numbers.Complex) => E.space.smul b v) _ _
+      (sym!{Numbers.Complex} _ _ (ComplexLaws.mulAssoc (Circle.inverse z) z a)) }
+    "=" _ "by" { congr!{Numbers.Complex {E.Vector}} (\fun (b: Numbers.Complex) => E.space.smul (C.mul b a) v) _ _ (Circle.leftInverse z) }
+    "=" _ "by" { congr!{Numbers.Complex {E.Vector}} (\fun (b: Numbers.Complex) => E.space.smul b v) _ _ (ComplexLaws.mulOneLeft a) }
+  };
+\definition scalar[v, w: Sphere]: Numbers.Complex := E.dot v w;
+\definition reconstruct[v, w: Sphere][same: projection v = projection w]: E.space.smul (scalar v w) v = w :=
+  trans!{{E.Vector}} _ _ _
+    (congr!{Space {E.Vector}} (\fun (x: Space) => (Model.projection x).map.apply w) _ _ same)
+    (fixed w);
+\definition scaledDot[v: Sphere][a: Numbers.Complex]: E.dot v (E.space.smul a v) = a :=
+  trans!{Numbers.Complex} _ _ _ (E.scaleRight a v v)
+    (trans!{Numbers.Complex} _ _ _
+      (congr!{Numbers.Complex Numbers.Complex} (C.mul a) _ _ (unit v))
+      (ComplexLaws.mulOneRight a));
+\definition scaleNorm[v: Sphere][a: Numbers.Complex]: E.dot (E.space.smul a v) (E.space.smul a v) = C.ofReal (C.normSq a) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { Dot.scaleLeft a v (E.space.smul a v) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.conj a)) _ _ (scaledDot v a) }
+    "=" _ "by" { ComplexLaws.conjMulSelf a }
+  };
+\definition orbitNorm[v, w: Sphere][same: projection v = projection w]: C.normSq (scalar v w) = R.one :=
+  congr!{Numbers.Complex R.Real} Numbers.re _ _
+    (trans!{Numbers.Complex} _ _ _ (sym!{Numbers.Complex} _ _ (scaleNorm v (scalar v w)))
+      (trans!{Numbers.Complex} _ _ _
+        (congr!{{E.Vector} {E.Vector} {Numbers.Complex}} E.dot _ _ _ _ (reconstruct v w same) (reconstruct v w same))
+        (unit w)));
+\definition orbit[v, w: Sphere][same: projection v = projection w]: Circle.Carrier :=
+  \into[Numbers.Complex](scalar v w, Circle.unit) \by { orbitNorm v w same };
+\definition orbitLaw[v, w: Sphere][same: projection v = projection w]: action (orbit v w same) v = w := reconstruct v w same;
+\definition uniqueOrbit[v, w: Sphere][z: Circle.Carrier][equal: action z v = w]: z = orbit v w (trans!{Space} _ _ _
+  (sym!{Space} _ _ (sameLine z v)) (congr!{Sphere Space} projection _ _ equal)) :=
+  trans!{Numbers.Complex} _ _ _ (sym!{Numbers.Complex} _ _ (scaledDot v z)) (congr!{{E.Vector} {Numbers.Complex}} (E.dot v) _ _ equal);
+\module Continuity;

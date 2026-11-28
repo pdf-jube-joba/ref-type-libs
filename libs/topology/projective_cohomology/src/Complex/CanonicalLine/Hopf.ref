@@ -110,3 +110,4 @@
     leftInverse := leftInverse, rightInverse := rightInverse
   };
 \definition projectionLaw[v: Sphere]: Disk.sphereProjection (toBundle v) = projection v := \refl(projection v);
+\module CircleAction;

@@ -1,0 +1,21 @@
+\import std.Data[].Pair[] \as Pair;
+\import topological_constructions.Product[A := Circle.Carrier, B := Sphere] \as Parameters;
+\definition Point: \Set := Parameters.CarrierSet;
+\definition topology: topology.Topology[Carrier := Point].Topology := Parameters.topology Circle.topology sphereTopology;
+\definition phase[p: Point]: Circle.Carrier := Pair.first Circle.Carrier Sphere p;
+\definition initial[p: Point]: Sphere := Pair.second Circle.Carrier Sphere p;
+\definition move[p: Point]: Sphere := action (phase p) (initial p);
+\definition phaseContinuous: topology.Continuity[A := Point, B := Numbers.Complex].Continuous topology Hermitian.Complex[].topological.space (\fun (p: Point) => phase p) :=
+  topology.Composition[A := Point, B := Circle.Carrier, C := Numbers.Complex].composeContinuous topology Circle.topology Hermitian.Complex[].topological.space
+    phase (\fun (z: Circle.Carrier) => z) (Parameters.Maps[].firstContinuous Circle.topology sphereTopology)
+    (topology.Continuity[A := Circle.Carrier, B := Numbers.Complex].Corestriction[S := Circle.unit].inclusionContinuous Hermitian.Complex[].topological.space);
+\import Ambient.Families[X := Point] \as Vectors;
+\definition coordinates: Vectors.Continuous topology (\fun (p: Point) => vector (initial p)) :=
+  \fun (i: Fin.Fin ambient) => topology.Composition[A := Point, B := Sphere, C := Numbers.Complex].composeContinuous
+    topology sphereTopology Hermitian.Complex[].topological.space initial (\fun (v: Sphere) => vector v i)
+    (Parameters.Maps[].secondContinuous Circle.topology sphereTopology) (coordinateContinuous i);
+\definition continuous: topology.Continuity[A := Point, B := Sphere].Continuous topology sphereTopology move :=
+  topology.Continuity[A := Point, B := E.Vector].Corestriction[S := UnitVectors].corestrictContinuous topology (Bundles.coordinateTopology ambient) move
+    (topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].Universal[A := Point].continuous
+      topology Hermitian.Complex[].topological.space (\fun (p: Point) => scale (phase p) (initial p))
+      (Vectors.scale topology (\fun (p: Point) => phase p) (\fun (p: Point) => vector (initial p)) phaseContinuous coordinates));
