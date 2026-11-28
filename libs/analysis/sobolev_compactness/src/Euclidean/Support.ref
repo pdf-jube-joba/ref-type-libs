@@ -1,0 +1,141 @@
+\import LE.CompactBounds[] \as CompactBounds;
+\import product_integration.Finiteness[A := Point, mu := LE.measure] \as Finite;
+\import measure_convergence.On[A := Point, mu := LE.measure].Complex[] \as CI;
+\import L.Hilbert[] \as RealHilbert;
+\import L.Holder[exponents := RealHilbert.exponents] \as Holder;
+\import L.Finite[p := PA.two] \as LTwo;
+\import I.Absolute[] \as Absolute;
+\import I.Linear[] \as Linear;
+\import I.Negation[] \as Negation;
+\import E.Integral[] \as FI;
+\import E.Kernel[] \as PhaseKernel;
+\import \parent.Kernel[] \as KEstimate;
+\import Real.Distance[] \as Distance;
+\import Real.FiniteSums[] \as Sum;
+\import topological_algebra.Euclidean[].Dimension[n := n].Norm[] \as Geometry;
+\import topological_algebra.Euclidean[].Dimension[n := n].Def[] \as Coordinates;
+\definition finite: Finite.FiniteMeasurableSet :=
+  \into[\Pow Point](K, Finite.FiniteMeasurableSet) \by { CompactBounds.finite K compact };
+\import \parent.Mask[K := K, measurable := (Finite.finiteLaw finite).measurable] \as Cut;
+\import L.Indicator[p := PA.two, S := finite] \as Indicator;
+\definition supported[x: Space]: \Prop := Cut.value x = x;
+\definition absolute[f: L2.Representatives]: I.Representatives :=
+  Absolute.representative (Holder.representative (L2.modulusRepresentative f) Indicator.representative);
+\definition size: Real.Real := LTwo.normRepresentative Indicator.representative;
+\definition sizeNonnegative: R.Le Real.zero size := LTwo.normNonnegative Indicator.representative;
+\definition absoluteNorm[f: L2.Representatives]: R.Le (I.integral (absolute f)) (Real.mul (L2.normRepresentative f) size) :=
+  Holder.inequality (L2.modulusRepresentative f) Indicator.representative;
+\definition modulus[f: L2.Representatives][x: Point]: Abs.abs (Cut.representative f x) = absolute f x :=
+  Logic.orElim _ _ _ (Classical.excludedMiddle (Sets.Member K x))
+    (\fun (member: _) => eq_reason_in!{Real.Real _
+      "=" _ "by" { congr!{C.Complex Real.Real} Abs.abs _ _ (Cut.onMember f x member) }
+      "=" _ "by" { sym!{Real.Real} _ _ (Product.absOfNonnegative _ (Abs.nonnegative (f x))) }
+      "=" _ "by" { congr!{Real.Real Real.Real} Product.abs _ _ (sym!{Real.Real} _ _ (Algebra.mulOneRight _)) }
+      "=" _ "by" { congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Product.abs (Real.mul (Abs.abs (f x)) r)) _ _
+        (sym!{Real.Real} _ _ (Indicator.inside x member)) }
+    })
+    (\fun (outside: _) => eq_reason_in!{Real.Real _
+      "=" _ "by" { congr!{C.Complex Real.Real} Abs.abs _ _ (Cut.offMember f x outside) }
+      "=" _ "by" { Scalars.realAxisAbs Real.zero }
+      "=" _ "by" { congr!{Real.Real Real.Real} Product.abs _ _ (sym!{Real.Real} _ _ (Laws.fieldMulZeroRight _)) }
+      "=" _ "by" { congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Product.abs (Real.mul (Abs.abs (f x)) r)) _ _
+        (sym!{Real.Real} _ _ (Indicator.outside x outside)) }
+    });
+\definition componentBound[f: L2.Representatives][part: C.Complex -> Real.Real]
+  [bound: \forall (z: C.Complex) -> R.Le (Product.abs (part z)) (Abs.abs z)][x: Point]:
+  R.Le (Product.abs (part (Cut.representative f x))) (absolute f x) :=
+  R.leReplaceRight _ _ _ (modulus f x) (bound (Cut.representative f x));
+\definition integrable[f: L2.Representatives]: CI.Representatives :=
+  \into[CI.Function](Cut.representative f, CI.Representatives) \by {
+    Logic.And[_, _]::#
+      (Absolute.dominatedIntegrable _ (absolute f) (LTwo.properties (L2.realPart (Cut.representative f))).measurable
+        (I.integralLaw (absolute f)).integrable
+        (\fun (x: Point) => R.leReplaceRight _ _ _ (sym!{Real.Real} _ _ (Product.absOfNonnegative _ (Product.absNonnegative _)))
+          (componentBound f C.re Scalars.realAbsolute x)))
+      (Absolute.dominatedIntegrable _ (absolute f) (LTwo.properties (L2.imaginaryPart (Cut.representative f))).measurable
+        (I.integralLaw (absolute f)).integrable
+        (\fun (x: Point) => R.leReplaceRight _ _ _ (sym!{Real.Real} _ _ (Product.absOfNonnegative _ (Product.absNonnegative _)))
+          (componentBound f C.im Scalars.imaginaryAbsolute x)))
+  };
+\definition transform[f: L2.Representatives][xi: Point]: C.Complex := FI.transform (integrable f) xi;
+\definition supportedRepresentative[f: L2.Representatives]: supported (L2.ofFunction f) ->
+  L2.ofFunction (Cut.representative f) = L2.ofFunction f :=
+  \fun (fixed: _) => trans!{Space} _ _ _ (sym!{Space} _ _ (Cut.onClass f)) fixed;
+\import Measure.AlmostEverywhere[mu := LE.measure] \as AE;
+\import Q.Maps[B := Point -> C.Complex] \as TransformClasses;
+\definition transformRespects: TransformClasses.Respects transform :=
+  \fun (f, g: L2.Representatives)(same: _) => \axiom:funext(transform f, transform g,
+    \fun (xi: Point) => CI.integralAlmost (FI.section (integrable f) xi) (FI.section (integrable g) xi)
+      (AE.nullSubset _ ({ x: Point \where Logic.Not (f x = g x) })
+        (\fun (x: Point)(different: _)(agrees: _) => different (congr!{C.Complex C.Complex}
+          (\fun (z: C.Complex) => D.mul (D.mul (Cut.symbol.function x) z) (PhaseKernel.value x xi)) _ _ agrees))
+        (L2.almost f g same)));
+\definition classTransform: Space -> Point -> C.Complex := TransformClasses.value L2.equivalence transform transformRespects;
+\definition onClass[f: L2.Representatives]: classTransform (L2.ofFunction f) = transform f :=
+  TransformClasses.onClass L2.equivalence transform transformRespects f;
+\definition sectionModulus[f: L2.Representatives][xi, x: Point]:
+  Abs.abs (FI.section (integrable f) xi x) = absolute f x :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { Abs.multiplicative (Cut.representative f x) (PhaseKernel.value x xi) }
+    "=" _ "by" { congr!{Real.Real Real.Real} (Real.mul (Abs.abs (Cut.representative f x))) _ _ (PhaseKernel.modulus x xi) }
+    "=" _ "by" { Algebra.mulOneRight _ }
+    "=" _ "by" { modulus f x }
+  };
+\definition components[f: L2.Representatives][xi: Point]:
+  Logic.And[R.Le (Product.abs (C.re (transform f xi))) (I.integral (absolute f)),
+    R.Le (Product.abs (C.im (transform f xi))) (I.integral (absolute f))] :=
+  CI.componentBounds (FI.section (integrable f) xi) (absolute f)
+    (\fun (x: Point) => R.leReplaceRight _ _ _ (sectionModulus f xi x) (Scalars.realAbsolute _))
+    (\fun (x: Point) => R.leReplaceRight _ _ _ (sectionModulus f xi x) (Scalars.imaginaryAbsolute _));
+\definition transformBound[f: L2.Representatives][xi: Point]:
+  R.Le (Abs.abs (transform f xi)) (Real.mul Powers.two (Real.mul (L2.normRepresentative f) size)) :=
+  R.leTrans _ _ _ (Scalars.absComponents (transform f xi))
+    (R.leReplaceRight _ _ _ (sym!{Real.Real} _ _ (Powers.twice (Real.mul (L2.normRepresentative f) size)))
+      (Estimates.addLe _ _ _ _
+        (R.leTrans _ _ _ (components f xi).left (absoluteNorm f))
+        (R.leTrans _ _ _ (components f xi).right (absoluteNorm f))));
+\definition difference[f, g: CI.Representatives]: CI.Representatives :=
+  \into[CI.Function]((\fun (x: Point) => D.sub (f x) (g x)), CI.Representatives) \by {
+    Logic.And[_, _]::#
+      (I.integralLaw (Linear.addRepresentative (CI.realPart f) (Negation.representative (CI.realPart g)))).integrable
+      (I.integralLaw (Linear.addRepresentative (CI.imaginaryPart f) (Negation.representative (CI.imaginaryPart g)))).integrable
+  };
+\definition integralDifference[f, g: CI.Representatives]: CI.integral (difference f g) = D.sub (CI.integral f) (CI.integral g) :=
+  CL.ext _ _
+    (trans!{Real.Real} _ _ _ (Linear.integralAdd (CI.realPart f) (Negation.representative (CI.realPart g)))
+      (congr!{Real.Real Real.Real} (Real.add (I.integral (CI.realPart f))) _ _ (Negation.integralNeg (CI.realPart g))))
+    (trans!{Real.Real} _ _ _ (Linear.integralAdd (CI.imaginaryPart f) (Negation.representative (CI.imaginaryPart g)))
+      (congr!{Real.Real Real.Real} (Real.add (I.integral (CI.imaginaryPart f))) _ _ (Negation.integralNeg (CI.imaginaryPart g))));
+\definition mulSub[z, a, b: C.Complex]: D.mul z (D.sub a b) = D.sub (D.mul z a) (D.mul z b) :=
+  trans!{C.Complex} _ _ _ (CL.mulAddLeft z a (D.neg b))
+    (congr!{C.Complex C.Complex} (D.add (D.mul z a)) _ _ (eq_reason_in!{C.Complex _
+      "=" _ "by" { congr!{C.Complex C.Complex} (D.mul z) _ _ (Scalars.negativeAsScale b) }
+      "=" _ "by" { Scalars.scaleRight _ _ _ }
+      "=" _ "by" { sym!{C.Complex} _ _ (Scalars.negativeAsScale (D.mul z b)) }
+    }));
+\definition sectionDifference[f: L2.Representatives][a, b: Point]: CI.Representatives :=
+  difference (FI.section (integrable f) a) (FI.section (integrable f) b);
+\definition differenceModulus[f: L2.Representatives][a, b, x: Point]:
+  Abs.abs (sectionDifference f a b x) = Real.mul (absolute f x) (Abs.abs (D.sub (PhaseKernel.value x a) (PhaseKernel.value x b))) :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { congr!{C.Complex Real.Real} Abs.abs _ _ (sym!{C.Complex} _ _ (mulSub (Cut.representative f x) (PhaseKernel.value x a) (PhaseKernel.value x b))) }
+    "=" _ "by" { Abs.multiplicative (Cut.representative f x) (D.sub (PhaseKernel.value x a) (PhaseKernel.value x b)) }
+    "=" _ "by" { congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Real.mul r (Abs.abs (D.sub (PhaseKernel.value x a) (PhaseKernel.value x b)))) _ _ (modulus f x) }
+  };
+\definition coordinateBoundExists: \exists (c: LE.Nonnegative \where
+    \forall (x: Point) -> Sets.Member K x -> R.Le (KEstimate.coordinateMass x) c ) := \block {
+  \takefrom r: \Cast[LE.Nonnegative] ({r: LE.Nonnegative \where
+      \forall (x: Point) -> Sets.Member K x -> R.Le (Geometry.metric.distance Coordinates.origin x) r})
+    \by CompactBounds.radiusBound K compact \then
+  \let c: Real.Real := Sum.sum n (\fun (i: E.Coordinate) => r) \then
+  \let nonnegative: R.Le Real.zero c := Sum.nonnegative n _ (\fun (i: E.Coordinate) =>
+    lp_spaces.Powers[].baseNonnegative r) \then
+  \return Logic.existsIntro[LE.Nonnegative, { c: LE.Nonnegative \where \forall (x: Point) -> Sets.Member K x -> R.Le (KEstimate.coordinateMass x) c }]
+    (\into[Real.Real](c, LE.Nonnegative) \by { nonnegative })
+    (\fun (x: Point)(member: _) => Sum.comparison n _ _ (\fun (i: E.Coordinate) =>
+      R.leTrans _ (Geometry.metric.distance Coordinates.origin x) _
+        (Geometry.coordinateDistance Coordinates.origin x i)
+        ((\bysub(LE.Nonnegative, {r: LE.Nonnegative \where
+          \forall (y: Point) -> Sets.Member K y -> R.Le (Geometry.metric.distance Coordinates.origin y) r}, r)) x member)))
+};
+\module Equicontinuity(c: LE.Nonnegative, coordinateBound: \forall (x: Point) -> Sets.Member K x -> R.Le (KEstimate.coordinateMass x) c);

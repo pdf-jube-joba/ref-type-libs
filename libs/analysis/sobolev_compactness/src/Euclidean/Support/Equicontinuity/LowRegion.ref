@@ -1,0 +1,104 @@
+\import Sets.Subspace[S := F] \as Subspace;
+\import Subspace.Properties[] \as SubspaceFacts;
+\definition Domain: \Set := Subspace.CarrierSet;
+\import topology.Topology[Carrier := Domain] \as DomainSets;
+\import metric_spaces.MetricSpace[Carrier := Point] \as Metric;
+\import Metric.Topology[] \as MetricTopology;
+\import metric_spaces.RealFunctions[A := Domain] \as Functions;
+\definition topology: DomainSets.Topology := Subspace.topology Ambient.topology;
+\import functional_analysis.Continuous[A := Domain, topology := topology] \as Continuous;
+\import Continuous.ArzelaAscoli[] \as Ascoli;
+\import topology.Topology[Carrier := Continuous.Function] \as FamilySets;
+\definition Inputs: \Set := \Cast[L2.Representatives] ({ f: L2.Representatives \where R.Le (L2.normRepresentative f) B });
+\definition inputBound[f: Inputs]: R.Le (L2.normRepresentative f) B :=
+  \bysub(L2.Representatives, { f: L2.Representatives \where R.Le (L2.normRepresentative f) B }, f);
+\definition uniformCoefficient: Real.Real := Real.mul Powers.two (Real.mul c (Real.mul B size));
+\definition lipschitz[f: Domain -> Real.Real]: \Prop :=
+  \forall (x, y: Domain) -> R.Le (Real.distance (f x) (f y)) (Real.mul uniformCoefficient (Geometry.metric.distance x y));
+\definition estimate[f: Inputs][x, y: Domain]:
+  R.Le (Real.mul (Real.mul Powers.two (Real.mul c (Real.mul (L2.normRepresentative f) size))) (Geometry.metric.distance x y))
+    (Real.mul uniformCoefficient (Geometry.metric.distance x y)) :=
+  R.leReplace _ _ _ _ (Laws.fieldMulComm _ _) (Laws.fieldMulComm _ _)
+    (Estimates.mulMonotone _ _ _ (Geometry.metric.nonnegative x y)
+      (Estimates.mulMonotone Powers.two _ _ Powers.twoNonnegative
+        (Estimates.mulMonotone c _ _ (lp_spaces.Powers[].baseNonnegative c)
+          (R.leReplace _ _ _ _ (Laws.fieldMulComm _ _) (Laws.fieldMulComm _ _)
+            (Estimates.mulMonotone size _ _ sizeNonnegative (inputBound f))))));
+\definition larger: Real.Real := Product.coefficient uniformCoefficient Real.zero;
+\definition largerPositive: R.Lt Real.zero larger := Product.coefficientPositive uniformCoefficient Real.zero;
+\definition coefficientBound: R.Le uniformCoefficient larger :=
+  R.leTrans _ (Product.abs uniformCoefficient) _
+    (R.leReplaceRight _ _ _ (sym!{Real.Real} _ _ (Product.absExpression uniformCoefficient))
+      (Distance.maxRight (Real.neg uniformCoefficient) uniformCoefficient))
+    (Product.coefficientFirst uniformCoefficient Real.zero);
+\definition radius[epsilon: Real.Real]: Real.Real := Product.radius larger epsilon;
+\definition neighborhood[x: Domain][epsilon: Real.Real]: \Pow Domain := Subspace.Trace (Metric.Ball Geometry.metric x (radius epsilon));
+\definition open[x: Domain][epsilon: Real.Real]: DomainSets.IsOpenIn topology (neighborhood x epsilon) :=
+  Subspace.traceOpen Ambient.topology _ (MetricTopology.ballOpenIn Geometry.metric x (radius epsilon));
+\definition center[x: Domain][epsilon: Real.Real]: R.Lt Real.zero epsilon -> DomainSets.Member (neighborhood x epsilon) x :=
+  \fun (positive: _) => Metric.ballCenter Geometry.metric x (radius epsilon) (Product.radiusPositive larger epsilon largerPositive positive);
+\definition close[g: Domain -> Real.Real][x, y: Domain][epsilon: Real.Real]:
+  lipschitz g -> R.Lt Real.zero epsilon -> DomainSets.Member (neighborhood x epsilon) y ->
+  R.Lt (Real.distance (g x) (g y)) epsilon :=
+  \fun (bound: _)(positive: _)(near: _) => R.leLtTrans _ _ _ (bound x y)
+    (R.leLtTrans _ (Real.mul larger (radius epsilon)) _
+      (R.leTrans _ (Real.mul larger (Geometry.metric.distance x y)) _
+        (R.leReplace _ _ _ _ (Laws.fieldMulComm _ _) (Laws.fieldMulComm _ _)
+          (Estimates.mulMonotone _ _ _ (Geometry.metric.nonnegative x y) coefficientBound))
+        (Estimates.mulMonotone _ _ _ (Order.leOfLt _ _ largerPositive) (Order.leOfLt _ _ near)))
+      (Product.radiusSmall larger epsilon largerPositive positive));
+\definition continuous[g: Domain -> Real.Real]: lipschitz g -> Functions.Continuous topology g :=
+  \fun (bound: _) => Functions.continuousOfLocal topology g
+    (\fun (x: Domain)(epsilon: Real.Real)(positive: _) =>
+      Logic.existsIntro[\Pow Domain, { W: \Pow Domain \where DomainSets.OpenNeighborhood[topology, x, Functions.Small g x epsilon, W] }]
+        (neighborhood x epsilon) (DomainSets.OpenNeighborhood[topology, x, Functions.Small g x epsilon, neighborhood x epsilon] {
+          open := open x epsilon, contains := center x epsilon positive,
+          within := \fun (y: Domain)(near: _) => close g x y epsilon bound positive near,
+        }));
+\definition realLipschitz[f: Inputs]: lipschitz (\fun (x: Domain) => C.re (transform f x)) :=
+  \fun (x, y: Domain) => R.leTrans _ _ _ (realBound f x y) (estimate f x y);
+\definition imaginaryLipschitz[f: Inputs]: lipschitz (\fun (x: Domain) => C.im (transform f x)) :=
+  \fun (x, y: Domain) => R.leTrans _ _ _ (imaginaryBound f x y) (estimate f x y);
+\definition realPart[f: Inputs]: Continuous.Function :=
+  \into[Domain -> Real.Real]((\fun (x: Domain) => C.re (transform f x)), Continuous.Function) \by { continuous _ (realLipschitz f) };
+\definition imaginaryPart[f: Inputs]: Continuous.Function :=
+  \into[Domain -> Real.Real]((\fun (x: Domain) => C.im (transform f x)), Continuous.Function) \by { continuous _ (imaginaryLipschitz f) };
+\definition InputFor[g: Continuous.Function][f: Inputs]: \Prop :=
+  Logic.Or[realPart f = g, imaginaryPart f = g];
+\definition family: \Pow Continuous.Function := { g: Continuous.Function \where \exists (f: Inputs \where InputFor g f) };
+\definition realMember[f: Inputs]: FamilySets.Member family (realPart f) :=
+  Logic.existsIntro[Inputs, { u: Inputs \where InputFor (realPart f) u }] f
+    (Logic.Or[realPart f = realPart f, imaginaryPart f = realPart f]::left (\refl(realPart f)));
+\definition imaginaryMember[f: Inputs]: FamilySets.Member family (imaginaryPart f) :=
+  Logic.existsIntro[Inputs, { u: Inputs \where InputFor (imaginaryPart f) u }] f
+    (Logic.Or[realPart f = imaginaryPart f, imaginaryPart f = imaginaryPart f]::right (\refl(imaginaryPart f)));
+\definition cases[g: Continuous.Function][P: Continuous.Function -> \Prop]:
+  FamilySets.Member family g ->
+  (\forall (f: Inputs) -> P (realPart f)) -> (\forall (f: Inputs) -> P (imaginaryPart f)) -> P g := \block {
+  \fun (member: _)(real: _)(imaginary: _) \then
+  \takefrom f: \Cast[Inputs] ({ u: Inputs \where InputFor g u }) \by member \then
+  \return Logic.orElim _ _ _ (\bysub(Inputs, { u: Inputs \where InputFor g u }, f))
+    (\fun (same: _) => \idelim realPart f = g \with h: Continuous.Function => P h \by { base: real f, equality: same })
+    (\fun (same: _) => \idelim imaginaryPart f = g \with h: Continuous.Function => P h \by { base: imaginary f, equality: same })
+};
+\definition amplitude: Real.Real := Real.mul B size;
+\definition uniformAmplitude[f: Inputs]: R.Le (Real.mul (L2.normRepresentative f) size) amplitude :=
+  R.leReplace _ _ _ _ (Laws.fieldMulComm _ _) (Laws.fieldMulComm _ _)
+    (Estimates.mulMonotone size _ _ sizeNonnegative (inputBound f));
+\definition pointwiseBounded: Continuous.PointwiseBounded family :=
+  \fun (x: Domain) => Logic.existsIntro[Real.Real, { b: Real.Real \where
+    \forall (g: Continuous.Function) -> FamilySets.Member family g -> R.Le (Product.abs (g x)) b }] amplitude
+    (\fun (g: Continuous.Function)(member: _) =>
+      cases g (\fun (h: Continuous.Function) => R.Le (Product.abs (h x)) amplitude) member
+        (\fun (f: Inputs) => R.leTrans _ _ _ (components f x).left (R.leTrans _ _ _ (absoluteNorm f) (uniformAmplitude f)))
+        (\fun (f: Inputs) => R.leTrans _ _ _ (components f x).right (R.leTrans _ _ _ (absoluteNorm f) (uniformAmplitude f))));
+\definition equicontinuous: Continuous.Equicontinuous family :=
+  \fun (x: Domain)(epsilon: Real.Real)(positive: _) =>
+    Logic.existsIntro[\Pow Domain, { W: \Pow Domain \where Continuous.EquicontinuousNeighborhood[family, x, epsilon, W] }]
+      (neighborhood x epsilon) (Continuous.EquicontinuousNeighborhood[family, x, epsilon, neighborhood x epsilon] {
+        open := open x epsilon, contains := center x epsilon positive,
+        estimate := \fun (g: Continuous.Function)(member: _)(y: Domain)(near: _) =>
+          close g x y epsilon (cases g (\fun (h: Continuous.Function) => lipschitz h) member realLipschitz imaginaryLipschitz) positive near,
+      });
+\definition relativelyCompact: Ascoli.RelativelyCompact family :=
+  Ascoli.arzelaAscoliClosure (SubspaceFacts.compact Ambient.topology frequencyCompact) family equicontinuous pointwiseBounded;

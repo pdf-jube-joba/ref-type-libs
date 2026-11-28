@@ -1,0 +1,74 @@
+\definition region: \Pow Point := { x: Point \where R.Lt t (GapWeight.value x) };
+\definition weightContinuous: metric_spaces.RealFunctions[A := Point].Continuous Ambient.topology GapWeight.value :=
+  Compact.smoothContinuous GapWeight.value (\bysub(Open.ScalarFunction Open.whole, Smooth.Predicate, GapWeight.smooth));
+\definition measurableWeight: Measure.IsMeasurable LE.measure GapWeight.value :=
+  Compact.continuousMeasurable GapWeight.value weightContinuous;
+\definition regionMeasurable: Measure.Measurable LE.measure.sigma region := measurableWeight t;
+\import \parent.\parent.Mask[K := region, measurable := regionMeasurable] \as Outside;
+\definition lowRegion: \Pow Point := Sets.Complement region;
+\definition lowMeasurable: Measure.Measurable LE.measure.sigma lowRegion :=
+  (Sigma.laws LE.measure.sigma).complement region regionMeasurable;
+\import \parent.\parent.Mask[K := lowRegion, measurable := lowMeasurable] \as Inside;
+\definition coefficient: Scaling.NonnegativeScalar := \into[Real.Real](Laws.fieldInv t, Scaling.NonnegativeScalar)
+  \by { Order.leOfLt _ _ (Product.invPositive t positive) };
+\definition multiplier[x: Point]: Real.Real := Real.mul (Outside.indicator x) (GapWeight.inverse x);
+\definition multiplierOn[x: Point]: Sets.Member region x -> multiplier x = GapWeight.inverse x :=
+  \fun (member: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (GapWeight.inverse x)) _ _ (Outside.inside x member))
+    (Laws.fieldMulOneLeft _);
+\definition multiplierOff[x: Point]: Logic.Not (Sets.Member region x) -> multiplier x = Real.zero :=
+  \fun (absent: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (GapWeight.inverse x)) _ _ (Outside.outside x absent))
+    (Laws.fieldMulZeroLeft _);
+\definition inverseMeasurable: Measure.IsMeasurable LE.measure GapWeight.inverse := GapWeight.reciprocal.measurable.left;
+\definition multiplierBound[x: Point]: R.Le (Product.abs (multiplier x)) coefficient :=
+  Logic.orElim _ _ _ (Classical.excludedMiddle (Sets.Member region x))
+    (\fun (member: _) => R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _
+      (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} Product.abs _ _ (multiplierOn x member))
+        (Product.absOfNonnegative _ (Order.leOfLt _ _ (GapWeight.inversePositive x)))))
+      (Inverse.invAntitone t _ positive (GapWeight.positive x) (Order.leOfLt _ _ member)))
+    (\fun (absent: _) => R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _
+      (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} Product.abs _ _ (multiplierOff x absent))
+        (Real.Distance[].distanceSelf Real.zero))) (Scaling.nonnegative coefficient));
+\definition symbol: Mult.Symbol := Outside.realSymbol multiplier
+  (Products.measurable Outside.indicator GapWeight.inverse Outside.indicatorMeasurable inverseMeasurable) coefficient multiplierBound;
+\import Mult.By[symbol := symbol] \as Tail;
+\definition value: Higher.Positive -> Lower.Positive := Tail.value;
+\definition bound[x: Higher.Positive]: R.Le (Lower.norm (value x)) (Real.mul (Laws.fieldInv t) (Higher.norm x)) :=
+  Tail.bound x;
+\definition masked: \forall (x: Higher.Positive) -> value x = Outside.value (lower x) :=
+  Q.induction (\fun (x: Space) => value x = Outside.value (lower x))
+    (\fun (f: L2.Representatives) => eq_reason_in!{Space _
+      "=" _ "by" { Tail.onClass f }
+      "=" _ "by" { L2.classPointwise (Tail.representative f) (Outside.representative (Ratio.representative f))
+        (\fun (x: Point) => eq_reason_in!{C.Complex _
+          "=" _ "by" { Scalars.realProduct _ _ }
+          "=" _ "by" { sym!{C.Complex} _ _ (Scalars.scaleCompose _ _ _) }
+          "=" _ "by" { congr!{C.Complex C.Complex} (D.scale (Outside.indicator x)) _ _ (sym!{C.Complex} _ _ (Scalars.realProduct _ _)) }
+          "=" _ "by" { sym!{C.Complex} _ _ (Scalars.realProduct _ _) }
+        }) }
+      "=" _ "by" { sym!{Space} _ _ (Outside.onClass (Ratio.representative f)) }
+      "=" _ "by" { congr!{Space Space} Outside.value _ _ (sym!{Space} _ _ (Ratio.onClass f)) }
+    });
+\definition split: \forall (x: Space) -> L2.add (Inside.value x) (Outside.value x) = x :=
+  Q.induction (\fun (x: Space) => L2.add (Inside.value x) (Outside.value x) = x)
+    (\fun (f: L2.Representatives) => eq_reason_in!{Space _
+      "=" _ "by" { congr!{Space Space Space} L2.add _ _ _ _ (Inside.onClass f) (Outside.onClass f) }
+      "=" _ "by" { L2.addClass (Inside.representative f) (Outside.representative f) }
+      "=" _ "by" { L2.classPointwise _ f (\fun (x: Point) => Logic.orElim _ _ _ (Classical.excludedMiddle (Sets.Member region x))
+        (\fun (member: _) => trans!{C.Complex} _ _ _
+          (congr!{C.Complex C.Complex C.Complex} D.add _ _ _ _
+            (Inside.offMember f x (\fun (absent: _) => absent member)) (Outside.onMember f x member))
+          (CL.addZeroLeft _))
+        (\fun (absent: _) => trans!{C.Complex} _ _ _
+          (congr!{C.Complex C.Complex C.Complex} D.add _ _ _ _ (Inside.onMember f x absent) (Outside.offMember f x absent))
+          (CL.addZeroRight _))) }
+    });
+\definition low[x: Higher.Positive]: Lower.Positive := Inside.value (lower x);
+\definition decomposition[x: Higher.Positive]: L2.add (low x) (value x) = lower x :=
+  trans!{Space} _ _ _ (congr!{Space Space} (L2.add (low x)) _ _ (masked x)) (split (lower x));
+\definition familyBound[B: Scaling.NonnegativeScalar][x: Higher.Positive]:
+  R.Le (Higher.norm x) B -> R.Le (Lower.norm (value x)) (Real.mul (Laws.fieldInv t) B) :=
+  \fun (within: _) => R.leTrans _ _ _ (bound x)
+    (Estimates.mulMonotone coefficient _ _ (Scaling.nonnegative coefficient) within);
+\module CompactRegion(nonzero: Logic.Not (q = N.Nat^::zero));
