@@ -1,0 +1,22 @@
+\import \parent.\parent.\parent.\parent.\parent.\parent.At[x := y].Basis[q := q] \as Actual;
+\import Lifts.Fiber[x := y].Basis[degree := degree, classes := classes, q := q] \as ActualHypothesis;
+\import Graded.At[q := q].NativeBasis[] \as Reference;
+\import Modules.Isomorphism[V := Free.Carrier, W := H.Group q, source := Free.space, target := H.moduleSpace q].OfBijective[f := Reference.linear] \as RefIso;
+\definition standard: _ := RefIso.isomorphism (basis q).left (basis q).right;
+\definition actual: _ := Actual.isomorphism (based y q);
+\import Modules.Isomorphism[V := Free.Carrier, W := H.Group q, source := Free.space, target := H.moduleSpace q].Inverse[] \as Inverse;
+\import Modules.Isomorphism[V := Free.Carrier, W := H.Group q, source := Free.space, target := H.moduleSpace q]
+  .Composition[U := Free.Carrier, final := Free.space] \as Compose;
+\definition changeBasis: _ := Compose.compose (Inverse.inverse standard) actual;
+\import FreeBlock.Extend[] \as Extend;
+\definition fullChange: _ := Extend.isomorphism changeBasis;
+\import commutative_algebra.Modules[R := K, ring := ring].Matrix[m := count, n := count] \as ScalarMatrix;
+\definition evaluated: ScalarMatrix.Matrix := Matrices.evaluateMatrix matrix y;
+\import Modules.Coordinates[I := Index].Kronecker[] \as ScalarDelta;
+\import Modules.FiniteCoordinates[n := count] \as Coordinates;
+\import FreeBlock.To[W := H.Group q, target := H.moduleSpace q, f := Reference.linear] \as Expand;
+\import Modules.Sums[I := Index].Vector[V := H.Group q, space := H.moduleSpace q] \as Sum;
+\definition degrees: Modules.Family[N.Nat^] := Modules.Family[N.Nat^] { Carrier := H.Group, space := H.moduleSpace };
+\import \root.Transport[K := K, ring := ring].For[Index := N.Nat^, family := degrees] \as Transport;
+\module Column(j: Indices);
+\module Entries;

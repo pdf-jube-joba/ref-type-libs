@@ -9,6 +9,8 @@
   Reindex.cast FiberGroups.Group (degree i) q (\bysub(Index, { j: Index \where degree j = q }, i)) (Slice.restrict (degree i) (lift i));
 \import Free.To[W := FiberGroups.Group q, target := FiberGroups.moduleSpace q] \as Extension;
 \definition map: _ := Extension.extension classAt;
+\definition onGenerator: \forall (i: Indices) -> map.apply (Free.generator i) = classAt i :=
+  Extension.onGenerator classAt;
 \import Modules.Hom[V := ActualGroups.Group q, W := FiberGroups.Group q,
   source := ActualGroups.moduleSpace q, target := FiberGroups.moduleSpace q].Composition[U := Free.Carrier, domain := Free.space] \as Compose;
 \definition composed: _ := Compose.compose Identification.At[n := q].backward Before.linear;

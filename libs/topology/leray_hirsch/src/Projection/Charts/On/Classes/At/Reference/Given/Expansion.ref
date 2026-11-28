@@ -39,4 +39,7 @@
       (congr!{{Projection.totalFamily.Carrier z} {ProductCochains.Cohomology[].Group (degree i)}} Absolute.Degree[n := degree i].isomorphism.forward.apply _ _ expands)
       (Absolute.Degree[n := degree i].isomorphism.rightInverse (lift i));
   \module AtFiber(y: LocalBase.CarrierSet);
+  \module Atoms;
 }
+
+\module Blocks(q: N.Nat^);

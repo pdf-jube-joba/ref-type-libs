@@ -1,0 +1,44 @@
+\import Modules.Free[Generators := Index] \as FullFree;
+\definition scalars: std.Alg[].Ring[].Ring[K] := std.Alg[].Ring[].commutativeRingAsRing K ring;
+\definition inside[i: Index][j: Indices]: ScalarMatrix.entries fullChange.forward i j = evaluated i j :=
+  eq_reason_in!{K _
+    "=" _ "by" { congr!{Coordinates.Carrier K} (\fun (v: Coordinates.Carrier) => v i) _ _ (Extend.forwardBasis changeBasis j) }
+    "=" _ "by" { congr!{{FullFree.Carrier} K} (\fun (x: FullFree.Carrier) => Coordinates.Free[].forward.apply x i) _ _
+      (Extend.inside changeBasis.forward j) }
+    "=" _ "by" { \parent.Column[j := j].onCoordinates i }
+  };
+\definition deltaValue[i, j: Index]: Values.evaluate (Delta.delta i j) y = ScalarDelta.delta i j :=
+  Matrices.unitAt y i j;
+\definition outside[i, j: Index][off: Logic.Not (InGrade j)]: ScalarMatrix.entries fullChange.forward i j = evaluated i j :=
+  eq_reason_in!{K _
+    "=" _ "by" { congr!{Coordinates.Carrier K} (\fun (v: Coordinates.Carrier) => v i) _ _ (Extend.forwardBasis changeBasis j) }
+    "=" _ "by" { congr!{{FullFree.Carrier} K} (\fun (x: FullFree.Carrier) => Coordinates.Free[].forward.apply x i) _ _
+      (Extend.outside changeBasis.forward j off) }
+    "=" _ "by" { congr!{Coordinates.Carrier K} (\fun (v: Coordinates.Carrier) => v i) _ _ (Coordinates.Free[].onGenerator j) }
+    "=" _ "by" { sym!{K} _ _ (deltaValue i j) }
+    "=" _ "by" { congr!{Values.Carrier K} (\fun (c: Values.Carrier) => Values.evaluate c y) _ _ (sym!{Values.Carrier} _ _ ((values i j).outsideColumn off)) }
+  };
+\definition equal: ScalarMatrix.entries fullChange.forward = evaluated :=
+  \axiom:funext(ScalarMatrix.entries fullChange.forward, evaluated,
+    \fun (i: Index) => \axiom:funext(ScalarMatrix.entries fullChange.forward i, evaluated i,
+      \fun (j: Index) => either!{{Classical.excludedMiddle (InGrade j)}
+        {ScalarMatrix.entries fullChange.forward i j = evaluated i j}
+        {\fun (insideGrade: InGrade j) => inside i (\into[Index](j, degreeSet) \by { insideGrade })}
+        {\fun (off: Logic.Not (InGrade j)) => outside i j off}
+      }));
+\import ScalarMatrix.Invertible[] \as InverseMatrix;
+\definition inverse: InverseMatrix.Inverse evaluated :=
+  InverseMatrix.transport _ _ equal (InverseMatrix.fromIsomorphism fullChange);
+\definition inverseSupport[i: Index][j: Indices][off: Logic.Not (InGrade i)]: (inverse).inverse i j = scalars.zero :=
+  eq_reason_in!{K _
+    "=" _ "by" { congr!{Coordinates.Carrier K} (\fun (v: Coordinates.Carrier) => v i) _ _ (Extend.backwardBasis changeBasis j) }
+    "=" _ "by" { congr!{{FullFree.Carrier} K} (\fun (u: FullFree.Carrier) => Coordinates.Free[].forward.apply u i) _ _
+      (Extend.inside changeBasis.backward j) }
+    "=" _ "by" { FreeBlock.coordinateSupport (changeBasis.backward.apply (Free.generator j)) i off }
+  };
+\import Matrices.With[a := matrix].Supported[included := degreeSet] \as Supported;
+\definition certificate: Supported.PointCertificate (Values.componentOf y) :=
+  \into[InverseMatrix.Inverse evaluated](inverse, Supported.PointCertificate (Values.componentOf y)) \by {
+    \fun (i, j: Index)(off: Logic.Not (InGrade i))(on: InGrade j) =>
+      inverseSupport i (\into[Index](j, degreeSet) \by { on }) off
+  };
