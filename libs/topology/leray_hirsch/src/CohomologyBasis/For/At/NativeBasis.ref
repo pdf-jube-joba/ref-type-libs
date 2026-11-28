@@ -9,6 +9,8 @@
   Transport.cast family (degrees i) q (degreeLaw i) (classOf (degrees i) (cycles i));
 \import Free.To[W := NativeH.Cohomology, target := NativeH.cohomologySpace] \as ExtendNative;
 \definition linear: _ := ExtendNative.extension nativeGenerators;
+\definition onNativeGenerator: \forall (i: Indices) -> linear.apply (Free.generator i) = nativeGenerators i :=
+  ExtendNative.onGenerator nativeGenerators;
 \import Modules.Isomorphism[V := Free.Carrier, W := NativeH.Cohomology, source := Free.space, target := NativeH.cohomologySpace]
   .OfBijective[f := linear] \as NativeIso;
 \definition IsBasis: \Prop := Logic.And[NativeIso.Injective, NativeIso.Onto];

@@ -1,0 +1,48 @@
+\module At(q: N.Nat^) {
+  \import \parent.\parent.\parent.Degree[q := q] \as Mask;
+  \import Modules.Functions[X := Index, V := V.Carrier q, target := V.space q] \as Vectors;
+  \definition recover[x: Product.Carrier][i: Index][s: degree i = q]:
+    Mask.mask (forward x) i = atForward q x i :=
+    trans!{{V.Carrier q}} _ _ _ (Mask.inside (forward x) i s)
+      (Cast.pointNatural V.Carrier (\fun (d: N.Nat^) => atForward d x i) (degree i) q s);
+  \definition recoverBack[x: Product.Carrier][i: Index][s: degree i = q]:
+    Mask.mask (backward x) i = atBackward q x i :=
+    trans!{{V.Carrier q}} _ _ _ (Mask.inside (backward x) i s)
+      (Cast.pointNatural V.Carrier (\fun (d: N.Nat^) => atBackward d x i) (degree i) q s);
+  \definition law: \forall (x: Product.Carrier) -> Mask.mask (forward x) = (isos q).forward.apply (Mask.mask x) :=
+    \fun (x: Product.Carrier) => Vectors.ext _ _ (\fun (i: Index) =>
+      either!{{Classical.excludedMiddle (degree i = q)} {_} {recover x i}
+        {\fun (outside: Logic.Not (degree i = q)) => trans!{{V.Carrier q}} _ _ _
+          (Mask.outside (forward x) i outside)
+          (sym!{{V.Carrier q}} _ _ (forwardSupported q (Mask.mask x) (Mask.support x) i outside))}
+      });
+  \definition backLaw: \forall (x: Product.Carrier) -> Mask.mask (backward x) = (isos q).backward.apply (Mask.mask x) :=
+    \fun (x: Product.Carrier) => Vectors.ext _ _ (\fun (i: Index) =>
+      either!{{Classical.excludedMiddle (degree i = q)} {_} {recoverBack x i}
+        {\fun (outside: Logic.Not (degree i = q)) => trans!{{V.Carrier q}} _ _ _
+          (Mask.outside (backward x) i outside)
+          (sym!{{V.Carrier q}} _ _ (backwardSupported q (Mask.mask x) (Mask.support x) i outside))}
+      });
+}
+\definition leftInverse: \forall (x: Product.Carrier) -> backward (forward x) = x :=
+  \fun (x: Product.Carrier) => Product.ext _ _ (\fun (i: Index) => eq_reason_in!{{family.Carrier i} _
+    "=" _ "by" { congr!{{Index -> family.Carrier i} {family.Carrier i}}
+      (\fun (v: Index -> family.Carrier i) => (isos (degree i)).backward.apply v i) _ _ (At[q := degree i].law x) }
+    "=" _ "by" { congr!{{Index -> family.Carrier i} {family.Carrier i}}
+      (\fun (v: Index -> family.Carrier i) => v i) _ _ ((isos (degree i)).leftInverse (\parent.\parent.Degree[q := degree i].mask x)) }
+    "=" _ "by" { \parent.\parent.Degree[q := degree i].inside x i (\refl(degree i)) }
+    "=" _ "by" { Cast.castRefl V.Carrier (degree i) (x i) }
+  });
+\definition rightInverse: \forall (x: Product.Carrier) -> forward (backward x) = x :=
+  \fun (x: Product.Carrier) => Product.ext _ _ (\fun (i: Index) => eq_reason_in!{{family.Carrier i} _
+    "=" _ "by" { congr!{{Index -> family.Carrier i} {family.Carrier i}}
+      (\fun (v: Index -> family.Carrier i) => (isos (degree i)).forward.apply v i) _ _ (At[q := degree i].backLaw x) }
+    "=" _ "by" { congr!{{Index -> family.Carrier i} {family.Carrier i}}
+      (\fun (v: Index -> family.Carrier i) => v i) _ _ ((isos (degree i)).rightInverse (\parent.\parent.Degree[q := degree i].mask x)) }
+    "=" _ "by" { \parent.\parent.Degree[q := degree i].inside x i (\refl(degree i)) }
+    "=" _ "by" { Cast.castRefl V.Carrier (degree i) (x i) }
+  });
+\import Modules.Isomorphism[V := Product.Carrier, W := Product.Carrier, source := Product.space, target := Product.space] \as Iso;
+\definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+  forward := map, backward := inverse, leftInverse := leftInverse, rightInverse := rightInverse,
+};

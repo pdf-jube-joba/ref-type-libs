@@ -175,5 +175,11 @@ the comparison isomorphism on the union from the comparisons on
 the two pieces and their overlap in the relevant degrees. The package
 also verifies nilpotence for endomorphisms strictly lowering a finite
 degree filtration and evaluation of degree-zero classes as functions
-on path components. The remaining steps are change of lifts on chart
-pairs and transport of the gluing lemma through the finite chart cover.
+on path components. The gluing lemma applies to the canonical restrictions to two open
+sets, their intersection, and their union. The nested subspaces in the
+Mayer–Vietoris row are identified by pair homeomorphisms. The full
+finite direct sum commutes with pullback and with coefficient change.
+On a product chart, the absolute expansion of a lift in the reference
+basis restricts to the fiber using only its degree-zero coefficients.
+It remains to assemble the relative comparison for the chosen lifts
+and apply the finite cover induction.

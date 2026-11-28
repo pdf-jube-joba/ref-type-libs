@@ -1,0 +1,42 @@
+\import \root.ProductFiberRestriction[X := LocalBase.CarrierSet, F := F, base := LocalBase.topology base, fiber := fiber,
+  K := K, ring := ring, x := y] \as Restriction;
+\import \root.DegreeShift[] \as Shift;
+\import Equality.Transport[A := I.Int^] \as IntegerCast;
+\import Equality.Transport[A := N.Nat^] \as NaturalCast;
+\import \root.ForgetPair[A := ProductCarrier, source := chartTarget, subset := totalZero, K := K, ring := ring] \as Forget;
+\import \root.ForgetPair[A := LocalBase.CarrierSet, source := LocalBase.topology base, subset := baseZero, K := K, ring := ring] \as BaseForget;
+\import H.Pullback[B := ProductCarrier, target := chartTarget] \as AbsolutePull;
+\definition absoluteMap[n: N.Nat^]: _ := AbsolutePull.At[n := n].linear Restriction.slice Restriction.continuous;
+\definition observe[n: N.Nat^][a: Projection.totalFamily.Carrier (I.Int^::ofNat n)]: H.Group n :=
+  (absoluteMap n).apply ((Forget.map n).apply a);
+\definition target: H.Group (degree i) := Restriction.restrict (degree i) (lift i);
+\definition term[j: Index]: H.Group (degree i) := observe (degree i) ((Direct.components j).apply (coordinates j));
+\import Modules.Sums[I := Index].Vector[V := Projection.totalFamily.Carrier z, space := Projection.totalFamily.space z] \as InputSum;
+\import Modules.Sums[I := Index].Vector[V := H.Group (degree i), space := H.moduleSpace (degree i)] \as OutputSum;
+\import InputSum.Mapping[W := H.Group (degree i), target := H.moduleSpace (degree i)] \as MoveSum;
+\import Modules.Hom[V := ProductCochains.Cohomology[].Group (degree i), W := H.Group (degree i),
+  source := ProductCochains.Cohomology[].moduleSpace (degree i), target := H.moduleSpace (degree i)]
+  .Composition[U := Projection.totalFamily.Carrier z, domain := Projection.totalFamily.space z] \as Compose;
+\definition observation: _ := Compose.compose (absoluteMap (degree i)) (Forget.map (degree i));
+\definition fiberExpansion: target = OutputSum.sum (Finite.elements count) term :=
+  trans!{{H.Group (degree i)}} _ _ _
+    (sym!{{H.Group (degree i)}} _ _ (congr!{{ProductCochains.Cohomology[].Group (degree i)} {H.Group (degree i)}}
+      (Restriction.restrict (degree i)) _ _ absolute))
+    (MoveSum.law observation (Finite.elements count) (\fun (j: Index) => (Direct.components j).apply (coordinates j)));
+\module Term(j: Index) {
+  \import Projection.Shifted[q := degree j, u := reference j].To[z := z] \as Component;
+  \definition rawDegree: I.Int^ := Component.input;
+  \module Negative(p: N.Nat^, same: I.Int^::negSucc p = rawDegree) {
+    \import Component.Below[p := p, same := same] \as Vanish;
+    \import Modules.Hom[V := Projection.totalFamily.Carrier z, W := H.Group (degree i),
+      source := Projection.totalFamily.space z, target := H.moduleSpace (degree i)] \as Maps;
+    \definition law: term j = (H.moduleSpace (degree i)).zero :=
+      trans!{{H.Group (degree i)}} _ _ _
+        (congr!{{Projection.totalFamily.Carrier z} {H.Group (degree i)}} (observe (degree i)) _ _ (Vanish.zero (coordinates j)))
+        (Maps.zeroPreserved observation);
+  }
+  \module Native(p: N.Nat^, same: I.Int^::ofNat p = rawDegree);
+  \module DifferentPositive(p: N.Nat^, same: I.Int^::ofNat (N.Nat^::succ p) = rawDegree);
+  \module Different(outside: std.Logic[].Proposition[].Not (degree j = degree i));
+  \module Equal(equal: degree j = degree i);
+}

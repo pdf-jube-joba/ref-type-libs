@@ -46,3 +46,5 @@
 
 \module Whole;
 \module Union(L, R: \Pow X, leftOpen: Base.IsOpenIn base L, rightOpen: Base.IsOpenIn base R);
+
+\module RightFactor(q: N.Nat^, z: I.Int^, a: baseFamily.Carrier (Degrees.unshift q z));

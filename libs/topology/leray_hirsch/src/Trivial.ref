@@ -11,6 +11,8 @@
 \module Over(U: \Pow X) {
   \import Bundle.Over[U := U, K := K, ring := ring] \as Comparison;
   \import External.Relative[leftSubset := U, rightSubset := FiberSpace.Empty] \as Relative;
+  \module Factorization(p, q, r: N.Nat^);
+  \module Forget(p, q: N.Nat^);
   \module Degree(p, q: N.Nat^) {
     \import Comparison.Component[p := p, q := q] \as Component;
     \import Relative.Cohomology[p := p, q := q] \as Product;

@@ -1,0 +1,47 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import singular_products.Cochains[A := Actual.Carrier, source := Actual.topology, R := K, ring := ring].Cohomology[] \as ActualGroups;
+\import Lifts.Fiber[x := x].Basis[degree := degree, classes := classes, q := q] \as Before;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import Equality.Transport[A := N.Nat^] \as Reindex;
+\definition Indices: \Set := Before.Indices;
+\import Modules.Free[Generators := Indices] \as Free;
+\definition classAt[i: Indices]: FiberGroups.Group q :=
+  Reindex.cast FiberGroups.Group (degree i) q (\bysub(Index, { j: Index \where degree j = q }, i)) (Slice.restrict (degree i) (lift i));
+\import Free.To[W := FiberGroups.Group q, target := FiberGroups.moduleSpace q] \as Extension;
+\definition map: _ := Extension.extension classAt;
+\import Modules.Hom[V := ActualGroups.Group q, W := FiberGroups.Group q,
+  source := ActualGroups.moduleSpace q, target := FiberGroups.moduleSpace q].Composition[U := Free.Carrier, domain := Free.space] \as Compose;
+\definition composed: _ := Compose.compose Identification.At[n := q].backward Before.linear;
+\definition onClasses: \forall (i: Indices) -> classAt i = Identification.At[n := q].backward.apply (Before.generator i) :=
+  \fun (i: Indices) => trans!{{FiberGroups.Group q}} _ _ _
+    (congr!{{FiberGroups.Group (degree i)} {FiberGroups.Group q}}
+      (Reindex.cast FiberGroups.Group (degree i) q (\bysub(Index, { j: Index \where degree j = q }, i))) _ _ (compatibility i))
+    (Reindex.natural ActualGroups.Group FiberGroups.Group
+      (\fun (n: N.Nat^) => Identification.At[n := n].backward.apply) (degree i) q
+      (\bysub(Index, { j: Index \where degree j = q }, i)) (Actual.restrict (degree i) (classes i)));
+\definition equality: map = composed :=
+  Extension.ext map composed (\fun (i: Indices) => eq_reason_in!{{FiberGroups.Group q} _
+    "=" _ "by" { Extension.onGenerator classAt i }
+    "=" _ "by" { onClasses i }
+    "=" _ "by" { congr!{{ActualGroups.Group q} {FiberGroups.Group q}} Identification.At[n := q].backward.apply _ _
+      (sym!{{ActualGroups.Group q}} _ _ (Before.onGenerator i)) }
+  });
+\import Modules.Isomorphism[V := FiberGroups.Group q, W := ActualGroups.Group q,
+  source := FiberGroups.moduleSpace q, target := ActualGroups.moduleSpace q].Inverse[] \as Reverse;
+\import Modules.Isomorphism[V := Free.Carrier, W := ActualGroups.Group q, source := Free.space, target := ActualGroups.moduleSpace q]
+  .Composition[U := FiberGroups.Group q, final := FiberGroups.moduleSpace q] \as Iso;
+\import Modules.Isomorphism[V := Free.Carrier, W := FiberGroups.Group q, source := Free.space, target := FiberGroups.moduleSpace q]
+  \as Isos;
+\definition product[basis: Before.IsBasis]: Isos.Isomorphism :=
+  Iso.compose (Reverse.inverse Identification.At[n := q].isomorphism) (Before.isomorphism basis);
+\definition formula[basis: Before.IsBasis][y: Free.Carrier]: map.apply y = (product basis).forward.apply y :=
+  congr!{{Modules.MapBetween (Modules.Bundle { Carrier := Free.Carrier, space := Free.space }) (FiberGroups.bundle q)} {FiberGroups.Group q}}
+    (\fun (f: Modules.MapBetween (Modules.Bundle { Carrier := Free.Carrier, space := Free.space }) (FiberGroups.bundle q)) => f.apply y)
+    map composed equality;
+\definition isomorphism[basis: Before.IsBasis]: Isos.Isomorphism := Isos.Isomorphism {
+  forward := map, backward := (product basis).backward,
+  leftInverse := \fun (y: Free.Carrier) => trans!{Free.Carrier} _ _ _
+    (congr!{{FiberGroups.Group q} Free.Carrier} (product basis).backward.apply _ _ (formula basis y)) ((product basis).leftInverse y),
+  rightInverse := \fun (y: FiberGroups.Group q) => trans!{{FiberGroups.Group q}} _ _ _
+    (formula basis ((product basis).backward.apply y)) ((product basis).rightInverse y),
+};

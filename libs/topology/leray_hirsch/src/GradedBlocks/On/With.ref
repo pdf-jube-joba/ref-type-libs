@@ -1,0 +1,48 @@
+\definition atForward[q: N.Nat^][x: Product.Carrier][i: Index]: V.Carrier q :=
+  (isos q).forward.apply (\parent.Degree[q := q].mask x) i;
+\definition atBackward[q: N.Nat^][x: Product.Carrier][i: Index]: V.Carrier q :=
+  (isos q).backward.apply (\parent.Degree[q := q].mask x) i;
+\definition forward[x: Product.Carrier][i: Index]: family.Carrier i := atForward (degree i) x i;
+\definition backward[x: Product.Carrier][i: Index]: family.Carrier i := atBackward (degree i) x i;
+\import Modules.Hom[V := Product.Carrier, W := Product.Carrier, source := Product.space, target := Product.space] \as Maps;
+\module At(i: Index) {
+  \import \parent.\parent.Degree[q := degree i] \as Mask;
+  \definition iso: Mask.Isomorphism := isos (degree i);
+  \definition applyAdd: \forall (x, y: Product.Carrier) -> forward (Product.add x y) i = (Product.add (forward x) (forward y)) i :=
+    \fun (x, y: Product.Carrier) => congr!{{Index -> family.Carrier i} {family.Carrier i}} (\fun (f: Index -> family.Carrier i) => f i) _ _
+      (trans!{{Index -> family.Carrier i}} _ _ _
+        (congr!{{Index -> family.Carrier i} {Index -> family.Carrier i}} iso.forward.apply _ _ (Mask.add x y))
+        (iso.forward.addition (Mask.mask x) (Mask.mask y)));
+  \definition applyScale: \forall (r: K)(x: Product.Carrier) -> forward (Product.scale r x) i = (Product.scale r (forward x)) i :=
+    \fun (r: K)(x: Product.Carrier) => congr!{{Index -> family.Carrier i} {family.Carrier i}} (\fun (f: Index -> family.Carrier i) => f i) _ _
+      (trans!{{Index -> family.Carrier i}} _ _ _
+        (congr!{{Index -> family.Carrier i} {Index -> family.Carrier i}} iso.forward.apply _ _ (Mask.scale r x))
+        (iso.forward.scalar r (Mask.mask x)));
+  \definition undoAdd: \forall (x, y: Product.Carrier) -> backward (Product.add x y) i = (Product.add (backward x) (backward y)) i :=
+    \fun (x, y: Product.Carrier) => congr!{{Index -> family.Carrier i} {family.Carrier i}} (\fun (f: Index -> family.Carrier i) => f i) _ _
+      (trans!{{Index -> family.Carrier i}} _ _ _
+        (congr!{{Index -> family.Carrier i} {Index -> family.Carrier i}} iso.backward.apply _ _ (Mask.add x y))
+        (iso.backward.addition (Mask.mask x) (Mask.mask y)));
+  \definition undoScale: \forall (r: K)(x: Product.Carrier) -> backward (Product.scale r x) i = (Product.scale r (backward x)) i :=
+    \fun (r: K)(x: Product.Carrier) => congr!{{Index -> family.Carrier i} {family.Carrier i}} (\fun (f: Index -> family.Carrier i) => f i) _ _
+      (trans!{{Index -> family.Carrier i}} _ _ _
+        (congr!{{Index -> family.Carrier i} {Index -> family.Carrier i}} iso.backward.apply _ _ (Mask.scale r x))
+        (iso.backward.scalar r (Mask.mask x)));
+}
+\definition map: Maps.Map := Maps.Map {
+  apply := forward,
+  addition := \fun (x, y: Product.Carrier) => Product.ext _ _ (\fun (i: Index) => At[i := i].applyAdd x y),
+  scalar := \fun (r: K)(x: Product.Carrier) => Product.ext _ _ (\fun (i: Index) => At[i := i].applyScale r x),
+};
+\definition inverse: Maps.Map := Maps.Map {
+  apply := backward,
+  addition := \fun (x, y: Product.Carrier) => Product.ext _ _ (\fun (i: Index) => At[i := i].undoAdd x y),
+  scalar := \fun (r: K)(x: Product.Carrier) => Product.ext _ _ (\fun (i: Index) => At[i := i].undoScale r x),
+};
+\definition inverseDepends: \forall (i: Index)(x, y: Product.Carrier) ->
+  (\forall (j: Index) -> degree j = degree i -> x j = y j) -> inverse.apply x i = inverse.apply y i :=
+  \fun (i: Index)(x, y: Product.Carrier)(same: \forall (j: Index) -> degree j = degree i -> x j = y j) =>
+    congr!{{Index -> family.Carrier i} {family.Carrier i}} (\fun (v: Index -> family.Carrier i) => (isos (degree i)).backward.apply v i) _ _
+      (\parent.Degree[q := degree i].depends x y same);
+\module Proved(forwardSupported: \forall (q: N.Nat^)(v: Index -> V.Carrier q) -> \parent.\parent.Degree[q := q].Supported v -> \parent.\parent.Degree[q := q].Supported ((isos q).forward.apply v),
+  backwardSupported: \forall (q: N.Nat^)(v: Index -> V.Carrier q) -> \parent.\parent.Degree[q := q].Supported v -> \parent.\parent.Degree[q := q].Supported ((isos q).backward.apply v));

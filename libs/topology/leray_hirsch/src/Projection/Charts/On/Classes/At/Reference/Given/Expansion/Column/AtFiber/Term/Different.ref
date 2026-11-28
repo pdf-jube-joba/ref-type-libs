@@ -1,0 +1,15 @@
+\definition nativeZero[p: N.Nat^][same: I.Int^::ofNat (N.Nat^::succ p) = rawDegree]: term j = (H.moduleSpace (degree i)).zero :=
+  \parent.DifferentPositive[p := p, same := same].law;
+\definition onNative: \forall (p: N.Nat^) -> I.Int^::ofNat p = rawDegree -> term j = (H.moduleSpace (degree i)).zero :=
+  \induction (p: N.Nat^) \return I.Int^::ofNat p = rawDegree -> term j = (H.moduleSpace (degree i)).zero \with {
+    | zero: \fun (same: I.Int^::ofNat N.Nat^::zero = rawDegree) => Logic.falseElim _ (outside
+      (trans!{N.Nat^} _ _ _ (sym!{N.Nat^} _ _ (N.Basic[].Prop[].addZeroLeft (degree j)))
+        (Shift.matchNatural (degree j) (degree i) N.Nat^::zero (sym!{I.Int^} _ _ same))))
+    | succ: \fun (p: N.Nat^)(unused: I.Int^::ofNat p = rawDegree -> term j = (H.moduleSpace (degree i)).zero) => nativeZero p
+  };
+\definition onDegree: \forall (d: I.Int^) -> d = rawDegree -> term j = (H.moduleSpace (degree i)).zero :=
+  \induction (d: I.Int^) \return d = rawDegree -> term j = (H.moduleSpace (degree i)).zero \with {
+    | ofNat: onNative
+    | negSucc: \fun (p: N.Nat^)(same: I.Int^::negSucc p = rawDegree) => \parent.Negative[p := p, same := same].law
+  };
+\definition law: term j = (H.moduleSpace (degree i)).zero := onDegree rawDegree (\refl(rawDegree));

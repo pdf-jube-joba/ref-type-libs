@@ -1,0 +1,22 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Finite;
+\import std.Logic[].Equality[] \as Equality;
+\import Equality.Transport[A := N.Nat^] \as Cast;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import std.Logic[].Classical[] \as Classical;
+\import std.Logic[].Proposition[] \as Logic;
+\use Logic.either;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\definition Index: \Set := Finite.Fin count;
+\module On(V: Modules.Family[N.Nat^]) {
+  \definition family: Modules.Family[Index] := Modules.Family[Index] {
+    Carrier := \fun (i: Index) => V.Carrier (degree i),
+    space := \fun (i: Index) => V.space (degree i),
+  };
+  \import Modules.Product[Index := Index, family := family] \as Product;
+  \module Degree(q: N.Nat^);
+  \module With(isos: \forall (q: N.Nat^) -> \parent.Degree[q := q].Isomorphism);
+}

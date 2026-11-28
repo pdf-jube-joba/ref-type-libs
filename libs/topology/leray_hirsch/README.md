@@ -24,11 +24,14 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `Projection.Over.Comparison.With.At.Empty.isomorphism` | Comparison isomorphism on the empty base |
 | `Projection.Pullback.Over.Degree.law` | Bidegree naturality for base change and inverse-image pairs |
 | `Projection.Over.Along.FiniteComparison.At.law` | Naturality of the full direct-sum comparison for a commuting square of projections and pairs |
+| `Projection.Pullback.Over.FiniteComparison.At.law` | Naturality of the full direct sum under a base pullback |
+| `Projection.Over.Change.FiniteComparison.At.law` | Naturality of the full direct sum under a unital coefficient-ring homomorphism |
 | `Projection.Over.Change.Degree.law` | Bidegree naturality for unital ring homomorphisms |
 | `Projection.Over.MayerVietoris.At.connectingLaw` | Naturality of the relative connecting map under projection |
 | `Projection.Over.MayerVietoris.SignedCup.connectingLaw` | Compatibility of the relative connecting map with a comparison summand in integer degrees |
 | `Projection.Over.MayerVietoris.Pieces.Summand.At.Integer` | Restriction and signed difference squares for the relative comparison summands |
 | `Projection.Over.MayerVietoris.Pieces.FiniteGluing.At.Glued.isomorphism` | Five-lemma isomorphism from the comparisons on the two pieces and their overlap |
+| `Projection.Over.Union.Glue.Given.result` | Gluing for the canonical restrictions to two open sets, their intersection, and their union |
 | `Projection.Over.MayerVietoris.FiniteConnecting.At.connectingLaw` | Connecting map on the finite sum of restricted components |
 | `ProductPair.AlexanderWhitney.RelativeMap.CohomologyComparison.At.isomorphism` | Relative Alexander–Whitney cohomology isomorphism over the coefficient ring |
 | `ProductPair.AlexanderWhitney.RelativeMap.CohomologyModel.With.At.Proved.isomorphism` | Relative external cup isomorphism for a product bundle with a finite homogeneous fiber basis |

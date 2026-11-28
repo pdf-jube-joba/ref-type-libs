@@ -1,0 +1,25 @@
+\import Equality.Transport[A := I.Int^] \as Cast;
+\use Equality.congr;
+\use Equality.trans;
+\import \parent.\parent.Component[p := p, q := q] \as Product;
+\import Action.Cohomology[p := p, q := q].Left[] \as Cup;
+\definition m: I.Int^ := I.Int^::ofNat Product.degree;
+\definition actual: Product.Domain := Cast.cast baseFamily.Carrier input (I.Int^::ofNat p) (sym!{I.Int^} _ _ equal) a;
+\definition pull: totalFamily.Carrier (I.Int^::ofNat p) := (projectionPullback (I.Int^::ofNat p)).apply actual;
+\import Modules.Hom[V := Factor, W := totalFamily.Carrier m, source := TotalCohomology.moduleSpace q, target := totalFamily.space m] \as Raw;
+\definition map: Raw.Map := Raw.Map {
+  apply := Cup.apply pull,
+  addition := Cup.bilinear.addRight pull,
+  scalar := \fun (r: K)(u: Factor) => Cup.bilinear.scaleRight r pull u,
+};
+\definition same: m = z := trans!{I.Int^} _ _ _
+  (sym!{I.Int^} _ _ (Degrees.natural q p)) (trans!{I.Int^} _ _ _
+    (congr!{I.Int^ I.Int^} (Degrees.shift q) _ _ equal) (Degrees.shiftUnshift q z));
+\import Reindex.At[m := m, n := z, same := same] \as Regard;
+\import Modules.Hom[V := totalFamily.Carrier m, W := totalFamily.Carrier z, source := totalFamily.space m, target := totalFamily.space z]
+  .Composition[U := Factor, domain := TotalCohomology.moduleSpace q] \as Compose;
+\definition linear: Maps.Map := Compose.compose Regard.map map;
+\definition result: Model := \into[Maps.Map](linear, Model) \by {
+  \fun (u: Factor) => sym!{{totalFamily.Carrier z}} _ _
+    (\parent.\parent.Shifted[q := q, u := u].To[z := z].Native[p := p, same := equal].law a)
+};

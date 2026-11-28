@@ -2,8 +2,6 @@
 \import Outer.Comparison[count := count, degree := degree, classes := classes] \as Original;
 \import Along.FiniteComparison[count := count, degree := degree, classes := Original.localClasses] \as Natural;
 \import singular_products.Cochains[A := Nested.TotalCarrier, source := Nested.totalTopology, R := K, ring := ring].Cohomology[] \as NewClasses;
-\import singular_products.Cochains[A := Outer.TotalCarrier, source := Outer.totalTopology, R := K, ring := ring].Cohomology[] \as MidClasses;
-\import NewClasses.Pullback[B := TotalCarrier, target := totalTopology] \as ToWhole;
 \import singular_cohomology.Maps[A := Nested.TotalCarrier, B := Outer.TotalCarrier, source := Nested.totalTopology, target := Outer.totalTopology]
   .Composition[C := E, final := total].Coefficients[M := TotalProduct.integerCoefficients] \as DirectComposition;
 \import singular_cohomology.Maps[A := Nested.TotalCarrier, B := TotalCarrier, source := Nested.totalTopology, target := totalTopology]
@@ -20,6 +18,9 @@
       (DirectComposition.onCohomology totalForward totalRegular Outer.totalInclude Outer.totalContinuous
         (degree i) (classes i)))
     (NestedComposition.onCohomology Nested.totalInclude Nested.totalContinuous totalInclude totalContinuous (degree i) (classes i));
+\import \root.Projection[X := Nested.BaseCarrier, E := Nested.TotalCarrier, base := Nested.baseTopology, total := Nested.totalTopology,
+  projection := Nested.project, continuous := Nested.regular].Over[U := Nested.basePart, K := K, ring := ring] \as Output;
+\import Output.Comparison[count := count].With[degree := degree, classes := Natural.newClasses] \as Compare;
 \module At(z: I.Int^) {
   \import Natural.At[z := z].Transfer[] \as Transport;
   \import Source.Comparison[count := count].With[degree := degree, classes := Original.localClasses].At[z := z] \as Input;
@@ -37,4 +38,8 @@
   \definition inputLaw[h: Original.Isomorphisms]: \forall (a: Original.At[z := z].domain.Carrier) -> (input h).forward.apply a = Original.At[z := z].linear.apply a :=
     \fun (a: Original.At[z := z].domain.Carrier) => \refl(Original.At[z := z].linear.apply a);
   \definition isomorphism[h: Original.Isomorphisms]: _ := Transfer.With[iso := input h, law := inputLaw h].comparison;
+  \import Compare.At[z := z].ProductCoordinates[] \as OutputCoordinates;
+  \import OutputCoordinates.Agree[other := nestedClasses, equal := classesAgree] \as Same;
+  \definition result[h: Original.Isomorphisms]: _ :=
+    Same.isomorphism (isomorphism h) (\fun (v: OutputCoordinates.domain.Carrier) => \refl(OutputCoordinates.finite.apply v));
 }

@@ -1,0 +1,64 @@
+\definition Index: \Set := Finite.Fin count;
+\import Canonical.Comparison[count := count, degree := degree, classes := classes] \as Original;
+\import Along.FiniteComparison[count := count, degree := degree, classes := Original.localClasses] \as Natural;
+\import \root.Projection[X := BaseMV.Overlap, E := TotalMV.Overlap, base := BaseMV.overlapTopology, total := TotalMV.overlapTopology,
+  projection := project, continuous := projectContinuous].Over[U := BaseMV.overlapPart, K := K, ring := ring] \as Range;
+\import Range.Comparison[count := count].With[degree := degree, classes := Natural.newClasses] \as Output;
+\import singular_products.Cochains[A := TotalMV.Overlap, source := TotalMV.overlapTopology, R := K, ring := ring].Cohomology[] \as New;
+\import singular_products.Cochains[A := Whole.TotalCarrier, source := Whole.totalTopology, R := K, ring := ring].Cohomology[] \as WholeGroups;
+\definition wholeClasses[i: Index]: WholeGroups.Group (degree i) := Whole.lift (degree i) (classes i);
+\definition nestedClasses[i: Index]: New.Group (degree i) := MayerVietoris.Pieces[].overlapLift (degree i) (wholeClasses i);
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import singular_cohomology.Relative[A := TotalMV.Left, source := TotalMV.leftTopology, subset := TotalMV.leftPart] \as LeftSpace;
+\import LeftSpace.Maps[B := Whole.TotalCarrier].Over[target := Whole.totalTopology, targetSubset := Whole.totalPart] \as IntoWhole;
+\import TotalSource.Maps[B := TotalMV.Left].Over[target := TotalMV.leftTopology, targetSubset := TotalMV.leftPart] \as IntoLeft;
+\import TotalSource.Maps[B := Canonical.TotalCarrier].Over[target := Canonical.totalTopology, targetSubset := Canonical.totalPart] \as ToCanonical;
+\import topology.Composition[A := TotalMV.Overlap, B := TotalMV.Left, C := Whole.TotalCarrier] \as Embedding;
+\definition include[x: TotalMV.Overlap]: Whole.TotalCarrier := TotalMV.leftPairMap (TotalMV.toLeft x);
+\definition includeContinuous: _ := Embedding.composeContinuous TotalMV.overlapTopology TotalMV.leftTopology Whole.totalTopology
+  TotalMV.toLeft TotalMV.leftPairMap (IntoLeft.laws TotalMV.toLeft).continuous (IntoWhole.laws TotalMV.leftPairMap).continuous;
+\definition e[x: TotalMV.Overlap]: E := x;
+\import topology.Composition[A := TotalMV.Overlap, B := Whole.TotalCarrier, C := E] \as IntoGlobal;
+\definition eContinuous: _ := IntoGlobal.composeContinuous TotalMV.overlapTopology Whole.totalTopology total include Whole.totalInclude
+  includeContinuous Whole.totalContinuous;
+\import New.Pullback[B := E, target := total] \as Pull;
+\import New.Pullback[B := Whole.TotalCarrier, target := Whole.totalTopology] \as PullWhole;
+\import singular_cohomology.Maps[A := TotalMV.Overlap, B := Whole.TotalCarrier, source := TotalMV.overlapTopology, target := Whole.totalTopology]
+  .Composition[C := E, final := total].Coefficients[M := TotalProduct.integerCoefficients] \as Nested;
+\import singular_cohomology.Maps[A := TotalMV.Overlap, B := TotalMV.Left, source := TotalMV.overlapTopology, target := TotalMV.leftTopology]
+  .Composition[C := Whole.TotalCarrier, final := Whole.totalTopology].Coefficients[M := TotalProduct.integerCoefficients] \as Left;
+\import singular_cohomology.Maps[A := TotalMV.Overlap, B := Canonical.TotalCarrier, source := TotalMV.overlapTopology, target := Canonical.totalTopology]
+  .Composition[C := E, final := total].Coefficients[M := TotalProduct.integerCoefficients] \as Direct;
+\definition classesAgree: \forall (i: Index) -> Natural.newClasses i = nestedClasses i :=
+  \fun (i: Index) => eq_reason_in!{{New.Group (degree i)} _
+    "=" _ "by" { sym!{{New.Group (degree i)}} _ _ (Direct.onCohomology totalMap (ToCanonical.laws totalMap).continuous
+      Canonical.totalInclude Canonical.totalContinuous (degree i) (classes i)) }
+    "=" _ "by" { Nested.onCohomology include includeContinuous Whole.totalInclude Whole.totalContinuous (degree i) (classes i) }
+    "=" _ "by" { Left.onCohomology TotalMV.toLeft (IntoLeft.laws TotalMV.toLeft).continuous
+      TotalMV.leftPairMap (IntoWhole.laws TotalMV.leftPairMap).continuous (degree i) (wholeClasses i) }
+  };
+\module At(z: I.Int^) {
+  \import Natural.At[z := z].Transfer[] \as Transport;
+  \import Domain.Comparison[count := count].With[degree := degree, classes := Original.localClasses].At[z := z] \as Input;
+  \import Input.ProductCoordinates[] \as InputCoordinates;
+  \import Output.At[z := z].ProductCoordinates[] \as OutputCoordinates;
+  \definition baseIsos[i: Index]: _ := BaseIso.At[z := Input.inputDegree i].isomorphism;
+  \definition totalIso: _ := TotalIso.At[z := z].isomorphism;
+  \definition baseLaw: \forall (i: Index)(a: Input.family.Carrier i) ->
+    (baseIsos i).forward.apply a = (Along.baseRestriction (Input.inputDegree i)).apply a :=
+    \fun (i: Index)(a: Input.family.Carrier i) => \refl((Along.baseRestriction (Input.inputDegree i)).apply a);
+  \definition totalLaw: \forall (a: InputCoordinates.range.Carrier) -> totalIso.forward.apply a = (Along.totalRestriction z).apply a :=
+    \fun (a: InputCoordinates.range.Carrier) => \refl((Along.totalRestriction z).apply a);
+  \import Transport.Given[baseIsos := baseIsos, totalIso := totalIso, baseLaw := baseLaw, totalLaw := totalLaw] \as Transfer;
+  \definition before[h: Original.Isomorphisms]: _ := Original.At[z := z].isomorphism (h.injective z) (h.onto z);
+  \definition inputLaw[h: Original.Isomorphisms]: \forall (a: InputCoordinates.domain.Carrier) -> (before h).forward.apply a = InputCoordinates.finite.apply a :=
+    \fun (a: InputCoordinates.domain.Carrier) => \refl(InputCoordinates.finite.apply a);
+  \definition transported[h: Original.Isomorphisms]: _ := Transfer.With[iso := before h, law := inputLaw h].comparison;
+  \import OutputCoordinates.Agree[other := nestedClasses, equal := classesAgree] \as Same;
+  \definition result[h: Original.Isomorphisms]: _ :=
+    Same.isomorphism (transported h) (\fun (v: OutputCoordinates.domain.Carrier) => \refl(OutputCoordinates.finite.apply v));
+}

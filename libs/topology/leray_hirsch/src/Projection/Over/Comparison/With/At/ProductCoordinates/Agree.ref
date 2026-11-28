@@ -1,0 +1,20 @@
+\import \parent.\parent.\parent.\parent.With[degree := degree, classes := other].At[z := z].ProductCoordinates[] \as Result;
+\definition component[i: Index][u: TotalCohomology.Group (degree i)][a: family.Carrier i]: range.Carrier :=
+  \parent.\parent.\parent.\parent.\parent.Shifted[q := degree i, u := u].To[z := z].linear.apply a;
+\definition agreement: \forall (v: domain.Carrier) -> finite.apply v = Result.finite.apply v :=
+  \fun (v: domain.Carrier) => Values.congruent (Finite.elements count)
+    (\fun (i: Index) => component i (classes i) (v i))
+    (\fun (i: Index) => component i (other i) (v i))
+    (\fun (i: Index) => congr!{{TotalCohomology.Group (degree i)} {range.Carrier}} (\fun (u: TotalCohomology.Group (degree i)) => component i u (v i))
+      _ _ (equal i));
+\definition isomorphism[e: Iso.Isomorphism][same: \forall (v: domain.Carrier) -> e.forward.apply v = finite.apply v]:
+  Iso.Isomorphism := Iso.Isomorphism {
+    forward := Result.finite, backward := e.backward,
+    leftInverse := \fun (v: domain.Carrier) => trans!{domain.Carrier} _ _ _
+      (congr!{range.Carrier domain.Carrier} e.backward.apply _ _
+        (sym!{range.Carrier} _ _ (trans!{range.Carrier} _ _ _ (same v) (agreement v))))
+      (e.leftInverse v),
+    rightInverse := \fun (v: range.Carrier) => trans!{range.Carrier} _ _ _
+      (sym!{range.Carrier} _ _ (trans!{range.Carrier} _ _ _ (same (e.backward.apply v)) (agreement (e.backward.apply v))))
+      (e.rightInverse v),
+  };

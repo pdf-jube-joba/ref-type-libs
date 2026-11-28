@@ -1,0 +1,28 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\import Equality.Transport[A := N.Nat^] \as Transport;
+\import singular_products.Cochains[A := X, source := base, R := K, ring := ring].Cohomology[] \as BaseGroups;
+\import \root.RelativeCupLaws[A := Product.CarrierSet, source := External.topology, subset := Relative.leftInverse, K := K, ring := ring]
+  .Associativity[p := p, q := q, r := r] \as Associativity;
+\definition n: N.Nat^ := Associativity.n;
+\definition m: N.Nat^ := Associativity.m;
+\import Comparison.Component[p := p, q := N.Basic[].Def[].add q r] \as Single;
+\import Comparison.Component[p := N.Basic[].Def[].add p q, q := r] \as Iterated;
+\import singular_cap.CochainPair[A := X, source := base, subset := U, R := K, ring := ring].Cohomology[p := p, q := q].Left[] \as BaseCup;
+\import \root.PairMap[A := Product.CarrierSet, B := X, source := External.topology, target := base,
+  part := Relative.leftInverse, boundary := U, f := Comparison.pairProjection, K := K, ring := ring] \as Pullback;
+\import External.Cohomology[p := q, q := r] \as Exterior;
+\import singular_products.Cochains[A := Product.CarrierSet, source := External.topology, R := K, ring := ring].Cohomology[]
+  .Pullback[B := X, target := base] \as LeftPullback;
+\definition law: \forall (a: Single.Domain)(b: BaseGroups.Group q)(c: FiberCohomology.Group r) ->
+  Iterated.apply (lift r c) (BaseCup.apply a b) =
+    Transport.cast (\fun (k: N.Nat^) => Comparison.totalFamily.Carrier (I.Int^::ofNat k)) m n Associativity.same
+      (Single.apply (Exterior.apply b c) a) :=
+  \fun (a: Single.Domain)(b: BaseGroups.Group q)(c: FiberCohomology.Group r) => trans!{Iterated.Range} _ _ _
+    (congr!{{Comparison.totalFamily.Carrier (I.Int^::ofNat (N.Basic[].Def[].add p q))} Iterated.Range}
+      (\fun (x: Comparison.totalFamily.Carrier (I.Int^::ofNat (N.Basic[].Def[].add p q))) => Iterated.cup x (lift r c)) _ _
+      (Pullback.Cup[p := p, q := q].Cohomology[].law a b))
+    (Associativity.law ((Comparison.projectionPullback (I.Int^::ofNat p)).apply a)
+      (LeftPullback.apply q External.leftProjection External.leftContinuous b) (lift r c));

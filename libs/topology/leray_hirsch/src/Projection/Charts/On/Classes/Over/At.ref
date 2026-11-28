@@ -1,0 +1,20 @@
+\import Exterior.Comparison[count := count].With[degree := degree, classes := lift].At[z := z] \as Input;
+\import Input.ProductCoordinates[] \as InputCoordinates;
+\import AmbientProjection.Comparison[count := count].With[degree := degree, classes := Natural.newClasses].At[z := z].ProductCoordinates[] \as Output;
+\import Natural.At[z := z].Transfer[] \as Transport;
+\definition baseIsos[i: Index]: _ := BaseIso.At[z := Input.inputDegree i].isomorphism;
+\definition totalIso: _ := TotalIso.At[z := z].isomorphism;
+\definition baseLaw: \forall (i: Index)(a: Input.family.Carrier i) ->
+  (baseIsos i).forward.apply a = (Along.baseRestriction (Input.inputDegree i)).apply a :=
+  \fun (i: Index)(a: Input.family.Carrier i) => \refl((Along.baseRestriction (Input.inputDegree i)).apply a);
+\definition totalLaw: \forall (a: InputCoordinates.range.Carrier) -> totalIso.forward.apply a = (Along.totalRestriction z).apply a :=
+  \fun (a: InputCoordinates.range.Carrier) => \refl((Along.totalRestriction z).apply a);
+\import Transport.Given[baseIsos := baseIsos, totalIso := totalIso, baseLaw := baseLaw, totalLaw := totalLaw] \as Transfer;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import Modules.Isomorphism[V := InputCoordinates.domain.Carrier, W := InputCoordinates.range.Carrier,
+  source := InputCoordinates.domain.space, target := InputCoordinates.range.space] \as Iso;
+\import Output.Agree[other := Original.localClasses, equal := transported] \as Change;
+\module With(provided: Iso.Isomorphism, law: \forall (x: InputCoordinates.domain.Carrier) -> provided.forward.apply x = InputCoordinates.finite.apply x) {
+  \definition transferred: _ := Transfer.With[iso := provided, law := law].comparison;
+  \definition result: _ := Change.isomorphism transferred (\fun (x: Output.domain.Carrier) => \refl(Output.finite.apply x));
+}

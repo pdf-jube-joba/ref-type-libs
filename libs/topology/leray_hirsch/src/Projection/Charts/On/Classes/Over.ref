@@ -1,0 +1,55 @@
+\import std.Arithmetic[].Int[] \as I;
+\import \root.Projection[X := X, E := E, base := base, total := total, projection := projection, continuous := continuous]
+  .Over[U := subset, K := K, ring := ring] \as Global;
+\import Global.Restriction[V := U] \as Local;
+\import Local.Comparison[count := count, degree := degree, classes := classes] \as Original;
+\import \parent.\parent.Paired[subset := subset, chart := chart] \as ChartPair;
+\import singular_cap.External[A := Local.BaseCarrier, B := F, left := Local.baseTopology, right := fiber, R := K, ring := ring] \as External;
+\import \root.Projection[X := Local.BaseCarrier, E := Product.CarrierSet, base := Local.baseTopology, total := chartTarget,
+  projection := External.leftProjection, continuous := External.leftContinuous]
+  .Over[U := Local.basePart, K := K, ring := ring] \as Exterior;
+\import \root.Projection[X := Local.BaseCarrier, E := Local.TotalCarrier, base := Local.baseTopology, total := Local.totalTopology,
+  projection := Local.project, continuous := Local.regular].Over[U := Local.basePart, K := K, ring := ring] \as AmbientProjection;
+\import topology.Homeomorphism[A := Local.BaseCarrier, B := Local.BaseCarrier] \as BaseGeometry;
+\definition identity: Local.BaseCarrier -> Local.BaseCarrier := \fun (x: Local.BaseCarrier) => x;
+\definition baseRegular: _ := topology.Maps[A := Local.BaseCarrier, B := Local.BaseCarrier].Identity[].continuous Local.baseTopology;
+\definition baseHomeomorphism: BaseGeometry.Homeomorphism[Local.baseTopology, Local.baseTopology] :=
+  BaseGeometry.Homeomorphism[Local.baseTopology, Local.baseTopology] {
+    forward := identity, backward := identity,
+    leftInverse := \fun (x: Local.BaseCarrier) => \refl(x), rightInverse := \fun (x: Local.BaseCarrier) => \refl(x),
+    forwardContinuous := baseRegular, backwardContinuous := baseRegular,
+  };
+\import singular_cohomology.Relative[A := Local.BaseCarrier, source := Local.baseTopology, subset := Local.basePart] \as BasePair;
+\import BasePair.Homeomorphism[B := Local.BaseCarrier].Over[target := Local.baseTopology, targetSubset := Local.basePart] \as BaseMaps;
+\definition baseData: BaseMaps.Data := BaseMaps.Data {
+  homeomorphism := baseHomeomorphism,
+  forwardPreserves := \fun (x: BasePair.SubspaceCarrier) => \bysub(Local.BaseCarrier, Local.basePart, x),
+  backwardPreserves := \fun (x: BasePair.SubspaceCarrier) => \bysub(Local.BaseCarrier, Local.basePart, x),
+};
+\import singular_cohomology.Relative[A := Local.TotalCarrier, source := Local.totalTopology, subset := Local.totalPart]
+  .Homeomorphism[B := Product.CarrierSet].Over[target := chartTarget, targetSubset := ChartPair.targetBoundary] \as TotalMaps;
+\definition baseMap: _ := BaseMaps.forwardMap baseData;
+\definition totalMap: _ := TotalMaps.forwardMap ChartPair.chartPair;
+\import singular_cellular_algebra.Algebra[].Refinement[A := X, S := U] \as Refine;
+\definition square: \forall (e: Local.TotalCarrier) -> External.leftProjection (totalMap e) = baseMap (Local.project e) :=
+  \fun (e: Local.TotalCarrier) => Refine.ext (External.leftProjection (totalMap e)) (baseMap (Local.project e)) (chart.overBase e);
+\import Exterior.Along[Y := Local.BaseCarrier, Z := Local.TotalCarrier, newBase := Local.baseTopology, newTotal := Local.totalTopology, newPart := Local.basePart,
+  newProjection := Local.project, newContinuous := Local.regular, baseMap := baseMap, totalMap := totalMap, square := square] \as Along;
+\import Along.FiniteComparison[count := count, degree := degree, classes := lift] \as Natural;
+\import singular_products.Cochains[A := Local.TotalCarrier, source := Local.totalTopology, R := K, ring := ring].Cohomology[] \as LocalClasses;
+\import \root.AbsoluteHomeomorphism[A := Local.TotalCarrier, B := Product.CarrierSet, source := Local.totalTopology, target := chartTarget,
+  K := K, ring := ring, homeomorphism := chart.coordinates] \as Identification;
+\import singular_cohomology.Maps[A := Product.CarrierSet, B := Local.TotalCarrier, source := chartTarget, target := Local.totalTopology]
+  .Composition[C := E, final := total].Coefficients[M := ProductCochains.integerCoefficients] \as ClassComposition;
+\definition composition[i: Index]:
+  lift i = Identification.At[n := degree i].backward.apply (Original.localClasses i) :=
+  ClassComposition.onCohomology chart.coordinates.backward chartLaws.backwardContinuous ambient ambientContinuous (degree i) (classes i);
+\definition transported: \forall (i: Index) -> Natural.newClasses i = Original.localClasses i :=
+  \fun (i: Index) => trans!{{LocalClasses.Group (degree i)}} _ _ _
+    (congr!{{H.Group (degree i)} {LocalClasses.Group (degree i)}} Identification.At[n := degree i].forward.apply _ _ (composition i))
+    (Identification.At[n := degree i].rightInverse (Original.localClasses i));
+\import \root.PairHomeomorphism[A := Local.BaseCarrier, B := Local.BaseCarrier, source := Local.baseTopology, target := Local.baseTopology,
+  part := Local.basePart, boundary := Local.basePart, K := K, ring := ring, data := baseData] \as BaseIso;
+\import \root.PairHomeomorphism[A := Local.TotalCarrier, B := Product.CarrierSet, source := Local.totalTopology, target := chartTarget,
+  part := Local.totalPart, boundary := ChartPair.targetBoundary, K := K, ring := ring, data := ChartPair.chartPair] \as TotalIso;
+\module At(z: I.Int^);

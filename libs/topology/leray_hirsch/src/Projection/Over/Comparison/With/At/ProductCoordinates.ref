@@ -63,3 +63,20 @@
       (consequence (composition.backward.apply y)) (composition.rightInverse y),
   };
 }
+
+\module Agree(other: \forall (i: Index) -> TotalCohomology.Group (degree i),
+  equal: \forall (i: Index) -> classes i = other i);
+
+\module Verified(iso: Iso.Isomorphism, law: \forall (x: domain.Carrier) -> iso.forward.apply x = finite.apply x) {
+  \import Iso.OfBijective[f := finite] \as Result;
+  \definition injective: Result.Injective :=
+    \fun (x, y: domain.Carrier)(same: finite.apply x = finite.apply y) => trans!{domain.Carrier} _ _ _
+      (sym!{domain.Carrier} _ _ (iso.leftInverse x))
+      (trans!{domain.Carrier} _ _ _
+        (congr!{range.Carrier domain.Carrier} iso.backward.apply _ _ (trans!{range.Carrier} _ _ _ (law x)
+          (trans!{range.Carrier} _ _ _ same (sym!{range.Carrier} _ _ (law y)))))
+        (iso.leftInverse y));
+  \definition onto: Result.Onto :=
+    \fun (y: range.Carrier) => Logic.existsIntro[domain.Carrier, { x: domain.Carrier \where finite.apply x = y }] (iso.backward.apply y)
+      (trans!{range.Carrier} _ _ _ (sym!{range.Carrier} _ _ (law (iso.backward.apply y))) (iso.rightInverse y));
+}

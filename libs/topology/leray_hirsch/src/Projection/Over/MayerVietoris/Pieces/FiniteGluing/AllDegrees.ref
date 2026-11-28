@@ -39,3 +39,26 @@
     equality: Indices.nextPrevious z
   }
 };
+
+\definition leftSource: Modules.Bundle := L.domain;
+\definition leftFinite: Modules.MapBetween L.domain L.range := L.finite;
+\definition rightSource: Modules.Bundle := R.domain;
+\definition rightFinite: Modules.MapBetween R.domain R.range := R.finite;
+\definition overlapSource: Modules.Bundle := O.domain;
+\definition overlapFinite: Modules.MapBetween O.domain O.range := O.finite;
+\import Modules.Isomorphism[V := L.domain.Carrier, W := L.range.Carrier, source := L.domain.space, target := L.range.space] \as LeftIso;
+\import Modules.Isomorphism[V := R.domain.Carrier, W := R.range.Carrier, source := R.domain.space, target := R.range.space] \as RightIso;
+\import Modules.Isomorphism[V := O.domain.Carrier, W := O.range.Carrier, source := O.domain.space, target := O.range.space] \as OverlapIso;
+\module FromIsomorphisms(l: LeftIso.Isomorphism, r: RightIso.Isomorphism, o: OverlapIso.Isomorphism,
+  lLaw: \forall (v: L.domain.Carrier) -> l.forward.apply v = L.finite.apply v,
+  rLaw: \forall (v: R.domain.Carrier) -> r.forward.apply v = R.finite.apply v,
+  oLaw: \forall (v: O.domain.Carrier) -> o.forward.apply v = O.finite.apply v) {
+  \import L.Verified[iso := l, law := lLaw] \as LeftProof;
+  \import R.Verified[iso := r, law := rLaw] \as RightProof;
+  \import O.Verified[iso := o, law := oLaw] \as OverlapProof;
+  \definition pieces: Pieces := Pieces {
+    leftInjective := LeftProof.injective, leftOnto := LeftProof.onto,
+    rightInjective := RightProof.injective, rightOnto := RightProof.onto,
+    overlapInjective := OverlapProof.injective, overlapOnto := OverlapProof.onto,
+  };
+}

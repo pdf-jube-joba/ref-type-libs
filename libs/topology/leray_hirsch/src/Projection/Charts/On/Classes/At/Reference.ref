@@ -1,0 +1,62 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import singular_products.Cochains[A := F, source := fiber, R := K, ring := ring] \as Product;
+\import Product.Cohomology[] \as H;
+\import singular_cohomology.Cochains[A := F, source := fiber].OverRing[R := K, ring := ring].With[coefficients := Product.coefficients] \as Ordinary;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\definition Cycle[n: N.Nat^]: \Set := Native.At[C := Ordinary.complex, k := n].CycleCarrier;
+\definition classOf[n: N.Nat^]: Cycle n -> H.Group n := Native.At[C := Ordinary.complex, k := n].classOf;
+\definition Represented[i: Index]: \Set := \Cast[Cycle (degree i)]
+  ({ c: Cycle (degree i) \where classOf (degree i) c = Slice.restrict (degree i) (lift i) });
+\definition Representatives: \Set := \forall (i: Index) -> Represented i;
+\definition existsRepresentatives: \exists Representatives :=
+  \axiom:classicalIndefiniteChoice(Index, Represented,
+    \fun (i: Index) => Native.At[C := Ordinary.complex, k := degree i].classInduction
+      (\fun (a: H.Group (degree i)) => \exists (c: Cycle (degree i) \where classOf (degree i) c = a))
+      (\fun (c: Cycle (degree i)) => Logic.existsIntro[Cycle (degree i),
+        { z: Cycle (degree i) \where classOf (degree i) z = classOf (degree i) c }] c (\refl(classOf (degree i) c)))
+      (Slice.restrict (degree i) (lift i)));
+\module Given(values: Representatives) {
+  \definition cocycle[i: Index]: Cycle (degree i) := values i;
+  \definition represents[i: Index]: classOf (degree i) (cocycle i) = Slice.restrict (degree i) (lift i) :=
+    \bysub(Cycle (degree i), { c: Cycle (degree i) \where classOf (degree i) c = Slice.restrict (degree i) (lift i) }, values i);
+  \import \root.CohomologyBasis[K := K, ring := ring].For[C := Ordinary.complex, count := count, degrees := degree,
+    cycles := cocycle] \as Graded;
+  \import Lifts.Given[degree := degree, classes := classes] \as GivenLifts;
+  \module Expansion(based: GivenLifts.LiftsBasis);
+  \module Degree(q: N.Nat^) {
+    \import Graded.At[q := q].NativeBasis[] \as Target;
+    \import \parent.\parent.\parent.Basis[q := q] \as Source;
+    \import Lifts.Fiber[x := x].Basis[degree := degree, classes := classes, q := q] \as Original;
+    \import Modules.Free[Generators := Source.Indices] \as Free;
+    \import Free.To[W := H.Group q, target := H.moduleSpace q] \as Extend;
+    \import Modules.Isomorphism[V := Free.Carrier, W := H.Group q, source := Free.space, target := H.moduleSpace q] \as Isos;
+    \import Equality.Transport[A := N.Nat^] \as Reindex;
+    \definition equality: Target.linear = Source.map :=
+      Extend.ext Target.linear Source.map (\fun (i: Source.Indices) => eq_reason_in!{{H.Group q} _
+        "=" _ "by" { Target.onNativeGenerator i }
+        "=" _ "by" { congr!{{H.Group (degree i)} {H.Group q}}
+          (Reindex.cast H.Group (degree i) q (\bysub(Index, { j: Index \where degree j = q }, i))) _ _ (represents i) }
+        "=" _ "by" { sym!{{H.Group q}} _ _ (Extend.onGenerator Source.classAt i) }
+      });
+    \definition basis[h: Original.IsBasis]: Target.IsBasis := \block {
+      \let ith: Isos.Isomorphism := Source.isomorphism h \then
+      \return \idelim Source.map = Target.linear \with f: Modules.MapBetween
+        (Modules.Bundle { Carrier := Free.Carrier, space := Free.space }) (H.bundle q) =>
+        Logic.And[Modules.Isomorphism[V := Free.Carrier, W := H.Group q, source := Free.space, target := H.moduleSpace q]
+          .OfBijective[f := f].Injective,
+          Modules.Isomorphism[V := Free.Carrier, W := H.Group q, source := Free.space, target := H.moduleSpace q]
+          .OfBijective[f := f].Onto] \by {
+        base: Logic.And[_, _] {
+          left := \fun (u, v: Free.Carrier)(same: Source.map.apply u = Source.map.apply v) =>
+            trans!{{Free.Carrier}} _ _ _ (sym!{{Free.Carrier}} _ _ (ith.leftInverse u))
+              (trans!{{Free.Carrier}} _ _ _
+                (congr!{{H.Group q} {Free.Carrier}} ith.backward.apply _ _ same) (ith.leftInverse v)),
+          right := \fun (u: H.Group q) => Logic.existsIntro[Free.Carrier, { v: Free.Carrier \where Source.map.apply v = u }]
+            (ith.backward.apply u) (ith.rightInverse u),
+        },
+        equality: sym!{{Modules.MapBetween (Modules.Bundle { Carrier := Free.Carrier, space := Free.space }) (H.bundle q)}} _ _ equality
+      }
+    };
+  }
+}

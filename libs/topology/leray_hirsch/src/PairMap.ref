@@ -20,3 +20,5 @@
   \definition linear: _ := Induced.induced map;
 }
 \module Cup(p, q: std.Data[].Nat[].Nat^);
+
+\module Forget(n: std.Data[].Nat[].Nat^);

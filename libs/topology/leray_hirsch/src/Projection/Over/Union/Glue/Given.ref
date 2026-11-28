@@ -1,0 +1,16 @@
+\module At(z: I.Int^) {
+  \import Argument.AllDegrees[z := z] \as Algebra;
+  \definition l: _ := LeftTransition.At[z := z].result onLeft;
+  \definition r: _ := RightTransition.At[z := z].result onRight;
+  \definition o: _ := OverlapTransition.At[z := z].result onOverlap;
+  \import Algebra.FromIsomorphisms[l := l, r := r, o := o,
+    lLaw := (\fun (v: Algebra.leftSource.Carrier) => \refl(Algebra.leftFinite.apply v)),
+    rLaw := (\fun (v: Algebra.rightSource.Carrier) => \refl(Algebra.rightFinite.apply v)),
+    oLaw := (\fun (v: Algebra.overlapSource.Carrier) => \refl(Algebra.overlapFinite.apply v))] \as Endpoints;
+  \definition pieces: Algebra.Pieces := Endpoints.pieces;
+}
+\definition pieces[z: I.Int^]: Argument.AllDegrees[z := z].Pieces := At[z := z].pieces;
+\definition result: OriginalWhole.Isomorphisms := OriginalWhole.Isomorphisms {
+  injective := \fun (z: I.Int^) => (Argument.AllDegrees[z := z].fromPieces pieces).injective,
+  onto := \fun (z: I.Int^) => (Argument.AllDegrees[z := z].fromPieces pieces).onto,
+};

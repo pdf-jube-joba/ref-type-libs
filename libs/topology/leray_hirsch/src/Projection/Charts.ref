@@ -12,6 +12,9 @@
   };
   \module Restriction(V: \Pow X, contained: Base.Subset V U, chart: Chart);
   \module Fiber(x: X, belongs: Base.Member U x, chart: Chart);
+  \module Classes(chart: Chart, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], count: std.Data[].Nat[].Nat^,
+    degree: std.Data[].FinSet[].Fin count -> std.Data[].Nat[].Nat^,
+    classes: \forall (i: std.Data[].FinSet[].Fin count) -> singular_products.Cochains[A := E, source := total, R := K, ring := ring].Cohomology[].Group (degree i));
   \module Paired(subset: \Pow X, chart: Chart);
 }
 \definition LocallyTrivial: \Prop := \forall (x: X) ->

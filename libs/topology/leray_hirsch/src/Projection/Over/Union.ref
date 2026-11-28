@@ -26,3 +26,8 @@
 \import \root.Projection[X := Whole.BaseCarrier, E := Whole.TotalCarrier, base := Whole.baseTopology, total := Whole.totalTopology,
   projection := Whole.project, continuous := Whole.regular].Over[U := Whole.basePart, K := K, ring := ring] \as Projection;
 \import Projection.MayerVietoris[cover := cover] \as MayerVietoris;
+
+\module Overlap;
+\import std.Data[].FinSet[] \as Finite;
+\module Glue(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

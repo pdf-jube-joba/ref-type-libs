@@ -83,6 +83,9 @@
 \module WeightedNilpotence(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
   count: std.Data[].Nat[].Nat^, degree: std.Data[].FinSet[].Fin count -> std.Data[].Nat[].Nat^);
 
+\module ForgetPair(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
 \module AbsoluteHomeomorphism(A, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology,
   K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], homeomorphism: topology.Homeomorphism[A := A, B := B].Homeomorphism[source, target]);
 
@@ -95,3 +98,8 @@
   K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
 
 \module ModuleMatrix(R: \Set, ring: std.Alg[].Ring[].CommutativeRing[R], count: std.Data[].Nat[].Nat^);
+
+\module GradedBlocks(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
+  count: std.Data[].Nat[].Nat^, degree: std.Data[].FinSet[].Fin count -> std.Data[].Nat[].Nat^);
+
+\module NestedSubspace(X: \Set, ambient: topology.Topology[Carrier := X].Topology, S, T: \Pow X);

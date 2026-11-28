@@ -1,0 +1,19 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\import singular_products.Cochains[A := X, source := base, R := K, ring := ring].Cohomology[] \as B;
+\import \root.ForgetPair[A := X, source := base, subset := U, K := K, ring := ring] \as From;
+\import \root.ForgetPair[A := Product.CarrierSet, source := External.topology, subset := Relative.leftInverse, K := K, ring := ring] \as To;
+\import \root.PairMap[A := Product.CarrierSet, B := X, source := External.topology, target := base,
+  part := Relative.leftInverse, boundary := U, f := Comparison.pairProjection, K := K, ring := ring].Forget[n := p] \as Pull;
+\import External.Cohomology[p := p, q := q] \as Exterior;
+\import Comparison.Component[p := p, q := q] \as Component;
+\import singular_products.Cochains[A := Product.CarrierSet, source := External.topology, R := K, ring := ring].Cohomology[] \as Groups;
+\import Groups.Cup[p := p, q := q] \as Cup;
+\definition law: \forall (a: Component.Domain)(b: FiberCohomology.Group q) ->
+  (To.map Exterior.total).apply (Component.apply (lift q b) a) = Exterior.apply ((From.map p).apply a) b :=
+  \fun (a: Component.Domain)(b: FiberCohomology.Group q) => trans!{{Groups.Group Exterior.total}} _ _ _
+    (To.Right[p := p, q := q].law ((Comparison.projectionPullback (I.Int^::ofNat p)).apply a) (lift q b))
+    (congr!{{Groups.Group p} {Groups.Group Exterior.total}}
+      (\fun (x: Groups.Group p) => Cup.apply x (lift q b)) _ _ (Pull.law a));
