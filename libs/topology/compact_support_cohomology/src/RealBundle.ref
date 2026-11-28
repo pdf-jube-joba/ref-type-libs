@@ -1,0 +1,12 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+
+\import real.Analysis[] \as Real;
+\import vector_bundles.Bundles[].Real[] \as Scalars;
+\import vector_bundles.Bundles[].Over[K := Real.Real, field := Real.Algebra[].field,
+  conjugation := linear_algebra.Hermitian[].Real[].scalar, scalar := Scalars.scalar] \as Bundles;
+\import Bundles.Family[X := X, F := F] \as Family;
+\import Family.Of[bundle := bundle] \as Original;
+\import thom_spaces.Thom[].Real[].For[X := X, F := F, bundle := bundle] \as Metric;
+\module With(metric: Metric.Metric);

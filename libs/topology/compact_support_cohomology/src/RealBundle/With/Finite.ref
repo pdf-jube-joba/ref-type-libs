@@ -1,0 +1,9 @@
+\import Disk.FiniteBase[complex := complex].Coordinates[coordinateSystem := thom_spaces.Thom[].CWType[].RealCoordinates[].data] \as Geometry;
+\module With(coefficients: Modules.Bundle, z: I.Int^) {
+  \import \parent.\parent.Compare[diskCompact := Geometry.diskCompact, diskHausdorff := Geometry.diskHausdorff]
+    .With[coefficients := coefficients, z := z] \as Comparison;
+  \definition diskSphere: _ := Comparison.diskSphere;
+  \definition thomDisk: _ := Comparison.thomDisk;
+  \definition diskSphereTotal: _ := Comparison.diskSphereTotal;
+  \definition thomTotal: _ := Comparison.thomTotal;
+}

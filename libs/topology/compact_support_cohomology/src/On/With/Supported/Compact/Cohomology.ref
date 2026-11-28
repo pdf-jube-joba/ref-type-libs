@@ -1,0 +1,7 @@
+\import \parent.\parent.Comparison[z := z] \as SupportedLimit;
+\import \parent.\parent.\parent.Degree[z := z] \as Limit;
+\import Iso.On[e := complexIsomorphism].At[z := z] \as ToWhole;
+\import Modules.Isomorphism[V := Limit.Cohomology, W := SupportedLimit.Group,
+  source := Limit.Module[].moduleSpace, target := SupportedLimit.cohomologySpace]
+  .Composition[U := Whole.cohomology z, final := Whole.cohomologySpace z] \as Compose;
+\definition isomorphism: _ := Compose.compose ToWhole.isomorphism SupportedLimit.isomorphism;

@@ -25,6 +25,9 @@ The construction uses all compact subsets and applies in particular to locally c
 | `External.Degree` | External product with a representative formula at the product of the supports |
 | `Homeomorphic.With.Isomorphism` | Mutually inverse proper pullbacks along a homeomorphism and its inverse |
 | `On.Collar.With.Linear` | Compact-support comparison of an open complement with the cohomology of a compact pair admitting a collar deformation |
+| `On.Collar.With.LongExact` | Long exact sequence of a compact collared pair with all terms written in compact-support cohomology |
+| `On.With.Supported.Compact.Cohomology` | Comparison with ordinary cohomology on a compact space |
+| `RealBundle.With.Finite.With` | Disk/sphere-relative, reduced Thom-space, and total-space compact-support comparisons for a real vector bundle over a finite CW complex |
 | `On.Exact.Between.With` | Exactness after taking direct limits of stagewise exact pairs |
 
 For \(K\subseteq L\), the transition is pullback along the identity map of pairs from
@@ -35,7 +38,8 @@ compose to pullback by the same map of pairs.
 
 For an open subspace of a Hausdorff space, extension by zero sends a class at
 a compact support in the subspace to the inverse excision class at its image
-in the ambient space. Both proper pullback and extension by zero expose linear maps through their `Linear` modules. The fixed-support comparison uses the complement of
+in the ambient space. Their `Linear` modules expose the induced module maps.
+The fixed-support comparison uses the complement of
 the open subspace as the excised closed set. Naturality of restriction under
 support enlargement also gives naturality of the inverse excision maps.
 
@@ -55,6 +59,13 @@ points in the compact cylinder that pass through that support. At the enlarged
 support the collar motion is a relative homotopy, which proves the inverse law
 on the direct limit. Exactness of stagewise sequences passes to the direct
 limit by lifting a class from a stage where its image vanishes.
+
+The collared-pair sequence transports the singular pair exact sequence
+through the open-complement comparison and the ordinary-cohomology
+comparisons on the compact ambient space and its closed boundary. The
+bundle comparison combines the radial homeomorphism from the total space
+to the open disk bundle with the C03 shell deformation and the reduced
+Thom-space comparison.
 
 Run the package check from the repository root.
 

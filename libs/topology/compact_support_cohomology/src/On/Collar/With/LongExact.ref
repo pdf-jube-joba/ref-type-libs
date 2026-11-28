@@ -1,0 +1,74 @@
+\import chain_complexes.Integer[] \as Degrees;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Complexes;
+\definition next: I.Int^ := Degrees.next z;
+\import \parent.\parent.With[coefficients := coefficients, z := next] \as Next;
+\import \parent.\parent.\parent.With[coefficients := coefficients] \as Ambient;
+\import Top.Subspace[S := boundary] \as Subspace;
+\import \root.On[A := Subspace.CarrierSet, space := Subspace.topology space] \as Boundary;
+\definition boundaryCompact: topology.Topology[Carrier := Subspace.CarrierSet].IsCompact (Subspace.topology space) :=
+  Subspace.Properties[].compact space (Compactness.closedCompact space compactSpace boundary closed);
+\import Boundary.With[coefficients := coefficients] \as BoundaryTheory;
+\import Relative.With[coefficients := coefficients] \as RelativeTheory;
+\import RelativeTheory.PairSequence[] \as Pair;
+\import Pair.LongExact[z := z] \as Native;
+\import singular_cohomology.Cochains[A := A, source := space].With[coefficients := coefficients].Integer[] \as Ordinary;
+\import singular_cohomology.Cochains[A := Subspace.CarrierSet, source := Subspace.topology space].With[coefficients := coefficients].Integer[] \as BoundaryOrdinary;
+\import Complexes.Map[C := RelativeTheory.complex, D := Ordinary.complex] \as Inclusion;
+\import Complexes.Map[C := Ordinary.complex, D := BoundaryOrdinary.complex] \as Restriction;
+\definition forget: _ := Inclusion.At[k := z].induced Pair.inclusion;
+\definition restrict: _ := Restriction.At[k := z].induced Pair.restriction;
+\definition forgetNext: _ := Inclusion.At[k := next].induced Pair.inclusion;
+\definition relative: Modules.Bundle := Modules.Bundle { Carrier := Group, space := RelativeDegree.space };
+\definition ambient: Modules.Bundle := Modules.Bundle { Carrier := Ordinary.cohomology z, space := Ordinary.cohomologySpace z };
+\definition unshifted: Modules.Bundle := Modules.Bundle { Carrier := BoundaryOrdinary.cohomology z, space := BoundaryOrdinary.cohomologySpace z };
+\definition relativeNext: Modules.Bundle := Modules.Bundle { Carrier := Next.Group, space := RelativeTheory.At[z := next].space };
+\definition ambientNext: Modules.Bundle := Modules.Bundle { Carrier := Ordinary.cohomology next, space := Ordinary.cohomologySpace next };
+
+\import Ambient.Degree[z := next] \as NextAmbientDegree;
+\import Interior.With[coefficients := coefficients].Degree[z := next] \as NextInteriorDegree;
+\import BoundaryTheory.Degree[z := z] \as BoundaryDegree;
+\definition compactInterior: Modules.Bundle := Modules.Bundle { Carrier := InteriorDegree.Cohomology, space := InteriorDegree.Module[].moduleSpace };
+\definition compactAmbient: Modules.Bundle := Modules.Bundle { Carrier := AmbientDegree.Cohomology, space := AmbientDegree.Module[].moduleSpace };
+\definition compactBoundary: Modules.Bundle := Modules.Bundle { Carrier := BoundaryDegree.Cohomology, space := BoundaryDegree.Module[].moduleSpace };
+\definition compactInteriorNext: Modules.Bundle := Modules.Bundle { Carrier := NextInteriorDegree.Cohomology, space := NextInteriorDegree.Module[].moduleSpace };
+\definition compactAmbientNext: Modules.Bundle := Modules.Bundle { Carrier := NextAmbientDegree.Cohomology, space := NextAmbientDegree.Module[].moduleSpace };
+\import Ambient.Supported[].Compact[compactSpace := compactSpace] \as CompactAmbient;
+\import BoundaryTheory.Supported[].Compact[compactSpace := boundaryCompact] \as CompactBoundary;
+
+\import Modules.Isomorphism[V := compactInterior.Carrier, W := relative.Carrier, source := compactInterior.space, target := relative.space].Inverse[] \as InvertInterior;
+\import Modules.Isomorphism[V := compactAmbient.Carrier, W := ambient.Carrier, source := compactAmbient.space, target := ambient.space].Inverse[] \as InvertAmbient;
+\import Modules.Isomorphism[V := compactBoundary.Carrier, W := unshifted.Carrier, source := compactBoundary.space, target := unshifted.space].Inverse[] \as InvertBoundary;
+\import Modules.Isomorphism[V := compactInteriorNext.Carrier, W := relativeNext.Carrier, source := compactInteriorNext.space, target := relativeNext.space].Inverse[] \as InvertInteriorNext;
+\import Modules.Isomorphism[V := compactAmbientNext.Carrier, W := ambientNext.Carrier, source := compactAmbientNext.space, target := ambientNext.space].Inverse[] \as InvertAmbientNext;
+
+\definition fromRelative: _ := InvertInterior.inverse \parent.Linear[].isomorphism;
+\definition fromOrdinary: _ := InvertAmbient.inverse CompactAmbient.Cohomology[z := z].isomorphism;
+\definition fromBoundary: _ := InvertBoundary.inverse CompactBoundary.Cohomology[z := z].isomorphism;
+\definition fromRelativeNext: _ := InvertInteriorNext.inverse Next.Linear[].isomorphism;
+\definition fromOrdinaryNext: _ := InvertAmbientNext.inverse CompactAmbient.Cohomology[z := next].isomorphism;
+
+\import Modules.ExactPair[A := relative, B := ambient, C := unshifted] \as Left;
+\definition left: Left.Sequence := Left.Sequence {
+  first := forget, last := restrict, zero := Native.inclusionProjectionZero, kernelImage := Native.exactAtSpace,
+};
+\import Modules.ExactPair[A := ambient, B := unshifted, C := relativeNext] \as Middle;
+\definition middle: Middle.Sequence := Middle.Sequence {
+  first := restrict, last := Native.connecting, zero := Native.projectionConnectingZero, kernelImage := Native.exactAtSubspace,
+};
+\import Modules.ExactPair[A := unshifted, B := relativeNext, C := ambientNext] \as Right;
+\definition right: Right.Sequence := Right.Sequence {
+  first := Native.connecting, last := forgetNext, zero := Native.connectingInclusionZero, kernelImage := Native.exactAtRelative,
+};
+\import Left.Reindex[A1 := compactInterior, B1 := compactAmbient, C1 := compactBoundary, sequence := left,
+  a := fromRelative, b := fromOrdinary, c := fromBoundary] \as LeftExact;
+\import Middle.Reindex[A1 := compactAmbient, B1 := compactBoundary, C1 := compactInteriorNext, sequence := middle,
+  a := fromOrdinary, b := fromBoundary, c := fromRelativeNext] \as MiddleExact;
+\import Right.Reindex[A1 := compactBoundary, B1 := compactInteriorNext, C1 := compactAmbientNext, sequence := right,
+  a := fromBoundary, b := fromRelativeNext, c := fromOrdinaryNext] \as RightExact;
+\definition extension: _ := LeftExact.first;
+\definition restriction: _ := LeftExact.last;
+\definition connecting: _ := MiddleExact.last;
+\definition nextExtension: _ := RightExact.last;
+\definition exactAtAmbient: _ := LeftExact.transported;
+\definition exactAtBoundary: _ := MiddleExact.transported;
+\definition exactAtInteriorNext: _ := RightExact.transported;

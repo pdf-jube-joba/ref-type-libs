@@ -28,3 +28,4 @@
   InteriorDegree.ofSupport baseSupport (Extension.AtSupport[K := baseSupport].restrict (atBase x));
 \module Inverses;
 \module Linear;
+\module LongExact;

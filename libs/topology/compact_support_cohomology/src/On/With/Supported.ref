@@ -39,3 +39,4 @@
 \module CompareSupport(K: Support);
 \module Comparison(z: I.Int^);
 \module Vanishing(z: I.Int^);
+\module Compact(compactSpace: Top.IsCompact space);
