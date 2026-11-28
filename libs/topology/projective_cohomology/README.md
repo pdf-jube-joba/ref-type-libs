@@ -8,6 +8,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Real.Schubert` and `Complex.Schubert` | Finite CW models with one cell per pivot and explicit cell bounds |
 | `Real.Inclusion` and `Complex.Inclusion` | Ambient inclusions preserve and reflect the Schubert filtration |
 | `Real.Inclusion.Bundle.Total.Naturality` | The real dimension inclusions pull back the fiber-normalized Thom class, the mod-2 Euler class, and each of its powers |
+| `Complex.Inclusion.Bundle.Total.Naturality` | The complex dimension inclusions pull back the signed Thom class, the integral Euler class, and every power |
 | `Cellular.With` | Cellular-to-singular chain equivalence, the resulting cohomology comparison, and cup products via a transferred diagonal |
 | `CanonicalLine.Hopf` | The unit sphere bundle is homeomorphic to the ambient unit sphere over the line-projection map |
 | `Real.CanonicalLine.Hopf.Standard` | Comparison with the standard real sphere and its intermediate-degree cohomology vanishing |

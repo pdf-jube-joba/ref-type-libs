@@ -1,0 +1,34 @@
+\import Circle.Coordinates[] \as CircleCoordinates;
+\import Circle.Translations[] \as Rotations;
+\import algebraic_topology.PathComponent[A := Circle.Carrier, source := Circle.topology] \as Paths;
+\import algebraic_topology.Homotopy[A := CircleCoordinates.Sphere, B := CircleCoordinates.Sphere] \as CircleHomotopies;
+\import algebraic_topology.Homotopy[A := Left.SubspaceCarrier, B := CircleCoordinates.Sphere] \as SphereHomotopies;
+\import algebraic_topology.Homotopy[A := Left.SubspaceCarrier, B := Model.SubspaceCarrier] \as Homotopies;
+\definition turned[v: Left.SubspaceCarrier]: CircleCoordinates.Sphere := Rotations.apply Phase.unit (SourceFiber.direction v);
+\definition directionLaw[v: Left.SubspaceCarrier]: TargetFiber.direction (targetBoundary v) = turned v :=
+  trans!{{CircleCoordinates.Sphere}} _ _ _ (sym!{{CircleCoordinates.Sphere}} _ _ (CircleCoordinates.leftInverse (TargetFiber.direction (targetBoundary v))))
+    (congr!{{Circle.Carrier} {CircleCoordinates.Sphere}} CircleCoordinates.backward _ _ (boundaryRotation v));
+\definition start[v: Left.SubspaceCarrier]: Model.SubspaceCarrier := PlaneDisk.boundaryPoint (SourceFiber.direction v);
+\definition end[v: Left.SubspaceCarrier]: Model.SubspaceCarrier := PlaneDisk.boundaryPoint (turned v);
+\definition endLaw[v: Left.SubspaceCarrier]: end v = CombinedMap.restriction v :=
+  congr!{{CircleCoordinates.Sphere} {Model.SubspaceCarrier}} PlaneDisk.boundaryPoint _ _
+    (sym!{{CircleCoordinates.Sphere}} _ _ (directionLaw v));
+\definition homotopic: Homotopies.Homotopic[SourceFiber.boundaryTopology, PlaneDisk.boundaryTopology, SourceMap.restriction, CombinedMap.restriction] := \block {
+  \takefrom path: Paths.Path Circle.identity Phase.unit \by Rotations.connected Circle.identity Phase.unit \then
+  \let onSphere: SphereHomotopies.Homotopy[SourceFiber.boundaryTopology, CircleCoordinates.sphereTopology, SourceFiber.direction, turned] :=
+    CircleHomotopies.Composition[C := Left.SubspaceCarrier].precompose
+      SourceFiber.boundaryTopology CircleCoordinates.sphereTopology CircleCoordinates.sphereTopology (\fun (v: CircleCoordinates.Sphere) => v)
+      (Rotations.apply Phase.unit) (Rotations.homotopy Phase.unit path) SourceFiber.direction SourceFiber.directionContinuous \then
+  \let h: Homotopies.Homotopy[SourceFiber.boundaryTopology, PlaneDisk.boundaryTopology, start, end] :=
+    SphereHomotopies.Composition[C := Model.SubspaceCarrier].postcompose SourceFiber.boundaryTopology CircleCoordinates.sphereTopology PlaneDisk.boundaryTopology
+      SourceFiber.direction turned onSphere PlaneDisk.boundaryPoint PlaneDisk.boundaryPointContinuous \then
+  \let laws: Homotopies.Laws[SourceFiber.boundaryTopology, PlaneDisk.boundaryTopology, start, end, h] :=
+    Homotopies.laws SourceFiber.boundaryTopology PlaneDisk.boundaryTopology start end h \then
+  \return \exact(\into[Homotopies.Family](h, Homotopies.Homotopy[SourceFiber.boundaryTopology, PlaneDisk.boundaryTopology, SourceMap.restriction, CombinedMap.restriction]) \by {
+    Homotopies.Laws[SourceFiber.boundaryTopology, PlaneDisk.boundaryTopology, SourceMap.restriction, CombinedMap.restriction, h] {
+      continuous := laws.continuous,
+      start := laws.start,
+      end := \fun (v: Left.SubspaceCarrier) => trans!{{Model.SubspaceCarrier}} _ _ _ (laws.end v) (endLaw v)
+    }
+  }, Homotopies.Homotopy[SourceFiber.boundaryTopology, PlaneDisk.boundaryTopology, SourceMap.restriction, CombinedMap.restriction])
+};

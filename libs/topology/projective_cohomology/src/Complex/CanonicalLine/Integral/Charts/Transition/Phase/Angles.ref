@@ -1,0 +1,41 @@
+\definition scaleNonzero: Logic.Not (s = R.zero) :=
+  \fun (zero: _) => R.Algebra[].field.nontrivial (eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (Laws.fieldMulZeroLeft R.zero) }
+    "=" _ "by" { sym!{R.Real} _ _ (realNorm R.zero) }
+    "=" _ "by" { congr!{Scalar R.Real} ComplexArithmetic.normSq _ _ (sym!{Scalar} _ _
+      (eq_reason_in!{Scalar _
+        "=" _ "by" { first }
+        "=" _ "by" { congr!{R.Real Scalar} (\fun (r: R.Real) => ComplexArithmetic.mul (ComplexArithmetic.ofReal r) raw) _ _ zero }
+        "=" _ "by" { Arithmetic.mulZeroLeft raw }
+      })) }
+    "=" _ "by" { Circle.norm u }
+  });
+\definition positiveScale: D.Lt R.zero s := D.Order[].ltOfLeNotEq R.zero s sNonnegative
+  (\fun (same: _) => scaleNonzero (sym!{R.Real} _ _ same));
+\definition inverse: R.Real := Laws.fieldInv s;
+\definition ratio: R.Real := R.mul t inverse;
+\definition ratioNonnegative: D.Le R.zero ratio := Laws.fieldMulNonnegative t inverse tNonnegative
+  (D.Order[].leOfLt R.zero inverse (R.Estimates[].Product[].invPositive s positiveScale));
+\definition recoverRaw: raw = ComplexArithmetic.mul (ComplexArithmetic.ofReal inverse) u :=
+  sym!{Scalar} _ _ (eq_reason_in!{Scalar _
+    "=" _ "by" { congr!{Scalar Scalar} (ComplexArithmetic.mul (ComplexArithmetic.ofReal inverse)) _ _ first }
+    "=" _ "by" { sym!{Scalar} _ _ (Arithmetic.mulAssoc (ComplexArithmetic.ofReal inverse) (ComplexArithmetic.ofReal s) raw) }
+    "=" _ "by" { congr!{Scalar Scalar} (\fun (a: Scalar) => ComplexArithmetic.mul a raw) _ _ (Arithmetic.ofRealMul inverse s) }
+    "=" _ "by" { congr!{R.Real Scalar} (\fun (a: R.Real) => ComplexArithmetic.mul (ComplexArithmetic.ofReal a) raw) _ _
+      (Laws.fieldInverseNonzero s scaleNonzero) }
+    "=" _ "by" { Arithmetic.mulOneLeft raw }
+  });
+\definition rotation: v = Circle.multiply unit u := action u v ratio ratioNonnegative
+  (eq_reason_in!{Scalar _
+    "=" _ "by" { second }
+    "=" _ "by" { congr!{Scalar Scalar} (\fun (a: Scalar) => ComplexArithmetic.mul (ComplexArithmetic.ofReal t) (ComplexArithmetic.mul coefficient a)) _ _ recoverRaw }
+    "=" _ "by" { congr!{Scalar Scalar} (ComplexArithmetic.mul (ComplexArithmetic.ofReal t)) _ _
+      (sym!{Scalar} _ _ (Arithmetic.mulAssoc coefficient (ComplexArithmetic.ofReal inverse) u)) }
+    "=" _ "by" { congr!{Scalar Scalar} (\fun (a: Scalar) => ComplexArithmetic.mul (ComplexArithmetic.ofReal t) (ComplexArithmetic.mul a u)) _ _
+      (Arithmetic.mulComm coefficient (ComplexArithmetic.ofReal inverse)) }
+    "=" _ "by" { congr!{Scalar Scalar} (ComplexArithmetic.mul (ComplexArithmetic.ofReal t)) _ _
+      (Arithmetic.mulAssoc (ComplexArithmetic.ofReal inverse) coefficient u) }
+    "=" _ "by" { sym!{Scalar} _ _ (Arithmetic.mulAssoc (ComplexArithmetic.ofReal t) (ComplexArithmetic.ofReal inverse) (ComplexArithmetic.mul coefficient u)) }
+    "=" _ "by" { congr!{Scalar Scalar} (\fun (a: Scalar) => ComplexArithmetic.mul a (ComplexArithmetic.mul coefficient u)) _ _
+      (Arithmetic.ofRealMul t inverse) }
+  });

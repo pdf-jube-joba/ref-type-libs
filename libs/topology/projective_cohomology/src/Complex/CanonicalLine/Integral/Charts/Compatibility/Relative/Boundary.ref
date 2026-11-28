@@ -32,27 +32,3 @@
     }
   }, Homotopies.Homotopy[Old.boundaryTopology, PlaneDisk.boundaryTopology, OldMap.restriction, NewMap.restriction])
 };
-\import singular_cohomology.Homotopy[A := Source.SubspaceCarrier, B := Target.SubspaceCarrier,
-  source := Old.boundaryTopology, target := PlaneDisk.boundaryTopology].Coefficients[M := Product.integerCoefficients] \as HomotopyPull;
-\import singular_cohomology.Maps[A := Source.SubspaceCarrier, B := Target.SubspaceCarrier, source := Old.boundaryTopology, target := PlaneDisk.boundaryTopology]
-  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients] \as BoundaryPull;
-\import Abelian.End[V := I.Int^, space := Product.integerCoefficients.space] \as Coefficients;
-\import BoundaryPull.Integer[f := OldMap.restriction, continuous := OldMap.restrictionContinuous, coefficientMap := Coefficients.identity].At[n := Degrees.one] \as OldSigned;
-\import BoundaryPull.Integer[f := NewMap.restriction, continuous := NewMap.restrictionContinuous, coefficientMap := Coefficients.identity].At[n := Degrees.one] \as NewSigned;
-\import singular_cohomology.Cochains[A := Target.SubspaceCarrier, source := PlaneDisk.boundaryTopology].With[coefficients := Product.integerCoefficients].Integer[] \as TargetBoundary;
-\import singular_cohomology.Cochains[A := Source.SubspaceCarrier, source := Old.boundaryTopology].With[coefficients := Product.integerCoefficients] \as NativeBoundary;
-\definition pullLaw[u: TargetBoundary.cohomology degreeOne]: OldSigned.induced.apply u = NewSigned.induced.apply u := \block {
-  \takefrom h: Homotopies.Homotopy[Old.boundaryTopology, PlaneDisk.boundaryTopology, OldMap.restriction, NewMap.restriction] \by homotopic \then
-  \return eq_reason_in!{{SourceBoundary.cohomology degreeOne} _
-    "=" _ "by" { sym!{{SourceBoundary.cohomology degreeOne}} _ _ (OldSigned.targetComparison.leftInverse (OldSigned.induced.apply u)) }
-    "=" _ "by" { congr!{{NativeBoundary.cohomology Degrees.one} {SourceBoundary.cohomology degreeOne}}
-      OldSigned.targetComparison.backward.apply _ _ (OldSigned.law u) }
-    "=" _ "by" { congr!{{NativeBoundary.cohomology Degrees.one} {SourceBoundary.cohomology degreeOne}}
-      OldSigned.targetComparison.backward.apply _ _
-        (sym!{{NativeBoundary.cohomology Degrees.one}} _ _
-          (HomotopyPull.onCohomology OldMap.restriction NewMap.restriction h Degrees.one (OldSigned.sourceComparison.forward.apply u))) }
-    "=" _ "by" { congr!{{NativeBoundary.cohomology Degrees.one} {SourceBoundary.cohomology degreeOne}}
-      OldSigned.targetComparison.backward.apply _ _ (sym!{{NativeBoundary.cohomology Degrees.one}} _ _ (NewSigned.law u)) }
-    "=" _ "by" { NewSigned.targetComparison.leftInverse (NewSigned.induced.apply u) }
-  }
-};

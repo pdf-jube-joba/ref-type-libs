@@ -1,0 +1,65 @@
+\import Source.Integral[].Canonical[] \as OldClass;
+\import TargetLine.Integral[].Canonical[] \as NewClass;
+\import cohomology_thom.RelativePullback[].On[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary, R := I.Int^, ring := Integers.commutativeRing]
+  .To[B := TargetDisk.DiskBundle, target := TargetDisk.diskTopology, part := TargetDisk.Boundary].Along[f := pairMap].Degree[n := Degrees.two] \as Pull;
+\definition normalized: OldClass.Normalized (Pull.map.apply NewClass.thomClass) :=
+  \fun (x: Space) => \parent.Fiber[x := x].Naturality[].normalized;
+\definition classLaw: Pull.map.apply NewClass.thomClass = OldClass.thomClass :=
+  OldClass.unique (\into[OldRelative.Class](Pull.map.apply NewClass.thomClass, OldClass.normalizedClasses) \by { normalized }) OldClass.thomClass;
+\import OldProduct.Cohomology[] \as H;
+\import NewProduct.Cohomology[] \as TargetH;
+\import H.Pullback[B := Target.Space, target := Target.topology] \as BasePull;
+\import singular_products.Cochains[A := Disk.DiskBundle, source := Disk.diskTopology, R := I.Int^, ring := Integers.commutativeRing].Cohomology[] \as DiskH;
+\import H.Pullback[B := Disk.DiskBundle, target := Disk.diskTopology] \as Section;
+\import singular_cap.CochainPair[A := TargetDisk.DiskBundle, source := TargetDisk.diskTopology, subset := TargetDisk.Boundary,
+  R := I.Int^, ring := Integers.commutativeRing].Comparison[n := Degrees.two].Cohomology[] \as Forget;
+\import singular_cohomology.Maps[A := Space, B := Disk.DiskBundle, source := topology, target := Disk.diskTopology]
+  .Composition[C := TargetDisk.DiskBundle, final := TargetDisk.diskTopology].Coefficients[M := OldProduct.integerCoefficients] \as First;
+\import singular_cohomology.Maps[A := Space, B := Target.Space, source := topology, target := Target.topology]
+  .Composition[C := TargetDisk.DiskBundle, final := TargetDisk.diskTopology].Coefficients[M := OldProduct.integerCoefficients] \as Second;
+\import singular_products.Cochains[A := TargetDisk.DiskBundle, source := TargetDisk.diskTopology, R := I.Int^, ring := Integers.commutativeRing].Cohomology[] \as TargetDiskH;
+\import H.Pullback[B := TargetDisk.DiskBundle, target := TargetDisk.diskTopology] \as Direct;
+\import topology.Continuity[A := Space, B := TargetDisk.DiskBundle] \as Regular;
+\definition Continuous[f: Space -> TargetDisk.DiskBundle]: \Prop := Regular.Continuous topology TargetDisk.diskTopology f;
+\definition equalPullback[f, g: Space -> TargetDisk.DiskBundle][fc: Continuous f][gc: Continuous g][a: TargetDiskH.Group Degrees.two]:
+  f = g -> Direct.apply Degrees.two f fc a = Direct.apply Degrees.two g gc a :=
+  \fun (same: f = g) => (\idelim f = g \with h: (Space -> TargetDisk.DiskBundle) =>
+    \forall (hc: Continuous h) -> Direct.apply Degrees.two f fc a = Direct.apply Degrees.two h hc a \by {
+      base: \fun (hc: Continuous f) => \refl(Direct.apply Degrees.two f fc a), equality: same
+    }) gc;
+\definition eulerPull[u: NewRelative.Class]: OldRelative.euler (Pull.map.apply u) = BasePull.apply Degrees.two map continuous (NewRelative.euler u) :=
+  trans!{{H.Group Degrees.two}} _ _ _
+    (congr!{{DiskH.Group Degrees.two} {H.Group Degrees.two}} (Section.apply Degrees.two Disk.zeroSection Disk.zeroSectionContinuous) _ _ (Pull.Forget[].law u))
+    (trans!{{H.Group Degrees.two}} _ _ _
+      (sym!{{H.Group Degrees.two}} _ _ (First.onCohomology Disk.zeroSection Disk.zeroSectionContinuous diskMap diskContinuous Degrees.two (Forget.map.apply u)))
+      (trans!{{H.Group Degrees.two}} _ _ _
+        (equalPullback _ _
+          (topology.Composition[A := Space, B := Disk.DiskBundle, C := TargetDisk.DiskBundle].composeContinuous
+            topology Disk.diskTopology TargetDisk.diskTopology Disk.zeroSection diskMap Disk.zeroSectionContinuous diskContinuous)
+          (topology.Composition[A := Space, B := Target.Space, C := TargetDisk.DiskBundle].composeContinuous
+            topology Target.topology TargetDisk.diskTopology map TargetDisk.zeroSection continuous TargetDisk.zeroSectionContinuous)
+          (Forget.map.apply u) (\axiom:funext((\fun (x: Space) => diskMap (Disk.zeroSection x)), (\fun (x: Space) => TargetDisk.zeroSection (map x)), section)))
+        (Second.onCohomology map continuous TargetDisk.zeroSection TargetDisk.zeroSectionContinuous Degrees.two (Forget.map.apply u))));
+\definition generatorLaw: BasePull.apply Degrees.two map continuous NewClass.generator = OldClass.generator :=
+  trans!{{H.Group Degrees.two}} _ _ _ (sym!{{H.Group Degrees.two}} _ _ (eulerPull NewClass.thomClass))
+    (congr!{{OldRelative.Class} {H.Group Degrees.two}} OldRelative.euler _ _ classLaw);
+\import Equality.Transport[A := N.Nat^] \as DegreeCast;
+\definition d[k: N.Nat^]: N.Nat^ := Degrees.double k;
+\definition next[k: N.Nat^]: N.Nat^ := N.Nat^::succ (N.Nat^::succ (d k));
+\definition grade[k: N.Nat^]: next k = d (N.Nat^::succ k) := sym!{N.Nat^} _ _ (Degrees.doubleSucc k);
+\definition powerLaw: \forall (k: N.Nat^) -> BasePull.apply (d k) map continuous (NewClass.power k) = OldClass.power k :=
+  \induction (k: N.Nat^) \return BasePull.apply (d k) map continuous (NewClass.power k) = OldClass.power k \with {
+    | zero: BasePull.Unit[].law map continuous
+    | succ: \fun (k: N.Nat^)(previous: _) =>
+      trans!{{H.Group (d (N.Nat^::succ k))}} _ _ _
+        (sym!{{H.Group (d (N.Nat^::succ k))}} _ _ (DegreeCast.natural TargetH.Group H.Group
+          (\fun (n: N.Nat^)(a: TargetH.Group n) => BasePull.apply n map continuous a)
+          (next k) (d (N.Nat^::succ k)) (grade k)
+          (TargetH.Cup[p := d k, q := Degrees.two].apply (NewClass.power k) NewClass.generator)))
+        (congr!{{H.Group (next k)} {H.Group (d (N.Nat^::succ k))}}
+          (DegreeCast.cast H.Group (next k) (d (N.Nat^::succ k)) (grade k)) _ _
+          (trans!{{H.Group (next k)}} _ _ _
+            (BasePull.Cup[p := d k, q := Degrees.two].law map continuous (NewClass.power k) NewClass.generator)
+            (congr!{{H.Group (d k)} {H.Group Degrees.two} {H.Group (next k)}}
+              H.Cup[p := d k, q := Degrees.two].apply _ _ _ _ previous generatorLaw)))
+  };

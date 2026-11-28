@@ -11,33 +11,16 @@
 \definition newMap: PairMaps.Map := PairHomeomorphisms.forwardMap NewChart.fiberPair;
 \import PairMaps.On[f := oldMap] \as OldMap;
 \import PairMaps.On[f := newMap] \as NewMap;
-\definition degreeOne: I.Int^ := I.Int^::ofNat Degrees.one;
+\import PlaneDisk.Comparison[A := Actual.Carrier, source := Actual.topology, subset := Actual.boundary, f := oldMap, g := newMap] \as Comparison;
 \definition degreeTwo: I.Int^ := I.Int^::ofNat Degrees.two;
 \import Source.With[coefficients := Product.integerCoefficients] \as SourceGroups;
 \import Target.With[coefficients := Product.integerCoefficients] \as TargetGroups;
-\import SourceGroups.PairSequence[].LongExact[z := degreeOne] \as SourceSequence;
-\import TargetGroups.PairSequence[].LongExact[z := degreeOne] \as TargetSequence;
 \import OldMap.Integer[].With[coefficients := Product.integerCoefficients] \as OldPull;
 \import NewMap.Integer[].With[coefficients := Product.integerCoefficients] \as NewPull;
-\import singular_cohomology.Cochains[A := Source.SubspaceCarrier, source := Old.boundaryTopology].With[coefficients := Product.integerCoefficients].Integer[] \as SourceBoundary;
 \module Boundary;
-\import singular_cohomology.Cochains[A := Target.SubspaceCarrier, source := PlaneDisk.boundaryTopology].With[coefficients := Product.integerCoefficients].Integer[] \as DomainBoundary;
 \definition samePull[u: TargetGroups.At[z := degreeTwo].Carrier]:
-  OldPull.At[z := degreeTwo].induced.apply u = NewPull.At[z := degreeTwo].induced.apply u := \block {
-    \takefrom b: \Cast[DomainBoundary.cohomology degreeOne] ({ b: DomainBoundary.cohomology degreeOne \where TargetSequence.connecting.apply b = u })
-      \by PlaneDisk.connectingOnto u \then
-    \let lift: TargetSequence.connecting.apply b = u := \bysub(DomainBoundary.cohomology degreeOne, { v: DomainBoundary.cohomology degreeOne \where TargetSequence.connecting.apply v = u }, b) \then
-    \return eq_reason_in!{{SourceGroups.At[z := degreeTwo].Carrier} _
-      "=" _ "by" { congr!{{TargetGroups.At[z := degreeTwo].Carrier} {SourceGroups.At[z := degreeTwo].Carrier}}
-        OldPull.At[z := degreeTwo].induced.apply _ _ (sym!{{TargetGroups.At[z := degreeTwo].Carrier}} _ _ lift) }
-      "=" _ "by" { sym!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ (OldPull.Naturality[].At[z := degreeOne].connectingNaturality b) }
-      "=" _ "by" { congr!{{SourceBoundary.cohomology degreeOne} {SourceGroups.At[z := degreeTwo].Carrier}}
-        SourceSequence.connecting.apply _ _ (Boundary[].pullLaw b) }
-      "=" _ "by" { NewPull.Naturality[].At[z := degreeOne].connectingNaturality b }
-      "=" _ "by" { congr!{{TargetGroups.At[z := degreeTwo].Carrier} {SourceGroups.At[z := degreeTwo].Carrier}}
-        NewPull.At[z := degreeTwo].induced.apply _ _ lift }
-    }
-  };
+  OldPull.At[z := degreeTwo].induced.apply u = NewPull.At[z := degreeTwo].induced.apply u :=
+  Comparison.samePull Boundary[].homotopic u;
 \import cohomology_thom.LocalDisk[].Point[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as Model;
 \definition classLaw: First.fiberClass p = Second.fiberClass q :=
   trans!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ _ Old.comparison

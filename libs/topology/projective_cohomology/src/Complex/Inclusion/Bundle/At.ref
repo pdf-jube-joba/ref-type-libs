@@ -1,0 +1,18 @@
+\import linear_algebra.Commutative[K := Numbers.Complex,
+  scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Numbers.Complex Numbers.Algebra[].field] \as Linear;
+\import Linear.Linear[V := Line x, W := Target.Line (map x), source := lineBundle.space x, target := Target.lineBundle.space (map x)] \as Forward;
+\import Linear.Linear[V := Target.Line (map x), W := Line x, source := Target.lineBundle.space (map x), target := lineBundle.space x] \as Backward;
+\definition forward: Forward.Map := Forward.Map {
+  apply := image x,
+  preservesAdd := \fun (v, w: Line x) => Blocks.inclusion.preservesAdd v w,
+  preservesScale := \fun (a: Numbers.Complex)(v: Line x) => Blocks.inclusion.preservesScale a v
+};
+\definition backward: Backward.Map := Backward.Map {
+  apply := preimage x,
+  preservesAdd := \fun (v, w: Target.Line (map x)) => Blocks.leftMap.preservesAdd v w,
+  preservesScale := \fun (a: Numbers.Complex)(v: Target.Line (map x)) => Blocks.leftMap.preservesScale a v
+};
+\import Linear.Isomorphism[V := Line x, W := Target.Line (map x), source := lineBundle.space x, target := Target.lineBundle.space (map x)] \as Iso;
+\definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+  forward := forward, backward := backward, leftInverse := leftInverse x, rightInverse := rightInverse x
+};

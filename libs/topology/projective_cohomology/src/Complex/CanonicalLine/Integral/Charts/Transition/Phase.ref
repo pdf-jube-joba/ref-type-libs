@@ -69,3 +69,7 @@
       "=" _ "by" { Arithmetic.mulOneLeft (Circle.multiply unit u) }
     }
   };
+\module Angles(u, v: Circle.Carrier, raw: Scalar, s, t: R.Real,
+  sNonnegative: D.Le R.zero s, tNonnegative: D.Le R.zero t,
+  first: u = ComplexArithmetic.mul (ComplexArithmetic.ofReal s) raw,
+  second: v = ComplexArithmetic.mul (ComplexArithmetic.ofReal t) (ComplexArithmetic.mul coefficient raw));

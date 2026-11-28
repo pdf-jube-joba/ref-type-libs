@@ -74,3 +74,6 @@
     (Spheres.topology Degrees.one) PairDisk.diskTopology boundaryPoint
     (topology.Composition[A := Spheres.Carrier Degrees.one, B := Plane.Disk, C := PairDisk.DiskCarrier].composeContinuous
       (Spheres.topology Degrees.one) Plane.diskTopology PairDisk.diskTopology sphereIntoDisk point sphereIntoDiskContinuous pointContinuous);
+\module Comparison(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  f, g: singular_cohomology.Relative[A := A, source := source, subset := subset].Maps[B := PairDisk.DiskCarrier]
+    .Over[target := PairDisk.diskTopology, targetSubset := PairDisk.boundary].Map);

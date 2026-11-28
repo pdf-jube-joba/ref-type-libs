@@ -1,0 +1,43 @@
+\definition z: I.Int^ := I.Int^::ofNat Degrees.two;
+\import Old.Additive[coefficients := OldProduct.integerCoefficients, z := z] \as OldGroup;
+\import New.Additive[coefficients := OldProduct.integerCoefficients, z := z] \as NewGroup;
+\import cohomology_thom.RelativePullback[].On[A := Old.Carrier, source := Old.topology, subset := Old.boundary, R := I.Int^, ring := Integers.commutativeRing]
+  .To[B := New.Carrier, target := New.topology, part := New.boundary].Homeomorphism[data := comparison].Degree[n := Degrees.two] \as Iso;
+\import cohomology_thom.RelativePullback[].On[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary, R := I.Int^, ring := Integers.commutativeRing]
+  .To[B := TargetDisk.DiskBundle, target := TargetDisk.diskTopology, part := TargetDisk.Boundary].Along[f := pairMap].Degree[n := Degrees.two] \as Pull;
+\import singular_cohomology.Relative[A := Old.Carrier, source := Old.topology, subset := Old.boundary]
+  .Maps[B := Disk.DiskBundle].Over[target := Disk.diskTopology, targetSubset := Disk.Boundary]
+  .Composition[C := TargetDisk.DiskBundle].Over[final := TargetDisk.diskTopology, finalSubset := TargetDisk.Boundary] \as First;
+\import singular_cohomology.Relative[A := Old.Carrier, source := Old.topology, subset := Old.boundary]
+  .Maps[B := New.Carrier].Over[target := New.topology, targetSubset := New.boundary]
+  .Composition[C := TargetDisk.DiskBundle].Over[final := TargetDisk.diskTopology, finalSubset := TargetDisk.Boundary] \as Second;
+\import singular_cohomology.Relative[A := Old.Carrier, source := Old.topology, subset := Old.boundary]
+  .Maps[B := TargetDisk.DiskBundle].Over[target := TargetDisk.diskTopology, targetSubset := TargetDisk.Boundary] \as Direct;
+\definition fiberMap: _ := Pairs.forwardMap comparison;
+\definition same: First.compose Old.pairInclusion pairMap = Second.compose fiberMap New.pairInclusion :=
+  \refl(First.compose Old.pairInclusion pairMap);
+\definition direct[f: Direct.Map]: _ := Direct.On[f := f].Integer[].With[coefficients := OldProduct.integerCoefficients].At[z := z].induced;
+\definition restrict[u: NewRelative.Class]: OldGroup.restriction.apply (Pull.map.apply u) = Iso.isomorphism.forward.apply (NewGroup.restriction.apply u) :=
+  trans!{{OldGroup.Class}} _ _ _
+    (sym!{{OldGroup.Class}} _ _ (First.On[f := Old.pairInclusion, g := pairMap].With[coefficients := OldProduct.integerCoefficients].law z u))
+    (trans!{{OldGroup.Class}} _ _ _
+      (congr!{{Direct.Map} {OldGroup.Class}} (\fun (f: Direct.Map) => (direct f).apply u) _ _ same)
+      (Second.On[f := fiberMap, g := New.pairInclusion].With[coefficients := OldProduct.integerCoefficients].law z u));
+\import Source.Integral[].Orientation[] \as SourceOrientation;
+\import TargetLine.Integral[].Orientation[] \as TargetOrientation;
+\definition fibers: Iso.isomorphism.forward.apply (TargetOrientation.fiber (map x)) = SourceOrientation.fiber x := \block {
+  \takefrom a: OldCharts.LocalChart[x] \by OldCharts.existsAt x \then
+  \takefrom b: NewCharts.LocalChart[map x] \by NewCharts.existsAt (map x) \then
+  \return trans!{{OldGroup.Class}} _ _ _
+    (congr!{{NewGroup.Class} {OldGroup.Class}} Iso.isomorphism.forward.apply _ _
+      (TargetOrientation.unique (map x) (TargetOrientation.chosen (map x)) (TargetOrientation.localClass (map x) b)))
+    (trans!{{OldGroup.Class}} _ _ _ (\parent.Charts[old := a, new := b].Relative[].classLaw)
+      (SourceOrientation.unique x (SourceOrientation.localClass x a) (SourceOrientation.chosen x)))
+};
+\import TargetLine.Integral[].Canonical[] \as NewClass;
+\definition normalized: OldGroup.restriction.apply (Pull.map.apply NewClass.thomClass) = SourceOrientation.fiber x :=
+  trans!{{OldGroup.Class}} _ _ _ (restrict NewClass.thomClass)
+    (trans!{{OldGroup.Class}} _ _ _
+      (congr!{{NewGroup.Class} {OldGroup.Class}} Iso.isomorphism.forward.apply _ _
+        ((\bysub(NewRelative.Class, NewClass.normalizedClasses, NewClass.thomClass)) (map x)))
+      fibers);

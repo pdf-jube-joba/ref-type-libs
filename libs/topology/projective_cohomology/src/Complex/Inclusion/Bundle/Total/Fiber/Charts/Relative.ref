@@ -1,0 +1,40 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import singular_products.Cochains[A := Space, source := topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\import Source.Integral[].PlaneDisk[] \as PlaneDisk;
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := Degrees.two] \as ModelDisk;
+\import singular_cohomology.Relative[A := Old.Carrier, source := Old.topology, subset := Old.boundary] \as Left;
+\import singular_cohomology.Relative[A := New.Carrier, source := New.topology, subset := New.boundary] \as Right;
+\import singular_cohomology.Relative[A := ModelDisk.DiskCarrier, source := ModelDisk.diskTopology, subset := ModelDisk.boundary] \as Model;
+\import Left.Homeomorphism[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as SourceCharts;
+\import Right.Homeomorphism[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as TargetCharts;
+\import OldGeometry.Chart[c := SourceChart.realChart].Fiber[x := sourcePoint] \as OldChart;
+\import NewGeometry.Chart[c := TargetChart.realChart].Fiber[x := targetPoint] \as NewChart;
+\import Left.Maps[B := New.Carrier].Over[target := New.topology, targetSubset := New.boundary] \as FiberMaps;
+\import Left.Maps[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as PairMaps;
+\import Right.Maps[B := ModelDisk.DiskCarrier].Over[target := ModelDisk.diskTopology, targetSubset := ModelDisk.boundary] \as TargetMaps;
+\definition fiberMap: FiberMaps.Map := Pairs.forwardMap comparison;
+\definition sourceMap: PairMaps.Map := SourceCharts.forwardMap OldChart.fiberPair;
+\definition targetMap: TargetMaps.Map := TargetCharts.forwardMap NewChart.fiberPair;
+\import Left.Maps[B := New.Carrier].Over[target := New.topology, targetSubset := New.boundary]
+  .Composition[C := ModelDisk.DiskCarrier].Over[final := ModelDisk.diskTopology, finalSubset := ModelDisk.boundary] \as Composite;
+\definition combined: PairMaps.Map := Composite.compose fiberMap targetMap;
+\import PlaneDisk.Comparison[A := Old.Carrier, source := Old.topology, subset := Old.boundary, f := sourceMap, g := combined] \as Comparisons;
+\import PairMaps.On[f := sourceMap] \as SourceMap;
+\import PairMaps.On[f := combined] \as CombinedMap;
+\module Boundary;
+\definition z: I.Int^ := I.Int^::ofNat Degrees.two;
+\import cohomology_thom.LocalDisk[].Point[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as ModelClass;
+\import Right.With[coefficients := Product.integerCoefficients].At[z := z] \as NewGroups;
+\import Left.With[coefficients := Product.integerCoefficients].At[z := z] \as OldGroups;
+\import Left.Maps[B := New.Carrier].Over[target := New.topology, targetSubset := New.boundary].On[f := fiberMap]
+  .Integer[].With[coefficients := Product.integerCoefficients].At[z := z] \as FiberPull;
+\definition classLaw: FiberPull.induced.apply (TargetChart.fiberClass targetPoint) = SourceChart.fiberClass sourcePoint :=
+  trans!{{OldGroups.Carrier}} _ _ _
+    (congr!{{NewGroups.Carrier} {OldGroups.Carrier}} FiberPull.induced.apply _ _ TargetFiber.comparison)
+    (trans!{{OldGroups.Carrier}} _ _ _
+      (sym!{{OldGroups.Carrier}} _ _ (Composite.On[f := fiberMap, g := targetMap].With[coefficients := Product.integerCoefficients].law z ModelClass.generator))
+      (trans!{{OldGroups.Carrier}} _ _ _
+        (sym!{{OldGroups.Carrier}} _ _ (Comparisons.samePull Boundary[].homotopic ModelClass.generator))
+        (sym!{{OldGroups.Carrier}} _ _ SourceFiber.comparison)));

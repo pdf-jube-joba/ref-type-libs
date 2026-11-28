@@ -1,0 +1,59 @@
+\use Equality.eq_reason_in;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset] \as Source;
+\import Source.Maps[B := PairDisk.DiskCarrier].Over[target := PairDisk.diskTopology, targetSubset := PairDisk.boundary] \as PairMaps;
+\import PairMaps.On[f := f] \as OldMap;
+\import PairMaps.On[f := g] \as NewMap;
+\import topology.Topology[Carrier := A].Subspace[S := subset] \as SourceBoundarySpace;
+\definition sourceBoundary: topology.Topology[Carrier := Source.SubspaceCarrier].Topology := SourceBoundarySpace.topology source;
+\import algebraic_topology.Homotopy[A := Source.SubspaceCarrier, B := PairTheory.SubspaceCarrier] \as Homotopies;
+\definition Equivalent: \Prop := Homotopies.Homotopic[sourceBoundary, boundaryTopology, OldMap.restriction, NewMap.restriction];
+\definition degreeOne: I.Int^ := I.Int^::ofNat Degrees.one;
+\definition degreeTwo: I.Int^ := I.Int^::ofNat Degrees.two;
+\import Source.With[coefficients := Product.integerCoefficients] \as SourceGroups;
+\import PairTheory.With[coefficients := Product.integerCoefficients] \as TargetGroups;
+\import SourceGroups.PairSequence[].LongExact[z := degreeOne] \as SourceSequence;
+\import TargetGroups.PairSequence[].LongExact[z := degreeOne] \as TargetSequence;
+\import OldMap.Integer[].With[coefficients := Product.integerCoefficients] \as OldPull;
+\import NewMap.Integer[].With[coefficients := Product.integerCoefficients] \as NewPull;
+\import singular_cohomology.Cochains[A := Source.SubspaceCarrier, source := sourceBoundary].With[coefficients := Product.integerCoefficients].Integer[] \as SourceBoundary;
+\import singular_cohomology.Cochains[A := PairTheory.SubspaceCarrier, source := boundaryTopology].With[coefficients := Product.integerCoefficients].Integer[] \as DomainBoundary;
+\import singular_cohomology.Homotopy[A := Source.SubspaceCarrier, B := PairTheory.SubspaceCarrier,
+  source := sourceBoundary, target := boundaryTopology].Coefficients[M := Product.integerCoefficients] \as HomotopyPull;
+\import singular_cohomology.Maps[A := Source.SubspaceCarrier, B := PairTheory.SubspaceCarrier, source := sourceBoundary, target := boundaryTopology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients] \as BoundaryPull;
+\import Abelian.End[V := I.Int^, space := Product.integerCoefficients.space] \as Coefficients;
+\import BoundaryPull.Integer[f := OldMap.restriction, continuous := OldMap.restrictionContinuous, coefficientMap := Coefficients.identity].At[n := Degrees.one] \as OldSigned;
+\import BoundaryPull.Integer[f := NewMap.restriction, continuous := NewMap.restrictionContinuous, coefficientMap := Coefficients.identity].At[n := Degrees.one] \as NewSigned;
+\import singular_cohomology.Cochains[A := PairTheory.SubspaceCarrier, source := boundaryTopology].With[coefficients := Product.integerCoefficients].Integer[] \as TargetBoundary;
+\import singular_cohomology.Cochains[A := Source.SubspaceCarrier, source := sourceBoundary].With[coefficients := Product.integerCoefficients] \as NativeBoundary;
+\definition pullLaw[equivalent: Equivalent][u: TargetBoundary.cohomology degreeOne]: OldSigned.induced.apply u = NewSigned.induced.apply u := \block {
+  \takefrom h: Homotopies.Homotopy[sourceBoundary, boundaryTopology, OldMap.restriction, NewMap.restriction] \by equivalent \then
+  \return eq_reason_in!{{SourceBoundary.cohomology degreeOne} _
+    "=" _ "by" { sym!{{SourceBoundary.cohomology degreeOne}} _ _ (OldSigned.targetComparison.leftInverse (OldSigned.induced.apply u)) }
+    "=" _ "by" { congr!{{NativeBoundary.cohomology Degrees.one} {SourceBoundary.cohomology degreeOne}}
+      OldSigned.targetComparison.backward.apply _ _ (OldSigned.law u) }
+    "=" _ "by" { congr!{{NativeBoundary.cohomology Degrees.one} {SourceBoundary.cohomology degreeOne}}
+      OldSigned.targetComparison.backward.apply _ _
+        (sym!{{NativeBoundary.cohomology Degrees.one}} _ _
+          (HomotopyPull.onCohomology OldMap.restriction NewMap.restriction h Degrees.one (OldSigned.sourceComparison.forward.apply u))) }
+    "=" _ "by" { congr!{{NativeBoundary.cohomology Degrees.one} {SourceBoundary.cohomology degreeOne}}
+      OldSigned.targetComparison.backward.apply _ _ (sym!{{NativeBoundary.cohomology Degrees.one}} _ _ (NewSigned.law u)) }
+    "=" _ "by" { NewSigned.targetComparison.leftInverse (NewSigned.induced.apply u) }
+  }
+};
+\definition samePull[equivalent: Equivalent][u: TargetGroups.At[z := degreeTwo].Carrier]:
+  OldPull.At[z := degreeTwo].induced.apply u = NewPull.At[z := degreeTwo].induced.apply u := \block {
+    \takefrom b: \Cast[DomainBoundary.cohomology degreeOne] ({ b: DomainBoundary.cohomology degreeOne \where TargetSequence.connecting.apply b = u })
+      \by connectingOnto u \then
+    \let lift: TargetSequence.connecting.apply b = u := \bysub(DomainBoundary.cohomology degreeOne, { v: DomainBoundary.cohomology degreeOne \where TargetSequence.connecting.apply v = u }, b) \then
+    \return eq_reason_in!{{SourceGroups.At[z := degreeTwo].Carrier} _
+      "=" _ "by" { congr!{{TargetGroups.At[z := degreeTwo].Carrier} {SourceGroups.At[z := degreeTwo].Carrier}}
+        OldPull.At[z := degreeTwo].induced.apply _ _ (sym!{{TargetGroups.At[z := degreeTwo].Carrier}} _ _ lift) }
+      "=" _ "by" { sym!{{SourceGroups.At[z := degreeTwo].Carrier}} _ _ (OldPull.Naturality[].At[z := degreeOne].connectingNaturality b) }
+      "=" _ "by" { congr!{{SourceBoundary.cohomology degreeOne} {SourceGroups.At[z := degreeTwo].Carrier}}
+        SourceSequence.connecting.apply _ _ (pullLaw equivalent b) }
+      "=" _ "by" { NewPull.Naturality[].At[z := degreeOne].connectingNaturality b }
+      "=" _ "by" { congr!{{TargetGroups.At[z := degreeTwo].Carrier} {SourceGroups.At[z := degreeTwo].Carrier}}
+        NewPull.At[z := degreeTwo].induced.apply _ _ lift }
+    }
+  };

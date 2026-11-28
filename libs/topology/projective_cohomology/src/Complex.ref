@@ -39,6 +39,7 @@
   \definition cellular: _ := Ambient.CW[].cellular;
   \definition reflectsSkeleton: _ := Ambient.CW[].reflects;
   \definition cellHomeomorphism: _ := Ambient.CW[].cellHomeomorphism;
+  \module Bundle;
 }
 \module CanonicalLine;
 \module Additive;
