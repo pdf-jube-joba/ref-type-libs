@@ -1,0 +1,33 @@
+\import \parent.\parent.\parent.Chart[x := x, c := c] \as Chart;
+\import Chart.TargetFiber[y := Chart.point] \as NewFiber;
+\import Chart.Reflection[] \as Reflection;
+\import Charts.Patch[U := c.domain, frames := c.frames] \as OldChartPatch;
+\import OldChartPatch.AtPoint[x := Chart.point] \as OldFiber;
+\import OldFiber.Angular[] \as OldAngle;
+\import NewFiber.Angular[] \as NewAngle;
+\import sphere_maps.Circle[] \as Circle;
+\import Circle.Coordinates[] \as Coordinates;
+\import \root.Complex[dimension := dimension].CanonicalLine[].Integral[].PlaneDisk[].BoundaryReflection[] \as DiskReflection;
+\import Equality.Transport[A := Space] \as Transport;
+\definition boundary[v: \Cast[Source.Carrier] Source.boundary]: \Cast[Target.Carrier] Target.boundary :=
+  \into[Target.Carrier](forward v, Target.boundary) \by { pair.forwardPreserves v };
+\definition boundaryLaw[v: \Cast[Source.Carrier] Source.boundary]: NewFiber.angle (boundary v) = Circle.inverse (OldFiber.angle v) := \block {
+  \let same: v.base = x := \bysub(Old.DiskBundle, Source.subset, v) \then
+  \let w: Line x := Transport.cast Line v.base x same v.vector \then
+  \let samePoint: Original.include x w = v := Original.ext _ _ (sym!{Space} _ _ same) (Transport.castInverse Line v.base x same v.vector) \then
+  \let unit: OldAngle.squared w = R.one := trans!{R.Real} _ _ _ (congr!{{Original.Point} {R.Real}} Old.squared _ _ samePoint)
+    (\bysub(Source.Carrier, Source.boundary, v)) \then
+  \let sameBoundary: OldAngle.fromUnit w unit = v := samePoint \then
+  \return trans!{{Circle.Carrier}} _ _ _
+    (congr!{{\Cast[Source.Carrier] Source.boundary} {Circle.Carrier}} (\fun (p: \Cast[Source.Carrier] Source.boundary) => NewFiber.angle (boundary p)) _ _
+      (sym!{{\Cast[Source.Carrier] Source.boundary}} _ _ sameBoundary))
+    (trans!{{Circle.Carrier}} _ _ _ (Reflection.inverseLaw w unit)
+      (congr!{{\Cast[Source.Carrier] Source.boundary} {Circle.Carrier}} (\fun (p: \Cast[Source.Carrier] Source.boundary) => Circle.inverse (OldFiber.angle p)) _ _ sameBoundary))
+};
+\definition directionLaw[v: \Cast[Source.Carrier] Source.boundary]: NewFiber.direction (boundary v) = DiskReflection.direction (OldFiber.direction v) :=
+  eq_reason_in!{{Coordinates.Sphere} _
+    "=" _ "by" { sym!{{Coordinates.Sphere}} _ _ (Coordinates.leftInverse (NewFiber.direction (boundary v))) }
+    "=" _ "by" { congr!{{Circle.Carrier} {Coordinates.Sphere}} Coordinates.backward _ _ (boundaryLaw v) }
+    "=" _ "by" { sym!{{Coordinates.Sphere}} _ _ (DiskReflection.inversePoint (OldFiber.direction v)) }
+  };
+\module Relative;

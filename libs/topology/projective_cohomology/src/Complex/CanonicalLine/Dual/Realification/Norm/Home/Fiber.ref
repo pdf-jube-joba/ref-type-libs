@@ -28,3 +28,4 @@
 \import cohomology_thom.RelativePullback[].On[A := Source.Carrier, source := Source.topology, subset := Source.boundary, R := I.Int^, ring := Integers.commutativeRing]
   .To[B := Target.Carrier, target := Target.topology, part := Target.boundary].Homeomorphism[data := pair].Degree[n := Degrees.two] \as Ordinary;
 \definition isomorphism: _ := Ordinary.isomorphism;
+\module Compare(c: Charts.LocalChart[x]);

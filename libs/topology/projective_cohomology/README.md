@@ -28,6 +28,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.CanonicalLine.Dual.Realification.Norm.Home` | The Riesz identification preserves the ambient norms and gives a homeomorphism of the corresponding disk and boundary pairs over projective space |
 | `Complex.CanonicalLine.Dual.Realification.Norm.Chart` | Unit directions in complex dual coordinates are conjugates of the corresponding directions under Riesz |
 | `Complex.CanonicalLine.Integral.PlaneDisk.Comparison.Negative` | Maps of disk pairs whose boundary directions differ by complex conjugation pull back relative integral classes with opposite signs in degree two |
+| `Complex.CanonicalLine.Dual.Realification.Norm.Home.Fiber.Compare.Relative` | On each fiber, the Riesz pullback sends the dual complex orientation class to the negative of the tautological orientation class |
 | `RealPlane` and `ComplexLineSphere` | Homeomorphisms with the antipodal quotient model of the real projective plane and the standard two-sphere model of the complex projective line |
 | `ComplexLineSphere.Equator` | In the standard two-sphere model, the second complex frame coordinate on the equator is the first multiplied by the inverse unit-circle coordinate |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
