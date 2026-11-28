@@ -1,0 +1,45 @@
+\import std.Data[].Option[] \as Option;
+\import \root.Simplex[n := N.Nat^::succ n] \as Higher;
+\import Barycentric.InsertionZero[] \as Zero;
+\definition dimension: N.Nat^ := N.Nat^::succ n;
+\definition Face: \Set := Fin.Fin (N.Nat^::succ dimension);
+\definition Domain: \Set := \Cast[E.Point] points;
+\definition Ambient: \Set := Barycentric.Coordinate dimension;
+\definition Target: \Set := \Cast[Ambient] Higher.points;
+\definition original[x: Domain]: Standard.CarrierSet := \block {
+  \let bounds: Logic.And[Nonnegative x, R.Le (Sums.sum n x) Real.one] := inequalities x (\bysub(E.Point, points, x)) \then
+  \return lift x bounds.left bounds.right
+};
+\definition originalProject[x: Domain]: project (original x) = x := \block {
+  \let bounds: Logic.And[Nonnegative x, R.Le (Sums.sum n x) Real.one] := inequalities x (\bysub(E.Point, points, x)) \then
+  \return projectLift x bounds.left bounds.right
+};
+\definition apply[i: Face][x: Domain]: Target :=
+  \into[Ambient](Higher.project (Barycentric.face n i (original x)), Higher.points) \by {
+    Higher.member (Higher.project (Barycentric.face n i (original x)))
+      (Higher.projectNonnegative (Barycentric.face n i (original x)))
+      (Higher.projectBound (Barycentric.face n i (original x)))
+  };
+\definition first[x: Domain]: (apply (Fin.zero dimension) x \of Ambient) = Tuples.extend n (slack x) x :=
+  \axiom:funext((apply (Fin.zero dimension) x \of Ambient), Tuples.extend n (slack x) x,
+    \fun (j: Fin.Fin dimension) => Barycentric.faceFirstSuccessor n (original x) j);
+\definition firstOnSlantedFace[x: Domain]: Sums.sum dimension (apply (Fin.zero dimension) x) = Real.one :=
+  trans!{Real.Real} _ _ _
+    (congr!{Ambient Real.Real} (Sums.sum dimension) _ _ (first x))
+    (trans!{Real.Real} _ _ _ (Barycentric.extendSum n (slack x) x)
+      (Differences.subAddCancel Real.one (Sums.sum n x)));
+\definition successor[i: Fin.Fin dimension][x: Domain]:
+  (apply (Fin.succ dimension i) x \of Ambient) = Barycentric.insertZero n i x :=
+  \axiom:funext((apply (Fin.succ dimension i) x \of Ambient), Barycentric.insertZero n i x, \fun (j: Fin.Fin dimension) =>
+    trans!{Real.Real} _ _ _
+      (congr!{{Option.Option[Fin.Fin dimension]} Real.Real}
+        (\fun (o: Option.Option[Fin.Fin dimension]) =>
+          Barycentric.insertStep n (Barycentric.insertZero n) (original x) o (Fin.succ dimension j))
+        _ _ (Fin.splitInflate dimension (Option.Option[Fin.Fin dimension]::some i)))
+      (trans!{Real.Real} _ _ _
+        (Tuples.atSuccessor dimension ((original x) (Fin.zero n)) (Barycentric.insertZero n i (project (original x))) j)
+        (congr!{{E.Point} Real.Real} (\fun (y: E.Point) => Barycentric.insertZero n i y j) _ _ (originalProject x))));
+\definition successorOnCoordinateFace[i: Fin.Fin dimension][x: Domain]: apply (Fin.succ dimension i) x i = Real.zero :=
+  trans!{Real.Real} _ _ _
+    (congr!{Ambient Real.Real} (\fun (y: Ambient) => y i) _ _ (successor i x))
+    (Zero.law n i x);

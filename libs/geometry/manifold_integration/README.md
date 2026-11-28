@@ -33,6 +33,7 @@ Compactly supported top forms are integrated in Euclidean coordinates by taking 
 | Collar.On.With.Of.At | Compute the outward-first contraction along the actual boundary inclusion from a G04 collar and prove the sign of its normal coefficient |
 | Corner.On.Over.cancel | Integrate the two orders of normal contraction over a common codimension-two parametrization and prove cancellation |
 | Simplex | Project the standard barycentric simplex onto its last \(n\) coordinates and recover the omitted coordinate |
+| Simplex.Faces | Express the standard singular face maps in the integration coordinates on the slanted and coordinate faces |
 | Simplex.On.Along.cochain | Integrate a pullback along a smooth extension of a simplex into a Euclidean open set |
 | Simplex.On.Manifold.To.Along.cochain | Integrate a pullback along a smooth extension of a simplex into a smooth manifold |
 
