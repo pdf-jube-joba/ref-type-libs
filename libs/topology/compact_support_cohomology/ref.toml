@@ -6,3 +6,4 @@ std = { path = "../../std" }
 topology = { path = "../basic" }
 module_theory = { path = "../../algebra/module_theory" }
 singular_cohomology = { path = "../singular/cohomology" }
+singular_excision = { path = "../singular/excision" }

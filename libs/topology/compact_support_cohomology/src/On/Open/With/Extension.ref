@@ -1,0 +1,16 @@
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\definition stage[K: Local.Support][x: LocalDegree.Stage K]: AmbientDegree.Cohomology :=
+  AmbientDegree.ofSupport (image K) (\parent.AtSupport[K := K].extend x);
+
+\definition compatible[K, L: Local.Support][included: Local.before K L][x: LocalDegree.Stage K]:
+  stage K x = stage L (LocalDegree.advance K L included x) :=
+  eq_reason_in!{AmbientDegree.Cohomology _
+    "=" _ "by" { AmbientDegree.compatible (image K) (image L) (imageMonotone K L included) (\parent.AtSupport[K := K].extend x) }
+    "=" _ "by" { congr!{{AmbientDegree.Stage (image L)} AmbientDegree.Cohomology} (AmbientDegree.ofSupport (image L)) _ _
+      (\parent.AtSupport[K := K].Through[L := L, included := included].extendLaw x) }};
+
+\import LocalDegree.Descend[Target := AmbientDegree.Cohomology, stageMap := stage, compatibleMap := compatible] \as Descend;
+\definition extend[x: LocalDegree.Cohomology]: AmbientDegree.Cohomology := Descend.map x;
+\definition onSupport[K: Local.Support][x: LocalDegree.Stage K]: extend (LocalDegree.ofSupport K x) = stage K x :=
+  Descend.onStage K x;

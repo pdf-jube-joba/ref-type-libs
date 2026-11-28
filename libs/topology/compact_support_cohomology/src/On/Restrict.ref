@@ -1,0 +1,8 @@
+\import Top.Subspace[S := U] \as Local;
+\definition Carrier: \Set := Local.CarrierSet;
+\definition topology: topology.Topology[Carrier := Carrier].Topology := Local.topology space;
+\definition trace: \Pow Carrier := Local.Trace (outside K);
+\definition inclusion[x: Carrier]: A := x;
+\definition continuous: topology.Continuity[A := Carrier, B := A].Continuous topology space inclusion :=
+  topology.Continuity[A := Carrier, B := A].Corestriction[S := U].inclusionContinuous space;
+\module To(part: \Pow Carrier, preserves: \forall (x: Carrier) -> \In[Carrier] part x -> \In[A] (outside K) (inclusion x));

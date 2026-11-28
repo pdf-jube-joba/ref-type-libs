@@ -1,0 +1,21 @@
+\import Top.Subspace[S := U] \as Part;
+\import Part.Open[] \as Image;
+\import \root.On[A := Part.CarrierSet, space := Part.topology space] \as Local;
+\import topology.Topology[Carrier := Part.CarrierSet] \as LocalTop;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\definition image[K: Local.Support]: Support :=
+  \into[\Pow A](Image.image K, Supports) \by {
+    topology.Compactness[A := Part.CarrierSet, B := A].continuousImage (Part.topology space) space Image.inclusion
+      (topology.Continuity[A := Part.CarrierSet, B := A].Corestriction[S := U].inclusionContinuous space) K (Local.compact K)
+  };
+\definition imageIncluded[K: Local.Support]: Top.Subset (image K) U := Image.imageIncluded K;
+\definition imageMonotone[K, L: Local.Support][included: Local.before K L]: before (image K) (image L) :=
+  \fun (x: A)(member: Top.Member (image K) x) => Image.imageElim K x (Top.Member (image L) x)
+    (\fun (y: Part.CarrierSet)(inK: LocalTop.Member K y)(same: y = x) => \idelim y = x
+      \with q: A => Top.Member (image L) q \by { base: Image.imageMember L y (included y inK), equality: same }) member;
+\definition imageReflects[K: Local.Support][x: Part.CarrierSet]: Top.Member (image K) x -> LocalTop.Member K x :=
+  Image.imageElim K x (LocalTop.Member K x)
+    (\fun (y: Part.CarrierSet)(inK: LocalTop.Member K y)(same: y = x) => \idelim y = x
+      \with q: Part.CarrierSet => LocalTop.Member K q \by { base: inK, equality: same });
+\module With(coefficients: Modules.Bundle, z: I.Int^);

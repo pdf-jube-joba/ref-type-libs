@@ -1,0 +1,32 @@
+\import \parent.\parent.AtSupport[K := L] \as Later;
+\import \parent.\parent.\parent.\parent.With[coefficients := coefficients]
+  .Enlarge[K := image K, L := image L, inclusion := imageMonotone K L included] \as AmbientEnlarge;
+\import Local.With[coefficients := coefficients].Enlarge[K := K, L := L, inclusion := included] \as LocalEnlarge;
+\import singular_cohomology.Relative[A := Part.CarrierSet, source := Part.topology space, subset := Local.outside L]
+  .Maps[B := A].Over[target := space, targetSubset := outside (image L)]
+  .Composition[C := A].Over[final := space, finalSubset := outside (image K)]
+  .On[f := Later.pairMap, g := AmbientEnlarge.pairMap].With[coefficients := coefficients] \as RestrictAfter;
+\import singular_cohomology.Relative[A := Part.CarrierSet, source := Part.topology space, subset := Local.outside L]
+  .Maps[B := Part.CarrierSet].Over[target := Part.topology space, targetSubset := Local.outside K]
+  .Composition[C := A].Over[final := space, finalSubset := outside (image K)]
+  .On[f := LocalEnlarge.pairMap, g := pairMap].With[coefficients := coefficients] \as RestrictBefore;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+
+\definition restrictLaw[x: AmbientDegree.Stage (image K)]:
+  Later.restrict (AmbientDegree.advance (image K) (image L) (imageMonotone K L included) x) =
+  LocalDegree.advance K L included (restrict x) :=
+  eq_reason_in!{{LocalDegree.Stage L} _
+    "=" _ "by" { sym!{{LocalDegree.Stage L}} _ _ (RestrictAfter.law z x) }
+    "=" _ "by" { RestrictBefore.law z x }};
+
+\definition extendLaw[x: LocalDegree.Stage K]:
+  AmbientDegree.advance (image K) (image L) (imageMonotone K L included) (extend x) =
+  Later.extend (LocalDegree.advance K L included x) :=
+  eq_reason_in!{{AmbientDegree.Stage (image L)} _
+    "=" _ "by" { sym!{{AmbientDegree.Stage (image L)}} _ _
+      (Later.isomorphism.leftInverse (AmbientDegree.advance (image K) (image L) (imageMonotone K L included) (extend x))) }
+    "=" _ "by" { congr!{{LocalDegree.Stage L} {AmbientDegree.Stage (image L)}} Later.extend _ _
+      (restrictLaw (extend x)) }
+    "=" _ "by" { congr!{{LocalDegree.Stage K} {AmbientDegree.Stage (image L)}}
+      (\fun (y: LocalDegree.Stage K) => Later.extend (LocalDegree.advance K L included y)) _ _ (isomorphism.rightInverse x) }};

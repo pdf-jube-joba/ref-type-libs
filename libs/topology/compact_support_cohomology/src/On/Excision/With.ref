@@ -1,0 +1,34 @@
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\import \parent.\parent.With[coefficients := coefficients].Degree[z := z] \as Ambient;
+\import \parent.\parent.Restrict[U := Top.Complement deleted, K := K] \as Remaining;
+\import Remaining.To[part := Remaining.trace, preserves := (\fun (x: Remaining.Carrier)(member: Top.Member (outside K) x) => member)]
+  .With[coefficients := coefficients, z := z] \as Model;
+\import Local.To[part := Local.trace, preserves := (\fun (x: Local.Carrier)(member: Top.Member (outside K) x) => member)]
+  .With[coefficients := coefficients, z := z] \as Actual;
+\definition model: Model.Isomorphism := Excision.With[coefficients := coefficients].At[z := z].isomorphism excisionPair;
+\import singular_cohomology.Relative[A := Remaining.Carrier, source := Remaining.topology, subset := Remaining.trace]
+  .With[coefficients := coefficients].At[z := z] \as ModelStage;
+\definition modelInjective[x, y: Ambient.Stage K][same: (Model.pull).apply x = (Model.pull).apply y]: x = y :=
+  eq_reason_in!{{Ambient.Stage K} x
+    "=" _ "by" { sym!{{Ambient.Stage K}} _ _ (model.leftInverse x) }
+    "=" _ "by" { congr!{ModelStage.Carrier {Ambient.Stage K}} (\fun (v: ModelStage.Carrier) => (model.backward).apply v) _ _ same }
+    "=" y "by" { model.leftInverse y }};
+
+\definition modelOnto[y: ModelStage.Carrier]: \exists (x: Ambient.Stage K \where (Model.pull).apply x = y) :=
+  Logic.existsIntro[Ambient.Stage K, { x: Ambient.Stage K \where (Model.pull).apply x = y }]
+    ((model.backward).apply y) (model.rightInverse y);
+
+\definition modelBijective: Model.IsBijective := Logic.And[_, _]::# modelInjective modelOnto;
+
+\module Trace(V: \Pow A) {
+  \import \parent.\parent.\parent.Restrict[U := V, K := K] \as Part;
+  \import Part.To[part := Part.trace, preserves := (\fun (x: Part.Carrier)(member: Top.Member (outside K) x) => member)]
+    .With[coefficients := coefficients, z := z] \as Comparison;
+  \definition IsBijective: \Prop := Comparison.IsBijective;
+}
+\definition traceBijective: Actual.IsBijective :=
+  \idelim Top.Complement deleted = U \with V: \Pow A => Trace[V := V].IsBijective
+    \by { base: modelBijective, equality: Finite.doubleComplement U };
+
+\module Identified(part: \Pow Local.Carrier, partEquality: Local.trace = part);

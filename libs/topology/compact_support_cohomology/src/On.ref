@@ -27,3 +27,7 @@
 \definition outsideReverse[K, L: Support][inclusion: before K L]: Top.Subset (outside L) (outside K) :=
   \fun (x: A)(notInL: Top.Member (outside L) x)(inK: Top.Member K x) => notInL (inclusion x inK);
 \module With(coefficients: Modules.Bundle);
+\module Restrict(U: \Pow A, K: Support);
+\module Excision(U: \Pow A, K: Support, hausdorff: Top.IsT2 space,
+  open: Top.IsOpenIn space U, included: Top.Subset K U);
+\module Open(U: \Pow A, hausdorff: Top.IsT2 space, open: Top.IsOpenIn space U);

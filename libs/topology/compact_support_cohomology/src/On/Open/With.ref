@@ -1,0 +1,4 @@
+\import \parent.\parent.With[coefficients := coefficients].Degree[z := z] \as AmbientDegree;
+\import Local.With[coefficients := coefficients].Degree[z := z] \as LocalDegree;
+\module AtSupport(K: Local.Support);
+\module Extension;

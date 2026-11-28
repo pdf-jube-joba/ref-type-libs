@@ -1,0 +1,18 @@
+\import \parent.\parent.\parent.Restrict[U := U, K := image K] \as Restriction;
+\definition preserves[x: Part.CarrierSet][member: LocalTop.Member (Local.outside K) x]:
+  Top.Member (outside (image K)) (Image.inclusion x) :=
+  \fun (inImage: Top.Member (image K) x) => member (imageReflects K x inImage);
+\definition samePart: Restriction.trace = Local.outside K :=
+  \axiom:setext(Restriction.trace, Local.outside K,
+    \fun (x: Part.CarrierSet)(outsideImage: Top.Member (outside (image K)) x)(inK: LocalTop.Member K x) =>
+      outsideImage (Image.imageMember K x inK),
+    preserves);
+\import Restriction.To[part := Local.outside K, preserves := preserves] \as Map;
+\definition pairMap: _ := Map.pairMap;
+\import Map.With[coefficients := coefficients, z := z] \as Pull;
+\import \parent.\parent.\parent.Excision[U := U, K := image K, hausdorff := hausdorff, open := open, included := imageIncluded K]
+  .With[coefficients := coefficients, z := z].Identified[part := Local.outside K, partEquality := samePart] \as Excise;
+\definition isomorphism: Pull.Isomorphism := Pull.isomorphism (Excise.bijective preserves);
+\definition restrict[x: AmbientDegree.Stage (image K)]: LocalDegree.Stage K := (isomorphism.forward).apply x;
+\definition extend[x: LocalDegree.Stage K]: AmbientDegree.Stage (image K) := (isomorphism.backward).apply x;
+\module Through(L: Local.Support, included: Local.before K L);
