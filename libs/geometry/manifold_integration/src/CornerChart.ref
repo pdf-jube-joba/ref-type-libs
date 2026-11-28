@@ -1,0 +1,10 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\use std.Logic[].Equality[].congr;
+\import real.Analysis[] \as Real;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import boundary_manifolds.Model[n := n] \as Model;
+\import boundary_manifolds.Dimension[n := n] \as Manifolds;
+\import topology.Topology[Carrier := Model.Point] \as Sets;
+\import topological_algebra.Euclidean[].Dimension[n := n].Topology[] \as Euclidean;
+\module On(C: Model.Constraints, U: Open.OpenSet);

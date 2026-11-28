@@ -1,0 +1,34 @@
+\use std.Logic[].Equality[].trans;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].congr;
+\import functional_analysis.Support[A := Change.Point] \as Support;
+\import Supports.ZeroExtension[U := U, f := Coordinates.coefficient omega] \as Extended;
+\definition pointwise[x: Change.Point]: Extended.value x = f x :=
+  Logic.orElim (Sets.Member U.points x) (Logic.Not (Sets.Member U.points x)) (Extended.value x = f x)
+    (Classical.excludedMiddle (Sets.Member U.points x))
+    (\fun (member: Sets.Member U.points x) => \block {
+      \let p: Open.Carrier U := \into[Change.Point](x, U.points) \by { member } \then
+      \return trans!{Real.Real} _ _ _ (Extended.inside p) (agrees p)
+    })
+    (\fun (outside: Logic.Not (Sets.Member U.points x)) =>
+      trans!{Real.Real} _ _ _ (Extended.outside x outside)
+        (sym!{Real.Real} _ _ (Support.zeroOutsideSupport Ambient.topology f x (\fun (member: _) => outside (within x member)))));
+\definition extension: Extended.value = (f \of CompactFunctions.Function) :=
+  \axiom:funext(Extended.value, f, pointwise);
+\definition support: Supported omega :=
+  Localization.Conditions[Coordinates.coefficient omega] {
+    smooth := \bysub(Open.ScalarFunction U, Open.Smooth[].SmoothFunction U, Coordinates.coefficient omega),
+    compact := \idelim (f \of CompactFunctions.Function) = Extended.value
+      \with g: CompactFunctions.Function => Sets.IsCompactIn Ambient.topology (Supports.support g) \by {
+        base: (CompactFunctions.smoothCompactLaws f).compact, equality: sym!{{CompactFunctions.Function}} _ _ extension
+      },
+    within := \idelim (f \of CompactFunctions.Function) = Extended.value
+      \with g: CompactFunctions.Function => Sets.Subset (Supports.support g) U.points \by {
+        base: within, equality: sym!{{CompactFunctions.Function}} _ _ extension
+      },
+  };
+\definition integralLaw[valid: Supported omega]:
+  integral omega valid = Integral.integral (Compact.representative f) :=
+  IntegralEquality.integralPointwise (representative omega valid) (Compact.representative f) pointwise;

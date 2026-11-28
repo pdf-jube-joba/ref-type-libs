@@ -1,0 +1,24 @@
+\import \parent.Of[f := left] \as Left;
+\import \parent.Of[f := right] \as Right;
+\import J.Linear[] \as Linear;
+\import J.Negation[] \as Negation;
+\import lp_spaces.On[A := E.Point, mu := Lebesgue.measure].One[].Norm[] \as Equality;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\definition value[x: Carrier]: Real.Real := Real.sub (left x) (right x);
+\definition difference: Coefficient := coefficient value (Functions.subContinuous topology left right Left.continuous Right.continuous);
+\import \parent.Of[f := difference] \as Difference;
+\definition combined: J.Representatives := Linear.addRepresentative Left.representative (Negation.representative Right.representative);
+\definition agrees[x: E.Point]: Difference.representative x = combined x :=
+  Logic.orElim (Sets.Member K x) (Logic.Not (Sets.Member K x)) (Difference.representative x = combined x) (Classical.excludedMiddle (Sets.Member K x))
+    (\fun (member: Sets.Member K x) => \block {
+      \let p: Carrier := \into[E.Point](x, K) \by { member } \then
+      \return trans!{Real.Real} _ _ _ (Difference.inside p)
+        (congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _ (sym!{Real.Real} _ _ (Left.inside p)) (sym!{Real.Real} _ _ (Right.inside p)))
+    })
+    (\fun (absent: Logic.Not (Sets.Member K x)) => trans!{Real.Real} _ _ _ (Difference.outside x absent)
+      (sym!{Real.Real} _ _ (trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _ (Left.outside x absent) (Right.outside x absent)) (Laws.subSelf Real.zero))));
+\definition law: Difference.integral = Real.sub Left.integral Right.integral :=
+  trans!{Real.Real} _ _ _ (Equality.integralPointwise Difference.representative combined agrees)
+    (trans!{Real.Real} _ _ _ (Linear.integralAdd Left.representative (Negation.representative Right.representative))
+      (congr!{Real.Real Real.Real} (Real.add Left.integral) _ _ (Negation.integralNeg Right.representative)));

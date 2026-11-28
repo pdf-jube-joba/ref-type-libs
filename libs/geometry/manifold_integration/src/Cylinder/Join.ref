@@ -1,0 +1,41 @@
+\import topology.Continuity[A := X, B := Base.Point] \as BaseMaps;
+\import topology.Continuity[A := X, B := Axis.Point] \as AxisMaps;
+\import topology.Continuity[A := X, B := E.Point] \as Maps;
+\import topology.Continuity[A := X, B := Real.Real] \as Scalar;
+\import topological_algebra.Coordinates[K := Real.Real, I := Fin.Fin dimension].Universal[A := X] \as Universal;
+\definition value[x: X]: E.Point := Blocks.join (left x) (right x);
+\definition projectedLeft[i: Fin.Fin n]: BaseMaps.Continuous source BaseTopology.topology left ->
+  Scalar.Continuous source RealLine.topology (\fun (x: X) => value x (Indices.left i)) :=
+  \fun (continuous: _) =>
+    \idelim (\fun (x: X) => left x i) = (\fun (x: X) => value x (Indices.left i))
+      \with f: (X -> Real.Real) => Scalar.Continuous source RealLine.topology f \by {
+        base: topology.Composition[A := X, B := Base.Point, C := Real.Real].composeContinuous source BaseTopology.topology RealLine.topology left
+          (\fun (p: Base.Point) => p i) continuous (BaseTopology.coordinateContinuous i),
+        equality: \axiom:funext((\fun (x: X) => left x i), (\fun (x: X) => value x (Indices.left i)),
+          \fun (x: X) => sym!{Real.Real} _ _ (Tuples.atLeft (left x) (right x) i))
+      };
+\definition projectedRight[i: One.Index]: AxisMaps.Continuous source AxisTopology.topology right ->
+  Scalar.Continuous source RealLine.topology (\fun (x: X) => value x (Indices.right i)) :=
+  \fun (continuous: _) =>
+    \idelim (\fun (x: X) => right x i) = (\fun (x: X) => value x (Indices.right i))
+      \with f: (X -> Real.Real) => Scalar.Continuous source RealLine.topology f \by {
+        base: topology.Composition[A := X, B := Axis.Point, C := Real.Real].composeContinuous source AxisTopology.topology RealLine.topology right
+          (\fun (p: Axis.Point) => p i) continuous (AxisTopology.coordinateContinuous i),
+        equality: \axiom:funext((\fun (x: X) => right x i), (\fun (x: X) => value x (Indices.right i)),
+          \fun (x: X) => sym!{Real.Real} _ _ (Tuples.atRight (left x) (right x) i))
+      };
+\definition coordinate[i: Fin.Fin dimension]:
+  BaseMaps.Continuous source BaseTopology.topology left -> AxisMaps.Continuous source AxisTopology.topology right ->
+  Scalar.Continuous source RealLine.topology (\fun (x: X) => value x i) :=
+  \fun (l: _)(r: _) => \idelim Indices.inflate (Indices.split i) = i \with j: Fin.Fin dimension =>
+    Scalar.Continuous source RealLine.topology (\fun (x: X) => value x j) \by {
+      base: (\induction (s: Indices.Index) \return Scalar.Continuous source RealLine.topology (\fun (x: X) => value x (Indices.inflate s)) \with {
+        | inl: \fun (j: Fin.Fin n) => projectedLeft j l
+        | inr: \fun (j: One.Index) => projectedRight j r
+      }) (Indices.split i),
+      equality: Indices.inflateSplit i
+    };
+\definition continuous: BaseMaps.Continuous source BaseTopology.topology left -> AxisMaps.Continuous source AxisTopology.topology right ->
+  Maps.Continuous source Topology.topology value :=
+  \fun (l: _)(r: _)(W: \Pow E.Point)(opened: Sets.IsOpenIn Topology.topology W) =>
+    Universal.continuous source RealLine.topology value (\fun (i: Fin.Fin dimension) => coordinate i l r) W (Topology.metricOpen W opened);

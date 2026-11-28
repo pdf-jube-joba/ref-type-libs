@@ -1,0 +1,112 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\import real.Analysis[].Algebra[] \as Algebra;
+\import Real.FiniteSums[] \as Sums;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\import Spaces.Coordinates[I := Fin.Fin dimension] \as Vectors;
+\import Vectors.Kronecker[] \as Kronecker;
+\import Spaces.Multilinear[V := E.Point, space := Vectors.space] \as Multilinear;
+\import Spaces.Exterior[V := E.Point, space := Vectors.space] \as Exterior;
+\import Spaces.Shuffle[I := E.Point] \as Shuffle;
+\import Shuffle.Boundary[] \as Boundary;
+\import Spaces.FiniteCoordinates[n := dimension].Top[] \as Basis;
+\import Spaces.FiniteCoordinateEnumeration[] \as Enumeration;
+\import std.Data[].List[] \as Lists;
+\import Fin.FromList[A := E.Point] \as Frames;
+\import euclidean_forms.Euclidean[n := dimension].On[U := Open.whole] \as Forms;
+\import Forms.ExteriorDerivative[k := One.dimension] \as D;
+\import D.SeriesBoundary[] \as Series;
+\import Forms.Partial[k := One.dimension] \as PartialForm;
+\import Forms.Summation[k := dimension, I := Fin.Fin dimension] \as Evaluation;
+\import change_of_variables.Euclidean[n := dimension].TopCoordinates[U := Open.whole] \as Top;
+\import \parent.Signs[] \as Frame;
+\definition p: Smooth.SmoothFunction Open.whole := Forms.evaluate One.dimension omega Frame.xArguments;
+\definition q: Smooth.SmoothFunction Open.whole := Forms.evaluate One.dimension omega Frame.yArguments;
+\import \parent.Of[p := p, q := q] \as Green;
+\definition singleton[v: E.Point]: Lists.List[E.Point] := Lists.List[E.Point]::cons v Lists.List[E.Point]::nil;
+\definition arguments: Lists.List[E.Point] := Lists.List[E.Point]::cons Frame.ex (singleton Frame.ey);
+\definition xList: Frames.list One.dimension Frame.xArguments = singleton Frame.ex := \refl(singleton Frame.ex);
+\definition yList: Frames.list One.dimension Frame.yArguments = singleton Frame.ey := \refl(singleton Frame.ey);
+\definition frameList: Frames.list dimension Basis.basisArguments = arguments := \refl(arguments);
+\definition first[i: Fin.Fin dimension][a: Open.Carrier Open.whole]: Real.Real :=
+  Exterior.component One.dimension (PartialForm.apply i omega a) (singleton Frame.ey);
+\definition second[i: Fin.Fin dimension][a: Open.Carrier Open.whole]: Real.Real :=
+  Exterior.component One.dimension (PartialForm.apply i omega a) (singleton Frame.ex);
+\definition term[i: Fin.Fin dimension][a: Open.Carrier Open.whole]:
+  Top.coefficient (D.term i omega) a = Real.sub (Real.mul (Frame.ex i) (first i a)) (Real.mul (Frame.ey i) (second i a)) :=
+  eq_reason_in!{Real.Real _
+    "=" { Exterior.component dimension (D.term i omega a) (Frames.list dimension Basis.basisArguments) } "by" {
+      sym!{Real.Real} _ _ (Multilinear.ListSeries[k := dimension].onArguments (D.term i omega a) Basis.basisArguments) }
+    "=" { Exterior.component dimension (D.term i omega a) arguments } "by" {
+      congr!{{Lists.List[E.Point]} Real.Real} (Exterior.component dimension (D.term i omega a)) _ _ frameList }
+    "=" { Boundary.apply (Series.contribution i omega a) arguments } "by" { Series.termLaw i omega a arguments }
+    "=" _ "by" {
+      congr!{Real.Real Real.Real} (\fun (v: Real.Real) => Real.sub (Real.mul (Frame.ex i) (first i a)) v) _ _
+        (trans!{Real.Real} _ _ _
+          (congr!{Real.Real Real.Real} (Real.add (Real.mul (Frame.ey i) (second i a))) _ _ Laws.negZero)
+          (Laws.addZeroRight (Real.mul (Frame.ey i) (second i a)))) }
+  };
+\definition firstValue[i: Fin.Fin dimension][a: Open.Carrier Open.whole]: first i a = Partial.partial Open.whole q i a :=
+  trans!{Real.Real} _ _ _
+    (Multilinear.ListSeries[k := One.dimension].onArguments (PartialForm.apply i omega a) Frame.yArguments)
+    (congr!{{Smooth.SmoothFunction Open.whole} Real.Real} (\fun (f: Smooth.SmoothFunction Open.whole) => f a) _ _
+      (PartialForm.evaluation i omega Frame.yArguments));
+\definition secondValue[i: Fin.Fin dimension][a: Open.Carrier Open.whole]: second i a = Partial.partial Open.whole p i a :=
+  trans!{Real.Real} _ _ _
+    (Multilinear.ListSeries[k := One.dimension].onArguments (PartialForm.apply i omega a) Frame.xArguments)
+    (congr!{{Smooth.SmoothFunction Open.whole} Real.Real} (\fun (f: Smooth.SmoothFunction Open.whole) => f a) _ _
+      (PartialForm.evaluation i omega Frame.xArguments));
+\definition crossYX: Frame.ey xIndex = Real.zero :=
+  Kronecker.different yIndex xIndex (\fun (same: yIndex = xIndex) => Indices.different One.index One.index (sym!{{Fin.Fin dimension}} _ _ same));
+\definition crossXY: Frame.ex yIndex = Real.zero := Kronecker.different xIndex yIndex (Indices.different One.index One.index);
+\definition weightedOne[c, value: Real.Real][same: c = Real.one]: Real.mul c value = value :=
+  trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (t: Real.Real) => Real.mul t value) _ _ same)
+    (Laws.fieldMulOneLeft value);
+\definition weightedZero[c, value: Real.Real][same: c = Real.zero]: Real.mul c value = Real.zero :=
+  trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (t: Real.Real) => Real.mul t value) _ _ same)
+    (Laws.fieldMulZeroLeft value);
+\definition xTerm[a: Open.Carrier Open.whole]: Top.coefficient (D.term xIndex omega) a = Partial.partial Open.whole q xIndex a :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { term xIndex a }
+    "=" { Real.sub (first xIndex a) Real.zero } "by" {
+      congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _
+        (weightedOne (Frame.ex xIndex) (first xIndex a) (Kronecker.self xIndex))
+        (weightedZero (Frame.ey xIndex) (second xIndex a) crossYX) }
+    "=" { first xIndex a } "by" {
+      trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} (Real.add (first xIndex a)) _ _ Laws.negZero)
+        (Laws.addZeroRight (first xIndex a)) }
+    "=" _ "by" { firstValue xIndex a }
+  };
+\definition yTerm[a: Open.Carrier Open.whole]: Top.coefficient (D.term yIndex omega) a = Real.neg (Partial.partial Open.whole p yIndex a) :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { term yIndex a }
+    "=" { Real.sub Real.zero (second yIndex a) } "by" {
+      congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _
+        (weightedZero (Frame.ex yIndex) (first yIndex a) crossXY)
+        (weightedOne (Frame.ey yIndex) (second yIndex a) (Kronecker.self yIndex)) }
+    "=" { Real.neg (second yIndex a) } "by" { Laws.addZeroLeft (Real.neg (second yIndex a)) }
+    "=" _ "by" { congr!{Real.Real Real.Real} Real.neg _ _ (secondValue yIndex a) }
+  };
+\definition terms[a: Open.Carrier Open.whole][i: Fin.Fin dimension]: Real.Real := Top.coefficient (D.term i omega) a;
+\definition coefficient[a: Open.Carrier Open.whole]: Top.coefficient (D.apply omega) a =
+  Real.sub (Partial.partial Open.whole q xIndex a) (Partial.partial Open.whole p yIndex a) :=
+  eq_reason_in!{Real.Real _
+    "=" { Spaces.Sums[I := Fin.Fin dimension].sum (Fin.elements dimension) (terms a) } "by" {
+      Evaluation.evaluateSum (Fin.elements dimension) (\fun (i: Fin.Fin dimension) => D.term i omega) a Basis.basisArguments }
+    "=" { Sums.sum dimension (terms a) } "by" { Enumeration.sumLaw dimension (terms a) }
+    "=" { Real.add (terms a xIndex) (terms a yIndex) } "by" {
+      congr!{Real.Real Real.Real} (Real.add (terms a xIndex)) _ _ (Laws.addZeroRight (terms a yIndex)) }
+    "=" _ "by" { congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _ (xTerm a) (yTerm a) }
+  };
+\definition value: Region.Coefficient := Vertical.function (Top.coefficient (D.apply omega));
+\import Region.Difference[left := Green.integralX, right := Green.integralY] \as Curl;
+\definition integral: Real.Real := Region.Of[f := value].integral;
+\definition boundary: Real.Real := Green.signedBoundary;
+\definition stokes: integral = boundary :=
+  trans!{Real.Real} _ _ _
+    (congr!{{Region.Coefficient} Real.Real} (\fun (f: Region.Coefficient) => Region.Of[f := f].integral) _ _
+      (\axiom:funext(value, Curl.difference, \fun (a: Region.Carrier) => coefficient (Vertical.coordinate a))))
+    Green.green;

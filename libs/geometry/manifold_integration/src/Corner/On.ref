@@ -1,0 +1,9 @@
+\import Spaces.Multilinear[V := V, space := space] \as Multilinear;
+\import Multilinear.Alternating[] \as Alternating;
+\import Alternating.Contraction[k := N.Nat^::succ n] \as First;
+\import Alternating.Contraction[k := n] \as Second;
+\import manifold_gluing.BoundarySigns[n := n].On[V := V, space := space].Corner[] \as Signs;
+\definition Form: \Set := Alternating.Form (N.Nat^::succ (N.Nat^::succ n));
+\definition Arguments: \Set := Multilinear.Arguments n;
+\module Over(A: \Set, mu: functional_analysis.Measure[A := A].Measure,
+  omega: A -> Form, first, second: A -> V, arguments: A -> Arguments);

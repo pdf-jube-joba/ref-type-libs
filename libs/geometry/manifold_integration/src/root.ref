@@ -1,0 +1,15 @@
+\module Euclidean(n: std.Data[].Nat[].Nat^);
+\module Interval(interval: integration.Real[].Interval);
+\module Collar(n: std.Data[].Nat[].Nat^);
+\module Corner(n: std.Data[].Nat[].Nat^);
+\module Atlas(n: std.Data[].Nat[].Nat^);
+\module FiniteIntegral(A: \Set, mu: functional_analysis.Measure[A := A].Measure);
+\module Flat(n: std.Data[].Nat[].Nat^);
+\module Region(n: std.Data[].Nat[].Nat^);
+\module StandardInterval;
+\module Cylinder(n: std.Data[].Nat[].Nat^, interval: integration.Real[].Interval);
+\module Orthant(n: std.Data[].Nat[].Nat^);
+\module Permute(n: std.Data[].Nat[].Nat^, p: std.Data[].FinSet[].Permutations[n := n].Permutation);
+\module Rectangle(horizontal, vertical: integration.Real[].Interval);
+\module CornerChart(n: std.Data[].Nat[].Nat^);
+\module Simplex(n: std.Data[].Nat[].Nat^);

@@ -1,0 +1,30 @@
+\import \root.Orthant[n := n].In[C := C, U := U, selected := selected] \as Geometry;
+\import boundary_manifolds.Model[n := dimension] \as Model;
+\import \parent.Slice[t := Box.coordinate lower] \as Lower;
+\definition baseBound[p: Carrier][j: Fin.Fin n]: \In[Fin.Fin dimension] C (Indices.left j) -> R.Le Real.zero (p (Indices.left j)) :=
+  \fun (selectedBase: _) => baseNonnegative (leftPoint p) j selectedBase;
+\definition normalBound[p: Carrier][i: One.Index]: R.Le Real.zero (p (Indices.right i)) :=
+  R.leReplace interval.left Real.zero (p (Indices.right One.index)) (p (Indices.right i))
+    atZero (congr!{{One.Index} Real.Real} (Blocks.right p) _ _ (sym!{{One.Index}} _ _ (Fin.singletonValue i)))
+    ((Box.inBox (rightPoint p) (\bysub(Axis.Point, Box.points, rightPoint p))).left);
+\definition nonnegative[p: Carrier]: Model.Nonnegative C p :=
+  \fun (i: Fin.Fin dimension)(inC: \In[Fin.Fin dimension] C i) =>
+    (\idelim Indices.inflate (Indices.split i) = i \with j: Fin.Fin dimension =>
+      \In[Fin.Fin dimension] C j -> R.Le Real.zero (p j) \by {
+        base: (\induction (k: Indices.Index) \return \In[Fin.Fin dimension] C (Indices.inflate k) -> R.Le Real.zero (p (Indices.inflate k)) \with {
+          | inl: \fun (j: Fin.Fin n) => baseBound p j
+          | inr: \fun (j: One.Index)(inC: _) => normalBound p j
+        }) (Indices.split i), equality: Indices.inflateSplit i
+      }) inC;
+\definition modelPoint[p: Carrier]: Geometry.ambient.Point :=
+  \into[Open.Carrier U](coordinate p, Model.region C U) \by { nonnegative p };
+\definition atLower[x: BaseRegion.Carrier]: Geometry.lowerPoint :=
+  \into[Geometry.ambient.Point](modelPoint (into x (Box.coordinate lower)), Geometry.lowerPoint) \by {
+    trans!{{Axis.Point}} _ _ _ (Blocks.rightJoin x (Box.coordinate lower))
+      (\axiom:funext((Box.coordinate lower \of Axis.Point), (\fun (i: One.Index) => Real.zero), \fun (i: One.Index) => atZero))
+  };
+\definition point[x: BaseRegion.Carrier]: Geometry.manifold.Point := Geometry.parameter (atLower x);
+\definition coordinateLaw[x: BaseRegion.Carrier]: (Geometry.apply (point x) \of Open.Carrier U) = Lower.apply x :=
+  congr!{{Geometry.ambient.Point} {Open.Carrier U}} (\fun (p: Geometry.ambient.Point) => p) _ _
+    (Geometry.rightInverse (atLower x));
+\module Of(h: Smooth.SmoothFunction U);

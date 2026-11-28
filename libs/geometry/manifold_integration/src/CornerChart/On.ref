@@ -1,0 +1,10 @@
+\import Manifolds.Quadrant[C := C, U := U] \as Geometry;
+\import euclidean_forms.Euclidean[n := n].On[U := U] \as Forms;
+\import change_of_variables.Euclidean[n := n].TopCoordinates[U := U] \as Top;
+\import Open.Smooth[] \as Smooth;
+\import Open.Topology[].Of[U := U] \as OpenSpace;
+\import metric_spaces.RealLine[] \as Line;
+\definition manifold: Manifolds.Manifold := Geometry.manifold;
+\definition Form: \Set := Forms.Form n;
+\module Within(K: \Pow Model.Point, compact: Sets.IsCompactIn Euclidean.topology K, included: Sets.Subset K U.points,
+  nonnegative: \forall (x: Model.Point) -> Sets.Member K x -> Model.Nonnegative C x);

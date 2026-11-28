@@ -1,0 +1,35 @@
+\import euclidean_measure.RealLine[] \as LebesgueLine;
+\import euclidean_measure.Euclidean[n := One.dimension] \as E;
+\import E.MeasureConstruction[] \as Lebesgue;
+\import euclidean_measure.BoxCompact[n := One.dimension] \as Compact;
+\import topology.Topology[Carrier := E.Point] \as Sets;
+\import topological_algebra.Euclidean[].Dimension[n := One.dimension].Topology[] \as Ambient;
+\import \root.Region[n := One.dimension] \as Integration;
+\definition box: E.Box := LebesgueLine.box interval.left interval.right interval.ordered;
+\definition points: \Pow E.Point := E.points box;
+\definition compact: Sets.IsCompactIn Ambient.topology points := Compact.compact box;
+\import Integration.On[K := points, compact := compact] \as Region;
+\definition inBox[x: E.Point]: Sets.Member points x -> Logic.And[R.Le interval.left (LebesgueLine.scalar x), R.Le (LebesgueLine.scalar x) interval.right] :=
+  \fun (member: Sets.Member points x) => member.right One.index;
+\definition ofBounds[x: E.Point]: Logic.And[R.Le interval.left (LebesgueLine.scalar x), R.Le (LebesgueLine.scalar x) interval.right] -> Sets.Member points x :=
+  \fun (bounds: _) => Logic.And[_, _]::# (\refl(std.Data[].Bool[].Bool^::true))
+    (\fun (i: One.Index) => \idelim x One.index = x i \with v: Real.Real => Logic.And[R.Le interval.left v, R.Le v interval.right] \by {
+      base: bounds,
+      equality: congr!{{One.Index} Real.Real} x _ _ (sym!{{One.Index}} _ _ (Fin.singletonValue i))
+    });
+\definition carrier: \Set := Region.Carrier;
+\definition parameter[x: carrier]: Continuous.Point :=
+  \into[Real.Real](LebesgueLine.scalar x, Line.ClosedInterval interval.left interval.right) \by {
+    inBox x (\bysub(E.Point, points, x))
+  };
+\definition coordinate[t: Continuous.Point]: carrier := \into[E.Point](point t, points) \by {
+  ofBounds (point t) (\bysub(Real.Real, Line.ClosedInterval interval.left interval.right, t))
+};
+\definition parameterContinuous: topology.Continuity[A := carrier, B := Continuous.Point].Continuous Region.topology Continuous.topology parameter :=
+  topology.Continuity[A := carrier, B := Real.Real].Corestriction[S := Line.ClosedInterval interval.left interval.right].corestrictContinuous
+    Region.topology Line.topology parameter
+    (topology.Composition[A := carrier, B := E.Point, C := Real.Real].composeContinuous
+      Region.topology Ambient.topology Line.topology (\fun (x: carrier) => x) LebesgueLine.scalar
+      (topology.Continuity[A := carrier, B := E.Point].Corestriction[S := points].inclusionContinuous Ambient.topology)
+      (Ambient.coordinateContinuous One.index));
+\module Of(f: Continuous.Function);

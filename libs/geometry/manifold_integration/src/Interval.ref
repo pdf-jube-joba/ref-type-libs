@@ -1,0 +1,34 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import real.Analysis[] \as Real;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import calculus.Real[].OneDimension[] \as One;
+\import calculus.Real[].Multivariable[n := One.dimension] \as Model;
+\import Model.Open[] \as Open;
+\import Model.Space[].Def[] \as Coordinates;
+\import Model.Space[].Prop[] \as CoordinateLaws;
+\import change_of_variables.Interval[interval := interval] \as Change;
+\import integration.Real[].Riemann[interval := interval].Continuous[] \as Continuous;
+\import metric_spaces.RealLine[] \as Line;
+\definition point[t: Real.Real]: Model.Point := \fun (i: One.Index) => t;
+\definition replacement[s, t: Real.Real]: point t = Coordinates.replace (point s) One.index t :=
+  \axiom:funext(point t, Coordinates.replace (point s) One.index t, \fun (i: One.Index) => eq_reason_in!{Real.Real t
+    "=" { Coordinates.replace (point s) One.index t One.index } "by" {
+      sym!{Real.Real} _ _ (CoordinateLaws.replaceSame (point s) One.index t) }
+    "=" { Coordinates.replace (point s) One.index t i } "by" {
+      congr!{{One.Index} Real.Real} (Coordinates.replace (point s) One.index t) _ _
+        (sym!{{One.Index}} _ _ (Fin.singletonValue i)) }
+  });
+\definition distance[s, t: Real.Real]: Coordinates.pointDistance (point t) (point s) = Real.distance t s :=
+  trans!{Real.Real} _ _ _
+    (congr!{{Model.Point} Real.Real} (\fun (x: Model.Point) => Coordinates.pointDistance x (point s)) _ _ (replacement s t))
+    (CoordinateLaws.replaceDistance (point s) One.index t);
+\module On(U: Open.OpenSet, within: \forall (t: Continuous.Point) -> \In[Model.Point] U.points (point t));
+\module Box;

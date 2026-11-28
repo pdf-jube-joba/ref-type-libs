@@ -1,0 +1,57 @@
+\import Functions.Sequence[family := Domains, bumps := selected.values] \as Sequence;
+\import Sequence.FiniteCover[S := K] \as Cover;
+\structure Choice[k: N.Nat^]: \Set := {
+  chart: Forms.Chart,
+  positive: \In[Forms.Chart] orientation.positive chart,
+  within: Sets.Subset (selected.values k).openSet chart.domain,
+};
+\definition choose[k: N.Nat^]: \exists Choice[k] :=
+  Logic.orElim (Sets.FamilyMember Domains (selected.values k).openSet) ((selected.values k).openSet = Sets.Empty) (\exists Choice[k])
+    (selected.values k).inCover
+    (\block {
+      \fun (member: Sets.FamilyMember Domains (selected.values k).openSet) \then
+      \takefrom c: \Cast[Forms.Chart] ({ c: Forms.Chart \where Logic.And[
+        \In[Forms.Chart] orientation.positive c, (selected.values k).openSet = c.domain] }) \by member \then
+      \let laws: Logic.And[\In[Forms.Chart] orientation.positive c, (selected.values k).openSet = c.domain] :=
+        \bysub(Forms.Chart, { c: Forms.Chart \where Logic.And[
+          \In[Forms.Chart] orientation.positive c, (selected.values k).openSet = c.domain] }, c) \then
+      \return \exact(Choice[k] { chart := c, positive := laws.left, within :=
+        \fun (x: M.Point)(inside: Sets.Member (selected.values k).openSet x) =>
+          \idelim (selected.values k).openSet = c.domain \with U: \Pow M.Point => Sets.Member U x \by { base: inside, equality: laws.right }
+        }, Choice[k])
+    })
+    (\fun (empty: (selected.values k).openSet = Sets.Empty) =>
+      \exact(Choice[k] {
+        chart := fallback, positive := \bysub(Forms.Chart, orientation.positive, fallback),
+        within := \fun (x: M.Point)(inside: Sets.Member (selected.values k).openSet x) => Logic.falseElim (Sets.Member fallback.domain x)
+          (\idelim (selected.values k).openSet = Sets.Empty \with U: \Pow M.Point => Sets.Member U x \by { base: inside, equality: empty }),
+      }, Choice[k]));
+\module For(chosen: \forall (k: N.Nat^) -> Choice[k], size: N.Nat^, covered: Sets.Subset K (Cover.region size)) {
+  \definition piece[k: N.Nat^]: Piece := Piece {
+    chart := (chosen k).chart,
+    positive := (chosen k).positive,
+    weight := Sequence.part k,
+    compact := Sets.Compactness[].closedSubset M.space (Functions.support (selected.values k).value) (Functions.support (Sequence.part k))
+      (selected.values k).supportCompact (Support.supportClosed M.space (Sequence.part k)) (Sequence.partSupport k),
+    within := Sets.subsetTrans _ _ _ (Sequence.partSupport k)
+      (Sets.subsetTrans _ _ _ (selected.values k).supportWithin (chosen k).within),
+  };
+  \definition normalized[x: M.Point]: Sets.Member K x -> Countable.prefix Sequence.values x size = Real.one :=
+    \fun (member: Sets.Member K x) => trans!{Real.Real} _ _ _
+      (sym!{Real.Real} _ _ (Laws.addZeroRight (Countable.prefix Sequence.values x size)))
+      (trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} (Real.add (Countable.prefix Sequence.values x size)) _ _
+          (sym!{Real.Real} _ _ (Cover.residueZero size x (covered x member))))
+        (Sequence.normalization size x));
+  \definition result: Partition := Partition {
+    size := size, pieces := \fun (i: Fin.Fin size) => piece (backwards size i),
+    total := \fun (x: M.Point)(member: Sets.Member K x) => trans!{Real.Real} _ _ _
+      (reverseSum size Sequence.values x) (normalized x member),
+  };
+}
+\definition exists: \exists Partition := \block {
+  \takefrom chosen: (\forall (k: N.Nat^) -> Choice[k]) \by \axiom:classicalIndefiniteChoice(N.Nat^, (\fun (k: N.Nat^) => Choice[k]), choose) \then
+  \takefrom size: \Cast[N.Nat^] ({ k: N.Nat^ \where Sets.Subset K (Cover.region k) }) \by Cover.prefixExists compact selected.covers \then
+  \let covered: Sets.Subset K (Cover.region size) := \bysub(N.Nat^, { k: N.Nat^ \where Sets.Subset K (Cover.region k) }, size) \then
+  \return \exact(For[chosen := chosen, size := size, covered := covered].result, Partition)
+};

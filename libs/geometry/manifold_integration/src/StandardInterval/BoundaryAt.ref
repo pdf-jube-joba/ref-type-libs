@@ -1,0 +1,58 @@
+\import boundary_manifolds.Tangent[n := One.dimension].On[M := manifold].At[x := x].Cones[] \as Cones;
+\import Geometry.At[x := x] \as Endpoints;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\import Spaces.Coordinates[I := One.Index] \as Vectors;
+\import Spaces.FiniteCoordinates[n := One.dimension] \as Basis;
+\import Basis.Top[] \as Volume;
+\import Spaces.Multilinear[V := Model.Point, space := Vectors.space].Alternating[].DegreeZero[] \as Empty;
+\import manifold_gluing.BoundarySigns[n := N.Nat^::zero].On[V := Model.Point, space := Vectors.space] \as Signs;
+\definition actual: Logic.PropEquiv[Cones.Boundary, Logic.Or[x = left, x = right]] := Endpoints.criterion;
+\definition outward: Model.Point := x;
+\definition outwardDerivative[onBoundary: Cones.Boundary]:
+  R.Lt (boundary_manifolds.Differentiation[n := One.dimension].On[U := Open.whole].value Disk.defining x outward) Real.zero :=
+  R.ltReplaceLeft Disk.At[a := x].coefficient _ Real.zero
+    (sym!{Real.Real} _ _ (Disk.At[a := x].radialAtBoundary
+      (boundary_manifolds.Sublevel[n := N.Nat^::zero].Of[U := Open.whole, f := Disk.function].Build[regular := Disk.regular].At[x := x].toZero onBoundary)))
+    (Laws.negativeNegOfPositive _ Disk.At[a := x].twoPositive);
+\definition orientation: Real.Real := Signs.inward Volume.volume outward Empty.emptyArguments;
+\definition contribution[f: Smooth.SmoothFunction Open.whole]: Real.Real := Real.mul orientation (f x);
+\definition scalarLaw: orientation = x One.index := \block {
+  \let unit: Model.Point := Basis.vectors One.index \then
+  \let normal: Model.Point := Vectors.space.smul (x One.index) unit \then
+  \let same: outward = normal := \axiom:funext(outward, normal, \fun (i: One.Index) => eq_reason_in!{Real.Real {outward i}
+    "=" {x One.index} "by" { congr!{{One.Index} Real.Real} x _ _ (Fin.singletonValue i) }
+    "=" {Real.mul (x One.index) Real.one} "by" { sym!{Real.Real} _ _ (Algebra.mulOneRight (x One.index)) }
+    "=" {normal i} "by" {
+      congr!{Real.Real Real.Real} (Real.mul (x One.index)) _ _
+        (sym!{Real.Real} _ _ (Vectors.Kronecker[].equal One.index i (sym!{{One.Index}} _ _ (Fin.singletonValue i)))) }
+  }) \then
+  \let args: Volume.Arguments := Fin.Tuples[A := Model.Point].extend N.Nat^::zero unit Empty.emptyArguments \then
+  \let argLaw: args = Volume.basisArguments := \axiom:funext(args, Volume.basisArguments, \fun (i: One.Index) => eq_reason_in!{Model.Point {args i}
+    "=" { args One.index } "by" { congr!{{One.Index} Model.Point} args _ _ (Fin.singletonValue i) }
+    "=" { unit } "by" { Fin.Tuples[A := Model.Point].atZero N.Nat^::zero unit Empty.emptyArguments }
+    "=" { Volume.basisArguments i } "by" { congr!{{One.Index} Model.Point} Basis.vectors _ _ (sym!{{One.Index}} _ _ (Fin.singletonValue i)) }
+  }) \then
+  \return eq_reason_in!{Real.Real _
+    "=" { Signs.inward Volume.volume normal Empty.emptyArguments } "by" {
+      congr!{Model.Point Real.Real} (\fun (v: Model.Point) => Signs.inward Volume.volume v Empty.emptyArguments) _ _ same }
+    "=" { Real.mul (x One.index) (Volume.volume args) } "by" {
+      Signs.positiveScale Volume.volume unit (x One.index) Empty.emptyArguments }
+    "=" { Real.mul (x One.index) Real.one } "by" {
+      congr!{Real.Real Real.Real} (Real.mul (x One.index)) _ _
+        (trans!{Real.Real} _ _ _ (congr!{{Volume.Arguments} Real.Real} Volume.volume _ _ argLaw) Volume.normalized) }
+    "=" _ "by" { Algebra.mulOneRight (x One.index) }
+  }
+};
+\definition leftValue[f: Smooth.SmoothFunction Open.whole]: x = left -> contribution f = Real.neg (f x) :=
+  \fun (same: x = left) => eq_reason_in!{Real.Real _
+    "=" { Real.mul (Real.neg Real.one) (f x) } "by" {
+      congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (f x)) _ _
+        (trans!{Real.Real} _ _ _ scalarLaw (congr!{{manifold.Point} Real.Real} (\fun (y: manifold.Point) => y One.index) _ _ same)) }
+    "=" _ "by" { trans!{Real.Real} _ _ _ (Laws.fieldMulNegLeft Real.one (f x))
+      (congr!{Real.Real Real.Real} Real.neg _ _ (Laws.fieldMulOneLeft (f x))) }
+  };
+\definition rightValue[f: Smooth.SmoothFunction Open.whole]: x = right -> contribution f = f x :=
+  \fun (same: x = right) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (f x)) _ _
+      (trans!{Real.Real} _ _ _ scalarLaw (congr!{{manifold.Point} Real.Real} (\fun (y: manifold.Point) => y One.index) _ _ same)))
+    (Laws.fieldMulOneLeft (f x));

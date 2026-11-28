@@ -1,0 +1,18 @@
+\import change_of_variables.OneCoordinate[n := n] \as A04;
+\import \parent.Slice[t := Box.coordinate lower] \as Lower;
+\import \parent.Slice[t := Box.coordinate upper] \as Upper;
+\import BaseRegion.Of[f := Lower.value h] \as LowerIntegral;
+\import BaseRegion.Of[f := Upper.value h] \as UpperIntegral;
+\import BaseRegion.Difference[left := Upper.value h, right := Lower.value h] \as Difference;
+\definition derivative: Smooth.SmoothFunction U := Partial.derivative U h A04.pivot;
+\import \parent.\parent.Of[f := function derivative] \as Interior;
+\import functional_analysis.Measure[A := Axis.Point].Integral[mu := Axis.MeasureConstruction[].measure] \as AxisIntegral;
+\import lp_spaces.On[A := Axis.Point, mu := Axis.MeasureConstruction[].measure].One[].Norm[] \as IntegralEquality;
+\module At(x: BaseRegion.Carrier);
+\definition fiberLaw[x: BaseRegion.Carrier]: Interior.inner x = Difference.difference x := At[x := x].law;
+\import Interior.Sections[g := Difference.difference, agrees := fiberLaw] \as Fubini;
+\definition integral: Real.Real := Interior.integral;
+\definition lowerIntegral: Real.Real := LowerIntegral.integral;
+\definition upperIntegral: Real.Real := UpperIntegral.integral;
+\definition theorem: integral = Real.sub upperIntegral lowerIntegral :=
+  trans!{Real.Real} _ _ _ Fubini.integralLaw Difference.law;

@@ -1,0 +1,66 @@
+\import std.Logic[].Classical[] \as Classical;
+\import smooth_partitions.Countable[A := M.Point] \as Countable;
+\definition Domains: \Pow (\Pow M.Point) := { U: \Pow M.Point \where
+  \exists (chart: Forms.Chart \where Logic.And[\In[Forms.Chart] orientation.positive chart, U = chart.domain]) };
+\import Functions.Selection[family := Domains, S := K] \as Selection;
+\import SmoothFunctions.Bumps[family := Domains] \as Bumps;
+\definition local[x: M.Point]: Sets.Member K x -> \exists (b: Functions.Bump[Domains] \where Sets.Member b.oneRegion x) := \block {
+  \fun (inK: Sets.Member K x) \then
+  \takefrom chart: \Cast[Forms.Chart] ({ c: Forms.Chart \where Logic.And[\In[Forms.Chart] orientation.positive c, Charts.Contains c x] })
+    \by orientation.covers x \then
+  \let valid: Logic.And[\In[Forms.Chart] orientation.positive chart, Charts.Contains chart x] :=
+    \bysub(Forms.Chart, { c: Forms.Chart \where Logic.And[\In[Forms.Chart] orientation.positive c, Charts.Contains c x] }, chart) \then
+  \let member: Sets.FamilyMember Domains chart.domain :=
+    Logic.existsIntro[Forms.Chart, { c: Forms.Chart \where Logic.And[\In[Forms.Chart] orientation.positive c, chart.domain = c.domain] }]
+      chart (Logic.And[_, _]::# valid.left (\refl(chart.domain))) \then
+  \let p: Charts.LocalPoint chart := \into[M.Point](x, chart.domain) \by { valid.right } \then
+  \let law: \exists (b: Functions.Bump[Domains] \where Sets.Member b.oneRegion x) :=
+    Bumps.At[c := chart, x := p, U := chart.domain, member := member, open := chart.open, inside := valid.right].existsBump \then
+  \return law
+};
+\import Fin.Tuples[A := N.Nat^] \as Indices;
+\definition backwards: \forall (size: N.Nat^) -> Fin.Fin size -> N.Nat^ :=
+  \induction (size: N.Nat^) \return Fin.Fin size -> N.Nat^ \with {
+    | zero: Fin.value N.Nat^::zero
+    | succ: \fun (size: N.Nat^)(tail: Fin.Fin size -> N.Nat^) => Indices.extend size size tail
+  };
+\definition reverseSum: \forall (size: N.Nat^)(f: Countable.Family)(x: M.Point) ->
+  Sums.sum size (\fun (i: Fin.Fin size) => f (backwards size i) x) = Countable.prefix f x size :=
+  \induction (size: N.Nat^) \return \forall (f: Countable.Family)(x: M.Point) ->
+    Sums.sum size (\fun (i: Fin.Fin size) => f (backwards size i) x) = Countable.prefix f x size \with {
+    | zero: \fun (f: Countable.Family)(x: M.Point) => \refl(Real.zero)
+    | succ: \fun (size: N.Nat^)(prev: _)(f: Countable.Family)(x: M.Point) => eq_reason_in!{Real.Real _
+        "=" {Real.add (f size x) (Sums.sum size (\fun (i: Fin.Fin size) => f (backwards size i) x))} "by" {
+          congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+            (congr!{{N.Nat^} Real.Real} (\fun (k: N.Nat^) => f k x) _ _ (Indices.atZero size size (backwards size)))
+            (Sums.congruent size
+              (\fun (i: Fin.Fin size) => f (backwards (N.Nat^::succ size) (Fin.succ size i)) x)
+              (\fun (i: Fin.Fin size) => f (backwards size i) x)
+              (\fun (i: Fin.Fin size) => congr!{{N.Nat^} Real.Real} (\fun (k: N.Nat^) => f k x) _ _ (Indices.atSuccessor size size (backwards size) i))) }
+        "=" {Real.add (f size x) (Countable.prefix f x size)} "by" {congr!{Real.Real Real.Real} (Real.add (f size x)) _ _ (prev f x)}
+        "=" _ "by" {Laws.addComm (f size x) (Countable.prefix f x size)}
+      }
+  };
+\definition Positive: \Set := \Cast[Forms.Chart] orientation.positive;
+\module From(selected: Selection.CountableBumps, fallback: Positive);
+\definition exists: \exists Partition :=
+  Logic.orElim (\exists \Cast[M.Point] K) (Logic.Not (\exists \Cast[M.Point] K)) (\exists Partition)
+    (Classical.excludedMiddle (\exists \Cast[M.Point] K))
+    (\block {
+      \fun (inhabited: \exists \Cast[M.Point] K) \then
+      \takefrom x: \Cast[M.Point] K \by inhabited \then
+      \takefrom chart: \Cast[Forms.Chart] ({ c: Forms.Chart \where Logic.And[\In[Forms.Chart] orientation.positive c, Charts.Contains c x] })
+        \by orientation.covers x \then
+      \let defaultChart: Positive := \into[Forms.Chart](chart, orientation.positive) \by {
+        (\bysub(Forms.Chart, { c: Forms.Chart \where Logic.And[\In[Forms.Chart] orientation.positive c, Charts.Contains c x] }, chart)).left
+      } \then
+      \takefrom selected: Selection.CountableBumps \by Selection.countable M.secondCountable local \then
+      \return From[selected := selected, fallback := defaultChart].exists
+    })
+    (\fun (empty: Logic.Not (\exists \Cast[M.Point] K)) =>
+      \exact(Partition {
+        size := N.Nat^::zero,
+        pieces := Fin.Empty[A := Piece].value,
+        total := \fun (x: M.Point)(member: Sets.Member K x) => Logic.falseElim (Real.zero = Real.one)
+          (empty (\exact(\into[M.Point](x, K) \by { member }, \Cast[M.Point] K))),
+      }, Partition));

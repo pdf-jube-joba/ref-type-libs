@@ -1,0 +1,9 @@
+\import std.Data[].Nat[].Basic[].Def[] \as Nat;
+\import real.Analysis[] \as Real;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import calculus.Real[].OneDimension[] \as One;
+\definition dimension: std.Data[].Nat[].Nat^ := Nat.add One.dimension n;
+\import boundary_manifolds.Dimension[n := dimension] \as Models;
+\import boundary_manifolds.Boundary[n := n] \as Boundary;
+\module On(M: Models.Manifold);

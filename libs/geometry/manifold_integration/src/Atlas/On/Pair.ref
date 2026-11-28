@@ -1,0 +1,58 @@
+\import Charts.Transition[left := left, right := right] \as Forward;
+\import Charts.Transition[left := right, right := left] \as Backward;
+\import Forms.Pair[left := left, right := right] \as LeftForms;
+\import Forms.Pair[left := right, right := left] \as RightForms;
+\import Charts.Of[chart := left] \as Left;
+\import Charts.Of[chart := right] \as Right;
+\import boundary_manifolds.Refinement[A := Model.Point] \as Refined;
+\definition sourceIncluded: Open.Included Forward.domain left.image := LeftForms.included;
+\definition targetIncluded: Open.Included Backward.domain right.image := RightForms.included;
+\definition forwardWithin[x: Open.Carrier Forward.domain]: \In[Model.Point] Backward.domain.points (Forward.apply x) :=
+  Backward.intro (Forward.apply x)
+    (\idelim Charts.point left (Forward.leftCoordinate x) = Charts.point right (Forward.apply x)
+      \with p: M.Point => Charts.Contains left p \by {
+        base: \bysub(M.Point, left.domain, Charts.point left (Forward.leftCoordinate x)),
+        equality: sym!{M.Point} _ _ (Forward.returnsPoint x)
+      });
+\definition backwardWithin[y: Open.Carrier Backward.domain]: \In[Model.Point] Forward.domain.points (Backward.apply y) :=
+  Forward.intro (Backward.apply y)
+    (\idelim Charts.point right (Backward.leftCoordinate y) = Charts.point left (Backward.apply y)
+      \with p: M.Point => Charts.Contains right p \by {
+        base: \bysub(M.Point, right.domain, Charts.point right (Backward.leftCoordinate y)),
+        equality: sym!{M.Point} _ _ (Backward.returnsPoint y)
+      });
+\import Maps.Corestriction[U := Forward.domain, V := right.image, W := Backward.domain, f := LeftForms.transition, inside := forwardWithin] \as ForwardMap;
+\import Maps.Corestriction[U := Backward.domain, V := left.image, W := Forward.domain, f := RightForms.transition, inside := backwardWithin] \as BackwardMap;
+\definition leftInverse[x: Open.Carrier Forward.domain]: BackwardMap.value (ForwardMap.value x) = x :=
+  Refined.equality Forward.domain.points (BackwardMap.value (ForwardMap.value x)) x
+    (Left.pointInjective (Backward.apply (ForwardMap.value x)) (Forward.leftCoordinate x)
+      (trans!{M.Point} _ _ _ (Backward.returnsPoint (ForwardMap.value x)) (Forward.returnsPoint x)));
+\definition rightInverse[y: Open.Carrier Backward.domain]: ForwardMap.value (BackwardMap.value y) = y :=
+  Refined.equality Backward.domain.points (ForwardMap.value (BackwardMap.value y)) y
+    (Right.pointInjective (Forward.apply (BackwardMap.value y)) (Backward.leftCoordinate y)
+      (trans!{M.Point} _ _ _ (Forward.returnsPoint (BackwardMap.value y)) (Backward.returnsPoint y)));
+\definition data: Diffeomorphisms.Data[Forward.domain, Backward.domain] := Diffeomorphisms.Data[Forward.domain, Backward.domain] {
+  forward := ForwardMap.map,
+  backward := BackwardMap.map,
+};
+\definition change: Diffeomorphisms.Diffeomorphism Forward.domain Backward.domain :=
+  \into[Diffeomorphisms.Data[Forward.domain, Backward.domain]](data, { d: Diffeomorphisms.Data[Forward.domain, Backward.domain]
+    \where Diffeomorphisms.Laws[Forward.domain, Backward.domain, d] }) \by {
+    Diffeomorphisms.Laws[Forward.domain, Backward.domain, data] { leftInverse := leftInverse, rightInverse := rightInverse }
+  };
+\import Integration.Transition[U := Forward.domain, V := Backward.domain, e := change] \as Transition;
+\definition Preserving: \Prop := Transition.Preserving;
+\import Integration.Restriction[U := Forward.domain, V := left.image, included := sourceIncluded] \as SourceRestriction;
+\import Integration.Restriction[U := Backward.domain, V := right.image, included := targetIncluded] \as TargetRestriction;
+\import LocalForms.On[U := Forward.domain] \as SourceForms;
+\definition agreement[omega: Forms.Form n]: SourceRestriction.apply (omega left) = Transition.pullback (TargetRestriction.apply (omega right)) :=
+  trans!{{SourceForms.Form n}} (SourceRestriction.apply (omega left)) (LeftForms.transport n omega)
+    (Transition.pullback (TargetRestriction.apply (omega right)))
+    ((\bysub(Forms.Family n, { eta: Forms.Family n \where Forms.Compatible n eta }, omega)) left right)
+    (SourceForms.ext n (LeftForms.transport n omega) (Transition.pullback (TargetRestriction.apply (omega right))) (\fun (x: Open.Carrier Forward.domain)(args: std.Data[].FinSet[].Fin n -> Model.Point) =>
+      congr!{{calculus.Vector[n := n, m := n].LinearMap} Real.Real}
+        (\fun (linear: calculus.Vector[n := n, m := n].LinearMap) => omega right (Forward.apply x)
+          (\fun (i: std.Data[].FinSet[].Fin n) => linear.apply (args i))) _ _ (sym!{{calculus.Vector[n := n, m := n].LinearMap}} _ _ (ForwardMap.differential x))));
+\import Integration.Chart[U := left.image] \as Source;
+\import Integration.Chart[U := right.image] \as Target;
+\module For(omega: Forms.Form n, sourceSupport: Source.Supported (omega left), targetSupport: Target.Supported (omega right));

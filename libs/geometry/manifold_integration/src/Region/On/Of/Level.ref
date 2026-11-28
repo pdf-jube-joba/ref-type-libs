@@ -1,0 +1,49 @@
+\definition inner: \Pow E.Point := Sets.Intersection K U;
+\definition innerMeasurable: M.Measurable Borel.borel.sigma inner :=
+  Sigma.intersectionMeasurable Borel.borel.sigma K U (BorelSets.closed K closed) (BorelSets.open U open);
+\definition insideAbove[x: Carrier]: R.Lt r (value x) -> Sets.Member U x :=
+  \fun (higher: _) => \idelim localAbove r = Subspace.Trace U \with W: \Pow Carrier => LocalSets.Member W x \by {
+    base: R.ltReplaceRight r (value x) (f x) (inside x) higher, equality: trace
+  };
+\definition aboveInside[x: Carrier]: Sets.Member U x -> R.Lt r (value x) :=
+  \fun (member: Sets.Member U x) => R.ltReplaceRight r (f x) (value x) (sym!{Real.Real} _ _ (inside x))
+    (\idelim Subspace.Trace U = localAbove r \with W: \Pow Carrier => LocalSets.Member W x \by {
+      base: member, equality: sym!{{\Pow Carrier}} _ _ trace
+    });
+\definition inject[x: E.Point]: Sets.Member inner x -> Sets.Member (above r) x :=
+  \fun (member: Sets.Member inner x) => aboveInside (\into[E.Point](x, K) \by { member.left }) member.right;
+\definition split[x: E.Point]: Sets.Member (above r) x ->
+  Logic.Or[Sets.Member inner x, Logic.And[Logic.Not (Sets.Member K x), R.Lt r Real.zero]] :=
+  \fun (higher: _) => Logic.orElim (Sets.Member K x) (Logic.Not (Sets.Member K x))
+    (Logic.Or[Sets.Member inner x, Logic.And[Logic.Not (Sets.Member K x), R.Lt r Real.zero]])
+    (Classical.excludedMiddle (Sets.Member K x))
+    (\fun (member: Sets.Member K x) => Logic.Or[_, _]::left
+      (Logic.And[_, _]::# member (insideAbove (\into[E.Point](x, K) \by { member }) higher)))
+    (\fun (absent: Logic.Not (Sets.Member K x)) => Logic.Or[_, _]::right
+      (Logic.And[_, _]::# absent (R.ltReplaceRight r (value x) Real.zero (outside x absent) higher)));
+\definition negative[rNegative: R.Lt r Real.zero]: Sigma.pairUnion inner (Sets.Complement K) = above r :=
+  \axiom:setext(Sigma.pairUnion inner (Sets.Complement K), above r,
+    \fun (x: E.Point)(member: Sets.Member (Sigma.pairUnion inner (Sets.Complement K)) x) =>
+      Logic.orElim (Sets.Member inner x) (Logic.Not (Sets.Member K x)) (Sets.Member (above r) x) member (inject x)
+        (\fun (absent: Logic.Not (Sets.Member K x)) => R.ltReplaceRight r Real.zero (value x) (sym!{Real.Real} _ _ (outside x absent)) rNegative),
+    \fun (x: E.Point)(member: Sets.Member (above r) x) => Logic.orElim (Sets.Member inner x)
+      (Logic.And[Logic.Not (Sets.Member K x), R.Lt r Real.zero]) (Sets.Member (Sigma.pairUnion inner (Sets.Complement K)) x)
+      (split x member) (\fun (a: Sets.Member inner x) => Logic.Or[_, _]::left a)
+      (\fun (b: Logic.And[Logic.Not (Sets.Member K x), R.Lt r Real.zero]) => Logic.Or[_, _]::right b.left));
+\definition nonnegative[rNonnegative: Logic.Not (R.Lt r Real.zero)]: inner = above r :=
+  \axiom:setext(inner, above r, inject,
+    \fun (x: E.Point)(member: Sets.Member (above r) x) => Logic.orElim (Sets.Member inner x)
+      (Logic.And[Logic.Not (Sets.Member K x), R.Lt r Real.zero]) (Sets.Member inner x) (split x member)
+      (\fun (a: Sets.Member inner x) => a)
+      (\fun (b: Logic.And[Logic.Not (Sets.Member K x), R.Lt r Real.zero]) => Logic.falseElim (Sets.Member inner x) (rNonnegative b.right)));
+\definition measurable: M.Measurable Borel.borel.sigma (above r) :=
+  Logic.orElim (R.Lt r Real.zero) (Logic.Not (R.Lt r Real.zero)) (M.Measurable Borel.borel.sigma (above r))
+    (Classical.excludedMiddle (R.Lt r Real.zero))
+    (\fun (yes: R.Lt r Real.zero) => \idelim Sigma.pairUnion inner (Sets.Complement K) = above r
+      \with V: \Pow E.Point => M.Measurable Borel.borel.sigma V \by {
+        base: Sigma.pairMeasurable Borel.borel.sigma inner (Sets.Complement K) innerMeasurable
+          ((Sigma.laws Borel.borel.sigma).complement K (BorelSets.closed K closed)), equality: negative yes
+      })
+    (\fun (no: Logic.Not (R.Lt r Real.zero)) => \idelim inner = above r \with V: \Pow E.Point => M.Measurable Borel.borel.sigma V \by {
+      base: innerMeasurable, equality: nonnegative no
+    });

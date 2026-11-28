@@ -1,0 +1,17 @@
+\import Charts.Transition[left := chart, right := other] \as Transition;
+\definition imageWithin: ModelSets.Subset image Transition.domain.points :=
+  \fun (a: Model.Point)(member: ModelSets.Member image a) =>
+    Image.imageElim coordinate LocalSets.Whole a (ModelSets.Member Transition.domain.points a)
+      (\fun (x: Carrier.CarrierSet)(whole: _)(same: coordinate x = a) => \block {
+        \let p: Open.Carrier chart.image := Charts.coordinate chart (localPoint x) \then
+        \let atPoint: Charts.Contains other (Charts.point chart p) :=
+          \idelim (x \of M.Point) = (Charts.point chart p \of M.Point) \with q: M.Point => Charts.Contains other q \by {
+            base: alsoContains x (\bysub(M.Point, K, x)),
+            equality: sym!{M.Point} _ _ (Charts.Of[chart := chart].pointCoordinate (localPoint x))
+          } \then
+        \return \idelim coordinate x = a \with y: Model.Point => ModelSets.Member Transition.domain.points y \by {
+          base: Transition.intro p atPoint, equality: same
+        }
+      }) member;
+\definition within: ModelSets.Subset (Smooth.support Extension.value) Transition.domain.points :=
+  \fun (a: Model.Point)(member: _) => imageWithin a (inImage a member);

@@ -1,0 +1,46 @@
+\import Finite.Bounded[S := finite] \as Bounded;
+\import I.Scaling[] \as Scaling;
+\definition continuous: Continuous f := \bysub(Carrier -> Real.Real, Coefficient, f);
+\definition value[x: E.Point]: Real.Real := Extension.extend f Real.zero x;
+\definition inside[x: Carrier]: value x = f x := Extension.inside f Real.zero x;
+\definition outside[x: E.Point]: Logic.Not (Sets.Member K x) -> value x = Real.zero := Extension.outside f Real.zero x;
+\definition above[r: Real.Real]: \Pow E.Point := { x: E.Point \where R.Lt r (value x) };
+\definition localAbove[r: Real.Real]: \Pow Carrier := { x: Carrier \where R.Lt r (f x) };
+\module Level(r: Real.Real, U: \Pow E.Point, open: Sets.IsOpenIn Ambient.topology U, trace: localAbove r = Subspace.Trace U);
+\definition measurable: M.IsMeasurable Borel.borel value :=
+  \fun (r: Real.Real) => Subspace.openTraceElim Ambient.topology (localAbove r) (M.Measurable Borel.borel.sigma (above r))
+    (\fun (U: \Pow E.Point)(open: Sets.IsOpenIn Ambient.topology U)(trace: localAbove r = Subspace.Trace U) =>
+      Level[r := r, U := U, open := open, trace := trace].measurable)
+    (Subspace.openRepresentation Ambient.topology (localAbove r) (continuous (Rays.Above r) (Rays.aboveOpen r)));
+\definition hasBound: \exists (c: Scaling.NonnegativeScalar \where \forall (x: Carrier) -> R.Le (Absolute.abs (f x)) c) := \block {
+  \let image: \Pow Real.Real := Image.Image (\fun (x: Carrier) => Absolute.abs (f x)) LocalSets.Whole \then
+  \let compactImage: topology.Topology[Carrier := Real.Real].IsCompactIn Line.topology image :=
+    CompactImage.continuousImage topology Line.topology (\fun (x: Carrier) => Absolute.abs (f x))
+      (Functions.Lattice[].absoluteContinuous topology f continuous) LocalSets.Whole (Properties.compact Ambient.topology compact) \then
+  \takefrom b: \Cast[Real.Real] ({ b: Real.Real \where R.Completeness[].UpperBound image b }) \by Extrema.compactBounded image compactImage \then
+  \let bound: R.Completeness[].UpperBound image b := \bysub(Real.Real, { b: Real.Real \where R.Completeness[].UpperBound image b }, b) \then
+  \let c: Scaling.NonnegativeScalar := \into[Real.Real](Real.Distance[].max Real.zero b, Scaling.NonnegativeScalar) \by { Real.Distance[].maxLeft Real.zero b } \then
+  \return Logic.existsIntro[Scaling.NonnegativeScalar, { d: Scaling.NonnegativeScalar \where \forall (x: Carrier) -> R.Le (Absolute.abs (f x)) d }] c
+    (\fun (x: Carrier) => R.leTrans (Absolute.abs (f x)) b c
+      (bound (Absolute.abs (f x)) (Image.imageMember (\fun (z: Carrier) => Absolute.abs (f z)) LocalSets.Whole x (\refl(x))))
+      (Real.Distance[].maxRight Real.zero b))
+};
+\definition integrable: I.Integrable value := \block {
+  \takefrom c: \Cast[Scaling.NonnegativeScalar] ({ c: Scaling.NonnegativeScalar \where \forall (x: Carrier) -> R.Le (Absolute.abs (f x)) c }) \by hasBound \then
+  \let bound: \forall (x: Carrier) -> R.Le (Absolute.abs (f x)) c :=
+    \bysub(Scaling.NonnegativeScalar, { c: Scaling.NonnegativeScalar \where \forall (x: Carrier) -> R.Le (Absolute.abs (f x)) c }, c) \then
+  \return Bounded.integrable c value (Bounded.Conditions[value, c] {
+    measurable := measurable,
+    bound := \fun (x: E.Point)(member: Sets.Member K x) => \block {
+      \let p: Carrier := \into[E.Point](x, K) \by { member } \then
+      \return R.leReplaceLeft (Absolute.abs (f p)) (Absolute.abs (value x)) c
+        (congr!{Real.Real Real.Real} Absolute.abs _ _ (sym!{Real.Real} _ _ (inside p))) (bound p)
+    },
+    outside := outside,
+  })
+};
+\definition borelRepresentative: I.Representatives := \into[E.Point -> Real.Real](value, I.Representatives) \by { integrable };
+\import Map.On[map := completion].RealFunction[f := borelRepresentative] \as Completed;
+\definition representative: J.Representatives := Completed.representative;
+\definition integral: Real.Real := J.integral representative;
+\definition borelIntegral: I.integral borelRepresentative = integral := sym!{Real.Real} _ _ Completed.integral;

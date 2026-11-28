@@ -1,0 +1,38 @@
+\import BaseSets.Finite[] \as Sets;
+\import BaseSets.Compactness[] \as Compactness;
+\definition union: \Pow M.Point := Sets.Join left right;
+\definition compact: BaseSets.IsCompactIn M.space union := Compactness.joinCompact M.space left right leftCompact rightCompact;
+\definition vanishes: Vanishing omega union :=
+  \fun (chart: Forms.Chart)(a: Open.Carrier chart.image)(outside: Logic.Not (BaseSets.Member union (Charts.point chart a))) =>
+    leftVanishes chart a (\fun (member: BaseSets.Member left (Charts.point chart a)) => outside
+      (Logic.Or[BaseSets.Member left (Charts.point chart a), BaseSets.Member right (Charts.point chart a)]::left member));
+\import \parent.Partition[orientation := orientation, omega := omega, K := left, compact := leftCompact, vanishes := leftVanishes] \as Left;
+\import \parent.Partition[orientation := orientation, omega := omega, K := right, compact := rightCompact, vanishes := rightVanishes] \as Right;
+\import \parent.Partition[orientation := orientation, omega := omega, K := union, compact := compact, vanishes := vanishes] \as Common;
+\module Using(partition: Common.Partition) {
+  \definition forLeft: Left.Partition := Left.Partition {
+    size := partition.size,
+    pieces := \fun (i: std.Data[].FinSet[].Fin partition.size) => Left.Piece {
+      chart := (partition.pieces i).chart, positive := (partition.pieces i).positive,
+      weight := (partition.pieces i).weight, compact := (partition.pieces i).compact, within := (partition.pieces i).within,
+    },
+    total := \fun (x: M.Point)(member: BaseSets.Member left x) => partition.total x
+      (Logic.Or[BaseSets.Member left x, BaseSets.Member right x]::left member),
+  };
+  \definition forRight: Right.Partition := Right.Partition {
+    size := partition.size,
+    pieces := \fun (i: std.Data[].FinSet[].Fin partition.size) => Right.Piece {
+      chart := (partition.pieces i).chart, positive := (partition.pieces i).positive,
+      weight := (partition.pieces i).weight, compact := (partition.pieces i).compact, within := (partition.pieces i).within,
+    },
+    total := \fun (x: M.Point)(member: BaseSets.Member right x) => partition.total x
+      (Logic.Or[BaseSets.Member left x, BaseSets.Member right x]::right member),
+  };
+  \definition equation: (Left.integral \of Real.Real) = (Right.integral \of Real.Real) :=
+    trans!{Real.Real} Left.integral (Left.sum forLeft) Right.integral (Left.evaluates forLeft)
+      (sym!{Real.Real} Right.integral (Right.sum forRight) (Right.evaluates forRight));
+}
+\definition independent: (Left.integral \of Real.Real) = (Right.integral \of Real.Real) := \block {
+  \takefrom partition: Common.Partition \by Common.exists \then
+  \return Using[partition := partition].equation
+};

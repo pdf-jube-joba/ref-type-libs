@@ -1,0 +1,39 @@
+\import Analysis.Section[U := U, f := f, a := left, i := One.index] \as Section;
+\definition value[t: Real.Real]: Real.Real := Section.value t;
+\definition agrees[t: Continuous.Point]: value t = f (coordinate t) :=
+  Section.agreement t (coordinate t) (replacement interval.left t);
+\definition continuousLaw: Continuous.IsContinuous value :=
+  Functions.continuousOfLocal Continuous.topology (Continuous.restrict value) (\block {
+    \fun (t: Continuous.Point)(epsilon: Real.Real)(positive: R.Lt Real.zero epsilon) \then
+    \let a: Open.Carrier U := coordinate t \then
+    \takefrom delta: \Cast[Real.Real] ({ d: Real.Real \where Analysis.ContinuityControl[U, f, a, epsilon, d] })
+      \by Properties.continuous U f (\bysub(Open.ScalarFunction U, Smooth.SmoothFunction U, f)) a epsilon positive \then
+    \let control: Analysis.ContinuityControl[U, f, a, epsilon, delta] :=
+      \bysub(Real.Real, { d: Real.Real \where Analysis.ContinuityControl[U, f, a, epsilon, d] }, delta) \then
+    \let ball: \Pow Continuous.Point := IntervalMetric.Ball Continuous.metric t delta \then
+    \return Logic.existsIntro[\Pow Continuous.Point, { B: \Pow Continuous.Point \where
+      PointSets.OpenNeighborhood[Continuous.topology, t, Functions.Small (Continuous.restrict value) t epsilon, B] }] ball
+      (PointSets.OpenNeighborhood[Continuous.topology, t, Functions.Small (Continuous.restrict value) t epsilon, ball] {
+        open := \idelim MetricTopology.topology Continuous.metric = Continuous.topology
+          \with space: PointSets.Topology => PointSets.IsOpenIn space ball \by {
+            base: MetricTopology.ballOpenIn Continuous.metric t delta,
+            equality: Submetric.topology RealMetric.metric
+          },
+        contains := IntervalMetric.ballCenter Continuous.metric t delta control.positive,
+        within := \fun (s: Continuous.Point)(near: PointSets.Member ball s) =>
+          R.ltReplaceLeft (Real.distance (f (coordinate s)) (f a)) _ epsilon
+            (eq_reason_in!{Real.Real _
+              "=" { Real.distance (value s) (value t) } "by" {
+                congr!{Real.Real Real.Real Real.Real} Real.distance _ _ _ _
+                  (sym!{Real.Real} _ _ (agrees s)) (sym!{Real.Real} _ _ (agrees t)) }
+              "=" _ "by" { Real.Distance[].distanceSymmetric (value s) (value t) }
+            })
+            (control.estimate (coordinate s)
+              (R.ltReplaceLeft (Real.distance t s) _ delta
+                (trans!{Real.Real} _ _ _ (Real.Distance[].distanceSymmetric t s) (sym!{Real.Real} _ _ (distance t s))) near)),
+      })
+  });
+\definition continuous: Continuous.Function := \into[Real.Real -> Real.Real](value, Continuous.Function) \by { continuousLaw };
+\definition derivativeAt[t: Continuous.Point]: Derivatives.HasDerivativeAt value t (Partials.partial U f One.index (coordinate t)) :=
+  Section.derivativeAt t (coordinate t) (Partials.partial U f One.index (coordinate t))
+    (replacement interval.left t) (Partials.partialLaw U f One.index (coordinate t));

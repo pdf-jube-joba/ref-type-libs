@@ -1,0 +1,21 @@
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].sym;
+\import \parent.Chart[U := U] \as Source;
+\import \parent.Chart[U := V] \as Target;
+\import Forms.Restriction[U := U, V := V] \as Restrict;
+\import Change.TopCoordinates[U := V] \as Coordinates;
+\import Change.Localization[U := V] \as Localization;
+\import Change.Compact[] \as Compact;
+\definition apply[omega: Target.Form]: Source.Form := Restrict.apply n included omega;
+\module Of(omega: Target.Form, supported: Target.Supported omega) {
+  \definition extension: CompactFunctions.SmoothCompact := Localization.extend (Coordinates.coefficient omega) supported;
+  \definition Within: \Prop := Sets.Subset (Supports.support extension) U.points;
+  \module In(within: Within) {
+    \definition agrees[x: Open.Carrier U]: Change.TopCoordinates[U := U].coefficient (apply omega) x = extension x :=
+      sym!{Real.Real} _ _ (Localization.inside (Coordinates.coefficient omega) supported (Open.inclusion U V included x));
+    \import Source.Represented[omega := apply omega, f := extension, within := within, agrees := agrees] \as Representation;
+    \definition support: Source.Supported (apply omega) := Representation.support;
+    \definition integral[valid: Source.Supported (apply omega)]: Source.integral (apply omega) valid = Target.integral omega supported :=
+      Representation.integralLaw valid;
+  }
+}

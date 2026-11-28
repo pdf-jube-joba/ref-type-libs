@@ -1,0 +1,30 @@
+\import calculus.Maps[n := n, m := n] \as Maps;
+\import Permutation.Smooth[] \as Permuted;
+\import Maps.Composition[U := Open.whole, V := Open.whole, f := Permuted.forward] \as Composition;
+\import calculus.Real[].Multivariable[n := n].Space[].Def[] \as Coordinates;
+\import calculus.Real[].Multivariable[n := n].Space[].Prop[] \as Laws;
+\import Open.Analysis[] \as Analysis;
+\import Smoothness.Differential[] \as Differential;
+\import Fin.Permutations[n := n] \as P;
+\definition function: Smoothness.SmoothFunction Open.whole := Composition.function f;
+\definition permutedBasis[i: Fin.Fin n]: point (Coordinates.basis i) = Coordinates.basis (p.backward i) :=
+  \axiom:funext(point (Coordinates.basis i), Coordinates.basis (p.backward i), \fun (j: Fin.Fin n) =>
+    Logic.orElim (i = p.forward j) (Logic.Not (i = p.forward j))
+      (Coordinates.basis i (p.forward j) = Coordinates.basis (p.backward i) j)
+      (Classical.excludedMiddle (i = p.forward j))
+      (\fun (same: i = p.forward j) => \block {
+        \let target: p.backward i = j := trans!{{Fin.Fin n}} _ _ _
+          (congr!{{Fin.Fin n} {Fin.Fin n}} p.backward _ _ same) ((P.laws p).leftInverse j) \then
+        \let atSource: Coordinates.basis i (p.forward j) = Real.one :=
+          trans!{Real.Real} _ _ _ (congr!{{Fin.Fin n} Real.Real} (Coordinates.basis i) _ _ (sym!{{Fin.Fin n}} _ _ same)) (Laws.replaceSame Coordinates.origin i Real.one) \then
+        \let atTarget: Coordinates.basis (p.backward i) j = Real.one :=
+          trans!{Real.Real} _ _ _ (congr!{{Fin.Fin n} Real.Real} (Coordinates.basis (p.backward i)) _ _ (sym!{{Fin.Fin n}} _ _ target))
+            (Laws.replaceSame Coordinates.origin (p.backward i) Real.one) \then
+        \return trans!{Real.Real} _ _ _ atSource (sym!{Real.Real} _ _ atTarget)
+      })
+      (\fun (different: Logic.Not (i = p.forward j)) => trans!{Real.Real} _ _ _
+        (Laws.replaceDifferent Coordinates.origin i (p.forward j) Real.one different)
+        (sym!{Real.Real} _ _ (Laws.replaceDifferent Coordinates.origin (p.backward i) j Real.one
+          (\fun (same: p.backward i = j) => different (trans!{{Fin.Fin n}} _ _ _
+            (sym!{{Fin.Fin n}} _ _ ((P.laws p).rightInverse i)) (congr!{{Fin.Fin n} {Fin.Fin n}} p.forward _ _ same)))))));
+\module At(x: Open.Carrier Open.whole);

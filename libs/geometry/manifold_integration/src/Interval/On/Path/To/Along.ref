@@ -1,0 +1,53 @@
+\definition zero: N.Nat^ := N.Nat^::zero;
+\import differential_forms.Pullback[n := One.dimension, m := m].Between[M := domain, N := target].Of[f := sigma] \as Pullback;
+\import Pullback.At[k := zero] \as PullbackZero;
+\import Pullback.At[k := One.dimension] \as PullbackOne;
+\import SourceForms.ExteriorDerivative[k := zero] \as SourceD;
+\import TargetForms.ExteriorDerivative[k := zero] \as TargetD;
+\import SourceForms.DegreeZero[] \as SourceZero;
+\import SourceZero.Coordinates[chart := chart] \as ChartZero;
+\import TargetForms.DegreeZero[] \as TargetZero;
+\import Forms.DegreeZero[] \as LocalZero;
+\import std.Data[].FinSet[] \as Fin;
+\import manifolds.Tangent[n := One.dimension].On[M := domain] \as SourceTangent;
+\import manifolds.Tangent[n := m].On[M := target] \as TargetTangent;
+\import Real.Algebra[] \as Algebra;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\definition start: target.Point := Maps.apply sigma left;
+\definition finish: target.Point := Maps.apply sigma right;
+\definition cochain[omega: TargetForms.Form One.dimension]: Real.Real :=
+  integral (PullbackOne.apply omega chart);
+\definition coboundary[f: TargetForms.Form zero]: Real.Real := Real.sub (TargetZero.value f finish) (TargetZero.value f start);
+\module Of(f: TargetForms.Form zero) {
+  \definition localForm: Forms.Form zero := PullbackZero.apply f chart;
+  \definition function: Smooth.SmoothFunction U := LocalZero.function localForm;
+  \definition functionForm: LocalZero.apply function = localForm := LocalZero.isomorphism.rightInverse localForm;
+  \module Endpoint(x: Open.Carrier U) {
+    \import SourceTangent.At[x := x] \as Source;
+    \import TargetTangent.At[x := Maps.apply sigma x] \as Target;
+    \import Spaces.Multilinear[V := Source.Vector, space := Source.space].Alternating[].DegreeZero[] \as SourceScalars;
+    \import Spaces.Multilinear[V := Target.Vector, space := Target.space].Alternating[].DegreeZero[] \as TargetScalars;
+    \import manifolds.Differential[n := One.dimension, m := m].Between[M := domain, N := target].At[f := sigma, x := x] \as D;
+    \definition mapped[i: Fin.Fin zero]: Target.Vector := D.value.apply (SourceScalars.emptyArguments i);
+    \definition law: function x = TargetZero.value f (Maps.apply sigma x) :=
+      eq_reason_in!{Real.Real _
+        "=" { SourceZero.value (PullbackZero.apply f) x } "by" { sym!{Real.Real} _ _ (ChartZero.law (PullbackZero.apply f) x) }
+        "=" { TargetForms.Pointwise[k := zero].value f (Maps.apply sigma x) mapped } "by" { PullbackZero.formula f x SourceScalars.emptyArguments }
+        "=" _ "by" {
+          congr!{{Fin.Fin zero -> Target.Vector} Real.Real} (TargetForms.Pointwise[k := zero].value f (Maps.apply sigma x))
+            mapped TargetScalars.emptyArguments (TargetScalars.argumentsUnique mapped) }
+      };
+  }
+  \definition endpoint[x: Open.Carrier U]: function x = TargetZero.value f (Maps.apply sigma x) := Endpoint[x := x].law;
+  \definition stokes: cochain (TargetD.apply f) = coboundary f :=
+    eq_reason_in!{Real.Real _
+      "=" { integral (SourceD.apply (PullbackZero.apply f) chart) } "by" {
+        congr!{{SourceForms.Form One.dimension} Real.Real} (\fun (u: SourceForms.Form One.dimension) => integral (u chart)) _ _
+          (sym!{{SourceForms.Form One.dimension}} _ _ (Pullback.Differential[k := zero].law f)) }
+      "=" { integral (Forms.ExteriorDerivative[k := zero].apply (LocalZero.apply function)) } "by" {
+        congr!{{Forms.Form zero} Real.Real} (\fun (u: Forms.Form zero) => integral (Forms.ExteriorDerivative[k := zero].apply u)) _ _
+          (sym!{{Forms.Form zero}} _ _ functionForm) }
+      "=" { Real.sub (function right) (function left) } "by" { \parent.\parent.\parent.\parent.Exact[f := function].stokes }
+      "=" _ "by" { congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _ (endpoint right) (endpoint left) }
+    };
+}

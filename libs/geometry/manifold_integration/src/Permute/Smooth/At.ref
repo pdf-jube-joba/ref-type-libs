@@ -1,0 +1,18 @@
+\import calculus.LinearMap[n := n, m := n].On[U := Open.whole, L := Permutation.map] \as Linear;
+\definition image: Open.Carrier Open.whole := Maps.apply Open.whole Open.whole Permuted.forward x;
+\import calculus.Vector[n := n, m := n].Chain[U := Open.whole, V := Open.whole, f := Maps.apply Open.whole Open.whole Permuted.forward,
+  a := x, d := Permutation.map, g := f, e := Differential.value Open.whole f image] \as Chain;
+\definition derivative[i: Fin.Fin n]: Partial.partial Open.whole function i x = Partial.partial Open.whole f (p.backward i) image := \block {
+  \let rule: Analysis.HasPartialDerivativeAt Open.whole function i x (Chain.differential.apply (Coordinates.basis i)) :=
+    Analysis.Differential[U := Open.whole, f := function, a := x, d := Chain.differential].Partial[i := i].law
+      (Chain.law (Linear.vectorLaw x) (Differential.law Open.whole f image)) \then
+  \let reduced: Chain.differential.apply (Coordinates.basis i) = (Differential.value Open.whole f image).apply (Coordinates.basis (p.backward i)) :=
+    congr!{{E.Point} Real.Real} (Differential.value Open.whole f image).apply _ _ (permutedBasis i) \then
+  \let target: Analysis.HasPartialDerivativeAt Open.whole f (p.backward i) image ((Differential.value Open.whole f image).apply (Coordinates.basis (p.backward i))) :=
+    Analysis.Differential[U := Open.whole, f := f, a := image, d := Differential.value Open.whole f image].Partial[i := p.backward i].law
+      (Differential.law Open.whole f image) \then
+  \return trans!{Real.Real} _ _ _
+    (Analysis.Properties[].partialUnique Open.whole function i x _ _ (Partial.partialLaw Open.whole function i x) rule)
+    (trans!{Real.Real} _ _ _ reduced (Analysis.Properties[].partialUnique Open.whole f (p.backward i) image _ _ target
+      (Partial.partialLaw Open.whole f (p.backward i) image)))
+};

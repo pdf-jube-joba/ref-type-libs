@@ -1,0 +1,26 @@
+[package]
+name = "manifold_integration"
+
+[dependencies]
+boundary_manifolds = { path = "../boundary_manifolds" }
+calculus = { path = "../../analysis/calculus" }
+differential_forms = { path = "../differential_forms" }
+manifolds = { path = "../manifolds" }
+integration = { path = "../../analysis/integration" }
+metric_spaces = { path = "../../topology/metric" }
+euclidean_measure = { path = "../../analysis/euclidean_measure" }
+functional_analysis = { path = "../../analysis/functional" }
+product_integration = { path = "../../analysis/product_integration" }
+topological_algebra = { path = "../../topology/algebra" }
+topological_constructions = { path = "../../topology/constructions" }
+change_of_variables = { path = "../../analysis/change_of_variables" }
+dedekind_reals = { path = "../../real/dedekind" }
+euclidean_forms = { path = "../euclidean_forms" }
+linear_algebra = { path = "../../algebra/linear_algebra" }
+lp_spaces = { path = "../../analysis/lp_spaces" }
+manifold_gluing = { path = "../manifold_gluing" }
+real = { path = "../../real/basic" }
+smooth_partitions = { path = "../smooth_partitions" }
+std = { path = "../../std" }
+topology = { path = "../../topology/basic" }
+algebraic_topology = { path = "../../topology/homotopy" }

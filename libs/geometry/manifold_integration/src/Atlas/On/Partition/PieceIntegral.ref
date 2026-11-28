@@ -1,0 +1,17 @@
+\import \parent.\parent.Weight[omega := omega, weight := piece.weight] \as Weighted;
+\import \parent.\parent.Compact[omega := Weighted.form, K := Functions.support piece.weight, compact := piece.compact] \as Supported;
+\definition vanishes: Supported.Vanishes :=
+  \fun (chart: Forms.Chart)(x: Open.Carrier chart.image)(outside: _) =>
+    trans!{Real.Real} _ _ _ (Weighted.coefficient chart x)
+      (trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (change_of_variables.Euclidean[n := n].TopCoordinates[U := chart.image].coefficient (omega chart) x)) _ _
+          (Support.zeroOutsideSupport M.space piece.weight (Charts.point chart x) outside))
+        (Laws.fieldMulZeroLeft _));
+\import Supported.In[chart := piece.chart, contains := piece.within, vanishes := vanishes] \as Localized;
+\definition integral: Real.Real := Localized.integral;
+\definition form: Forms.Form n := Weighted.form;
+\definition coefficient[chart: Forms.Chart][x: Open.Carrier chart.image]:
+  change_of_variables.Euclidean[n := n].TopCoordinates[U := chart.image].coefficient (form chart) x =
+  Real.mul (piece.weight (Charts.point chart x)) (change_of_variables.Euclidean[n := n].TopCoordinates[U := chart.image].coefficient (omega chart) x) :=
+  Weighted.coefficient chart x;
+\definition supported: Integration.Chart[U := piece.chart.image].Supported (form piece.chart) := Localized.supported;

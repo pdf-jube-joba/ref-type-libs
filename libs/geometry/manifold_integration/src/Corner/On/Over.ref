@@ -1,0 +1,30 @@
+\import functional_analysis.Measure[A := A].Integral[mu := mu] \as Integral;
+\import Integral.Negation[] \as Negation;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\definition forward[x: A]: Real.Real := Second.apply (First.apply (omega x) (first x)) (second x) (arguments x);
+\definition backward[x: A]: Real.Real := Second.apply (First.apply (omega x) (second x)) (first x) (arguments x);
+\definition opposite[x: A]: backward x = Real.neg (forward x) := Signs.swapNormal (omega x) (first x) (second x) (arguments x);
+\definition firstRepresentative[integrable: Integral.Integrable forward]: Integral.Representatives :=
+  \into[A -> Real.Real](forward, Integral.Representatives) \by { integrable };
+\definition secondIntegrable[integrable: Integral.Integrable forward]: Integral.Integrable backward :=
+  \idelim Negation.neg forward = backward \with f: (A -> Real.Real) => Integral.Integrable f \by {
+    base: (Integral.integralLaw (Negation.representative (firstRepresentative integrable))).integrable,
+    equality: \axiom:funext(Negation.neg forward, backward, \fun (x: A) => sym!{Real.Real} _ _ (opposite x))
+  };
+\definition secondRepresentative[integrable: Integral.Integrable forward]: Integral.Representatives :=
+  \into[A -> Real.Real](backward, Integral.Representatives) \by { secondIntegrable integrable };
+\definition cancel[integrable: Integral.Integrable forward]:
+  Real.add (Integral.integral (firstRepresentative integrable)) (Integral.integral (secondRepresentative integrable)) = Real.zero :=
+  \block {
+    \let equals: secondRepresentative integrable = Negation.representative (firstRepresentative integrable) :=
+      \axiom:funext(secondRepresentative integrable, Negation.representative (firstRepresentative integrable), opposite) \then
+    \let integrals: Integral.integral (secondRepresentative integrable) = Real.neg (Integral.integral (firstRepresentative integrable)) :=
+      trans!{Real.Real} _ _ _
+        (congr!{{Integral.Representatives} Real.Real} Integral.integral _ _ equals)
+        (Negation.integralNeg (firstRepresentative integrable)) \then
+    \return trans!{Real.Real} _ _ _
+      (congr!{Real.Real Real.Real} (Real.add (Integral.integral (firstRepresentative integrable))) _ _ integrals)
+      (Laws.addNegRight (Integral.integral (firstRepresentative integrable)))
+  };
