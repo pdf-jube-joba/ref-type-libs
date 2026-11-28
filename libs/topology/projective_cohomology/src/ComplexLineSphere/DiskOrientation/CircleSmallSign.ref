@@ -1,0 +1,67 @@
+\import std.Data[].Nat[] \as N;
+\import \root.ComplexLineSphere[].Orientation[] \as Orientation;
+\import \parent.ZeroSphereSign[].DiscreteRepresentative[].Spherical[] \as Zero;
+\import \parent.ZeroSphereSign[] \as ZeroSign;
+\definition zero: N.Nat^ := N.Nat^::zero;
+\definition one: N.Nat^ := N.Nat^::succ zero;
+\definition coefficients: Modules.Bundle := Orientation.coefficients;
+\definition degree: I.Int^ := I.Int^::ofNat zero;
+\definition next: I.Int^ := I.Int^::ofNat one;
+\import Spheres.Positive[n := zero] \as Geometry;
+\import Geometry.Equatorial[] \as Equatorial;
+\import cohomology_models.SphereCover[n := zero] \as SphereCover;
+\import \parent.SphereCoverSign[n := zero].CohomologyLaw[] \as Ordinary;
+\import \parent.NonnegativePull[A := Geometry.Intersection, B := Spheres.Carrier zero, source := Geometry.intersectionTopology,
+  target := Spheres.topology zero, coefficients := coefficients, n := zero, f := Equatorial.retraction,
+  regular := Equatorial.Topology[].retractionContinuous] \as Equator;
+\import singular_cohomology.Cochains[A := Geometry.Intersection, source := Geometry.intersectionTopology].With[coefficients := coefficients].Integer[] \as Overlap;
+\import Cochains.At[C := Overlap.complex, z := degree] \as Input;
+\definition cycle: Input.Closed := Equator.ordinaryClosed Zero.representative;
+\definition input: Input.Cohomology := Input.classOf cycle;
+\import singular_cohomology.Relative[A := Geometry.Left, source := Geometry.leftTopology, subset := Geometry.intersection] \as LeftPair;
+\import Orientation.PairAugmentation[A := Geometry.Left, source := Geometry.leftTopology, subset := Geometry.intersection].At[z := degree] \as PairComparison;
+\import singular_cohomology.Chains[A := Geometry.Intersection, source := Geometry.intersectionTopology].Reduced[] \as ReducedOverlap;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing].Integer[P := ReducedOverlap.complex, N := coefficients] \as ReducedCochain;
+\import Cochains.At[C := ReducedCochain.complex, z := degree] \as ReducedInput;
+\definition reducedClass: ReducedInput.Cohomology := Equator.reduced ZeroSign.standard;
+\definition reducedLaw: ReducedInput.classOf (PairComparison.cycles cycle) = reducedClass :=
+  trans!{ReducedInput.Cohomology} _ _ _ (sym!{ReducedInput.Cohomology} _ _ (Equator.law Zero.representative))
+    (congr!{{cohomology_models.Spheres[].With[coefficients := coefficients].Reduced[].cohomology zero degree} ReducedInput.Cohomology}
+      Equator.reduced _ _ Zero.representativeLaw);
+\import LeftPair.With[coefficients := coefficients].At[z := next] \as North;
+\import LeftPair.Reduced[].With[coefficients := coefficients].ConnectingContractible[].At[z := degree] \as LocalDelta;
+\definition northClass: North.Carrier := (LocalDelta.isomorphism SphereCover.leftContraction).forward.apply reducedClass;
+\definition northLaw: PairComparison.ordinaryConnecting input = northClass :=
+  trans!{North.Carrier} _ _ _ (PairComparison.onCycle cycle)
+    (congr!{ReducedInput.Cohomology North.Carrier} PairComparison.reducedConnecting _ _ reducedLaw);
+\import singular_excision.MayerVietoris[A := Geometry.Sphere].Over[source := Spheres.topology one].On[cover := SphereCover.cover].Reduced[].With[coefficients := coefficients].At[z := degree] \as Shift;
+\import singular_cohomology.Relative[A := Geometry.Sphere, source := Spheres.topology one, subset := Geometry.right] \as Global;
+\import Global.With[coefficients := coefficients].At[z := next] \as GlobalH;
+\definition globalClass: GlobalH.Carrier := Shift.cut.backward.apply northClass;
+\definition globalLaw: Ordinary.ordinary input = globalClass :=
+  congr!{North.Carrier GlobalH.Carrier} Shift.cut.backward.apply _ _ northLaw;
+\import Global.Reduced[].With[coefficients := coefficients].Contractible[].At[z := next] \as Forget;
+\definition reducedStandard: _ := (Forget.isomorphism SphereCover.rightContraction).forward.apply globalClass;
+\definition reducedStandardLaw: reducedStandard = Orientation.circleReduced := \refl(Orientation.circleReduced);
+\import Orientation.PositiveForgetting[A := Geometry.Sphere, source := Spheres.topology one, subset := Geometry.right, n := zero] \as Forgetting;
+\import singular_cohomology.Cochains[A := Geometry.Sphere, source := Spheres.topology one].With[coefficients := coefficients] \as Circle;
+\import Circle.Integer[].At[n := one] \as Signed;
+\definition signedStandard: Circle.Integer[].cohomology next := Signed.isomorphism.backward.apply Orientation.circleGenerator;
+\definition ordinaryImage: Signed.isomorphism.forward.apply (Ordinary.forget globalClass) = Orientation.circleGenerator :=
+  trans!{{Circle.cohomology one}} _ _ _ (sym!{{Circle.cohomology one}} _ _ (Forgetting.law globalClass))
+    (congr!{{cohomology_models.Spheres[].With[coefficients := coefficients].Reduced[].cohomology one next} {Circle.cohomology one}}
+      Circle.Reduced[].Positive[n := zero].isomorphism.forward.apply _ _
+      (trans!{{cohomology_models.Spheres[].With[coefficients := coefficients].Reduced[].cohomology one next}} _ _ _
+        (sym!{{cohomology_models.Spheres[].With[coefficients := coefficients].Reduced[].cohomology one next}} _ _
+          (Forget.onForward SphereCover.rightContraction globalClass)) reducedStandardLaw));
+\definition sign: Ordinary.connecting input = signedStandard :=
+  eq_reason_in!{{Circle.Integer[].cohomology next} _
+    "=" _ "by" { Ordinary.law input }
+    "=" _ "by" { congr!{GlobalH.Carrier {Circle.Integer[].cohomology next}} Ordinary.forget _ _ globalLaw }
+    "=" _ "by" { sym!{{Circle.Integer[].cohomology next}} _ _ (Signed.isomorphism.leftInverse (Ordinary.forget globalClass)) }
+    "=" _ "by" { congr!{{Circle.cohomology one} {Circle.Integer[].cohomology next}} Signed.isomorphism.backward.apply _ _ ordinaryImage }
+  };
+\import singular_cohomology.Cochains[A := Spheres.Carrier zero, source := Spheres.topology zero].With[coefficients := coefficients].Integer[] \as EquatorTheory;
+\import Cochains.At[C := EquatorTheory.complex, z := degree] \as EquatorGroup;
+\definition signedZero: EquatorGroup.Cohomology := EquatorGroup.classOf Zero.representative;
+\definition inputLaw: input = Equator.ordinary signedZero := sym!{Input.Cohomology} _ _ (Equator.ordinaryLaw Zero.representative);

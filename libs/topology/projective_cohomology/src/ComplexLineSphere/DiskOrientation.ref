@@ -14,3 +14,4 @@
 \module SignedDegree(A: \Set, source: topology.Topology[Carrier := A].Topology, coefficients: Modules.Bundle, n: std.Data[].Nat[].Nat^);
 \module ExtensionByZero(A, B, C, A1, B1: Cochains.Complex);
 \module SphereCoverSign(n: std.Data[].Nat[].Nat^);
+\module CircleSmallSign;

@@ -1,0 +1,46 @@
+\import std.Data[].Nat[] \as N;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Cochains;
+\definition degree: N.Nat^ := N.Nat^::succ n;
+\definition z: I.Int^ := I.Int^::ofNat degree;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset] \as Pair;
+\import Pair.With[coefficients := coefficients] \as Relative;
+\import Pair.With[coefficients := coefficients].PairSequence[] \as Ordinary;
+\import Pair.Reduced[].With[coefficients := coefficients] \as Reduced;
+\import Cochains.At[C := Relative.complex, z := z] \as RelativeH;
+\import singular_cohomology.Chains[A := A, source := source] \as Chains;
+\import Chains.Reduced[] \as ReducedChains;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.Integer[P := ReducedChains.complex, N := coefficients] \as ReducedCochains;
+\import Cochains.Map[C := Relative.complex, D := ReducedCochains.complex].At[k := z] \as ReducedForget;
+\import singular_cohomology.Cochains[A := A, source := source].With[coefficients := coefficients] \as Native;
+\import Native.Reduced[].Positive[n := n] \as ReducedComparison;
+\import Hom.ZeroExtension[P := Chains.complex, N := coefficients].Cohomology[n := degree] \as OrdinaryComparison;
+\import Cochains.Map[C := Relative.complex, D := Native.Integer[].complex].At[k := z] \as OrdinaryForget;
+\import Cochains.At[C := ReducedCochains.complex, z := z] \as ReducedAt;
+\import chain_complexes.Cochain[].Over[R := I.Int^, ring := Integers.ring].At[C := Native.complex, k := degree] \as NaturalAt;
+\definition toReduced[h: RelativeH.Closed]: NaturalAt.CycleCarrier :=
+  ReducedComparison.toNatural ((ReducedForget.cyclesMap Reduced.pullback).apply h);
+\definition toOrdinary[h: RelativeH.Closed]: NaturalAt.CycleCarrier :=
+  OrdinaryComparison.restrict ((OrdinaryForget.cyclesMap Ordinary.inclusion).apply h);
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring].ZeroExtension[C := Chains.complex] \as Extended;
+\import Modules.Hom[V := Chains.Carrier degree, W := I.Int^, source := Chains.space degree, target := coefficients.space] \as Naturals;
+\definition reducedValue[h: RelativeH.Closed][x: Chains.Carrier degree]: (toReduced h).apply x = h.apply (Pair.class z (Extended.Positive[n := degree].intro x)) :=
+  \refl(h.apply (Pair.class z (Extended.Positive[n := degree].intro x)));
+\definition ordinaryValue[h: RelativeH.Closed][x: Chains.Carrier degree]: (toOrdinary h).apply x = h.apply (Pair.class z (Extended.Positive[n := degree].intro x)) :=
+  \refl(h.apply (Pair.class z (Extended.Positive[n := degree].intro x)));
+\definition cochainLaw[h: RelativeH.Closed]: toReduced h = toOrdinary h :=
+  Naturals.ext (toReduced h) (toOrdinary h)
+    (\fun (x: Chains.Carrier degree) => trans!{I.Int^} _ _ _ (reducedValue h x) (sym!{I.Int^} _ _ (ordinaryValue h x)));
+\definition law: \forall (q: RelativeH.Cohomology) -> ReducedComparison.isomorphism.forward.apply ((ReducedForget.induced Reduced.pullback).apply q) =
+  OrdinaryComparison.isomorphism.forward.apply ((OrdinaryForget.induced Ordinary.inclusion).apply q) :=
+  RelativeH.classInduction (\fun (q: RelativeH.Cohomology) =>
+    ReducedComparison.isomorphism.forward.apply ((ReducedForget.induced Reduced.pullback).apply q) =
+    OrdinaryComparison.isomorphism.forward.apply ((OrdinaryForget.induced Ordinary.inclusion).apply q))
+    (\fun (h: RelativeH.Closed) => eq_reason_in!{{Native.cohomology degree} _
+      "=" _ "by" { congr!{{ReducedAt.Cohomology} {Native.cohomology degree}} ReducedComparison.isomorphism.forward.apply _ _ (ReducedForget.onClass Reduced.pullback h) }
+      "=" _ "by" { ReducedComparison.onIntegerClass ((ReducedForget.cyclesMap Reduced.pullback).apply h) }
+      "=" _ "by" { NaturalAt.equalClass (toReduced h) (toOrdinary h) (cochainLaw h) }
+      "=" _ "by" { sym!{{Native.cohomology degree}} _ _ (OrdinaryComparison.onClass ((OrdinaryForget.cyclesMap Ordinary.inclusion).apply h)) }
+      "=" _ "by" { congr!{{Native.Integer[].cohomology z} {Native.cohomology degree}} OrdinaryComparison.isomorphism.forward.apply _ _
+        (sym!{{Native.Integer[].cohomology z}} _ _ (OrdinaryForget.onClass Ordinary.inclusion h)) }
+    });

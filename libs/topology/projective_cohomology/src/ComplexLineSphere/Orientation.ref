@@ -42,3 +42,4 @@
 \module AugmentationMap(A: \Set, source: topology.Topology[Carrier := A].Topology);
 \module PairAugmentation(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A);
 \module PositiveConnecting(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A, n: std.Data[].Nat[].Nat^);
+\module PositiveForgetting(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A, n: std.Data[].Nat[].Nat^);
