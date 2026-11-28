@@ -1,0 +1,23 @@
+\import boundary_manifolds.Face[n := n, r := One.dimension].On[C := C, U := U] \as Geometry;
+\import AmbientModels.Quadrant[C := C, U := U] \as Ambient;
+\definition manifold: FaceModels.Manifold := Geometry.manifold;
+\definition ambient: AmbientModels.Manifold := Ambient.manifold;
+\definition isFace: Geometry.IsBoundaryFace :=
+  \fun (i: One.Index) => \idelim normal = Indices.right i \with j: Fin.Fin dimension => \In[Fin.Fin dimension] C j \by {
+    base: selected, equality: congr!{{One.Index} {Fin.Fin dimension}} Indices.right _ _
+      (sym!{{One.Index}} _ _ (Fin.singletonValue i))
+  };
+\definition lowerPoint: \Set := Geometry.FacePoint;
+\definition parameter[x: lowerPoint]: manifold.Point := Geometry.inverse x;
+\import boundary_manifolds.SmoothMap[n := n, m := dimension].Between[M := manifold, N := ambient] \as Map;
+\definition inclusion: Map.Map := Geometry.inclusion;
+\definition apply[x: manifold.Point]: ambient.Point := Map.apply inclusion x;
+\definition rightInverse[x: lowerPoint]: apply (parameter x) = (x \of ambient.Point) := Geometry.rightInverse x;
+\definition active[x: manifold.Point]: Model.Active C (apply x) normal :=
+  Logic.And[_, _]::# selected
+    (congr!{{One.Index -> Real.Real} Real.Real} (\fun (p: One.Index -> Real.Real) => p One.index) _ _ (Geometry.normalZero x));
+\definition inwardCone[x: manifold.Point]: Model.Cone C (apply x) inwardNormal :=
+  \fun (i: Fin.Fin dimension)(isActive: Model.Active C (apply x) i) => normalNonnegative i;
+\definition outwardFirst[volume: Forms.Form (N.Nat^::succ n)][tangent: Multilinear.Arguments n]:
+  Signs.outward volume inwardNormal tangent = Real.neg (Signs.inward volume inwardNormal tangent) :=
+  Signs.normalOppositeValue volume inwardNormal tangent;

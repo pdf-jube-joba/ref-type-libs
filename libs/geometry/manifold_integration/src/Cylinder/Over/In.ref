@@ -42,3 +42,6 @@
         BaseRegion.topology OpenSpace.topology RealLine.topology apply h continuous (smoothContinuous h));
 }
 \module Vertical(h: Smooth.SmoothFunction U);
+\module LowerFace(C: boundary_manifolds.Model[n := dimension].Constraints, atZero: interval.left = Real.zero,
+  selected: \In[Fin.Fin dimension] C (Indices.right One.index),
+  baseNonnegative: \forall (x: BaseRegion.Carrier)(i: Fin.Fin n) -> \In[Fin.Fin dimension] C (Indices.left i) -> R.Le Real.zero (x i));

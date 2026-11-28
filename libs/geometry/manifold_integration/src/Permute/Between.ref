@@ -1,0 +1,12 @@
+\import \root.Region[n := n].On[K := S, compact := sourceCompact] \as Source;
+\import \root.Region[n := n].On[K := T, compact := targetCompact] \as Target;
+\import metric_spaces.RealLine[] \as Line;
+\definition transport[x: Source.Carrier]: Target.Carrier :=
+  \into[E.Point](point x, T) \by { (within x).ltr (\bysub(E.Point, S, x)) };
+\definition continuous: topology.Continuity[A := Source.Carrier, B := Target.Carrier].Continuous Source.topology Target.topology transport :=
+  topology.Continuity[A := Source.Carrier, B := E.Point].Corestriction[S := T].corestrictContinuous Source.topology Ambient.topology transport
+    (topology.Composition[A := Source.Carrier, B := E.Point, C := E.Point].composeContinuous Source.topology Ambient.topology Ambient.topology
+      (\fun (x: Source.Carrier) => x) point
+      (topology.Continuity[A := Source.Carrier, B := E.Point].Corestriction[S := S].inclusionContinuous Ambient.topology)
+      Permutation.Topology[].forwardContinuous);
+\module Of(f: Target.Coefficient);

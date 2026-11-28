@@ -21,6 +21,11 @@ Compactly supported top forms are integrated in Euclidean coordinates by taking 
 | Interval.Box.Of.integral | Compare the compact region integral on a closed interval with its Riemann integral |
 | Cylinder.Over.Of.Sections.integralLaw | Integrate one coordinate first on a compact product region using Lebesgue Fubini |
 | Cylinder.Over.In.Vertical.theorem | Integrate a normal partial derivative on a compact product region and obtain the upper trace minus the lower trace |
+| Cylinder.Over.In.LowerFace.Of.stokes | Identify a normal derivative's lower boundary term with its trace along the actual G03 orthant face |
+| Orthant.In.outwardFirst | Give the outward contraction sign on the standard lower orthant face |
+| Permute.Between.Of.invariant | Transport compact-region coefficient integrals under coordinate permutations |
+| Rectangle.Of.green | Prove the planar curl integral formula with four signed edge integrals |
+| Rectangle.Signs | Compute the outward-first orientation of the four rectangle edges |
 | StandardInterval.stokes | Prove Stokes on the actual G03 interval with the outward-first orientation at its two endpoints |
 | Collar.On.With.Of.At | Compute the outward-first contraction along the actual boundary inclusion from a G04 collar and prove the sign of its normal coefficient |
 | Corner.On.Over.cancel | Integrate the two orders of normal contraction over a common codimension-two parametrization and prove cancellation |

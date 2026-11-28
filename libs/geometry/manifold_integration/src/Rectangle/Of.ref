@@ -1,0 +1,32 @@
+\import Rotate.Smooth[f := q] \as Swapped;
+\import Vertical.Vertical[h := p] \as YTerm;
+\import Horizontal.Vertical[h := Swapped.function] \as XTerm;
+\definition derivativeX: Smooth.SmoothFunction Open.whole := Partial.derivative Open.whole q xIndex;
+\definition integralX: Region.Coefficient := Vertical.function derivativeX;
+\definition integralY: Region.Coefficient := Vertical.function YTerm.derivative;
+\import Transport.Of[f := integralX] \as Flip;
+\import Region.Difference[left := integralX, right := integralY] \as Surface;
+\import Region.Of[f := integralX] \as XInterior;
+\import Region.Of[f := integralY] \as YInterior;
+\import Region.Of[f := Surface.difference] \as Curl;
+\definition value: Real.Real := Curl.integral;
+\definition right: Real.Real := XTerm.upperIntegral;
+\definition left: Real.Real := XTerm.lowerIntegral;
+\definition top: Real.Real := YTerm.upperIntegral;
+\definition bottom: Real.Real := YTerm.lowerIntegral;
+\definition signedBoundary: Real.Real := Real.sub (Real.sub right left) (Real.sub top bottom);
+\definition horizontalDerivative[x: FlippedRegion.Carrier]: Horizontal.function XTerm.derivative x = Flip.pullback x :=
+  trans!{Real.Real} _ _ _
+    (Swapped.At[x := Horizontal.coordinate x].derivative yIndex)
+    (congr!{{Fin.Fin dimension} Real.Real} (\fun (i: Fin.Fin dimension) => Partial.partial Open.whole q i (Whole.point (Rotate.point x))) _ _
+      Transform.onSecond);
+\definition horizontalComparison: XInterior.integral = XTerm.integral :=
+  trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ Flip.invariant)
+    (congr!{{FlippedRegion.Coefficient} Real.Real}
+      (\fun (f: FlippedRegion.Coefficient) => FlippedRegion.Of[f := f].integral) _ _
+      (\axiom:funext(Flip.pullback, Horizontal.function XTerm.derivative,
+        \fun (x: FlippedRegion.Carrier) => sym!{Real.Real} _ _ (horizontalDerivative x))));
+\definition green: value = signedBoundary :=
+  trans!{Real.Real} _ _ _ Surface.law
+    (congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _
+      (trans!{Real.Real} _ _ _ horizontalComparison XTerm.theorem) YTerm.theorem);

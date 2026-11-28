@@ -1,0 +1,31 @@
+\import \parent.\parent.Vertical[h := h] \as Vertical;
+\definition trace[x: BaseRegion.Carrier]: Real.Real := h (Geometry.apply (point x));
+\definition traceLaw[x: BaseRegion.Carrier]: trace x = Lower.value h x :=
+  congr!{{Open.Carrier U} Real.Real} h _ _ (coordinateLaw x);
+\definition continuous: BaseRegion.Continuous trace :=
+  \idelim (Lower.value h \of (BaseRegion.Carrier -> Real.Real)) = trace
+    \with f: (BaseRegion.Carrier -> Real.Real) => BaseRegion.Continuous f \by {
+      base: \bysub(BaseRegion.Carrier -> Real.Real, BaseRegion.Coefficient, Lower.value h),
+      equality: \axiom:funext((Lower.value h \of (BaseRegion.Carrier -> Real.Real)), trace, \fun (x: BaseRegion.Carrier) => sym!{Real.Real} _ _ (traceLaw x))
+    };
+\definition lowerTrace: BaseRegion.Coefficient := BaseRegion.coefficient trace continuous;
+\import BaseRegion.Of[f := lowerTrace] \as Pullback;
+\import BaseRegion.Of[f := Lower.value h] \as LowerIntegral;
+\import Base.MeasureConstruction[] \as Measure;
+\import functional_analysis.Measure[A := Base.Point].Integral[mu := Measure.measure] \as Integral;
+\import lp_spaces.On[A := Base.Point, mu := Measure.measure].One[].Norm[] \as Equality;
+\definition agrees[x: Base.Point]: Pullback.representative x = LowerIntegral.representative x :=
+  Logic.orElim (BaseSets.Member K x) (Logic.Not (BaseSets.Member K x)) (Pullback.representative x = LowerIntegral.representative x)
+    (Classical.excludedMiddle (BaseSets.Member K x))
+    (\fun (inK: BaseSets.Member K x) => \block {
+      \let p: BaseRegion.Carrier := \into[Base.Point](x, K) \by { inK } \then
+      \return trans!{Real.Real} _ _ _ (Pullback.inside p)
+        (trans!{Real.Real} _ _ _ (traceLaw p) (sym!{Real.Real} _ _ (LowerIntegral.inside p)))
+    })
+    (\fun (absent: Logic.Not (BaseSets.Member K x)) => trans!{Real.Real} _ _ _
+      (Pullback.outside x absent) (sym!{Real.Real} _ _ (LowerIntegral.outside x absent)));
+\definition lowerContribution: Real.Real := Real.neg Pullback.integral;
+\definition stokes: Vertical.integral = Real.add Vertical.upperIntegral lowerContribution :=
+  trans!{Real.Real} _ _ _ Vertical.theorem
+    (congr!{Real.Real Real.Real} (Real.sub Vertical.upperIntegral) _ _
+      (sym!{Real.Real} _ _ (Equality.integralPointwise Pullback.representative LowerIntegral.representative agrees)));
