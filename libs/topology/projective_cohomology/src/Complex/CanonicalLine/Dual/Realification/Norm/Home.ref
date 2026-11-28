@@ -50,3 +50,4 @@
 \import singular_products.Cochains[A := Space, source := topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
 \module Fiber(x: Space);
 \module Orientation;
+\module Integral;

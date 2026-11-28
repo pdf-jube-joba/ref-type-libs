@@ -1,0 +1,38 @@
+\import singular_products.Cochains[A := Old.DiskBundle, source := Old.diskTopology, R := I.Int^, ring := Integers.commutativeRing].Cohomology[] \as OldTotal;
+\import singular_products.Cochains[A := New.DiskBundle, source := New.diskTopology, R := I.Int^, ring := Integers.commutativeRing].Cohomology[] \as NewTotal;
+\import singular_cap.CochainPair[A := New.DiskBundle, source := New.diskTopology, subset := New.Boundary, R := I.Int^,
+  ring := Integers.commutativeRing].Comparison[n := Degrees.two].Cohomology[] \as Forget;
+\import H.Pullback[B := Old.DiskBundle, target := Old.diskTopology] \as OldSection;
+\import H.Pullback[B := New.DiskBundle, target := New.diskTopology] \as NewSection;
+\import singular_cohomology.Maps[A := Space, B := Old.DiskBundle, source := topology, target := Old.diskTopology]
+  .Composition[C := New.DiskBundle, final := New.diskTopology].Coefficients[M := Product.integerCoefficients] \as Composition;
+\definition zero[x: Space]: \parent.\parent.\parent.\parent.\parent.At[x := x].represent ((lineBundle.space x).zero) = (bundle.space x).zero :=
+  \axiom:funext(\parent.\parent.\parent.\parent.\parent.At[x := x].represent ((lineBundle.space x).zero), (bundle.space x).zero,
+    \fun (v: Line x) => Dot.zeroLeft v);
+\definition zeroLaw[x: Space]: diskMap (Old.zeroSection x) = New.zeroSection x := Family.ext (diskMap (Old.zeroSection x)) (New.zeroSection x) (\refl(x))
+    (trans!{{Fiber x}} _ _ _ (Transport.castRefl Fiber x (diskMap (Old.zeroSection x)).vector) (zero x));
+\import topology.Continuity[A := Space, B := New.DiskBundle] \as Continuity;
+\definition Continuous[f: Space -> New.DiskBundle]: \Prop := Continuity.Continuous topology New.diskTopology f;
+\definition equalPull[f, g: Space -> New.DiskBundle][fc: Continuous f][gc: Continuous g][u: NewTotal.Group Degrees.two]:
+  f = g -> NewSection.apply Degrees.two f fc u = NewSection.apply Degrees.two g gc u :=
+  \fun (same: f = g) => (\idelim f = g \with h: (Space -> New.DiskBundle) =>
+    \forall (regular: Continuous h) -> NewSection.apply Degrees.two f fc u = NewSection.apply Degrees.two h regular u \by {
+      base: \fun (regular: Continuous f) => \refl(NewSection.apply Degrees.two f fc u), equality: same
+    }) gc;
+\definition law[u: Relative.Class]: OriginalRelative.euler (Pull.map.apply u) = Relative.euler u :=
+  eq_reason_in!{{H.Group Degrees.two} _
+    "=" _ "by" { congr!{{OldTotal.Group Degrees.two} {H.Group Degrees.two}} (OldSection.apply Degrees.two Old.zeroSection Old.zeroSectionContinuous) _ _ (Pull.Forget[].law u) }
+    "=" _ "by" { sym!{{H.Group Degrees.two}} _ _ (Composition.onCohomology Old.zeroSection Old.zeroSectionContinuous diskMap diskContinuous Degrees.two (Forget.map.apply u)) }
+    "=" _ "by" { equalPull _ _
+      (topology.Composition[A := Space, B := Old.DiskBundle, C := New.DiskBundle].composeContinuous topology Old.diskTopology New.diskTopology
+        Old.zeroSection diskMap Old.zeroSectionContinuous diskContinuous)
+      New.zeroSectionContinuous (Forget.map.apply u)
+      (\axiom:funext((\fun (x: Space) => diskMap (Old.zeroSection x)), New.zeroSection, zeroLaw)) }
+  };
+\import Modules.Hom[V := OriginalRelative.Class, W := H.Group Degrees.two, source := OriginalRelative.space, target := H.moduleSpace Degrees.two] \as EulerMap;
+\definition sign: generator = (H.moduleSpace Degrees.two).neg CanonicalClass.generator :=
+  eq_reason_in!{{H.Group Degrees.two} _
+    "=" _ "by" { sym!{{H.Group Degrees.two}} _ _ (law thomClass) }
+    "=" _ "by" { congr!{{OriginalRelative.Class} {H.Group Degrees.two}} OriginalRelative.euler _ _ classSign }
+    "=" _ "by" { EulerMap.negativePreserved OriginalRelative.zeroSection CanonicalClass.thomClass }
+  };

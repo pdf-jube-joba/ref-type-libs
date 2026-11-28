@@ -30,6 +30,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.CanonicalLine.Integral.PlaneDisk.Comparison.Negative` | Maps of disk pairs whose boundary directions differ by complex conjugation pull back relative integral classes with opposite signs in degree two |
 | `Complex.CanonicalLine.Dual.Realification.Norm.Home.Fiber.Compare.Relative` | On each fiber, the Riesz pullback sends the dual complex orientation class to the negative of the tautological orientation class |
 | `Complex.CanonicalLine.Dual.Realification.Norm.Home.Orientation` | The native complex dual chart orientations define a signed C03 orientation on the underlying real dual bundle |
+| `Complex.CanonicalLine.Dual.Realification.Norm.Home.Integral.Euler` | Riesz pulls the dual Thom class back to the negative of the tautological Thom class. The dual Euler class is the negative of the canonical projective generator |
 | `RealPlane` and `ComplexLineSphere` | Homeomorphisms with the antipodal quotient model of the real projective plane and the standard two-sphere model of the complex projective line |
 | `ComplexLineSphere.Equator` | In the standard two-sphere model, the second complex frame coordinate on the equator is the first multiplied by the inverse unit-circle coordinate |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |

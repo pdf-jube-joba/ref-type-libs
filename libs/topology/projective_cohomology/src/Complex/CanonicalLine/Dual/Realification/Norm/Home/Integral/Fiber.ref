@@ -1,0 +1,43 @@
+\import \parent.\parent.Fiber[x := x] \as Geometry;
+\import OldGeometry.Fiber[x := x] \as OldFiber;
+\import NewGeometry.Fiber[x := x] \as NewFiber;
+\definition z: I.Int^ := I.Int^::ofNat Degrees.two;
+\import OldFiber.Additive[coefficients := Product.integerCoefficients, z := z] \as OldGroup;
+\import NewFiber.Additive[coefficients := Product.integerCoefficients, z := z] \as NewGroup;
+\import singular_cohomology.Relative[A := OldFiber.Carrier, source := OldFiber.topology, subset := OldFiber.boundary]
+  .Homeomorphism[B := NewFiber.Carrier].Over[target := NewFiber.topology, targetSubset := NewFiber.boundary] \as Home;
+\definition fiberMap: _ := Home.forwardMap Geometry.pair;
+\import singular_cohomology.Relative[A := OldFiber.Carrier, source := OldFiber.topology, subset := OldFiber.boundary]
+  .Maps[B := Old.DiskBundle].Over[target := Old.diskTopology, targetSubset := Old.Boundary]
+  .Composition[C := New.DiskBundle].Over[final := New.diskTopology, finalSubset := New.Boundary] \as First;
+\import singular_cohomology.Relative[A := OldFiber.Carrier, source := OldFiber.topology, subset := OldFiber.boundary]
+  .Maps[B := NewFiber.Carrier].Over[target := NewFiber.topology, targetSubset := NewFiber.boundary]
+  .Composition[C := New.DiskBundle].Over[final := New.diskTopology, finalSubset := New.Boundary] \as Second;
+\import singular_cohomology.Relative[A := OldFiber.Carrier, source := OldFiber.topology, subset := OldFiber.boundary]
+  .Maps[B := New.DiskBundle].Over[target := New.diskTopology, targetSubset := New.Boundary] \as Direct;
+\definition same: First.compose OldFiber.pairInclusion map = Second.compose fiberMap NewFiber.pairInclusion :=
+  \refl(First.compose OldFiber.pairInclusion map);
+\definition direct[f: Direct.Map]: _ := Direct.On[f := f].Integer[].With[coefficients := Product.integerCoefficients].At[z := z].induced;
+\definition restrict[u: Relative.Class]: OldGroup.restriction.apply (Pull.map.apply u) = (Geometry.isomorphism).forward.apply (NewGroup.restriction.apply u) :=
+  trans!{{OldGroup.Class}} _ _ _
+    (sym!{{OldGroup.Class}} _ _ (First.On[f := OldFiber.pairInclusion, g := map].With[coefficients := Product.integerCoefficients].law z u))
+    (trans!{{OldGroup.Class}} _ _ _
+      (congr!{{Direct.Map} {OldGroup.Class}} (\fun (f: Direct.Map) => (direct f).apply u) _ _ same)
+      (Second.On[f := fiberMap, g := NewFiber.pairInclusion].With[coefficients := Product.integerCoefficients].law z u));
+\import OldGeometry.Local[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two].Fiber[x := x] \as FiberSpace;
+\import OldGeometry.Additive[coefficients := Product.integerCoefficients].Degree[z := z] \as BaseGroup;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import Abelian.Hom[V := BaseGroup.Class, W := OldGroup.Class, source := BaseGroup.space, target := OldGroup.space] \as Maps;
+\import Abelian.Laws[V := OldGroup.Class, space := OldGroup.space] \as Laws;
+\import algebra.Group[].Of[Carrier := OldGroup.Class, group := Laws.additive] \as Group;
+\definition fiberSign: OldGroup.restriction.apply (Pull.map.apply thomClass) = (FiberSpace.space).neg (CanonicalOrientation.fiber x) :=
+  trans!{{OldGroup.Class}} _ _ _ (restrict thomClass)
+    (trans!{{OldGroup.Class}} _ _ _
+      (congr!{{NewGroup.Class} {OldGroup.Class}} (Geometry.isomorphism).forward.apply _ _
+        ((\bysub(Relative.Class, normalizedClasses, thomClass)) x))
+      ((Geometry.isomorphism).rightInverse (Orientation.opposite x)));
+\definition normalized: OldGroup.restriction.apply ((OriginalRelative.space).neg (Pull.map.apply thomClass)) = CanonicalOrientation.fiber x :=
+  trans!{{OldGroup.Class}} _ _ _ (Maps.negativePreserved OldGroup.restriction (Pull.map.apply thomClass))
+    (trans!{{OldGroup.Class}} _ _ _
+      (congr!{{OldGroup.Class} {OldGroup.Class}} (FiberSpace.space).neg _ _ fiberSign)
+      (Group.negNeg (CanonicalOrientation.fiber x)));
