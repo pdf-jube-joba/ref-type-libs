@@ -16,6 +16,6 @@
 
 ## Implementation
 
-[stable_thom_spaces](../libs/topology/stable_thom_spaces/README.md) provides the pointed-sphere class sets, their suspension maps, the sequential direct limit with its universal property, and the common-stage homotopy criterion for representatives. The sphere spectrum supplies concrete structure maps. The finite real and oriented Grassmannian Thom spaces use the tautological projection bundle.
+[stable_thom_spaces](../libs/topology/stable_thom_spaces/README.md) provides the pointed-sphere class sets, their suspension maps, the sequential direct limit with its universal property, and the common-stage homotopy criterion for representatives. The sphere spectrum supplies concrete structure maps. The finite real and oriented Grassmannian Thom spaces use the tautological projection bundle. The finite unoriented rank structure map adds a line and descends from the suspension cylinder to the target Thom quotient.
 
-The abelian group laws on the stable class sets, finite ambient factorization, the MO and MSO structure maps, and direct-sum products and signs remain open.
+The abelian group laws on the stable class sets, finite ambient factorization, the compatibility of rank structure maps with ambient stabilization, the oriented rank structure maps, and direct-sum products and signs remain open.

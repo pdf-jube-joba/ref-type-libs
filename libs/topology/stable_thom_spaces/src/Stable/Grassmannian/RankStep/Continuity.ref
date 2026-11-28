@@ -1,0 +1,63 @@
+\import metric_spaces.RealLine[] \as RealLine;
+\import metric_spaces.RealFunctions[A := I.Carrier] \as OnInterval;
+\import metric_spaces.RealFunctions[A := Cylinder.Carrier] \as Functions;
+\definition heightContinuous: OnInterval.Continuous I.topology height :=
+  topology.Composition[A := I.Carrier, B := Symmetric.Carrier, C := R.Real].composeContinuous
+    I.topology Symmetric.topology RealLine.topology Symmetric.backward (\fun (s: Symmetric.Carrier) => s) Symmetric.backwardContinuous
+    (topology.Continuity[A := Symmetric.Carrier, B := R.Real].Corestriction[S := Symmetric.unit].inclusionContinuous RealLine.topology);
+\definition capacityContinuous: OnInterval.Continuous I.topology capacity :=
+  OnInterval.subContinuous I.topology (\fun (_: I.Carrier) => R.one) heightSquared
+    (OnInterval.constantContinuous I.topology R.one)
+    (OnInterval.Product[].continuous I.topology height height heightContinuous heightContinuous);
+\definition scaleContinuous: OnInterval.Continuous I.topology scale :=
+  OnInterval.SquareRoot[].continuous I.topology capacity capacityContinuous;
+\definition sourcePoint[p: Cylinder.Carrier]: SourceFamily.Point := Cylinder.point p;
+\definition sourceContinuous: topology.Continuity[A := Cylinder.Carrier, B := SourceFamily.Point].Continuous
+  cylinderTopology SourceBundle.bundle.totalSpace sourcePoint :=
+  topology.Composition[A := Cylinder.Carrier, B := Universal.Disk, C := SourceFamily.Point].composeContinuous
+    cylinderTopology Universal.diskTopology SourceBundle.bundle.totalSpace Cylinder.point
+    (\fun (p: Universal.Disk) => p) (Cylinder.pointContinuous Universal.diskTopology)
+    (topology.Continuity[A := Universal.Disk, B := SourceFamily.Point].Corestriction[S := Universal.closedBall].inclusionContinuous SourceBundle.bundle.totalSpace);
+\definition oldVectorContinuous: topology.Continuity[A := Cylinder.Carrier, B := SourceCoordinates.Coordinate].Continuous
+  cylinderTopology SourceCoordinates.topology (\fun (p: Cylinder.Carrier) => (sourcePoint p).vector) :=
+  topology.Composition[A := Cylinder.Carrier, B := SourceFamily.Point, C := SourceCoordinates.Coordinate].composeContinuous
+    cylinderTopology SourceBundle.bundle.totalSpace SourceCoordinates.topology sourcePoint
+    (\fun (p: SourceFamily.Point) => p.vector) sourceContinuous SourceBundle.vectorContinuous;
+\import topological_algebra.Coordinates[K := R.Real, I := SourceCoordinates.Index] \as Old;
+\definition scaledContinuous: topology.Continuity[A := Cylinder.Carrier, B := SourceCoordinates.Coordinate].Continuous cylinderTopology SourceCoordinates.topology scaled :=
+  Old.Universal[A := Cylinder.Carrier].continuous cylinderTopology RealLine.topology scaled
+    (\fun (i: SourceCoordinates.Index) => Functions.Product[].continuous cylinderTopology
+      (\fun (p: Cylinder.Carrier) => scale (Cylinder.time p)) (\fun (p: Cylinder.Carrier) => (sourcePoint p).vector i)
+      (topology.Composition[A := Cylinder.Carrier, B := I.Carrier, C := R.Real].composeContinuous
+        cylinderTopology I.topology RealLine.topology Cylinder.time scale (Cylinder.timeContinuous Universal.diskTopology) scaleContinuous)
+      (topology.Composition[A := Cylinder.Carrier, B := SourceCoordinates.Coordinate, C := R.Real].composeContinuous
+        cylinderTopology SourceCoordinates.topology RealLine.topology (\fun (p: Cylinder.Carrier) => (sourcePoint p).vector)
+        (\fun (v: SourceCoordinates.Coordinate) => v i) oldVectorContinuous (Old.evaluationContinuous RealLine.topology i)));
+\definition lineContinuous: topology.Continuity[A := Cylinder.Carrier, B := LineCoordinates.Coordinate].Continuous
+  cylinderTopology LineCoordinates.topology (\fun (p: Cylinder.Carrier) => line (Cylinder.time p)) :=
+  topological_algebra.Coordinates[K := R.Real, I := LineCoordinates.Index].Universal[A := Cylinder.Carrier].continuous
+    cylinderTopology RealLine.topology (\fun (p: Cylinder.Carrier) => line (Cylinder.time p))
+    (\fun (_: LineCoordinates.Index) => topology.Composition[A := Cylinder.Carrier, B := I.Carrier, C := R.Real].composeContinuous
+      cylinderTopology I.topology RealLine.topology Cylinder.time height (Cylinder.timeContinuous Universal.diskTopology) heightContinuous);
+\import bundle_operations.Operations[].Over[K := R.Real, field := R.Algebra[].field, conjugation := H.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].CoordinateSum[n := n, m := extra] \as Sum;
+\import topological_constructions.Product[A := SourceCoordinates.Coordinate, B := LineCoordinates.Coordinate] \as Vectors;
+\import std.Data[].Pair[] \as Pair;
+\definition pair[p: Cylinder.Carrier]: Vectors.CarrierSet :=
+  Pair.pair SourceCoordinates.Coordinate LineCoordinates.Coordinate (scaled p) (line (Cylinder.time p));
+\definition vectorContinuous: topology.Continuity[A := Cylinder.Carrier, B := TargetCoordinates.Coordinate].Continuous
+  cylinderTopology TargetCoordinates.topology vector :=
+  topology.Composition[A := Cylinder.Carrier, B := Vectors.CarrierSet, C := TargetCoordinates.Coordinate].composeContinuous
+    cylinderTopology Sum.Topology[].product TargetCoordinates.topology pair Sum.join
+    (Vectors.Universal[X := Cylinder.Carrier].pairContinuous cylinderTopology SourceCoordinates.topology LineCoordinates.topology
+      scaled (\fun (p: Cylinder.Carrier) => line (Cylinder.time p)) scaledContinuous lineContinuous)
+    Sum.Topology[].joinRegular;
+\definition baseContinuous: topology.Continuity[A := Cylinder.Carrier, B := TargetBase.Carrier].Continuous cylinderTopology TargetBase.topology base :=
+  topology.Composition[A := Cylinder.Carrier, B := Base.Carrier, C := TargetBase.Carrier].composeContinuous
+    cylinderTopology Base.topology TargetBase.topology (\fun (p: Cylinder.Carrier) => (sourcePoint p).base) Stabilization.dimension
+    (topology.Composition[A := Cylinder.Carrier, B := SourceFamily.Point, C := Base.Carrier].composeContinuous
+      cylinderTopology SourceBundle.bundle.totalSpace Base.topology sourcePoint SourceFamily.projection
+      sourceContinuous SourceBundle.projectionContinuous) Stabilization.dimensionContinuous;
+\definition totalContinuous: topology.Continuity[A := Cylinder.Carrier, B := TargetFamily.Point].Continuous
+  cylinderTopology TargetBundle.bundle.totalSpace total :=
+  TargetBundle.Universal[Y := Cylinder.Carrier, source := cylinderTopology].continuous total baseContinuous vectorContinuous;

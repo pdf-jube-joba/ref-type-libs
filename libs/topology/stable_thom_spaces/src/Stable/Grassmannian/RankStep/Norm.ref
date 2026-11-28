@@ -1,0 +1,48 @@
+\import Finite.Sums[] \as Sums;
+\definition dotNorm[d: N.Nat^][v: algebraic_topology.Euclidean[].coordinateCarrier d]:
+  algebraic_topology.Euclidean[].normSquaredAt d v = Finite.Finite[n := d].dot v v :=
+  Sums.enumeration d (\fun (i: Fin.Fin d) => R.mul (v i) (v i));
+\definition lineNorm[t: I.Carrier]: LineCoordinates.normSquared (line t) = heightSquared t :=
+  Laws.addZeroRight (heightSquared t);
+\definition normFormula[p: Cylinder.Carrier]: Target.squared (total p) =
+  R.add (R.mul (capacity (Cylinder.time p)) (Universal.squared (Cylinder.point p))) (heightSquared (Cylinder.time p)) :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { dotNorm ambient (vector p) }
+    "=" _ "by" { Blocks.dotJoined (scaled p) (scaled p) (line (Cylinder.time p)) (line (Cylinder.time p)) }
+    "=" _ "by" { congr!{R.Real R.Real R.Real} R.add _ _ _ _
+      (sym!{R.Real} _ _ (dotNorm n (scaled p))) (sym!{R.Real} _ _ (dotNorm extra (line (Cylinder.time p)))) }
+    "=" _ "by" { congr!{R.Real R.Real R.Real} R.add _ _ _ _
+      (SourceCoordinates.Contraction[].normScale (scale (Cylinder.time p)) (Cylinder.point p).vector) (lineNorm (Cylinder.time p)) }
+    "=" _ "by" { congr!{R.Real R.Real} (\fun (a: R.Real) =>
+        R.add (R.mul a (Universal.squared (Cylinder.point p))) (heightSquared (Cylinder.time p))) _ _
+        (scaleSquared (Cylinder.time p)) }
+  };
+\definition fill[t: I.Carrier]: R.add (R.mul (capacity t) R.one) (heightSquared t) = R.one :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { congr!{R.Real R.Real} (\fun (a: R.Real) => R.add a (heightSquared t)) _ _ (R.Algebra[].mulOneRight (capacity t)) }
+    "=" _ "by" { Laws.addComm (capacity t) (heightSquared t) }
+    "=" _ "by" { Estimates.addSubCancel R.one (heightSquared t) }
+  };
+\definition within[p: Cylinder.Carrier]: D.Le (Target.squared (total p)) R.one :=
+  D.leReplace (R.add (R.mul (capacity (Cylinder.time p)) (Universal.squared (Cylinder.point p))) (heightSquared (Cylinder.time p)))
+    (Target.squared (total p)) (R.add (R.mul (capacity (Cylinder.time p)) R.one) (heightSquared (Cylinder.time p))) R.one
+    (sym!{R.Real} _ _ (normFormula p)) (fill (Cylinder.time p))
+    (Laws.addMonotoneRight _ _ (heightSquared (Cylinder.time p))
+      (Estimates.mulMonotone (capacity (Cylinder.time p)) (Universal.squared (Cylinder.point p)) R.one
+        (capacityNonnegative (Cylinder.time p)) (\bysub(SourceFamily.Point, Universal.closedBall, Cylinder.point p))));
+\definition onEnd[p: Cylinder.Carrier][endpoint: heightSquared (Cylinder.time p) = R.one]: Target.squared (total p) = R.one :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { normFormula p }
+    "=" _ "by" { congr!{R.Real R.Real} (\fun (s: R.Real) => R.add (R.mul (R.sub R.one s) (Universal.squared (Cylinder.point p))) s) _ _ endpoint }
+    "=" _ "by" { congr!{R.Real R.Real} (\fun (a: R.Real) => R.add (R.mul a (Universal.squared (Cylinder.point p))) R.one) _ _ (Laws.subSelf R.one) }
+    "=" _ "by" { congr!{R.Real R.Real} (\fun (a: R.Real) => R.add a R.one) _ _ (Laws.fieldMulZeroLeft (Universal.squared (Cylinder.point p))) }
+    "=" _ "by" { Laws.addZeroLeft R.one }
+  };
+\definition onSide[p: Cylinder.Carrier][side: \In[Universal.Disk] Universal.boundary (Cylinder.point p)]:
+  Target.squared (total p) = R.one :=
+  eq_reason_in!{R.Real _
+    "=" _ "by" { normFormula p }
+    "=" _ "by" { congr!{R.Real R.Real} (\fun (s: R.Real) =>
+      R.add (R.mul (capacity (Cylinder.time p)) s) (heightSquared (Cylinder.time p))) _ _ side }
+    "=" _ "by" { fill (Cylinder.time p) }
+  };

@@ -17,3 +17,7 @@ bundle_complements = { path = "../../geometry/bundle_complements" }
 bundle_classification = { path = "../../geometry/bundle_classification" }
 grassmannians = { path = "../../geometry/grassmannians" }
 grassmannian_cells = { path = "../../geometry/grassmannian_cells" }
+linear_algebra = { path = "../../algebra/linear_algebra" }
+bundle_operations = { path = "../../geometry/bundle_operations" }
+metric_spaces = { path = "../metric" }
+topological_algebra = { path = "../algebra" }

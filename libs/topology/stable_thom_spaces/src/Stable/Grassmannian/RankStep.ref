@@ -1,0 +1,108 @@
+\import N.Basic[].Def[] \as Nat;
+\import real.Analysis[] \as R;
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import R.Estimates[] \as Estimates;
+\import R.SquareRoot[] \as Root;
+\import std.Data[].FinSet[] \as Fin;
+\import algebraic_topology.Interval[] \as I;
+\import thom_spaces.Thom[].SymmetricInterval[] \as Symmetric;
+\import algebraic_topology.Cylinder[A := Universal.Disk] \as Cylinder;
+\definition cylinderTopology: topology.Topology[Carrier := Cylinder.Carrier].Topology := Cylinder.topology Universal.diskTopology;
+\definition extra: N.Nat^ := N.Nat^::succ N.Nat^::zero;
+\definition ambient: N.Nat^ := Nat.add extra n;
+\definition rank: N.Nat^ := Nat.add extra k;
+\import Base.Stabilization[m := extra] \as Stabilization;
+\import grassmannians.Real[n := ambient, k := rank].Model[] \as TargetBase;
+\import \root.Stable[].FiniteThom[n := ambient, k := rank, X := TargetBase.Carrier, source := TargetBase.topology,
+  classify := (\fun (p: TargetBase.Carrier) => p),
+  continuous := topology.Maps[A := TargetBase.Carrier, B := TargetBase.Carrier].Identity[].continuous TargetBase.topology] \as Target;
+\import algebraic_topology.Euclidean[].Dimension[n := n] \as SourceCoordinates;
+\import algebraic_topology.Euclidean[].Dimension[n := extra] \as LineCoordinates;
+\import algebraic_topology.Euclidean[].Dimension[n := ambient] \as TargetCoordinates;
+\import hermitian_frames.Hermitian[] \as H;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := H.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Bundles;
+\import bundle_complements.Complements[].Over[K := R.Real, field := R.Algebra[].field, conjugation := H.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Complements;
+\import Complements.Projection[X := Base.Carrier, n := n, baseSpace := Base.topology, P := Base.projection, regular := Base.regular] \as SourceBundle;
+\import Complements.Projection[X := TargetBase.Carrier, n := ambient, baseSpace := TargetBase.topology,
+  P := TargetBase.projection, regular := TargetBase.regular] \as TargetBundle;
+\import Bundles.Family[X := Base.Carrier, F := SourceBundle.Fiber] \as SourceFamily;
+\import Bundles.Family[X := TargetBase.Carrier, F := TargetBundle.Fiber] \as TargetFamily;
+\import linear_algebra.Hermitian[].Over[K := R.Real, field := R.Algebra[].field, scalar := H.Real[].scalar] \as Finite;
+\import Finite.Finite[n := n].Blocks[m := extra] \as Blocks;
+
+\definition height[t: I.Carrier]: R.Real := Symmetric.backward t;
+\definition heightSquared[t: I.Carrier]: R.Real := R.mul (height t) (height t);
+\definition capacity[t: I.Carrier]: R.Real := R.sub R.one (heightSquared t);
+\definition capacityNonnegative[t: I.Carrier]: D.Le R.zero (capacity t) :=
+  R.Distance[].subNonnegative R.one (heightSquared t) (\bysub(R.Real, Symmetric.unit, Symmetric.backward t));
+\definition scale[t: I.Carrier]: R.Real := Root.sqrt (capacity t);
+\definition scaleSquared[t: I.Carrier]: R.mul (scale t) (scale t) = capacity t := Root.squareOfNonnegative (capacity t) (capacityNonnegative t);
+\definition line[t: I.Carrier]: LineCoordinates.Coordinate := \fun (_: LineCoordinates.Index) => height t;
+\definition scaled[p: Cylinder.Carrier]: SourceCoordinates.Coordinate :=
+  SourceCoordinates.Contraction[].scale (scale (Cylinder.time p)) (Cylinder.point p).vector;
+\definition vector[p: Cylinder.Carrier]: TargetCoordinates.Coordinate := Blocks.join (scaled p) (line (Cylinder.time p));
+\definition base[p: Cylinder.Carrier]: TargetBase.Carrier := Stabilization.dimension (Cylinder.point p).base;
+\definition vectorFixed[p: Cylinder.Carrier]: (base p).map.apply (vector p) = vector p := \block {
+  \let x: Universal.Disk := Cylinder.point p \then
+  \let a: R.Real := scale (Cylinder.time p) \then
+  \let fixed: x.base.map.apply x.vector = x.vector :=
+    \bysub(SourceCoordinates.Coordinate, SourceBundle.Image x.base, x.vector) \then
+  \let scaledFixed: x.base.map.apply (scaled p) = scaled p :=
+    trans!{SourceCoordinates.Coordinate} _ _ _ (x.base.map.preservesScale a x.vector)
+      (congr!{SourceCoordinates.Coordinate SourceCoordinates.Coordinate} (SourceCoordinates.Contraction[].scale a) _ _ fixed) \then
+  \return congr!{SourceCoordinates.Coordinate LineCoordinates.Coordinate TargetCoordinates.Coordinate} Blocks.join _ _ _ _
+    (trans!{SourceCoordinates.Coordinate} _ _ _
+      (congr!{SourceCoordinates.Coordinate SourceCoordinates.Coordinate} x.base.map.apply _ _ (Blocks.leftJoin (scaled p) (line (Cylinder.time p))))
+      scaledFixed)
+    (Blocks.rightJoin (scaled p) (line (Cylinder.time p)))
+};
+\definition total[p: Cylinder.Carrier]: TargetFamily.Point :=
+  TargetFamily.include (base p) (\into[TargetCoordinates.Coordinate](vector p, TargetBundle.Image (base p)) \by { vectorFixed p });
+\module Norm;
+\module Continuity;
+\definition disk[p: Cylinder.Carrier]: Target.Disk :=
+  \into[TargetFamily.Point](total p, Target.closedBall) \by { Norm[].within p };
+\definition diskContinuous: topology.Continuity[A := Cylinder.Carrier, B := Target.Disk].Continuous cylinderTopology Target.diskTopology disk :=
+  topology.Continuity[A := Cylinder.Carrier, B := TargetFamily.Point].Corestriction[S := Target.closedBall].corestrictContinuous
+    cylinderTopology TargetBundle.bundle.totalSpace disk Continuity[].totalContinuous;
+\import thom_spaces.Thom[].SuspendedPair[A := Universal.Disk, source := Universal.diskTopology, subset := Universal.boundary] \as Pair;
+\import thom_spaces.Thom[].Collapse[A := Cylinder.Carrier, source := cylinderTopology, subset := Pair.boundary] \as CylinderThom;
+\import CylinderThom.Mapping[B := Target.Disk, target := Target.diskTopology, targetSubset := Target.boundary] \as Quotient;
+\definition preserves[p: Cylinder.Carrier][member: \In[Cylinder.Carrier] Pair.boundary p]: \In[Target.Disk] Target.boundary (disk p) :=
+  either!{member {Target.squared (disk p) = R.one}
+    {\fun (bottom: Cylinder.time p = I.start) => Norm[].onEnd p
+      (trans!{R.Real} _ _ _ (congr!{I.Carrier R.Real} heightSquared _ _ bottom) Symmetric.startSquare)}
+    {\fun (other: _) => either!{other {Target.squared (disk p) = R.one}
+      {\fun (top: Cylinder.time p = I.end) => Norm[].onEnd p
+        (trans!{R.Real} _ _ _ (congr!{I.Carrier R.Real} heightSquared _ _ top) Symmetric.endSquare)}
+      {\fun (side: \In[Universal.Disk] Universal.boundary (Cylinder.point p)) => Norm[].onSide p side}
+    }}
+  };
+
+\import puppe_sequences.Puppe[].Suspension[A := Carrier, source := pointed] \as Suspension;
+\definition apply[x: Suspension.Carrier]: Target.Carrier := Quotient.apply disk preserves (Pair.backward x);
+\definition atPoint: apply Suspension.point = Target.pointed.basepoint :=
+  trans!{Target.Carrier} _ _ _
+    (congr!{CylinderThom.Carrier Target.Carrier} (Quotient.apply disk preserves) _ _ Pair.backwardPoint)
+    (Quotient.onPoint disk preserves);
+\import algebraic_topology.Pointed[A := Suspension.Carrier].Maps[B := Target.Carrier] \as Pointed;
+\definition map: Pointed.Map[Suspension.pointed, Target.pointed] :=
+  \into[Suspension.Carrier -> Target.Carrier](apply, Pointed.Map[Suspension.pointed, Target.pointed]) \by {
+    Pointed.Laws[Suspension.pointed, Target.pointed, apply] {
+      continuous := topology.Composition[A := Suspension.Carrier, B := CylinderThom.Carrier, C := Target.Carrier].composeContinuous
+        Suspension.topology CylinderThom.topology Target.pointed.topology Pair.backward (Quotient.apply disk preserves)
+        (topology.Homeomorphism[A := CylinderThom.Carrier, B := Suspension.Carrier].laws CylinderThom.topology Suspension.topology Pair.homeomorphism).backwardContinuous
+        (Quotient.continuous disk preserves diskContinuous),
+      pointed := atPoint,
+    }
+  };
+\import algebraic_topology.Cylinder[A := Carrier] \as SourceCylinder;
+\definition onClass[t: I.Carrier][p: Universal.Disk]:
+  map (Suspension.class (SourceCylinder.at t (Universal.class p))) = Target.class (disk (Cylinder.at t p)) :=
+  trans!{Target.Carrier} _ _ _
+    (congr!{CylinderThom.Carrier Target.Carrier} (Quotient.apply disk preserves) _ _
+      (trans!{CylinderThom.Carrier} _ _ _ (Pair.backwardClass (SourceCylinder.at t (Universal.class p))) (Pair.familyClass t p)))
+    (Quotient.onClass disk preserves (Cylinder.at t p));

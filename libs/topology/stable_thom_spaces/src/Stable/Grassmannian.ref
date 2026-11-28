@@ -11,3 +11,4 @@
 \import Oriented.ToUniversal[] \as Forget;
 \definition forgetOrientation: algebraic_topology.Pointed[A := OrientedCarrier].Maps[B := Carrier].Map[orientedPointed, pointed] :=
   Forget.map;
+\module RankStep;
