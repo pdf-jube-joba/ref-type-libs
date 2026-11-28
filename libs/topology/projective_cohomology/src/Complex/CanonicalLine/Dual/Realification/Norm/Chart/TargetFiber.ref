@@ -1,0 +1,42 @@
+\import Geometry.Chart[c := real].Fiber[x := y] \as ChartFiber;
+\import ChartFiber.Ring[K := I.Int^, ring := Integers.commutativeRing] \as OrientedFiber;
+\import Geometry.Fiber[x := y] \as Actual;
+\import Equality.Transport[A := N.Nat^] \as DegreeCast;
+\definition models[n: N.Nat^]: \Set := Local.Model[n := n, U := c.domain].Data;
+\definition comparison: fiberClass y = OrientedFiber.generator :=
+  trans!{{Rank.FiberClass y}} _ _ _
+    (congr!{{models Degrees.two} {Rank.FiberClass y}}
+      (\fun (m: models Degrees.two) => (On.restriction y).apply m.thomClass) _ _
+      (DegreeCast.castRefl models Degrees.two Local.Chart[c := real].data))
+    OrientedFiber.Normalization[].normalized;
+\import sphere_maps.Circle[] \as Circle;
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := Degrees.two] \as PointDisk;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import std.Data[].Pair[] \as Pair;
+\import topology.Topology[Carrier := Actual.Carrier].Subspace[S := Actual.boundary] \as Boundary;
+\definition boundaryTopology: topology.Topology[Carrier := Boundary.CarrierSet].Topology := Boundary.topology Actual.topology;
+\definition coordinate[p: Actual.Carrier]: Plane.Coordinate := Pair.second Point.Carrier Plane.Coordinate (ChartFiber.forward p);
+\definition direction[p: Boundary.CarrierSet]: Circle.Coordinates[].Sphere :=
+  \into[Plane.Coordinate](coordinate p, Plane.Boundary) \by { ChartFiber.fiberPair.forwardPreserves p };
+\definition angle[p: Boundary.CarrierSet]: Circle.Carrier := Circle.Coordinates[].forward (direction p);
+\import topological_constructions.Product[A := Point.Carrier, B := Plane.Coordinate] \as Cartesian;
+\definition coordinateContinuous: topology.Continuity[A := Actual.Carrier, B := Plane.Coordinate].Continuous Actual.topology Plane.topology coordinate :=
+  topology.Composition[A := Actual.Carrier, B := PointDisk.DiskCarrier, C := Plane.Coordinate].composeContinuous
+    Actual.topology PointDisk.diskTopology Plane.topology ChartFiber.forward
+    (\fun (v: PointDisk.DiskCarrier) => Pair.second Point.Carrier Plane.Coordinate v)
+    ChartFiber.forwardContinuous
+    (topology.Continuity[A := PointDisk.Point, B := Plane.Coordinate].Restriction[S := PointDisk.disk].restrictContinuous
+      PointDisk.totalTopology Plane.topology (Pair.second Point.Carrier Plane.Coordinate)
+      (Cartesian.Maps[].secondContinuous Point.topology Plane.topology));
+\definition directionContinuous: topology.Continuity[A := Boundary.CarrierSet, B := Circle.Coordinates[].Sphere].Continuous
+  boundaryTopology Circle.Coordinates[].sphereTopology direction :=
+  topology.Continuity[A := Boundary.CarrierSet, B := Plane.Coordinate].Corestriction[S := Plane.Boundary].corestrictContinuous
+    boundaryTopology Plane.topology direction
+    (topology.Continuity[A := Actual.Carrier, B := Plane.Coordinate].Restriction[S := Actual.boundary].restrictContinuous
+      Actual.topology Plane.topology coordinate coordinateContinuous);
+\definition angleContinuous: topology.Continuity[A := Boundary.CarrierSet, B := Circle.Carrier].Continuous boundaryTopology Circle.topology angle :=
+  topology.Composition[A := Boundary.CarrierSet, B := Circle.Coordinates[].Sphere, C := Circle.Carrier].composeContinuous
+    boundaryTopology Circle.Coordinates[].sphereTopology Circle.topology direction Circle.Coordinates[].forward
+    directionContinuous Circle.Coordinates[].forwardContinuous;
+\module Angular;

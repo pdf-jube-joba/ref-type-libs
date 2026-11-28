@@ -1,0 +1,99 @@
+\use Equality.eq_reason_in;
+\import singular_cohomology.Cochains[A := PairTheory.SubspaceCarrier, source := boundaryTopology]
+  .With[coefficients := Product.integerCoefficients] \as Ordinary;
+\import singular_cohomology.Cochains[A := Coordinates.Sphere, source := Coordinates.sphereTopology]
+  .With[coefficients := Product.integerCoefficients] \as CircleTheory;
+\definition Group: \Set := Ordinary.cohomology Degrees.one;
+\definition CircleGroup: \Set := CircleTheory.cohomology Degrees.one;
+\import Abelian.End[V := I.Int^, space := Product.integerCoefficients.space] \as Coefficients;
+\import singular_cohomology.Maps[A := PairTheory.SubspaceCarrier, B := Coordinates.Sphere, source := boundaryTopology, target := Coordinates.sphereTopology] \as IntoSphere;
+\import singular_cohomology.Maps[A := Coordinates.Sphere, B := PairTheory.SubspaceCarrier, source := Coordinates.sphereTopology, target := boundaryTopology] \as IntoFiber;
+\import singular_cohomology.Maps[A := Coordinates.Sphere, B := Coordinates.Sphere, source := Coordinates.sphereTopology, target := Coordinates.sphereTopology] \as SphereMaps;
+\import singular_cohomology.Maps[A := PairTheory.SubspaceCarrier, B := PairTheory.SubspaceCarrier, source := boundaryTopology, target := boundaryTopology] \as Maps;
+\import IntoSphere.Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as First;
+\import IntoFiber.Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as Last;
+\import SphereMaps.Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as Middle;
+\import Maps.Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as Result;
+\definition first: _ := First.induced boundaryVector boundaryVectorContinuous Coefficients.identity;
+\definition last: _ := Last.induced boundaryPoint boundaryPointContinuous Coefficients.identity;
+\definition middle: _ := Middle.induced GeometricReflection.tail GeometricReflection.tailContinuous Coefficients.identity;
+\definition pull: _ := Result.induced reflect continuous Coefficients.identity;
+\import sphere_maps.Hemispheres[n := N.Nat^::zero].With[coefficients := Product.integerCoefficients].Positive[].Whole[] \as Head;
+\import algebraic_topology.Spheres[].Antipodal[n := Degrees.one] \as Antipodal;
+\import sphere_maps.Circle[].Antipodal[] \as ComplexAntipodal;
+\import sphere_maps.Circle[].Translations[] \as Translations;
+\import topology.Composition[A := Coordinates.Sphere, B := Coordinates.Sphere, C := Coordinates.Sphere] \as Compose;
+\definition composite[v: Coordinates.Sphere]: Coordinates.Sphere := GeometricReflection.head (Antipodal.apply v);
+\definition compositeContinuous: SphereMaps.Continuous composite := Compose.composeContinuous Coordinates.sphereTopology Coordinates.sphereTopology Coordinates.sphereTopology
+  Antipodal.apply GeometricReflection.head Antipodal.continuous GeometricReflection.headContinuous;
+\definition compositeLaw[v: Coordinates.Sphere]: GeometricReflection.tail v = composite v :=
+  trans!{{Coordinates.Sphere}} _ _ _ (sym!{{Coordinates.Sphere}} _ _ (GeometricReflection.headInvolution (GeometricReflection.tail v)))
+    (congr!{{Coordinates.Sphere} {Coordinates.Sphere}} GeometricReflection.head _ _ (GeometricReflection.factorization v));
+\definition sphereEquality[f, g: Coordinates.Sphere -> Coordinates.Sphere][fc: SphereMaps.Continuous f][gc: SphereMaps.Continuous g][u: CircleGroup]:
+  f = g -> (Middle.induced f fc Coefficients.identity).apply u = (Middle.induced g gc Coefficients.identity).apply u :=
+  \fun (same: f = g) => (\idelim f = g \with h: (Coordinates.Sphere -> Coordinates.Sphere) =>
+    \forall (regular: SphereMaps.Continuous h) ->
+      (Middle.induced f fc Coefficients.identity).apply u = (Middle.induced h regular Coefficients.identity).apply u \by {
+        base: \fun (regular: SphereMaps.Continuous f) => \refl((Middle.induced f fc Coefficients.identity).apply u),
+        equality: same
+    }) gc;
+\definition translation[v: Coordinates.Sphere]: Translations.apply ComplexAntipodal.minusOne v = Antipodal.apply v :=
+  trans!{{Coordinates.Sphere}} _ _ _
+    (congr!{{Circle.Carrier} {Coordinates.Sphere}} Coordinates.backward
+      (Circle.multiply ComplexAntipodal.minusOne (Coordinates.forward v)) (Coordinates.forward (Antipodal.apply v))
+      (trans!{Numbers.Complex} _ _ _ (ComplexAntipodal.multiplication (Coordinates.forward v))
+        (sym!{Numbers.Complex} _ _ (ComplexAntipodal.coordinates v))))
+    (Coordinates.leftInverse (Antipodal.apply v));
+\import singular_cohomology.Identity[A := Coordinates.Sphere, source := Coordinates.sphereTopology] \as SphereId;
+\import singular_cohomology.Homotopy[A := Coordinates.Sphere, B := Coordinates.Sphere,
+  source := Coordinates.sphereTopology, target := Coordinates.sphereTopology].Coefficients[M := Product.integerCoefficients] \as Homotopy;
+\import algebraic_topology.PathComponent[A := Circle.Carrier, source := Circle.topology] \as CirclePaths;
+\definition antipodalAction[u: CircleGroup]: (Middle.induced Antipodal.apply Antipodal.continuous Coefficients.identity).apply u = u := \block {
+  \takefrom path: CirclePaths.Path Circle.identity ComplexAntipodal.minusOne \by Translations.connected Circle.identity ComplexAntipodal.minusOne \then
+  \return eq_reason_in!{CircleGroup _
+    "=" _ "by" { sphereEquality Antipodal.apply (Translations.apply ComplexAntipodal.minusOne) Antipodal.continuous
+      (Translations.continuous ComplexAntipodal.minusOne) u
+      (\axiom:funext(Antipodal.apply, Translations.apply ComplexAntipodal.minusOne, \fun (v: Coordinates.Sphere) => sym!{{Coordinates.Sphere}} _ _ (translation v))) }
+    "=" _ "by" { Homotopy.onCohomology SphereId.function (Translations.apply ComplexAntipodal.minusOne)
+      (Translations.homotopy ComplexAntipodal.minusOne path) Degrees.one u }
+    "=" _ "by" { SphereId.Coefficients[M := Product.integerCoefficients].At[n := Degrees.one].cohomologyIdentity u }
+  }
+};
+\import SphereMaps.Composition[C := Coordinates.Sphere, final := Coordinates.sphereTopology].Coefficients[M := Product.integerCoefficients] \as SphereComposition;
+\definition middleLaw[u: CircleGroup]: middle.apply u = (CircleTheory.cohomologySpace Degrees.one).neg u :=
+  eq_reason_in!{CircleGroup _
+    "=" _ "by" { sphereEquality GeometricReflection.tail composite GeometricReflection.tailContinuous compositeContinuous u
+      (\axiom:funext(GeometricReflection.tail, composite, compositeLaw)) }
+    "=" _ "by" { SphereComposition.onCohomology Antipodal.apply Antipodal.continuous GeometricReflection.head GeometricReflection.headContinuous Degrees.one u }
+    "=" _ "by" { antipodalAction (Head.action.apply u) }
+    "=" _ "by" { Head.naturalAction u }
+  };
+\import IntoSphere.Composition[C := PairTheory.SubspaceCarrier, final := boundaryTopology].Coefficients[M := Product.integerCoefficients] \as Outer;
+\import IntoSphere.Composition[C := Coordinates.Sphere, final := Coordinates.sphereTopology].Coefficients[M := Product.integerCoefficients] \as Inner;
+\definition Continuous[f: PairTheory.SubspaceCarrier -> PairTheory.SubspaceCarrier]: \Prop := Maps.Continuous f;
+\definition equalPullback[f, g: PairTheory.SubspaceCarrier -> PairTheory.SubspaceCarrier][fc: Continuous f][gc: Continuous g][u: Group]:
+  f = g -> (Result.induced f fc Coefficients.identity).apply u = (Result.induced g gc Coefficients.identity).apply u :=
+  \fun (same: f = g) => (\idelim f = g \with h: (PairTheory.SubspaceCarrier -> PairTheory.SubspaceCarrier) =>
+    \forall (regular: Continuous h) -> (Result.induced f fc Coefficients.identity).apply u = (Result.induced h regular Coefficients.identity).apply u \by {
+      base: \fun (regular: Continuous f) => \refl((Result.induced f fc Coefficients.identity).apply u), equality: same
+    }) gc;
+\definition roundTrip[p: PairTheory.SubspaceCarrier]: PairTheory.SubspaceCarrier := boundaryPoint (boundaryVector p);
+\definition roundContinuous: Continuous roundTrip :=
+  topology.Composition[A := PairTheory.SubspaceCarrier, B := Coordinates.Sphere, C := PairTheory.SubspaceCarrier].composeContinuous
+    boundaryTopology Coordinates.sphereTopology boundaryTopology boundaryVector boundaryPoint boundaryVectorContinuous boundaryPointContinuous;
+\import singular_cohomology.Identity[A := PairTheory.SubspaceCarrier, source := boundaryTopology] \as Identity;
+\definition compositeIdentity[u: Group]: first.apply (last.apply u) = u :=
+  eq_reason_in!{{Group} _
+    "=" _ "by" { sym!{{Group}} _ _ (Outer.onCohomology boundaryVector boundaryVectorContinuous boundaryPoint boundaryPointContinuous Degrees.one u) }
+    "=" _ "by" { equalPullback roundTrip Identity.function roundContinuous Identity.continuous u (\axiom:funext(roundTrip, Identity.function, right)) }
+    "=" _ "by" { Identity.Coefficients[M := Product.integerCoefficients].At[n := Degrees.one].cohomologyIdentity u }
+  };
+\import Abelian.Hom[V := CircleGroup, W := Group, source := CircleTheory.cohomologySpace Degrees.one, target := Ordinary.cohomologySpace Degrees.one] \as Linear;
+\definition action[u: Group]: pull.apply u = (Ordinary.cohomologySpace Degrees.one).neg u :=
+  eq_reason_in!{{Group} _
+    "=" _ "by" { Outer.onCohomology reflectedVector reflectedVectorContinuous boundaryPoint boundaryPointContinuous Degrees.one u }
+    "=" _ "by" { Inner.onCohomology boundaryVector boundaryVectorContinuous GeometricReflection.tail GeometricReflection.tailContinuous Degrees.one (last.apply u) }
+    "=" _ "by" { congr!{{CircleGroup} {Group}} first.apply _ _ (middleLaw (last.apply u)) }
+    "=" _ "by" { Linear.negativePreserved first (last.apply u) }
+    "=" _ "by" { congr!{{Group} {Group}} (Ordinary.cohomologySpace Degrees.one).neg _ _ (compositeIdentity u) }
+  };

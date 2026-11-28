@@ -1,0 +1,45 @@
+\import Charts.Patch[U := c.domain, frames := c.frames] \as OriginalChart;
+\definition point: \Cast[Space] c.domain := \into[Space](x, c.domain) \by { c.contains };
+\import OriginalChart.AtPoint[x := point] \as SourceFiber;
+\import SourceFiber.Angular[] \as SourceAngle;
+\import Dual.In[c := OriginalChart.nativeChart] \as Native;
+\definition native: _ := Native.trivialization;
+\definition real: _ := Underlying.In[c := native].trivialization;
+\definition frameRank: real.dimension = Degrees.two := \refl(Degrees.two);
+\import Charts.Transition[x := x, source := OriginalChart.nativeChart.frame point, target := OriginalChart.nativeChart.frame point] \as Scalar;
+\import Scalar.Phase[] \as Phase;
+\import std.Data[].FinSet[] \as Fin;
+\import linear_algebra.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, scalar := Hermitian.Complex[].scalar].Finite[n := Degrees.one] \as Domain;
+\definition unitOnAxis: Domain.basis Scalar.index = Scalar.axis :=
+  \axiom:funext(Domain.basis Scalar.index, Scalar.axis, \fun (i: Fin.Fin Degrees.one) =>
+    Linear.Coordinates[I := Fin.Fin Degrees.one].Kronecker[].equal Scalar.index i (sym!{{Fin.Fin Degrees.one}} _ _ (Fin.singletonValue i)));
+\definition axis: Line x := (OriginalChart.nativeChart.frame point).backward.apply Scalar.axis;
+\definition lambda: R.Real := Vector.squared axis;
+\definition lambdaNonnegative: D.Le R.zero lambda := Vector.nonnegative axis;
+\definition raw[f: Fiber x]: Numbers.Complex := (native.frame point).forward.apply f Scalar.index;
+\definition expansion[w: Line x]: (lineBundle.space x).smul (SourceAngle.value w) axis = w :=
+  eq_reason_in!{{Line x} _
+    "=" _ "by" { sym!{{Line x}} _ _ ((OriginalChart.nativeChart.frame point).backward.preservesScale (SourceAngle.value w) Scalar.axis) }
+    "=" _ "by" { congr!{{Domain.Vector} {Line x}} (OriginalChart.nativeChart.frame point).backward.apply _ _
+      (Scalar.reconstruct ((OriginalChart.nativeChart.frame point).forward.apply w)) }
+    "=" _ "by" { (OriginalChart.nativeChart.frame point).leftInverse w }
+  };
+\definition coordinateFormula[w: Line x]: raw (\parent.\parent.\parent.At[x := x].represent w) = C.mul (C.ofReal lambda) (C.conj (SourceAngle.value w)) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { congr!{{Domain.Vector} {Numbers.Complex}}
+      (\fun (v: Domain.Vector) => Vector.dot w ((OriginalChart.nativeChart.frame point).backward.apply v)) _ _ unitOnAxis }
+    "=" _ "by" { congr!{{Line x} {Numbers.Complex}} (\fun (v: Line x) => Vector.dot v axis) _ _ (sym!{{Line x}} _ _ (expansion w)) }
+    "=" _ "by" { Dot.scaleLeft (SourceAngle.value w) axis axis }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.conj (SourceAngle.value w))) _ _ (Vector.selfReal axis) }
+    "=" _ "by" { ComplexLaws.mulComm (C.conj (SourceAngle.value w)) (C.ofReal lambda) }
+  };
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import cohomology_thom.Thom[].Real[].For[X := Space, F := Fiber, bundle := underlying].With[metric := metric] \as Geometry;
+\import Geometry.Local[K := I.Int^, ring := Integers.commutativeRing] \as Local;
+\import Local.Rank[n := Degrees.two] \as Rank;
+\import Rank.On[U := c.domain] \as On;
+\import Local.Chart[c := real].Rank[n := Degrees.two, same := frameRank] \as Model;
+\definition fiberClass[y: \Cast[Space] c.domain]: Rank.FiberClass y := (On.restriction y).apply Model.model.thomClass;
+\module TargetFiber(y: \Cast[Space] c.domain);
+\module Reflection;

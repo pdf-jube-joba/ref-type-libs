@@ -77,3 +77,4 @@
 \module Comparison(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
   f, g: singular_cohomology.Relative[A := A, source := source, subset := subset].Maps[B := PairDisk.DiskCarrier]
     .Over[target := PairDisk.diskTopology, targetSubset := PairDisk.boundary].Map);
+\module BoundaryReflection;

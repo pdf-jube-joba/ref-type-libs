@@ -47,4 +47,5 @@
   Pairs.Laws[diskMap] { continuous := diskContinuous, contained := boundary }
 };
 \import \parent.\parent.\parent.Integral[].Charts[] \as Charts;
+\module Chart(x: Space, c: Charts.LocalChart[x]);
 \module Home;

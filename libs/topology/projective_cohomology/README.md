@@ -26,6 +26,8 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.CanonicalLine.Integral.Canonical` | \(H^*(\mathbb{CP}^n;\mathbb{Z})\cong\mathbb{Z}[t]/(t^{n+1})\), with \(t\) the Euler class of the canonically oriented underlying real plane bundle |
 | `Complex.CanonicalLine.Dual.Riesz` | The Hermitian Riesz identification with the complex-linear dual is continuous in both directions and conjugate-linear on each fiber |
 | `Complex.CanonicalLine.Dual.Realification.Norm.Home` | The Riesz identification preserves the ambient norms and gives a homeomorphism of the corresponding disk and boundary pairs over projective space |
+| `Complex.CanonicalLine.Dual.Realification.Norm.Chart` | Unit directions in complex dual coordinates are conjugates of the corresponding directions under Riesz |
+| `Complex.CanonicalLine.Integral.PlaneDisk.Comparison.Negative` | Maps of disk pairs whose boundary directions differ by complex conjugation pull back relative integral classes with opposite signs in degree two |
 | `RealPlane` and `ComplexLineSphere` | Homeomorphisms with the antipodal quotient model of the real projective plane and the standard two-sphere model of the complex projective line |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
 | `ZeroDegree` | Evaluation of constant classes and surjectivity of degree-zero pullback from a path-connected source |

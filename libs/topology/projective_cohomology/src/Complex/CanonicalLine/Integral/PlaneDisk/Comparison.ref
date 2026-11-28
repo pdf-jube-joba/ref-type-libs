@@ -57,3 +57,4 @@
         NewPull.At[z := degreeTwo].induced.apply _ _ lift }
     }
   };
+\module Negative;

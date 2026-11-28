@@ -1,0 +1,46 @@
+\import sphere_maps.Reflection[n := Degrees.one] \as GeometricReflection;
+\import sphere_maps.Circle[] \as Circle;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.one] \as ReflectionAxis;
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import Numbers.Prop[] \as ComplexLaws;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as RealLaws;
+\import sphere_maps.Circle[].Coordinates[] \as Coordinates;
+\definition boundaryVector[p: PairTheory.SubspaceCarrier]: Coordinates.Sphere :=
+  \into[Plane.Coordinate](vector p, Plane.Boundary) \by { \bysub(PairDisk.DiskCarrier, PairDisk.boundary, p) };
+\definition boundaryVectorContinuous: topology.Continuity[A := PairTheory.SubspaceCarrier, B := Coordinates.Sphere].Continuous
+  boundaryTopology Coordinates.sphereTopology boundaryVector :=
+  topology.Continuity[A := PairTheory.SubspaceCarrier, B := Plane.Coordinate].Corestriction[S := Plane.Boundary].corestrictContinuous
+    boundaryTopology Plane.topology boundaryVector
+    (topology.Composition[A := PairTheory.SubspaceCarrier, B := Plane.Disk, C := Plane.Coordinate].composeContinuous
+      boundaryTopology Plane.diskTopology Plane.topology (\fun (p: PairTheory.SubspaceCarrier) => vector p) (\fun (v: Plane.Disk) => v)
+      (topology.Continuity[A := PairDisk.DiskCarrier, B := Plane.Disk].Restriction[S := PairDisk.boundary].restrictContinuous
+        PairDisk.diskTopology Plane.diskTopology vector vectorContinuous)
+      (topology.Continuity[A := Plane.Disk, B := Plane.Coordinate].Corestriction[S := Plane.ClosedBall].inclusionContinuous Plane.topology));
+\definition left[v: Coordinates.Sphere]: boundaryVector (boundaryPoint v) = v := \refl(v);
+\definition right[p: PairTheory.SubspaceCarrier]: boundaryPoint (boundaryVector p) = p := homeomorphism.rightInverse p;
+\definition conjugated[v: Coordinates.Sphere]: Coordinates.forward (GeometricReflection.tail v) = Circle.inverse (Coordinates.forward v) :=
+  ComplexLaws.ext _ _ (GeometricReflection.tailHead v)
+    (trans!{R.Real} _ _ _
+      (congr!{{ReflectionAxis.Coordinate} {R.Real}}
+        (\fun (w: ReflectionAxis.Coordinate) => w (Fin.zero N.Nat^::zero)) _ _ (GeometricReflection.tailTail v))
+      (trans!{R.Real} _ _ _
+        (RealLaws.fieldMulNegLeft R.one (v Coordinates.second))
+        (congr!{R.Real R.Real} R.neg _ _ (RealLaws.fieldMulOneLeft (v Coordinates.second)))));
+\definition direction[v: Coordinates.Sphere]: Coordinates.Sphere := GeometricReflection.tail v;
+\definition inversePoint[v: Coordinates.Sphere]:
+  direction v = Coordinates.backward (Circle.inverse (Coordinates.forward v)) :=
+  trans!{{Coordinates.Sphere}} _ _ _
+    (sym!{{Coordinates.Sphere}} _ _ (Coordinates.leftInverse (GeometricReflection.tail v)))
+    (congr!{{Circle.Carrier} {Coordinates.Sphere}} Coordinates.backward _ _ (conjugated v));
+\definition reflect[p: PairTheory.SubspaceCarrier]: PairTheory.SubspaceCarrier := boundaryPoint (GeometricReflection.tail (boundaryVector p));
+\definition reflectedVector[p: PairTheory.SubspaceCarrier]: Coordinates.Sphere := GeometricReflection.tail (boundaryVector p);
+\definition reflectedVectorContinuous: topology.Continuity[A := PairTheory.SubspaceCarrier, B := Coordinates.Sphere].Continuous
+  boundaryTopology Coordinates.sphereTopology reflectedVector :=
+  topology.Composition[A := PairTheory.SubspaceCarrier, B := Coordinates.Sphere, C := Coordinates.Sphere].composeContinuous
+    boundaryTopology Coordinates.sphereTopology Coordinates.sphereTopology boundaryVector GeometricReflection.tail boundaryVectorContinuous GeometricReflection.tailContinuous;
+\definition continuous: topology.Continuity[A := PairTheory.SubspaceCarrier, B := PairTheory.SubspaceCarrier].Continuous
+  boundaryTopology boundaryTopology reflect :=
+  topology.Composition[A := PairTheory.SubspaceCarrier, B := Coordinates.Sphere, C := PairTheory.SubspaceCarrier].composeContinuous
+    boundaryTopology Coordinates.sphereTopology boundaryTopology reflectedVector boundaryPoint reflectedVectorContinuous boundaryPointContinuous;
+\module Cohomology;
