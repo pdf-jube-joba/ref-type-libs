@@ -1,5 +1,4 @@
 \import \parent.\parent.\parent.\parent.\parent.\parent.At[x := y].Basis[q := q] \as Actual;
-\import Lifts.Fiber[x := y].Basis[degree := degree, classes := classes, q := q] \as ActualHypothesis;
 \import Graded.At[q := q].NativeBasis[] \as Reference;
 \import Modules.Isomorphism[V := Free.Carrier, W := H.Group q, source := Free.space, target := H.moduleSpace q].OfBijective[f := Reference.linear] \as RefIso;
 \definition standard: _ := RefIso.isomorphism (basis q).left (basis q).right;

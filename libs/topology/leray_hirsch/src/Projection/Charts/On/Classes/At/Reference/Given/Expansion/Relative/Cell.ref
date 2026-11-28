@@ -1,0 +1,69 @@
+\import N.Basic[].Prop[] \as Nat;
+\import Equality.Transport[A := N.Nat^] \as NatCast;
+\import Equality.Transport[A := I.Int^] \as Cast;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\import \parent.\parent.Column[i := i].Atoms[] \as Atoms;
+\import Atoms.At[j := j] \as Atom;
+\import ProductCochains.Cohomology[] \as Groups;
+\import RelativeProjection.RightFactor[q := degree i, z := z, a := x] \as Apply;
+\import RelativeProjection.FactorDegree[z := z] \as Regrade;
+\import \parent.\parent.Blocks[q := degree j] \as Block;
+\import RightAction.Signed[z := ActualDirect.inputDegree j] \as CupZero;
+\definition Input: \Set := ActualDirect.family.Carrier i;
+\definition Output: \Set := StandardDirect.family.Carrier j;
+\definition Range: \Set := Standard.range.Carrier;
+\definition image: Output -> Range := (StandardDirect.components j).apply;
+\definition total: Range := Apply.map.apply (Atoms.term j);
+\definition expected[e: degree i = degree j]: Output :=
+  CupZero.act (Block.matrix j i) (NatCast.cast family.Carrier (degree i) (degree j) e x);
+\structure Laws[a: Output]: \Prop := {
+  imageLaw: image a = total,
+  above: Nat.Lt (degree i) (degree j) -> a = (StandardDirect.family.space j).zero,
+  zeroInput: x = (ActualDirect.family.space i).zero -> a = (StandardDirect.family.space j).zero,
+  sameGrade: \forall (e: degree i = degree j) -> a = expected e,
+};
+\definition Candidate: \Set := \Cast[Output] ({ a: Output \where Laws[a] });
+\definition laws[a: Candidate]: Laws[a] := \bysub(Output, { a: Output \where Laws[a] }, a);
+\definition Realization: \Prop := \exists (a: Output \where image a = total);
+\definition absoluteZero: \forall (d: I.Int^) -> d = Atom.input -> Nat.Lt (degree i) (degree j) ->
+  Atoms.term j = (Groups.moduleSpace (degree i)).zero :=
+  \induction (d: I.Int^) \return d = Atom.input -> Nat.Lt (degree i) (degree j) ->
+    Atoms.term j = (Groups.moduleSpace (degree i)).zero \with {
+    | ofNat: \fun (p: N.Nat^)(same: I.Int^::ofNat p = Atom.input)(greater: Nat.Lt (degree i) (degree j)) => Logic.falseElim _
+      (Nat.ltIrrefl (degree j) (Nat.leLtTrans (degree j) (degree i) (degree j)
+        (\idelim N.Basic[].Def[].add p (degree j) = degree i \with n: N.Nat^ => Nat.Le (degree j) n \by {
+          base: Nat.leAddLeft p (degree j), equality: Shift.matchNatural (degree j) (degree i) p (sym!{I.Int^} _ _ same)
+        }) greater))
+    | negSucc: \fun (p: N.Nat^)(same: I.Int^::negSucc p = Atom.input)(greater: Nat.Lt (degree i) (degree j)) => Atom.Negative[p := p, same := same].law
+  };
+\import Modules.Hom[V := Groups.Group (degree i), W := Range, source := Groups.moduleSpace (degree i), target := Standard.range.space] \as ApplyMaps;
+\import Modules.Hom[V := Output, W := Range, source := StandardDirect.family.space j, target := Standard.range.space] \as ImageMaps;
+\import Modules.Hom[V := Input, W := Range, source := ActualDirect.family.space i, target := Standard.range.space] \as ShiftedMaps;
+\definition zeroResult[h: Atoms.term j = (Groups.moduleSpace (degree i)).zero]: total = Standard.range.space.zero :=
+  trans!{Range} _ _ _
+    (congr!{{Groups.Group (degree i)} Range} Apply.map.apply _ _ h)
+    (ApplyMaps.zeroPreserved Apply.map);
+\definition zeroInputResult[h: x = (ActualDirect.family.space i).zero]: total = Standard.range.space.zero :=
+  trans!{Range} _ _ _
+    (Apply.law (Atoms.term j))
+    (trans!{Range} _ _ _
+      (congr!{Input Range} (Apply.shifted (Atoms.term j)).apply _ _ h)
+      (ShiftedMaps.zeroPreserved (Apply.shifted (Atoms.term j))));
+\definition zeroImage[h: total = Standard.range.space.zero]:
+  image (StandardDirect.family.space j).zero = total :=
+  trans!{Range} _ _ _
+    (ImageMaps.zeroPreserved (StandardDirect.components j))
+    (sym!{Range} _ _ h);
+\module Natural(p: N.Nat^, source: I.Int^::ofNat p = Atom.input);
+\module Matching(equal: degree i = degree j);
+\definition realize: \forall (d: I.Int^) -> d = Atom.input -> Realization :=
+  \induction (d: I.Int^) \return d = Atom.input -> Realization \with {
+    | ofNat: \fun (p: N.Nat^)(same: I.Int^::ofNat p = Atom.input) => Natural[p := p, source := same].existsTerm
+    | negSucc: \fun (p: N.Nat^)(same: I.Int^::negSucc p = Atom.input) =>
+      Logic.existsIntro[Output, { a: Output \where image a = total }] (StandardDirect.family.space j).zero
+        (zeroImage (zeroResult (Atom.Negative[p := p, same := same].law)))
+  };
+\definition realizeTerm: Realization := realize Atom.input (\refl(Atom.input));
+\module Choice;
+\definition existsCandidate: \exists Candidate := Choice[].proof;

@@ -42,7 +42,8 @@
 }
 \definition termLaw: \forall (i: Index) ->
   Regrade.map.apply (Evaluation.term i) = (H.moduleSpace q).smul (vector i) (Expand.term i) :=
-  \fun (i: Index) => either!{{Classical.excludedMiddle (InGrade i)} {_}
+  \fun (i: Index) => either!{{Classical.excludedMiddle (InGrade i)}
+    {Regrade.map.apply (Evaluation.term i) = (H.moduleSpace q).smul (vector i) (Expand.term i)}
     {\fun (row: InGrade i) => Selected[i := i, row := row].law}
     {\fun (off: Logic.Not (InGrade i)) => Unselected[i := i, off := off].law}
   };
@@ -51,7 +52,9 @@
     "=" _ "by" { Actual.onGenerator j }
     "=" _ "by" { congr!{{H.Group (degree j)} {H.Group q}} Regrade.map.apply _ _ Evaluation.fiberExpansion }
     "=" _ "by" { MoveSum.law Regrade.map (Finite.elements count) Evaluation.term }
-    "=" _ "by" { Sum.congruent (Finite.elements count) _ _ termLaw }
+    "=" _ "by" { Sum.congruent (Finite.elements count)
+      (\fun (i: Index) => Regrade.map.apply (Evaluation.term i))
+      (\fun (i: Index) => (H.moduleSpace q).smul (vector i) (Expand.term i)) termLaw }
     "=" _ "by" { sym!{{H.Group q}} _ _ (Expand.sum vector) }
   };
 \definition onFree: changeBasis.forward.apply (Free.generator j) = FreeBlock.assemble vector :=

@@ -1,0 +1,30 @@
+\import Atom.Native[p := p, same := source] \as Coefficient;
+\import \root.Trivial[X := LocalBase.CarrierSet, F := F, base := LocalBase.topology base, fiber := fiber, K := K, ring := ring]
+  .Over[U := part].Associated[q := p, r := degree j, z := z].Given[b := Coefficient.coefficient, c := Model.fiberClass j] \as Factor;
+\definition inputDegree: I.Int^ := Factor.input;
+\definition a: RelativeProjection.baseFamily.Carrier inputDegree :=
+  NatCast.cast Regrade.Inputs (degree i) Coefficient.sumDegree (sym!{N.Nat^} _ _ Coefficient.degreeLaw) x;
+\definition imageLaw: total = Regrade.shifted Coefficient.sumDegree Coefficient.exteriorClass a :=
+  eq_reason_in!{Range _
+    "=" _ "by" { Apply.law (Atoms.term j) }
+    "=" _ "by" { congr!{{Groups.Group (degree i)} Range} (\fun (u: Groups.Group (degree i)) => (Apply.shifted u).apply x) _ _ Coefficient.law }
+    "=" _ "by" { Regrade.law Coefficient.sumDegree (degree i) Coefficient.exteriorClass Coefficient.degreeLaw x }
+  };
+\module Positive(n: N.Nat^, before: I.Int^::ofNat n = inputDegree) {
+  \import Factor.From[p := n, same := before] \as Proof;
+  \definition existsTerm: Realization :=
+    Logic.existsIntro[Output, { t: Output \where image t = total }] (Proof.term a)
+      (trans!{Range} _ _ _ (Proof.law a) (sym!{Range} _ _ imageLaw));
+}
+\module Negative(n: N.Nat^, before: I.Int^::negSucc n = inputDegree) {
+  \import RelativeProjection.Shifted[q := Coefficient.sumDegree, u := Coefficient.exteriorClass].To[z := z].Below[p := n, same := before] \as Vanish;
+  \definition existsTerm: Realization :=
+    Logic.existsIntro[Output, { t: Output \where image t = total }] (StandardDirect.family.space j).zero
+      (zeroImage (trans!{Range} _ _ _ imageLaw (Vanish.zero a)));
+}
+\definition find: \forall (d: I.Int^) -> d = inputDegree -> Realization :=
+  \induction (d: I.Int^) \return d = inputDegree -> Realization \with {
+    | ofNat: \fun (n: N.Nat^)(before: I.Int^::ofNat n = inputDegree) => Positive[n := n, before := before].existsTerm
+    | negSucc: \fun (n: N.Nat^)(before: I.Int^::negSucc n = inputDegree) => Negative[n := n, before := before].existsTerm
+  };
+\definition existsTerm: Realization := find inputDegree (\refl(inputDegree));

@@ -31,8 +31,8 @@
 \definition top: N.Nat^ := bound (Finite.elements count);
 \definition degreeBelow: \forall (i: Index) -> Nat.Lt (degree i) top :=
   \fun (i: Index) => Nat.ltOfSuccLe top (degree i) (occursBound (Finite.elements count) i (Finite.exhaustive count i));
-\module On(family: Modules.Family[Index]) {
-  \import Modules.Product[Index := Index, family := family] \as Product;
+\module On(family: Modules.Family[Finite.Fin count]) {
+  \import Modules.Product[Index := Finite.Fin count, family := family] \as Product;
   \import Modules.Hom[V := Product.Carrier, W := Product.Carrier, source := Product.space, target := Product.space] \as Hom;
   \module With(t: Hom.Map);
   \import Modules.Isomorphism[V := Product.Carrier, W := Product.Carrier, source := Product.space, target := Product.space] \as Iso;

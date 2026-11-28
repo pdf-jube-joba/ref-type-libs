@@ -43,3 +43,5 @@
 }
 
 \module Blocks(q: N.Nat^);
+
+\module Relative(part: \Pow LocalBase.CarrierSet, z: I.Int^);
