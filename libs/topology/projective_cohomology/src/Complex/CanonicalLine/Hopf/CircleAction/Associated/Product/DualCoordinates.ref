@@ -54,3 +54,4 @@
 \module Orbits;
 \module FinalTopology;
 \module AssociatedLine;
+\module Euler;

@@ -16,6 +16,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.AssociatedLine` | The quotient by the inverse-weight circle action is homeomorphic over projective space to the tautological line bundle |
 | `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.DualCoordinates.Orbits` | Evaluation into the complex dual has fibers given by the direct-weight circle action |
 | `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.DualCoordinates.AssociatedLine` | The quotient by the direct-weight circle action is homeomorphic over projective space to the complex-linear dual |
+| `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.DualCoordinates.Euler` | The two character bundles have opposite integral Euler classes, with the identity character giving the canonical generator |
 | `Real.CanonicalLine.Hopf.Standard` | Comparison with the standard real sphere and its intermediate-degree cohomology vanishing |
 | `Complex.CanonicalLine.Realification` | The underlying real bundle has rank two and carries a metric induced by its ambient embedding |
 | `Complex.CanonicalLine.Realification.Norm.Sphere.Standard` | The realified unit sphere bundle is homeomorphic to \(S^{2n+1}\) |
