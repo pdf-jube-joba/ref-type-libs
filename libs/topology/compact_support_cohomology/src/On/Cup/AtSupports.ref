@@ -1,0 +1,26 @@
+\import cohomology_thom.MixedCup[A := A, source := space, first := outside K, second := outside L, K := R, ring := ring] \as Mixed;
+\import Mixed.Union[] \as Union;
+\import Union.Cover[] \as Cover;
+\import Top.Subspace[S := Union.subset] \as Subspace;
+\definition unionSubset: \Pow A := Union.subset;
+\definition leftOpen: Top.IsOpenIn space (outside K) := Compactness.compactClosed space hausdorff K (compact K);
+\definition rightOpen: Top.IsOpenIn space (outside L) := Compactness.compactClosed space hausdorff L (compact L);
+\definition conditions: Cover.Conditions := Cover.Conditions {
+  leftOpen := Subspace.traceOpen space (outside K) leftOpen,
+  rightOpen := Subspace.traceOpen space (outside L) rightOpen,
+};
+\import singular_cohomology.Identity[A := A, source := space] \as Identity;
+\import singular_cohomology.Relative[A := A, source := space, subset := outside (intersection K L)]
+  .Maps[B := A].Over[target := space, targetSubset := unionSubset] \as Maps;
+\definition refine: Maps.Map := \into[A -> A](Identity.function, Maps.Map) \by {
+  Maps.Laws[Identity.function] {
+    continuous := Identity.continuous,
+    contained := \fun (x: \Cast[A] (outside (intersection K L))) =>
+      outsideIntersection K L x (\bysub(A, outside (intersection K L), x)),
+  }
+};
+\import Maps.On[f := refine].Integer[].With[coefficients := coefficients] \as Pull;
+\definition fromUnion[z: I.Int^]: _ := Pull.At[z := z].induced;
+\module Product(p, q: N.Nat^) {
+  \definition cup: _ := Cover.On[conditions := conditions].Cup[p := p, q := q].apply;
+}

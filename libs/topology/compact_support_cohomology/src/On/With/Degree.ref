@@ -30,3 +30,14 @@
 
 \module Compact(compactSpace: Top.IsCompact space);
 \module Module;
+
+\module PairDescent(B: \Set, secondSpace: topology.Topology[Carrier := B].Topology, secondDegree: I.Int^, Result: \Set,
+  product: \forall (K: Support)(L: \root.On[A := B, space := secondSpace].Support) ->
+    Stage K -> \root.On[A := B, space := secondSpace].With[coefficients := coefficients].Degree[z := secondDegree].Stage L -> Result,
+  firstCompatible: \forall (K, K1: Support)(L: \root.On[A := B, space := secondSpace].Support)
+    (included: before K K1)(a: Stage K)(b: \root.On[A := B, space := secondSpace].With[coefficients := coefficients].Degree[z := secondDegree].Stage L) ->
+    product K L a b = product K1 L (advance K K1 included a) b,
+  secondCompatible: \forall (K: Support)(L, L1: \root.On[A := B, space := secondSpace].Support)
+    (included: \root.On[A := B, space := secondSpace].before L L1)(a: Stage K)
+    (b: \root.On[A := B, space := secondSpace].With[coefficients := coefficients].Degree[z := secondDegree].Stage L) ->
+    product K L a b = product K L1 a (\root.On[A := B, space := secondSpace].With[coefficients := coefficients].Degree[z := secondDegree].advance L L1 included b));

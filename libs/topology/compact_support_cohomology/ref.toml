@@ -10,3 +10,5 @@ singular_excision = { path = "../singular/excision" }
 chain_complexes = { path = "../../algebra/homological/chain_complexes" }
 double_complexes = { path = "../../algebra/homological/double_complexes" }
 resolutions = { path = "../../algebra/homological/resolutions" }
+singular_products = { path = "../singular/products" }
+cohomology_thom = { path = "../cohomology_thom" }

@@ -1,0 +1,4 @@
+\import \parent.\parent.AtSupports[K := K, L := L] \as Fixed;
+\definition cup[a: Left.Stage K][b: Right.Stage L]: Target.Stage (intersection K L) :=
+  (Fixed.fromUnion outputDegree).apply (Fixed.Product[p := p, q := q].cup a b);
+\module Through(K1, L1: Support, first: before K K1, second: before L L1);

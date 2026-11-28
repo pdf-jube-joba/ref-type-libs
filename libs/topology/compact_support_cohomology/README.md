@@ -21,6 +21,7 @@ The construction uses all compact subsets and applies in particular to locally c
 | `On.Excision.With` | Restriction to an open neighborhood of a compact support is an isomorphism |
 | `On.Open.With.AtSupport` | Excision for an open subspace at a chosen compact support |
 | `On.Open.With.Extension` | Extension by zero using inverse excision, with a representative formula |
+| `On.Cup.Degree` | Cup product with coefficients in a commutative ring, with a representative formula at the intersection of the supports |
 
 For \(K\subseteq L\), the transition is pullback along the identity map of pairs from
 \((X,X\setminus L)\) to \((X,X\setminus K)\). For a proper map \(f\), the
@@ -38,6 +39,11 @@ The cochain comparison sends a relative class to the class of its cochain on
 the ambient space. Every supported cocycle lifts to a relative stage. A
 supported primitive witnesses zero after enlarging to a compact support
 containing both the original cocycle support and the primitive support.
+
+For commutative ring coefficients the cup product is defined in nonnegative
+degrees by the relative mixed cup product of C03 with its two-open-cover
+comparison. Both support transitions commute with the product, which
+gives a map of the direct-limit carriers in each pair of degrees.
 
 Run the package check from the repository root.
 

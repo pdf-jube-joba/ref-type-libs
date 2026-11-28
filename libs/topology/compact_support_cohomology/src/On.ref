@@ -31,3 +31,4 @@
 \module Excision(U: \Pow A, K: Support, hausdorff: Top.IsT2 space,
   open: Top.IsOpenIn space U, included: Top.Subset K U);
 \module Open(U: \Pow A, hausdorff: Top.IsT2 space, open: Top.IsOpenIn space U);
+\module Cup(R: \Set, ring: std.Alg[].Ring[].CommutativeRing[R], hausdorff: Top.IsT2 space);
