@@ -12,3 +12,5 @@
 \module ZeroSphereSign;
 \module NonnegativePull(A, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology, coefficients: Modules.Bundle, n: std.Data[].Nat[].Nat^, f: A -> B, regular: topology.Continuity[A := A, B := B].Continuous source target f);
 \module SignedDegree(A: \Set, source: topology.Topology[Carrier := A].Topology, coefficients: Modules.Bundle, n: std.Data[].Nat[].Nat^);
+\module ExtensionByZero(A, B, C, A1, B1: Cochains.Complex);
+\module SphereCoverSign(n: std.Data[].Nat[].Nat^);

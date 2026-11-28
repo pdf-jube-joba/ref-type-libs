@@ -35,3 +35,4 @@ singular_cap = { path = "../singular/cap" }
 sphere_maps = { path = "../spheres" }
 metric_spaces = { path = "../metric" }
 singular_excision = { path = "../singular/excision" }
+singular_subdivision = { path = "../singular/subdivision" }

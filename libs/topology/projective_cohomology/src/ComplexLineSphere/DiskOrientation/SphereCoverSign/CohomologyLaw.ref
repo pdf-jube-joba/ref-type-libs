@@ -1,0 +1,56 @@
+\import \parent.Cut[] \as Cut;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\definition next: I.Int^ := I.Int^::ofNat upper;
+\import Cochains.At[C := WholeRelative.complex, z := next] \as Whole;
+\import Cochains.At[C := LeftRelative.complex, z := next] \as Left;
+\import Cochains.At[C := SmallHom.complex, z := next] \as Small;
+\import Cochains.At[C := IntersectionHom.complex, z := z] \as Intersection;
+\import Cochains.At[C := WholeHom.complex, z := next] \as Absolute;
+\import Cochains.Map[C := WholeRelative.complex, D := LeftRelative.complex].At[k := next] \as Restriction;
+\import Cochains.Map[C := LeftRelative.complex, D := SmallHom.complex].At[k := next] \as Extending;
+\import Cochains.Map[C := WholeRelative.complex, D := WholeHom.complex].At[k := next] \as Forget;
+\import Cochains.Map[C := WholeHom.complex, D := SmallHom.complex].At[k := next] \as ToSmall;
+\import Cochains.End[C := IntersectionHom.complex].At[k := z] \as Identity;
+\import LeftRelative.PairSequence[].LongExact[z := z] \as LeftDelta;
+\import Middle.At[z := z] \as SmallDelta;
+\import Comparison.At[z := z] \as WholeDelta;
+\import Comparison.Degree[z := next] \as Compare;
+\definition throughCut[h: Whole.Closed]: Small.Closed :=
+  (Extending.cyclesMap Supported.map).apply ((Restriction.cyclesMap Cut.pullback).apply h);
+\definition throughWhole[h: Whole.Closed]: Small.Closed :=
+  (ToSmall.cyclesMap Cut.smallPullback).apply ((Forget.cyclesMap WholeExact.inclusion).apply h);
+\definition onCycle[h: Whole.Closed]: throughCut h = throughWhole h :=
+  (\idelim throughCut h = throughWhole h \with c: SmallHom.Carrier next =>
+    \forall (closed: SmallHom.complex.differential.apply next c = (SmallHom.space (Degree.next next)).zero) ->
+      throughCut h = Small.cycle c closed \by {
+    base: \fun (closed: _) => \refl(throughCut h), equality: Cut.onCochain upper h
+  }) (\bysub(SmallHom.Carrier next, Small.cycles.carrier, throughWhole h));
+\definition onClass[h: Whole.Closed]: (Extending.induced Supported.map).apply ((Cut.onCohomology next).apply (Whole.classOf h)) =
+  Compare.comparison.backward.apply ((Forget.induced WholeExact.inclusion).apply (Whole.classOf h)) :=
+  eq_reason_in!{Small.Cohomology _
+    "=" _ "by" { congr!{Left.Cohomology Small.Cohomology} (Extending.induced Supported.map).apply _ _ (Restriction.onClass Cut.pullback h) }
+    "=" _ "by" { Extending.onClass Supported.map ((Restriction.cyclesMap Cut.pullback).apply h) }
+    "=" _ "by" { congr!{Small.Closed Small.Cohomology} Small.classOf _ _ (onCycle h) }
+    "=" _ "by" { sym!{Small.Cohomology} _ _ (ToSmall.onClass Cut.smallPullback ((Forget.cyclesMap WholeExact.inclusion).apply h)) }
+    "=" _ "by" { congr!{Absolute.Cohomology Small.Cohomology} Compare.comparison.backward.apply _ _ (sym!{Absolute.Cohomology} _ _ (Forget.onClass WholeExact.inclusion h)) }
+  };
+\definition onClasses: \forall (q: Whole.Cohomology) -> (Extending.induced Supported.map).apply ((Cut.onCohomology next).apply q) =
+  Compare.comparison.backward.apply ((Forget.induced WholeExact.inclusion).apply q) :=
+  Whole.classInduction (\fun (q: Whole.Cohomology) => (Extending.induced Supported.map).apply ((Cut.onCohomology next).apply q) =
+    Compare.comparison.backward.apply ((Forget.induced WholeExact.inclusion).apply q)) onClass;
+\definition ordinary[c: Intersection.Cohomology]: Whole.Cohomology := Reduced.With[coefficients := coefficients].At[z := z].cut.backward.apply (LeftDelta.connecting.apply c);
+\definition cut[c: Intersection.Cohomology]: (Cut.onCohomology next).apply (ordinary c) = LeftDelta.connecting.apply c :=
+  trans!{Left.Cohomology} _ _ _ (sym!{Left.Cohomology} _ _ (Cut.cutLaw n (ordinary c)))
+    (Reduced.With[coefficients := coefficients].At[z := z].cut.rightInverse (LeftDelta.connecting.apply c));
+\definition law[c: Intersection.Cohomology]: WholeDelta.connecting.apply c = (Forget.induced WholeExact.inclusion).apply (ordinary c) :=
+  eq_reason_in!{Absolute.Cohomology _
+    "=" _ "by" { congr!{Small.Cohomology Absolute.Cohomology} Compare.comparison.forward.apply _ _
+      (sym!{Small.Cohomology} _ _ (congr!{Intersection.Cohomology Small.Cohomology} SmallDelta.connecting.apply _ _ (Identity.identityOnCohomology c))) }
+    "=" _ "by" { congr!{Small.Cohomology Absolute.Cohomology} Compare.comparison.forward.apply _ _ (Supported.connecting z c) }
+    "=" _ "by" { congr!{Left.Cohomology Absolute.Cohomology}
+      (\fun (q: Left.Cohomology) => Compare.comparison.forward.apply ((Extending.induced Supported.map).apply q)) _ _ (sym!{Left.Cohomology} _ _ (cut c)) }
+    "=" _ "by" { congr!{Small.Cohomology Absolute.Cohomology} Compare.comparison.forward.apply _ _ (onClasses (ordinary c)) }
+    "=" _ "by" { Compare.comparison.rightInverse ((Forget.induced WholeExact.inclusion).apply (ordinary c)) }
+  };
+\definition forget[q: Whole.Cohomology]: Absolute.Cohomology := (Forget.induced WholeExact.inclusion).apply q;
+\definition connecting[q: Intersection.Cohomology]: Absolute.Cohomology := WholeDelta.connecting.apply q;

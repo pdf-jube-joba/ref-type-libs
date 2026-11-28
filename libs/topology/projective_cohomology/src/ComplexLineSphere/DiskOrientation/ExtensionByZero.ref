@@ -1,0 +1,8 @@
+\import Cochains.ShortExact[A := A, B := B, C := C] \as Source;
+\import Cochains.ShortExact[A := A1, B := B1, C := C] \as Target;
+\import Cochains.Map[C := B, D := B1] \as Middles;
+\module Along(s: Source.Sequence, t: Target.Sequence, b: Middles.Map) {
+  \definition Commutes: \Prop := \forall (z: I.Int^)(x: B.family.Carrier z) ->
+    t.projection.apply z (b.apply z x) = s.projection.apply z x;
+  \module With(right: Commutes);
+}

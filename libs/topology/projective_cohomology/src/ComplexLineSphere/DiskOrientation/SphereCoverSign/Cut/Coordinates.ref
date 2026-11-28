@@ -1,0 +1,57 @@
+\definition z: I.Int^ := I.Int^::ofNat k;
+\import SmallFromLeft.At[n := k] \as LeftSmall;
+\import SmallFromRight.At[n := k] \as RightSmall;
+\import LeftPair.Maps[B := Sphere].Over[target := source, targetSubset := Geometry.right].On[f := inclusion].Integer[] \as LeftMap;
+\definition includeSum[q: WholeRelative.Carrier z]: SumHom.Carrier z := Middle.sequence.inclusion.apply z (smallForget k q);
+\import ChainsCover.Sequence[] \as ChainSequence;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring].ShortExact[A := OverlapExtension.complex,
+  B := SumExtension.complex, C := SmallExtension.complex].Cokernel[s := ChainSequence.sequence] \as Cokernel;
+\import Nonnegative.Map[C := LeftChains.complex, D := ChainsSum.complex].ZeroExtension[f := ChainsSum.firstInjection] \as LeftIntoSum;
+\import Nonnegative.Map[C := RightChains.complex, D := ChainsSum.complex].ZeroExtension[f := ChainsSum.secondInjection] \as RightIntoSum;
+\import Modules.Biproduct[V := LeftChains.Carrier k, W := RightChains.Carrier k, left := LeftChains.space k, right := RightChains.space k]
+  .Copair[U := SmallChains.Carrier k, target := SmallChains.space k] \as Copair;
+\definition eval[h: SmallHom.Carrier z][v: SumExtension.Carrier z]: (Middle.sequence.inclusion.apply z h).apply v =
+    h.apply (ChainSequence.sequence.projection.apply z v) :=
+  congr!{{SmallExtension.Carrier z} I.Int^} h.apply _ _ (Cokernel.At[k := z].onClass v);
+\definition leftProjection[v: LeftExtension.Carrier z]: ChainSequence.sequence.projection.apply z (LeftIntoSum.map.apply z v) =
+    SmallExtension.Positive[n := k].intro (LeftSmall.map.apply v) :=
+  congr!{{SmallChains.Carrier k} {SmallExtension.Carrier z}} SmallExtension.Positive[n := k].intro _ _
+    (Copair.onLeft LeftSmall.map RightSmall.map v);
+\definition rightProjection[v: RightExtension.Carrier z]: ChainSequence.sequence.projection.apply z (RightIntoSum.map.apply z v) =
+    SmallExtension.Positive[n := k].intro (RightSmall.map.apply v) :=
+  congr!{{SmallChains.Carrier k} {SmallExtension.Carrier z}} SmallExtension.Positive[n := k].intro _ _
+    (Copair.onRight LeftSmall.map RightSmall.map v);
+\definition evaluateWhole[q: WholeRelative.Carrier z][v: WholeChains.Carrier k]: I.Int^ :=
+  q.apply (WholePair.class z (WholeExtension.Positive[n := k].intro v));
+\definition leftValue[q: WholeRelative.Carrier z][v: LeftExtension.Carrier z]:
+    (Sum.firstProjection.apply z (includeSum q)).apply v = (LeftExact.inclusion.apply z (CutPull.pullback.apply z q)).apply v :=
+  trans!{I.Int^} _ _ _ (eval (smallForget k q) (LeftIntoSum.map.apply z v))
+    (trans!{I.Int^} _ _ _ (congr!{{SmallExtension.Carrier z} I.Int^} (smallForget k q).apply _ _ (leftProjection v))
+      (trans!{I.Int^} _ _ _ (congr!{{WholeChains.Carrier k} I.Int^} (evaluateWhole q) _ _ (LeftSmall.law v))
+        (sym!{I.Int^} _ _ (congr!{{WholePair.Carrier z} I.Int^} q.apply _ _ (LeftMap.At[z := z].quotientOnClass v)))));
+\definition left[q: WholeRelative.Carrier z]: Sum.firstProjection.apply z (includeSum q) = LeftExact.inclusion.apply z (CutPull.pullback.apply z q) :=
+  LeftHom.At[z := z].ext _ _ (\fun (v: LeftExtension.Carrier z) => leftValue q v);
+\definition zeroRestriction[q: WholeRelative.Carrier z][v: RightExtension.Carrier z]:
+    (WholeExact.restriction.apply z (WholeExact.inclusion.apply z q)).apply v = ((RightHom.space z).zero).apply v :=
+  congr!{{RightHom.Carrier z} I.Int^} (\fun (h: RightHom.Carrier z) => h.apply v) _ _ (WholeExact.sequence.zero z q);
+\definition rightValue[q: WholeRelative.Carrier z][v: RightExtension.Carrier z]:
+    (Sum.secondProjection.apply z (includeSum q)).apply v = ((RightHom.space z).zero).apply v :=
+  trans!{I.Int^} _ _ _ (eval (smallForget k q) (RightIntoSum.map.apply z v))
+    (trans!{I.Int^} _ _ _ (congr!{{SmallExtension.Carrier z} I.Int^} (smallForget k q).apply _ _ (rightProjection v))
+      (trans!{I.Int^} _ _ _ (congr!{{WholeChains.Carrier k} I.Int^} (evaluateWhole q) _ _ (RightSmall.law v)) (zeroRestriction q v)));
+\definition right[q: WholeRelative.Carrier z]: Sum.secondProjection.apply z (includeSum q) = (RightHom.space z).zero :=
+  RightHom.At[z := z].ext _ _ (\fun (v: RightExtension.Carrier z) => rightValue q v);
+\definition restrictLeft[q: WholeRelative.Carrier z]: LeftHom.Carrier z := LeftExact.inclusion.apply z (CutPull.pullback.apply z q);
+\definition summed[q: WholeRelative.Carrier z]: includeSum q = Sum.firstInjection.apply z (restrictLeft q) :=
+  eq_reason_in!{{SumHom.Carrier z} _
+    "=" _ "by" { sym!{{SumHom.Carrier z}} _ _ (Sum.reconstruction z (includeSum q)) }
+    "=" _ "by" { congr!{{LeftHom.Carrier z} {RightHom.Carrier z} {SumHom.Carrier z}}
+      (\fun (a: LeftHom.Carrier z)(b: RightHom.Carrier z) => (SumHom.space z).add
+        (Sum.firstInjection.apply z a) (Sum.secondInjection.apply z b)) _ _ _ _ (left q) (right q) }
+    "=" _ "by" { congr!{{SumHom.Carrier z} {SumHom.Carrier z}} ((SumHom.space z).add (Sum.firstInjection.apply z (restrictLeft q))) _ _
+      (Cochains.Map[C := RightHom.complex, D := SumHom.complex].At[k := z].zeroPreserved Sum.secondInjection) }
+    "=" _ "by" { Modules.Laws[V := SumHom.Carrier z, space := SumHom.space z].zeroRight (Sum.firstInjection.apply z (restrictLeft q)) }
+  };
+\definition law[q: WholeRelative.Carrier z]: Supported.map.apply z (CutPull.pullback.apply z q) = smallForget k q :=
+  Middle.sequence.injective z _ _ (trans!{{SumHom.Carrier z}} _ _ _
+    (Supported.square z (CutPull.pullback.apply z q)) (sym!{{SumHom.Carrier z}} _ _ (summed q)));
