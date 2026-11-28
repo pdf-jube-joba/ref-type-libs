@@ -1,0 +1,29 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\import real.Analysis[] \as Real;
+\import Real.Estimates[].Product[] \as Absolute;
+\import dedekind_reals.DedekindReal[] \as R;
+\import euclidean_measure.Euclidean[n := n] \as E;
+\import E.Borel[] \as BorelSets;
+\import E.MeasureConstruction[] \as Lebesgue;
+\import euclidean_measure.EuclideanBorel[n := n] \as Completion;
+\import lp_spaces.Euclidean[n := n] \as L;
+\import L.BorelMeasure[] \as Borel;
+\import L.CompactBounds[] \as Bounds;
+\import functional_analysis.Measure[A := E.Point] \as M;
+\import M.Sigma[] \as Sigma;
+\import M.Integral[mu := Borel.borel] \as I;
+\import M.Integral[mu := Lebesgue.measure] \as J;
+\import topology.Topology[Carrier := E.Point] \as Sets;
+\import topological_algebra.Euclidean[].Dimension[n := n].Topology[] \as Ambient;
+\import product_integration.Finiteness[A := E.Point, mu := Borel.borel] \as Finite;
+\import product_integration.MeasureMap[A := E.Point, B := E.Point, source := Lebesgue.measure, target := Borel.borel] \as Map;
+\definition completion: Map.Data := Map.Data {
+  function := \fun (x: E.Point) => x,
+  measurable := Completion.borelMeasurable,
+  value := \fun (S: \Pow E.Point)(valid: _) => \refl(Lebesgue.measure.value S),
+};
+\module On(K: \Pow E.Point, compact: Sets.IsCompactIn Ambient.topology K);

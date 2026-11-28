@@ -1,0 +1,66 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\use std.Logic[].Equality[].eq_reason_in;
+\import real.Analysis[] \as Real;
+\import Real.Algebra[] \as Algebra;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import calculus.Real[].OneDimension[] \as One;
+\import calculus.Real[].Multivariable[n := One.dimension].Open[] \as Open;
+\import Open.Whole[] \as Whole;
+\import boundary_manifolds.Interval[] \as Geometry;
+\import boundary_manifolds.Disk[n := N.Nat^::zero] \as Disk;
+\import boundary_manifolds.Model[n := One.dimension] \as Model;
+\import boundary_manifolds.Dimension[n := One.dimension] \as Manifolds;
+\import integration.Real[] \as Integrals;
+\definition manifold: Manifolds.Manifold := Geometry.manifold;
+\definition interval: Integrals.Interval := Integrals.Interval {
+  left := Real.neg Real.one, right := Real.one, ordered := Geometry.endpointOrder,
+};
+\import \root.Interval[interval := interval].Box[] \as Box;
+\import \root.Interval[interval := interval] \as Parameter;
+\import integration.Real[].Riemann[interval := interval].Continuous[] \as Continuous;
+\definition whole[t: Continuous.Point]: \In[Model.Point] Open.whole.points (Parameter.point t) := \refl(Parameter.point t);
+\import \root.Interval[interval := interval].On[U := Open.whole, within := whole] \as Local;
+\import euclidean_forms.Euclidean[n := One.dimension].On[U := Open.whole] \as Forms;
+\import Forms.ExteriorDerivative[k := N.Nat^::zero] \as D;
+\import Forms.DegreeZero[] \as ZeroForms;
+\import change_of_variables.Euclidean[n := One.dimension].TopCoordinates[U := Open.whole] \as Top;
+\import Open.Smooth[] \as Smooth;
+\definition point[x: Box.carrier]: manifold.Point :=
+  Geometry.point (x One.index) (Box.inBox x (\bysub(Model.Point, Box.points, x)));
+\definition fromManifold[x: manifold.Point]: Box.carrier :=
+  \into[Model.Point](x, Box.points) \by {
+    Box.ofBounds x (Geometry.toBounds (x One.index)
+      (\idelim Disk.defining x = Disk.defining (Geometry.coordinate (x One.index)) \with v: Real.Real => R.Le Real.zero v \by {
+        base: \bysub(Open.Carrier Open.whole, { p: Open.Carrier Open.whole \where R.Le Real.zero (Disk.defining p) }, x),
+        equality: congr!{{Open.Carrier Open.whole} Real.Real} Disk.defining _ _
+          (\axiom:funext((x \of Open.Carrier Open.whole), Geometry.coordinate (x One.index), \fun (i: One.Index) => congr!{{One.Index} Real.Real} x _ _ (Fin.singletonValue i)))
+      }))
+  };
+\definition left: manifold.Point := Geometry.left;
+\definition right: manifold.Point := Geometry.right;
+\definition coefficient[omega: Forms.Form One.dimension]: Continuous.Function :=
+  Local.Scalar[f := Top.coefficient omega].continuous;
+\definition representative[omega: Forms.Form One.dimension]:
+  functional_analysis.Measure[A := Model.Point].Integral[mu := euclidean_measure.Euclidean[n := One.dimension].MeasureConstruction[].measure].Representatives :=
+  Box.Of[f := coefficient omega].representative;
+\definition integral[omega: Forms.Form One.dimension]: Real.Real :=
+  functional_analysis.Measure[A := Model.Point].Integral[mu := euclidean_measure.Euclidean[n := One.dimension].MeasureConstruction[].measure].integral (representative omega);
+\definition comparison[omega: Forms.Form One.dimension]: integral omega = Local.integral omega := Box.Of[f := coefficient omega].integral;
+\definition leftValue[f: Smooth.SmoothFunction Open.whole]: f Local.left = f left := \refl(f left);
+\definition rightValue[f: Smooth.SmoothFunction Open.whole]: f Local.right = f right := \refl(f right);
+\module BoundaryAt(x: manifold.Point);
+\definition orientedBoundary[f: Smooth.SmoothFunction Open.whole]: Real.Real := Real.add (BoundaryAt[x := right].contribution f) (BoundaryAt[x := left].contribution f);
+\definition stokes[f: Smooth.SmoothFunction Open.whole]: integral (D.apply (ZeroForms.apply f)) = orientedBoundary f :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { comparison (D.apply (ZeroForms.apply f)) }
+    "=" { Real.sub (f Local.right) (f Local.left) } "by" { Local.Exact[f := f].stokes }
+    "=" { Real.sub (f right) (f left) } "by" { congr!{Real.Real Real.Real Real.Real} Real.sub _ _ _ _ (rightValue f) (leftValue f) }
+    "=" _ "by" { sym!{Real.Real} _ _ (congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+      (BoundaryAt[x := right].rightValue f (\refl(right))) (BoundaryAt[x := left].leftValue f (\refl(left)))) }
+  };

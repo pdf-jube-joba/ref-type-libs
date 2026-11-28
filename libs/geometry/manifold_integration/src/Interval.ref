@@ -31,3 +31,4 @@
     (congr!{{Model.Point} Real.Real} (\fun (x: Model.Point) => Coordinates.pointDistance x (point s)) _ _ (replacement s t))
     (CoordinateLaws.replaceDistance (point s) One.index t);
 \module On(U: Open.OpenSet, within: \forall (t: Continuous.Point) -> \In[Model.Point] U.points (point t));
+\module Box;

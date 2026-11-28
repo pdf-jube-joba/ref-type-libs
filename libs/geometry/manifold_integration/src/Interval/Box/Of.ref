@@ -1,0 +1,45 @@
+\import euclidean_measure.RealLine[].RiemannMap[interval := interval] \as RiemannMap;
+\import euclidean_measure.RealLine[].IntervalIntegral[interval := interval] \as Indicator;
+\import functional_analysis.Measure[A := E.Point].Integral[mu := Lebesgue.measure] \as Integral;
+\import functional_analysis.Measure[A := Real.Real].Integral[mu := LebesgueLine.measure] \as LineIntegral;
+\import product_integration.MeasureMap[A := E.Point, B := Real.Real, source := Lebesgue.measure, target := LebesgueLine.measure] \as Map;
+\import lp_spaces.On[A := E.Point, mu := Lebesgue.measure].One[].Norm[] \as IntegralEquality;
+\definition function[x: carrier]: Real.Real := f (parameter x);
+\definition coefficient: Region.Coefficient := Region.coefficient function
+  (topology.Composition[A := carrier, B := Continuous.Point, C := Real.Real].composeContinuous
+    Region.topology Continuous.topology Line.topology parameter (Continuous.restrict f) parameterContinuous
+    (\bysub(Real.Real -> Real.Real, Continuous.Function, f)));
+\import Region.Of[f := coefficient] \as Regional;
+\definition lineMap: Map.Data := Map.Data {
+  function := LebesgueLine.scalar,
+  measurable := \fun (S: \Pow Real.Real)(valid: _) => valid,
+  value := \fun (S: \Pow Real.Real)(valid: _) => \refl(LebesgueLine.measure.value S),
+};
+\import Continuous.Of[f := f] \as Riemann;
+\import Map.On[map := lineMap].RealFunction[f := RiemannMap.representative Riemann.integral] \as Transport;
+\import std.Logic[].Classical[] \as Classical;
+\definition pointwise[x: E.Point]: Regional.value x = Transport.function x :=
+  Logic.orElim (Sets.Member points x) (Logic.Not (Sets.Member points x)) (Regional.value x = Transport.function x)
+    (Classical.excludedMiddle (Sets.Member points x))
+    (\fun (member: Sets.Member points x) => \block {
+      \let p: carrier := \into[E.Point](x, points) \by { member } \then
+      \return eq_reason_in!{Real.Real {Regional.value x}
+        "=" {f (LebesgueLine.scalar x)} "by" { Regional.inside p }
+        "=" {Real.mul Real.one (f (LebesgueLine.scalar x))} "by" { sym!{Real.Real} _ _ (Laws.fieldMulOneLeft (f (LebesgueLine.scalar x))) }
+        "=" {Transport.function x} "by" {
+          congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (f (LebesgueLine.scalar x))) _ _
+            (sym!{Real.Real} _ _ (Indicator.pointwiseInside (LebesgueLine.scalar x) ((inBox x member).left) ((inBox x member).right))) }
+      }
+    })
+    (\fun (absent: Logic.Not (Sets.Member points x)) => eq_reason_in!{Real.Real {Regional.value x}
+      "=" Real.zero "by" {Regional.outside x absent}
+      "=" {Real.mul Real.zero (f (LebesgueLine.scalar x))} "by" {sym!{Real.Real} _ _ (Laws.fieldMulZeroLeft (f (LebesgueLine.scalar x)))}
+      "=" {Transport.function x} "by" {
+        congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (f (LebesgueLine.scalar x))) _ _
+          (sym!{Real.Real} _ _ (Indicator.pointwiseOutside (LebesgueLine.scalar x)
+            (\fun (bounds: Logic.And[R.Le interval.left (LebesgueLine.scalar x), R.Le (LebesgueLine.scalar x) interval.right]) => absent (ofBounds x bounds)))) }
+    });
+\definition representative: Integral.Representatives := Regional.representative;
+\definition integral: Integral.integral representative = Riemann.value :=
+  trans!{Real.Real} _ _ _ (IntegralEquality.integralPointwise representative Transport.representative pointwise)
+    (trans!{Real.Real} _ _ _ Transport.integral (RiemannMap.integral Riemann.integral));

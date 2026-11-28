@@ -1,0 +1,24 @@
+\import Sets.Subspace[S := K] \as Subspace;
+\import Subspace.Properties[] \as Properties;
+\definition Carrier: \Set := Subspace.CarrierSet;
+\definition topology: topology.Topology[Carrier := Carrier].Topology := Subspace.topology Ambient.topology;
+\import topology.Topology[Carrier := Carrier] \as LocalSets;
+\import metric_spaces.RealFunctions[A := Carrier] \as Functions;
+\import std.Set[].Extension[A := E.Point, B := Real.Real, domain := K] \as Extension;
+\import metric_spaces.RealLine[] \as Line;
+\import Line.Rays[] \as Rays;
+\import Line.CompactExtrema[] \as Extrema;
+\import topology.Maps[A := Carrier, B := Real.Real] \as Image;
+\import topology.Compactness[A := Carrier, B := Real.Real] \as CompactImage;
+\definition closed: Sets.IsClosedIn Ambient.topology K := Sets.Compactness[].compactClosed Ambient.topology Ambient.hausdorff K compact;
+\definition finite: Finite.FiniteMeasurableSet := \into[\Pow E.Point](K, Finite.FiniteMeasurableSet) \by {
+  Finite.FiniteSet[K] {
+    measurable := BorelSets.closed K closed,
+    bounded := (Bounds.finite K compact).bounded,
+  }
+};
+\definition Continuous[f: Carrier -> Real.Real]: \Prop := Functions.Continuous topology f;
+\definition Coefficient: \Set := \Cast[Carrier -> Real.Real] ({ f: Carrier -> Real.Real \where Continuous f });
+\definition coefficient[f: Carrier -> Real.Real][continuous: Continuous f]: Coefficient :=
+  \into[Carrier -> Real.Real](f, Coefficient) \by { continuous };
+\module Of(f: Coefficient);

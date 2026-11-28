@@ -17,6 +17,9 @@ Compactly supported top forms are integrated in Euclidean coordinates by taking 
 | Interval.On.Exact.stokes | Integrate the exterior derivative of a smooth function on a closed interval with its increasing orientation |
 | Interval.On.Simplex.stokes | Integrate pullbacks along smooth singular paths into a Euclidean open set and compare with the signed endpoint coboundary |
 | Interval.On.Path.To.Along.Of.stokes | Compare the integral and endpoint coboundary for a smooth singular path in a smooth manifold |
+| Region.On.Of | Integrate continuous coefficients on compact Euclidean regions by their zero extensions |
+| Interval.Box.Of.integral | Compare the compact region integral on a closed interval with its Riemann integral |
+| StandardInterval.stokes | Prove Stokes on the actual G03 interval with the outward-first orientation at its two endpoints |
 | Collar.On.With.Of.At | Compute the outward-first contraction along the actual boundary inclusion from a G04 collar and prove the sign of its normal coefficient |
 | Corner.On.Over.cancel | Integrate the two orders of normal contraction over a common codimension-two parametrization and prove cancellation |
 

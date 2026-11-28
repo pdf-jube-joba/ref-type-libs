@@ -5,3 +5,5 @@
 \module Atlas(n: std.Data[].Nat[].Nat^);
 \module FiniteIntegral(A: \Set, mu: functional_analysis.Measure[A := A].Measure);
 \module Flat(n: std.Data[].Nat[].Nat^);
+\module Region(n: std.Data[].Nat[].Nat^);
+\module StandardInterval;

@@ -10,6 +10,7 @@ integration = { path = "../../analysis/integration" }
 metric_spaces = { path = "../../topology/metric" }
 euclidean_measure = { path = "../../analysis/euclidean_measure" }
 functional_analysis = { path = "../../analysis/functional" }
+product_integration = { path = "../../analysis/product_integration" }
 topological_algebra = { path = "../../topology/algebra" }
 change_of_variables = { path = "../../analysis/change_of_variables" }
 dedekind_reals = { path = "../../real/dedekind" }
