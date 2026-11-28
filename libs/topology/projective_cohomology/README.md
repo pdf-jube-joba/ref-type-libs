@@ -19,6 +19,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.Additive` | Integral groups are free of rank one in degrees \(0,2,\ldots,2n\) and vanish in odd degrees and above \(2n\) |
 | `Complex.CanonicalLine.Integral` | Even-degree zero-section isomorphisms in degrees \(2,\ldots,2n\), and the degree-zero basis given by the cup unit |
 | `RealPlane` and `ComplexLineSphere` | Homeomorphisms with the antipodal quotient model of the real projective plane and the standard two-sphere model of the complex projective line |
+| `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
 | `ZeroDegree` | Evaluation of constant classes and surjectivity of degree-zero pullback from a path-connected source |
 
 [Source](src/root.ref) · [Plan](../../../math/c04-projective-cohomology.md) · [Checking](../../USAGE.md)

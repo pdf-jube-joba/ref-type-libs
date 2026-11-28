@@ -105,3 +105,4 @@
   Classification.homeomorphism (Spheres.topology Degrees.two) Projective.topology Involution.laws respects
     (\fun (x, y: Plane.Sphere)(same: project x = project y) => Fiber[x := x, y := y, same := same].relation)
     (Compact.quotientMap Coordinates.Compactness[].sphere ModelSpace.hausdorff continuous surjective);
+\module ModTwo;
