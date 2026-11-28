@@ -1,0 +1,66 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import Numbers.Prop[] \as Laws;
+\import Bundles.Family[X := Space, F := Fiber] \as DualFamily;
+\import Bundles.Family[X := Space, F := Line] \as Native;
+\definition column[x: Space][i: Fin.Fin ambient]: Line x := (Universal.Project[].data.fiber x).apply (Vector.basis i);
+\definition coordinates[x: Space][f: Fiber x]: Vector.Vector := \fun (i: Fin.Fin ambient) => f (column x i);
+\definition riesz[x: Space][v: Line x][i: Fin.Fin ambient]: coordinates x (\parent.At[x := x].represent v) i = Arithmetic.conj (v i) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { sym!{Numbers.Complex} _ _ ((Model.projection x).selfAdjoint v (Vector.basis i)) }
+    "=" _ "by" { congr!{{Vector.Vector} {Numbers.Complex}} (\fun (w: Vector.Vector) => Vector.dot w (Vector.basis i)) _ _ (\bysub(Vector.Vector, Universal.Image x, v)) }
+    "=" _ "by" { Vector.symmetric v (Vector.basis i) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} Arithmetic.conj _ _ (Vector.dotBasis i v) }
+  };
+\definition inverseCoordinate[x: Space][f: Fiber x][i: Fin.Fin ambient]: (\parent.At[x := x].inverse f) i = Arithmetic.conj (coordinates x f i) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (Laws.conjConj ((\parent.At[x := x].inverse f) i)) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} Arithmetic.conj _ _ (sym!{Numbers.Complex} _ _ (riesz x (\parent.At[x := x].inverse f) i)) }
+    "=" _ "by" { congr!{{Fiber x} {Numbers.Complex}} (\fun (a: Fiber x) => Arithmetic.conj (coordinates x a i)) _ _ (\parent.At[x := x].rightInverse f) }
+  };
+\definition injective[x: Space][f, g: Fiber x][same: coordinates x f = coordinates x g]: f = g := \block {
+  \let v: Line x := \parent.At[x := x].inverse f \then
+  \let w: Line x := \parent.At[x := x].inverse g \then
+  \let equal: v = w := \axiom:funext(v, w, \fun (i: Fin.Fin ambient) => eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { inverseCoordinate x f i }
+    "=" _ "by" { congr!{{Vector.Vector} {Numbers.Complex}} (\fun (u: Vector.Vector) => Arithmetic.conj (u i)) _ _ same }
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (inverseCoordinate x g i) }
+  }) \then
+  \return eq_reason_in!{{Fiber x} _
+    "=" _ "by" { sym!{{Fiber x}} _ _ (\parent.At[x := x].rightInverse f) }
+    "=" _ "by" { congr!{{Line x} {Fiber x}} \parent.At[x := x].represent _ _ equal }
+    "=" _ "by" { \parent.At[x := x].rightInverse g }
+  }
+};
+\definition total[p: DualFamily.Point]: Vector.Vector := coordinates p.base p.vector;
+\import bundle_operations.Operations[].Evaluations[K := Numbers.Complex, X := Space, E := DualFamily.Point, I := Dual.Section,
+  scalarSpace := Hermitian.Complex[].topological.space, baseSpace := topology, projection := DualFamily.projection,
+  domains := Dual.domains, open := (\fun (s: Dual.Section) => s.open), evaluate := Dual.evaluate] \as Evaluations;
+\module Column(index: Fin.Fin ambient);
+\definition atContinuous[index: Fin.Fin ambient]: topology.Continuity[A := DualFamily.Point, B := Numbers.Complex].Continuous bundle.totalSpace
+  Hermitian.Complex[].topological.space (\fun (p: DualFamily.Point) => total p index) := Column[index := index].evaluateContinuous;
+\definition continuous: topology.Continuity[A := DualFamily.Point, B := Vector.Vector].Continuous bundle.totalSpace (Bundles.coordinateTopology ambient) total :=
+  topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].Universal[A := DualFamily.Point].continuous
+    bundle.totalSpace Hermitian.Complex[].topological.space total atContinuous;
+\import Bundles.Trivial[X := Space, n := ambient, baseSpace := topology] \as Trivial;
+\import Bundles.Morphisms[X := Space, Y := Space, F := Fiber, G := \fun (x: Space) => Vector.Vector,
+  source := bundle, target := Trivial.bundle, f := \fun (x: Space) => x] \as Into;
+\module At(x: Space) {
+  \import Linear.Linear[V := Fiber x, W := Vector.Vector, source := bundle.space x, target := Bundles.coordinates ambient] \as LinearMap;
+  \definition map: LinearMap.Map := LinearMap.Map {
+    apply := coordinates x,
+    preservesAdd := \fun (f, g: Fiber x) => \refl(coordinates x ((bundle.space x).add f g)),
+    preservesScale := \fun (a: Numbers.Complex)(f: Fiber x) => \refl(coordinates x ((bundle.space x).smul a f))
+  };
+}
+\definition data: Into.Data := Into.Data { fiber := \fun (x: Space) => At[x := x].map };
+\import bundle_complements.Complements[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field, conjugation := Hermitian.Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar].TrivialMaps[X := Space, n := ambient, baseSpace := topology]
+  .Into[Y := DualFamily.Point, source := bundle.totalSpace] \as IntoTrivial;
+\definition map: Into.Map := \into[Into.Data](data, Into.Map) \by {
+  IntoTrivial.continuous DualFamily.projection total Dual.projectionContinuous continuous
+};

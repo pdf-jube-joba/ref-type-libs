@@ -1,0 +1,32 @@
+\import Regular.At[i := s, f := forward] \as At;
+\import topology.Topology[Carrier := Space].Subspace[S := s.domain] \as Base;
+\definition domain: \Pow Source.Point := { p: Source.Point \where \In[Space] s.domain p.base };
+\import topology.Topology[Carrier := Source.Point].Subspace[S := domain] \as Local;
+\definition source: topology.Topology[Carrier := At.Point].Topology := Local.topology lineBundle.totalSpace;
+\definition point[p: At.Point]: Base.CarrierSet := \into[Space](p.base, s.domain) \by { \bysub(Source.Point, domain, p) };
+\definition baseContinuous: topology.Continuity[A := At.Point, B := Base.CarrierSet].Continuous source (Base.topology topology) point :=
+  topology.Continuity[A := At.Point, B := Space].Corestriction[S := s.domain].corestrictContinuous source topology point
+    (topology.Continuity[A := Source.Point, B := Space].Restriction[S := domain].restrictContinuous
+      lineBundle.totalSpace topology Source.projection Bundle.projectionContinuous);
+\definition first[p: At.Point]: Vector.Vector := p.vector;
+\definition firstContinuous: topology.Continuity[A := At.Point, B := Vector.Vector].Continuous
+  source (Bundles.coordinateTopology ambient) first :=
+  topology.Continuity[A := Source.Point, B := Vector.Vector].Restriction[S := domain].restrictContinuous
+    lineBundle.totalSpace (Bundles.coordinateTopology ambient) (\fun (p: Source.Point) => p.vector) Universal.vectorContinuous;
+\definition second[p: At.Point]: Vector.Vector := s.value (point p);
+\definition secondContinuous: topology.Continuity[A := At.Point, B := Vector.Vector].Continuous source (Bundles.coordinateTopology ambient) second :=
+  topology.Composition[A := At.Point, B := Base.CarrierSet, C := Vector.Vector].composeContinuous
+    source (Base.topology topology) (Bundles.coordinateTopology ambient) point (\fun (x: Base.CarrierSet) => s.value x) baseContinuous
+    (topology.Composition[A := Base.CarrierSet, B := Source.Point, C := Vector.Vector].composeContinuous
+      (Base.topology topology) lineBundle.totalSpace (Bundles.coordinateTopology ambient)
+      (\fun (x: Base.CarrierSet) => Source.include x (s.value x)) (\fun (p: Source.Point) => p.vector)
+      s.regular Universal.vectorContinuous);
+\import Ambient.Families[X := At.Point] \as Coordinates;
+\import std.Data[].FinSet[] \as Fin;
+\definition coordinate[f: At.Point -> Vector.Vector][regular: topology.Continuity[A := At.Point, B := Vector.Vector].Continuous
+  source (Bundles.coordinateTopology ambient) f]: Coordinates.Continuous source f :=
+  \fun (i: Fin.Fin ambient) => topology.Composition[A := At.Point, B := Vector.Vector, C := Numbers.Complex].composeContinuous
+    source (Bundles.coordinateTopology ambient) Hermitian.Complex[].topological.space f (\fun (v: Vector.Vector) => v i) regular
+    (topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].evaluationContinuous Hermitian.Complex[].topological.space i);
+\definition continuous: At.Regular lineBundle.totalSpace :=
+  Coordinates.dotContinuous source first second (coordinate first firstContinuous) (coordinate second secondContinuous);

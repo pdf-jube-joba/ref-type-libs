@@ -1,0 +1,27 @@
+\import topology.Topology[Carrier := Space] \as Base;
+\import topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient] \as Vectors;
+\definition point[x: Space]: Native.Point := Native.include x (column x index);
+\definition reg: topology.Continuity[A := Space, B := Native.Point].Continuous topology lineBundle.totalSpace point :=
+  Universal.Universal[Y := Space, source := topology].continuous point
+    (topology.Maps[A := Space, B := Space].Identity[].continuous topology)
+    (Vectors.Universal[A := Space].continuous topology Hermitian.Complex[].topological.space (\fun (x: Space) => column x index)
+      (\fun (j: Fin.Fin ambient) => Model.regular (Vector.basis index) j));
+\import topology.Topology[Carrier := Space].Subspace[S := Base.Whole] \as Whole;
+\definition restrict: topology.Continuity[A := Whole.CarrierSet, B := Native.Point].Continuous (Whole.topology topology) lineBundle.totalSpace
+  (\fun (x: Whole.CarrierSet) => point x) :=
+  topology.Continuity[A := Space, B := Native.Point].Restriction[S := Base.Whole].restrictContinuous
+    topology lineBundle.totalSpace point reg;
+\definition section: Dual.Section := Dual.Section { domain := Base.Whole, open := (Base.topologyLaws topology).wholeOpen,
+  value := \fun (x: Whole.CarrierSet) => column x index, regular := restrict };
+\import topology.Topology[Carrier := DualFamily.Point].Subspace[S := Evaluations.Domain section] \as Local;
+\definition lift[p: DualFamily.Point]: Evaluations.Point section :=
+  \into[DualFamily.Point](p, Evaluations.Domain section) \by { \refl(p.base) };
+\definition liftContinuous: topology.Continuity[A := DualFamily.Point, B := Evaluations.Point section].Continuous
+  bundle.totalSpace (Local.topology bundle.totalSpace) lift :=
+  topology.Continuity[A := DualFamily.Point, B := DualFamily.Point].Corestriction[S := Evaluations.Domain section].corestrictContinuous
+    bundle.totalSpace bundle.totalSpace lift (topology.Maps[A := DualFamily.Point, B := DualFamily.Point].Identity[].continuous bundle.totalSpace);
+\definition evaluateContinuous: topology.Continuity[A := DualFamily.Point, B := Numbers.Complex].Continuous bundle.totalSpace
+  Hermitian.Complex[].topological.space (\fun (p: DualFamily.Point) => total p index) :=
+  topology.Composition[A := DualFamily.Point, B := Evaluations.Point section, C := Numbers.Complex].composeContinuous
+    bundle.totalSpace (Local.topology bundle.totalSpace) Hermitian.Complex[].topological.space lift (Dual.evaluate section)
+    liftContinuous Evaluations.At[i := section].continuous;

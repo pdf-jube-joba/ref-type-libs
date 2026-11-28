@@ -52,3 +52,4 @@
 \module Hopf;
 \module Realification;
 \module Integral;
+\module Dual;

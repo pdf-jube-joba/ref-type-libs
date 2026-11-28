@@ -1,0 +1,23 @@
+\import \parent.\parent.Embedding[] \as Embedding;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\import std.Data[].FinSet[] \as Fin;
+\import topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient] \as Coordinates;
+\import hermitian_frames.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field,
+  scalar := Hermitian.Complex[].scalar, topological := Hermitian.Complex[].topological].Functions[X := Target.Point] \as Scalar;
+\definition coordinate[p: Target.Point]: Vector.Vector := \fun (i: Fin.Fin ambient) => Arithmetic.conj (Embedding.total p i);
+\definition coordinateContinuous: topology.Continuity[A := Target.Point, B := Vector.Vector].Continuous bundle.totalSpace (Bundles.coordinateTopology ambient) coordinate :=
+  Coordinates.Universal[A := Target.Point].continuous bundle.totalSpace Hermitian.Complex[].topological.space coordinate
+    (\fun (i: Fin.Fin ambient) => Scalar.conjugation bundle.totalSpace (\fun (p: Target.Point) => Embedding.total p i) (Embedding.atContinuous i));
+\definition vector[p: Target.Point]: Vector.Vector := (backward p).vector;
+\definition coordinateLaw[p: Target.Point]: vector p = coordinate p :=
+  \axiom:funext(vector p, coordinate p, \fun (i: Fin.Fin ambient) => Embedding.inverseCoordinate p.base p.vector i);
+\definition equal: coordinate = vector :=
+  \axiom:funext(coordinate, vector, \fun (p: Target.Point) => sym!{{Vector.Vector}} _ _ (coordinateLaw p));
+\definition vectorContinuous: topology.Continuity[A := Target.Point, B := Vector.Vector].Continuous bundle.totalSpace (Bundles.coordinateTopology ambient) vector :=
+  \idelim coordinate = vector \with f: (Target.Point -> Vector.Vector) =>
+    topology.Continuity[A := Target.Point, B := Vector.Vector].Continuous bundle.totalSpace (Bundles.coordinateTopology ambient) f \by {
+      base: coordinateContinuous, equality: equal
+    };
+\definition continuous: topology.Continuity[A := Target.Point, B := Source.Point].Continuous bundle.totalSpace lineBundle.totalSpace backward :=
+  Universal.Universal[Y := Target.Point, source := bundle.totalSpace].continuous backward Dual.projectionContinuous vectorContinuous;

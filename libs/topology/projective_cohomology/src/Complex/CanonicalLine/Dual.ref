@@ -1,0 +1,14 @@
+\import real.Analysis[] \as R;
+\import Numbers.Def[] \as Arithmetic;
+\import bundle_operations.Operations[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field,
+  conjugation := Hermitian.Complex[].scalar, scalar := vector_bundles.Bundles[].Complex[].scalar]
+  .Dual[X := Space, F := Line, bundle := lineBundle] \as Dual;
+\import linear_algebra.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field,
+  scalar := Hermitian.Complex[].scalar] \as InnerProducts;
+\import InnerProducts.Finite[n := ambient] \as Vector;
+\import InnerProducts.Inner[V := Vector.Vector, space := Vector.space].Of[h := Vector.form] \as Dot;
+\definition Fiber[x: Space]: \Set := Dual.Fiber x;
+\definition bundle: _ := Dual.dual;
+\module At(x: Space);
+\module Riesz;
+\module Embedding;

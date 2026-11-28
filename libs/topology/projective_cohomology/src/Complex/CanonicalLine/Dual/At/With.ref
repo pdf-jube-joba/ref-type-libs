@@ -1,0 +1,63 @@
+\import \parent.\parent.\parent.At[x := x].With[basis := frame.basis] \as Coordinates;
+\import \parent.\parent.\parent.Integral[].Charts[].Transition[x := x, source := Coordinates.frame, target := Coordinates.frame] \as Singleton;
+\import \parent.\parent.\parent.Hopf[].AtLine[x := x].With[frame := frame] \as UnitVector;
+\import std.Data[].FinSet[] \as Fin;
+\import Numbers.Prop[] \as Laws;
+\definition axisSame: Singleton.axis = UnitBasis.axis :=
+  \axiom:funext(Singleton.axis, UnitBasis.axis, \fun (i: Fin.Fin Degrees.one) =>
+    sym!{Numbers.Complex} _ _ (Linear.Coordinates[I := Fin.Fin Degrees.one].Kronecker[].equal Singleton.index i
+      (sym!{{Fin.Fin Degrees.one}} _ _ (Fin.singletonValue i))));
+\definition axis: Line x := Coordinates.frame.backward.apply Singleton.axis;
+\definition norm: Vector.dot axis axis = Numbers.Algebra[].field.one :=
+  trans!{Numbers.Complex} _ _ _
+    (congr!{{Bundles.Vector Degrees.one} {Numbers.Complex}}
+      (\fun (v: Bundles.Vector Degrees.one) => Vector.dot (frame.basis.value.apply v) (frame.basis.value.apply v)) _ _ axisSame) UnitVector.norm;
+\definition coefficient[v: Line x]: Numbers.Complex := Singleton.value (Coordinates.frame.forward.apply v);
+\definition expansion[v: Line x]: (lineBundle.space x).smul (coefficient v) axis = v :=
+  eq_reason_in!{{Line x} _
+    "=" _ "by" { sym!{{Line x}} _ _ (Coordinates.frame.backward.preservesScale (coefficient v) Singleton.axis) }
+    "=" _ "by" { congr!{{Bundles.Vector Degrees.one} {Line x}} Coordinates.frame.backward.apply _ _
+      (Singleton.reconstruct (Coordinates.frame.forward.apply v)) }
+    "=" _ "by" { Coordinates.frame.leftInverse v }
+  };
+\definition identifies[v: Line x]: represent v axis = Arithmetic.conj (coefficient v) :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { congr!{{Line x} {Numbers.Complex}} (\fun (w: Line x) => Vector.dot w axis) _ _
+      (sym!{{Line x}} _ _ (expansion v)) }
+    "=" _ "by" { Dot.scaleLeft (coefficient v) axis axis }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (Arithmetic.mul (Arithmetic.conj (coefficient v))) _ _ norm }
+    "=" _ "by" { Laws.mulOneRight (Arithmetic.conj (coefficient v)) }
+  };
+\definition candidate[f: Fiber x]: Line x := (lineBundle.space x).smul (Arithmetic.conj (f axis)) axis;
+\definition atAxis[f: Fiber x]: represent (candidate f) axis = f axis :=
+  eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { Dot.scaleLeft (Arithmetic.conj (f axis)) axis axis }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (Arithmetic.mul (Arithmetic.conj (Arithmetic.conj (f axis)))) _ _ norm }
+    "=" _ "by" { Laws.mulOneRight (Arithmetic.conj (Arithmetic.conj (f axis))) }
+    "=" _ "by" { Laws.conjConj (f axis) }
+  };
+\definition represented[f: Fiber x]: represent (candidate f) = f :=
+  Functionals.ext (represent (candidate f)) f (\fun (v: Line x) => eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { congr!{{Line x} {Numbers.Complex}} (represent (candidate f)) _ _ (sym!{{Line x}} _ _ (expansion v)) }
+    "=" _ "by" { Vector.scaleRight (coefficient v) (candidate f) axis }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (Arithmetic.mul (coefficient v)) _ _ (atAxis f) }
+    "=" _ "by" { sym!{Numbers.Complex} _ _ ((Functionals.laws f).preservesScale (coefficient v) axis) }
+    "=" _ "by" { congr!{{Line x} {Numbers.Complex}} f _ _ (expansion v) }
+  });
+\definition injective[v, w: Line x][same: represent v = represent w]: v = w := \block {
+  \let conjugates: Arithmetic.conj (coefficient v) = Arithmetic.conj (coefficient w) := eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (identifies v) }
+    "=" _ "by" { congr!{{Fiber x} {Numbers.Complex}} (\fun (f: Fiber x) => f axis) _ _ same }
+    "=" _ "by" { identifies w }
+  } \then
+  \let scalars: coefficient v = coefficient w := eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (Laws.conjConj (coefficient v)) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} Arithmetic.conj _ _ conjugates }
+    "=" _ "by" { Laws.conjConj (coefficient w) }
+  } \then
+  \return eq_reason_in!{{Line x} _
+    "=" _ "by" { sym!{{Line x}} _ _ (expansion v) }
+    "=" _ "by" { congr!{Numbers.Complex {Line x}} (\fun (a: Numbers.Complex) => (lineBundle.space x).smul a axis) _ _ scalars }
+    "=" _ "by" { expansion w }
+  }
+};
