@@ -19,3 +19,4 @@
     (\fun (y: Part.CarrierSet)(inK: LocalTop.Member K y)(same: y = x) => \idelim y = x
       \with q: Part.CarrierSet => LocalTop.Member K q \by { base: inK, equality: same });
 \module With(coefficients: Modules.Bundle, z: I.Int^);
+\module CompactTrace(K: Support, within: Top.Subset K U);

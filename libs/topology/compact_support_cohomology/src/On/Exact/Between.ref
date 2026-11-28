@@ -1,0 +1,19 @@
+\import \parent.\parent.With[coefficients := M].Degree[z := p] \as First;
+\import \parent.\parent.With[coefficients := N].Degree[z := q] \as Middle;
+\import \parent.\parent.With[coefficients := P].Degree[z := r] \as Last;
+\import First.Module[] \as LeftModule;
+\import Middle.Module[] \as MiddleModule;
+\import Last.Module[] \as RightModule;
+\import RightModule.Vanishing[] \as RightVanishing;
+\definition left[K: Support]: Modules.Bundle := Modules.Bundle { Carrier := First.Stage K, space := LeftModule.spaces K };
+\definition center[K: Support]: Modules.Bundle := Modules.Bundle { Carrier := Middle.Stage K, space := MiddleModule.spaces K };
+\definition right[K: Support]: Modules.Bundle := Modules.Bundle { Carrier := Last.Stage K, space := RightModule.spaces K };
+\module With(f: \forall (K: Support) -> Modules.MapBetween (left K) (center K),
+  g: \forall (K: Support) -> Modules.MapBetween (center K) (right K),
+  firstNatural: \forall (K, L: Support)(included: before K L)(x: First.Stage K) ->
+    Middle.advance K L included ((f K).apply x) = (f L).apply (First.advance K L included x),
+  lastNatural: \forall (K, L: Support)(included: before K L)(x: Middle.Stage K) ->
+    Last.advance K L included ((g K).apply x) = (g L).apply (Middle.advance K L included x),
+  compositeZero: \forall (K: Support)(x: First.Stage K) -> (g K).apply ((f K).apply x) = (RightModule.spaces K).zero,
+  kernelImage: \forall (K: Support)(x: Middle.Stage K) -> (g K).apply x = (RightModule.spaces K).zero ->
+    \exists (y: First.Stage K \where (f K).apply y = x));

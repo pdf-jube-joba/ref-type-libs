@@ -1,0 +1,38 @@
+\import topology.Topology[Carrier := Cylinder.Carrier] \as CylinderTop;
+\import topology.Maps[A := Cylinder.Carrier, B := A] \as Maps;
+\import topological_constructions.Product[A := Interval.Carrier, B := A].Compactness[] \as ProductCompact;
+\definition cylinderCompact: CylinderTop.IsCompact (Cylinder.topology space) :=
+  ProductCompact.productCompact Interval.topology space Interval.compact compactSpace;
+\definition visits: \Pow Cylinder.Carrier := Maps.Preimage motion (Open.image K);
+\definition visitsCompact: CylinderTop.IsCompactIn (Cylinder.topology space) visits :=
+  CylinderTop.Compactness[].closedCompact (Cylinder.topology space) cylinderCompact visits
+    (topology.Continuity[A := Cylinder.Carrier, B := A].closedPreimage (Cylinder.topology space) space motion
+      motionLaws.continuous (Open.image K) (Compactness.compactClosed space hausdorff (Open.image K) (compact (Open.image K))));
+\definition saturation: Support :=
+  \into[\Pow A](Maps.Image Cylinder.point visits, Supports) \by {
+    topology.Compactness[A := Cylinder.Carrier, B := A].continuousImage (Cylinder.topology space) space
+      Cylinder.point (Cylinder.pointContinuous space) visits visitsCompact
+  };
+\definition inOpen[x: A][member: Top.Member saturation x]: Top.Member interior x :=
+  Maps.imageElim Cylinder.point visits x (Top.Member interior x)
+    (\fun (p: Cylinder.Carrier)(seen: CylinderTop.Member visits p)(same: Cylinder.point p = x) =>
+      \idelim Cylinder.point p = x \with y: A => Top.Member interior y \by {
+        base: (\fun (atBoundary: Top.Member boundary (Cylinder.point p)) =>
+          (Open.imageIncluded K (motion p) seen)
+            (\idelim Cylinder.point p = motion p \with q: A => Top.Member boundary q
+              \by { base: atBoundary, equality: sym!{A} _ _ (fixedMotion p atBoundary) })),
+        equality: same
+      }) member;
+\import Open.CompactTrace[K := saturation, within := inOpen] \as Trace;
+\definition larger: Interior.Support := Interior.union (Interior.union K baseSupport) Trace.trace;
+\definition includesOriginal: Interior.before K larger :=
+  \fun (x: Part.CarrierSet)(member: \In[Part.CarrierSet] K x) =>
+    (Interior.upper (Interior.union K baseSupport) Trace.trace).left x ((Interior.upper K baseSupport).left x member);
+\definition includesBase: Interior.before baseSupport larger :=
+  \fun (x: Part.CarrierSet)(member: \In[Part.CarrierSet] baseSupport x) =>
+    (Interior.upper (Interior.union K baseSupport) Trace.trace).left x ((Interior.upper K baseSupport).right x member);
+\definition outsideAtAllTimes[t: Interval.Carrier][x: A][outsideLarger: Top.Member (outside (Open.image larger)) x]:
+  Top.Member (outside (Open.image K)) (motion (Cylinder.at t x)) :=
+  \fun (seen: Top.Member (Open.image K) (motion (Cylinder.at t x))) =>
+    outsideLarger (Open.imageMonotone Trace.trace larger (Interior.upper (Interior.union K baseSupport) Trace.trace).right x
+      (Trace.ambientContains x (Maps.imageMember Cylinder.point visits (Cylinder.at t x) seen)));

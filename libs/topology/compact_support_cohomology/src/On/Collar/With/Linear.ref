@@ -1,0 +1,15 @@
+\import InteriorDegree.Module[] \as InteriorModule;
+\import InteriorModule.LinearDescent[W := Group, target := RelativeDegree.space,
+  stageMap := (\fun (K: Interior.Support) => \parent.AtSupport[K := K].linear), compatibleMap := compatible] \as Descend;
+\import \parent.Inverses[] \as Inverses;
+\import Modules.Isomorphism[V := InteriorDegree.Cohomology, W := Group, source := InteriorModule.moduleSpace, target := RelativeDegree.space] \as Iso;
+\import Iso.OfBijective[f := Descend.map] \as Bijective;
+\definition injective[x, y: InteriorDegree.Cohomology][same: forward x = forward y]: x = y :=
+  eq_reason_in!{InteriorDegree.Cohomology _
+    "=" _ "by" { sym!{InteriorDegree.Cohomology} _ _ (Inverses.backwardForward x) }
+    "=" _ "by" { congr!{Group InteriorDegree.Cohomology} backward _ _ same }
+    "=" _ "by" { Inverses.backwardForward y }};
+\definition onto[y: Group]: \exists (x: InteriorDegree.Cohomology \where forward x = y) :=
+  Logic.existsIntro[InteriorDegree.Cohomology, { x: InteriorDegree.Cohomology \where forward x = y }]
+    (backward y) (Inverses.forwardBackward y);
+\definition isomorphism: Iso.Isomorphism := Bijective.isomorphism injective onto;

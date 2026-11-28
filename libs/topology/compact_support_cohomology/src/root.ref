@@ -2,3 +2,9 @@
 \module On(A: \Set, space: topology.Topology[Carrier := A].Topology);
 \module Proper(A, B: \Set, source: topology.Topology[Carrier := A].Topology,
   target: topology.Topology[Carrier := B].Topology);
+\module Homeomorphic(A, B: \Set, source: topology.Topology[Carrier := A].Topology,
+  target: topology.Topology[Carrier := B].Topology,
+  h: topology.Homeomorphism[A := A, B := B].Homeomorphism[source, target]);
+\module External(A, B: \Set, left: topology.Topology[Carrier := A].Topology,
+  right: topology.Topology[Carrier := B].Topology, R: \Set, ring: std.Alg[].Ring[].CommutativeRing[R],
+  leftHausdorff: topology.Topology[Carrier := A].IsT2 left, rightHausdorff: topology.Topology[Carrier := B].IsT2 right);

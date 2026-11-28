@@ -12,3 +12,6 @@ double_complexes = { path = "../../algebra/homological/double_complexes" }
 resolutions = { path = "../../algebra/homological/resolutions" }
 singular_products = { path = "../singular/products" }
 cohomology_thom = { path = "../cohomology_thom" }
+algebraic_topology = { path = "../homotopy" }
+topological_constructions = { path = "../constructions" }
+singular_cap = { path = "../singular/cap" }

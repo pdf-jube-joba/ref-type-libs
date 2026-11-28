@@ -22,6 +22,10 @@ The construction uses all compact subsets and applies in particular to locally c
 | `On.Open.With.AtSupport` | Excision for an open subspace at a chosen compact support |
 | `On.Open.With.Extension` | Extension by zero using inverse excision, with a representative formula |
 | `On.Cup.Degree` | Cup product with coefficients in a commutative ring, with a representative formula at the intersection of the supports |
+| `External.Degree` | External product with a representative formula at the product of the supports |
+| `Homeomorphic.With.Isomorphism` | Mutually inverse proper pullbacks along a homeomorphism and its inverse |
+| `On.Collar.With.Linear` | Compact-support comparison of an open complement with the cohomology of a compact pair admitting a collar deformation |
+| `On.Exact.Between.With` | Exactness after taking direct limits of stagewise exact pairs |
 
 For \(K\subseteq L\), the transition is pullback along the identity map of pairs from
 \((X,X\setminus L)\) to \((X,X\setminus K)\). For a proper map \(f\), the
@@ -43,7 +47,14 @@ containing both the original cocycle support and the primitive support.
 For commutative ring coefficients the cup product is defined in nonnegative
 degrees by the relative mixed cup product of C03 with its two-open-cover
 comparison. Both support transitions commute with the product, which
-gives a map of the direct-limit carriers in each pair of degrees.
+gives a map of the direct-limit carriers in each pair of degrees. The external
+product also uses C01 pullback along the projections of the relative pairs.
+
+The collar comparison enlarges each compact support by the projection of the
+points in the compact cylinder that pass through that support. At the enlarged
+support the collar motion is a relative homotopy, which proves the inverse law
+on the direct limit. Exactness of stagewise sequences passes to the direct
+limit by lifting a class from a stage where its image vanishes.
 
 Run the package check from the repository root.
 

@@ -1,0 +1,14 @@
+\import \parent.\parent.AtSupport[K := L] \as Later;
+\import \parent.\parent.\parent.\parent.With[coefficients := coefficients]
+  .Enlarge[K := Open.image K, L := Open.image L, inclusion := Open.imageMonotone K L included] \as AmbientEnlarge;
+\import Relative.Maps[B := A].Over[target := space, targetSubset := outside (Open.image L)]
+  .Composition[C := A].Over[final := space, finalSubset := outside (Open.image K)]
+  .On[f := Later.keepBoundary, g := AmbientEnlarge.pairMap].With[coefficients := coefficients] \as Functor;
+\definition natural[x: AmbientDegree.Stage (Open.image K)]:
+  pullback x = Later.pullback (AmbientDegree.advance (Open.image K) (Open.image L) (Open.imageMonotone K L included) x) :=
+  Functor.law z x;
+\definition law[x: InteriorDegree.Stage K]: apply x = Later.apply (InteriorDegree.advance K L included x) :=
+  eq_reason_in!{Group _
+    "=" _ "by" { natural (Extension.AtSupport[K := K].extend x) }
+    "=" _ "by" { congr!{{AmbientDegree.Stage (Open.image L)} Group} Later.pullback _ _
+      (Extension.AtSupport[K := K].Through[L := L, included := included].extendLaw x) }};

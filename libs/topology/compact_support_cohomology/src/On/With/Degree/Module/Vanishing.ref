@@ -1,0 +1,29 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.sym;
+\use Equality.congr;
+
+\structure AtLargerSupport[K: Support, x: Stage K]: \Set := {
+  support: Support,
+  inclusion: before K support,
+  zero: advance K support inclusion x = (spaces support).zero,
+};
+\definition eventualZero[K: Support][x: Stage K][vanishes: ofSupport K x = (moduleSpace).zero]:
+  \exists AtLargerSupport[K, x] := \block {
+  \let same: ofSupport K x = ofSupport K ((spaces K).zero) :=
+    eq_reason_in!{Cohomology _ "=" _ "by" { vanishes } "=" _ "by" { zeroOnSupport K }} \then
+  \takefrom agreement: System.Agreement[Limit.represent K x, Limit.represent K ((spaces K).zero)]
+    \by agreementOf K K x ((spaces K).zero) same \then
+  \return \exact(AtLargerSupport[K, x] {
+    support := agreement.index, inclusion := agreement.bounds.left,
+    zero := eq_reason_in!{{Stage agreement.index} _
+      "=" _ "by" { agreement.equal }
+      "=" _ "by" { preservesZero K agreement.index agreement.bounds.right }}
+  }, AtLargerSupport[K, x])
+};
+
+\definition zeroFromStage[K: Support][x: Stage K][at: AtLargerSupport[K, x]]: ofSupport K x = (moduleSpace).zero :=
+  eq_reason_in!{Cohomology _
+    "=" _ "by" { compatible K at.support at.inclusion x }
+    "=" _ "by" { congr!{{Stage at.support} Cohomology} (ofSupport at.support) _ _ at.zero }
+    "=" _ "by" { sym!{Cohomology} _ _ (zeroOnSupport at.support) }};

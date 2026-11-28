@@ -1,0 +1,39 @@
+\import C01.Relative[leftSubset := LeftSpace.outside K, rightSubset := RightSpace.outside L] \as Relative;
+\definition first: \Pow Carrier := Relative.leftInverse;
+\definition second: \Pow Carrier := Relative.rightInverse;
+\import cohomology_thom.MixedCup[A := Carrier, source := topology, first := first, second := second, K := R, ring := ring] \as Mixed;
+\import Mixed.Union[] \as Union;
+\import Union.Cover[] \as Cover;
+\import ProductTop.Subspace[S := Union.subset] \as Subspace;
+\definition unionSubset: \Pow Carrier := Union.subset;
+\definition leftOpen: ProductTop.IsOpenIn topology first :=
+  C01.leftContinuous (LeftSpace.outside K) (LeftTop.Compactness[].compactClosed left leftHausdorff K (LeftSpace.compact K));
+\definition rightOpen: ProductTop.IsOpenIn topology second :=
+  C01.rightContinuous (RightSpace.outside L) (RightTop.Compactness[].compactClosed right rightHausdorff L (RightSpace.compact L));
+\definition conditions: Cover.Conditions := Cover.Conditions {
+  leftOpen := Subspace.traceOpen topology first leftOpen,
+  rightOpen := Subspace.traceOpen topology second rightOpen,
+};
+\definition exterior[x: Carrier][outside: ProductTop.Member (ProductSpace.outside (rectangle K L)) x]:
+  ProductTop.Member unionSubset x :=
+  either!{{(Classical.excludedMiddle (LeftTop.Member K (C01.leftProjection x)))} {ProductTop.Member unionSubset x}
+    {\fun (inK: LeftTop.Member K (C01.leftProjection x)) => Logic.Or[_, _]::right
+      (\fun (inL: RightTop.Member L (C01.rightProjection x)) => outside (Logic.And[_, _]::# inK inL))}
+    {\fun (outK: ProductTop.Member first x) => Logic.Or[_, _]::left outK}};
+\import singular_cohomology.Identity[A := Carrier, source := topology] \as Identity;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := ProductSpace.outside (rectangle K L)]
+  .Maps[B := Carrier].Over[target := topology, targetSubset := unionSubset] \as Maps;
+\definition refine: Maps.Map := \into[Carrier -> Carrier](Identity.function, Maps.Map) \by {
+  Maps.Laws[Identity.function] {
+    continuous := Identity.continuous,
+    contained := \fun (x: \Cast[Carrier] (ProductSpace.outside (rectangle K L))) =>
+      exterior x (\bysub(Carrier, ProductSpace.outside (rectangle K L), x)),
+  }
+};
+\import Maps.On[f := refine].Integer[].With[coefficients := coefficients] \as Pull;
+\definition leftPair: _ := Relative.leftPair;
+\definition rightPair: _ := Relative.rightPair;
+\definition fromUnion[z: I.Int^]: _ := Pull.At[z := z].induced;
+\module Product(p, q: N.Nat^) {
+  \definition cup: _ := Cover.On[conditions := conditions].Cup[p := p, q := q].apply;
+}

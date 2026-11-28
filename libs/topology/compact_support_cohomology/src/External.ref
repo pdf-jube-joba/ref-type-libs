@@ -1,0 +1,30 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\import topology.Topology[Carrier := A] \as LeftTop;
+\import topology.Topology[Carrier := B] \as RightTop;
+\import \root.On[A := A, space := left] \as LeftSpace;
+\import \root.On[A := B, space := right] \as RightSpace;
+\import topological_constructions.Product[A := A, B := B] \as Product;
+\import singular_cap.External[A := A, B := B, left := left, right := right, R := R, ring := ring] \as C01;
+\definition Carrier: \Set := Product.CarrierSet;
+\definition topology: topology.Topology[Carrier := Carrier].Topology := C01.topology;
+\import topology.Topology[Carrier := Carrier] \as ProductTop;
+\import \root.On[A := Carrier, space := topology] \as ProductSpace;
+\import singular_products.Cochains[A := Carrier, source := topology, R := R, ring := ring] \as Cochains;
+\definition coefficients: Modules.Bundle := Cochains.integerCoefficients;
+\definition rectangle[K: LeftSpace.Support][L: RightSpace.Support]: ProductSpace.Support :=
+  \into[\Pow Carrier](Product.Rectangle K L, ProductSpace.Supports) \by {
+    Product.Compactness[].productCompactIn left right K L (LeftSpace.compact K) (RightSpace.compact L)
+  };
+\definition monotone[K, K1: LeftSpace.Support][L, L1: RightSpace.Support][first: LeftSpace.before K K1][second: RightSpace.before L L1]:
+  ProductSpace.before (rectangle K L) (rectangle K1 L1) :=
+  \fun (x: Carrier)(inside: ProductTop.Member (rectangle K L) x) => Logic.And[_, _]::#
+    (first (C01.leftProjection x) inside.left) (second (C01.rightProjection x) inside.right);
+\module AtSupports(K: LeftSpace.Support, L: RightSpace.Support);
+\module Degree(p, q: N.Nat^);

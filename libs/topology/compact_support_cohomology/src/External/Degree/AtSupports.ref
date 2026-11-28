@@ -1,0 +1,14 @@
+\import \parent.\parent.AtSupports[K := K, L := L] \as Fixed;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := Fixed.first] \as FirstPair;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := Fixed.second] \as SecondPair;
+\import FirstPair.With[coefficients := coefficients].At[z := I.Int^::ofNat p] \as First;
+\import SecondPair.With[coefficients := coefficients].At[z := I.Int^::ofNat q] \as Second;
+\import FirstPair.Maps[B := A].Over[target := left, targetSubset := LeftSpace.outside K]
+  .On[f := Fixed.leftPair].Integer[].With[coefficients := coefficients] \as PullLeft;
+\import SecondPair.Maps[B := B].Over[target := right, targetSubset := RightSpace.outside L]
+  .On[f := Fixed.rightPair].Integer[].With[coefficients := coefficients] \as PullRight;
+\definition leftPull[a: Left.Stage K]: First.Carrier := (PullLeft.At[z := I.Int^::ofNat p].induced).apply a;
+\definition rightPull[b: Right.Stage L]: Second.Carrier := (PullRight.At[z := I.Int^::ofNat q].induced).apply b;
+\definition cross[a: Left.Stage K][b: Right.Stage L]: Target.Stage (rectangle K L) :=
+  (Fixed.fromUnion outputDegree).apply (Fixed.Product[p := p, q := q].cup (leftPull a) (rightPull b));
+\module Through(K1: LeftSpace.Support, L1: RightSpace.Support, first: LeftSpace.before K K1, second: RightSpace.before L L1);

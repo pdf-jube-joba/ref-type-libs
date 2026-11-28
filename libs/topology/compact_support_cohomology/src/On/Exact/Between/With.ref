@@ -1,0 +1,69 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.congr;
+\use Equality.sym;
+
+\module Stage(K: Support) {
+  \import Modules.Hom[V := Middle.Stage K, W := Middle.Cohomology,
+    source := MiddleModule.spaces K, target := MiddleModule.moduleSpace]
+    .Composition[U := First.Stage K, domain := LeftModule.spaces K] \as FirstCompose;
+  \import Modules.Hom[V := Last.Stage K, W := Last.Cohomology,
+    source := RightModule.spaces K, target := RightModule.moduleSpace]
+    .Composition[U := Middle.Stage K, domain := MiddleModule.spaces K] \as LastCompose;
+  \definition first: _ := FirstCompose.compose (MiddleModule.ofSupportLinear K) (f K);
+  \definition last: _ := LastCompose.compose (RightModule.ofSupportLinear K) (g K);
+}
+\definition firstCompatible[K, L: Support][included: before K L][x: First.Stage K]:
+  Middle.ofSupport K ((f K).apply x) = Middle.ofSupport L ((f L).apply (First.advance K L included x)) :=
+  eq_reason_in!{Middle.Cohomology _
+    "=" _ "by" { Middle.compatible K L included ((f K).apply x) }
+    "=" _ "by" { congr!{{Middle.Stage L} Middle.Cohomology} (Middle.ofSupport L) _ _ (firstNatural K L included x) }};
+\definition lastCompatible[K, L: Support][included: before K L][x: Middle.Stage K]:
+  Last.ofSupport K ((g K).apply x) = Last.ofSupport L ((g L).apply (Middle.advance K L included x)) :=
+  eq_reason_in!{Last.Cohomology _
+    "=" _ "by" { Last.compatible K L included ((g K).apply x) }
+    "=" _ "by" { congr!{{Last.Stage L} Last.Cohomology} (Last.ofSupport L) _ _ (lastNatural K L included x) }};
+
+\import LeftModule.LinearDescent[W := Middle.Cohomology, target := MiddleModule.moduleSpace,
+  stageMap := (\fun (K: Support) => Stage[K := K].first), compatibleMap := firstCompatible] \as FirstMap;
+\import MiddleModule.LinearDescent[W := Last.Cohomology, target := RightModule.moduleSpace,
+  stageMap := (\fun (K: Support) => Stage[K := K].last), compatibleMap := lastCompatible] \as LastMap;
+\definition first: First.Cohomology -> Middle.Cohomology := (FirstMap.map).apply;
+\definition last: Middle.Cohomology -> Last.Cohomology := (LastMap.map).apply;
+\definition zero: \forall (x: First.Cohomology) -> last (first x) = (RightModule.moduleSpace).zero :=
+  First.induction (\fun (x: First.Cohomology) => last (first x) = (RightModule.moduleSpace).zero)
+    (\fun (K: Support)(x: First.Stage K) => eq_reason_in!{Last.Cohomology _
+      "=" _ "by" { congr!{Middle.Cohomology Last.Cohomology} last _ _ (FirstMap.onStage K x) }
+      "=" _ "by" { LastMap.onStage K ((f K).apply x) }
+      "=" _ "by" { congr!{{Last.Stage K} Last.Cohomology} (Last.ofSupport K) _ _ (compositeZero K x) }
+      "=" _ "by" { sym!{Last.Cohomology} _ _ (RightModule.zeroOnSupport K) }});
+
+\definition lift[K: Support][x: Middle.Stage K][same: last (Middle.ofSupport K x) = (RightModule.moduleSpace).zero]:
+  \exists (y: First.Cohomology \where first y = Middle.ofSupport K x) := \block {
+  \takefrom at: RightVanishing.AtLargerSupport[K, (g K).apply x] \by RightVanishing.eventualZero K ((g K).apply x)
+    (eq_reason_in!{Last.Cohomology _ "=" _ "by" { sym!{Last.Cohomology} _ _ (LastMap.onStage K x) } "=" _ "by" { same }}) \then
+  \let z: Middle.Stage at.support := Middle.advance K at.support at.inclusion x \then
+  \let zero: (g at.support).apply z = (RightModule.spaces at.support).zero :=
+    eq_reason_in!{{Last.Stage at.support} _
+      "=" _ "by" { sym!{{Last.Stage at.support}} _ _ (lastNatural K at.support at.inclusion x) }
+      "=" _ "by" { at.zero }} \then
+  \takefrom y: \Cast[First.Stage at.support] ({ y: First.Stage at.support \where (f at.support).apply y = z })
+    \by kernelImage at.support z zero \then
+  \return Logic.existsIntro[First.Cohomology, { y: First.Cohomology \where first y = Middle.ofSupport K x }]
+    (First.ofSupport at.support y)
+    (eq_reason_in!{Middle.Cohomology _
+      "=" _ "by" { FirstMap.onStage at.support y }
+      "=" _ "by" { congr!{{Middle.Stage at.support} Middle.Cohomology} (Middle.ofSupport at.support) _ _
+        (\bysub(First.Stage at.support, { w: First.Stage at.support \where (f at.support).apply w = z }, y)) }
+      "=" _ "by" { sym!{Middle.Cohomology} _ _ (Middle.compatible K at.support at.inclusion x) }})
+};
+
+\definition exact: \forall (x: Middle.Cohomology) -> last x = (RightModule.moduleSpace).zero ->
+  \exists (y: First.Cohomology \where first y = x) :=
+  Middle.induction (\fun (x: Middle.Cohomology) => last x = (RightModule.moduleSpace).zero ->
+    \exists (y: First.Cohomology \where first y = x)) lift;
+\definition source: Modules.Bundle := Modules.Bundle { Carrier := First.Cohomology, space := LeftModule.moduleSpace };
+\definition middleGroup: Modules.Bundle := Modules.Bundle { Carrier := Middle.Cohomology, space := MiddleModule.moduleSpace };
+\definition target: Modules.Bundle := Modules.Bundle { Carrier := Last.Cohomology, space := RightModule.moduleSpace };
+\import Modules.ExactPair[A := source, B := middleGroup, C := target] \as Exact;
+\definition sequence: Exact.Sequence := Exact.Sequence { first := FirstMap.map, last := LastMap.map, zero := zero, kernelImage := exact };

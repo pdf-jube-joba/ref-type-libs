@@ -1,0 +1,41 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import algebraic_topology.Interval[] \as Interval;
+\import algebraic_topology.Cylinder[A := A] \as Cylinder;
+\import algebraic_topology.Homotopy[A := A, B := A] \as Homotopies;
+\definition motionLaws: Homotopies.Laws[space, space, (\fun (x: A) => x), retract, motion] :=
+  Homotopies.laws space space (\fun (x: A) => x) retract motion;
+\definition adjusted[f, g: A -> A]
+  [start: \forall (x: A) -> motion (Cylinder.at Interval.start x) = f x]
+  [end: \forall (x: A) -> motion (Cylinder.at Interval.end x) = g x]:
+  Homotopies.Homotopy[space, space, f, g] :=
+  \into[Homotopies.Family](motion, Homotopies.Homotopy[space, space, f, g]) \by {
+    Homotopies.Laws[space, space, f, g, motion] { continuous := motionLaws.continuous, start := start, end := end }
+  };
+\definition interior: \Pow A := Top.Complement boundary;
+\import \parent.Open[U := interior, hausdorff := hausdorff, open := closed] \as Open;
+\import Top.Subspace[S := interior] \as Part;
+\import \root.On[A := Part.CarrierSet, space := Part.topology space] \as Interior;
+\definition openSupport: Support :=
+  \into[\Pow A](Top.Complement neighborhood, Supports) \by {
+    Compactness.closedCompact space compactSpace (Top.Complement neighborhood) (Finite.openComplementClosed space neighborhood neighborhoodOpen)
+  };
+\definition supportedInside[x: A][member: Top.Member openSupport x]: Top.Member interior x :=
+  \fun (atBoundary: Top.Member boundary x) => member (containsBoundary x atBoundary);
+\import Open.CompactTrace[K := openSupport, within := supportedInside] \as Fixed;
+\definition baseSupport: Interior.Support := Fixed.trace;
+\definition outsideBaseSupport[x: A][outside: Top.Member (outside (Open.image baseSupport)) x]:
+  Top.Member neighborhood x :=
+  Finite.doubleNegElim (Top.Member neighborhood x) (\fun (notInNeighborhood: Top.Member openSupport x) =>
+    outside (Fixed.ambientContains x notInNeighborhood));
+\definition retractContinuous: topology.Continuity[A := A, B := A].Continuous space space retract :=
+  Homotopies.endContinuous space space (\fun (x: A) => x) retract motion;
+\import std.Data[].Pair[].Prop[A := Interval.Carrier, B := A] \as CylinderCoordinates;
+\definition fixedMotion[p: Cylinder.Carrier][member: Top.Member boundary (Cylinder.point p)]: motion p = Cylinder.point p :=
+  eq_reason_in!{A _
+    "=" _ "by" { congr!{Cylinder.Carrier A} motion _ _ (sym!{Cylinder.Carrier} _ _ (CylinderCoordinates.eta p)) }
+    "=" _ "by" { fixed (Cylinder.time p) (Cylinder.point p) member }};
+\module Enlarge(K: Interior.Support);
+\module With(coefficients: Modules.Bundle, z: I.Int^);

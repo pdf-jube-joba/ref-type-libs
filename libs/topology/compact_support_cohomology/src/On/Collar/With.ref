@@ -1,0 +1,30 @@
+\import \parent.\parent.With[coefficients := coefficients].Degree[z := z] \as AmbientDegree;
+\import Interior.With[coefficients := coefficients].Degree[z := z] \as InteriorDegree;
+\import Open.With[coefficients := coefficients, z := z] \as Extension;
+\import singular_cohomology.Relative[A := A, source := space, subset := boundary] \as Relative;
+\import Relative.With[coefficients := coefficients].At[z := z] \as RelativeDegree;
+\definition Group: \Set := RelativeDegree.Carrier;
+
+\import singular_cohomology.Identity[A := A, source := space] \as Identity;
+\module AtSupport(K: Interior.Support);
+\definition stage[K: Interior.Support][x: InteriorDegree.Stage K]: Group := AtSupport[K := K].apply x;
+\definition compatible[K, L: Interior.Support][included: Interior.before K L][x: InteriorDegree.Stage K]:
+  stage K x = stage L (InteriorDegree.advance K L included x) := AtSupport[K := K].Through[L := L, included := included].law x;
+\import InteriorDegree.Descend[Target := Group, stageMap := stage, compatibleMap := compatible] \as Descend;
+\definition forward: InteriorDegree.Cohomology -> Group := Descend.map;
+\definition onStage: _ := Descend.onStage;
+
+\import singular_cohomology.Relative[A := A, source := space, subset := outside (Open.image baseSupport)]
+  .Maps[B := A].Over[target := space, targetSubset := boundary] \as Collapse;
+\definition collapse: Collapse.Map := \into[A -> A](retract, Collapse.Map) \by {
+  Collapse.Laws[retract] {
+    continuous := retractContinuous,
+    contained := \fun (x: \Cast[A] (outside (Open.image baseSupport))) => retracts x (outsideBaseSupport x (\bysub(A, outside (Open.image baseSupport), x))),
+  }
+};
+\import Collapse.On[f := collapse].Integer[].With[coefficients := coefficients] \as CollapsePull;
+\definition atBase[x: Group]: AmbientDegree.Stage (Open.image baseSupport) := (CollapsePull.At[z := z].induced).apply x;
+\definition backward[x: Group]: InteriorDegree.Cohomology :=
+  InteriorDegree.ofSupport baseSupport (Extension.AtSupport[K := baseSupport].restrict (atBase x));
+\module Inverses;
+\module Linear;

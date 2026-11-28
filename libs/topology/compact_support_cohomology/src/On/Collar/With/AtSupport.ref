@@ -1,0 +1,18 @@
+\import Relative.Maps[B := A].Over[target := space, targetSubset := outside (Open.image K)] \as Maps;
+\definition keepBoundary: Maps.Map := \into[A -> A](Identity.function, Maps.Map) \by {
+  Maps.Laws[Identity.function] {
+    continuous := Identity.continuous,
+    contained := \fun (x: Relative.SubspaceCarrier)(supported: Top.Member (Open.image K) x) =>
+      (Open.imageIncluded K x supported) (\bysub(A, boundary, x)),
+  }
+};
+\import Maps.On[f := keepBoundary].Integer[].With[coefficients := coefficients] \as Pull;
+\definition pullback[x: AmbientDegree.Stage (Open.image K)]: Group := (Pull.At[z := z].induced).apply x;
+\definition apply[x: InteriorDegree.Stage K]: Group := pullback (Extension.AtSupport[K := K].extend x);
+\module Through(L: Interior.Support, included: Interior.before K L);
+\import InteriorDegree.Module[] \as InteriorModule;
+\import AmbientDegree.Module[] \as AmbientModule;
+\import Modules.Hom[V := AmbientDegree.Stage (Open.image K), W := Group,
+  source := AmbientModule.spaces (Open.image K), target := RelativeDegree.space]
+  .Composition[U := InteriorDegree.Stage K, domain := InteriorModule.spaces K] \as Compose;
+\definition linear: _ := Compose.compose Pull.At[z := z].induced (Extension.AtSupport[K := K].isomorphism).backward;

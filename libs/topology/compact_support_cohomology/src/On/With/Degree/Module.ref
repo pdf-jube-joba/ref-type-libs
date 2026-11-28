@@ -36,3 +36,4 @@
   stageMap: \forall (K: Support) -> Modules.Hom[V := Stage K, W := W, source := spaces K, target := target].Map,
   compatibleMap: \forall (K, L: Support)(included: before K L)(x: Stage K) ->
     (stageMap K).apply x = (stageMap L).apply (advance K L included x));
+\module Vanishing;

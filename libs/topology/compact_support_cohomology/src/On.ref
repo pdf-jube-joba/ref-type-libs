@@ -32,3 +32,14 @@
   open: Top.IsOpenIn space U, included: Top.Subset K U);
 \module Open(U: \Pow A, hausdorff: Top.IsT2 space, open: Top.IsOpenIn space U);
 \module Cup(R: \Set, ring: std.Alg[].Ring[].CommutativeRing[R], hausdorff: Top.IsT2 space);
+
+\module Collar(compactSpace: Top.IsCompact space, hausdorff: Top.IsT2 space,
+  boundary: \Pow A, closed: Top.IsClosedIn space boundary,
+  neighborhood: \Pow A, neighborhoodOpen: Top.IsOpenIn space neighborhood,
+  containsBoundary: Top.Subset boundary neighborhood,
+  retract: A -> A,
+  motion: algebraic_topology.Homotopy[A := A, B := A].Homotopy[space, space, (\fun (x: A) => x), retract],
+  fixed: \forall (t: algebraic_topology.Interval[].Carrier)(x: A) -> Top.Member boundary x ->
+    motion (algebraic_topology.Cylinder[A := A].at t x) = x,
+  retracts: \forall (x: A) -> Top.Member neighborhood x -> Top.Member boundary (retract x));
+\module Exact;
