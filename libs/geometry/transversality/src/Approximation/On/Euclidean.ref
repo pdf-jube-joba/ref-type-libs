@@ -1,0 +1,9 @@
+\import std.Data[].FinSet[] \as Fin;
+\import topological_algebra.Euclidean[].Dimension[n := m] \as Coordinates;
+\import Coordinates.Def[] \as Def;
+\import Coordinates.Norm[] \as Norm;
+\import Coordinates.Topology[] \as EuclideanTopology;
+\import compact_embeddings.WeightedChart[n := n].On[M := M].Vector[m := m] \as Vector;
+\import topology.Continuity[A := M.Point, B := Coordinates.Point] \as ContinuousMaps;
+\import manifolds.SmoothMap[n := n, m := m].Between[M := M, N := Vector.target] \as Maps;
+\module Of(f: M.Point -> Coordinates.Point, continuous: ContinuousMaps.Continuous M.space EuclideanTopology.topology f);

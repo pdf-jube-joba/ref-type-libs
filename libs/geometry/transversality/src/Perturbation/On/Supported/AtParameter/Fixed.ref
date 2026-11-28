@@ -1,0 +1,60 @@
+\definition weightZero: weight x = Real.zero := eq_reason_in!{Real.Real _
+  "=" _ "by" {congr!{Real.Real Real.Real} (Real.mul (bump x)) _ _ zero}
+  "=" _ "by" {Laws.fieldMulZeroRight (bump x)}
+};
+\definition agrees: Maps.apply U Output.whole map x = Maps.apply U Output.whole f x :=
+  \axiom:funext(output x, Maps.apply U Output.whole f x, \fun (i: Fin.Fin m) => eq_reason_in!{Real.Real _
+    "=" _ "by" {congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Real.add (f.apply x i) (Real.mul (Real.neg (a i)) r)) _ _ weightZero}
+    "=" _ "by" {congr!{Real.Real Real.Real} (Real.add (f.apply x i)) _ _ (Laws.fieldMulZeroRight (Real.neg (a i)))}
+    "=" _ "by" {Laws.addZeroRight (f.apply x i)}
+  });
+
+\definition weightDerivative[v: calculus.Real[].Multivariable[n := n].Point]:
+  (Differential.value U weight x).apply v = Real.zero := eq_reason_in!{Real.Real _
+    "=" _ "by" {Derivatives.product bump bump x v}
+    "=" _ "by" {congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Real.add
+      (Real.mul r ((Differential.value U bump x).apply v)) (Real.mul r ((Differential.value U bump x).apply v))) _ _ zero}
+    "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+      (Laws.fieldMulZeroLeft ((Differential.value U bump x).apply v))
+      (Laws.fieldMulZeroLeft ((Differential.value U bump x).apply v))}
+    "=" _ "by" {Laws.addZeroRight Real.zero}
+  };
+
+\definition derivativeCoordinate[v: calculus.Real[].Multivariable[n := n].Point][j: Fin.Fin m]:
+  (Perturbed.differential x).apply v j = (Original.differential x).apply v j := \block {
+  \let c: Functions.Function := Functions.constant (Real.neg (a j)) \then
+  \let original: Functions.Function := Maps.coordinateFunction U Output.whole f j \then
+  \let first: Real.Real := (Differential.value U c x).apply v \then
+  \let second: Real.Real := (Differential.value U weight x).apply v \then
+  \let vanished: (Differential.value U (Functions.product c weight) x).apply v = Real.zero :=
+    eq_reason_in!{Real.Real _
+      "=" _ "by" {Derivatives.product c weight x v}
+      "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+        (congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Real.mul r first) _ _ weightZero)
+        (congr!{Real.Real Real.Real} (Real.mul (c x)) _ _ (weightDerivative v))}
+      "=" _ "by" {congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+        (Laws.fieldMulZeroLeft first) (Laws.fieldMulZeroRight (c x))}
+      "=" _ "by" {Laws.addZeroRight Real.zero}
+    } \then
+  \return eq_reason_in!{Real.Real _
+    "=" _ "by" {Derivatives.addition original (Functions.product c weight) x v}
+    "=" _ "by" {congr!{Real.Real Real.Real} (Real.add ((Differential.value U original x).apply v)) _ _ vanished}
+    "=" _ "by" {Laws.addZeroRight ((Differential.value U original x).apply v)}
+  }
+};
+\definition derivative[v: calculus.Real[].Multivariable[n := n].Point]:
+  (Perturbed.differential x).apply v = (Original.differential x).apply v :=
+  \axiom:funext((Perturbed.differential x).apply v, (Original.differential x).apply v, derivativeCoordinate v);
+\definition regular: FixedRegular -> Maps.apply U Output.whole map x = Def.origin -> Perturbed.SurjectiveAt x :=
+  \fun (atFixed: FixedRegular)(atZero: _)(v: Coordinates.Point) => \block {
+    \let originalZero: Maps.apply U Output.whole f x = Def.origin :=
+      trans!{Coordinates.Point} _ _ _ (sym!{Coordinates.Point} _ _ agrees) atZero \then
+    \takefrom u: \Cast[calculus.Real[].Multivariable[n := n].Point]
+      ({ u: calculus.Real[].Multivariable[n := n].Point \where (Original.differential x).apply u = v })
+      \by atFixed x zero originalZero v \then
+    \return Logic.existsIntro[calculus.Real[].Multivariable[n := n].Point,
+      { u: calculus.Real[].Multivariable[n := n].Point \where (Perturbed.differential x).apply u = v }] u
+      (trans!{Coordinates.Point} _ _ _ (derivative u)
+        (\bysub(calculus.Real[].Multivariable[n := n].Point, { u: calculus.Real[].Multivariable[n := n].Point \where
+          (Original.differential x).apply u = v }, u)))
+  };

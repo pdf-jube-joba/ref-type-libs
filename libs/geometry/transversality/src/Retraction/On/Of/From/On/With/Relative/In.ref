@@ -1,0 +1,20 @@
+\import \parent.\parent.Window[W := W, open := windowOpen, around := around] \as Window;
+\module Using(radius: Window.Radius, improved: Euclidean.Result[radius.size, K]) {
+  \definition inside[x: X.Point]: AmbientSets.Member neighborhood.image.points (improved.map.apply x) :=
+    Window.tubePoint x (improved.map.apply x) (radius.within x (improved.map.apply x) (improved.close x));
+  \import \parent.\parent.\parent.Send[g := improved.map, within := inside] \as Project;
+  \definition result: Result[K, W] := Result[K, W] {
+    map := Project.map,
+    neighborhood := improved.neighborhood,
+    neighborhoodOpen := improved.neighborhoodOpen,
+    contains := improved.contains,
+    agrees := \fun (x: X.Point)(inFixed: _) => Project.onFixed x (improved.agrees x inFixed),
+    near := \fun (x: X.Point) =>
+      Window.preserves x (improved.map.apply x) (radius.within x (improved.map.apply x) (improved.close x)),
+  };
+}
+\definition exists[compact: XS.IsCompact X.space][smoothOnU: SmoothOnU]: \exists Result[K, W] := \block {
+  \takefrom radius: Window.Radius \by Window.exists compact \then
+  \takefrom improved: Euclidean.Result[radius.size, K] \by Approximate.exists compact smoothOnU radius.size radius.positive \then
+  \return \exact(Using[radius := radius, improved := improved].result, Result[K, W])
+};

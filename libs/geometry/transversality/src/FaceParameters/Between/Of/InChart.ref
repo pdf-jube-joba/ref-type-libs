@@ -1,0 +1,17 @@
+\import Sard.InChart[right := right] \as Chartwise;
+\definition exceptional: \Pow Model.Point := Chartwise.tangentialCriticalCoordinates;
+\definition null: Null.Null exceptional := Chartwise.tangentialNull;
+\module OnFace(F: Faces.Manifold) {
+  \import sard.Faces[n := Nat.add r d, m := m].Global[d := d, r := r].In[F := F, M := M, T := T] \as FaceSard;
+  \definition regular[face: Face F][y: T.Point]: \Prop := Values.Member (FaceSard.restrict f face right).regular y;
+  \definition ofTangential[face: Face F][y: T.Point]: Sard.TangentialRegular y -> regular face y :=
+    FaceSard.regularOfTangential f face right y;
+}
+\definition AllFaces[y: T.Point]: \Prop :=
+  \forall (F: Faces.Manifold)(face: Face F) -> OnFace[F := F].regular face y;
+\definition regularOutside[u: Model.Carrier right.constraints right.image]:
+  Logic.Not (Sets.Member exceptional u) -> AllFaces (Charts.point right u) :=
+  \fun (outside: _)(F: Faces.Manifold)(face: Face F) =>
+    OnFace[F := F].ofTangential face (Charts.point right u) (Chartwise.tangentialRegularAt u outside);
+\module Window(W: Output.OpenSet, included: Output.Included W right.image,
+    admissible: \forall (u: Output.Carrier W) -> Model.Nonnegative right.constraints u);

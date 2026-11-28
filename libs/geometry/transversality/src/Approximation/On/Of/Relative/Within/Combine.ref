@@ -1,0 +1,13 @@
+\definition Weight[i: N.Nat^]: \Set := \Cast[N.Nat^] ({ j: N.Nat^ \where Nat.Lt j i });
+\definition weights: Sums.Family := Functions.FamilyValues partition.functions;
+\definition Select[i: Weight partition.size]: \Set := Patch (partition.targets i);
+\definition existsPatches: \exists (\forall (i: Weight partition.size) -> Select i) :=
+  \axiom:classicalIndefiniteChoice(Weight partition.size, Select,
+    \fun (i: Weight partition.size) => \parent.Patches[].exists (partition.targets i)
+      (partition.refines i (\bysub(N.Nat^, { j: N.Nat^ \where Nat.Lt j partition.size }, i))));
+\module Using(patches: \forall (i: Weight partition.size) -> Select i);
+\definition exists: \exists ( result: Result[radius, K] \where result.neighborhood = fixed.inner ) := \block {
+  \takefrom selected: (\forall (i: Weight partition.size) -> Select i) \by existsPatches \then
+  \return Logic.existsIntro[Result[radius, K], { result: Result[radius, K] \where result.neighborhood = fixed.inner }]
+    Using[patches := selected].result (\refl(fixed.inner))
+};

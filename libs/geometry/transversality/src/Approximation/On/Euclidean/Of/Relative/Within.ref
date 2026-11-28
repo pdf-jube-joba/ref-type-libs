@@ -1,0 +1,20 @@
+\module Coordinate(i: Fin.Fin m) {
+  \import \root.Approximation[n := n].On[M := M].Of[f := coordinate i, continuous := continuousCoordinate i] \as Scalar;
+  \import Scalar.Relative[K := K, U := U, closed := closed, open := open, inside := inside]
+    .Within[regular := regular i, radius := radius, positive := positive, fixed := fixed] \as Approximate;
+  \definition Choice: \Set := \Cast[Scalar.Result[radius, K]] ({ result: Scalar.Result[radius, K] \where result.neighborhood = fixed.inner });
+  \definition exists[compact: Space.IsCompact M.space]: \exists Choice := Approximate.exists compact;
+  \definition exact[chosen: Choice][x: M.Point]: Space.Member fixed.inner x -> chosen.map x = coordinate i x :=
+    \fun (inInner: _) => chosen.agrees x
+      (\idelim fixed.inner = chosen.neighborhood \with V: \Pow M.Point => Space.Member V x \by {
+        base: inInner,
+        equality: sym!{\Pow M.Point} _ _ (\bysub(Scalar.Result[radius, K], Choice, chosen))
+      });
+}
+\definition Choice[i: Fin.Fin m]: \Set := Coordinate[i := i].Choice;
+\module Using(chosen: \forall (i: Fin.Fin m) -> Choice i);
+\definition exists[compact: Space.IsCompact M.space]: \exists Result[radius, K] := \block {
+  \takefrom chosen: (\forall (i: Fin.Fin m) -> Choice i) \by
+    \axiom:classicalIndefiniteChoice(Fin.Fin m, Choice, \fun (i: Fin.Fin m) => Coordinate[i := i].exists compact) \then
+  \return \exact(Using[chosen := chosen].result, Result[radius, K])
+};

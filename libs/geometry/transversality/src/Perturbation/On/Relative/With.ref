@@ -1,0 +1,57 @@
+\import Input.Smooth[] \as Smooth;
+\import Smooth.Operations[] \as Operations;
+\import Input.Restriction[] \as Restrict;
+\import Sets.Closure[] \as Closure;
+\import real.Analysis[].Distance[] \as Distance;
+\import real.Analysis[].Estimates[] \as Estimates;
+\import smooth_partitions.Scalars[A := calculus.Real[].Multivariable[n := n].Point, space := SourceTopology.topology]
+  .Using[calculus := Partitions.ScalarCalculus[].calculus] \as Scalar;
+\definition restrictWhole[x: calculus.Real[].Multivariable[n := n].Point]: Sets.Member U.points x -> Sets.Member Input.whole.points x :=
+  \fun (inside: _) => \refl(x);
+\definition onU: Smooth.SmoothOn U (\fun (x: Input.Carrier U) => cutoff.value x) :=
+  Restrict.localSmooth U Input.whole restrictWhole
+    (\fun (x: Input.Carrier Input.whole) => cutoff.value x) (Scalar.regular cutoff.value);
+\definition bump: Functions.Function := \into[Input.ScalarFunction U]((\fun (x: Input.Carrier U) => Real.sub Real.one (cutoff.value x)), Functions.Predicate) \by {
+  Operations.subSmooth U (\fun (x: Input.Carrier U) => Real.one) (\fun (x: Input.Carrier U) => cutoff.value x)
+    (Operations.constantSmooth U Real.one) onU
+};
+\import \parent.\parent.Supported[bump := bump] \as Perturb;
+\definition fixed[x: Input.Carrier U]: Sets.Member cutoff.neighborhood x -> bump x = Real.zero :=
+  \fun (inside: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (Real.sub Real.one) _ _ (cutoff.oneOnNeighborhood x inside))
+    (Laws.subSelf Real.one);
+\definition protectedOfZero[x: Input.Carrier U]: bump x = Real.zero -> Sets.Member protected.points x :=
+  \fun (zero: _) => cutoff.supportWithin x
+    (Closure.contains SourceTopology.topology (Partitions.Nonzero cutoff.value) x
+      (\fun (vanishes: cutoff.value x = Real.zero) =>
+        Laws.zeroNeOne (trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ vanishes) (sym!{Real.Real} _ _
+          (Distance.subZeroEq Real.one (cutoff.value x) zero)))));
+\definition lower[x: Input.Carrier U]: R.Le Real.zero (bump x) :=
+  Distance.subNonnegative Real.one (cutoff.value x) (cutoff.upper x);
+\definition upper[x: Input.Carrier U]: R.Le (bump x) Real.one :=
+  R.leReplaceRight _ _ _ (Laws.subZeroRight Real.one)
+    (Laws.addMonotoneLeft (Real.neg (cutoff.value x)) (Real.neg Real.zero) Real.one
+      (Laws.negAntitone Real.zero (cutoff.value x) (cutoff.lower x)));
+\definition bounded[x: Input.Carrier U]: R.Le (Perturb.weight x) Real.one :=
+  R.leTrans _ (bump x) Real.one
+    (R.leReplaceRight _ _ _
+      (trans!{Real.Real} _ _ _ (Laws.fieldMulComm (bump x) Real.one) (Laws.fieldMulOneLeft (bump x)))
+      (Estimates.mulMonotone (bump x) (bump x) Real.one (lower x) (upper x)))
+    (upper x);
+\definition fixedRegular[regular: RegularOnProtected]: Perturb.FixedRegular :=
+  \fun (x: Input.Carrier U)(zero: bump x = Real.zero) => regular x (protectedOfZero x zero);
+\definition exists[radius: Real.Real][positive: R.Lt Real.zero radius][regular: RegularOnProtected]: \exists Result[radius] := \block {
+  \takefrom a: \Cast[Coordinates.Point] ({ p: Coordinates.Point \where Logic.And[Perturb.AtParameter[a := p].RegularAtZero, Perturb.Close p radius] })
+    \by Perturb.approximate radius positive (fixedRegular regular) bounded \then
+  \let selected: Logic.And[Perturb.AtParameter[a := a].RegularAtZero, Perturb.Close a radius] :=
+    \bysub(Coordinates.Point, { p: Coordinates.Point \where Logic.And[Perturb.AtParameter[a := p].RegularAtZero, Perturb.Close p radius] }, a) \then
+  \return \exact(Result[radius] {
+    map := Perturb.AtParameter[a := a].map,
+    neighborhood := cutoff.neighborhood,
+    neighborhoodOpen := cutoff.neighborhoodOpen,
+    contains := cutoff.contains,
+    agrees := \fun (x: Input.Carrier U)(inside: _) => Perturb.AtParameter[a := a].Fixed[x := x, zero := fixed x inside].agrees,
+    regular := selected.left,
+    close := selected.right,
+  }, Result[radius])
+};

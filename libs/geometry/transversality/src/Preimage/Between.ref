@@ -1,0 +1,12 @@
+\import manifolds.SmoothMap[n := Nat.add m n, m := p].Between[M := M, N := N] \as Maps;
+\import manifolds.SmoothMap[n := p, m := m].Between[M := N, N := T] \as Defining;
+\import manifolds.Composition[n := Nat.add m n, m := p, l := m].Between[M := M, N := N, P := T] \as Composition;
+\import manifolds.Tangent[n := Nat.add m n].On[M := M] \as SourceTangent;
+\import manifolds.Tangent[n := p].On[M := N] \as TargetTangent;
+\import manifolds.Tangent[n := m].On[M := T] \as ValueTangent;
+\import manifolds.Differential[n := Nat.add m n, m := p].Between[M := M, N := N] \as First;
+\import manifolds.Differential[n := p, m := m].Between[M := N, N := T] \as Second;
+\import manifolds.Differential[n := Nat.add m n, m := m].Between[M := M, N := T] \as Composite;
+\import inverse_implicit.Product[n := n, m := m].RegularValue[M := M, T := T] \as RegularValues;
+\import manifolds.SmoothMap[n := Nat.add m n, m := m].Between[M := M, N := T] \as ResultMaps;
+\module Of(f: Maps.Map, defining: Defining.Map, y: T.Point);

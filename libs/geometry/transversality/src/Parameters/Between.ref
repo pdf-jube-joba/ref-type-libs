@@ -1,0 +1,3 @@
+\import manifolds.SmoothMap[n := n, m := r].Between[M := M, N := P] \as Projections;
+\import topology.Topology[Carrier := P.Point] \as Sets;
+\module Of(projection: Projections.Map);

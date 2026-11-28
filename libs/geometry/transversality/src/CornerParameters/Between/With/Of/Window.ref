@@ -1,0 +1,8 @@
+\definition inChart[u: Output.Carrier W]: Model.Carrier right.constraints right.image :=
+  \into[Output.Carrier right.image](Output.inclusion W right.image included u, Model.region right.constraints right.image) \by { admissible u };
+\definition choose[center: Output.Carrier W]: \exists ( u: Output.Carrier W \where Good (inChart u) ) := \block {
+  \takefrom u: \Cast[Output.Carrier W] ({ u: Output.Carrier W \where Logic.Not (Sets.Member InChart.exceptional u) })
+    \by Null.Open[].avoids InChart.exceptional InChart.exceptionalNull W center \then
+  \return Logic.existsIntro[Output.Carrier W, { u: Output.Carrier W \where Good (inChart u) }] u
+    (outside (inChart u) (\bysub(Output.Carrier W, { u: Output.Carrier W \where Logic.Not (Sets.Member InChart.exceptional u) }, u)))
+};

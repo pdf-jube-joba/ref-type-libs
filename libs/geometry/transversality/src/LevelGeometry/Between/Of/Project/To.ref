@@ -1,0 +1,2 @@
+\import manifolds.SmoothMap[n := Nat.add m n, m := r].Between[M := M, N := P] \as Maps;
+\module Of(projection: Maps.Map);

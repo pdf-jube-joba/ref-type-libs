@@ -1,0 +1,12 @@
+\import RegularValues.Of[f := f, y := y] \as Level;
+\import Level.Smooth[regular := regular] \as Smooth;
+\import manifolds.Dimension[n := n].Smooth[] \as Fibers;
+\definition preimage: Fibers.Manifold := Smooth.S;
+\import manifolds.Immersion[n := n, m := Nat.add m n].Between[M := preimage, N := M] \as Embeddings;
+\definition embedding: Embeddings.Embedding := Smooth.embedding;
+\import manifolds.Tangent[n := n].On[M := preimage] \as PreimageTangent;
+\import manifolds.Tangent[n := Nat.add m n].On[M := M] \as SourceTangent;
+\import manifolds.Tangent[n := m].On[M := T] \as TargetTangent;
+\import manifolds.Differential[n := Nat.add m n, m := m].Between[M := M, N := T] \as Differential;
+\module At(x: Level.Fiber);
+\module Project(r: std.Data[].Nat[].Nat^);

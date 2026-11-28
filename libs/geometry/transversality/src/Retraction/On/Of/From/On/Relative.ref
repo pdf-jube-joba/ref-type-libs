@@ -1,0 +1,9 @@
+\import Euclidean.Relative[K := K, U := U, closed := closed, open := open, inside := included] \as Approximate;
+\definition SmoothOnU: \Prop := Approximate.SmoothOnU;
+\definition exists[compactSource: XS.IsCompact X.space][compactTarget: TargetSets.IsCompact M.space][smoothOnU: SmoothOnU]
+    [W: \Pow Graphs.CarrierSet][windowOpen: GraphSets.IsOpenIn graphTopology W]
+    [around: \forall (x: X.Point) -> GraphSets.Member W (graph x (f x))]: \exists Result[K, W] := \block {
+  \takefrom tube: Neighborhood \by existsNeighborhood compactTarget \then
+  \return \parent.With[neighborhood := tube].Relative[K := K, U := U, closed := closed, open := open, included := included]
+    .In[W := W, windowOpen := windowOpen, around := around].exists compactSource smoothOnU
+};

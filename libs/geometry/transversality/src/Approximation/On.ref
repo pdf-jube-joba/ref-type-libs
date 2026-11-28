@@ -1,0 +1,12 @@
+\import topology.Topology[Carrier := M.Point] \as Space;
+\import topology.Continuity[A := M.Point, B := Real.Real] \as Continuity;
+\import Space.Finite[] \as Finite;
+\import Space.Compactness[] \as Compact;
+\import Space.Closure[] \as Closure;
+\import Space.Urysohn[] \as Shrinking;
+\import smooth_partitions.Manifold[n := n].On[M := M] \as Scalars;
+\import smooth_partitions.Scalars[A := M.Point, space := M.space].Using[calculus := Scalars.calculus] \as Functions;
+\import smooth_partitions.Countable[A := M.Point] \as Sums;
+\module Of(f: Scalars.Function, continuous: Continuity.Continuous M.space Line.topology f);
+\module Euclidean(m: N.Nat^);
+\module Empty;

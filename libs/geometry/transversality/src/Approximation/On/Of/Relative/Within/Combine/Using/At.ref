@@ -1,0 +1,60 @@
+\definition patch: Select i := patches i;
+\definition domain: \Pow M.Point := partition.targets i;
+\definition weight: Functions.Smooth := partition.functions i;
+\definition insideSupport: Space.Subset (Scalars.support weight) domain :=
+  partition.subordinate i (\bysub(N.Nat^, { j: N.Nat^ \where Nat.Lt j partition.size }, i));
+\import Scalars.OnOpen[U := domain, open := patch.openSet] \as Local;
+\definition product[x: Local.Carrier]: Real.Real := Real.mul (weight x) (patch.sample x);
+\import calculus.Real[].Multivariable[n := n].Open[].Smooth[].Operations[] \as Operations;
+\definition productSmooth: Local.IsSmooth product := \fun (c: Scalars.Chart) =>
+  Operations.mulSmooth (Local.InChart[c := c].domain)
+    (Local.InChart[c := c].coordinates (Local.restrict weight))
+    (Local.InChart[c := c].coordinates (Local.restrict patch.sample))
+    (Local.restrictSmooth weight (Functions.regular weight) c) (patch.smooth c);
+\definition weightZero[x: M.Point]: Logic.Not (Space.Member (Scalars.support weight) x) -> weight x = Real.zero :=
+  \fun (outside: _) => Finite.doubleNegElim (weight x = Real.zero)
+    (\fun (nonzero: _) => outside (Closure.contains M.space (Scalars.Nonzero weight) x nonzero));
+\definition productZero[x: Local.Carrier]: Logic.Not (Space.Member (Scalars.support weight) x) -> product x = Real.zero :=
+  \fun (outside: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (w: Real.Real) => Real.mul w (patch.sample x)) _ _ (weightZero x outside))
+    (Laws.fieldMulZeroLeft (patch.sample x));
+\import std.Set[].Extension[A := M.Point, B := Real.Real, domain := domain] \as Extend;
+\import Local.ZeroExtension[f := product] \as Extension;
+\definition term: Scalars.Function := Extension.value;
+\definition termSmooth: Scalars.IsSmooth term :=
+  Extension.Closed[F := Scalars.support weight, closed := Closure.closed M.space (Scalars.Nonzero weight),
+    included := insideSupport, vanishes := productZero].smooth productSmooth;
+\definition termInside[x: M.Point]: Space.Member domain x -> term x = Real.mul (weight x) (patch.sample x) :=
+  \fun (inside: _) => Extension.inside (\into[M.Point](x, domain) \by { inside });
+\definition termOutside[x: M.Point]: Logic.Not (Space.Member domain x) -> term x = Real.zero :=
+  \fun (outside: _) => Extend.outside product Real.zero x outside;
+\definition weightedZero[x: M.Point][a: Real.Real]: Logic.Not (Space.Member domain x) -> Real.mul (weight x) a = Real.zero :=
+  \fun (outside: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (\fun (w: Real.Real) => Real.mul w a) _ _
+      (weightZero x (\fun (member: _) => outside (insideSupport x member))))
+    (Laws.fieldMulZeroLeft a);
+\definition exactOn[x: M.Point]: Space.Member fixed.envelope x -> term x = Real.mul (weight x) (f x) :=
+  \fun (atFixed: _) => either!{{(Classical.excludedMiddle (Space.Member domain x))} {term x = Real.mul (weight x) (f x)}
+    {\fun (inside: _) => trans!{Real.Real} _ _ _ (termInside x inside)
+      (congr!{Real.Real Real.Real} (Real.mul (weight x)) _ _ (patch.exactOn x inside atFixed))}
+    {\fun (outside: _) => trans!{Real.Real} _ _ _ (termOutside x outside)
+      (sym!{Real.Real} _ _ (weightedZero x (f x) outside))}
+  };
+\definition lower[x: M.Point]: R.Le (Real.mul (weight x) (Real.sub (f x) tolerance)) (term x) :=
+  either!{{(Classical.excludedMiddle (Space.Member domain x))} {R.Le (Real.mul (weight x) (Real.sub (f x) tolerance)) (term x)}
+    {\fun (inside: _) => R.leReplaceRight _ _ _ (sym!{Real.Real} _ _ (termInside x inside))
+      (Estimates.mulMonotone (weight x) _ _ (partition.lower i x)
+        (Order.leOfLt _ _ (Distance.distanceLtLower (f x) (patch.sample x) tolerance (patch.close x inside))))}
+    {\fun (outside: _) => R.leReplace _ _ _ _
+      (sym!{Real.Real} _ _ (weightedZero x (Real.sub (f x) tolerance) outside))
+      (sym!{Real.Real} _ _ (termOutside x outside)) (R.leRefl Real.zero)}
+  };
+\definition upper[x: M.Point]: R.Le (term x) (Real.mul (weight x) (Real.add (f x) tolerance)) :=
+  either!{{(Classical.excludedMiddle (Space.Member domain x))} {R.Le (term x) (Real.mul (weight x) (Real.add (f x) tolerance))}
+    {\fun (inside: _) => R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (termInside x inside))
+      (Estimates.mulMonotone (weight x) _ _ (partition.lower i x)
+        (Order.leOfLt _ _ (Distance.distanceLtUpper (f x) (patch.sample x) tolerance (patch.close x inside))))}
+    {\fun (outside: _) => R.leReplace _ _ _ _
+      (sym!{Real.Real} _ _ (termOutside x outside))
+      (sym!{Real.Real} _ _ (weightedZero x (Real.add (f x) tolerance) outside)) (R.leRefl Real.zero)}
+  };

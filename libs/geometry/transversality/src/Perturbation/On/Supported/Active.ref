@@ -1,0 +1,25 @@
+\definition V: Input.OpenSet := Domain.domain;
+\import Smooth.Algebra[U := V] \as Local;
+\import Differential.Operations[U := V] \as ProductRule;
+\import Maps.Restriction[U := V, V := U, W := Output.whole] \as Restrict;
+\definition original: Maps.Map V Output.whole := Restrict.input Domain.included f;
+\definition reciprocal: Local.Function := \into[Input.ScalarFunction V](Domain.inverse, Local.Predicate) \by { Domain.inverseSmooth };
+\definition normalizedCoordinate[j: Fin.Fin m]: Local.Function :=
+  Local.product reciprocal (Maps.coordinateFunction V Output.whole original j);
+\definition normalizedData: Maps.Data[V, Output.whole] := Maps.Data[V, Output.whole] {
+  apply := \fun (x: Input.Carrier V) => Output.Whole[].point (\fun (j: Fin.Fin m) => normalizedCoordinate j x),
+};
+\definition normalized: Maps.Map V Output.whole := \into[Maps.Data[V, Output.whole]](normalizedData, Maps.Map V Output.whole) \by {
+  Maps.Laws[V, Output.whole, normalizedData] { smooth := \fun (j: Fin.Fin m) =>
+    \bysub(Input.ScalarFunction V, Local.Predicate, normalizedCoordinate j) }
+};
+\import \root.Perturbation[n := n, m := m].On[U := V, f := normalized] \as Translations;
+\module At(a: Coordinates.Point);
+\definition dense[W: Output.OpenSet][center: Output.Carrier W]:
+  FixedRegular -> \exists ( a: Output.Carrier W \where \parent.AtParameter[a := a].RegularAtZero ) :=
+  \fun (fixed: FixedRegular) => \block {
+    \takefrom a: \Cast[Output.Carrier W] ({ p: Output.Carrier W \where Translations.holds p })
+      \by Translations.dense W center \then
+    \return Logic.existsIntro[Output.Carrier W, { p: Output.Carrier W \where \parent.AtParameter[a := p].RegularAtZero }] a
+      (At[a := a].regular fixed (\bysub(Output.Carrier W, { p: Output.Carrier W \where Translations.holds p }, a)))
+  };

@@ -1,0 +1,14 @@
+\structure Result[radius: Real.Real, K: \Pow M.Point]: \Set := {
+  map: Functions.Smooth,
+  neighborhood: \Pow M.Point,
+  neighborhoodOpen: Space.IsOpenIn M.space neighborhood,
+  contains: Space.Subset K neighborhood,
+  agrees: \forall (x: M.Point) -> Space.Member neighborhood x -> map x = f x,
+  close: \forall (x: M.Point) -> R.Lt (Distance.distance (f x) (map x)) radius,
+};
+\module Relative(K, U: \Pow M.Point, closed: Space.IsClosedIn M.space K, open: Space.IsOpenIn M.space U, inside: Space.Subset K U);
+\import \parent.Empty[] \as Empty;
+\definition exists[compact: Space.IsCompact M.space][radius: Real.Real][positive: R.Lt Real.zero radius]:
+  \exists Result[radius, Space.Empty] :=
+  Relative[K := Space.Empty, U := Space.Empty, closed := Empty.closed, open := Empty.open, inside := Empty.included]
+    .exists compact (Empty.smooth f) radius positive;

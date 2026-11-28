@@ -1,0 +1,36 @@
+\import Spaces.Subspace[V := V, space := source] \as Subspaces;
+\definition kernel: Subspaces.Subspace := Subspaces.Kernel[W := W, target := target].kernel D;
+\definition Surjective: \Prop := \forall (w: W) -> \exists ( v: V \where D.apply v = w );
+\import Spaces.Quotient[V := V, space := source] \as SourceQuotients;
+\import SourceQuotients.Of[S := kernel] \as SourceNormal;
+\definition SourceNormalCarrier: \Set := SourceNormal.Carrier;
+\import Spaces.Linear[V := SourceNormal.Carrier, W := W, source := SourceNormal.vectorSpace,
+  target := target] \as ComparisonMaps;
+\import module_theory.Module[].Over[R := Real.Real, ring := Spaces.ring]
+  .Of[V := V, space := source].Submodule[].Quotient[S := SourceQuotients.asSubmodule kernel] \as Quotient;
+\import SourceNormal.Universal[U := W, target := target] \as Descent;
+\definition vanishes: Descent.Vanishes D := \fun (v: V)(inKernel: _) => inKernel;
+\definition normalComparison: ComparisonMaps.Map := Descent.map D vanishes;
+\definition onClass: \forall (v: V) -> normalComparison.apply (SourceNormal.class v) = D.apply v :=
+  \fun (v: V) => Descent.onClass D vanishes v;
+
+\definition injective: \forall (q, r: SourceNormal.Carrier) -> normalComparison.apply q = normalComparison.apply r -> q = r :=
+  ComparisonMaps.injectiveOfZeroKernel normalComparison
+    (Quotient.induction
+      (\fun (q: SourceNormal.Carrier) => (normalComparison.apply q = target.zero -> q = SourceNormal.vectorSpace.zero))
+      (\fun (v: V)(zero: normalComparison.apply (SourceNormal.class v) = target.zero) =>
+        SourceNormal.classZero v (trans!{W} _ _ _ (sym!{W} _ _ (onClass v)) zero)));
+
+\definition surjective: Surjective -> \forall (q: W) -> \exists ( r: SourceNormal.Carrier \where normalComparison.apply r = q ) :=
+  \fun (transverse: Surjective)(q: W) => \block {
+    \takefrom v: \Cast[V] ({ v: V \where D.apply v = q }) \by transverse q \then
+    \return Logic.existsIntro[SourceNormal.Carrier, { r: SourceNormal.Carrier \where normalComparison.apply r = q }]
+      (SourceNormal.class v) (trans!{W} _ _ _ (onClass v)
+        (\bysub(V, { v: V \where D.apply v = q }, v)))
+  };
+
+\import Spaces.Isomorphism[V := SourceNormal.Carrier, W := W, source := SourceNormal.vectorSpace,
+  target := target] \as Comparisons;
+\definition Comparison: \Set := Comparisons.Isomorphism;
+\definition normalIsomorphism[transverse: Surjective]: Comparison :=
+  Comparisons.OfBijective[f := normalComparison].isomorphism injective (surjective transverse);
