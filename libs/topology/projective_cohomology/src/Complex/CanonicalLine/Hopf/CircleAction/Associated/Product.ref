@@ -35,3 +35,7 @@
     (\bysub(Sphere, { w: Sphere \where tautological w (coefficient w p) = p }, v))
 };
 \module Orbit;
+\module Nearby(v: Sphere);
+\module LocalQuotient;
+\module DualCoordinates;
+\module AssociatedLine;

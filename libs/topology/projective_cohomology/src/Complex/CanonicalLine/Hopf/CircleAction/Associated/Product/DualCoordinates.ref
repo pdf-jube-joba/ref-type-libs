@@ -1,0 +1,54 @@
+\import \root.Complex[dimension := dimension].CanonicalLine[].Dual[] \as Dual;
+\import Bundles.Family[X := Space, F := Dual.Fiber] \as DualFamily;
+\definition dual[v: Sphere][a: Numbers.Complex]: DualFamily.Point :=
+  DualFamily.include (projection v) ((Dual.bundle.space (projection v)).smul a (Dual.At[x := projection v].represent (toBundle v).vector));
+\import std.Logic[].Equality[].Transport[A := Space] \as Transport;
+\definition dualComparison[v: Sphere][a: Numbers.Complex]: Dual.Riesz[].forward (tautological v (C.conj a)) = dual v a :=
+  DualFamily.ext (Dual.Riesz[].forward (tautological v (C.conj a))) (dual v a) (\refl(projection v))
+    (eq_reason_in!{{Dual.Fiber (projection v)} _
+      "=" _ "by" { Transport.castRefl Dual.Fiber (projection v) (Dual.Riesz[].forward (tautological v (C.conj a))).vector }
+      "=" _ "by" { Dual.At[x := projection v].conjugateLinear (C.conj a) (toBundle v).vector }
+      "=" _ "by" { congr!{Numbers.Complex {Dual.Fiber (projection v)}}
+        (\fun (b: Numbers.Complex) => (Dual.bundle.space (projection v)).smul b (Dual.At[x := projection v].represent (toBundle v).vector)) _ _
+        (ComplexLaws.conjConj a) }
+    });
+\definition conjugateCharacter[z: Circle.Carrier][a: Numbers.Complex]:
+  C.conj (C.mul z a) = C.mul (Circle.inverse z) (C.conj a) := ComplexLaws.conjMul z a;
+\definition dualAction[z: Circle.Carrier][v: Sphere][a: Numbers.Complex]: dual (action z v) (C.mul z a) = dual v a :=
+  eq_reason_in!{{DualFamily.Point} _
+    "=" _ "by" { sym!{{DualFamily.Point}} _ _ (dualComparison (action z v) (C.mul z a)) }
+    "=" _ "by" { congr!{Numbers.Complex {DualFamily.Point}} (\fun (b: Numbers.Complex) => Dual.Riesz[].forward (tautological (action z v) b)) _ _ (conjugateCharacter z a) }
+    "=" _ "by" { congr!{{Family.Point} {DualFamily.Point}} Dual.Riesz[].forward _ _ (tautologicalAction z v (C.conj a)) }
+    "=" _ "by" { dualComparison v a }
+  };
+\definition evaluateDual[p: Carrier]: DualFamily.Point := dual (frame p) (scalar p);
+\import std.Logic[].Proposition[] \as Logic;
+\import hermitian_frames.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field,
+  scalar := Hermitian.Complex[].scalar, topological := Hermitian.Complex[].topological].Functions[X := Carrier] \as Functions;
+\definition conjugate[p: Carrier]: Carrier := lift (frame p) (C.conj (scalar p));
+\definition conjugateContinuous: topology.Continuity[A := Carrier, B := Carrier].Continuous topology topology conjugate :=
+  Parameters.Universal[X := Carrier].pairContinuous topology sphereTopology Hermitian.Complex[].topological.space
+    frame (\fun (p: Carrier) => C.conj (scalar p)) frameContinuous (Functions.conjugation topology scalar scalarContinuous);
+\definition conjugateTwice[p: Carrier]: conjugate (conjugate p) = p :=
+  Pair.Prop[A := Sphere, B := Numbers.Complex].ext (conjugate (conjugate p)) p (\refl(frame p)) (ComplexLaws.conjConj (scalar p));
+\definition comparison[p: Carrier]: Dual.Riesz[].forward (evaluate (conjugate p)) = evaluateDual p := dualComparison (frame p) (scalar p);
+\definition comparisonBack[p: Carrier]: evaluateDual (conjugate p) = Dual.Riesz[].forward (evaluate p) :=
+  trans!{{DualFamily.Point}} _ _ _ (sym!{{DualFamily.Point}} _ _ (comparison (conjugate p)))
+    (congr!{Carrier {DualFamily.Point}} (\fun (q: Carrier) => Dual.Riesz[].forward (evaluate q)) _ _ (conjugateTwice p));
+\definition regular: topology.Continuity[A := Carrier, B := DualFamily.Point].Continuous topology Dual.bundle.totalSpace evaluateDual :=
+  \idelim (\fun (p: Carrier) => Dual.Riesz[].forward (evaluate (conjugate p))) = evaluateDual \with f: (Carrier -> DualFamily.Point) =>
+    topology.Continuity[A := Carrier, B := DualFamily.Point].Continuous topology Dual.bundle.totalSpace f \by {
+      base: topology.Composition[A := Carrier, B := Family.Point, C := DualFamily.Point].composeContinuous
+        topology lineBundle.totalSpace Dual.bundle.totalSpace (\fun (p: Carrier) => evaluate (conjugate p)) Dual.Riesz[].forward
+        (topology.Composition[A := Carrier, B := Carrier, C := Family.Point].composeContinuous topology topology lineBundle.totalSpace
+          conjugate evaluate conjugateContinuous continuous) Dual.Riesz[].continuous,
+      equality: \axiom:funext((\fun (p: Carrier) => Dual.Riesz[].forward (evaluate (conjugate p))), evaluateDual, comparison)
+    };
+\definition onto[p: DualFamily.Point]: \exists (q: Carrier \where evaluateDual q = p) := \block {
+  \takefrom q: \Cast[Carrier] ({ q: Carrier \where evaluate q = Dual.Riesz[].backward p }) \by surjective (Dual.Riesz[].backward p) \then
+  \return Logic.existsIntro[Carrier, { q: Carrier \where evaluateDual q = p }] (conjugate q)
+    (trans!{{DualFamily.Point}} _ _ _ (comparisonBack q)
+      (trans!{{DualFamily.Point}} _ _ _ (congr!{{Family.Point} {DualFamily.Point}} Dual.Riesz[].forward _ _
+        (\bysub(Carrier, { q: Carrier \where evaluate q = Dual.Riesz[].backward p }, q))) (Dual.Riesz[].rightInverse p)))
+};
+\module Orbits;

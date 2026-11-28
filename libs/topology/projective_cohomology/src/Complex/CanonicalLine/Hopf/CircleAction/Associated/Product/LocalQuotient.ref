@@ -1,0 +1,43 @@
+\import \root.Complex[dimension := dimension].CanonicalLine[].Hopf[] \as HopfBundle;
+\import topological_constructions.Quotient[A := Carrier, B := Family.Point] \as Quotients;
+\import std.Logic[].Proposition[] \as Logic;
+\definition quotientTopology: topology.Topology[Carrier := Family.Point].Topology := Quotients.topology topology evaluate;
+\definition over[v: Sphere]: \Pow Family.Point := \parent.Nearby[v := v].Frame[].LocalInverse[].region;
+\definition open[v: Sphere]: topology.Topology[Carrier := Family.Point].IsOpenIn lineBundle.totalSpace (over v) :=
+  \parent.Nearby[v := v].Frame[].LocalInverse[].open;
+\definition covered[p: Family.Point]: \exists (v: Sphere \where \In[Family.Point] (over v) p) := \block {
+  \takefrom v: \Cast[Sphere] ({ v: Sphere \where projection v = p.base }) \by HopfBundle.surjective p.base \then
+  \let same: projection v = p.base := \bysub(Sphere, { v: Sphere \where projection v = p.base }, v) \then
+  \return Logic.existsIntro[Sphere, { w: Sphere \where \In[Family.Point] (over w) p }] v
+    (\idelim projection v = p.base \with x: Space => \In[Space] (\parent.Nearby[v := v].domain) x \by {
+      base: \parent.Nearby[v := v].member, equality: same
+    })
+};
+\module On(v: Sphere) {
+  \import \parent.\parent.Nearby[v := v].Frame[].LocalInverse[] \as Section;
+  \definition inclusion[p: Section.Total]: Family.Point := p;
+  \definition evaluated[p: Section.Total]: Family.Point := evaluate (Section.inverse p);
+  \definition continuous: topology.Continuity[A := Section.Total, B := Family.Point].Continuous Section.totalTopology quotientTopology inclusion :=
+    \idelim evaluated = inclusion \with f: (Section.Total -> Family.Point) =>
+      topology.Continuity[A := Section.Total, B := Family.Point].Continuous Section.totalTopology quotientTopology f \by {
+        base: topology.Composition[A := Section.Total, B := Carrier, C := Family.Point].composeContinuous
+          Section.totalTopology topology quotientTopology Section.inverse evaluate Section.inverseContinuous (Quotients.projectionContinuous topology evaluate),
+        equality: \axiom:funext(evaluated, inclusion, Section.inverseLaw)
+      };
+}
+\import topology.Continuity[A := Family.Point, B := Family.Point].Covered[I := Sphere, domains := over] \as Cover;
+\definition identity: topology.Continuity[A := Family.Point, B := Family.Point].Continuous lineBundle.totalSpace quotientTopology (\fun (p: Family.Point) => p) :=
+  Cover.continuous lineBundle.totalSpace quotientTopology (\fun (p: Family.Point) => p) open covered (\fun (v: Sphere) => On[v := v].continuous);
+\import topology.Maps[A := Family.Point, B := Family.Point] \as End;
+\definition unchanged[U: \Pow Family.Point]: End.Preimage (\fun (p: Family.Point) => p) U = U :=
+  \axiom:setext((End.Preimage (\fun (p: Family.Point) => p) U), U,
+    (\fun (p: Family.Point)(member: \In[Family.Point] U p) => member), (\fun (p: Family.Point)(member: \In[Family.Point] U p) => member));
+\definition quotient: Quotients.IsQuotientMap[topology, lineBundle.totalSpace, evaluate] :=
+  Quotients.IsQuotientMap[topology, lineBundle.totalSpace, evaluate] {
+    onto := surjective, continuous := continuous,
+    reflectsOpen := \fun (U: \Pow Family.Point)(h: _) =>
+      \idelim End.Preimage (\fun (p: Family.Point) => p) U = U \with V: (\Pow Family.Point) =>
+        topology.Topology[Carrier := Family.Point].IsOpenIn lineBundle.totalSpace V \by {
+          base: identity U h, equality: unchanged U
+        }
+  };

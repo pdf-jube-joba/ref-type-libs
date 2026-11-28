@@ -33,3 +33,4 @@ bott_product = { path = "../bott_product" }
 commutative_algebra = { path = "../../algebra/commutative_algebra" }
 singular_cap = { path = "../singular/cap" }
 sphere_maps = { path = "../spheres" }
+metric_spaces = { path = "../metric" }

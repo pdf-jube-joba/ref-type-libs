@@ -1,0 +1,38 @@
+\import topology.Topology[Carrier := Space].Subspace[S := domain] \as Domain;
+\definition Base: \Set := Domain.CarrierSet;
+\definition baseTopology: topology.Topology[Carrier := Base].Topology := Domain.topology lineBundle.baseSpace;
+\definition baseNorm[x: Base]: R.Real := norm x;
+\definition baseNormContinuous: metric_spaces.RealFunctions[A := Base].Continuous baseTopology baseNorm :=
+  topology.Continuity[A := Space, B := R.Real].Restriction[S := domain].restrictContinuous lineBundle.baseSpace RealLine.topology norm normContinuous;
+\definition positive[x: Base]: D.Lt R.zero (baseNorm x) := \bysub(Space, domain, x);
+\definition reciprocal[x: Base]: R.Real := Laws.fieldInv (baseNorm x);
+\definition reciprocalContinuous: metric_spaces.RealFunctions[A := Base].Continuous baseTopology reciprocal :=
+  metric_spaces.RealFunctions[A := Base].Reciprocal[].continuousPositive baseTopology baseNorm baseNormContinuous positive;
+\definition scalar[x: Base]: Numbers.Complex := Hermitian.Complex[].scalar.embed (reciprocal x);
+\import hermitian_frames.Hermitian[].Over[K := Numbers.Complex, field := Numbers.Algebra[].field,
+  scalar := Hermitian.Complex[].scalar, topological := Hermitian.Complex[].topological].Functions[X := Base] \as Functions;
+\definition scalarContinuous: topology.Continuity[A := Base, B := Numbers.Complex].Continuous baseTopology Hermitian.Complex[].topological.space scalar :=
+  Functions.embedding baseTopology reciprocal reciprocalContinuous;
+\definition restricted[x: Base]: E.Vector := coordinates x;
+\definition component[i: Fin.Fin ambient]: topology.Continuity[A := Base, B := Numbers.Complex].Continuous
+  baseTopology Hermitian.Complex[].topological.space (\fun (x: Base) => restricted x i) :=
+  topology.Continuity[A := Space, B := Numbers.Complex].Restriction[S := domain].restrictContinuous
+    lineBundle.baseSpace Hermitian.Complex[].topological.space (\fun (x: Space) => coordinates x i) (Model.regular v i);
+\definition spherePoint[x: Base]: Disk.SphereBundle := Disk.normalize (point x) (positive x);
+\import Ambient.Families[X := Base] \as Coordinates;
+\definition vectorContinuous: topology.Continuity[A := Base, B := E.Vector].Continuous baseTopology (Bundles.coordinateTopology ambient) (\fun (x: Base) => (spherePoint x).vector) :=
+  topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].Universal[A := Base].continuous
+    baseTopology Hermitian.Complex[].topological.space (\fun (x: Base) => (spherePoint x).vector)
+    (Coordinates.scale baseTopology scalar restricted scalarContinuous component);
+\definition normalizedContinuous: topology.Continuity[A := Base, B := Family.Point].Continuous baseTopology lineBundle.totalSpace spherePoint :=
+  Universal.Universal[Y := Base, source := baseTopology].continuous spherePoint
+    (topology.Continuity[A := Base, B := Space].Corestriction[S := domain].inclusionContinuous lineBundle.baseSpace) vectorContinuous;
+\definition sphereContinuous: topology.Continuity[A := Base, B := Disk.SphereBundle].Continuous baseTopology Disk.sphereTopology spherePoint :=
+  topology.Continuity[A := Base, B := Family.Point].Corestriction[S := Disk.UnitSphere].corestrictContinuous
+    baseTopology lineBundle.totalSpace spherePoint normalizedContinuous;
+\definition vector[x: Base]: Sphere := fromBundle (spherePoint x);
+\definition continuous: topology.Continuity[A := Base, B := Sphere].Continuous baseTopology sphereTopology vector :=
+  topology.Composition[A := Base, B := Disk.SphereBundle, C := Sphere].composeContinuous
+    baseTopology Disk.sphereTopology sphereTopology spherePoint fromBundle sphereContinuous backwardContinuous;
+\definition projects[x: Base]: projection (vector x) = x := recoveredBase (spherePoint x);
+\module LocalInverse;

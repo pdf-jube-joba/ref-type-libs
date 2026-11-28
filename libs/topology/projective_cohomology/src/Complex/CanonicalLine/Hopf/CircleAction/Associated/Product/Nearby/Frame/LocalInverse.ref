@@ -1,0 +1,38 @@
+\definition region: \Pow Family.Point := { p: Family.Point \where \In[Space] domain p.base };
+\import topology.Topology[Carrier := Family.Point].Subspace[S := region] \as Local;
+\definition Total: \Set := Local.CarrierSet;
+\definition totalTopology: topology.Topology[Carrier := Total].Topology := Local.topology lineBundle.totalSpace;
+\definition base[p: Total]: Base := \into[Space](p.base, domain) \by { \bysub(Family.Point, region, p) };
+\definition baseContinuous: topology.Continuity[A := Total, B := Base].Continuous totalTopology baseTopology base :=
+  topology.Continuity[A := Total, B := Space].Corestriction[S := domain].corestrictContinuous totalTopology lineBundle.baseSpace base
+    (topology.Continuity[A := Family.Point, B := Space].Restriction[S := region].restrictContinuous
+      lineBundle.totalSpace lineBundle.baseSpace Family.projection Universal.projectionContinuous);
+\definition frame[p: Total]: Sphere := vector (base p);
+\definition frameContinuous: topology.Continuity[A := Total, B := Sphere].Continuous totalTopology sphereTopology frame :=
+  topology.Composition[A := Total, B := Base, C := Sphere].composeContinuous totalTopology baseTopology sphereTopology base vector baseContinuous continuous;
+\definition ambientFrame[p: Total]: E.Vector := frame p;
+\definition ambientFrameContinuous: topology.Continuity[A := Total, B := E.Vector].Continuous totalTopology (Bundles.coordinateTopology ambient) ambientFrame :=
+  topology.Composition[A := Total, B := Sphere, C := E.Vector].composeContinuous
+    totalTopology sphereTopology (Bundles.coordinateTopology ambient) frame (\fun (v: Sphere) => v) frameContinuous
+    (topology.Continuity[A := Sphere, B := E.Vector].Corestriction[S := UnitVectors].inclusionContinuous (Bundles.coordinateTopology ambient));
+\definition ambientVector[p: Total]: E.Vector := p.vector;
+\definition ambientVectorContinuous: topology.Continuity[A := Total, B := E.Vector].Continuous totalTopology (Bundles.coordinateTopology ambient) ambientVector :=
+  topology.Continuity[A := Family.Point, B := E.Vector].Restriction[S := region].restrictContinuous
+    lineBundle.totalSpace (Bundles.coordinateTopology ambient) (\fun (p: Family.Point) => p.vector) Universal.vectorContinuous;
+\import Ambient.Families[X := Total] \as Coordinates;
+\definition regular[f: Total -> E.Vector][proof: topology.Continuity[A := Total, B := E.Vector].Continuous totalTopology (Bundles.coordinateTopology ambient) f]:
+  Coordinates.Continuous totalTopology f :=
+  \fun (i: Fin.Fin ambient) => topology.Composition[A := Total, B := E.Vector, C := Numbers.Complex].composeContinuous
+    totalTopology (Bundles.coordinateTopology ambient) Hermitian.Complex[].topological.space f (\fun (v: E.Vector) => v i) proof
+    (topological_algebra.Coordinates[K := Numbers.Complex, I := Fin.Fin ambient].evaluationContinuous Hermitian.Complex[].topological.space i);
+\definition coordinate[p: Total]: Numbers.Complex := coefficient (frame p) p;
+\definition coordinateContinuous: topology.Continuity[A := Total, B := Numbers.Complex].Continuous totalTopology Hermitian.Complex[].topological.space coordinate :=
+  Coordinates.dotContinuous totalTopology ambientFrame ambientVector (regular ambientFrame ambientFrameContinuous) (regular ambientVector ambientVectorContinuous);
+\definition inverse[p: Total]: Carrier := lift (frame p) (coordinate p);
+\definition inverseContinuous: topology.Continuity[A := Total, B := Carrier].Continuous totalTopology topology inverse :=
+  Parameters.Universal[X := Total].pairContinuous totalTopology sphereTopology Hermitian.Complex[].topological.space frame coordinate frameContinuous coordinateContinuous;
+\definition inverseLaw[p: Total]: evaluate (inverse p) = p := Family.ext _ _ (projects (base p))
+  (trans!{{E.Vector}} _ _ _ (castVector _ _ (projects (base p)) (value (frame p) (coordinate p)))
+    (reconstructValue (frame p) p (projects (base p))));
+\definition open: topology.Topology[Carrier := Family.Point].IsOpenIn lineBundle.totalSpace region :=
+  Universal.projectionContinuous domain domainOpen;
