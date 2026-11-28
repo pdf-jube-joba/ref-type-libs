@@ -1,0 +1,27 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import std.Data[].FinSet[] \as Fin;
+\import real.Analysis[] \as Real;
+\import calculus.Blocks[n := d, m := r] \as Blocks;
+\import Fin.Sum[m := d, n := r] \as Indices;
+\import Indices.Tuples[A := Real.Real] \as Tuples;
+\import inverse_implicit.Product[n := d, m := r] \as Linear;
+\import boundary_manifolds.Model[n := d] \as FaceSpace;
+\import boundary_manifolds.Model[n := r] \as NormalSpace;
+\import boundary_manifolds.Model[n := Nat.add r d] \as AmbientSpace;
+\import FaceModel.Chart[M := F.Point, space := F.space] \as FaceCharts;
+\import AmbientModel.Chart[M := M.Point, space := M.space] \as AmbientCharts;
+\import calculus.Vector[n := d, m := Nat.add r d] \as Vectors;
+\definition apply[x: F.Point]: M.Point := embedding.apply x;
+\module At(x: F.Point);
+\definition tangentialImage[certificate: Faces.IsFace embedding]:
+  \forall (x: F.Point)(v: AmbientTangent.At[x := apply x].Vector) ->
+    AmbientTangent.At[x := apply x].Cones[].Tangential v ->
+    \exists ( u: FaceTangent.At[x := x].Vector \where InclusionDifferential.At[f := embedding, x := x].value.apply u = v ) :=
+  \block {
+    \fun (x: F.Point) \then
+    \takefrom form: Faces.LocalForm[embedding, x] \by certificate x \then
+    \return At[x := x].In[form := form].ontoTangential
+  };

@@ -1,0 +1,91 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Data[].Bool[] \as Bool;
+\import real.Analysis[] \as Real;
+\import Real.Estimates[] \as Estimates;
+\import Real.Distance[] \as Distance;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Order[] \as Order;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import calculus.Real[].Multivariable[n := m].Open[] \as Domains;
+\import topological_algebra.Euclidean[].Dimension[n := m].Norm[] \as Norm;
+\import topological_algebra.Euclidean[].Dimension[n := m].Def[] \as Coordinates;
+\import topological_algebra.Euclidean[].Dimension[n := m].Topology[] \as Topology;
+\import euclidean_measure.BoxVolume[n := m] \as Volume;
+
+\definition box[a: E.Point][r: Real.Real][positive: R.Lt Real.zero r]: E.Box :=
+  E.Box {
+    active := Bool.Bool^::true,
+    left := a,
+    right := \fun (i: Fin.Fin m) => Real.add (Real.mul Real.half r) (a i),
+    ordered := \fun (i: Fin.Fin m) => R.leReplaceLeft _ _ _ (Laws.addZeroLeft (a i))
+      (Laws.addMonotoneRight Real.zero (Real.mul Real.half r) (a i)
+        (Order.leOfLt _ _ (Estimates.halfOfPositive r positive))),
+  };
+
+\definition width: \forall (a: E.Point)(r: Real.Real)(positive: R.Lt Real.zero r)(i: Fin.Fin m) ->
+  R.Lt Real.zero (Real.sub ((box a r positive).right i) ((box a r positive).left i)) :=
+  \fun (a: E.Point)(r: Real.Real)(positive: R.Lt Real.zero r)(i: Fin.Fin m) =>
+    R.ltReplaceRight _ _ _
+      (trans!{Real.Real} _ _ _
+        (sym!{Real.Real} _ _
+          (Laws.subZeroRight (Real.mul Real.half r)))
+        (trans!{Real.Real} _ _ _
+          (sym!{Real.Real} _ _ (E.translatedWidth (Real.mul Real.half r) Real.zero (a i)))
+          (congr!{Real.Real Real.Real} (Real.sub ((box a r positive).right i)) _ _ (Laws.addZeroLeft (a i)))))
+      (Estimates.halfOfPositive r positive);
+
+\definition volumePositive: \forall (a: E.Point)(r: Real.Real)(positive: R.Lt Real.zero r) ->
+  R.Lt Real.zero (E.volume (box a r positive)) :=
+  \fun (a: E.Point)(r: Real.Real)(positive: R.Lt Real.zero r) =>
+    E.Scaling[].productPositive m
+      (\fun (i: Fin.Fin m) => Real.sub ((box a r positive).right i) ((box a r positive).left i))
+      (width a r positive);
+
+\definition insideBall: \forall (a: E.Point)(r: Real.Real)(positive: R.Lt Real.zero r)(x: E.Point) ->
+  Sets.Member (E.points (box a r positive)) x -> R.Lt (Coordinates.pointDistance x a) r :=
+  \fun (a: E.Point)(r: Real.Real)(positive: R.Lt Real.zero r)(x: E.Point)(inside: Sets.Member (E.points (box a r positive)) x) =>
+    R.ltReplaceLeft _ _ _ (Norm.distanceSymmetric a x)
+      (Norm.finiteStrictUpper m (Coordinates.subPoint a x) r positive
+        (\fun (i: Fin.Fin m) =>
+          R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Norm.distanceDifference (a i) (x i)))
+            (Distance.distanceLtOfInterval (a i) (x i) r
+            (R.ltLeTrans _ _ _
+              (Distance.distanceLtLower (a i) (a i) r
+                (R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Distance.distanceSelf (a i))) positive))
+              (inside.right i).left)
+            (R.leLtTrans _ _ _ (inside.right i).right
+              (R.ltReplaceRight _ _ _ (Laws.addComm r (a i))
+                (Laws.ltAddRight (Real.mul Real.half r) r (a i) (Estimates.halfStrict r positive)))))));
+
+\definition nonemptyNotNull: \forall (U: Domains.OpenSet)(a: Domains.Carrier U) -> Logic.Not (Null U.points) := \block {
+  \fun (U: Domains.OpenSet)(a: Domains.Carrier U)(null: Null U.points) \then
+  \takefrom r: \Cast[Real.Real] ({ r: Real.Real \where Domains.BallInside[U.points, a, r] })
+    \by U.open a (\bysub(E.Point, U.points, a)) \then
+  \let ball: Domains.BallInside[U.points, a, r] :=
+    \bysub(Real.Real, { r: Real.Real \where Domains.BallInside[U.points, a, r] }, r) \then
+  \let b: E.Box := box a r ball.positive \then
+  \let nullBox: Null (E.points b) :=
+    included (E.points b) U.points
+      (\fun (x: E.Point)(inside: Sets.Member (E.points b) x) => ball.included x (insideBall a r ball.positive x inside))
+      null \then
+  \let positive: Measure.below (E.outer (E.points b)) Real.zero :=
+    \idelim E.volumeValue b = E.outer (E.points b) \with v: Measure.Value => Measure.below v Real.zero \by {
+      base: volumePositive a r ball.positive, equality: sym!{Measure.Value} _ _ (Volume.boxVolume b) } \then
+  \return R.ltIrrefl Real.zero
+    (\idelim E.outer (E.points b) = Measure.zero \with v: Measure.Value => Measure.below v Real.zero \by {
+      base: positive, equality: nullBox })
+};
+
+\definition avoids: \forall (S: \Pow E.Point) -> Null S -> \forall (U: Domains.OpenSet)(a: Domains.Carrier U) ->
+  \exists ( y: Domains.Carrier U \where Logic.Not (Sets.Member S y) ) :=
+  \fun (S: \Pow E.Point)(null: Null S)(U: Domains.OpenSet)(a: Domains.Carrier U) =>
+    Measure.Sigma[].doubleNegative
+      (\exists ( y: Domains.Carrier U \where Logic.Not (Sets.Member S y) ))
+      (\fun (no: Logic.Not (\exists ( y: Domains.Carrier U \where Logic.Not (Sets.Member S y) ))) =>
+        nonemptyNotNull U a
+          (included U.points S
+            (\fun (y: E.Point)(inside: Sets.Member U.points y) =>
+              Measure.Sigma[].doubleNegative (Sets.Member S y)
+                (\fun (outside: Logic.Not (Sets.Member S y)) =>
+                  no (Logic.existsIntro[Domains.Carrier U, { z: Domains.Carrier U \where Logic.Not (Sets.Member S z) }]
+                    (\into[E.Point](y, U.points) \by { inside }) outside))) null));

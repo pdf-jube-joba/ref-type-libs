@@ -1,0 +1,55 @@
+\import RegularValue.Of[f := f, y := y] \as Fiber;
+\import Fiber.Smooth[regular := regular] \as Smooth;
+\import manifolds.Composition[n := n, m := dimension, l := r].Between[M := Smooth.S, N := M, P := P] \as Composition;
+\import manifolds.DifferentialComposition[n := n, m := dimension, l := r].Between[M := Smooth.S, N := M, P := P].Of[
+  f := Smooth.inclusion, g := projection] \as Chain;
+\import manifolds.SmoothMap[n := n, m := r].Between[M := Smooth.S, N := P] \as MapsOnLevel;
+\definition parameterMap: MapsOnLevel.Map := Composition.compose Smooth.inclusion projection;
+\import \root.Manifold[n := n, m := r].Between[M := Smooth.S, N := P].Of[f := parameterMap] \as Exceptional;
+\definition exceptionalParameters: \Pow P.Point := Exceptional.criticalValues;
+\import \root.Null[m := r] \as Null;
+\definition exceptionalNull: \forall (chart: Exceptional.TargetChart) -> Null.Null Exceptional.InChart[right := chart].criticalCoordinates :=
+  \fun (chart: Exceptional.TargetChart) => Exceptional.criticalNull (\root.Proof[].theorem n r) chart;
+\definition Submersion: \Prop := \forall (x: M.Point) -> ProjectionRegularity.Of[f := projection].Surjective x;
+\import manifolds.Tangent[n := dimension].On[M := M] \as SourceTangent;
+\import manifolds.Tangent[n := m].On[M := T] \as TargetTangent;
+\import manifolds.Tangent[n := r].On[M := P] \as ParameterTangent;
+\import manifolds.Tangent[n := n].On[M := Smooth.S] \as FiberTangent;
+\import manifolds.Differential[n := dimension, m := m].Between[M := M, N := T] \as Derivative;
+\import manifolds.Differential[n := dimension, m := r].Between[M := M, N := P] \as DParameter;
+\import manifolds.Differential[n := n, m := dimension].Between[M := Smooth.S, N := M] \as DInclusion;
+\import manifolds.Differential[n := n, m := r].Between[M := Smooth.S, N := P] \as DOnLevel;
+\module At(x: Fiber.Fiber);
+
+\definition RegularParameter[t: P.Point]: \Prop :=
+  \forall (x: Fiber.Fiber) -> Projections.apply projection x = t -> At[x := x].SliceRegular;
+
+\definition regularParameter: \forall (t: P.Point) -> Exceptional.Regular t -> RegularParameter t :=
+  \fun (t: P.Point)(regularValue: Exceptional.Regular t)(x: Fiber.Fiber)(same: Projections.apply projection x = t) =>
+    At[x := x].toSlice (regularValue x same);
+
+\definition regularValue: Submersion -> \forall (t: P.Point) -> RegularParameter t -> Exceptional.Regular t :=
+  \fun (submersion: Submersion)(t: P.Point)(regularParameter: RegularParameter t)(x: Fiber.Fiber)(same: Projections.apply projection x = t) =>
+    At[x := x].fromSlice submersion (regularParameter x same);
+
+\import topology.Topology[Carrier := P.Point] \as Sets;
+\definition dense: \forall (U: \Pow P.Point) -> Sets.IsOpenIn P.space U ->
+  \forall (a: P.Point) -> Sets.Member U a -> \exists ( t: P.Point \where Logic.And[Sets.Member U t, RegularParameter t] ) :=
+  \fun (U: \Pow P.Point)(open: Sets.IsOpenIn P.space U)(a: P.Point)(contains: Sets.Member U a) => \block {
+    \takefrom t: \Cast[P.Point] ({ t: P.Point \where Logic.And[Sets.Member U t, Exceptional.Regular t] })
+      \by Exceptional.dense (\root.Proof[].theorem n r) U open a contains \then
+    \let law: Logic.And[Sets.Member U t, Exceptional.Regular t] :=
+      \bysub(P.Point, { t: P.Point \where Logic.And[Sets.Member U t, Exceptional.Regular t] }, t) \then
+    \return Logic.existsIntro[P.Point, { t: P.Point \where Logic.And[Sets.Member U t, RegularParameter t] }] t
+      (Logic.And[_, _]::# law.left (regularParameter t law.right))
+  };
+
+\import \root.Values[A := Smooth.S.Point, B := P.Point, f := MapsOnLevel.apply parameterMap, surjective := Exceptional.Surjective] \as ParameterValues;
+
+\definition regularOutside: \forall (t: P.Point) -> Logic.Not (Sets.Member exceptionalParameters t) -> RegularParameter t :=
+  \fun (t: P.Point)(outside: Logic.Not (Sets.Member exceptionalParameters t)) =>
+    regularParameter t (ParameterValues.regular t outside);
+
+\definition outsideOfRegular: Submersion -> \forall (t: P.Point) -> RegularParameter t -> Logic.Not (Sets.Member exceptionalParameters t) :=
+  \fun (submersion: Submersion)(t: P.Point)(regular: RegularParameter t) =>
+    ParameterValues.outside t (regularValue submersion t regular);

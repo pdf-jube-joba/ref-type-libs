@@ -1,0 +1,26 @@
+\use Equality.eq_reason_in;
+\definition leftEndpoint: Real.sub (lower a r) (half r) = Real.sub a r :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { Laws.addAssoc a (Real.neg (half r)) (Real.neg (half r)) }
+    "=" _ "by" { congr!{Real.Real Real.Real} (Real.add a) _ _ (sym!{Real.Real} _ _ (Laws.negAdd (half r) (half r))) }
+    "=" _ "by" { congr!{Real.Real Real.Real} (Real.sub a) _ _ (Estimates.halfTwice r) }
+  };
+\definition rightEndpoint: Real.add (upper a r) (half r) = Real.add a r :=
+  trans!{Real.Real} _ _ _ (Laws.addAssoc a (half r) (half r))
+    (congr!{Real.Real Real.Real} (Real.add a) _ _ (Estimates.halfTwice r));
+\definition centerLeft: Real.add (lower a r) (half r) = a :=
+  Distance.subAddCancel a (half r);
+\definition centerRight: Real.sub (upper a r) (half r) = a :=
+  trans!{Real.Real} _ _ _ (Laws.addAssoc a (half r) (Real.neg (half r)))
+    (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} (Real.add a) _ _ (Laws.addNegRight (half r))) (Laws.addZeroRight a));
+
+\definition cover: \forall (x: Real.Real) -> Interval a r x ->
+  Logic.Or[Interval (lower a r) (half r) x, Interval (upper a r) (half r) x] :=
+  \fun (x: Real.Real)(within: Interval a r x) =>
+    Logic.orElim (R.Le x a) (R.Le a x) (Logic.Or[Interval (lower a r) (half r) x, Interval (upper a r) (half r) x]) (Order.leTotal x a)
+      (\fun (left: R.Le x a) => Logic.Or[_, _]::left (Logic.And[_, _]::#
+        (R.leReplaceLeft (Real.sub a r) (Real.sub (lower a r) (half r)) x (sym!{Real.Real} _ _ leftEndpoint) within.left)
+        (R.leReplaceRight x a (Real.add (lower a r) (half r)) (sym!{Real.Real} _ _ centerLeft) left)))
+      (\fun (right: R.Le a x) => Logic.Or[_, _]::right (Logic.And[_, _]::#
+        (R.leReplaceLeft a (Real.sub (upper a r) (half r)) x (sym!{Real.Real} _ _ centerRight) right)
+        (R.leReplaceRight x (Real.add a r) (Real.add (upper a r) (half r)) (sym!{Real.Real} _ _ rightEndpoint) within.right)));

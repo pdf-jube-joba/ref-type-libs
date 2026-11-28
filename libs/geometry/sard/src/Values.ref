@@ -1,0 +1,21 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import topology.Topology[Carrier := A] \as Source;
+\import topology.Topology[Carrier := B] \as Target;
+\import functional_analysis.Measure[A := B].Sigma[] \as LogicLaws;
+\import topology.Maps[A := A, B := B] \as Maps;
+
+\definition criticalPoints: \Pow A := { x: A \where Logic.Not (surjective x) };
+\definition criticalValues: \Pow B := Maps.Image f criticalPoints;
+\definition Regular[y: B]: \Prop := \forall (x: A) -> f x = y -> surjective x;
+
+\definition outside: \forall (y: B) -> Regular y -> Logic.Not (Target.Member criticalValues y) :=
+  \fun (y: B)(regular: Regular y) =>
+    Maps.imageElim f criticalPoints y Logic.False
+      (\fun (x: A)(critical: Logic.Not (surjective x))(same: f x = y) => critical (regular x same));
+
+\definition regular: \forall (y: B) -> Logic.Not (Target.Member criticalValues y) -> Regular y :=
+  \fun (y: B)(outside: Logic.Not (Target.Member criticalValues y))(x: A)(same: f x = y) =>
+    LogicLaws.doubleNegative (surjective x)
+      (\fun (critical: Logic.Not (surjective x)) =>
+        outside (Logic.existsIntro[A, { t: A \where Logic.And[Source.Member criticalPoints t, f t = y] }]
+          x (Logic.And[_, _]::# critical same)));

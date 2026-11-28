@@ -1,0 +1,44 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as Real;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\definition one: N.Nat^ := N.Nat^::succ N.Nat^::zero;
+\definition index: Fin.Fin one := Fin.zero N.Nat^::zero;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import calculus.Real[].Multivariable[n := one].Open[] \as Line;
+\import calculus.Maps[n := n, m := one] \as Maps;
+\import calculus.Vector[n := n, m := one] \as Linear;
+\import topological_algebra.Euclidean[].Dimension[n := n] \as Domain;
+\import topological_algebra.Euclidean[].Dimension[n := one] \as Output;
+\import Open.Smooth[].Derivative[] \as Partials;
+\import Open.Analysis[] \as Analysis;
+
+\definition constant[x: Real.Real]: Output.Point := \fun (_: Fin.Fin one) => x;
+
+\definition equal: \forall (v, w: Output.Point) -> v index = w index -> v = w :=
+  \fun (v, w: Output.Point)(same: v index = w index) =>
+    \axiom:funext(v, w, Fin.cases N.Nat^::zero (\fun (j: Fin.Fin one) => v j = w j) same
+      (\fun (j: Fin.Fin N.Nat^::zero) => Logic.falseElim _ (Fin.zeroImpossible j (Fin.bound N.Nat^::zero j))));
+
+\definition surjective: \forall (d: Linear.LinearMap)(v: Domain.Point) -> Logic.Not (d.apply v index = Real.zero) ->
+    \forall (y: Output.Point) -> \exists ( w: Domain.Point \where d.apply w = y ) :=
+  \fun (d: Linear.LinearMap)(v: Domain.Point)(nonzero: Logic.Not (d.apply v index = Real.zero))(y: Output.Point) => \block {
+    \let c: Real.Real := Real.mul (y index) (Laws.fieldInv (d.apply v index)) \then
+    \let w: Domain.Point := Domain.Def[].scale c v \then
+    \let value: d.apply w index = y index :=
+      trans!{Real.Real} _ _ _
+        (congr!{Output.Point Real.Real} (\fun (z: Output.Point) => z index) _ _ (d.preservesScale c v))
+        (trans!{Real.Real} _ _ _
+          (Laws.fieldMulAssoc (y index) (Laws.fieldInv (d.apply v index)) (d.apply v index))
+          (trans!{Real.Real} _ _ _
+            (congr!{Real.Real Real.Real} (Real.mul (y index)) _ _ (Laws.fieldInverseNonzero (d.apply v index) nonzero))
+            (Real.Algebra[].mulOneRight (y index)))) \then
+    \return Logic.existsIntro[Domain.Point, { z: Domain.Point \where d.apply z = y }] w (equal (d.apply w) y value)
+  };
+
+\module On(U: Open.OpenSet, h: Partials.Function U);

@@ -1,0 +1,23 @@
+\import calculus.LinearMap[n := Input.dimension, m := p].On[U := U, L := SourceProduct.leftLinear] \as Projection;
+\import inverse_implicit.Product[n := p, m := m].Pair[d := Input.dimension, U := U, f := Projection.map, g := h] \as PairMap;
+\definition map: Maps.Map U Target.whole := PairMap.map;
+\import Total.On[U := U, V := Target.whole, f := map] \as Whole;
+\module At(a: Open.Carrier U);
+\module Slice(c: Parameter.Point);
+
+\definition sectionNull: Smaller.Sard -> \forall (S: \Pow TargetSpace.Point) ->
+  TargetSets.Subset S Whole.criticalValues -> \forall (c: Parameter.Point) ->
+  Null.Null (ProductSections.On[S := S].section c) :=
+  \fun (sard: Smaller.Sard)(S: \Pow TargetSpace.Point)(included: TargetSets.Subset S Whole.criticalValues)
+    (c: Parameter.Point) => Slice[c := c].sectionNull sard S included;
+
+\definition closedCriticalValuesNull: Smaller.Sard -> \forall (S: \Pow TargetSpace.Point) ->
+  TargetSets.Subset S Whole.criticalValues ->
+  TargetSets.IsClosedIn TargetSpace.Topology[].topology S -> TargetNull.Null S :=
+  \fun (sard: Smaller.Sard)(S: \Pow TargetSpace.Point)(included: TargetSets.Subset S Whole.criticalValues)
+    (closed: TargetSets.IsClosedIn TargetSpace.Topology[].topology S) =>
+    ProductSections.closed S closed (sectionNull sard S included);
+
+\definition criticalValuesNull: Smaller.Sard -> TargetNull.Null Whole.criticalValues :=
+  \fun (sard: Smaller.Sard) =>
+    Whole.CompactPatches[].theorem (closedCriticalValuesNull sard);

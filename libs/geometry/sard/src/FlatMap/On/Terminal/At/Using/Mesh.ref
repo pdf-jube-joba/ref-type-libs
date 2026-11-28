@@ -1,0 +1,125 @@
+\definition r: Real.Real := Real.add delta delta;
+\definition deltaNonnegative: R.Le Real.zero delta := Order.leOfLt _ _ positive;
+\definition rNonnegative: R.Le Real.zero r := Laws.addNonnegative delta delta deltaNonnegative deltaNonnegative;
+\definition error: Real.Real := Taylor.On[U := U, a := a, rho := radius, r := r, bound := controls.bound].scale order;
+\definition errorNonnegative: R.Le Real.zero error :=
+  Taylor.On[U := U, a := a, rho := radius, r := r, bound := controls.bound].scaleNonnegative rNonnegative
+    (Order.leOfLt _ _ controlsLaw.positiveBound) order;
+
+\definition scaling: \forall (j: N.Nat^) ->
+  Taylor.On[U := U, a := a, rho := radius, r := r, bound := controls.bound].scale j =
+    Real.mul (Taylor.On[U := U, a := a, rho := radius, r := unit, bound := controls.bound].scale j) (Iterated.power delta j) := \block {
+  \let local: N.Nat^ -> Real.Real := Taylor.On[U := U, a := a, rho := radius, r := r, bound := controls.bound].scale \then
+  \let unitScale: N.Nat^ -> Real.Real := Taylor.On[U := U, a := a, rho := radius, r := unit, bound := controls.bound].scale \then
+  \let radiusEqual: r = Real.mul unit delta :=
+    sym!{Real.Real} _ _ (trans!{Real.Real} _ _ _ (Algebra.mulAddRight Real.one Real.one delta)
+      (congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _ (Laws.fieldMulOneLeft delta) (Laws.fieldMulOneLeft delta))) \then
+  \return \induction (j: N.Nat^) \return local j = Real.mul (unitScale j) (Iterated.power delta j) \with {
+    | zero: sym!{Real.Real} _ _ (Algebra.mulOneRight controls.bound)
+    | succ: \fun (j: N.Nat^)(previous: _) => eq_reason_in!{Real.Real _
+      "=" _ "by" { congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _
+        (congr!{Real.Real Real.Real} (Real.mul Taylor.count) _ _ previous) radiusEqual }
+      "=" _ "by" { congr!{Real.Real Real.Real} (\fun (u: Real.Real) => Real.mul u (Real.mul unit delta)) _ _
+        (sym!{Real.Real} _ _ (Laws.fieldMulAssoc Taylor.count (unitScale j) (Iterated.power delta j))) }
+      "=" _ "by" { Algebra.mulFour _ _ _ _ }
+      "=" _ "by" { congr!{Real.Real Real.Real} (Real.mul (unitScale (N.Nat^::succ j))) _ _
+        (Laws.fieldMulComm (Iterated.power delta j) delta) }
+    }
+  }
+};
+
+\definition diameter: Real.Real := Real.add error error;
+\definition diameterNonnegative: R.Le Real.zero diameter := Laws.addNonnegative error error errorNonnegative errorNonnegative;
+\definition diameterFormula: diameter = Real.mul (Real.mul rate delta) (Iterated.power delta p) :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _ (scaling order) (scaling order) }
+    "=" _ "by" { sym!{Real.Real} _ _ (Algebra.mulAddRight factor factor (Iterated.power delta order)) }
+    "=" _ "by" { sym!{Real.Real} _ _ (Laws.fieldMulAssoc rate delta (Iterated.power delta p)) }
+  };
+\definition powerNonnegative: R.Le Real.zero (Iterated.power delta p) :=
+  Real.Geometric[q := delta].nonnegative deltaNonnegative p;
+\definition diameterBound: R.Le diameter (Iterated.volume c p delta) :=
+  R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ diameterFormula)
+    (R.leReplace _ _ _ _ (Laws.fieldMulComm (Iterated.power delta p) (Real.mul rate delta))
+      (Laws.fieldMulComm (Iterated.power delta p) c)
+      (Estimates.mulMonotone (Iterated.power delta p) _ _ powerNonnegative
+        (R.leTrans _ _ _ (R.leReplace _ _ _ _ (Laws.fieldMulComm delta rate) (Laws.fieldMulComm delta coefficient)
+          (Estimates.mulMonotone delta rate coefficient deltaNonnegative rateBound)) coefficientBound)));
+\definition diameterUnit: R.Le diameter Real.one :=
+  R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ diameterFormula)
+    (R.leTrans _ _ _
+      (Estimates.mulMonotone (Real.mul rate delta) (Iterated.power delta p) Real.one
+        (Laws.fieldMulNonnegative rate delta rateNonnegative deltaNonnegative)
+        (Real.Geometric[q := delta].bounded deltaNonnegative small p))
+      (R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Algebra.mulOneRight (Real.mul rate delta)))
+        (R.leTrans _ _ _ (R.leReplace _ _ _ _ (Laws.fieldMulComm delta rate) (Laws.fieldMulComm delta coefficient)
+          (Estimates.mulMonotone delta rate coefficient deltaNonnegative rateBound)) unitBound)));
+
+\definition volumeBound: \forall (y: Output.Point) ->
+  R.Le (E.volume (TargetCube.box y error errorNonnegative)) (Iterated.volume c p delta) :=
+  \fun (y: Output.Point) =>
+    R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (TargetCube.volume y error errorNonnegative))
+      (R.leTrans _ _ _
+        (R.leReplaceRight _ _ _ (Algebra.mulOneRight diameter)
+          (Estimates.mulMonotone diameter (Iterated.power diameter m) Real.one diameterNonnegative
+            (Real.Geometric[q := diameter].bounded diameterNonnegative diameterUnit m)))
+        diameterBound);
+
+\definition inCube: \forall (u: Domain.Point)(x, z: Open.Carrier U) ->
+  DomainSets.Member (Bounds.Cube p ambient relevant u delta) x ->
+  DomainSets.Member (Bounds.Cube p ambient relevant u delta) z ->
+  R.Le (Coordinates.pointDistance x z) r :=
+  \fun (u: Domain.Point)(x, z: Open.Carrier U)(inside: _)(anchor: _) =>
+    R.leTrans _ _ _ (Norm.distanceTriangle x u z)
+      (Estimates.addLe _ _ _ _
+        (R.leReplaceLeft _ _ _ (Norm.distanceSymmetric u x)
+          (DomainCube.distance u delta deltaNonnegative x (Logic.And[_, _]::# (\refl(std.Data[].Bool[].Bool^::true)) inside.right)))
+        (DomainCube.distance u delta deltaNonnegative z (Logic.And[_, _]::# (\refl(std.Data[].Bool[].Bool^::true)) anchor.right)));
+
+\definition imageNear: \forall (u: Domain.Point)(x, z: Open.Carrier U) ->
+  DomainSets.Member (Bounds.Cube p ambient relevant u delta) x ->
+  DomainSets.Member (Bounds.Cube p ambient relevant u delta) z ->
+  R.Le (Output.Def[].pointDistance (apply z) (apply x)) error :=
+  \fun (u: Domain.Point)(x, z: Open.Carrier U)(inside: _)(anchor: _) =>
+    Output.Norm[].finiteUpper q (Output.Def[].subPoint (apply z) (apply x)) error errorNonnegative
+      (\fun (j: Fin.Fin q) =>
+        R.leReplaceLeft _ _ _
+          (trans!{Real.Real} _ _ _ (Distance.distanceSymmetric (component j x) (component j z))
+            (sym!{Real.Real} _ _ (Output.Norm[].distanceDifference (component j z) (component j x))))
+          (Taylor.On[U := U, a := z, rho := radius, r := r, bound := controls.bound].estimate
+            (centered z anchor.left.right) close rNonnegative (Order.leOfLt _ _ controlsLaw.positiveBound)
+            p (component j) (anchor.left.left j)
+            (uniform z anchor.left.right r close order (component j) (controlsLaw.law j))
+            x (inCube u x z inside anchor)));
+
+\definition bound: \forall (u: Domain.Point) -> Bounds.Bound (Bounds.Cube p ambient relevant u delta) (Iterated.volume c p delta) :=
+  \fun (u: Domain.Point) => \block {
+    \let S: \Pow (Open.Carrier U) := Bounds.Cube p ambient relevant u delta \then
+    \return Logic.orElim _ _ (Bounds.Bound S (Iterated.volume c p delta))
+      (std.Logic[].Classical[].excludedMiddle (\exists \Cast[Open.Carrier U] S))
+      (\fun (nonempty: \exists \Cast[Open.Carrier U] S) => \block {
+        \takefrom z: \Cast[Open.Carrier U] S \by nonempty \then
+        \let box: E.Box := TargetCube.box (apply z) error errorNonnegative \then
+        \let included: OutputSets.Subset (Images.Image apply S) (E.points box) :=
+          \fun (y: Output.Point) => Images.imageElim apply S y (OutputSets.Member (E.points box) y)
+            (\fun (x: Open.Carrier U)(inside: DomainSets.Member S x)(same: apply x = y) =>
+              \idelim apply x = y \with w: Output.Point => OutputSets.Member (E.points box) w \by {
+                base: TargetCube.member (apply z) error errorNonnegative (apply x)
+                  (imageNear u x z inside (\bysub(Open.Carrier U, S, z))), equality: same }) \then
+        \return \fun (s: Real.Real)(inside: Measure.below (E.outer (Images.Image apply S)) s) =>
+          R.ltLeTrans _ _ _ (E.boxUpper box s (E.monotone (Images.Image apply S) (E.points box) included s inside))
+            (volumeBound (apply z))
+      })
+      (\fun (empty: Logic.Not (\exists \Cast[Open.Carrier U] S)) => \block {
+        \let null: Null.Null (Images.Image apply S) :=
+          Null.included (Images.Image apply S) OutputSets.Empty
+            (\fun (y: Output.Point) => Images.imageElim apply S y Logic.False
+              (\fun (x: Open.Carrier U)(member: DomainSets.Member S x)(_: apply x = y) =>
+                empty (\exact(\into[Open.Carrier U](x, S) \by { member }, \Cast[Open.Carrier U] S)))) Null.empty \then
+        \return \fun (s: Real.Real)(inside: Measure.below (E.outer (Images.Image apply S)) s) =>
+          R.ltLeTrans _ _ _
+            (\idelim E.outer (Images.Image apply S) = Measure.zero \with w: Measure.Value => Measure.below w s \by {
+              base: inside, equality: null })
+            (Laws.fieldMulNonnegative c (Iterated.power delta p) (Order.leOfLt _ _ cPositive) powerNonnegative)
+      })
+  };

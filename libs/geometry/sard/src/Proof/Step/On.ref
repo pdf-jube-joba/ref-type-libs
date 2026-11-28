@@ -1,0 +1,112 @@
+\import Flat.On[U := U, V := V, f := f] \as Jets;
+\import Positive.On[U := U, V := V, f := f] \as Rank;
+\import Euclidean.On[U := U, V := V, f := f] \as Given;
+\import topology.Topology[Carrier := Open.Carrier U] \as Sets;
+\import topology.Maps[A := Open.Carrier U, B := Range.Point] \as Images;
+\import \root.Taylor[n := p] \as Taylor;
+\import Open.Smooth[].Derivative[] \as Partials;
+\import std.Logic[].Classical[] \as Classical;
+
+\definition Layer[i: N.Nat^]: \Pow (Open.Carrier U) := Jets.Layer[k := i].points;
+\definition layers[i: N.Nat^]: \Pow Range.Point := Images.Image Jets.apply (Layer i);
+
+\definition noEntry: \forall (x: Open.Carrier U) -> Logic.Not (\exists ( j: Fin.Fin q \where \exists ( i: Fin.Fin p \where
+  Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero) ) )) ->
+  Jets.Flat one x :=
+  \fun (x: Open.Carrier U)(zero: _)(j: Fin.Fin q)(i: Fin.Fin p) =>
+    Logic.And[_, _]::#
+      (trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ (Given.Entries[].At[a := x].partial i j))
+        (Sigma.doubleNegative _ (\fun (nonzero: Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero)) =>
+          zero (Logic.existsIntro[Fin.Fin q,
+            { j: Fin.Fin q \where \exists ( i: Fin.Fin p \where Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero) ) }] j
+            (Logic.existsIntro[Fin.Fin p, { i: Fin.Fin p \where
+              Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero) }] i nonzero)))))
+      Logic.True::intro;
+
+\definition allFlat: \forall (x: Open.Carrier U) -> Jets.Flat one x ->
+  (\forall (i: N.Nat^) -> Logic.Not (Sets.Member (Layer i) x)) ->
+  \forall (k: N.Nat^) -> Jets.Flat (N.Nat^::succ k) x :=
+  \fun (x: Open.Carrier U)(first: Jets.Flat one x)(noLayer: _) =>
+    \induction (k: N.Nat^) \return Jets.Flat (N.Nat^::succ k) x \with {
+      | zero: first
+      | succ: \fun (k: N.Nat^)(prior: Jets.Flat (N.Nat^::succ k) x) =>
+        Sigma.doubleNegative _ (\fun (fails: Logic.Not (Jets.Flat (N.Nat^::succ (N.Nat^::succ k)) x)) =>
+          noLayer k (Logic.And[_, _]::# prior fails))
+    };
+
+\definition terminalOrLayer: \forall (x: Open.Carrier U) -> Jets.Flat one x ->
+  Logic.Or[Jets.Flat p x, \exists ( k: N.Nat^ \where Sets.Member (Layer k) x )] :=
+  \fun (x: Open.Carrier U)(flat: Jets.Flat one x) =>
+    Logic.orElim (\exists ( k: N.Nat^ \where Sets.Member (Layer k) x ))
+      (Logic.Not (\exists ( k: N.Nat^ \where Sets.Member (Layer k) x )))
+      (Logic.Or[Jets.Flat p x, \exists ( k: N.Nat^ \where Sets.Member (Layer k) x )])
+      (Classical.excludedMiddle (\exists ( k: N.Nat^ \where Sets.Member (Layer k) x )))
+      (\fun (some: \exists ( k: N.Nat^ \where Sets.Member (Layer k) x )) => Logic.Or[_, _]::right some)
+      (\fun (none: Logic.Not (\exists ( k: N.Nat^ \where Sets.Member (Layer k) x ))) => Logic.Or[_, _]::left
+        ((\induction (k: N.Nat^) \return Jets.Flat k x \with {
+          | zero: \fun (j: Fin.Fin q) => Logic.True::intro
+          | succ: \fun (k: N.Nat^)(_: Jets.Flat k x) => allFlat x flat
+            (\fun (i: N.Nat^)(member: Sets.Member (Layer i) x) =>
+              none (Logic.existsIntro[N.Nat^, { k: N.Nat^ \where Sets.Member (Layer k) x }] i member)) k
+        }) p));
+
+\definition terminal: \Pow Range.Point := Images.Image Jets.apply (Jets.Part p);
+\definition lowerImages: \Pow Range.Point := Measure.union layers;
+\definition rankImages: \Pow Range.Point := Images.Image Rank.apply Rank.points;
+\definition cover: \Pow Range.Point := Sigma.pairUnion rankImages (Sigma.pairUnion terminal lowerImages);
+
+\definition imageOfPoint: \forall (S: \Pow (Open.Carrier U))(x: Open.Carrier U)(y: Range.Point) ->
+  Sets.Member S x -> Maps.apply U V f x = y -> RangeSets.Member (Images.Image Jets.apply S) y :=
+  \fun (S: \Pow (Open.Carrier U))(x: Open.Carrier U)(y: Range.Point)(member: Sets.Member S x)(same: Maps.apply U V f x = y) =>
+    Logic.existsIntro[Open.Carrier U, { t: Open.Carrier U \where Logic.And[Sets.Member S t, Maps.apply U V f t = y] }]
+      x (Logic.And[_, _]::# member same);
+
+\definition HasEntry[x: Open.Carrier U]: \Prop :=
+  \exists ( j: Fin.Fin q \where \exists ( i: Fin.Fin p \where
+    Logic.Not ((Given.differential x).apply (Domain.Def[].basis i) j = Real.zero) ) );
+
+\definition layeredImage: \forall (x: Open.Carrier U)(y: Range.Point) -> Maps.apply U V f x = y ->
+  (\exists ( k: N.Nat^ \where Sets.Member (Layer k) x )) -> RangeSets.Member lowerImages y := \block {
+  \fun (x: Open.Carrier U)(y: Range.Point)(same: Maps.apply U V f x = y)
+    (some: \exists ( k: N.Nat^ \where Sets.Member (Layer k) x )) \then
+  \takefrom k: \Cast[N.Nat^] ({ k: N.Nat^ \where Sets.Member (Layer k) x }) \by some \then
+  \return Logic.existsIntro[N.Nat^, { i: N.Nat^ \where RangeSets.Member (layers i) y }]
+    k (imageOfPoint (Layer k) x y (\bysub(N.Nat^, { i: N.Nat^ \where Sets.Member (Layer i) x }, k)) same)
+};
+
+\definition flatImage: \forall (x: Open.Carrier U)(y: Range.Point) -> Maps.apply U V f x = y -> Jets.Flat one x ->
+  RangeSets.Member (Sigma.pairUnion terminal lowerImages) y :=
+  \fun (x: Open.Carrier U)(y: Range.Point)(same: Maps.apply U V f x = y)(first: Jets.Flat one x) =>
+    Logic.orElim (Jets.Flat p x) (\exists ( k: N.Nat^ \where Sets.Member (Layer k) x ))
+      (RangeSets.Member (Sigma.pairUnion terminal lowerImages) y) (terminalOrLayer x first)
+      (\fun (flat: Jets.Flat p x) => Logic.Or[RangeSets.Member terminal y, RangeSets.Member lowerImages y]::left
+        (imageOfPoint (Jets.Part p) x y flat same))
+      (\fun (some: \exists ( k: N.Nat^ \where Sets.Member (Layer k) x )) =>
+        Logic.Or[RangeSets.Member terminal y, RangeSets.Member lowerImages y]::right (layeredImage x y same some));
+
+\definition fromWitness: \forall (x: Open.Carrier U)(y: Range.Point) -> Maps.apply U V f x = y ->
+  Given.CriticalAt x -> RangeSets.Member cover y :=
+  \fun (x: Open.Carrier U)(y: Range.Point)(same: Maps.apply U V f x = y)(critical: Given.CriticalAt x) =>
+    Logic.orElim (HasEntry x) (Logic.Not (HasEntry x)) (RangeSets.Member cover y) (Classical.excludedMiddle (HasEntry x))
+      (\fun (nonzero: HasEntry x) =>
+        Logic.Or[RangeSets.Member rankImages y, RangeSets.Member (Sigma.pairUnion terminal lowerImages) y]::left
+          (imageOfPoint Rank.points x y (Logic.And[_, _]::# critical nonzero) same))
+      (\fun (zero: Logic.Not (HasEntry x)) =>
+        Logic.Or[RangeSets.Member rankImages y, RangeSets.Member (Sigma.pairUnion terminal lowerImages) y]::right
+          (flatImage x y same (noEntry x zero)));
+
+\definition included: RangeSets.Subset Given.criticalValues cover := \block {
+  \fun (y: Range.Point)(member: RangeSets.Member Given.criticalValues y) \then
+  \takefrom x: \Cast[Open.Carrier U] ({ x: Open.Carrier U \where Logic.And[Maps.apply U V f x = y, Given.CriticalAt x] }) \by member \then
+  \let witness: Logic.And[Maps.apply U V f x = y, Given.CriticalAt x] :=
+    \bysub(Open.Carrier U, { x: Open.Carrier U \where Logic.And[Maps.apply U V f x = y, Given.CriticalAt x] }, x) \then
+  \return fromWitness x y witness.left witness.right
+};
+
+\definition criticalNull: SardIn n -> Null.Null Given.criticalValues :=
+  \fun (lower: SardIn n) =>
+    Null.included Given.criticalValues cover included
+      (Null.pair rankImages (Sigma.pairUnion terminal lowerImages)
+        (Rank.theorem (lower m))
+        (Null.pair terminal lowerImages Jets.Terminal[].theorem
+          (Null.union layers (\fun (i: N.Nat^) => Jets.Layer[k := i].theorem (lower q)))));

@@ -1,0 +1,46 @@
+\definition differential[x: Source.Carrier U]: calculus.Vector[n := n, m := m].LinearMap :=
+  Maps.Differential[U := U, V := V, f := f, a := x].value;
+
+\definition SurjectiveAt[x: Source.Carrier U]: \Prop :=
+  \forall (v: Codomain.Point) -> \exists ( u: Domain.Point \where (differential x).apply u = v );
+
+\definition CriticalAt[x: Source.Carrier U]: \Prop := Logic.Not (SurjectiveAt x);
+
+\definition criticalValues: \Pow Codomain.Point :=
+  { y: Codomain.Point \where
+    \exists ( x: Source.Carrier U \where Logic.And[Maps.apply U V f x = y, CriticalAt x] ) };
+
+\definition RegularValue[y: Codomain.Point]: \Prop :=
+  \forall (x: Source.Carrier U) -> Maps.apply U V f x = y -> SurjectiveAt x;
+
+\definition criticalValue: \forall (x: Source.Carrier U) -> CriticalAt x ->
+  Sets.Member criticalValues (Maps.apply U V f x) :=
+  \fun (x: Source.Carrier U)(critical: CriticalAt x) =>
+    Logic.existsIntro[Source.Carrier U,
+      { t: Source.Carrier U \where Logic.And[Maps.apply U V f t = Maps.apply U V f x, CriticalAt t] }]
+      x (Logic.And[_, _]::# (\refl(Maps.apply U V f x)) critical);
+
+\definition regularOfOutside: \forall (y: Codomain.Point) -> Logic.Not (Sets.Member criticalValues y) -> RegularValue y :=
+  \fun (y: Codomain.Point)(outside: Logic.Not (Sets.Member criticalValues y))
+    (x: Source.Carrier U)(same: Maps.apply U V f x = y) =>
+      Sigma.doubleNegative (SurjectiveAt x)
+        (\fun (critical: CriticalAt x) => outside
+          (Logic.existsIntro[Source.Carrier U,
+            { t: Source.Carrier U \where Logic.And[Maps.apply U V f t = y, CriticalAt t] }]
+            x (Logic.And[_, _]::# same critical)));
+
+\definition outsideOfRegular: \forall (y: Codomain.Point) -> RegularValue y -> Logic.Not (Sets.Member criticalValues y) :=
+  \fun (y: Codomain.Point)(regular: RegularValue y)(inside: Sets.Member criticalValues y) => \block {
+    \takefrom x: \Cast[Source.Carrier U]
+      ({ t: Source.Carrier U \where Logic.And[Maps.apply U V f t = y, CriticalAt t] }) \by inside \then
+    \let witness: Logic.And[Maps.apply U V f x = y, CriticalAt x] :=
+      \bysub(Source.Carrier U, { t: Source.Carrier U \where Logic.And[Maps.apply U V f t = y, CriticalAt t] }, x) \then
+    \return witness.right (regular x witness.left)
+  };
+
+\definition criticalPoints: \Pow (Source.Carrier U) :=
+  { x: Source.Carrier U \where CriticalAt x };
+
+\module Closed;
+\module CompactPatches;
+\module Entries;

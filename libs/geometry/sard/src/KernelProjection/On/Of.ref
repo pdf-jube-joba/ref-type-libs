@@ -1,0 +1,37 @@
+\import Spaces.Laws[V := Y, space := first] \as DL;
+\import Spaces.Laws[V := Z, space := second] \as GL;
+\definition Full: \Prop := \forall (y: Y) -> \exists ( x: X \where D.apply x = y );
+\definition FirstOnKernel: \Prop := \forall (y: Y) ->
+  \exists ( x: X \where Logic.And[D.apply x = y, G.apply x = second.zero] );
+\definition SecondOnKernel: \Prop := \forall (z: Z) ->
+  \exists ( x: X \where Logic.And[G.apply x = z, D.apply x = first.zero] );
+
+\definition transfer: Full -> SecondOnKernel -> FirstOnKernel := \block {
+  \fun (full: Full)(onKernel: SecondOnKernel)(y: Y) \then
+  \takefrom x: \Cast[X] ({ x: X \where D.apply x = y }) \by full y \then
+  \takefrom z: \Cast[X] ({ z: X \where Logic.And[G.apply z = G.apply x, D.apply z = first.zero] })
+    \by onKernel (G.apply x) \then
+  \let hz: Logic.And[G.apply z = G.apply x, D.apply z = first.zero] :=
+    \bysub(X, { z: X \where Logic.And[G.apply z = G.apply x, D.apply z = first.zero] }, z) \then
+  \let v: X := domain.add (domain.neg z) x \then
+  \let correctedFirst: first.add (first.neg first.zero) (D.apply x) = D.apply x :=
+    trans!{Y} _ _ _
+      (congr!{Y Y} (\fun (u: Y) => first.add u (D.apply x)) _ _
+        (trans!{Y} _ _ _ (sym!{Y} _ _ (DL.zeroRight (first.neg first.zero))) (DL.inverseLeft first.zero)))
+      (DL.zeroLeft (D.apply x)) \then
+  \let firstLaw: D.apply v = y := eq_reason_in!{Y _
+    "=" _ "by" { D.preservesAdd (domain.neg z) x }
+    "=" _ "by" { congr!{Y Y} (\fun (u: Y) => first.add u (D.apply x)) _ _ (First.Operations[].preservesNeg D z) }
+    "=" _ "by" { congr!{Y Y} (\fun (u: Y) => first.add (first.neg u) (D.apply x)) _ _ hz.right }
+    "=" _ "by" { correctedFirst }
+    "=" y "by" { \bysub(X, { x: X \where D.apply x = y }, x) }
+  } \then
+  \let secondLaw: G.apply v = second.zero := eq_reason_in!{Z _
+    "=" _ "by" { G.preservesAdd (domain.neg z) x }
+    "=" _ "by" { congr!{Z Z} (\fun (u: Z) => second.add u (G.apply x)) _ _ (Second.Operations[].preservesNeg G z) }
+    "=" _ "by" { congr!{Z Z} (\fun (u: Z) => second.add (second.neg u) (G.apply x)) _ _ hz.left }
+    "=" _ "by" { GL.inverseLeft (G.apply x) }
+  } \then
+  \return Logic.existsIntro[X, { u: X \where Logic.And[D.apply u = y, G.apply u = second.zero] }]
+    v (Logic.And[_, _]::# firstLaw secondLaw)
+};

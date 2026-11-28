@@ -1,0 +1,8 @@
+\import Maps.Differential[U := U, V := V, f := f, a := a] \as Derivative;
+\definition partial: \forall (i: Fin.Fin n)(j: Fin.Fin m) ->
+  (differential a).apply (Domain.Def[].basis i) j = Partials.derivative U (Maps.coordinateFunction U V f j) i a :=
+  \fun (i: Fin.Fin n)(j: Fin.Fin m) =>
+    Analysis.Properties[].partialUnique U (Maps.coordinateFunction U V f j) i a _ _
+      (Analysis.Differential[U := U, f := Maps.coordinateFunction U V f j, a := a, d := Derivative.row j].Partial[i := i].law
+        (Derivative.componentLaw j))
+      (Partials.partialLaw U (Maps.coordinateFunction U V f j) i a);

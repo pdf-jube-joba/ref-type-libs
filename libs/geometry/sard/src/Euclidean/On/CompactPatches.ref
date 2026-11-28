@@ -1,0 +1,59 @@
+\import real.Analysis[] \as Real;
+\import Real.Estimates[] \as Estimates;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Order[] \as Order;
+\import euclidean_measure.Euclidean[n := n] \as SourceMeasure;
+\import \root.Null[m := n].Cube[] \as Cube;
+\import euclidean_measure.BoxCompact[n := n] \as Boxes;
+\import Domain.Topology[] \as Ambient;
+\import Domain.Norm[] \as Norm;
+\import Domain.Def[] \as Coordinates;
+\import Source.Topology[].Of[U := U] \as DomainTopology;
+\import topology.Topology[Carrier := Domain.Point] \as AmbientSets;
+\import topology.Topology[Carrier := Source.Carrier U] \as DomainSets;
+\import topology.Maps[A := Source.Carrier U, B := Codomain.Point] \as Images;
+\import topology.Topology[Carrier := Domain.Point].Subspace[S := U.points] \as DomainSubset;
+\import metric_spaces.MetricSpace[Carrier := Domain.Point] \as Metric;
+\import topology.Continuity[A := Source.Carrier U, B := Codomain.Point] \as Continuous;
+\import Continuous.Corestriction[S := V.points] \as IntoTarget;
+\use Equality.sym;
+
+\definition apply[x: Source.Carrier U]: Codomain.Point := Maps.apply U V f x;
+\import \root.Cover[A := Source.Carrier U, m := m, space := DomainTopology.topology, f := apply] \as Cover;
+
+\definition continuous: Continuous.Continuous DomainTopology.topology Codomain.Topology[].topology apply :=
+  \fun (W: \Pow Codomain.Point)(open: Sets.IsOpenIn Codomain.Topology[].topology W) =>
+    Maps.Topology[U := U, V := V].continuous f
+      (topology.Topology[Carrier := Codomain.Point].Subspace[S := V.points].Trace W)
+      (IntoTarget.inclusionContinuous Codomain.Topology[].topology W open);
+
+\definition criticalImage: \forall (y: Codomain.Point) -> Sets.Member criticalValues y ->
+  Sets.Member (Images.Image apply criticalPoints) y :=
+  \fun (y: Codomain.Point)(member: Sets.Member criticalValues y) => \block {
+    \takefrom x: \Cast[Source.Carrier U] ({ x: Source.Carrier U \where Logic.And[Maps.apply U V f x = y, CriticalAt x] }) \by member \then
+    \let law: Logic.And[Maps.apply U V f x = y, CriticalAt x] :=
+      \bysub(Source.Carrier U, { x: Source.Carrier U \where Logic.And[Maps.apply U V f x = y, CriticalAt x] }, x) \then
+    \return Logic.existsIntro[Source.Carrier U, { x: Source.Carrier U \where Logic.And[DomainSets.Member criticalPoints x, apply x = y] }]
+      x (Logic.And[_, _]::# law.right law.left)
+  };
+
+\definition ClosedPartsNull: \Prop := \forall (S: \Pow Codomain.Point) ->
+  Sets.Subset S criticalValues -> Sets.IsClosedIn Codomain.Topology[].topology S -> Null.Null S;
+
+\module At(a: Source.Carrier U, rho: Real.Real, ball: Source.BallInside[U.points, a, rho]);
+
+\definition theorem: ClosedPartsNull -> Null.Null criticalValues := \block {
+  \fun (null: ClosedPartsNull) \then
+  \let local: Cover.LocallyNull criticalPoints :=
+    \fun (a: Source.Carrier U)(_: CriticalAt a) => \block {
+      \takefrom rho: \Cast[Real.Real] ({ r: Real.Real \where Source.BallInside[U.points, a, r] })
+        \by U.open a (\bysub(Domain.Point, U.points, a)) \then
+      \let ball: Source.BallInside[U.points, a, rho] :=
+        \bysub(Real.Real, { r: Real.Real \where Source.BallInside[U.points, a, r] }, rho) \then
+      \return At[a := a, rho := rho, ball := ball].localNull null
+    } \then
+  \return Null.included criticalValues (Images.Image apply criticalPoints) criticalImage
+    (Cover.local
+      (DomainSubset.Properties[].secondCountable Ambient.topology Domain.Countability[].secondCountable)
+      criticalPoints local)
+};

@@ -1,0 +1,37 @@
+\import product_integration.FiniteProduct[A := Left.Point, B := Right.Point,
+  mu := ProductMeasure.leftMeasure i, nu := ProductMeasure.rightMeasure j] \as FiniteProduct;
+\import product_integration.FiniteKernel[A := Left.Point, B := Right.Point,
+  mu := ProductMeasure.leftMeasure i, nu := ProductMeasure.rightMeasure j] \as Kernel;
+\import functional_analysis.Measure[A := Left.Point].Integral[mu := ProductMeasure.leftMeasure i] \as LeftIntegral;
+\import LeftIntegral.Zero[] \as LeftZero;
+\import RightMeasure.Integral[mu := ProductMeasure.rightMeasure j].Zero[] \as RightZero;
+
+\definition value: Measure.Value := FiniteProduct.measure.value preimage;
+
+\definition sectionZero: \forall (x: Left.Point) -> Fiber.Null (section x) ->
+  (ProductMeasure.rightMeasure j).value (section x) = RightMeasure.zero :=
+  \fun (x: Left.Point)(null: Fiber.Null (section x)) =>
+    Fiber.included (RightSets.Intersection (section x) (ProductMeasure.rightSet j)) (section x)
+      (\fun (y: Right.Point)(inside: RightSets.Member (RightSets.Intersection (section x) (ProductMeasure.rightSet j)) y) =>
+        inside.left) null;
+
+\definition zero: Measure.Measurable Sigma.sigma preimage ->
+  (\forall (x: Left.Point) -> Fiber.Null (section x)) ->
+  FiniteProduct.measure.value preimage = Measure.zero := \block {
+  \fun (measurable: Measure.Measurable Sigma.sigma preimage)
+    (sections: \forall (x: Left.Point) -> Fiber.Null (section x)) \then
+  \takefrom w: Kernel.Witness[preimage] \by Kernel.exists preimage measurable \then
+  \let pointwise: \forall (x: Left.Point) -> w.function x = Real.zero :=
+    \fun (x: Left.Point) => Complete.leastUpperBoundUnique RightMeasure.zero (w.function x) Real.zero
+      (\idelim (ProductMeasure.rightMeasure j).value (section x) = RightMeasure.zero
+        \with v: RightMeasure.Value => Complete.LeastUpperBound[v, w.function x] \by {
+          base: w.law x, equality: sectionZero x (sections x) })
+      RightZero.zeroSup \then
+  \let eq: w.function = LeftZero.representative :=
+    \axiom:funext(w.function, LeftZero.representative, pointwise) \then
+  \return trans!{Measure.Value} _ _ _ (FiniteProduct.valueCut preimage w)
+    (congr!{Real.Real Measure.Value} Cuts.cut _ _
+      (trans!{Real.Real} _ _ _
+        (congr!{LeftIntegral.Representatives Real.Real} LeftIntegral.integral _ _ eq)
+        LeftZero.integralZero))
+};

@@ -1,0 +1,11 @@
+\import Product.Submersion[U := U, f := g, a := a] \as Submersion;
+\module Patch(form: Submersion.LocalForm);
+
+\definition localNull: Smaller.Sard -> ScalarMaps.apply U Line.whole g a = value ->
+  Submersion.Surjective ->
+  \exists ( W: \Pow (Open.Carrier U) \where Logic.And[Sets.IsOpenIn Domain.topology W,
+    Logic.And[Sets.Member W a, Null.Null (Images.Image apply (Sets.Intersection points W))]] ) := \block {
+    \fun (sard: Smaller.Sard)(level: ScalarMaps.apply U Line.whole g a = value)(regular: Submersion.Surjective) \then
+    \takefrom form: Submersion.LocalForm \by Submersion.localExistence regular \then
+    \return Patch[form := form].localNull sard level
+  };

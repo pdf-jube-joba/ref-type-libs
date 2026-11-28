@@ -1,0 +1,38 @@
+\import topology.Continuity[A := M.Point, B := N.Point] \as Continuity;
+\definition preimage: \Pow M.Point := Continuity.Preimage (Maps.apply f) right.domain;
+\definition Domain: \Set := \Cast[M.Point] preimage;
+\import Source.Subspace[S := preimage] \as Subspace;
+\definition domainTopology: topology.Topology[Carrier := Domain].Topology := Subspace.topology M.space;
+\definition inTarget[x: Domain]: TargetCharts.LocalPoint right :=
+  \into[N.Point](Maps.apply f x, right.domain) \by { \bysub(M.Point, preimage, x) };
+\definition coordinate[x: Domain]: Output.Point :=
+  TargetCharts.coordinate right (inTarget x);
+\import \root.Cover[A := Domain, m := m, space := domainTopology, f := coordinate] \as Cover;
+\import topology.Topology[Carrier := Domain] \as DomainSets;
+\import topology.Maps[A := Domain, B := Output.Point] \as Images;
+\definition criticalPoints: \Pow Domain := Subspace.Trace Values.criticalPoints;
+\definition criticalCoordinates: \Pow Output.Point := Images.Image coordinate criticalPoints;
+\definition SourceChart: \Set := \Cast[SourceCharts.Chart] M.atlas.charts;
+\module Patch(left: SourceChart);
+
+\definition localNull: Euclidean.Sard -> Cover.LocallyNull criticalPoints := \block {
+  \fun (sard: Euclidean.Sard)(x: Domain)(critical: DomainSets.Member criticalPoints x) \then
+  \takefrom left: \Cast[SourceCharts.Chart]
+    ({ c: SourceCharts.Chart \where Logic.And[\In[SourceCharts.Chart] M.atlas.charts c, SourceCharts.Contains c x] })
+    \by M.atlas.covers x \then
+  \let law: Logic.And[\In[SourceCharts.Chart] M.atlas.charts left, SourceCharts.Contains left x] :=
+    \bysub(SourceCharts.Chart, { c: SourceCharts.Chart \where Logic.And[\In[SourceCharts.Chart] M.atlas.charts c,
+      SourceCharts.Contains c x] }, left) \then
+  \let chosen: SourceChart := \into[SourceCharts.Chart](left, SourceChart) \by { law.left } \then
+  \return Patch[left := chosen].localNull sard x law.right
+};
+
+\definition chartNull: Euclidean.Sard -> Null.Null criticalCoordinates :=
+  \fun (sard: Euclidean.Sard) =>
+    Cover.local (Subspace.Properties[].secondCountable M.space M.secondCountable) criticalPoints (localNull sard);
+
+\module Density;
+
+\definition dense: Euclidean.Sard -> \forall (U: \Pow N.Point) -> Target.IsOpenIn N.space U ->
+  \forall (a: N.Point) -> Target.Member U a -> TargetCharts.Contains right a ->
+  \exists ( y: N.Point \where Logic.And[Target.Member U y, Regular y] ) := Density[].theorem;

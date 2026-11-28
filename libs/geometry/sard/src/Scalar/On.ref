@@ -1,0 +1,18 @@
+\definition apply[x: Open.Carrier U]: Line.Carrier Line.whole :=
+  \into[Output.Point](constant (h x), Line.whole.points) \by { \refl(constant (h x)) };
+\definition smooth: Open.Smooth[].SmoothOn U h :=
+  \bysub(Open.ScalarFunction U, { g: Open.ScalarFunction U \where Open.Smooth[].SmoothOn U g }, h);
+\definition componentSmooth: \forall (i: Fin.Fin one) -> Open.Smooth[].SmoothOn U (\fun (x: Open.Carrier U) => apply x i) :=
+  \fun (i: Fin.Fin one) =>
+    \idelim h = (\fun (x: Open.Carrier U) => apply x i) \with g: Open.ScalarFunction U => Open.Smooth[].SmoothOn U g \by {
+      base: smooth,
+      equality: \axiom:funext((h \of Open.ScalarFunction U), (\fun (x: Open.Carrier U) => apply x i), \fun (x: Open.Carrier U) => \refl(h x))
+    };
+\definition map: Maps.Map U Line.whole :=
+  \into[Maps.Data[U, Line.whole]](Maps.Data[U, Line.whole] { apply := apply },
+    { d: Maps.Data[U, Line.whole] \where Maps.Laws[U, Line.whole, d] }) \by {
+      Maps.Laws[U, Line.whole, Maps.Data[U, Line.whole]::# apply] {
+        smooth := componentSmooth,
+      }
+    };
+\module At(a: Open.Carrier U);

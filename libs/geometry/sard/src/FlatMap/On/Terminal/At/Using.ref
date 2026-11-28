@@ -1,0 +1,125 @@
+\definition controlsLaw: Uniform.LawsOf[All, controls] := Uniform.laws All controls;
+\definition rhoSmall: Real.Real := Distance.min rho controls.radius;
+\definition rhoPositive: R.Lt Real.zero rhoSmall := Product.minPositive rho controls.radius ball.positive controlsLaw.positiveRadius;
+\definition radius: Real.Real := Bounds.half rhoSmall;
+\definition radiusPositive: R.Lt Real.zero radius := Estimates.halfOfPositive rhoSmall rhoPositive;
+\definition radiusNonnegative: R.Le Real.zero radius := Order.leOfLt _ _ radiusPositive;
+\definition region: \Pow (Open.Carrier U) := Subspace.Trace (Metric.Ball Norm.metric a radius);
+\definition relevant: \Pow (Open.Carrier U) := DomainSets.Intersection points region;
+\definition ambient[x: Open.Carrier U]: Domain.Point := x;
+\definition unit: Real.Real := Real.add Real.one Real.one;
+\definition unitNonnegative: R.Le Real.zero unit := Laws.addNonnegative Real.one Real.one Laws.oneNonnegative Laws.oneNonnegative;
+\definition factor: Real.Real := Taylor.On[U := U, a := a, rho := radius, r := unit, bound := controls.bound].scale order;
+\definition rate: Real.Real := Real.add factor factor;
+\definition coefficient: Real.Real := Real.add rate Real.one;
+\definition rateNonnegative: R.Le Real.zero rate :=
+  Laws.addNonnegative factor factor
+    (Taylor.On[U := U, a := a, rho := radius, r := unit, bound := controls.bound].scaleNonnegative unitNonnegative
+      (Order.leOfLt _ _ controlsLaw.positiveBound) order)
+    (Taylor.On[U := U, a := a, rho := radius, r := unit, bound := controls.bound].scaleNonnegative unitNonnegative
+      (Order.leOfLt _ _ controlsLaw.positiveBound) order);
+\definition coefficientPositive: R.Lt Real.zero coefficient :=
+  R.leLtTrans _ _ _ rateNonnegative (Real.SquareRoot[].addPositive rate Real.one Product.onePositive);
+\definition rateBound: R.Le rate coefficient := Distance.leAddOfNonnegative rate Real.one Laws.oneNonnegative;
+
+\definition centered: \forall (z: Open.Carrier U) -> DomainSets.Member region z -> Open.BallInside[U.points, z, radius] :=
+  \fun (z: Open.Carrier U)(inside: DomainSets.Member region z) =>
+    Open.BallInside[U.points, z, radius] {
+      positive := radiusPositive,
+      included := \fun (y: Domain.Point)(near: R.Lt (Coordinates.pointDistance y z) radius) =>
+        ball.included y
+          (R.ltLeTrans _ _ _
+            (R.leLtTrans _ _ _ (Norm.distanceTriangle y z a)
+              (R.ltReplaceRight _ _ _ (Estimates.halfTwice rhoSmall)
+                (Order.ltTrans _ _ _ (Laws.ltAddRight _ _ _ near)
+                  (Laws.ltAddLeft _ _ _ (R.ltReplaceLeft _ _ _ (Norm.distanceSymmetric a z) inside)))))
+            (Distance.minLeft rho controls.radius)),
+    };
+
+\definition uniform: \forall (z: Open.Carrier U) -> DomainSets.Member region z -> \forall (r: Real.Real) -> R.Lt r radius ->
+  \forall (k: N.Nat^)(g: Partials.Function U) -> Uniform.Local k g controls.radius controls.bound ->
+  Taylor.On[U := U, a := z, rho := radius, r := r, bound := controls.bound].HigherBound k g :=
+  \fun (z: Open.Carrier U)(inside: DomainSets.Member region z)(r: Real.Real)(small: R.Lt r radius) =>
+    \induction (k: N.Nat^) \return \forall (g: Partials.Function U) -> Uniform.Local k g controls.radius controls.bound ->
+      Taylor.On[U := U, a := z, rho := radius, r := r, bound := controls.bound].HigherBound k g \with {
+      | zero: \fun (g: Partials.Function U)(bounded: Uniform.Local N.Nat^::zero g controls.radius controls.bound)
+        (x: Open.Carrier U)(near: R.Le (Coordinates.pointDistance x z) r) =>
+          bounded x (R.ltLeTrans _ _ _
+            (R.leLtTrans _ _ _ (Norm.distanceTriangle x z a)
+              (R.ltReplaceRight _ _ _ (Estimates.halfTwice rhoSmall)
+                (Order.ltTrans _ _ _ (Laws.ltAddRight _ _ _ (R.leLtTrans _ _ _ near small))
+                  (Laws.ltAddLeft _ _ _ (R.ltReplaceLeft _ _ _ (Norm.distanceSymmetric a z) inside)))))
+            (Distance.minRight rho controls.radius))
+      | succ: \fun (k: N.Nat^)(previous: _)(g: Partials.Function U)
+        (bounded: Uniform.Local (N.Nat^::succ k) g controls.radius controls.bound)(i: Fin.Fin p) =>
+          previous (Partials.derivative U g i) (bounded i)
+    };
+
+\module Mesh(delta, c: Real.Real, positive: R.Lt Real.zero delta, cPositive: R.Lt Real.zero c,
+  close: R.Lt (Real.add delta delta) radius, small: R.Le delta Real.one,
+  coefficientBound: R.Le (Real.mul coefficient delta) c, unitBound: R.Le (Real.mul coefficient delta) Real.one);
+
+\definition cubeIncludes: DomainSets.Subset relevant (Bounds.Cube p ambient relevant a radius) :=
+  \fun (x: Open.Carrier U)(inside: DomainSets.Member relevant x) =>
+    Logic.And[_, _]::# inside
+      ((DomainCube.member a radius radiusNonnegative x (Order.leOfLt _ _ inside.right)).right);
+
+\definition smallBounds: \forall (epsilon: Real.Real) -> R.Lt Real.zero epsilon -> Bounds.Bound relevant epsilon := \block {
+  \fun (epsilon: Real.Real)(epsilonPositive: R.Lt Real.zero epsilon) \then
+  \let size: Real.Real := Real.add (Iterated.power radius p) Real.one \then
+  \let sizePositive: R.Lt Real.zero size :=
+    R.leLtTrans _ _ _ (Real.Geometric[q := radius].nonnegative radiusNonnegative p)
+      (Real.SquareRoot[].addPositive (Iterated.power radius p) Real.one Product.onePositive) \then
+  \let c: Real.Real := Product.radius size epsilon \then
+  \let cPositive: R.Lt Real.zero c := Product.radiusPositive size epsilon sizePositive epsilonPositive \then
+  \let target: Real.Real := Distance.min c Real.one \then
+  \let targetPositive: R.Lt Real.zero target := Product.minPositive c Real.one cPositive Product.onePositive \then
+  \let t: Real.Real := Product.radius coefficient target \then
+  \let tPositive: R.Lt Real.zero t := Product.radiusPositive coefficient target coefficientPositive targetPositive \then
+  \let bound: Real.Real := Distance.min (Bounds.half radius) (Distance.min t Real.one) \then
+  \let boundPositive: R.Lt Real.zero bound := Product.minPositive _ _ (Estimates.halfOfPositive radius radiusPositive)
+    (Product.minPositive _ _ tPositive Product.onePositive) \then
+  \takefrom k: \Cast[N.Nat^] ({ k: N.Nat^ \where R.Lt (Iterated.mesh k radius) bound }) \by
+    Iterated.arbitrarilySmall radius bound radiusPositive boundPositive \then
+  \let delta: Real.Real := Iterated.mesh k radius \then
+  \let dPositive: R.Lt Real.zero delta := Iterated.meshPositive k radius radiusPositive \then
+  \let meshSmall: R.Lt delta bound := \bysub(N.Nat^, { k: N.Nat^ \where R.Lt (Iterated.mesh k radius) bound }, k) \then
+  \let half: R.Lt delta (Bounds.half radius) := R.ltLeTrans _ _ _ meshSmall (Distance.minLeft _ _) \then
+  \let close: R.Lt (Real.add delta delta) radius :=
+    R.ltReplaceRight _ _ _ (Estimates.halfTwice radius)
+      (Order.ltTrans _ _ _ (Laws.ltAddRight _ _ _ half) (Laws.ltAddLeft _ _ _ half)) \then
+  \let small: R.Le delta Real.one := Order.leOfLt _ _ (R.ltLeTrans _ _ _ meshSmall
+    (R.leTrans _ _ _ (Distance.minRight _ _) (Distance.minRight t Real.one))) \then
+  \let productSmall: R.Lt (Real.mul coefficient delta) target :=
+    Order.ltTrans _ _ _ (Product.mulStrict coefficient delta t coefficientPositive
+      (R.ltLeTrans _ _ _ meshSmall (R.leTrans _ _ _ (Distance.minRight _ _) (Distance.minLeft t Real.one))))
+      (Product.radiusSmall coefficient target coefficientPositive targetPositive) \then
+  \let controlled: R.Le (Real.mul coefficient delta) c :=
+    Order.leOfLt _ _ (R.ltLeTrans _ _ _ productSmall (Distance.minLeft c Real.one)) \then
+  \let atMostOne: R.Le (Real.mul coefficient delta) Real.one :=
+    Order.leOfLt _ _ (R.ltLeTrans _ _ _ productSmall (Distance.minRight c Real.one)) \then
+  \let meshBound: \forall (u: Domain.Point) -> Bounds.Bound (Bounds.Cube p ambient relevant u delta) (Iterated.volume c p delta) :=
+    Mesh[delta := delta, c := c, positive := dPositive, cPositive := cPositive, close := close, small := small,
+      coefficientBound := controlled, unitBound := atMostOne].bound \then
+  \let bounded: Bounds.Bound relevant (Iterated.volume c p radius) :=
+    Bounds.monotone relevant (Bounds.Cube p ambient relevant a radius) (Iterated.volume c p radius)
+      cubeIncludes (Iterated.bound k p ambient relevant radius c meshBound a) \then
+  \let costSmall: R.Lt (Iterated.volume c p radius) epsilon :=
+    R.leLtTrans _ _ _
+      (R.leReplaceRight _ _ _ (Laws.fieldMulComm c size)
+        (Estimates.mulMonotone c (Iterated.power radius p) size (Order.leOfLt _ _ cPositive)
+          (Distance.leAddOfNonnegative (Iterated.power radius p) Real.one Laws.oneNonnegative)))
+      (Product.radiusSmall size epsilon sizePositive epsilonPositive) \then
+  \return \fun (s: Real.Real)(inside: Measure.below (E.outer (Images.Image apply relevant)) s) =>
+    Order.ltTrans _ _ _ (bounded s inside) costSmall
+};
+
+\definition localNull: \exists ( W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+  Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] ) :=
+  Logic.existsIntro[\Pow (Open.Carrier U), { W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+    Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] }]
+    region (Logic.And[_, _]::#
+      (Subspace.traceOpen Domain.Topology[].topology (Metric.Ball Norm.metric a radius) (Metric.Topology[].ballOpenIn Norm.metric a radius))
+      (Logic.And[_, _]::#
+        (R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Norm.distanceSelf a)) radiusPositive)
+        (Iterated.null relevant smallBounds)));

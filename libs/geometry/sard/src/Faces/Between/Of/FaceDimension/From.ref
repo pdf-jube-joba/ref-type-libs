@@ -1,0 +1,2 @@
+\import boundary_manifolds.SmoothMap[n := d, m := n].Between[M := F, N := M] \as Maps;
+\module Restricted(inclusion: Maps.Map);

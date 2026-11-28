@@ -1,0 +1,140 @@
+\import inverse_implicit.Product[n := one, m := n] \as LeftProduct;
+\import calculus.Maps[n := LeftBlocks.dimension, m := G02.dimension] \as InputMaps;
+\import calculus.Maps[n := G02.dimension, m := G02.dimension] \as InnerMaps;
+\import calculus.Maps[n := LeftBlocks.dimension, m := targetDimension] \as Composite;
+\import calculus.Maps[n := targetDimension, m := targetDimension] \as End;
+\import calculus.Maps[n := targetDimension, m := m] \as Tail;
+\import inverse_implicit.Product[n := one, m := m] \as TargetProduct;
+\import calculus.Maps[n := LeftBlocks.dimension, m := m] \as RemainingMaps;
+\definition rectangle: Open.OpenSet := RightBlocks.product form.parameters form.values;
+\definition flipLinear: calculus.Vector[n := LeftBlocks.dimension, m := G02.dimension].LinearMap :=
+  G02.LinearPair[d := LeftBlocks.dimension, left := LeftProduct.rightLinear, right := LeftProduct.leftLinear].map;
+\import calculus.LinearMap[n := LeftBlocks.dimension, m := G02.dimension].On[U := Parameter.whole, L := flipLinear] \as FullFlip;
+\import InputMaps.Preimage[U := Parameter.whole, W := Open.whole, V := rectangle, f := FullFlip.map] \as Flip;
+\definition parameter: Parameter.OpenSet := Flip.domain;
+\import InputMaps.Composition[U := parameter, V := rectangle, f := Flip.map].After[
+  l := G02.dimension, W := form.domain, g := form.coordinates.backward] \as Back;
+\definition back: InputMaps.Map parameter form.domain := Back.compose;
+\import Maps.Restriction[U := form.domain, V := U, W := V] \as Restriction;
+\definition localMap: Maps.Map form.domain V := Restriction.input form.included f;
+\import InputMaps.Composition[U := parameter, V := form.domain, f := back].After[l := targetDimension, W := V, g := localMap] \as Original;
+\definition original: Composite.Map parameter V := Original.compose;
+\import calculus.LinearMap[n := targetDimension, m := targetDimension].On[U := V, L := Swap.map] \as PermutationMap;
+\import Composite.Composition[U := parameter, V := V, f := original].After[
+  l := targetDimension, W := Output.whole, g := PermutationMap.map] \as Reorder;
+\definition reordered: Composite.Map parameter Output.whole := Reorder.compose;
+\import calculus.LinearMap[n := targetDimension, m := m].On[U := Output.whole, L := TargetProduct.rightLinear] \as Projection;
+\definition remainder: RemainingMaps.Map parameter Transverse.whole :=
+  Composite.Composition[U := parameter, V := Output.whole, f := reordered].After[l := m, W := Transverse.whole, g := Projection.map].compose;
+\import Split.On[U := parameter, h := remainder] \as Normal;
+\import \root.Euclidean[n := LeftBlocks.dimension, m := targetDimension].On[U := parameter, V := Output.whole, f := Normal.map] \as NormalValues;
+
+\definition base[x: Parameter.Carrier parameter]: Open.Carrier form.domain := InputMaps.apply parameter form.domain back x;
+\definition originalPoint[x: Parameter.Carrier parameter]: Open.Carrier U := Open.inclusion form.domain U form.included (base x);
+
+\import Fin.Sum[m := one, n := m] \as OutputIndices;
+
+\definition projection: \forall (x: Parameter.Carrier parameter) ->
+  TargetBlocks.left (Composite.apply parameter Output.whole reordered x) = LeftBlocks.left x := \block {
+  \fun (x: Parameter.Carrier parameter) \then
+  \let y: Range.Point := Composite.apply parameter Output.whole reordered x \then
+  \let u: Open.Carrier form.domain := base x \then
+  \let v: Open.Carrier rectangle := InputMaps.apply parameter rectangle Flip.map x \then
+  \let coord: Open.Carrier rectangle := InnerMaps.apply form.domain rectangle form.coordinates.forward u \then
+  \let j0: Fin.Fin targetDimension := OutputIndices.left Scalar.index \then
+  \let indexEqual: j0 = head := \refl(head) \then
+  \let permutedIndex: permutation.forward j0 = j :=
+    trans!{{Fin.Fin targetDimension}} (permutation.forward j0) (permutation.forward head) j
+      (congr!{{Fin.Fin targetDimension} {Fin.Fin targetDimension}} permutation.forward j0 head indexEqual) atHead \then
+  \let pivot: TargetBlocks.left y Scalar.index = apply (originalPoint x) j :=
+    congr!{{Fin.Fin targetDimension} Real.Real} (apply (originalPoint x)) (permutation.forward j0) j permutedIndex \then
+  \let parameterValue: ScalarMaps.apply U Line.whole Component.map (originalPoint x) = LeftBlocks.left x :=
+    trans!{ScalarSpace.Point} _ (RightBlocks.right coord) _
+      (form.projection u)
+      (trans!{ScalarSpace.Point} (RightBlocks.right coord) (RightBlocks.right v) (LeftBlocks.left x)
+        (congr!{Domain.Point ScalarSpace.Point} RightBlocks.right coord v (form.coordinates.rightInverse v))
+        (RightBlocks.rightJoin (LeftBlocks.right x) (LeftBlocks.left x))) \then
+  \let scalar: apply (originalPoint x) j = LeftBlocks.left x Scalar.index :=
+    congr!{ScalarSpace.Point Real.Real} (\fun (w: ScalarSpace.Point) => w Scalar.index) _ _ parameterValue \then
+  \return Scalar.equal (TargetBlocks.left y) (LeftBlocks.left x)
+    (trans!{Real.Real} (TargetBlocks.left y Scalar.index) (apply (originalPoint x) j) (LeftBlocks.left x Scalar.index)
+      pivot scalar)
+};
+
+\definition agreement: \forall (x: Parameter.Carrier parameter) ->
+  Composite.apply parameter Output.whole reordered x = Composite.apply parameter Output.whole Normal.map x :=
+  \fun (x: Parameter.Carrier parameter) =>
+    trans!{Range.Point} _ _ _
+      (sym!{Range.Point} _ _ (TargetBlocks.recover (Composite.apply parameter Output.whole reordered x)))
+      (congr!{ScalarSpace.Point Range.Point} (\fun (v: ScalarSpace.Point) =>
+        TargetBlocks.join v (TargetBlocks.right (Composite.apply parameter Output.whole reordered x))) _ _
+        (projection x));
+
+\definition coordinate[u: Open.Carrier form.domain]: Open.Carrier rectangle :=
+  InnerMaps.apply form.domain rectangle form.coordinates.forward u;
+\definition reverse[z: Domain.Point]: ProductSpace.Point := LeftBlocks.join (RightBlocks.right z) (RightBlocks.left z);
+\definition unflip: \forall (z: Domain.Point) -> flipLinear.apply (reverse z) = z :=
+  \fun (z: Domain.Point) =>
+    trans!{Domain.Point} _ _ _
+      (congr!{Fiber.Point ScalarSpace.Point Domain.Point} RightBlocks.join _ _ _ _
+        (LeftBlocks.rightJoin (RightBlocks.right z) (RightBlocks.left z))
+        (LeftBlocks.leftJoin (RightBlocks.right z) (RightBlocks.left z)))
+      (RightBlocks.recover z);
+
+\definition point[u: Open.Carrier form.domain]: Parameter.Carrier parameter :=
+  \into[ProductSpace.Point](reverse (coordinate u), parameter.points) \by {
+    Flip.intro (Parameter.Whole[].point (reverse (coordinate u)))
+      (\idelim coordinate u = flipLinear.apply (reverse (coordinate u)) \with z: Domain.Point =>
+        \In[Domain.Point] rectangle.points z \by {
+          base: \bysub(Domain.Point, rectangle.points, coordinate u),
+          equality: sym!{Domain.Point} _ _ (unflip (coordinate u))
+        })
+  };
+\definition goesBack: \forall (u: Open.Carrier form.domain) -> base (point u) = u :=
+  \fun (u: Open.Carrier form.domain) => \block {
+    \let before: Open.Carrier rectangle := InputMaps.apply parameter rectangle Flip.map (point u) \then
+    \let after: Open.Carrier rectangle := coordinate u \then
+    \let same: before = after :=
+      boundary_manifolds.Refinement[A := Domain.Point].equality rectangle.points before after (unflip (coordinate u)) \then
+    \return trans!{{Open.Carrier form.domain}} _ _ _
+      (congr!{{Open.Carrier rectangle} {Open.Carrier form.domain}}
+        (InnerMaps.apply rectangle form.domain form.coordinates.backward) before after same)
+      (form.coordinates.leftInverse u)
+  };
+
+\module AtPoint(x: Parameter.Carrier parameter);
+\definition region: \Pow (Open.Carrier U) := Subspace.Trace form.domain.points;
+
+\definition included: RangeSets.Subset (Images.Image apply (DomainSets.Intersection points region)) (Swap.forward NormalValues.criticalValues) :=
+  \fun (y: Range.Point) =>
+    Images.imageElim apply (DomainSets.Intersection points region) y (RangeSets.Member (Swap.forward NormalValues.criticalValues) y)
+      (\fun (x: Open.Carrier U)(member: DomainSets.Member (DomainSets.Intersection points region) x)(same: apply x = y) => \block {
+        \let u: Open.Carrier form.domain := \into[Domain.Point](x, form.domain.points) \by { member.right } \then
+        \let v: Parameter.Carrier parameter := point u \then
+        \let equal: originalPoint v = x :=
+          congr!{{Open.Carrier form.domain} {Open.Carrier U}} (\fun (t: Open.Carrier form.domain) =>
+            Open.inclusion form.domain U form.included t) _ _ (goesBack u) \then
+        \let critical: Given.CriticalAt (originalPoint v) :=
+          \idelim x = originalPoint v \with t: Open.Carrier U => Given.CriticalAt t \by {
+            base: member.left.left, equality: sym!{{Open.Carrier U}} _ _ equal } \then
+        \let imageEquation: Composite.apply parameter Output.whole Normal.map v = Swap.point y :=
+          trans!{Range.Point} _ _ _ (sym!{Range.Point} _ _ (agreement v))
+            (congr!{Range.Point Range.Point} Swap.point _ _
+              (trans!{Range.Point} _ _ _ (congr!{{Open.Carrier U} Range.Point} apply _ _ equal) same)) \then
+        \return \idelim Composite.apply parameter Output.whole Normal.map v = Swap.backpoint y
+          \with w: Range.Point => RangeSets.Member NormalValues.criticalValues w \by {
+            base: NormalValues.criticalValue v (AtPoint[x := v].critical critical),
+            equality: trans!{Range.Point} _ _ _ imageEquation (AtPoint[x := v].swapSymmetric y)
+          }
+      });
+
+\definition localNull: Smaller.Sard ->
+  \exists ( W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+    Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] ) :=
+  \fun (sard: Smaller.Sard) =>
+    Logic.existsIntro[\Pow (Open.Carrier U), { W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+      Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] }]
+      region (Logic.And[_, _]::# (Subspace.traceOpen Domain.Topology[].topology form.domain.points (Open.Topology[].open form.domain))
+        (Logic.And[_, _]::# form.contains
+          (Null.included (Images.Image apply (DomainSets.Intersection points region)) (Swap.forward NormalValues.criticalValues) included
+            (trans!{{\Pow Real.Real}} _ _ _ (Swap.outer NormalValues.criticalValues) (Normal.criticalValuesNull sard)))));

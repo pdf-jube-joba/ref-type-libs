@@ -1,0 +1,32 @@
+\definition preimage: \Pow Sigma.Point := Push.preimage S;
+
+\definition section[x: Left.Point]: \Pow Right.Point := Sigma.section preimage x;
+
+\module Restricted(i, j: N.Nat^);
+
+\definition rowZero: \forall (borel: OutputMeasure.Measurable Output.Borel[].sigma S) ->
+  (\forall (x: Left.Point) -> Fiber.Null (section x)) ->
+  \forall (i: N.Nat^) -> ProductMeasure.Row[i := i].measure.value preimage = Measure.zero :=
+  \fun (borel: OutputMeasure.Measurable Output.Borel[].sigma S)
+    (sections: \forall (x: Left.Point) -> Fiber.Null (section x))(i: N.Nat^) =>
+    trans!{Measure.Value} _ _ _
+      (congr!{{N.Nat^ -> Measure.Value} Measure.Value} Measure.series _ _
+        (\axiom:funext(
+          (\fun (j: N.Nat^) => Restricted[i := i, j := j].value),
+          (\fun (_: N.Nat^) => Measure.zero),
+          \fun (j: N.Nat^) => Restricted[i := i, j := j].zero (Product.Borel[].measurable S borel) sections)))
+      Measure.Continuity[mu := ProductMeasure.measure].zeroSeries;
+
+\definition theorem: \forall (borel: OutputMeasure.Measurable Output.Borel[].sigma S) ->
+  (\forall (x: Left.Point) -> Fiber.Null (section x)) -> Total.Null S :=
+  \fun (borel: OutputMeasure.Measurable Output.Borel[].sigma S)
+    (sections: \forall (x: Left.Point) -> Fiber.Null (section x)) =>
+    trans!{OutputMeasure.Value} _ _ _
+      (sym!{OutputMeasure.Value} _ _ (Product.Comparison[].theorem S borel))
+      (trans!{Measure.Value} _ _ _
+        (congr!{{N.Nat^ -> Measure.Value} Measure.Value} Measure.series _ _
+          (\axiom:funext(
+            (\fun (i: N.Nat^) => ProductMeasure.Row[i := i].measure.value preimage),
+            (\fun (_: N.Nat^) => Measure.zero),
+            rowZero borel sections)))
+        Measure.Continuity[mu := ProductMeasure.measure].zeroSeries);

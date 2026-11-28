@@ -1,0 +1,86 @@
+\import SourceTangent.At[x := y] \as TangentDomain;
+\import TargetTangent.At[x := Maps.apply f y] \as TangentRange;
+\import Differential.At[f := f, x := y] \as Derivative;
+\import SourceCharts.Total[c := left] \as SourceCoordinates;
+\import TargetCharts.Total[c := right] \as TargetCoordinates;
+
+\definition belongsLeft: SourceCharts.Contains left y :=
+  \idelim z = y \with p: M.Point => SourceCharts.Contains left p \by {
+    base: \bysub(M.Point, left.domain, z), equality: same };
+
+\definition sourceChart: TangentDomain.Chart :=
+  \into[SourceCharts.Chart](left, TangentDomain.Chart) \by {
+    TangentDomain.ChartLaws[left] { member := sourceMember, contains := belongsLeft }
+  };
+
+\definition targetChart: TangentRange.Chart :=
+  \into[TargetCharts.Chart](right, TangentRange.Chart) \by {
+    TangentRange.ChartLaws[right] { member := targetMember, contains := \bysub(M.Point, preimage, y) }
+  };
+
+\import Derivative.InCharts[left := sourceChart, right := targetChart] \as InCharts;
+\import Maps.At[function := Maps.apply f, left := sourceChart, right := targetChart, x := y, contains := TangentDomain.contains sourceChart] \as Here;
+
+\definition near: \In[Input.Point] e.neighborhood.points Here.source :=
+  \idelim SourceCharts.coordinate left z = Here.source
+    \with v: Input.Point => \In[Input.Point] e.neighborhood.points v \by {
+      base: inside,
+      equality: trans!{Input.Point} _ _ _
+        (sym!{Input.Point} _ _ (SourceCoordinates.coordinateInside z))
+        (trans!{Input.Point} _ _ _
+          (congr!{M.Point Input.Point} SourceCoordinates.coordinate _ _ same)
+          (SourceCoordinates.coordinateInside Here.local))
+    };
+
+\definition extension: Here.Extension := Here.Extension {
+  neighborhood := e.neighborhood, included := e.included, contains := near,
+  map := e.map, inside := e.inside, agrees := e.agrees,
+};
+\import Here.Using[e := extension] \as Using;
+\import TangentDomain.Coordinate[chart := sourceChart] \as DomainVectors;
+\import TangentRange.Coordinate[chart := targetChart] \as TargetVectors;
+
+\definition lifts: Extended.SurjectiveAt Using.center -> Surjective y := \block {
+  \fun (regular: Extended.SurjectiveAt Using.center)(v: TangentRange.Vector) \then
+  \takefrom u: \Cast[Input.Point] ({ u: Input.Point \where
+    (Extended.differential Using.center).apply u = TargetVectors.decode v }) \by regular (TargetVectors.decode v) \then
+  \let w: TangentDomain.Vector := DomainVectors.encode u \then
+  \let sameValue: TargetVectors.decode (Derivative.value.apply w) = TargetVectors.decode v :=
+    trans!{Output.Point} _ _ _ (Derivative.coordinates sourceChart targetChart w)
+      (trans!{Output.Point} _ _ _
+        (congr!{{calculus.Vector[n := n, m := m].LinearMap} Output.Point}
+          (\fun (L: calculus.Vector[n := n, m := m].LinearMap) => L.apply (DomainVectors.decode w)) _ _
+          (Here.ofExtension InCharts.smooth extension))
+        (trans!{Output.Point} _ _ _
+          (congr!{Input.Point Output.Point} (Extended.differential Using.center).apply _ _ (DomainVectors.decodeEncode u))
+          (\bysub(Input.Point, { u: Input.Point \where
+            (Extended.differential Using.center).apply u = TargetVectors.decode v }, u)))) \then
+  \return Logic.existsIntro[TangentDomain.Vector, { w: TangentDomain.Vector \where Derivative.value.apply w = v }]
+    w (TargetVectors.injective (Derivative.value.apply w) v sameValue)
+};
+
+\definition critical: Logic.Not (Surjective y) -> OutputSets.Member Extended.criticalValues (coordinate y) :=
+  \fun (critical: Logic.Not (Surjective y)) =>
+    \idelim calculus.Maps[n := n, m := m].apply e.neighborhood OutputOpen.whole e.map Using.center = coordinate y
+      \with v: Output.Point => OutputSets.Member Extended.criticalValues v \by {
+        base: Extended.criticalValue Using.center (\fun (regular: Extended.SurjectiveAt Using.center) => critical (lifts regular)),
+        equality: Using.centerValue
+      };
+
+\definition coordinateDerivative: \forall (v: TangentDomain.Vector) ->
+  TargetVectors.decode (Derivative.value.apply v) = (Extended.differential Using.center).apply (DomainVectors.decode v) :=
+  \fun (v: TangentDomain.Vector) =>
+    trans!{Output.Point} _ _ _ (Derivative.coordinates sourceChart targetChart v)
+      (congr!{{calculus.Vector[n := n, m := m].LinearMap} Output.Point}
+        (\fun (L: calculus.Vector[n := n, m := m].LinearMap) => L.apply (DomainVectors.decode v)) _ _
+        (Here.ofExtension InCharts.smooth extension));
+
+\module FrozenPoint(mask: Mask.Mask, matches: Mask.Matches left.constraints Here.source mask);
+
+\definition tangentialCritical: Logic.Not (TangentialSurjective y) ->
+  OutputSets.Member (FiniteParts.union Mask.all) (coordinate y) := \block {
+    \fun (critical: Logic.Not (TangentialSurjective y)) \then
+    \takefrom mask: \Cast[Mask.Mask] ({ s: Mask.Mask \where Mask.Matches left.constraints Here.source s }) \by Mask.exists left.constraints Here.source \then
+    \return FiniteParts.member Mask.all mask (coordinate y) (\refl(mask))
+      (FrozenPoint[mask := mask, matches := \bysub(Mask.Mask, { s: Mask.Mask \where Mask.Matches left.constraints Here.source s }, mask)].criticalValue critical)
+  };

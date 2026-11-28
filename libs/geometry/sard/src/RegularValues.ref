@@ -1,0 +1,9 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import calculus.Real[].Multivariable[n := m].Open[] \as Output;
+\import calculus.Maps[n := n, m := m] \as Maps;
+\import \root.Euclidean[n := n, m := m] \as Euclidean;
+\import \root.Null[m := m] \as Null;
+\import topological_algebra.Euclidean[].Dimension[n := m] \as Range;
+\import topology.Topology[Carrier := Range.Point] \as Sets;
+\module On(U: Open.OpenSet, V: Output.OpenSet, f: Maps.Map U V);

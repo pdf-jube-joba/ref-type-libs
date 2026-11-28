@@ -1,0 +1,6 @@
+\import manifolds.SmoothMap[n := dimension, m := m].Between[M := M, N := T] \as Maps;
+\import manifolds.SmoothMap[n := dimension, m := r].Between[M := M, N := P] \as Projections;
+\import \root.Manifold[n := dimension, m := m].Between[M := M, N := T] \as Regularity;
+\import \root.Manifold[n := dimension, m := r].Between[M := M, N := P] \as ProjectionRegularity;
+\import G02.RegularValue[M := M, T := T] \as RegularValue;
+\module Level(f: Maps.Map, y: T.Point, regular: RegularValue.Of[f := f, y := y].Regular, projection: Projections.Map);

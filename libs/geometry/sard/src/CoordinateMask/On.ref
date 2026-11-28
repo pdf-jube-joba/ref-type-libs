@@ -1,0 +1,27 @@
+\definition weight[j: Fin.Fin two]: Real.Real :=
+  \match Nat.isZero j \in Bool.Bool^ \return (\fun (_: Bool.Bool^) => Real.Real) \with {
+    | false: Real.one
+    | true: Real.zero
+  };
+\definition apply[v: Space.Point][i: Fin.Fin n]: Real.Real := Real.mul (weight (mask i)) (v i);
+\import calculus.Vector[n := n, m := n] \as Vector;
+\definition linear: Vector.LinearMap := Vector.LinearMap {
+  apply := apply,
+  preservesAdd := \fun (v, w: Space.Point) => \axiom:funext(apply (Space.Def[].addPoint v w), Space.Def[].addPoint (apply v) (apply w),
+    \fun (i: Fin.Fin n) => Laws.fieldMulAdd (weight (mask i)) (v i) (w i)),
+  preservesScale := \fun (c: Real.Real)(v: Space.Point) => \axiom:funext(apply (Space.Def[].scale c v), Space.Def[].scale c (apply v),
+    \fun (i: Fin.Fin n) => Algebra.mulSwap (weight (mask i)) c (v i)),
+};
+\definition selected: \forall (v: Space.Point)(i: Fin.Fin n) -> mask i = blocked -> apply v i = Real.zero :=
+  \fun (v: Space.Point)(i: Fin.Fin n)(equal: mask i = blocked) =>
+    trans!{Real.Real} _ _ _
+      (congr!{{Fin.Fin two} Real.Real} (\fun (j: Fin.Fin two) => Real.mul (weight j) (v i)) _ _ equal)
+      (Laws.fieldMulZeroLeft (v i));
+\definition fixed: \forall (v: Space.Point) -> (\forall (i: Fin.Fin n) -> mask i = blocked -> v i = Real.zero) -> apply v = v :=
+  \fun (v: Space.Point)(zero: \forall (i: Fin.Fin n) -> mask i = blocked -> v i = Real.zero) =>
+    \axiom:funext(apply v, v, \fun (i: Fin.Fin n) =>
+      Fin.cases one (\fun (j: Fin.Fin two) => mask i = j -> Real.mul (weight j) (v i) = v i)
+        (\fun (equal: mask i = blocked) =>
+          trans!{Real.Real} _ _ _ (Laws.fieldMulZeroLeft (v i)) (sym!{Real.Real} _ _ (zero i equal)))
+        (\fun (j: Fin.Fin one)(_: mask i = Fin.succ one j) => Laws.fieldMulOneLeft (v i))
+        (mask i) (\refl(mask i)));

@@ -1,0 +1,60 @@
+\import Open.C1[] \as C1;
+\import Space.Def[] \as Coordinates;
+\import Space.Norm[] \as Norm;
+\import Real.Distance[] \as Distance;
+\definition radius[x: Open.Carrier U]: Real.Real := Coordinates.pointDistance x a;
+
+\definition HigherBound: \forall (k: N.Nat^) -> Partials.Function U -> \Prop :=
+  \induction (k: N.Nat^) \return Partials.Function U -> \Prop \with {
+    | zero: \fun (f: Partials.Function U) => \forall (x: Open.Carrier U) -> R.Le (radius x) r -> R.Le (Real.distance (f x) Real.zero) bound
+    | succ: \fun (k: N.Nat^)(prev: Partials.Function U -> \Prop)(f: Partials.Function U) =>
+      \forall (i: Fin.Fin n) -> prev (Partials.derivative U f i)
+  };
+
+\definition scale: N.Nat^ -> Real.Real :=
+  \induction (k: N.Nat^) \return Real.Real \with {
+    | zero: bound
+    | succ: \fun (k: N.Nat^)(v: Real.Real) => Real.mul (Real.mul count v) r
+  };
+
+\definition scaleNonnegative: R.Le Real.zero r -> R.Le Real.zero bound -> \forall (k: N.Nat^) -> R.Le Real.zero (scale k) :=
+  \fun (rNonnegative: R.Le Real.zero r)(bNonnegative: R.Le Real.zero bound) =>
+    \induction (k: N.Nat^) \return R.Le Real.zero (scale k) \with {
+      | zero: bNonnegative
+      | succ: \fun (k: N.Nat^)(previous: R.Le Real.zero (scale k)) =>
+        Laws.fieldMulNonnegative (Real.mul count (scale k)) r
+          (Laws.fieldMulNonnegative count (scale k) countNonnegative previous) rNonnegative
+    };
+
+\definition step: Open.BallInside[U.points, a, rho] -> R.Lt r rho ->
+  \forall (theta: Real.Real) -> R.Le Real.zero theta ->
+  \forall (f: Partials.Function U)(x: Open.Carrier U) -> R.Le (radius x) r ->
+  (\forall (i: Fin.Fin n)(y: Open.Carrier U) -> R.Le (radius y) r -> R.Le (Real.distance (Partials.derivative U f i y) Real.zero) theta) ->
+  R.Le (Real.distance (f x) (f a)) (Real.mul (Real.mul count theta) r) :=
+  \fun (ball: Open.BallInside[U.points, a, rho])(small: R.Lt r rho)(theta: Real.Real)(nonnegative: R.Le Real.zero theta)
+    (f: Partials.Function U)(x: Open.Carrier U)(near: R.Le (radius x) r)(control: _) =>
+    R.leTrans _ _ _
+      (C1.Bounded[U := U, f := f, g := \fun (i: Fin.Fin n) => Partials.derivative U f i, a := a, x := x].estimate
+        rho theta ball (R.leLtTrans _ _ _ near small) nonnegative (Partials.partialLaw U f)
+        (\fun (y: Open.Carrier U)(i: Fin.Fin n)(closer: R.Le (radius y) (radius x)) =>
+          control i y (R.leTrans _ _ _ closer near)))
+      (Estimates.mulMonotone (Real.mul count theta) (radius x) r (Laws.fieldMulNonnegative count theta countNonnegative nonnegative) near);
+
+\definition estimate: Open.BallInside[U.points, a, rho] -> R.Lt r rho -> R.Le Real.zero r -> R.Le Real.zero bound ->
+  \forall (k: N.Nat^)(f: Partials.Function U) -> Flat U a k f -> HigherBound (N.Nat^::succ k) f ->
+  \forall (x: Open.Carrier U) -> R.Le (radius x) r -> R.Le (Real.distance (f x) (f a)) (scale (N.Nat^::succ k)) :=
+  \fun (ball: Open.BallInside[U.points, a, rho])(small: R.Lt r rho)
+    (rNonnegative: R.Le Real.zero r)(bNonnegative: R.Le Real.zero bound) =>
+    \induction (k: N.Nat^) \return \forall (f: Partials.Function U) -> Flat U a k f -> HigherBound (N.Nat^::succ k) f ->
+      \forall (x: Open.Carrier U) -> R.Le (radius x) r -> R.Le (Real.distance (f x) (f a)) (scale (N.Nat^::succ k)) \with {
+        | zero: \fun (f: Partials.Function U)(_: Flat U a N.Nat^::zero f)(bounded: HigherBound (N.Nat^::succ N.Nat^::zero) f)
+          (x: Open.Carrier U)(near: R.Le (radius x) r) => step ball small bound bNonnegative f x near bounded
+        | succ: \fun (k: N.Nat^)(previous: _)(f: Partials.Function U)(flat: Flat U a (N.Nat^::succ k) f)
+          (bounded: HigherBound (N.Nat^::succ (N.Nat^::succ k)) f)(x: Open.Carrier U)(near: R.Le (radius x) r) =>
+            step ball small (scale (N.Nat^::succ k)) (scaleNonnegative rNonnegative bNonnegative (N.Nat^::succ k)) f x near
+              (\fun (i: Fin.Fin n)(y: Open.Carrier U)(close: R.Le (radius y) r) =>
+                \idelim Partials.derivative U f i a = Real.zero \with z: Real.Real =>
+                  R.Le (Real.distance (Partials.derivative U f i y) z) (scale (N.Nat^::succ k)) \by {
+                    base: previous (Partials.derivative U f i) (flat i).right (bounded i) y close,
+                    equality: (flat i).left })
+      };

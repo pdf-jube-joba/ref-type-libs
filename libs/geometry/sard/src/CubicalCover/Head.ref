@@ -1,0 +1,54 @@
+\definition tail[x: A][i: Fin.Fin n]: Real.Real := p x (Fin.succ n i);
+\definition tailCenter[i: Fin.Fin n]: Real.Real := a (Fin.succ n i);
+\definition halfSet[t: Real.Real]: \Pow A :=
+  { x: A \where Logic.And[Sets.Member S x, Interval t (half r) (p x (Fin.zero n))] };
+\definition halfCube[t: Real.Real]: \Pow A := Cube n tail (halfSet t) tailCenter r;
+
+\definition child: \forall (t: Real.Real)(c: Vector n) ->
+  Logic.Or[t = lower (a (Fin.zero n)) r, t = upper (a (Fin.zero n)) r] -> Child n tailCenter r c ->
+  Child (N.Nat^::succ n) a r (Tuples.extend n t c) :=
+  \fun (t: Real.Real)(c: Vector n)(first: _)(rest: Child n tailCenter r c) =>
+    Fin.cases n (\fun (i: Fin.Fin (N.Nat^::succ n)) =>
+      Logic.Or[Tuples.extend n t c i = lower (a i) r, Tuples.extend n t c i = upper (a i) r])
+      (\idelim t = Tuples.extend n t c (Fin.zero n) \with z: Real.Real =>
+        Logic.Or[z = lower (a (Fin.zero n)) r, z = upper (a (Fin.zero n)) r] \by {
+          base: first, equality: sym!{Real.Real} _ _ (Tuples.atZero n t c) })
+      (\fun (i: Fin.Fin n) => \idelim c i = Tuples.extend n t c (Fin.succ n i) \with z: Real.Real =>
+        Logic.Or[z = lower (tailCenter i) r, z = upper (tailCenter i) r] \by {
+          base: rest i, equality: sym!{Real.Real} _ _ (Tuples.atSuccessor n t c i) });
+
+\definition included: \forall (t: Real.Real)(c: Vector n) ->
+  Sets.Subset (Cube n tail (halfSet t) c (half r)) (Cube (N.Nat^::succ n) p S (Tuples.extend n t c) (half r)) :=
+  \fun (t: Real.Real)(c: Vector n)(x: A)(inside: Sets.Member (Cube n tail (halfSet t) c (half r)) x) =>
+    Logic.And[_, _]::# inside.left.left
+      (Fin.cases n (\fun (i: Fin.Fin (N.Nat^::succ n)) => Interval (Tuples.extend n t c i) (half r) (p x i))
+        (\idelim t = Tuples.extend n t c (Fin.zero n) \with z: Real.Real => Interval z (half r) (p x (Fin.zero n)) \by {
+          base: inside.left.right, equality: sym!{Real.Real} _ _ (Tuples.atZero n t c) })
+        (\fun (i: Fin.Fin n) => \idelim c i = Tuples.extend n t c (Fin.succ n i) \with z: Real.Real => Interval z (half r) (tail x i) \by {
+          base: inside.right i, equality: sym!{Real.Real} _ _ (Tuples.atSuccessor n t c i) }));
+
+\definition step: Step n ->
+  (\forall (c: Vector (N.Nat^::succ n)) -> Child (N.Nat^::succ n) a r c -> Bound (Cube (N.Nat^::succ n) p S c (half r)) b) ->
+  Bound (Cube (N.Nat^::succ n) p S a r) (cost (N.Nat^::succ n) b) :=
+  \fun (prior: Step n)(children: _) => \block {
+    \let a0: Real.Real := a (Fin.zero n) \then
+    \let lo: Real.Real := lower a0 r \then
+    \let hi: Real.Real := upper a0 r \then
+    \let bound: \forall (t: Real.Real) -> Logic.Or[t = lo, t = hi] -> Bound (halfCube t) (cost n b) :=
+      \fun (t: Real.Real)(isHalf: Logic.Or[t = lo, t = hi]) => prior tail (halfSet t) tailCenter r b
+        (\fun (c: Vector n)(isChild: Child n tailCenter r c) =>
+          monotone (Cube n tail (halfSet t) c (half r)) (Cube (N.Nat^::succ n) p S (Tuples.extend n t c) (half r)) b
+            (included t c) (children (Tuples.extend n t c) (child t c isHalf isChild))) \then
+    \return split (Cube (N.Nat^::succ n) p S a r) (halfCube lo) (halfCube hi) (cost n b) (cost n b)
+      (\fun (x: A)(inside: Sets.Member (Cube (N.Nat^::succ n) p S a r) x) =>
+        Logic.orElim (Interval lo (half r) (p x (Fin.zero n))) (Interval hi (half r) (p x (Fin.zero n)))
+          (Logic.Or[Sets.Member (halfCube lo) x, Sets.Member (halfCube hi) x])
+          (\parent.Halves[a := a0, r := r].cover (p x (Fin.zero n)) (inside.right (Fin.zero n)))
+          (\fun (l: Interval lo (half r) (p x (Fin.zero n))) =>
+            Logic.Or[_, _]::left (Logic.And[_, _]::# (Logic.And[_, _]::# inside.left l)
+              (\fun (i: Fin.Fin n) => inside.right (Fin.succ n i))))
+          (\fun (h: Interval hi (half r) (p x (Fin.zero n))) =>
+            Logic.Or[_, _]::right (Logic.And[_, _]::# (Logic.And[_, _]::# inside.left h)
+              (\fun (i: Fin.Fin n) => inside.right (Fin.succ n i)))))
+      (bound lo (Logic.Or[_, _]::left (\refl(lo)))) (bound hi (Logic.Or[_, _]::right (\refl(hi))))
+  };

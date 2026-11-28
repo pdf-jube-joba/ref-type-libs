@@ -1,0 +1,36 @@
+\import std.Data[].FinSet[] \as Fin;
+\import real.Analysis[] \as Real;
+\import Real.Algebra[] \as Algebra;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\import Spaces.FiniteCoordinates[n := m] \as Basis;
+\import Spaces.Coordinates[I := Fin.Fin m] \as RangeCoordinates;
+\import Spaces.Coordinates[I := Fin.Fin n] \as DomainCoordinates;
+\import Spaces.Matrix[I := Fin.Fin n, J := Fin.Fin m] \as Columns;
+\import Spaces.Linear[V := Domain.Point, W := Codomain.Point, source := DomainCoordinates.space, target := RangeCoordinates.space] \as Differentials;
+\import Differentials.Composition[U := Codomain.Point, domain := RangeCoordinates.space] \as Compose;
+\import matrix_invariants.Ring[K := Real.Real, scalars := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field].At[n := m] \as Square;
+\import matrix_invariants.Field[K := Real.Real, field := Algebra.field].At[n := m] \as Inverse;
+\import Source.Topology[].Of[U := U] \as DomainTopology;
+\import topology.Topology[Carrier := Source.Carrier U] \as DomainSets;
+\import topology.Topology[Carrier := Real.Real] \as Scalars;
+\import Source.Smooth[].Properties[] \as Smooth;
+\import matrix_invariants.Topological[K := Real.Real, ring := topological_algebra.Real[].topologicalRing].At[n := m].Families[X := Source.Carrier U] \as Families;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+
+\definition Preimages[a: Source.Carrier U][j: Fin.Fin m]: \Set :=
+  \Cast[Domain.Point] ({ v: Domain.Point \where (differential a).apply v = Basis.vectors j });
+
+\module With(a: Source.Carrier U, vectors: \forall (j: Fin.Fin m) -> Preimages a j);
+
+\definition regularOpen: DomainSets.IsOpenIn DomainTopology.topology (DomainSets.Complement criticalPoints) := \block {
+  \return DomainSets.openOfNeighborhoods DomainTopology.topology (DomainSets.Complement criticalPoints)
+    (\fun (a: Source.Carrier U)(regular: Logic.Not (CriticalAt a)) => \block {
+      \let surjective: SurjectiveAt a := Sigma.doubleNegative (SurjectiveAt a) regular \then
+      \takefrom vectors: \forall (j: Fin.Fin m) -> Preimages a j \by
+        \axiom:classicalIndefiniteChoice(Fin.Fin m, Preimages a, \fun (j: Fin.Fin m) => surjective (Basis.vectors j)) \then
+      \return With[a := a, vectors := vectors].neighborhood
+    })
+};

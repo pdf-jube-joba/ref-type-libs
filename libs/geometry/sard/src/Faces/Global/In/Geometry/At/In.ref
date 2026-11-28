@@ -1,0 +1,63 @@
+\definition sourceChart: Domain.Chart :=
+  \into[FaceCharts.Chart](form.source, Domain.Chart) \by {
+    Domain.ChartLaws[form.source] { member := form.sourceMember, contains := form.contains }
+  };
+\definition targetChart: Codomain.Chart :=
+  \into[AmbientCharts.Chart](form.target, Codomain.Chart) \by {
+    Codomain.ChartLaws[form.target] { member := form.targetMember, contains := form.containsImage }
+  };
+\import Domain.Coordinate[chart := sourceChart] \as SourceVectors;
+\import Codomain.Coordinate[chart := targetChart] \as TargetVectors;
+\import InclusionMaps.At[function := embedding.apply, left := sourceChart, right := targetChart,
+  x := x, contains := Domain.contains sourceChart] \as Local;
+\import Derivative.InCharts[left := sourceChart, right := targetChart] \as InCharts;
+\import calculus.LinearMap[n := d, m := Nat.add r d].On[U := form.source.image, L := Linear.horizontal] \as Horizontal;
+
+\definition extension: Local.Extension := Local.Extension {
+  neighborhood := form.source.image,
+  included := \fun (u: FaceSpace.Point)(member: \In[FaceSpace.Point] form.source.image.points u) => member,
+  contains := \bysub(FaceSpace.Point, form.source.image.points, Local.source),
+  map := Horizontal.map,
+  inside := \fun (u: FaceSpace.Carrier form.source.constraints form.source.image) => form.inside (FaceCharts.point form.source u),
+  agrees := \fun (u: FaceSpace.Carrier form.source.constraints form.source.image) => sym!{AmbientSpace.Point} _ _
+    (trans!{AmbientSpace.Point} _ _ _ (form.formula (FaceCharts.point form.source u))
+      (congr!{FaceSpace.Point AmbientSpace.Point} (\fun (v: FaceSpace.Point) => Blocks.join v (\fun (_: NormalSpace.Coordinate) => Real.zero))
+        _ _ (FaceCharts.coordinatePoint form.source u))),
+};
+\import Local.Using[e := extension] \as Extension;
+\definition jacobian: InCharts.jacobian = Linear.horizontal :=
+  trans!{{Vectors.LinearMap}} _ _ _ (Local.ofExtension InCharts.smooth extension) (Horizontal.differential Extension.center);
+\definition ambientCoordinate: (Codomain.coordinate targetChart \of AmbientSpace.Point) =
+  Blocks.join (Domain.coordinate sourceChart) (\fun (_: NormalSpace.Coordinate) => Real.zero) :=
+  form.formula Local.local;
+
+\definition active: \forall (i: NormalSpace.Coordinate) ->
+  AmbientSpace.Active form.target.constraints (Codomain.coordinate targetChart) (Indices.right i) :=
+  \fun (i: NormalSpace.Coordinate) =>
+    Logic.And[_, _]::# (form.normalSelected i)
+      (trans!{Real.Real} _ _ _
+        (congr!{AmbientSpace.Point Real.Real} (\fun (v: AmbientSpace.Point) => v (Indices.right i)) _ _ ambientCoordinate)
+        (Tuples.atRight (Domain.coordinate sourceChart) (\fun (_: NormalSpace.Coordinate) => Real.zero) i));
+
+\definition ontoTangential: \forall (v: Codomain.Vector) -> Cones.Tangential v ->
+  \exists ( w: Domain.Vector \where Derivative.value.apply w = v ) := \block {
+    \fun (v: Codomain.Vector)(tangent: Cones.Tangential v) \then
+    \let p: AmbientSpace.Point := TargetVectors.decode v \then
+    \let w: Domain.Vector := SourceVectors.encode (Blocks.left p) \then
+    \let normals: Blocks.right p = (\fun (_: NormalSpace.Coordinate) => Real.zero) :=
+      \axiom:funext(Blocks.right p, (\fun (_: NormalSpace.Coordinate) => Real.zero),
+        \fun (j: NormalSpace.Coordinate) => Cones.Lineality[c := targetChart, v := v].fromIntrinsic tangent (Indices.right j) (active j)) \then
+    \let horizontal: Linear.horizontal.apply (SourceVectors.decode w) = p :=
+      trans!{AmbientSpace.Point} _ _ _
+        (congr!{FaceSpace.Point AmbientSpace.Point} Linear.horizontal.apply _ _ (SourceVectors.decodeEncode (Blocks.left p)))
+        (trans!{AmbientSpace.Point} _ _ _
+          (congr!{NormalSpace.Point AmbientSpace.Point} (Blocks.join (Blocks.left p)) _ _ (sym!{NormalSpace.Point} _ _ normals))
+          (Blocks.recover p)) \then
+    \let equation: TargetVectors.decode (Derivative.value.apply w) = p :=
+      trans!{AmbientSpace.Point} _ _ _ (Derivative.coordinates sourceChart targetChart w)
+        (trans!{AmbientSpace.Point} _ _ _
+          (congr!{{Vectors.LinearMap} AmbientSpace.Point} (\fun (L: Vectors.LinearMap) => L.apply (SourceVectors.decode w)) _ _ jacobian)
+          horizontal) \then
+    \return Logic.existsIntro[Domain.Vector, { w: Domain.Vector \where Derivative.value.apply w = v }] w
+      (TargetVectors.injective (Derivative.value.apply w) v equation)
+  };

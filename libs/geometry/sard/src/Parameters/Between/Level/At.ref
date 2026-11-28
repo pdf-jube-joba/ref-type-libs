@@ -1,0 +1,35 @@
+\import SourceTangent.At[x := x] \as Domain;
+\import TargetTangent.At[x := Maps.apply f x] \as Range;
+\import ParameterTangent.At[x := Projections.apply projection x] \as Parameters;
+\import FiberTangent.At[x := x] \as LevelTangent;
+\import Derivative.At[f := f, x := x] \as DF;
+\import DParameter.At[f := projection, x := x] \as DP;
+\import DInclusion.At[f := Smooth.inclusion, x := x] \as DI;
+\import DOnLevel.At[f := parameterMap, x := x] \as DLevel;
+\import Smooth.At[x := x] \as Inclusion;
+\import \root.KernelProjection[].On[X := Domain.Vector, Y := Range.Vector, Z := Parameters.Vector,
+  domain := Domain.space, first := Range.space, second := Parameters.space].Of[D := DF.value, G := DP.value] \as Full;
+\import \root.KernelProjection[].On[X := Domain.Vector, Y := Parameters.Vector, Z := Range.Vector,
+  domain := Domain.space, first := Parameters.space, second := Range.space].Of[D := DP.value, G := DF.value] \as Projection;
+
+\definition SliceRegular: \Prop := Full.FirstOnKernel;
+\definition chainRule: \forall (v: LevelTangent.Vector) -> DLevel.value.apply v = DP.value.apply (DI.value.apply v) :=
+  Chain.At[x := x].pointwise;
+
+\module InSlice(slice: Fiber.Slice, contains: manifolds.Dimension[n := dimension].Chart[M := M.Point, space := M.space].Contains slice.source x);
+
+\definition toSlice: Exceptional.Surjective x -> SliceRegular := \block {
+  \fun (onto: Exceptional.Surjective x) \then
+  \takefrom slice: \Cast[Fiber.Slice] ({ s: Fiber.Slice \where manifolds.Dimension[n := dimension].Chart[M := M.Point, space := M.space].Contains s.source x })
+    \by Fiber.covers regular x \then
+  \return Full.transfer (regular x)
+    (InSlice[slice := slice, contains := \bysub(Fiber.Slice, { s: Fiber.Slice \where manifolds.Dimension[n := dimension].Chart[M := M.Point, space := M.space].Contains s.source x }, slice)].restrictProjection onto)
+};
+
+\definition fromSlice: Submersion -> SliceRegular -> Exceptional.Surjective x := \block {
+  \fun (submersion: Submersion)(sliceRegular: SliceRegular) \then
+  \takefrom slice: \Cast[Fiber.Slice] ({ s: Fiber.Slice \where manifolds.Dimension[n := dimension].Chart[M := M.Point, space := M.space].Contains s.source x })
+    \by Fiber.covers regular x \then
+  \return InSlice[slice := slice, contains := \bysub(Fiber.Slice, { s: Fiber.Slice \where manifolds.Dimension[n := dimension].Chart[M := M.Point, space := M.space].Contains s.source x }, slice)].liftProjection
+    (Projection.transfer (submersion x) sliceRegular)
+};

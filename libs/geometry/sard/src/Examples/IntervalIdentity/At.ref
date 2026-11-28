@@ -1,0 +1,9 @@
+\import Tangent.At[x := x] \as Space;
+\import Space.Cones[] \as Cones;
+\import boundary_manifolds.Differential[n := One.dimension, m := One.dimension].Between[M := DiskGeometry.boundaryInput, N := DiskGeometry.boundaryInput].At[f := Identity.map, x := x] \as D;
+\module With(chart: Space.Chart);
+\definition critical: Logic.Not (Sard.TangentialSurjective x) := \block {
+  \fun (surjective: Sard.TangentialSurjective x) \then
+  \takefrom chart: Space.Chart \by Space.chartExists \then
+  \return With[chart := chart].contradiction surjective
+};

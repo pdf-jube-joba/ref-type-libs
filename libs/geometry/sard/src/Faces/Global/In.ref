@@ -1,0 +1,26 @@
+\import boundary_manifolds.Face[n := d, r := r].Global[F := F, M := M] \as Faces;
+\import \root.Faces[n := Nat.add r d, m := m].Between[M := M, T := T] \as Sard;
+\import boundary_manifolds.SmoothMap[n := Nat.add r d, m := m].Between[M := M, N := T] \as Maps;
+\definition restrict[f: Maps.Map][face: Faces.Face][right: Sard.Chart]: Sard.Restriction[right] :=
+  Sard.Of[f := f].FaceDimension[d := d].From[F := F].Restricted[inclusion := face].restriction right;
+
+\import boundary_manifolds.SmoothMap[n := d, m := Nat.add r d].Between[M := F, N := M] \as InclusionMaps;
+\import boundary_manifolds.Tangent[n := d].On[M := F] \as FaceTangent;
+\import boundary_manifolds.Tangent[n := Nat.add r d].On[M := M] \as AmbientTangent;
+\import boundary_manifolds.Differential[n := d, m := Nat.add r d].Between[M := F, N := M] \as InclusionDifferential;
+\import boundary_manifolds.Immersion[n := d, m := Nat.add r d].Between[M := F, N := M] \as Embeddings;
+\module Geometry(embedding: Embeddings.Embedding);
+
+\import topology.Topology[Carrier := T.Point] \as TargetSets;
+\definition regularOfTangential[f: Maps.Map][face: Faces.Face][right: Sard.Chart][y: T.Point]:
+  \root.Corners[n := Nat.add r d, m := m].Between[M := M, N := T].Of[f := f].TangentialRegular y ->
+  TargetSets.Member (restrict f face right).regular y :=
+  Sard.Of[f := f].FaceDimension[d := d].From[F := F].Restricted[inclusion := face].regularOfTangential
+    (Geometry[embedding := face].tangentialImage (\bysub(Embeddings.Embedding, Faces.Face, face))) y;
+
+\import Target.Chart[M := T.Point, space := T.space] \as TargetCharts;
+\definition regularAt[f: Maps.Map][face: Faces.Face][right: Sard.Chart][u: TargetModel.Carrier right.constraints right.image]:
+  Logic.Not (Sets.Member (\root.Corners[n := Nat.add r d, m := m].Between[M := M, N := T].Of[f := f].InChart[right := right].tangentialCriticalCoordinates) u) ->
+  TargetSets.Member (restrict f face right).regular (TargetCharts.point right u) :=
+  \fun (outside: _) => regularOfTangential f face right (TargetCharts.point right u)
+    (\root.Corners[n := Nat.add r d, m := m].Between[M := M, N := T].Of[f := f].InChart[right := right].tangentialRegularAt u outside);

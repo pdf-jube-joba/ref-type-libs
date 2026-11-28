@@ -1,0 +1,45 @@
+\import topological_algebra.Euclidean[].Dimension[n := N.Nat^::zero] \as Domain;
+\import topological_algebra.Euclidean[].Dimension[n := N.Nat^::succ m] \as Codomain;
+\import calculus.Real[].Multivariable[n := N.Nat^::zero].Open[] \as Source;
+\import calculus.Real[].Multivariable[n := N.Nat^::succ m].Open[] \as Target;
+\import calculus.Maps[n := N.Nat^::zero, m := N.Nat^::succ m] \as Maps;
+\import topology.Topology[Carrier := Codomain.Point] \as Sets;
+\import \root.Null[m := N.Nat^::succ m] \as Null;
+\import \root.Euclidean[n := N.Nat^::zero, m := N.Nat^::succ m] \as Euclidean;
+\import euclidean_measure.Positive[k := m] \as Positive;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+
+\definition theorem: Euclidean.Sard :=
+  \fun (U: Source.OpenSet)(V: Target.OpenSet)(f: Maps.Map U V) => \block {
+    \let S: \Pow Codomain.Point := Euclidean.On[U := U, V := V, f := f].criticalValues \then
+    \return Logic.orElim _ _ (Null.Null S)
+      (std.Logic[].Classical[].excludedMiddle (\exists Source.Carrier U))
+      (\fun (nonempty: \exists Source.Carrier U) => \block {
+        \takefrom a: Source.Carrier U \by nonempty \then
+        \let y: Codomain.Point := Maps.apply U V f a \then
+        \return Null.included S (Sets.Singleton y)
+          (\fun (z: Codomain.Point)(member: Sets.Member S z) => \block {
+            \takefrom x: \Cast[Source.Carrier U]
+              ({ t: Source.Carrier U \where Logic.And[Maps.apply U V f t = z,
+                Euclidean.On[U := U, V := V, f := f].CriticalAt t] }) \by member \then
+            \let witness: Logic.And[Maps.apply U V f x = z, Euclidean.On[U := U, V := V, f := f].CriticalAt x] :=
+              \bysub(Source.Carrier U, { t: Source.Carrier U \where Logic.And[Maps.apply U V f t = z,
+                Euclidean.On[U := U, V := V, f := f].CriticalAt t] }, x) \then
+            \return trans!{Codomain.Point} z (Maps.apply U V f x) y
+              (sym!{Codomain.Point} _ _ witness.left)
+              (congr!{{Source.Carrier U} Codomain.Point}
+                (\fun (t: Source.Carrier U) => Maps.apply U V f t) x a
+                (Fin.Empty[A := Real.Real].unique x a))
+          }) (Positive.singletonNull y)
+      })
+      (\fun (empty: Logic.Not (\exists Source.Carrier U)) =>
+        Null.included S Sets.Empty
+          (\fun (z: Codomain.Point)(member: Sets.Member S z) => \block {
+            \takefrom x: \Cast[Source.Carrier U]
+              ({ t: Source.Carrier U \where Logic.And[Maps.apply U V f t = z,
+                Euclidean.On[U := U, V := V, f := f].CriticalAt t] }) \by member \then
+            \return empty (\exact(x, Source.Carrier U))
+          }) Null.empty)
+  };
