@@ -55,3 +55,4 @@
 \module FinalTopology;
 \module AssociatedLine;
 \module Euler;
+\module Fiber(v: Sphere);

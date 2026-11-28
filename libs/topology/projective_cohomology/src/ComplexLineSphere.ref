@@ -6,3 +6,4 @@
   Projective.topology, Spheres.topology Degrees.two] := Sphere.homeomorphism;
 \module Equator(w: Spheres.Carrier Degrees.one);
 \module Section;
+\module PulledHopf;

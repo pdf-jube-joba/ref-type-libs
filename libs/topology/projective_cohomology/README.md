@@ -16,6 +16,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.AssociatedLine` | The quotient by the inverse-weight circle action is homeomorphic over projective space to the tautological line bundle |
 | `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.DualCoordinates.Orbits` | Evaluation into the complex dual has fibers given by the direct-weight circle action |
 | `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.DualCoordinates.AssociatedLine` | The quotient by the direct-weight circle action is homeomorphic over projective space to the complex-linear dual |
+| `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.Fiber` and `DualCoordinates.Fiber` | Each scalar evaluation in a fixed unit frame is a complex-linear isomorphism onto the corresponding associated line fiber |
 | `Complex.CanonicalLine.Hopf.CircleAction.Associated.Product.DualCoordinates.Euler` | The two character bundles have opposite integral Euler classes, with the identity character giving the canonical generator |
 | `Real.CanonicalLine.Hopf.Standard` | Comparison with the standard real sphere and its intermediate-degree cohomology vanishing |
 | `Complex.CanonicalLine.Realification` | The underlying real bundle has rank two and carries a metric induced by its ambient embedding |
@@ -36,6 +37,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `Complex.CanonicalLine.Dual.Realification.Norm.Home.Orientation` | The native complex dual chart orientations define a signed C03 orientation on the underlying real dual bundle |
 | `Complex.CanonicalLine.Dual.Realification.Norm.Home.Integral.Euler` | Riesz pulls the dual Thom class back to the negative of the tautological Thom class. The dual Euler class is the negative of the canonical projective generator |
 | `RealPlane` and `ComplexLineSphere` | Homeomorphisms with the antipodal quotient model of the real projective plane and the standard two-sphere model of the complex projective line |
+| `ComplexLineSphere.PulledHopf` | The underlying real bundle of the sphere model line is the pullback of the realified projective tautological line |
 | `ComplexLineSphere.Equator` | In the standard two-sphere model, the second complex frame coordinate on the equator is the first multiplied by the inverse unit-circle coordinate |
 | `ComplexLineSphere.Section.Relative.Forgetting` | The projected coordinate section on the standard two-sphere pulls the punctured-bundle Thom class back to a relative class whose absolute image is the tautological Euler class |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
