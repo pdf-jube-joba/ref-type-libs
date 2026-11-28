@@ -1,0 +1,25 @@
+\import topology.Continuity[A := Normal.Point,B := E.Vector] \as EndpointTopology;
+\definition domain: \Pow Normal.Point := S.Intersection t.domain (EndpointTopology.Preimage endpoint V.points);
+\definition open: S.IsOpenIn Normal.topology domain := (S.topologyLaws Normal.topology).intersectionOpen _ _ t.open
+  (continuous V.points (Open.Topology[].open V));
+\definition source[q: \Cast[Normal.Point] domain]: \Cast[Normal.Point] t.domain :=
+  \into[Normal.Point](q,t.domain) \by { (\bysub(Normal.Point,domain,q)).left };
+\definition target[y: Open.Carrier V]: Open.Carrier t.image := Open.inclusion V t.image included y;
+\import manifolds.EuclideanMap[n := d,m := d].Between[U := V,V := t.image] \as Coordinates;
+\definition inverse: InverseMap V :=
+  manifolds.Composition[n := d,m := d,l := d].Between[M := Coordinates.source,N := Coordinates.target,P := Normal.manifold].compose
+    (Coordinates.map (calculus.Identity[n := d].Between[U := V,V := t.image].map included)) t.inverse;
+\definition restricted: Neighborhood := Neighborhood {
+  domain := domain, open := open, image := V, inverse := inverse,
+  section := \fun (x: M.Point) => Logic.And[_, _]::# (t.section x)
+    (\idelim Maps.apply e x = endpoint (zero x) \with y: E.Vector => T.Member V.points y \by {
+      base: contains x, equality: sym!{{E.Vector}} _ _ (atZero x)
+    }),
+  into := \fun (q: \Cast[Normal.Point] domain) => (\bysub(Normal.Point,domain,q)).right,
+  back := \fun (y: Open.Carrier V) => Logic.And[_, _]::# (t.back (target y))
+    (\idelim (y \of E.Vector) = endpoint (t.inverse.apply (target y)) \with z: E.Vector => T.Member V.points z \by {
+      base: \bysub(E.Vector,V.points,y), equality: sym!{{E.Vector}} _ _ (t.right (target y))
+    }),
+  left := \fun (q: \Cast[Normal.Point] domain) => t.left (source q),
+  right := \fun (y: Open.Carrier V) => t.right (target y),
+};

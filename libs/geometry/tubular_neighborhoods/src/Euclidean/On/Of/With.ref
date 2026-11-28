@@ -42,6 +42,7 @@
 \module Disk;
 \module Inside(t: Neighborhood);
 \module Restriction(t: Neighborhood);
+\module OnImage(t: Neighborhood,V: Open.OpenSet,included: Open.Included V t.image,contains: \forall (x: M.Point) -> T.Member V.points (Maps.apply e x));
 \structure DiskNeighborhood: \Set := {
   tube: Neighborhood, width: Inside[t := tube].Width,
   collapse: E.Vector -> Disk[].Thom,

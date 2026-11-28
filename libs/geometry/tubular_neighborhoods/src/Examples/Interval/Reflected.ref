@@ -1,0 +1,20 @@
+\import G05.Of[result := result] \as Example;
+\import compact_embeddings.HalfSpace[k := result.dimension] \as Half;
+\import \root.HalfSpaceCoordinates[p := result.dimension] \as Coordinates;
+\import \root.ReflectedDouble[n := zero].On[B := Interval.manifold].With[cover := Geometry.boundaryCover].Into[p := result.dimension] \as Into;
+\import boundary_manifolds.Neat[n := one,m := Half.dimension].Between[M := Interval.manifold,N := Half.manifold] \as Neat;
+\definition embedding: Neat.Embedding := Example.embedding;
+\import Into.Reflected[f := embedding] \as Mirror;
+\import Mirror.WithCollar[compact := Compact.compact] \as CompactMirror;
+\import CompactMirror.Using[collar := result.collar,compatible := Example.collarCompatibility] \as Collared;
+\import boundary_manifolds.SmoothMap[n := one,m := Half.dimension].Between[M := Interval.manifold,N := Half.manifold] \as Maps;
+\definition endpointHeight[x: Interval.manifold.Point][endpoint: Logic.Or[x = Interval.left,x = Interval.right]]:
+  Half.height (Maps.apply Example.embedding x) = R.zero :=
+  trans!{{R.Real}} _ _ _ (sym!{{R.Real}} _ _ (Half.last (Maps.apply Example.embedding x)))
+    ((Coordinates.boundaryCriterion (Maps.apply Example.embedding x)).ltr ((Example.boundary x).rtl endpoint));
+\definition leftHeight: Mirror.height (Mirror.left Interval.left) = R.zero :=
+  trans!{{R.Real}} _ _ _ (Mirror.leftHeight Interval.left) (endpointHeight Interval.left (Logic.Or[_, _]::left (\refl(Interval.left))));
+\definition rightHeight: Mirror.height (Mirror.left Interval.right) = R.zero :=
+  trans!{{R.Real}} _ _ _ (Mirror.leftHeight Interval.right) (endpointHeight Interval.right (Logic.Or[_, _]::right (\refl(Interval.right))));
+\definition compactDouble: topology.Topology[Carrier := Collared.ordinary.Point].IsCompact Collared.ordinary.space :=
+  Collared.ordinaryCompact;

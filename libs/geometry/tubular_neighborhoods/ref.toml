@@ -20,3 +20,4 @@ algebraic_topology = { path = "../../topology/homotopy" }
 metric_spaces = { path = "../../topology/metric" }
 matrix_invariants = { path = "../../algebra/matrix_invariants" }
 boundary_manifolds = { path = "../boundary_manifolds" }
+manifold_gluing = { path = "../manifold_gluing" }

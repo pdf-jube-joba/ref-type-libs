@@ -1,0 +1,8 @@
+\import compact_embeddings.Examples[].Interval[] \as Source;
+\import Source.Neat[] \as G05;
+\import Source.Compactness[] \as Compact;
+\import boundary_manifolds.Interval[] \as Interval;
+\import boundary_manifolds.Disk[n := zero] \as Disk;
+\import calculus.Real[].Multivariable[n := one].Open[] \as Open;
+\import boundary_manifolds.Sublevel[n := zero].Of[U := Open.whole,f := Disk.function].Build[regular := Disk.regular] \as Geometry;
+\module Reflected(result: G05.Result);

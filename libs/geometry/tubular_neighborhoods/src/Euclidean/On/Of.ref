@@ -17,6 +17,7 @@
   smooth := \fun (b: Normal.Local) => b.decodeSmooth, definite := \fun (x: M.Point)(v: Normal.Fiber x) => E.separated v,
 };
 \module With(lift: Lift);
+\module Transition(a,b: Lift);
 \module Stabilized;
 \module Neat(j: std.Data[].FinSet[].Fin d);
 \definition tubularNeighborhood[compact: BaseSpace.IsCompact M.space]: \exists With[lift := straight].DiskNeighborhood :=
