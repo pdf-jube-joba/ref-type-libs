@@ -54,3 +54,4 @@
 \module Puncture;
 \module LocalPuncture;
 \module OpenToModel;
+\module EquatorialPull;

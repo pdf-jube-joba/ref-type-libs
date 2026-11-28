@@ -1,0 +1,52 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import singular_products.Cochains[A := Projective.Space, source := Projective.topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\import \parent.Puncture[] \as ModelSection;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import singular_cellular.DiskCollar[n := Degrees.two] \as Collar;
+\import Base.Equatorial[] \as Equatorial;
+\definition Circles: \Set := Spheres.Carrier Degrees.one;
+\definition circleTopology: topology.Topology[Carrier := Circles].Topology := Spheres.topology Degrees.one;
+\definition angular[p: Base.Intersection]: Circles := ModelSection.normalize (ModelSection.boundaryPoint p);
+\definition continuous: topology.Continuity[A := Base.Intersection, B := Circles].Continuous Base.intersectionTopology circleTopology angular :=
+  topology.Composition[A := Base.Intersection, B := Collar.Carrier, C := Circles].composeContinuous
+    Base.intersectionTopology Collar.topology circleTopology ModelSection.boundaryPoint ModelSection.normalize
+    ModelSection.boundaryContinuous ModelSection.normalizeContinuous;
+\definition law[w: Circles]: angular (Equatorial.inclusion w) = w := ModelSection.boundaryLaw w;
+\import singular_cohomology.Maps[A := Circles, B := Base.Intersection, source := circleTopology, target := Base.intersectionTopology]
+  .Composition[C := Circles, final := circleTopology].Coefficients[M := Product.integerCoefficients] \as Composite;
+\import singular_cohomology.Maps[A := Base.Intersection, B := Circles, source := Base.intersectionTopology, target := circleTopology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as AnglePull;
+\import singular_cohomology.Maps[A := Circles, B := Base.Intersection, source := circleTopology, target := Base.intersectionTopology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as InclusionPull;
+\import cohomology_models.Spheres[].With[coefficients := Product.integerCoefficients] \as Spherical;
+\definition CircleClass: \Set := Spherical.cohomology Degrees.one Degrees.one;
+\import singular_cohomology.Identity[A := Circles, source := circleTopology] \as Identity;
+\import singular_cohomology.Maps[A := Circles, B := Circles, source := circleTopology, target := circleTopology]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients].At[n := Degrees.one] \as Pull;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring].End[V := I.Int^, space := Product.integerCoefficients.space] \as Scalars;
+\definition composed[w: Circles]: Circles := angular (Equatorial.inclusion w);
+\definition composedContinuous: topology.Continuity[A := Circles, B := Circles].Continuous circleTopology circleTopology composed :=
+  topology.Composition[A := Circles, B := Base.Intersection, C := Circles].composeContinuous
+    circleTopology Base.intersectionTopology circleTopology Equatorial.inclusion angular Equatorial.Topology[].inclusionContinuous continuous;
+\definition composedIdentity[u: CircleClass]: (Pull.induced composed composedContinuous Scalars.identity).apply u = u :=
+  (\idelim Identity.function = composed \with f: (Circles -> Circles) =>
+    \forall (regular: topology.Continuity[A := Circles, B := Circles].Continuous circleTopology circleTopology f) ->
+      (Pull.induced f regular Scalars.identity).apply u = u \by {
+    base: \fun (regular: topology.Continuity[A := Circles, B := Circles].Continuous circleTopology circleTopology Identity.function) =>
+      Identity.Coefficients[M := Product.integerCoefficients].At[n := Degrees.one].cohomologyIdentity u,
+    equality: \axiom:funext(Identity.function, composed, (\fun (w: Circles) => sym!{Circles} _ _ (law w)))
+  }) composedContinuous;
+\definition onClasses[u: CircleClass]: (InclusionPull.induced Equatorial.inclusion Equatorial.Topology[].inclusionContinuous Scalars.identity).apply
+    ((AnglePull.induced angular continuous Scalars.identity).apply u) = u :=
+  trans!{CircleClass} _ _ _ (sym!{CircleClass} _ _
+    (Composite.onCohomology Equatorial.inclusion Equatorial.Topology[].inclusionContinuous angular continuous Degrees.one u)) (composedIdentity u);
+\import singular_cohomology.Cochains[A := Base.Intersection, source := Base.intersectionTopology].With[coefficients := Product.integerCoefficients] \as IntersectionH;
+\definition IntersectionClass: \Set := IntersectionH.cohomology Degrees.one;
+\import singular_cohomology.Equivalence[A := Circles, B := Base.Intersection, source := circleTopology, target := Base.intersectionTopology]
+  .With[coefficients := Product.integerCoefficients].At[n := Degrees.one] \as EquatorComparison;
+\definition isomorphism: _ := EquatorComparison.isomorphism Equatorial.equivalence;
+\definition angularClassLaw[u: CircleClass]: (AnglePull.induced angular continuous Scalars.identity).apply u = isomorphism.forward.apply u :=
+  trans!{IntersectionClass} _ _ _
+    (sym!{IntersectionClass} _ _ (isomorphism.rightInverse ((AnglePull.induced angular continuous Scalars.identity).apply u)))
+    (congr!{CircleClass IntersectionClass} isomorphism.forward.apply _ _ (onClasses u));
