@@ -36,6 +36,7 @@ packages = [
     "analysis/fourier_schwartz",
     "analysis/fourier_l2",
     "analysis/euclidean_sobolev",
+    "analysis/sobolev_compactness",
     "analysis/euclidean_measure",
     "analysis/complex_hilbert",
     "analysis/fredholm_operators",

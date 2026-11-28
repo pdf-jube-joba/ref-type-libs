@@ -1,0 +1,64 @@
+\import fourier_schwartz.Phase[] \as PhaseAlgebra;
+\import PhaseAlgebra.Global[] \as Phase;
+\import fourier_schwartz.RealBounds[] \as Bounds;
+\import E.Kernel[] \as K;
+\import Real.Distance[] \as Distance;
+\import Real.FiniteSums[] \as Sum;
+\import topological_algebra.Euclidean[].Dimension[n := n].Norm[] \as Geometry;
+\definition phaseReal[a, b: Real.Real]: R.Le (Real.distance (C.re (Phase.value a)) (C.re (Phase.value b))) (Real.distance a b) :=
+  Logic.orElim _ _ _ (Classical.excludedMiddle (a = b))
+    (\fun (same: _) => \idelim a = b \with y: Real.Real =>
+      R.Le (Real.distance (C.re (Phase.value a)) (C.re (Phase.value y))) (Real.distance a y) \by {
+        base: R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Distance.distanceSelf _)) (Distance.distanceNonnegative a a), equality: same
+      })
+    (\fun (different: _) => R.leReplace _ _ _ _
+      (Bounds.absDifference (C.re (Phase.value a)) (C.re (Phase.value b))) (Laws.fieldMulOneLeft _)
+      (Bounds.increment (\fun (s: Real.Real) => C.re (Phase.value s)) (\fun (s: Real.Real) => Real.neg (C.im (Phase.value s)))
+        b a Real.one (\fun (s: Real.Real) => (Phase.derivative s).real)
+        (\fun (s: Real.Real) => R.leReplace _ _ _ _ (sym!{Real.Real} _ _ (Product.absNeg (C.im (Phase.value s))))
+          (Phase.modulus s) (Scalars.imaginaryAbsolute (Phase.value s))) different));
+\definition phaseImaginary[a, b: Real.Real]: R.Le (Real.distance (C.im (Phase.value a)) (C.im (Phase.value b))) (Real.distance a b) :=
+  Logic.orElim _ _ _ (Classical.excludedMiddle (a = b))
+    (\fun (same: _) => \idelim a = b \with y: Real.Real =>
+      R.Le (Real.distance (C.im (Phase.value a)) (C.im (Phase.value y))) (Real.distance a y) \by {
+        base: R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Distance.distanceSelf _)) (Distance.distanceNonnegative a a), equality: same
+      })
+    (\fun (different: _) => R.leReplace _ _ _ _
+      (Bounds.absDifference (C.im (Phase.value a)) (C.im (Phase.value b))) (Laws.fieldMulOneLeft _)
+      (Bounds.increment (\fun (s: Real.Real) => C.im (Phase.value s)) (\fun (s: Real.Real) => C.re (Phase.value s))
+        b a Real.one (\fun (s: Real.Real) => (Phase.derivative s).imaginary)
+        (\fun (s: Real.Real) => R.leReplaceRight _ _ _ (Phase.modulus s) (Scalars.realAbsolute (Phase.value s))) different));
+\definition phaseBound[a, b: Real.Real]: R.Le (Abs.abs (D.sub (Phase.value a) (Phase.value b)))
+  (Real.mul Powers.two (Real.distance a b)) :=
+  R.leTrans _ _ _ (Scalars.absComponents (D.sub (Phase.value a) (Phase.value b)))
+    (R.leReplace _ _ _ _ (congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _
+      (sym!{Real.Real} _ _ (Bounds.absDifference (C.re (Phase.value a)) (C.re (Phase.value b))))
+      (sym!{Real.Real} _ _ (Bounds.absDifference (C.im (Phase.value a)) (C.im (Phase.value b)))))
+      (sym!{Real.Real} _ _ (Powers.twice (Real.distance a b)))
+      (Estimates.addLe _ _ _ _ (phaseReal a b) (phaseImaginary a b)));
+\definition coordinateMass[x: Point]: Real.Real := Sum.sum n (\fun (i: E.Coordinate) => Product.abs (x i));
+\definition coordinateMassNonnegative[x: Point]: R.Le Real.zero (coordinateMass x) :=
+  Sum.nonnegative n _ (\fun (i: E.Coordinate) => Product.absNonnegative (x i));
+\definition pairingBound[x, a, b: Point]: R.Le (Real.distance (K.pairing x a) (K.pairing x b))
+  (Real.mul (coordinateMass x) (Geometry.metric.distance a b)) := \block {
+  \let term: E.Coordinate -> Real.Real := \fun (i: E.Coordinate) => Real.mul (x i) (Real.sub (a i) (b i)) \then
+  \let difference: Sum.sum n term = Real.sub (K.pairing x a) (K.pairing x b) := trans!{Real.Real} _ _ _
+    (Sum.congruent n term _ (\fun (i: E.Coordinate) => Algebra.mulSub (x i) (a i) (b i)))
+    (Sum.difference n (\fun (i: E.Coordinate) => Real.mul (x i) (a i)) (\fun (i: E.Coordinate) => Real.mul (x i) (b i))) \then
+  \return R.leTrans _ (Sum.sum n (\fun (i: E.Coordinate) => Real.distance (term i) Real.zero)) _
+    (R.leReplaceLeft _ _ _ (trans!{Real.Real} _ _ _
+      (Distance.distanceSymmetric (Sum.sum n term) Real.zero)
+      (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} Product.abs _ _ difference)
+        (Bounds.absDifference _ _))) (Sum.absolute n term))
+    (R.leReplaceRight _ _ _ (Sum.Convex[].scalarRight n (\fun (i: E.Coordinate) => Product.abs (x i)) (Geometry.metric.distance a b))
+      (Sum.comparison n _ _ (\fun (i: E.Coordinate) => R.leReplaceLeft _ _ _
+        (trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ (Product.absProduct (x i) (Real.sub (a i) (b i))))
+          (Distance.distanceSymmetric Real.zero (term i)))
+        (Estimates.mulMonotone _ _ _ (Product.absNonnegative (x i))
+          (R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Bounds.absDifference (a i) (b i))) (Geometry.coordinateDistance a b i))))))
+};
+\definition translationBound[x, a, b: Point]: R.Le (Abs.abs (D.sub (K.value x a) (K.value x b)))
+  (Real.mul Powers.two (Real.mul (coordinateMass x) (Geometry.metric.distance a b))) :=
+  R.leTrans _ _ _ (phaseBound (Real.neg (K.pairing x a)) (Real.neg (K.pairing x b)))
+    (Estimates.mulMonotone Powers.two _ _ Powers.twoNonnegative
+      (R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Product.distanceNeg (K.pairing x a) (K.pairing x b))) (pairingBound x a b)));

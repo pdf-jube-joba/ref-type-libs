@@ -1,0 +1,85 @@
+\definition coefficient[a, b: Point]: Real.Real := Real.mul Powers.two (Real.mul c (Geometry.metric.distance a b));
+\definition absoluteOutside[f: L2.Representatives][x: Point]: Logic.Not (Sets.Member K x) -> absolute f x = Real.zero :=
+  \fun (outside: _) => eq_reason_in!{Real.Real _
+    "=" _ "by" { congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Product.abs (Real.mul (Abs.abs (f x)) r)) _ _ (Indicator.outside x outside) }
+    "=" _ "by" { congr!{Real.Real Real.Real} Product.abs _ _ (Laws.fieldMulZeroRight _) }
+    "=" _ "by" { Distance.distanceSelf Real.zero }
+  };
+\definition dominator[f: L2.Representatives][a, b: Point]: I.Representatives :=
+  Scaling.scalarRepresentative (coefficient a b) (absolute f);
+\definition phaseOn[a, b, x: Point]: Sets.Member K x ->
+  R.Le (Abs.abs (D.sub (PhaseKernel.value x a) (PhaseKernel.value x b))) (coefficient a b) :=
+  \fun (member: _) => \block {
+    \let d: Real.Real := Geometry.metric.distance a b \then
+    \let estimate: R.Le (Real.mul (KEstimate.coordinateMass x) d) (Real.mul c d) :=
+      R.leReplace _ _ _ _ (Laws.fieldMulComm d (KEstimate.coordinateMass x)) (Laws.fieldMulComm d c)
+        (Estimates.mulMonotone d (KEstimate.coordinateMass x) c (Geometry.metric.nonnegative a b) (coordinateBound x member)) \then
+    \return R.leTrans _ _ _ (KEstimate.translationBound x a b)
+      (Estimates.mulMonotone Powers.two _ _ Powers.twoNonnegative estimate)
+  };
+\definition pointwise[f: L2.Representatives][a, b, x: Point]:
+  R.Le (Abs.abs (sectionDifference f a b x)) (dominator f a b x) := \block {
+  \let v: Real.Real := absolute f x \then
+  \let u: Real.Real := Abs.abs (D.sub (PhaseKernel.value x a) (PhaseKernel.value x b)) \then
+  \let estimate: R.Le (Real.mul v u) (Real.mul (coefficient a b) v) :=
+    Logic.orElim (Sets.Member K x) (Logic.Not (Sets.Member K x))
+      (R.Le (Real.mul v u) (Real.mul (coefficient a b) v)) (Classical.excludedMiddle (Sets.Member K x))
+      (\fun (member: _) => R.leReplaceRight (Real.mul v u) (Real.mul v (coefficient a b)) (Real.mul (coefficient a b) v)
+        (Laws.fieldMulComm v (coefficient a b))
+        (Estimates.mulMonotone v u (coefficient a b) (Product.absNonnegative _) (phaseOn a b x member)))
+      (\fun (absent: _) => R.leReplace Real.zero (Real.mul v u) Real.zero (Real.mul (coefficient a b) v)
+        (sym!{Real.Real} _ _ (trans!{Real.Real} _ _ _
+          (congr!{Real.Real Real.Real} (\fun (r: Real.Real) => Real.mul r u) _ _ (absoluteOutside f x absent))
+          (Laws.fieldMulZeroLeft u)))
+        (sym!{Real.Real} _ _ (trans!{Real.Real} _ _ _
+          (congr!{Real.Real Real.Real} (Real.mul (coefficient a b)) _ _ (absoluteOutside f x absent))
+          (Laws.fieldMulZeroRight (coefficient a b))))
+        (R.leRefl Real.zero)) \then
+  \return R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (differenceModulus f a b x)) estimate
+};
+\definition componentDifferences[f: L2.Representatives][a, b: Point]:
+  Logic.And[
+    R.Le (Real.distance (C.re (transform f a)) (C.re (transform f b))) (I.integral (dominator f a b)),
+    R.Le (Real.distance (C.im (transform f a)) (C.im (transform f b))) (I.integral (dominator f a b))] := \block {
+  \let same: CI.integral (sectionDifference f a b) = D.sub (transform f a) (transform f b) :=
+    integralDifference (FI.section (integrable f) a) (FI.section (integrable f) b) \then
+  \let bounds: Logic.And[
+    R.Le (Product.abs (C.re (CI.integral (sectionDifference f a b)))) (I.integral (dominator f a b)),
+    R.Le (Product.abs (C.im (CI.integral (sectionDifference f a b)))) (I.integral (dominator f a b))] :=
+    CI.componentBounds (sectionDifference f a b) (dominator f a b)
+      (\fun (x: Point) => R.leTrans _ _ _ (Scalars.realAbsolute _) (pointwise f a b x))
+      (\fun (x: Point) => R.leTrans _ _ _ (Scalars.imaginaryAbsolute _) (pointwise f a b x)) \then
+  \return Logic.And[_, _]::#
+    (R.leReplaceLeft _ _ _ (trans!{Real.Real} _ _ _
+      (congr!{C.Complex Real.Real} (\fun (z: C.Complex) => Product.abs (C.re z)) _ _ same)
+      (fourier_schwartz.RealBounds[].absDifference _ _)) bounds.left)
+    (R.leReplaceLeft _ _ _ (trans!{Real.Real} _ _ _
+      (congr!{C.Complex Real.Real} (\fun (z: C.Complex) => Product.abs (C.im z)) _ _ same)
+      (fourier_schwartz.RealBounds[].absDifference _ _)) bounds.right)
+};
+\definition integralBound[f: L2.Representatives][a, b: Point]:
+  R.Le (I.integral (dominator f a b)) (Real.mul (Real.mul Powers.two (Real.mul c (Real.mul (L2.normRepresentative f) size))) (Geometry.metric.distance a b)) :=
+  R.leReplace _ _ _ _
+    (sym!{Real.Real} _ _ (Scaling.integralScalar (coefficient a b) (absolute f)))
+    (eq_reason_in!{Real.Real _
+      "=" _ "by" { Laws.fieldMulAssoc _ _ _ }
+      "=" _ "by" { congr!{Real.Real Real.Real} (Real.mul Powers.two) _ _ (eq_reason_in!{Real.Real _
+        "=" _ "by" { Laws.fieldMulAssoc _ _ _ }
+        "=" _ "by" { congr!{Real.Real Real.Real} (Real.mul c) _ _ (Laws.fieldMulComm _ _) }
+        "=" _ "by" { sym!{Real.Real} _ _ (Laws.fieldMulAssoc _ _ _) }
+      }) }
+      "=" _ "by" { sym!{Real.Real} _ _ (Laws.fieldMulAssoc _ _ _) }
+    })
+    (Estimates.mulMonotone _ _ _
+      (Laws.fieldMulNonnegative _ _ Powers.twoNonnegative
+        (Laws.fieldMulNonnegative _ _ (lp_spaces.Powers[].baseNonnegative c) (Geometry.metric.nonnegative a b)))
+      (absoluteNorm f));
+\definition realBound[f: L2.Representatives][a, b: Point]:
+  R.Le (Real.distance (C.re (transform f a)) (C.re (transform f b)))
+    (Real.mul (Real.mul Powers.two (Real.mul c (Real.mul (L2.normRepresentative f) size))) (Geometry.metric.distance a b)) :=
+  R.leTrans _ _ _ (componentDifferences f a b).left (integralBound f a b);
+\definition imaginaryBound[f: L2.Representatives][a, b: Point]:
+  R.Le (Real.distance (C.im (transform f a)) (C.im (transform f b)))
+    (Real.mul (Real.mul Powers.two (Real.mul c (Real.mul (L2.normRepresentative f) size))) (Geometry.metric.distance a b)) :=
+  R.leTrans _ _ _ (componentDifferences f a b).right (integralBound f a b);
+\module LowRegion(F: \Pow Point, frequencyCompact: Sets.IsCompactIn Ambient.topology F, B: LE.Nonnegative);

@@ -1,0 +1,42 @@
+\import LE.CompactBounds[] \as Boxes;
+\import euclidean_measure.Euclidean[n := n] \as Lebesgue;
+\import euclidean_measure.BoxCompact[n := n] \as BoxCompact;
+\import Sets.Compactness[] \as Compactness;
+\import metric_spaces.RealLine[].Rays[] \as Rays;
+\import E.Decay[].WeightBounds[] \as Weights;
+\import topological_algebra.Euclidean[].Dimension[n := n].Def[] \as Coordinates;
+\import topological_algebra.Euclidean[].Dimension[n := n].Norm[] \as Geometry;
+\definition regionOpen: Sets.IsOpenIn Ambient.topology region := weightContinuous (Rays.Above t) (Rays.aboveOpen t);
+\definition lowClosed: Sets.IsClosedIn Ambient.topology lowRegion :=
+  \idelim region = Sets.Complement lowRegion \with S: \Pow Point => Sets.IsOpenIn Ambient.topology S \by {
+    base: regionOpen,
+    equality: \axiom:setext(region, Sets.Complement lowRegion,
+      (\fun (x: Point)(member: _) => \fun (absent: _) => absent member),
+      (\fun (x: Point)(member: _) => Sigma.doubleNegative (Sets.Member region x) member))
+  };
+\definition baseBelowWeight[x: Point]: \forall (j: N.Nat^) -> Logic.Not (j = N.Nat^::zero) -> R.Le (E.weightBase x) (E.weight j x) :=
+  \induction (j: N.Nat^) \return Logic.Not (j = N.Nat^::zero) -> R.Le (E.weightBase x) (E.weight j x) \with {
+    | zero: \fun (impossible: _) => Logic.falseElim _ (impossible (\refl(N.Nat^::zero)))
+    | succ: \fun (j: N.Nat^)(previous: _)(positiveOrder: _) =>
+      R.leReplaceLeft _ _ _ (Algebra.mulOneRight (E.weightBase x))
+        (Estimates.mulMonotone (E.weightBase x) _ _ (E.weightBaseNonnegative x) (Weights.weightOne j x))
+  };
+\definition radius: LE.Nonnegative := \into[Real.Real](Real.mul t t, LE.Nonnegative) \by { Algebra.squareNonnegative t };
+\definition normBound[x: Point]: Sets.Member lowRegion x -> R.Le (Coordinates.norm x) radius :=
+  \fun (member: _) => R.leTrans _ (E.weightBase x) _ (Weights.normBase x)
+    (R.leTrans _ (E.weight q x) _ (baseBelowWeight x q nonzero)
+      (R.leReplaceLeft _ _ _ (GapWeight.square x)
+        (Root.squareMonotone (GapWeight.value x) t
+          (Order.leOfLt _ _ (GapWeight.positive x)) (Order.leOfLt _ _ positive)
+          (Order.leOfNotLtReverse _ _ member))));
+\definition within: Sets.Subset lowRegion (Lebesgue.points (Boxes.box radius)) :=
+  \fun (x: Point)(member: _) => \block {
+    \let equal: Coordinates.pointDistance Coordinates.origin x = Coordinates.norm x :=
+      trans!{Real.Real} _ _ _ (Geometry.distanceSymmetric Coordinates.origin x)
+        (congr!{Point Real.Real} Coordinates.norm _ _ (\axiom:funext(Coordinates.subPoint x Coordinates.origin, x,
+          \fun (i: E.Coordinate) => Laws.subZeroRight (x i)))) \then
+    \return Boxes.coordinateBound x radius (R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ equal) (normBound x member))
+  };
+\definition compact: Sets.IsCompactIn Ambient.topology lowRegion :=
+  Compactness.closedSubset Ambient.topology (Lebesgue.points (Boxes.box radius)) lowRegion
+    (BoxCompact.compact (Boxes.box radius)) lowClosed within;

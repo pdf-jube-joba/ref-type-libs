@@ -1,0 +1,73 @@
+\import Sobolev.Order[k := k] \as Lower;
+\import Sobolev.Order[k := q] \as Difference;
+\import Sobolev.Order[k := Nat.add k q] \as Higher;
+\import Lower.Weight[] \as LowWeight;
+\import Difference.Weight[] \as GapWeight;
+\import Higher.Weight[] \as HighWeight;
+\import Mult.By[symbol := GapWeight.reciprocal] \as Ratio;
+\import Fourier.Weighted[weight := LowWeight.weight] \as LowModel;
+\import Fourier.Weighted[weight := HighWeight.weight] \as HighModel;
+\import Mult.By[symbol := LowModel.reciprocal] \as DivideLow;
+\import Mult.By[symbol := HighModel.reciprocal] \as DivideHigh;
+\definition factor[x: Point]: HighWeight.value x = Real.mul (LowWeight.value x) (GapWeight.value x) :=
+  Root.squaresInjective _ _
+    (Order.leOfLt _ _ (HighWeight.positive x))
+    (Laws.fieldMulNonnegative _ _ (Order.leOfLt _ _ (LowWeight.positive x)) (Order.leOfLt _ _ (GapWeight.positive x)))
+    (eq_reason_in!{Real.Real _
+      "=" _ "by" { HighWeight.square x }
+      "=" _ "by" { Powers.addition (E.weightBase x) k q }
+      "=" _ "by" { congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _
+        (sym!{Real.Real} _ _ (LowWeight.square x)) (sym!{Real.Real} _ _ (GapWeight.square x)) }
+      "=" _ "by" { sym!{Real.Real} _ _ (Algebra.mulFour _ _ _ _) }
+    });
+\definition lower: Higher.Positive -> Lower.Positive := Ratio.value;
+\definition normBound[x: Higher.Positive]: R.Le (Lower.norm (lower x)) (Higher.norm x) :=
+  R.leReplaceRight _ _ _ (Laws.fieldMulOneLeft _) (Ratio.bound x);
+\definition inverseFactor[x: Point]: Real.mul (LowWeight.inverse x) (GapWeight.inverse x) = HighWeight.inverse x :=
+  trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ (Powers.inverseProduct _ _ (LowWeight.positive x) (GapWeight.positive x)))
+    (congr!{Real.Real Real.Real} Laws.fieldInv _ _ (sym!{Real.Real} _ _ (factor x)));
+\module High(t: Real.Real, positive: R.Lt Real.zero t);
+\definition frequency: \forall (x: Higher.Positive) -> LowModel.frequency (lower x) = HighModel.frequency x :=
+  Q.induction
+    (\fun (x: Space) => LowModel.frequency (lower x) = HighModel.frequency x)
+    (\fun (f: L2.Representatives) => eq_reason_in!{Space _
+      "=" _ "by" { congr!{Space Space} LowModel.frequency _ _ (Ratio.onClass f) }
+      "=" _ "by" { DivideLow.onClass (Ratio.representative f) }
+      "=" _ "by" { L2.classPointwise (DivideLow.representative (Ratio.representative f))
+        (DivideHigh.representative f) (\fun (x: Point) => eq_reason_in!{C.Complex _
+          "=" _ "by" { Scalars.realProduct _ _ }
+          "=" _ "by" { congr!{C.Complex C.Complex} (D.scale (LowWeight.inverse x)) _ _ (Scalars.realProduct _ _) }
+          "=" _ "by" { Scalars.scaleCompose _ _ _ }
+          "=" _ "by" { congr!{Real.Real C.Complex} (\fun (a: Real.Real) => D.scale a (f x)) _ _ (inverseFactor x) }
+          "=" _ "by" { sym!{C.Complex} _ _ (Scalars.realProduct _ _) }
+        }) }
+      "=" _ "by" { sym!{Space} _ _ (DivideHigh.onClass f) }
+    });
+\definition physical[x: Higher.Positive]: Lower.physical (lower x) = Higher.physical x :=
+  congr!{Space Space} U.backward _ _ (frequency x);
+\definition Uniform[B: Scaling.NonnegativeScalar][epsilon, t: Real.Real]: \Prop :=
+  \forall (positive: R.Lt Real.zero t)(x: Higher.Positive) ->
+    R.Le (Higher.norm x) B -> R.Lt (Lower.norm (High[t := t, positive := positive].value x)) epsilon;
+\definition threshold[B: Scaling.NonnegativeScalar][epsilon: Real.Real]: R.Lt Real.zero epsilon ->
+  \exists (t: Real.Real \where Logic.And[R.Lt Real.zero t, Uniform B epsilon t]) := \block {
+  \fun (positive: _) \then
+  \let c: Real.Real := Product.coefficient B Real.zero \then
+  \let cp: R.Lt Real.zero c := Product.coefficientPositive B Real.zero \then
+  \let bBelow: R.Le B c := R.leReplaceLeft _ _ _ (Product.absOfNonnegative B (Scaling.nonnegative B))
+    (Product.coefficientFirst B Real.zero) \then
+  \let r: Real.Real := Product.radius c epsilon \then
+  \let rp: R.Lt Real.zero r := Product.radiusPositive c epsilon cp positive \then
+  \let t: Real.Real := Laws.fieldInv r \then
+  \let tp: R.Lt Real.zero t := Product.invPositive r rp \then
+  \let inverse: r = Laws.fieldInv t := Inverse.inverseUnique t r (Inverse.positiveNonzero t tp)
+    (trans!{Real.Real} _ _ _ (Laws.fieldMulComm r t)
+      (Laws.fieldInverseNonzero r (Inverse.positiveNonzero r rp))) \then
+  \let below: R.Lt (Real.mul (Laws.fieldInv t) B) epsilon := R.leLtTrans _ (Real.mul c r) _
+    (R.leReplace (Real.mul r B) (Real.mul (Laws.fieldInv t) B) (Real.mul r c) (Real.mul c r)
+      (congr!{Real.Real Real.Real} (\fun (z: Real.Real) => Real.mul z B) _ _ inverse)
+      (Laws.fieldMulComm r c) (Estimates.mulMonotone r B c (Order.leOfLt _ _ rp) bBelow))
+    (Product.radiusSmall c epsilon cp positive) \then
+  \return Logic.existsIntro[Real.Real, { t: Real.Real \where Logic.And[R.Lt Real.zero t, Uniform B epsilon t] }] t
+    (Logic.And[_, _]::# tp (\fun (tp: R.Lt Real.zero t)(x: Higher.Positive)(within: _) =>
+      R.leLtTrans _ _ _ (High[t := t, positive := tp].familyBound B x within) below))
+};

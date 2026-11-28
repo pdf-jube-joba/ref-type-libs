@@ -1,0 +1,42 @@
+\definition data: I.StepData := I.StepData {
+  set := K, coefficient := Real.one, measurable := measurable, nonnegative := Laws.oneNonnegative,
+};
+\import I.Step[p := data] \as Step;
+\import I.Evaluation[n := Step.size, s := Step.simple] \as Eval;
+\definition indicator: Point -> Real.Real := Eval.value;
+\definition indicatorMeasurable: Measure.IsMeasurable LE.measure indicator := Eval.measurable;
+\definition inside[x: Point]: Sets.Member K x -> indicator x = Real.one := Step.inside x;
+\definition outside[x: Point]: Logic.Not (Sets.Member K x) -> indicator x = Real.zero := Step.outside x;
+\definition bound[x: Point]: R.Le (Product.abs (indicator x)) Real.one :=
+  Logic.orElim _ _ _ (Classical.excludedMiddle (Sets.Member K x))
+    (\fun (member: _) => R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _
+      (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} Product.abs _ _ (inside x member))
+        (Product.absOfNonnegative Real.one Laws.oneNonnegative))) (R.leRefl Real.one))
+    (\fun (absent: _) => R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _
+      (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} Product.abs _ _ (outside x absent))
+        (Real.Distance[].distanceSelf Real.zero))) Laws.oneNonnegative);
+\definition realSymbol[h: Point -> Real.Real][m: Measure.IsMeasurable LE.measure h][c: Scaling.NonnegativeScalar]
+  [estimate: \forall (x: Point) -> R.Le (Product.abs (h x)) c]: Mult.Symbol := Mult.Symbol {
+  function := \fun (x: Point) => D.ofReal (h x),
+  measurable := Logic.And[_, _]::# m (I.integralLaw I.Zero[].representative).integrable.left,
+  coefficient := c,
+  bound := \fun (x: Point) => R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Scalars.realAxisAbs (h x))) (estimate x),
+};
+\definition one: Scaling.NonnegativeScalar := \into[Real.Real](Real.one, Scaling.NonnegativeScalar) \by { Laws.oneNonnegative };
+\definition symbol: Mult.Symbol := realSymbol indicator Eval.measurable one bound;
+\import Mult.By[symbol := symbol] \as Apply;
+\definition value: Space -> Space := Apply.value;
+\definition representative[f: L2.Representatives]: L2.Representatives := Apply.representative f;
+\definition onClass[f: L2.Representatives]: value (L2.ofFunction f) = L2.ofFunction (representative f) := Apply.onClass f;
+\definition normBound[x: Space]: R.Le (L2.normValue (value x)) (L2.normValue x) :=
+  R.leReplaceRight _ _ _ (Laws.fieldMulOneLeft _) (Apply.bound x);
+\definition onMember[f: L2.Representatives][x: Point]: Sets.Member K x -> Apply.representative f x = f x :=
+  \fun (member: _) => eq_reason_in!{C.Complex _
+    "=" _ "by" { Scalars.realProduct _ _ }
+    "=" _ "by" { congr!{Real.Real C.Complex} (\fun (a: Real.Real) => D.scale a (f x)) _ _ (inside x member) }
+    "=" _ "by" { Scalars.scaleOne _ }
+  };
+\definition offMember[f: L2.Representatives][x: Point]: Logic.Not (Sets.Member K x) -> Apply.representative f x = D.zero :=
+  \fun (absent: _) => trans!{C.Complex} _ _ _
+    (congr!{Real.Real C.Complex} (\fun (a: Real.Real) => D.mul (D.ofReal a) (f x)) _ _ (outside x absent))
+    (CL.mulZeroLeft (f x));
