@@ -1,0 +1,50 @@
+\import std.Data[].Nat[] \as N;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as IntegerCochains;
+\import chain_complexes.Cochain[].Over[R := I.Int^, ring := Integers.ring] \as NaturalCochains;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Modules.End[V := coefficients.Carrier, space := coefficients.space] \as Scalars;
+\import singular_cohomology.Chains[A := A, source := source] \as Domain;
+\import singular_cohomology.Chains[A := B, source := target] \as Codomain;
+\import Domain.Reduced[] \as DomainReduced;
+\import Codomain.Reduced[] \as CodomainReduced;
+\import Hom.Integer[P := DomainReduced.complex, N := coefficients] \as DomainHom;
+\import Hom.Integer[P := CodomainReduced.complex, N := coefficients] \as CodomainHom;
+\import singular_cohomology.Cochains[A := A, source := source].With[coefficients := coefficients] \as DomainNative;
+\import singular_cohomology.Cochains[A := B, source := target].With[coefficients := coefficients] \as CodomainNative;
+\import DomainNative.Reduced[].Positive[n := n] \as DomainCompare;
+\import CodomainNative.Reduced[].Positive[n := n] \as CodomainCompare;
+\import singular_cohomology.Maps[A := A, B := B, source := source, target := target] \as Maps;
+\import Hom.IntegerMapping[P := DomainReduced.complex, Q := CodomainReduced.complex, N := coefficients, L := coefficients]
+  .On[f := (Maps.Reduced[].map f regular), u := Scalars.identity] \as ReducedAction;
+\import Maps.Coefficients[M := coefficients, L := coefficients] \as NativeAction;
+\definition degree: N.Nat^ := N.Nat^::succ n;
+\definition z: I.Int^ := I.Int^::ofNat degree;
+\import IntegerCochains.Map[C := CodomainHom.complex, D := DomainHom.complex].At[k := z] \as ReducedPull;
+\import NaturalCochains.Map[C := CodomainNative.complex, D := DomainNative.complex].At[k := degree] \as NativePull;
+\import IntegerCochains.At[C := DomainHom.complex, z := z] \as FromAugmented;
+\import IntegerCochains.At[C := CodomainHom.complex, z := z] \as ToAugmented;
+\import NaturalCochains.At[C := DomainNative.complex, k := degree] \as FromNatural;
+\import Hom.On[P := Domain.complex, N := coefficients].At[n := degree] \as NaturalCochain;
+\definition fromReduced[h: ToAugmented.Closed]: FromNatural.CycleCarrier :=
+  DomainCompare.toNatural ((ReducedPull.cyclesMap ReducedAction.map).apply h);
+\definition fromOrdinary[h: ToAugmented.Closed]: FromNatural.CycleCarrier :=
+  (NativePull.cyclesMap (NativeAction.map f regular Scalars.identity)).apply (CodomainCompare.toNatural h);
+\definition value[h: ToAugmented.Closed][x: Domain.Carrier degree]: (fromReduced h).apply x = (fromOrdinary h).apply x := \block {
+  \let q: CodomainHom.Carrier z := h \then
+  \return \refl(q.apply ((Maps.push f regular).apply degree x))
+};
+\definition onCochain[h: ToAugmented.Closed]:
+    (\fun (q: DomainNative.Carrier degree) => q) (fromReduced h) = fromOrdinary h :=
+  NaturalCochain.ext _ _ (\fun (x: Domain.Carrier degree) => value h x);
+\definition reduced[q: ToAugmented.Cohomology]: FromAugmented.Cohomology := (ReducedPull.induced ReducedAction.map).apply q;
+\definition ordinary[q: CodomainNative.cohomology degree]: DomainNative.cohomology degree :=
+  (NativeAction.At[n := degree].induced f regular Scalars.identity).apply q;
+\definition law: \forall (q: ToAugmented.Cohomology) -> DomainCompare.isomorphism.forward.apply (reduced q) = ordinary (CodomainCompare.isomorphism.forward.apply q) :=
+  ToAugmented.classInduction (\fun (q: ToAugmented.Cohomology) => DomainCompare.isomorphism.forward.apply (reduced q) = ordinary (CodomainCompare.isomorphism.forward.apply q))
+    (\fun (h: ToAugmented.Closed) => eq_reason_in!{{DomainNative.cohomology degree} _
+      "=" _ "by" { congr!{{FromAugmented.Cohomology} {DomainNative.cohomology degree}} DomainCompare.isomorphism.forward.apply _ _ (ReducedPull.onClass ReducedAction.map h) }
+      "=" _ "by" { DomainCompare.onIntegerClass ((ReducedPull.cyclesMap ReducedAction.map).apply h) }
+      "=" _ "by" { FromNatural.equalClass (fromReduced h) (fromOrdinary h) (onCochain h) }
+      "=" _ "by" { sym!{{DomainNative.cohomology degree}} _ _ (NativePull.onClass (NativeAction.map f regular Scalars.identity) (CodomainCompare.toNatural h)) }
+      "=" _ "by" { congr!{{CodomainNative.cohomology degree} {DomainNative.cohomology degree}} ordinary _ _ (sym!{{CodomainNative.cohomology degree}} _ _ (CodomainCompare.onIntegerClass h)) }
+    });

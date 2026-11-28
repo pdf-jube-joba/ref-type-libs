@@ -43,3 +43,4 @@
 \module PairAugmentation(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A);
 \module PositiveConnecting(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A, n: std.Data[].Nat[].Nat^);
 \module PositiveForgetting(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A, n: std.Data[].Nat[].Nat^);
+\module PullCompatibility(A: \Set, B: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology, n: std.Data[].Nat[].Nat^, f: A -> B, regular: topology.Continuity[A := A, B := B].Continuous source target f);

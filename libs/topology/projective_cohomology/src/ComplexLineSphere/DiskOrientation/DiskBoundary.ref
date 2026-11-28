@@ -1,0 +1,96 @@
+\import std.Data[].Nat[] \as N;
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := n] \as Lower;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := N.Nat^::succ n] \as Higher;
+\import algebraic_topology.Cylinder[A := Lower.DiskCarrier] \as CylinderSpace;
+\import Lower.Step[] \as Step;
+\import Step.Cylinder[] \as CoordinateChange;
+\import algebraic_topology.Euclidean[].Dimension[n := N.Nat^::succ n] \as Plane;
+\import singular_cellular.DiskRelative[n := n] \as NativeDisk;
+\import cohomology_thom.StandardShell[n := (N.Nat^::succ n)] \as Shell;
+\import Shell.PointModel[] \as PointModel;
+\import cohomology_thom.LocalDisk[].On[X := Point.Carrier, source := Point.topology].Step[n := n] \as Comparison;
+\import cohomology_thom.RelativeSuspension[].On[A := Lower.DiskCarrier, source := Lower.diskTopology, subset := Lower.boundary] \as CylinderModel;
+\import singular_cohomology.Relative[A := Plane.Disk, source := Plane.diskTopology, subset := NativeDisk.subset] \as NativePair;
+\import singular_cohomology.Relative[A := Higher.DiskCarrier, source := Higher.diskTopology, subset := Higher.boundary] \as PointPair;
+\import singular_cohomology.Relative[A := Step.BoxCarrier, source := Step.boxTopology, subset := Step.BoxBoundary] \as BoxPair;
+\import singular_cohomology.Relative[A := CylinderSpace.Carrier, source := CylinderModel.topology, subset := CylinderModel.boundary] \as CylinderPair;
+\import NativePair.Homeomorphism[B := Higher.DiskCarrier].Over[target := Higher.diskTopology, targetSubset := Higher.boundary] \as ModelPair;
+\import ModelPair.On[data := PointModel.pair] \as Model;
+\import PointPair.Homeomorphism[B := Step.BoxCarrier].Over[target := Step.boxTopology, targetSubset := Step.BoxBoundary] \as RoundPairs;
+\import RoundPairs.On[data := Comparison.round] \as Round;
+\import BoxPair.Homeomorphism[B := CylinderSpace.Carrier].Over[target := CylinderModel.topology, targetSubset := CylinderModel.boundary] \as CylinderPairs;
+\import CylinderPairs.On[data := Comparison.cylinder] \as Cylinder;
+\import NativePair.Maps[B := Higher.DiskCarrier].Over[target := Higher.diskTopology, targetSubset := Higher.boundary].On[f := Model.forward] \as NativeForward;
+\import PointPair.Maps[B := Plane.Disk].Over[target := Plane.diskTopology, targetSubset := NativeDisk.subset].On[f := Model.backward] \as NativeBackward;
+\import PointPair.Maps[B := Step.BoxCarrier].Over[target := Step.boxTopology, targetSubset := Step.BoxBoundary].On[f := Round.forward] \as RoundForward;
+\import BoxPair.Maps[B := Higher.DiskCarrier].Over[target := Higher.diskTopology, targetSubset := Higher.boundary].On[f := Round.backward] \as RoundBackward;
+\import BoxPair.Maps[B := CylinderSpace.Carrier].Over[target := CylinderModel.topology, targetSubset := CylinderModel.boundary].On[f := Cylinder.forward] \as CylinderForward;
+\import CylinderPair.Maps[B := Step.BoxCarrier].Over[target := Step.boxTopology, targetSubset := Step.BoxBoundary].On[f := Cylinder.backward] \as CylinderBackward;
+\definition NativeBoundary: \Set := NativePair.SubspaceCarrier;
+\definition nativeTopology: topology.Topology[Carrier := NativePair.SubspaceCarrier].Topology :=
+  topology.Topology[Carrier := Plane.Disk].Subspace[S := NativeDisk.subset].topology Plane.diskTopology;
+\definition pointTopology: topology.Topology[Carrier := PointPair.SubspaceCarrier].Topology :=
+  topology.Topology[Carrier := Higher.DiskCarrier].Subspace[S := Higher.boundary].topology Higher.diskTopology;
+\definition boxTopology: topology.Topology[Carrier := BoxPair.SubspaceCarrier].Topology :=
+  topology.Topology[Carrier := Step.BoxCarrier].Subspace[S := Step.BoxBoundary].topology Step.boxTopology;
+\definition cylinderTopology: topology.Topology[Carrier := CylinderPair.SubspaceCarrier].Topology :=
+  topology.Topology[Carrier := CylinderSpace.Carrier].Subspace[S := CylinderModel.boundary].topology CylinderModel.topology;
+\import topology.Homeomorphism[A := NativePair.SubspaceCarrier, B := PointPair.SubspaceCarrier] \as NativeHome;
+\definition model: NativeHome.Homeomorphism[nativeTopology, pointTopology] := NativeHome.Homeomorphism[nativeTopology, pointTopology] {
+  forward := NativeForward.restriction, backward := NativeBackward.restriction,
+  forwardContinuous := NativeForward.restrictionContinuous, backwardContinuous := NativeBackward.restrictionContinuous,
+  leftInverse := \fun (x: NativePair.SubspaceCarrier) => Model.homeomorphismLaws.leftInverse x,
+  rightInverse := \fun (x: PointPair.SubspaceCarrier) => Model.homeomorphismLaws.rightInverse x
+};
+\import topology.Homeomorphism[A := PointPair.SubspaceCarrier, B := BoxPair.SubspaceCarrier] \as RoundHome;
+\definition round: RoundHome.Homeomorphism[pointTopology, boxTopology] := RoundHome.Homeomorphism[pointTopology, boxTopology] {
+  forward := RoundForward.restriction, backward := RoundBackward.restriction,
+  forwardContinuous := RoundForward.restrictionContinuous, backwardContinuous := RoundBackward.restrictionContinuous,
+  leftInverse := \fun (x: PointPair.SubspaceCarrier) => Round.homeomorphismLaws.leftInverse x,
+  rightInverse := \fun (x: BoxPair.SubspaceCarrier) => Round.homeomorphismLaws.rightInverse x
+};
+\import topology.Homeomorphism[A := BoxPair.SubspaceCarrier, B := CylinderPair.SubspaceCarrier] \as CylinderHome;
+\definition cylinder: CylinderHome.Homeomorphism[boxTopology, cylinderTopology] := CylinderHome.Homeomorphism[boxTopology, cylinderTopology] {
+  forward := CylinderForward.restriction, backward := CylinderBackward.restriction,
+  forwardContinuous := CylinderForward.restrictionContinuous, backwardContinuous := CylinderBackward.restrictionContinuous,
+  leftInverse := \fun (x: BoxPair.SubspaceCarrier) => Cylinder.homeomorphismLaws.leftInverse x,
+  rightInverse := \fun (x: CylinderPair.SubspaceCarrier) => Cylinder.homeomorphismLaws.rightInverse x
+};
+\import topology.Homeomorphism[A := Spheres.Carrier n, B := NativePair.SubspaceCarrier].Composition[C := PointPair.SubspaceCarrier] \as First;
+\definition BoxBoundary: \Set := BoxPair.SubspaceCarrier;
+\definition CylinderBoundary: \Set := CylinderPair.SubspaceCarrier;
+\definition PointBoundary: \Set := PointPair.SubspaceCarrier;
+\definition axisHomeomorphism: topology.Homeomorphism[A := Spheres.Carrier n, B := PointBoundary].Homeomorphism[Spheres.topology n, pointTopology] :=
+  First.compose (Spheres.topology n) nativeTopology pointTopology NativeDisk.homeomorphism model;
+\import topology.Homeomorphism[A := Spheres.Carrier n, B := PointPair.SubspaceCarrier].Composition[C := BoxPair.SubspaceCarrier] \as Second;
+\import topology.Homeomorphism[A := Spheres.Carrier n, B := BoxPair.SubspaceCarrier].Composition[C := CylinderPair.SubspaceCarrier] \as Third;
+\import topology.Homeomorphism[A := Spheres.Carrier n, B := CylinderPair.SubspaceCarrier] \as Final;
+\definition homeomorphism: Final.Homeomorphism[Spheres.topology n, cylinderTopology] :=
+  Third.compose (Spheres.topology n) boxTopology cylinderTopology
+    (Second.compose (Spheres.topology n) pointTopology boxTopology
+      axisHomeomorphism round) cylinder;
+\import real.Analysis[] \as R;
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import std.Data[].Pair[] \as Pair;
+\import algebraic_topology.Euclidean[].Dimension[n := n] \as Axis;
+\import Axis.Splitting[] \as Split;
+\import thom_spaces.Thom[].SymmetricInterval[] \as Symmetric;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := linear_algebra.Hermitian[].Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Bundles;
+\import Bundles.Trivial[X := Point.Carrier, n := N.Nat^::succ n, baseSpace := Point.topology] \as FrameBundle;
+\import Bundles.Family[X := Point.Carrier, F := (\fun (x: Point.Carrier) => Bundles.Vector (N.Nat^::succ n))] \as FrameFamily;
+\import thom_spaces.Thom[].Quadratic[].Over[X := Point.Carrier, F := (\fun (x: Point.Carrier) => Bundles.Vector (N.Nat^::succ n)), bundle := FrameBundle.bundle] \as Gauges;
+\import Gauges.Comparison[left := Step.standard, right := Step.box] \as Radial;
+\import thom_spaces.Thom[].Levels[A := Higher.Point, B := FrameFamily.Point, source := Higher.totalTopology, target := FrameBundle.topology,
+  q := Higher.squared, r := Step.squared, h := Step.totalHomeomorphism, forwardSquared := Step.forwardSquared, backwardSquared := Step.backwardSquared] \as Levels;
+\definition disk[x: Spheres.Carrier n]: Higher.DiskCarrier :=
+  \into[Higher.Point](Pair.pair Point.Carrier Plane.Coordinate Point.point x, Higher.disk) \by {
+    D.leReplaceLeft R.one (Plane.normSquared x) R.one
+      (sym!{R.Real} _ _ (\bysub(Plane.Coordinate, Plane.Boundary, x))) (D.leRefl R.one)
+  };
+\definition coordinates[x: Spheres.Carrier n]: CylinderSpace.Carrier :=
+  CoordinateChange.forward (Levels.diskHomeomorphism.forward (disk x));
+\definition coordinatesLaw[x: Spheres.Carrier n]: homeomorphism.forward x = coordinates x := \refl(coordinates x);
+\module Connecting;

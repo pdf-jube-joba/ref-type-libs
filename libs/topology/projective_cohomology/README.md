@@ -47,9 +47,11 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `ComplexLineSphere.Section.Frame.DiskCoordinates.EquatorialPull` | The angular section map induces the same integral degree-one pullback as the equatorial retraction |
 | `ComplexLineSphere.Orientation` | The chosen integral generator of the standard two-sphere is obtained from its northern relative generator by the excision comparison and forgetting |
 | `ComplexLineSphere.Orientation.PositiveConnecting` | The positive-degree comparison from ordinary to reduced cohomology commutes with the connecting map of a pair |
+| `ComplexLineSphere.Orientation.PullCompatibility` | Positive-degree integral pullbacks commute with the reduced-to-ordinary comparison |
 | `ComplexLineSphere.DiskOrientation.ZeroSphereSign.DiscreteRepresentative.Spherical` | The chosen reduced integral generator of the standard zero-sphere is represented by the cocycle with values one and zero at its positive and negative points |
 | `ComplexLineSphere.DiskOrientation.SphereCoverSign.CohomologyLaw` | The ordinary Mayer–Vietoris connecting map for the standard sphere cover agrees with the northern relative connecting map followed by inverse excision and forgetting |
 | `ComplexLineSphere.DiskOrientation.CircleSmallSign` | The normalized zero-sphere cocycle gives the chosen integral circle generator under the ordinary Mayer–Vietoris connecting map |
+| `ComplexLineSphere.DiskOrientation.DiskBoundary.Connecting` | The ordinary connecting maps of the round, box, and cylinder disk pairs agree under the C03 coordinate homeomorphisms |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
 | `ZeroDegree` | Evaluation of constant classes and surjectivity of degree-zero pullback from a path-connected source |
 
