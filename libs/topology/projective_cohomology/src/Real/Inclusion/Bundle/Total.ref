@@ -1,0 +1,72 @@
+\import Bundles.Family[X := Space, F := Line] \as Family;
+\import Bundles.Family[X := Target.Space, F := Target.Line] \as TargetFamily;
+\import bundle_operations.Operations[].Over[K := R.Real, field := R.Algebra[].field,
+  conjugation := hermitian_frames.Hermitian[].Real[].scalar, scalar := vector_bundles.Bundles[].Real[].scalar]
+  .CoordinateSum[n := ambient, m := extra] \as Coordinates;
+\import Coordinates.Topology[] \as CoordTopology;
+\import std.Data[].Pair[] \as Pair;
+\import topological_constructions.Product[A := E.Vector, B := Extra.Vector] \as VectorProduct;
+\definition vectorInclusionContinuous: topology.Continuity[A := E.Vector, B := W.Vector].Continuous
+  (Bundles.coordinateTopology ambient) (Bundles.coordinateTopology Blocks.dimension) Blocks.inclusion.apply :=
+  topology.Composition[A := E.Vector, B := VectorProduct.CarrierSet, C := W.Vector].composeContinuous
+    (Bundles.coordinateTopology ambient)
+    (VectorProduct.topology (Bundles.coordinateTopology ambient) (Bundles.coordinateTopology extra))
+    (Bundles.coordinateTopology Blocks.dimension)
+    (\fun (v: E.Vector) => Pair.pair E.Vector Extra.Vector v Extra.space.zero) Coordinates.join
+    (VectorProduct.Universal[X := E.Vector].pairContinuous
+      (Bundles.coordinateTopology ambient) (Bundles.coordinateTopology ambient) (Bundles.coordinateTopology extra)
+      (\fun (v: E.Vector) => v) (\fun (_: E.Vector) => Extra.space.zero)
+      (topology.Maps[A := E.Vector, B := E.Vector].Identity[].continuous (Bundles.coordinateTopology ambient))
+      (topology.Maps[A := E.Vector, B := Extra.Vector].constantContinuous
+        (Bundles.coordinateTopology ambient) (Bundles.coordinateTopology extra) Extra.space.zero))
+    CoordTopology.joinRegular;
+\definition forward[p: Family.Point]: TargetFamily.Point :=
+  TargetFamily.include (map p.base) (image p.base p.vector);
+\definition forwardContinuous: topology.Continuity[A := Family.Point, B := TargetFamily.Point].Continuous
+  lineBundle.totalSpace Target.lineBundle.totalSpace forward :=
+  TargetUniversal.Universal[Y := Family.Point, source := lineBundle.totalSpace].continuous forward
+    (topology.Composition[A := Family.Point, B := Space, C := Target.Space].composeContinuous
+      lineBundle.totalSpace topology Target.topology Family.projection map Family.Of[bundle := lineBundle].projectionContinuous continuous)
+    (topology.Composition[A := Family.Point, B := E.Vector, C := W.Vector].composeContinuous
+      lineBundle.totalSpace (Bundles.coordinateTopology ambient) (Bundles.coordinateTopology Blocks.dimension)
+      (\fun (p: Family.Point) => p.vector) Blocks.inclusion.apply SourceUniversal.vectorContinuous vectorInclusionContinuous);
+\import thom_spaces.Thom[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as DiskTheory;
+\import DiskTheory.For[X := Space, F := Line, bundle := lineBundle].With[metric := Source.metric] \as Disk;
+\import DiskTheory.For[X := Target.Space, F := Target.Line, bundle := Target.lineBundle].With[metric := TargetLine.metric] \as TargetDisk;
+\definition squared[p: Family.Point]: TargetDisk.squared (forward p) = Disk.squared p :=
+  trans!{R.Real} _ _ _ (TargetLine.Hopf[].squared (forward p))
+    (trans!{R.Real} _ _ _ (norm p.vector) (sym!{R.Real} _ _ (Source.Hopf[].squared p)));
+\import dedekind_reals.DedekindReal[] \as Order;
+\definition diskMap[p: Disk.DiskBundle]: TargetDisk.DiskBundle :=
+  \into[TargetFamily.Point](forward p, TargetDisk.ClosedBall) \by {
+    Order.leReplaceLeft (Disk.squared p) (TargetDisk.squared (forward p)) R.one
+      (sym!{R.Real} _ _ (squared p)) (\bysub(Family.Point, Disk.ClosedBall, p))
+  };
+\definition diskContinuous: topology.Continuity[A := Disk.DiskBundle, B := TargetDisk.DiskBundle].Continuous
+  Disk.diskTopology TargetDisk.diskTopology diskMap :=
+  topology.Continuity[A := Disk.DiskBundle, B := TargetFamily.Point].Corestriction[S := TargetDisk.ClosedBall].corestrictContinuous
+    Disk.diskTopology Target.lineBundle.totalSpace diskMap
+    (topology.Continuity[A := Family.Point, B := TargetFamily.Point].Restriction[S := Disk.ClosedBall].restrictContinuous
+      lineBundle.totalSpace Target.lineBundle.totalSpace forward forwardContinuous);
+\definition boundary[p: \Cast[Disk.DiskBundle] Disk.Boundary]: \In[TargetDisk.DiskBundle] TargetDisk.Boundary (diskMap p) :=
+  trans!{R.Real} _ _ _ (squared p) (\bysub(Disk.DiskBundle, Disk.Boundary, p));
+\import singular_cohomology.Relative[A := Disk.DiskBundle, source := Disk.diskTopology, subset := Disk.Boundary]
+  .Maps[B := TargetDisk.DiskBundle].Over[target := TargetDisk.diskTopology, targetSubset := TargetDisk.Boundary] \as Pairs;
+\definition pairMap: Pairs.Map := \into[Disk.DiskBundle -> TargetDisk.DiskBundle](diskMap, Pairs.Map) \by {
+  Pairs.Laws[diskMap] { continuous := diskContinuous, contained := boundary }
+};
+\definition section[x: Space]: diskMap (Disk.zeroSection x) = TargetDisk.zeroSection (map x) :=
+  TargetFamily.ext _ _ (\refl(map x))
+    (trans!{{W.Vector}} _ _ _
+      (TargetLine.Hopf[].castVector _ _ (\refl(map x)) (diskMap (Disk.zeroSection x)).vector)
+      Blocks.inclusion.preservesZero);
+\import cohomology_thom.Thom[].Real[].For[X := Space, F := Line, bundle := lineBundle].With[metric := Source.metric] \as OldGeometry;
+\import cohomology_thom.Thom[].Real[].For[X := Target.Space, F := Target.Line, bundle := Target.lineBundle].With[metric := TargetLine.metric] \as NewGeometry;
+\import algebra.Two[] \as Two;
+\import singular_products.Cochains[A := Space, source := topology, R := Two.Carrier, ring := Two.commutativeRing] \as OldProduct;
+\import singular_products.Cochains[A := Target.Space, source := Target.topology, R := Two.Carrier, ring := Two.commutativeRing] \as NewProduct;
+\import OldGeometry.Coefficients[R := Two.Carrier, ring := Two.commutativeRing].Degree[n := Degrees.one] \as OldRelative;
+\import NewGeometry.Coefficients[R := Two.Carrier, ring := Two.commutativeRing].Degree[n := Degrees.one] \as NewRelative;
+\module Fiber(x: Space);
+\module Naturality;
