@@ -1,0 +1,31 @@
+\import Region.Of[f := f] \as Regional;
+\import Base.MeasureConstruction[] \as BaseMeasure;
+\import Axis.MeasureConstruction[] \as AxisMeasure;
+\import E.MeasureConstruction[] \as Measure;
+\import lp_spaces.Euclidean[n := dimension].BorelMeasure[] \as Borel;
+\import product_integration.Euclidean[n := n] \as LeftMeasure;
+\import product_integration.Euclidean[n := One.dimension] \as RightMeasure;
+\import product_integration.EuclideanProduct[m := n, n := One.dimension] \as EP;
+\import product_integration.ProductSigma[A := Base.Point, B := Axis.Point, left := BaseMeasure.measure.sigma, right := AxisMeasure.measure.sigma] \as Sigma;
+\import product_integration.Product[A := Base.Point, B := Axis.Point, mu := BaseMeasure.measure, nu := AxisMeasure.measure, left := LeftMeasure.exhaustion, right := RightMeasure.exhaustion] \as ProductMeasure;
+\import product_integration.MeasureMap[A := Sigma.Point, B := E.Point, source := ProductMeasure.measure, target := Borel.borel] \as MeasureMap;
+\import product_integration.Integration[A := Base.Point, B := Axis.Point, mu := BaseMeasure.measure, nu := AxisMeasure.measure, left := LeftMeasure.exhaustion, right := RightMeasure.exhaustion] \as Fubini;
+\import functional_analysis.Measure[A := Sigma.Point].Integral[mu := ProductMeasure.measure] \as ProductIntegral;
+\import functional_analysis.Measure[A := Base.Point].Integral[mu := BaseMeasure.measure] \as BaseIntegral;
+\import functional_analysis.Measure[A := Axis.Point].Integral[mu := AxisMeasure.measure] \as AxisIntegral;
+\import functional_analysis.Measure[A := E.Point].Integral[mu := Measure.measure] \as Integral;
+\import lp_spaces.On[A := Axis.Point, mu := AxisMeasure.measure].One[].Norm[] \as IntegralEquality;
+\definition measureMap: MeasureMap.Data := MeasureMap.Data {
+  function := EP.join,
+  measurable := EP.Borel[].measurable,
+  value := EP.Comparison[].theorem,
+};
+\import MeasureMap.On[map := measureMap].RealFunction[f := Regional.borelRepresentative] \as Pullback;
+\definition representative: Integral.Representatives := Regional.representative;
+\definition integral: Real.Real := Regional.integral;
+\definition joint: ProductIntegral.Representatives := Pullback.representative;
+\definition jointIntegral: ProductIntegral.integral joint = integral :=
+  trans!{Real.Real} _ _ _ Pullback.integral Regional.borelIntegral;
+\module Section(x: BaseRegion.Carrier);
+\definition inner[x: BaseRegion.Carrier]: Real.Real := Section[x := x].integral;
+\module Sections(g: BaseRegion.Coefficient, agrees: \forall (x: BaseRegion.Carrier) -> inner x = g x);

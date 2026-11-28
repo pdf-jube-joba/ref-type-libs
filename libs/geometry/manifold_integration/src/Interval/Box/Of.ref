@@ -43,3 +43,5 @@
 \definition integral: Integral.integral representative = Riemann.value :=
   trans!{Real.Real} _ _ _ (IntegralEquality.integralPointwise representative Transport.representative pointwise)
     (trans!{Real.Real} _ _ _ Transport.integral (RiemannMap.integral Riemann.integral));
+\definition inside[x: carrier]: representative x = f (parameter x) := Regional.inside x;
+\definition outside[x: E.Point]: Logic.Not (Sets.Member points x) -> representative x = Real.zero := Regional.outside x;

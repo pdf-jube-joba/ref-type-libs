@@ -1,0 +1,31 @@
+\definition pair[y: AxisRegion.Carrier]: Parameters.CarrierSet := Pair.pair BaseRegion.Carrier AxisRegion.Carrier x y;
+\import topology.Maps[A := AxisRegion.Carrier, B := BaseRegion.Carrier] \as Constant;
+\import topology.Maps[A := AxisRegion.Carrier, B := AxisRegion.Carrier].Identity[] \as Identity;
+\definition pairContinuous: topology.Continuity[A := AxisRegion.Carrier, B := Parameters.CarrierSet].Continuous AxisRegion.topology parameterSpace pair :=
+  Parameters.Universal[X := AxisRegion.Carrier].pairContinuous AxisRegion.topology BaseRegion.topology AxisRegion.topology
+    (\fun (y: AxisRegion.Carrier) => x) (\fun (y: AxisRegion.Carrier) => y)
+    (Constant.constantContinuous AxisRegion.topology BaseRegion.topology x) (Identity.continuous AxisRegion.topology);
+\definition continuous: topology.Continuity[A := AxisRegion.Carrier, B := Real.Real].Continuous AxisRegion.topology RealLine.topology (\fun (y: AxisRegion.Carrier) => f (into x y)) :=
+  topology.Composition[A := AxisRegion.Carrier, B := Parameters.CarrierSet, C := Real.Real].composeContinuous
+    AxisRegion.topology parameterSpace RealLine.topology pair (\fun (p: Parameters.CarrierSet) => f (intoPair p)) pairContinuous
+    (topology.Composition[A := Parameters.CarrierSet, B := Carrier, C := Real.Real].composeContinuous
+      parameterSpace topology RealLine.topology intoPair f intoContinuous Regional.continuous);
+\definition fiber: AxisRegion.Coefficient := AxisRegion.coefficient (\fun (y: AxisRegion.Carrier) => f (into x y)) continuous;
+\import AxisRegion.Of[f := fiber] \as Slice;
+\definition representative: AxisIntegral.Representatives := Slice.representative;
+\definition integral: Real.Real := Slice.integral;
+\definition inside[y: AxisRegion.Carrier]: representative y = f (into x y) := Slice.inside y;
+\definition outside[y: Axis.Point]: Logic.Not (AxisSets.Member Box.points y) -> representative y = Real.zero := Slice.outside y;
+\definition jointValue[y: Axis.Point]: joint (Pair.pair Base.Point Axis.Point x y) = representative y :=
+  Logic.orElim (AxisSets.Member Box.points y) (Logic.Not (AxisSets.Member Box.points y))
+    (joint (Pair.pair Base.Point Axis.Point x y) = representative y) (Classical.excludedMiddle (AxisSets.Member Box.points y))
+    (\fun (member: AxisSets.Member Box.points y) => \block {
+      \let p: AxisRegion.Carrier := \into[Axis.Point](y, Box.points) \by { member } \then
+      \return trans!{Real.Real} _ _ _ (Regional.inside (into x p)) (sym!{Real.Real} _ _ (inside p))
+    })
+    (\fun (absent: Logic.Not (AxisSets.Member Box.points y)) => trans!{Real.Real} _ _ _
+      (Regional.outside (Blocks.join x y) (\fun (member: Sets.Member domain (Blocks.join x y)) => absent
+        (\idelim Blocks.right (Blocks.join x y) = y \with p: Axis.Point => AxisSets.Member Box.points p \by {
+          base: member.right, equality: Blocks.rightJoin x y
+        })))
+      (sym!{Real.Real} _ _ (outside y absent)));

@@ -22,3 +22,4 @@
 \definition coefficient[f: Carrier -> Real.Real][continuous: Continuous f]: Coefficient :=
   \into[Carrier -> Real.Real](f, Coefficient) \by { continuous };
 \module Of(f: Coefficient);
+\module Difference(left, right: Coefficient);

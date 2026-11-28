@@ -1,0 +1,52 @@
+\import BaseRegion.Of[f := g] \as BoundaryIntegral;
+\import functional_analysis.Measure[A := Base.Point] \as BaseMeasureAPI;
+\import BaseMeasureAPI.AlmostEverywhere[mu := BaseMeasure.measure] \as AE;
+\import BaseIntegral.Null[] \as Null;
+\import AxisIntegral.Zero[] \as Zero;
+\definition absent[x: Base.Point][y: Axis.Point]: Logic.Not (BaseSets.Member K x) -> joint (Pair.pair Base.Point Axis.Point x y) = Real.zero :=
+  \fun (outside: _) => Regional.outside (Blocks.join x y) (\fun (inside: Sets.Member domain (Blocks.join x y)) => outside
+    (\idelim Blocks.left (Blocks.join x y) = x \with p: Base.Point => BaseSets.Member K p \by {
+      base: inside.left, equality: Blocks.leftJoin x y
+    }));
+\module With(certificate: Fubini.AEFubini[joint]) {
+  \definition matches[x: Base.Point]: Logic.Not (BaseSets.Member certificate.exception x) -> certificate.outer x = BoundaryIntegral.representative x :=
+    \fun (outside: _) => trans!{Real.Real} _ _ _ (certificate.outerValues x)
+      (Logic.orElim (BaseSets.Member K x) (Logic.Not (BaseSets.Member K x))
+        (AxisIntegral.integral (certificate.sections x) = BoundaryIntegral.representative x)
+        (Classical.excludedMiddle (BaseSets.Member K x))
+        (\fun (inside: BaseSets.Member K x) => \block {
+          \let p: BaseRegion.Carrier := \into[Base.Point](x, K) \by { inside } \then
+          \let fiber: AxisIntegral.Representatives := \parent.\parent.Section[x := p].representative \then
+          \return eq_reason_in!{Real.Real { AxisIntegral.integral (certificate.sections x) }
+            "=" { AxisIntegral.integral fiber } "by" { IntegralEquality.integralPointwise (certificate.sections x) fiber
+              (\fun (y: Axis.Point) => trans!{Real.Real} _ _ _ (certificate.sectionValues x outside y) (\parent.\parent.Section[x := p].jointValue y)) }
+            "=" {g p} "by" { agrees p }
+            "=" _ "by" { sym!{Real.Real} _ _ (BoundaryIntegral.inside p) }
+          }
+        })
+        (\fun (notIn: Logic.Not (BaseSets.Member K x)) => eq_reason_in!{Real.Real {AxisIntegral.integral (certificate.sections x)}
+          "=" {AxisIntegral.integral Zero.representative} "by" { IntegralEquality.integralPointwise (certificate.sections x) Zero.representative
+            (\fun (y: Axis.Point) => trans!{Real.Real} _ _ _ (certificate.sectionValues x outside y) (absent x y notIn)) }
+          "=" Real.zero "by" { Zero.integralZero }
+          "=" _ "by" { sym!{Real.Real} _ _ (BoundaryIntegral.outside x notIn) }
+        }));
+  \definition almost: BaseMeasureAPI.AlmostEqual BaseMeasure.measure certificate.outer BoundaryIntegral.representative := \block {
+    \let law: Null.NullSetLaw[certificate.exception] := Null.nullSetLaw certificate.exception \then
+    \let zero: BaseMeasureAPI.Null BaseMeasure.measure certificate.exception :=
+      Logic.existsIntro[\Pow Base.Point, { Z: \Pow Base.Point \where BaseMeasureAPI.NullCover[BaseMeasure.measure, certificate.exception, Z] }] certificate.exception
+        (BaseMeasureAPI.NullCover[BaseMeasure.measure, certificate.exception, certificate.exception] {
+          measurable := law.measurable, measure := law.zeroMeasure,
+          included := \fun (x: Base.Point)(member: BaseSets.Member certificate.exception x) => member,
+        }) \then
+    \return AE.nullSubset ({ x: Base.Point \where Logic.Not (certificate.outer x = BoundaryIntegral.representative x) }) certificate.exception
+      (\fun (x: Base.Point)(different: Logic.Not (certificate.outer x = BoundaryIntegral.representative x)) =>
+        R.Order[].byContradiction (BaseSets.Member certificate.exception x)
+          (\fun (outside: Logic.Not (BaseSets.Member certificate.exception x)) => different (matches x outside))) zero
+  };
+  \definition theorem: ProductIntegral.integral joint = BoundaryIntegral.integral :=
+    trans!{Real.Real} _ _ _ certificate.exchange (Null.integralAlmost certificate.outer BoundaryIntegral.representative almost);
+}
+\definition integralLaw: integral = BoundaryIntegral.integral := \block {
+  \takefrom certificate: Fubini.AEFubini[joint] \by Fubini.fubini joint \then
+  \return trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ jointIntegral) With[certificate := certificate].theorem
+};

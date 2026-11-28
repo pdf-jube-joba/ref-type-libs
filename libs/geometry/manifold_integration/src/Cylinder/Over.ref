@@ -1,0 +1,71 @@
+\import \root.Region[n := n].On[K := K, compact := compact] \as BaseRegion;
+\import \root.Region[n := One.dimension].On[K := Box.points, compact := Box.compact] \as AxisRegion;
+\import topological_constructions.Product[A := BaseRegion.Carrier, B := AxisRegion.Carrier] \as Parameters;
+\definition parameterSpace: topology.Topology[Carrier := Parameters.CarrierSet].Topology := Parameters.topology BaseRegion.topology AxisRegion.topology;
+\import topology.Topology[Carrier := Parameters.CarrierSet] \as ParameterSets;
+\definition domain: \Pow E.Point := { p: E.Point \where Logic.And[BaseSets.Member K (Blocks.left p), AxisSets.Member Box.points (Blocks.right p)] };
+\definition left[x: Parameters.CarrierSet]: Base.Point := Pair.first BaseRegion.Carrier AxisRegion.Carrier x;
+\definition right[x: Parameters.CarrierSet]: Axis.Point := Pair.second BaseRegion.Carrier AxisRegion.Carrier x;
+\import \parent.Join[X := Parameters.CarrierSet, source := parameterSpace, left := left, right := right] \as Join;
+\definition leftContinuous: topology.Continuity[A := Parameters.CarrierSet, B := Base.Point].Continuous parameterSpace BaseTopology.topology left :=
+  topology.Composition[A := Parameters.CarrierSet, B := BaseRegion.Carrier, C := Base.Point].composeContinuous
+    parameterSpace BaseRegion.topology BaseTopology.topology (Pair.first BaseRegion.Carrier AxisRegion.Carrier)
+    (\fun (x: BaseRegion.Carrier) => x) (Parameters.Maps[].firstContinuous BaseRegion.topology AxisRegion.topology)
+    (topology.Continuity[A := BaseRegion.Carrier, B := Base.Point].Corestriction[S := K].inclusionContinuous BaseTopology.topology);
+\definition rightContinuous: topology.Continuity[A := Parameters.CarrierSet, B := Axis.Point].Continuous parameterSpace AxisTopology.topology right :=
+  topology.Composition[A := Parameters.CarrierSet, B := AxisRegion.Carrier, C := Axis.Point].composeContinuous
+    parameterSpace AxisRegion.topology AxisTopology.topology (Pair.second BaseRegion.Carrier AxisRegion.Carrier)
+    (\fun (x: AxisRegion.Carrier) => x) (Parameters.Maps[].secondContinuous BaseRegion.topology AxisRegion.topology)
+    (topology.Continuity[A := AxisRegion.Carrier, B := Axis.Point].Corestriction[S := Box.points].inclusionContinuous AxisTopology.topology);
+\definition contains[x: BaseRegion.Carrier][y: AxisRegion.Carrier]: Sets.Member domain (Blocks.join x y) :=
+  Logic.And[_, _]::#
+    (\idelim (x \of Base.Point) = Blocks.left (Blocks.join x y) \with p: Base.Point => BaseSets.Member K p \by {
+      base: \bysub(Base.Point, K, x), equality: sym!{{Base.Point}} _ _ (Blocks.leftJoin x y)
+    })
+    (\idelim (y \of Axis.Point) = Blocks.right (Blocks.join x y) \with p: Axis.Point => AxisSets.Member Box.points p \by {
+      base: \bysub(Axis.Point, Box.points, y), equality: sym!{{Axis.Point}} _ _ (Blocks.rightJoin x y)
+    });
+\import topology.Maps[A := Parameters.CarrierSet, B := E.Point] \as Image;
+\definition image: Image.Image Join.value ParameterSets.Whole = domain :=
+  \axiom:setext(Image.Image Join.value ParameterSets.Whole, domain,
+    \fun (p: E.Point)(member: Sets.Member (Image.Image Join.value ParameterSets.Whole) p) =>
+      Image.imageElim Join.value ParameterSets.Whole p (Sets.Member domain p)
+        (\fun (q: Parameters.CarrierSet)(whole: _)(same: Join.value q = p) =>
+          \idelim Join.value q = p \with r: E.Point => Sets.Member domain r \by {
+            base: contains (Pair.first BaseRegion.Carrier AxisRegion.Carrier q) (Pair.second BaseRegion.Carrier AxisRegion.Carrier q), equality: same
+          }) member,
+    \fun (p: E.Point)(member: Sets.Member domain p) => \block {
+      \let a: BaseRegion.Carrier := \into[Base.Point](Blocks.left p, K) \by { member.left } \then
+      \let b: AxisRegion.Carrier := \into[Axis.Point](Blocks.right p, Box.points) \by { member.right } \then
+      \let q: Parameters.CarrierSet := Pair.pair BaseRegion.Carrier AxisRegion.Carrier a b \then
+      \return \idelim Join.value q = p \with r: E.Point => Sets.Member (Image.Image Join.value ParameterSets.Whole) r \by {
+        base: Image.imageMember Join.value ParameterSets.Whole q (\refl(q)), equality: Blocks.recover p
+      }
+    });
+\definition compactDomain: Sets.IsCompactIn Topology.topology domain :=
+  \idelim Image.Image Join.value ParameterSets.Whole = domain \with W: \Pow E.Point => Sets.IsCompactIn Topology.topology W \by {
+    base: topology.Compactness[A := Parameters.CarrierSet, B := E.Point].continuousImage
+      parameterSpace Topology.topology Join.value (Join.continuous leftContinuous rightContinuous) ParameterSets.Whole
+      (Parameters.Compactness[].productCompact BaseRegion.topology AxisRegion.topology
+        (BaseSets.Subspace[S := K].Properties[].compact BaseTopology.topology compact)
+        (AxisSets.Subspace[S := Box.points].Properties[].compact AxisTopology.topology Box.compact)),
+    equality: image
+  };
+\import \root.Region[n := dimension].On[K := domain, compact := compactDomain] \as Region;
+\definition Carrier: \Set := Region.Carrier;
+\definition Coefficient: \Set := Region.Coefficient;
+\definition coefficient[f: Carrier -> Real.Real][continuous: Region.Continuous f]: Coefficient := Region.coefficient f continuous;
+\definition into[x: BaseRegion.Carrier][y: AxisRegion.Carrier]: Carrier :=
+  \into[E.Point](Blocks.join x y, domain) \by { contains x y };
+\definition leftPoint[p: Carrier]: BaseRegion.Carrier :=
+  \into[Base.Point](Blocks.left p, K) \by { (\bysub(E.Point, domain, p)).left };
+\definition rightPoint[p: Carrier]: AxisRegion.Carrier :=
+  \into[Axis.Point](Blocks.right p, Box.points) \by { (\bysub(E.Point, domain, p)).right };
+\definition topology: topology.Topology[Carrier := Carrier].Topology := Region.topology;
+\definition intoPair[q: Parameters.CarrierSet]: Carrier :=
+  into (Pair.first BaseRegion.Carrier AxisRegion.Carrier q) (Pair.second BaseRegion.Carrier AxisRegion.Carrier q);
+\definition intoContinuous: topology.Continuity[A := Parameters.CarrierSet, B := Carrier].Continuous parameterSpace topology intoPair :=
+  topology.Continuity[A := Parameters.CarrierSet, B := E.Point].Corestriction[S := domain].corestrictContinuous parameterSpace Topology.topology intoPair
+    (Join.continuous leftContinuous rightContinuous);
+\module Of(f: Coefficient);
+\module In(U: Open.OpenSet, included: Sets.Subset domain U.points);

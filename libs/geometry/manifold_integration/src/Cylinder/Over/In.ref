@@ -1,0 +1,44 @@
+\import \root.Interval[interval := interval] \as Interval;
+\import integration.Real[].Riemann[interval := interval].Continuous[] \as Continuous;
+\import Open.Smooth[] \as Smooth;
+\import Smooth.Derivative[] \as Partial;
+\import Open.Topology[].Of[U := U] \as OpenSpace;
+\definition coordinate[p: Carrier]: Open.Carrier U := \into[E.Point](p, U.points) \by { included p (\bysub(E.Point, domain, p)) };
+\definition coordinateContinuous: topology.Continuity[A := Carrier, B := Open.Carrier U].Continuous topology OpenSpace.topology coordinate :=
+  topology.Continuity[A := Carrier, B := E.Point].Corestriction[S := U.points].corestrictContinuous topology Topology.topology coordinate
+    (topology.Continuity[A := Carrier, B := E.Point].Corestriction[S := domain].inclusionContinuous Topology.topology);
+\definition smoothContinuous[h: Smooth.SmoothFunction U]:
+  topology.Continuity[A := Open.Carrier U, B := Real.Real].Continuous OpenSpace.topology RealLine.topology h :=
+  OpenSpace.Continuity[].topological h (Smooth.Properties[].continuous U h (\bysub(Open.ScalarFunction U, Smooth.SmoothFunction U, h)));
+\definition function[h: Smooth.SmoothFunction U]: Coefficient :=
+  coefficient (\fun (p: Carrier) => h (coordinate p))
+    (topology.Composition[A := Carrier, B := Open.Carrier U, C := Real.Real].composeContinuous
+      topology OpenSpace.topology RealLine.topology coordinate h coordinateContinuous (smoothContinuous h));
+\definition lower: Continuous.Point :=
+  \into[Real.Real](interval.left, RealLine.ClosedInterval interval.left interval.right) \by {
+    Logic.And[_, _]::# (R.leRefl interval.left) interval.ordered
+  };
+\definition upper: Continuous.Point :=
+  \into[Real.Real](interval.right, RealLine.ClosedInterval interval.left interval.right) \by {
+    Logic.And[_, _]::# interval.ordered (R.leRefl interval.right)
+  };
+\module Slice(t: AxisRegion.Carrier) {
+  \import topology.Maps[A := BaseRegion.Carrier, B := AxisRegion.Carrier] \as Constant;
+  \import topology.Maps[A := BaseRegion.Carrier, B := BaseRegion.Carrier].Identity[] \as Identity;
+  \definition pair[x: BaseRegion.Carrier]: Parameters.CarrierSet := Pair.pair BaseRegion.Carrier AxisRegion.Carrier x t;
+  \definition pairContinuous: topology.Continuity[A := BaseRegion.Carrier, B := Parameters.CarrierSet].Continuous BaseRegion.topology parameterSpace pair :=
+    Parameters.Universal[X := BaseRegion.Carrier].pairContinuous BaseRegion.topology BaseRegion.topology AxisRegion.topology
+      (\fun (x: BaseRegion.Carrier) => x) (\fun (x: BaseRegion.Carrier) => t)
+      (Identity.continuous BaseRegion.topology) (Constant.constantContinuous BaseRegion.topology AxisRegion.topology t);
+  \definition apply[x: BaseRegion.Carrier]: Open.Carrier U := coordinate (into x t);
+  \definition continuous: topology.Continuity[A := BaseRegion.Carrier, B := Open.Carrier U].Continuous BaseRegion.topology OpenSpace.topology apply :=
+    topology.Composition[A := BaseRegion.Carrier, B := Parameters.CarrierSet, C := Open.Carrier U].composeContinuous
+      BaseRegion.topology parameterSpace OpenSpace.topology pair (\fun (p: Parameters.CarrierSet) => coordinate (intoPair p)) pairContinuous
+      (topology.Composition[A := Parameters.CarrierSet, B := Carrier, C := Open.Carrier U].composeContinuous
+        parameterSpace topology OpenSpace.topology intoPair coordinate intoContinuous coordinateContinuous);
+  \definition value[h: Smooth.SmoothFunction U]: BaseRegion.Coefficient :=
+    BaseRegion.coefficient (\fun (x: BaseRegion.Carrier) => h (apply x))
+      (topology.Composition[A := BaseRegion.Carrier, B := Open.Carrier U, C := Real.Real].composeContinuous
+        BaseRegion.topology OpenSpace.topology RealLine.topology apply h continuous (smoothContinuous h));
+}
+\module Vertical(h: Smooth.SmoothFunction U);
