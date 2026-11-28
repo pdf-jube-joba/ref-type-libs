@@ -63,4 +63,15 @@
   };
   \import Iso.Composition[U := Target.Cohomology, final := Target.cohomologySpace] \as Final;
   \definition isomorphism: _ := Final.compose ChangeDegree.At[q := q].isomorphism gauge;
+  \definition rowCycle[x: Target.CycleCarrier]: Source.CycleCarrier := (Backward.cyclesMap Push.map).apply x;
+  \definition backwardOnClass: \forall (x: Target.CycleCarrier) ->
+    isomorphism.backward.apply (Target.classOf x) = Source.classOf (rowCycle x) :=
+    \fun (x: Target.CycleCarrier) => trans!{Source.Cohomology} _ _ _
+      (congr!{Middle.Cohomology Source.Cohomology} (Backward.induced Push.map).apply _ _
+        (ChangeDegree.At[q := q].backwardOnClass x))
+      (Backward.onClass Push.map x);
 }
+
+\module FreeRow(Generators: \Set,
+  basis: Modules.Isomorphism[V := Modules.Free[Generators := Generators].Carrier, W := concentrated.family.Carrier cutoff,
+    source := Modules.Free[Generators := Generators].space, target := concentrated.family.space cutoff].Isomorphism);

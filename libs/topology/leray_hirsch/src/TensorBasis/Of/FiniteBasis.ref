@@ -1,0 +1,19 @@
+\definition Index: \Set := Finite.Fin count;
+\module At(z: I.Int^) {
+  \definition sourceDegree[i: Index]: I.Int^ := Degree.unshift (degrees i) z;
+  \definition family: Modules.Family[Index] := Modules.Family[Index] {
+    Carrier := \fun (i: Index) => (source (sourceDegree i)).Carrier,
+    space := \fun (i: Index) => (source (sourceDegree i)).space,
+  };
+  \import Modules.DirectSum[Index := Index, family := family] \as Sum;
+  \import Sum.To[W := (target z).Carrier, target := (target z).space] \as Universal;
+  \definition domain: Modules.Bundle := Sum.bundle;
+  \definition range: Modules.Bundle := target z;
+  \definition components: Universal.Components := \fun (i: Index) =>
+    \parent.\parent.Fixed[q := degrees i, beta := cycles i, closed := closed i].At[z := z].linear;
+  \definition comparison: Modules.MapBetween domain range := Universal.extension components;
+  \definition onSummand: \forall (i: Index)(x: family.Carrier i) ->
+    comparison.apply (Sum.Injection[i := i].map.apply x) = (components i).apply x :=
+    Universal.onInjection components;
+  \module Product;
+}

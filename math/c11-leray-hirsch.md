@@ -126,8 +126,17 @@ quasi-isomorphism for the column. The tensor cup differential
 formula for a closed right factor has only the horizontal term.
 Multiplication by that factor therefore defines a map on cohomology.
 The map commutes with pullback along a map of base chain complexes.
-The cohomology comparison at the middle of a short exact sequence
-follows from the five lemma. For a cochain complex in integer degrees, the
+Dualizing the split chain sequences gives short exact sequences of
+cochains. The fixed-right-cocycle map commutes with the connecting
+maps of these sequences after reindexing the input degree. In every
+integer degree, the finite product of component rows is exact and
+maps to the dual tensor row. The finite product is identified with
+the finite direct sum. The five lemma gives bijectivity of the middle
+comparison from bijectivity on the other two chain complexes. This
+step applies to successive cutoffs and their concentrated layer. The
+empty cutoff and the induction over cutoffs are formalized using
+that step. Evaluation on a free basis of the actual relative base
+chain term gives the cohomology of the unsigned row. For a cochain complex in integer degrees, the
 differential twisted by $(-1)^p$ is identified with the untwisted
 differential by multiplication by $(-1)^{p|q|}$ in degree $q$.
 
@@ -143,9 +152,10 @@ of the overlap sum and the whole-space comparison on the vector of
 componentwise connecting classes.
 
 The pair homeomorphism over a chart and the comparison isomorphism
-for an empty base are formalized. The remaining algebraic step is to
-assemble the cocycle maps on the signed layers into a morphism of the
-cutoff short exact sequences. For the relative base chain complex
+for an empty base are formalized. The remaining algebraic step is to identify the actual finite comparison
+on each concentrated layer with evaluation on the chosen fiber
+cohomology basis. The cutoff induction and stabilization must then
+give the unrestricted comparison. For the relative base chain complex
 $P_*=C_*(V,W;\mathbb Z)$, this should show that the map with
 components $(x,y)\mapsto a_i(x)u_i(y)$ induces an isomorphism from the
 direct sum of shifted cohomology groups of

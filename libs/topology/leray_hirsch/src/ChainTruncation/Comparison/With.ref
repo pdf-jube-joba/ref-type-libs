@@ -1,0 +1,30 @@
+\module Cutoff(p: N.Nat^) {
+  \import \parent.\parent.\parent.Layer[C := C, cutoff := p] \as Layer;
+  \import Maps.Of[P := Layer.below, Q := D] \as Lower;
+  \import Maps.Of[P := Layer.concentrated, Q := D] \as Graded;
+  \import Lower.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Below;
+  \import Graded.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as OnLayer;
+  \definition Through: \Prop := \forall (z: I.Int^) -> Below.At[z := z].Product[].Bijective;
+  \definition GradedIso: \Prop := \forall (z: I.Int^) -> OnLayer.At[z := z].Product[].Bijective;
+  \import Layer.Sequence[].Cohomology[D := D, K := K, ring := ring].Step[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Cut;
+  \definition next: Through -> GradedIso -> \parent.\parent.With[count := count, degrees := degrees, cycles := cycles, closed := closed].Cutoff[p := N.Nat^::succ p].Through :=
+    Cut.glue;
+}
+\module Empty {
+  \import \parent.\parent.\parent.Layer[C := C, cutoff := N.Nat^::zero] \as Layer;
+  \import Maps.Of[P := Layer.below, Q := D] \as Base;
+  \import Base.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Comparison;
+  \definition chainZero: \forall (n: N.Nat^)(x: Layer.below.family.Carrier n) -> x = (Layer.below.family.space n).zero :=
+    \fun (n: N.Nat^)(x: Layer.below.family.Carrier n) => Layer.zeroBelow n (Order.ltZero n) x;
+  \import Base.ZeroLeft[zeroLeft := chainZero] \as Zero;
+  \module At(z: I.Int^) {
+    \import Comparison.At[z := z].Product[] \as Product;
+    \definition bijective: Product.Bijective := Product.Vanishing[].vanishing
+      (\fun (i: Finite.Fin count) => Zero.sourceZero (Comparison.At[z := z].sourceDegree i)) (Zero.targetZero z);
+  }
+}
+\definition realizations[layer: \forall (p: N.Nat^) -> Cutoff[p := p].GradedIso]: \forall (p: N.Nat^) -> Cutoff[p := p].Through :=
+  \induction (p: N.Nat^) \return Cutoff[p := p].Through \with {
+    | zero: \fun (z: I.Int^) => Empty[].At[z := z].bijective
+    | succ: \fun (p: N.Nat^)(prev: Cutoff[p := p].Through) => Cutoff[p := p].next prev (layer p)
+  };

@@ -1,0 +1,8 @@
+\import \parent.\parent.\parent.SumMaps[indices := indices] \as Summed;
+\import Summed.From[source := A, target := A1] \as ArrowA;
+\import Summed.From[source := B, target := B1] \as ArrowB;
+\import Summed.From[source := C, target := C1] \as ArrowC;
+\import Summed.From[source := D, target := D1] \as ArrowD;
+\import Summed.From[source := E, target := E1] \as ArrowE;
+\structure Maps: \Set := { a: ArrowA.Components, b: ArrowB.Components, c: ArrowC.Components, d: ArrowD.Components, e: ArrowE.Components };
+\module WithMaps(m: Maps);

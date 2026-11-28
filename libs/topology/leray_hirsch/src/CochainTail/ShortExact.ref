@@ -1,0 +1,68 @@
+\import \parent.Of[C := A].Drop[cutoff := cutoff] \as Left;
+\import \parent.Of[C := B].Drop[cutoff := cutoff] \as Middle;
+\import \parent.Of[C := C].Drop[cutoff := cutoff] \as Right;
+\import Cochains.Map[C := Left.complex, D := Middle.complex] \as Inclusion;
+\import Cochains.Map[C := Middle.complex, D := Right.complex] \as Projection;
+\definition inclusion: Inclusion.Map := Inclusion.Map {
+  apply := \fun (n: N.Nat^) => s.inclusion.apply (Left.grade n),
+  addition := \fun (n: N.Nat^) => s.inclusion.addition (Left.grade n),
+  scalar := \fun (n: N.Nat^) => s.inclusion.scalar (Left.grade n),
+  commutes := \fun (n: N.Nat^) => s.inclusion.commutes (Left.grade n),
+};
+\definition projection: Projection.Map := Projection.Map {
+  apply := \fun (n: N.Nat^) => s.projection.apply (Left.grade n),
+  addition := \fun (n: N.Nat^) => s.projection.addition (Left.grade n),
+  scalar := \fun (n: N.Nat^) => s.projection.scalar (Left.grade n),
+  commutes := \fun (n: N.Nat^) => s.projection.commutes (Left.grade n),
+};
+\definition left: Cochains.Complex := Left.complex;
+\definition middle: Cochains.Complex := Middle.complex;
+\definition right: Cochains.Complex := Right.complex;
+\import Cochains.ShortExact[A := left, B := middle, C := right] \as Exact;
+\definition sequence: Exact.Sequence := Exact.Sequence {
+  inclusion := inclusion, projection := projection,
+  injective := \fun (n: N.Nat^) => s.injective (Left.grade n),
+  onto := \fun (n: N.Nat^) => s.onto (Left.grade n),
+  zero := \fun (n: N.Nat^) => s.zero (Left.grade n),
+  kernelImage := \fun (n: N.Nat^) => s.kernelImage (Left.grade n),
+};
+\module At(n: N.Nat^) {
+  \definition degree: N.Nat^ := Left.grade n;
+  \definition next: N.Nat^ := N.Nat^::succ degree;
+  \import Cochains.At[C := right, k := n] \as Source;
+  \import Cochains.At[C := C, k := degree] \as FullSource;
+  \import Cochains.At[C := A, k := next] \as Target;
+  \import Exact.With[s := sequence].At[n := n] \as Cut;
+  \import Cochains.ShortExact[A := A, B := B, C := C].With[s := s].At[n := degree] \as Original;
+  \import Right.At[q := n] \as Include;
+  \import Left.At[q := N.Nat^::succ n] \as Compare;
+  \definition onCycles: \forall (x: Source.CycleCarrier) ->
+    Original.connecting.apply (Include.forward.apply (Source.classOf x)) = Compare.forward.apply (Cut.connecting.apply (Source.classOf x)) := \block {
+    \fun (x: Source.CycleCarrier) \then
+    \takefrom lift: \Cast[B.family.Carrier degree] ({ v: B.family.Carrier degree \where s.projection.apply degree v = x }) \by s.onto degree x \then
+    \let lifted: s.projection.apply degree lift = x := \bysub(B.family.Carrier degree, { v: B.family.Carrier degree \where s.projection.apply degree v = x }, lift) \then
+    \let zero: s.projection.apply next (B.differential.apply degree lift) = (C.family.space next).zero :=
+      trans!{{C.family.Carrier next}} _ _ _ (sym!{{C.family.Carrier next}} _ _ (s.projection.commutes degree lift))
+        (trans!{{C.family.Carrier next}} _ _ _
+          (congr!{{C.family.Carrier degree} {C.family.Carrier next}} (C.differential.apply degree) _ _ lifted)
+          (\bysub(C.family.Carrier degree, FullSource.cycles.carrier, x))) \then
+    \takefrom lower: \Cast[A.family.Carrier next] ({ u: A.family.Carrier next \where s.inclusion.apply next u = B.differential.apply degree lift })
+      \by s.kernelImage next (B.differential.apply degree lift) zero \then
+    \let differential: s.inclusion.apply next lower = B.differential.apply degree lift :=
+      \bysub(A.family.Carrier next, { u: A.family.Carrier next \where s.inclusion.apply next u = B.differential.apply degree lift }, lower) \then
+    \let closed: A.differential.apply next lower = (A.family.space (N.Nat^::succ next)).zero := Original.lowerClosed lift lower differential \then
+    \return trans!{Target.Cohomology} _ _ _
+      (congr!{FullSource.Cohomology Target.Cohomology} Original.connecting.apply _ _ (Include.forwardOnClass x))
+      (trans!{Target.Cohomology} _ _ _
+        (Original.onLift x lift lower lifted differential closed)
+        (sym!{Target.Cohomology} _ _
+          (trans!{Target.Cohomology} _ _ _
+            (congr!{{Cochains.At[C := left, k := N.Nat^::succ n].Cohomology} Target.Cohomology}
+              Compare.forward.apply _ _ (Cut.onLift x lift lower lifted differential closed))
+            (Compare.forwardOnClass (Target.cycle lower closed)))))
+  };
+  \definition connectingLaw: \forall (a: Source.Cohomology) ->
+    Original.connecting.apply (Include.forward.apply a) = Compare.forward.apply (Cut.connecting.apply a) :=
+    Source.classInduction (\fun (a: Source.Cohomology) =>
+      Original.connecting.apply (Include.forward.apply a) = Compare.forward.apply (Cut.connecting.apply a)) onCycles;
+}

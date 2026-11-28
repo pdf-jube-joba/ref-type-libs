@@ -32,6 +32,9 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `FreeTensorCochains.OneColumn.On.Cohomology.comparison` | Cohomology of an unsigned tensor column with free base module |
 | `ChainTruncation.Layer.Sequence.Tensor.exact` | Split exact truncation layer after tensoring |
 | `ChainTruncation.Layer.TensorColumn.Model.Coefficients.At.isomorphism` | Cohomology of the reindexed tensor layer with its differential sign accounted for |
+| `ChainTruncation.Layer.TensorColumn.Model.Coefficients.FreeRow.Cohomology.isomorphism` | Evaluation of the reindexed layer cohomology on a free basis of its base chain module |
+| `ChainTruncation.Layer.Sequence.Cohomology.Step.glue` | Five-lemma step for the finite comparison on a cutoff sequence |
+| `ChainTruncation.Comparison.With.realizations` | Induction from an empty cutoff and the comparison on each concentrated layer |
 | `ChainTruncation.Layer.Stable.At.isomorphism` | Stabilization of tensor cohomology when the cutoff contains degree $n+1$ |
 | `TensorCochainCup.Of.Fixed.Cohomology.linear` | Tensor cohomology multiplication by a fixed right cocycle |
 | `TensorCochainCup.Of.Along.At.Closed.naturality` | Compatibility of tensor cohomology multiplication with base chain maps |

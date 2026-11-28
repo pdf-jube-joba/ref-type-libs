@@ -1,0 +1,35 @@
+\import chain_complexes.Integer[] \as Degrees;
+\import Degrees.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\import Cochains.ZeroExtension[C := Unsigned.complex] \as Source;
+\import Hom.Native[P := D] \as Fiber;
+\import Cochains.ZeroExtension[C := Fiber.complex] \as Target;
+\import \root.CohomologyPowers[K := K, ring := ring, Index := Generators].On[C := Target.complex] \as Powers;
+\import Modules.Free[Generators := Generators] \as Free;
+\definition leftTerm: Modules.Bundle := Modules.Bundle {
+  Carrier := concentrated.family.Carrier cutoff, space := concentrated.family.space cutoff,
+};
+\definition rightTerm[q: N.Nat^]: Modules.Bundle := Modules.Bundle { Carrier := D.family.Carrier q, space := D.family.space q };
+\import \root.FreeTensorCochains[K := K, ring := ring, Generators := Generators].Rebased[A := leftTerm, basis := basis] \as Rebased;
+\module At(z: I.Int^) {
+  \import Scalars.Isomorphism[V := Source.Carrier z, W := Powers.family.Carrier z,
+    source := Source.space z, target := Powers.family.space z] \as Iso;
+  \definition Isomorphism: \Set := Iso.Isomorphism;
+}
+\module Positive(q: N.Nat^);
+\module Negative(q: N.Nat^);
+\definition term: \forall (z: I.Int^) -> At[z := z].Isomorphism :=
+  \induction (z: I.Int^) \return At[z := z].Isomorphism \with {
+    | ofNat: \fun (q: N.Nat^) => Positive[q := q].isomorphism
+    | negSucc: \fun (q: N.Nat^) => Negative[q := q].isomorphism
+  };
+\module Step(q: N.Nat^);
+\module NegativeStep(q: N.Nat^);
+\import Signed.Isomorphism[C := Source.complex, D := Powers.complex].Degreewise[isomorphisms := term] \as Comparison;
+\definition commutes: Comparison.Commutes :=
+  \induction (z: I.Int^) \return \forall (h: Source.Carrier z) ->
+    Powers.differential.apply z ((term z).forward.apply h) = (term (Degrees.next z)).forward.apply (Source.apply z h) \with {
+    | ofNat: \fun (q: N.Nat^) => Step[q := q].law
+    | negSucc: \fun (q: N.Nat^) => NegativeStep[q := q].law
+  };
+\definition cochains: _ := Comparison.isomorphism commutes;
+\module Cohomology(q: N.Nat^);

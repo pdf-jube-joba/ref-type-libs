@@ -1,0 +1,23 @@
+\definition q: N.Nat^ := degrees i;
+\definition lower: I.Int^ := degreesBefore i;
+\definition upper: I.Int^ := sourceDegree i;
+\definition lowerImage: I.Int^ := Degree.shift q lower;
+\definition upperImage: I.Int^ := Degree.shift q upper;
+\definition imageLaw: lowerImage = upperImage := congr!{I.Int^ I.Int^} (Degree.shift q) _ _ (same i);
+\definition targetLaw: lowerImage = z := trans!{I.Int^} _ _ _ imageLaw (Degree.shiftUnshift q z);
+\import \root.TensorBasis[K := K, ring := ring].Of[P := P, Q := Q].Fixed[q := q, beta := cycles i, closed := closed i] \as Product;
+\definition forward: _ := SourceTransport.At[m := lower, n := upper, same := same i].map;
+\definition backward: _ := SourceTransport.At[m := upper, n := lower, same := sym!{I.Int^} lower upper (same i)].map;
+\definition leftInverse: \forall (x: (source lower).Carrier) -> backward.apply (forward.apply x) = x :=
+  Casting.castInverse sourceFamily.Carrier lower upper (same i);
+\definition rightInverse: \forall (x: (source upper).Carrier) -> forward.apply (backward.apply x) = x :=
+  Casting.castInverse sourceFamily.Carrier upper lower (sym!{I.Int^} _ _ (same i));
+\definition linear: _ := Product.To[input := lower, output := z, same := targetLaw].linear;
+\definition law: \forall (x: (source lower).Carrier) -> linear.apply x = (components i).apply (forward.apply x) :=
+  \fun (x: (source lower).Carrier) => trans!{range.Carrier} _ _ _
+    (sym!{range.Carrier} _ _ (Casting.castComposition targetFamily.Carrier lowerImage upperImage z imageLaw (Degree.shiftUnshift q z) ((Product.map lower).apply x)))
+    (congr!{{(target upperImage).Carrier} range.Carrier} (Casting.cast targetFamily.Carrier upperImage z (Degree.shiftUnshift q z)) _ _
+      (trans!{{(target upperImage).Carrier}} _ _ _
+        (sym!{{(target upperImage).Carrier}} _ _ (Casting.reindex targetFamily.Carrier (Degree.shift q) lower upper (same i) ((Product.map lower).apply x)))
+        (Casting.natural sourceFamily.Carrier (\fun (k: I.Int^) => (target (Degree.shift q k)).Carrier)
+          (\fun (k: I.Int^) => (Product.map k).apply) lower upper (same i) x)));

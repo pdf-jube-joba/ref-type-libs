@@ -1,0 +1,42 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import OnA.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as BasisA;
+\import OnB.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as BasisB;
+\import OnC.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as BasisC;
+\import BasisA.At[z := z].Product[] \as First;
+\import BasisC.At[z := next].Product[] \as Second;
+\import BasisB.At[z := next].Product[] \as Third;
+\import BasisA.At[z := next].Product[] \as Fourth;
+\import BasisC.At[z := last].Product[] \as Last;
+\definition upper[i: Index]: I.Int^ := Degrees.next (input i);
+\definition twice[i: Index]: I.Int^ := Degrees.next (upper i);
+\definition nextLaw: \forall (i: Index) -> upper i = Degree.unshift (degrees i) next :=
+  \fun (i: Index) => sym!{I.Int^} _ _ (Degree.unshiftNext (degrees i) z);
+\definition lastLaw: \forall (i: Index) -> twice i = Degree.unshift (degrees i) last :=
+  \fun (i: Index) => trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} Degrees.next _ _ (nextLaw i))
+    (sym!{I.Int^} _ _ (Degree.unshiftNext (degrees i) next));
+\import Second.Regrade[degreesBefore := upper, same := nextLaw] \as Before;
+\import Third.Regrade[degreesBefore := upper, same := nextLaw] \as Middle;
+\import Fourth.Regrade[degreesBefore := upper, same := nextLaw] \as After;
+\import Last.Regrade[degreesBefore := twice, same := lastLaw] \as End;
+\structure Local: \Prop := {
+  left: First.Onto,
+  before: Second.Bijective,
+  after: Fourth.Bijective,
+  last: Last.Injective,
+};
+\definition rawIsomorphism[h: Local]: _ := fiveLemma h.left (Before.injective h.before.injective) (Before.onto h.before.onto)
+  (After.injective h.after.injective) (After.onto h.after.onto) (End.injective h.last);
+\definition rawInjective[h: Local]: Middle.Injective :=
+  \fun (x, y: Middle.input.Carrier)(same: _) => trans!{Middle.input.Carrier} _ _ _
+    (sym!{Middle.input.Carrier} _ _ ((rawIsomorphism h).leftInverse x))
+    (trans!{Middle.input.Carrier} _ _ _
+      (congr!{Target.third.Carrier Middle.input.Carrier} (rawIsomorphism h).backward.apply _ _ same)
+      ((rawIsomorphism h).leftInverse y));
+\definition rawOnto[h: Local]: Middle.Onto :=
+  \fun (y: Target.third.Carrier) => Logic.existsIntro[Middle.input.Carrier, { x: Middle.input.Carrier \where Middle.comparison.apply x = y }]
+    ((rawIsomorphism h).backward.apply y) ((rawIsomorphism h).rightInverse y);
+\definition bijective[h: Local]: Third.Bijective := Third.Bijective {
+  injective := Middle.ungradeInjective (rawInjective h),
+  onto := Middle.ungradeOnto (rawOnto h),
+};
+\definition isomorphism[h: Local]: _ := Third.invert (bijective h);

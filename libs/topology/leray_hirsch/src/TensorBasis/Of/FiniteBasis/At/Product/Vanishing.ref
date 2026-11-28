@@ -1,0 +1,11 @@
+\import Modules.Product[Index := Index, family := family] \as Source;
+\import Modules.Hom[V := domain.Carrier, W := range.Carrier, source := domain.space, target := range.space] \as Maps;
+\definition vanishing[inputs: \forall (i: Index)(x: family.Carrier i) -> x = (family.space i).zero]
+  [outputs: \forall (y: range.Carrier) -> y = range.space.zero]: Bijective :=
+  Bijective {
+    injective := \fun (x, y: domain.Carrier)(same: _) => Source.ext x y
+      (\fun (i: Index) => trans!{{family.Carrier i}} _ _ _ (inputs i (x i)) (sym!{{family.Carrier i}} _ _ (inputs i (y i)))),
+    onto := \fun (y: range.Carrier) =>
+      Logic.existsIntro[domain.Carrier, { x: domain.Carrier \where ProductComparison.apply x = y }] domain.space.zero
+        (trans!{{range.Carrier}} _ _ _ (Maps.zeroPreserved ProductComparison) (sym!{{range.Carrier}} _ _ (outputs y))),
+  };

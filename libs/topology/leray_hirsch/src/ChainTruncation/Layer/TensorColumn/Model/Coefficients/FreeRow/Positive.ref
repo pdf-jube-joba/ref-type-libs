@@ -1,0 +1,48 @@
+\definition z: I.Int^ := I.Int^::ofNat q;
+\import Rebased.Term[W := rightTerm q] \as Evaluate;
+\import Source.Positive[n := q] \as Input;
+\import Target.Positive[n := q] \as Output;
+\import Scalars.Functions[X := Generators, V := Fiber.Carrier q, target := Fiber.space q] \as Values;
+\import Scalars.Product[Index := Generators, family := Powers.power (Powers.term z)] \as Product;
+\import Scalars.Hom[V := Source.Carrier z, W := Product.Carrier, source := Source.space z, target := Product.space] \as Forward;
+\import Scalars.Hom[V := Product.Carrier, W := Source.Carrier z, source := Product.space, target := Source.space z] \as Backward;
+\definition rawValues[h: Unsigned.Carrier q]: Values.Carrier := Evaluate.comparison.forward.apply h;
+\definition ungrade[f: Product.Carrier]: Values.Carrier := \fun (g: Generators) => f g;
+\definition rawRecover[f: Values.Carrier]: Unsigned.Carrier q := Evaluate.comparison.backward.apply f;
+\definition evaluate[h: Source.Carrier z][g: Generators]: Target.Carrier z :=
+  Output.intro (rawValues h g);
+\definition recover[f: Product.Carrier]: Source.Carrier z :=
+  Input.intro (rawRecover (ungrade f));
+\definition forward: Forward.Map := Forward.Map {
+  apply := evaluate,
+  addition := \fun (h, k: Source.Carrier z) => Product.ext (evaluate ((Source.space z).add h k)) (Product.add (evaluate h) (evaluate k))
+    (\fun (g: Generators) => congr!{Values.Carrier {Target.Carrier z}} (\fun (f: Values.Carrier) => Output.intro (f g)) _ _
+      (Evaluate.comparison.forward.addition h k)),
+  scalar := \fun (a: K)(h: Source.Carrier z) => Product.ext (evaluate ((Source.space z).smul a h)) (Product.scale a (evaluate h))
+    (\fun (g: Generators) => congr!{Values.Carrier {Target.Carrier z}} (\fun (f: Values.Carrier) => Output.intro (f g)) _ _
+      (Evaluate.comparison.forward.scalar a h)),
+};
+\definition backward: Backward.Map := Backward.Map {
+  apply := recover,
+  addition := \fun (f, g: Product.Carrier) => congr!{{Unsigned.Carrier q} {Source.Carrier z}} Input.intro _ _
+    (Evaluate.comparison.backward.addition (\fun (x: Generators) => f x) (\fun (x: Generators) => g x)),
+  scalar := \fun (a: K)(f: Product.Carrier) => congr!{{Unsigned.Carrier q} {Source.Carrier z}} Input.intro _ _
+    (Evaluate.comparison.backward.scalar a (\fun (x: Generators) => f x)),
+};
+\definition forget[h: Source.Carrier z]: ungrade (evaluate h) = rawValues h :=
+  Values.ext (ungrade (evaluate h)) (rawValues h) (\fun (g: Generators) => \refl(rawValues h g));
+\definition left: \forall (h: Source.Carrier z) -> recover (evaluate h) = h :=
+  \fun (h: Source.Carrier z) => trans!{{Source.Carrier z}} _ _ _
+    (congr!{Values.Carrier {Source.Carrier z}} (\fun (f: Values.Carrier) => Input.intro (rawRecover f)) _ _ (forget h))
+    (congr!{{Unsigned.Carrier q} {Source.Carrier z}} Input.intro _ _ (Evaluate.comparison.leftInverse h));
+\definition right: \forall (f: Product.Carrier) -> evaluate (recover f) = f :=
+  \fun (f: Product.Carrier) => Product.ext (evaluate (recover f)) f
+    (\fun (g: Generators) => congr!{Values.Carrier {Target.Carrier z}} (\fun (v: Values.Carrier) => Output.intro (v g)) _ _
+      (Evaluate.comparison.rightInverse (ungrade f)));
+\definition isomorphism: \parent.At[z := z].Isomorphism := \parent.At[z := z].Isomorphism {
+  forward := forward, backward := backward, leftInverse := left, rightInverse := right,
+};
+\import Tensor.Term[p := cutoff, q := q] \as Term;
+\definition onTensor[h: Source.Carrier z][g: Generators][w: D.family.Carrier q]:
+  (evaluate h g).apply w = h.apply (Term.tensor (basis.forward.apply (Free.generator g)) w) :=
+  Evaluate.onTensor h g w;

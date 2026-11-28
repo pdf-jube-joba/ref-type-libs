@@ -1,0 +1,34 @@
+\definition underlying: Tensor.Retraction := Tensor.Retraction { apply := r.apply, retracts := r.law };
+\import Tensor.Split[r := underlying] \as ExactTensor;
+\import Dual.On[A := LeftTotal.complex, B := MiddleTotal.complex, C := RightTotal.complex].With[s := ExactTensor.sequence] \as Target;
+\module Retraction(n: N.Nat^) {
+  \import LeftTotal.Degree[n := n] \as LeftTerm;
+  \import MiddleTotal.Degree[n := n] \as MiddleTerm;
+  \import RightTotal.Degree[n := n] \as RightTerm;
+  \import ExactTensor.At[n := n] \as Data;
+  \import Double.SplitDiagonal[Index := Double.Index n, left := LeftTerm.family, middle := MiddleTerm.family, right := RightTerm.family]
+    .With[i := Data.inclusions, p := Data.projections, r := Data.retractions, s := Data.sections] \as Diagonal;
+  \definition map: _ := Diagonal.retraction;
+  \definition law: \forall (x: LeftTerm.Carrier) -> map.apply (ExactTensor.sequence.inclusion.apply n x) = x := Diagonal.retracts Data.splitting;
+}
+\definition tensorRetraction: Target.Retraction := Target.Retraction {
+  apply := \fun (n: N.Nat^) => Retraction[n := n].map,
+  law := \fun (n: N.Nat^) => Retraction[n := n].law,
+};
+\definition baseSequence: _ := Base.sequence r;
+\definition tensorSequence: _ := Target.sequence tensorRetraction;
+\import module_theory.Module[].Over[R := K, ring := baseRing] \as CoefficientModules;
+\definition coefficients: CoefficientModules.Bundle := CoefficientModules.Bundle { Carrier := K, space := CoefficientModules.scalarModule };
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\import Hom.Native[P := D] \as Fiber;
+\module Cup(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero);
+
+\module Shifted(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero);
+
+\import std.Data[].FinSet[] \as FiniteIndex;
+
+\module Finite(count: N.Nat^, degrees: FiniteIndex.Fin count -> N.Nat^,
+
+  cycles: \forall (i: FiniteIndex.Fin count) -> Fiber.Carrier (degrees i),
+
+  closed: \forall (i: FiniteIndex.Fin count) -> Fiber.apply (degrees i) (cycles i) = (Fiber.space (N.Nat^::succ (degrees i))).zero);

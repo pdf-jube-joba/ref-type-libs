@@ -46,3 +46,11 @@
   K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
 
 \module CochainTail(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module DualSplit(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module TensorExact(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module TensorBasis(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module CohomologyZero(K: \Set, ring: std.Alg[].Ring[].Ring[K]);

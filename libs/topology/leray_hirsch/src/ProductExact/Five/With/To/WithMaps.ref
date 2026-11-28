@@ -1,0 +1,29 @@
+\import Modules.FiveLemma[A := bundle A, B := bundle B, C := bundle C, D := bundle D, E := bundle E,
+  A1 := A1, B1 := B1, C1 := C1, D1 := D1, E1 := E1].Diagram[s := sequence, t := t,
+    a := ArrowA.map m.a, b := ArrowB.map m.b, c := ArrowC.map m.c, d := ArrowD.map m.d, e := ArrowE.map m.e] \as Five;
+\structure Commutative: \Prop := {
+  first: \forall (i: Index)(x: A.Carrier i) -> (m.b i).apply ((rows i).first.apply x) = t.first.apply ((m.a i).apply x),
+  second: \forall (i: Index)(x: B.Carrier i) -> (m.c i).apply ((rows i).second.apply x) = t.second.apply ((m.b i).apply x),
+  third: \forall (i: Index)(x: C.Carrier i) -> (m.d i).apply ((rows i).third.apply x) = t.third.apply ((m.c i).apply x),
+  last: \forall (i: Index)(x: D.Carrier i) -> (m.e i).apply ((rows i).last.apply x) = t.last.apply ((m.d i).apply x),
+};
+\import Summed.Square[A := A, B := B, V := A1, W := B1] \as FirstSquare;
+\import Summed.Square[A := B, B := C, V := B1, W := C1] \as SecondSquare;
+\import Summed.Square[A := C, B := D, V := C1, W := D1] \as ThirdSquare;
+\import Summed.Square[A := D, B := E, V := D1, W := E1] \as LastSquare;
+\definition diagram[h: Commutative]: Five.Commutative := Five.Commutative {
+  first := FirstSquare.law (\fun (i: Index) => (rows i).first) t.first m.a m.b h.first,
+  second := SecondSquare.law (\fun (i: Index) => (rows i).second) t.second m.b m.c h.second,
+  third := ThirdSquare.law (\fun (i: Index) => (rows i).third) t.third m.c m.d h.third,
+  last := LastSquare.law (\fun (i: Index) => (rows i).last) t.last m.d m.e h.last,
+};
+\definition LeftOnto: \Prop := Modules.Surjective (bundle A) A1 (ArrowA.map m.a);
+\definition BeforeInjective: \Prop := Modules.Injective (bundle B) B1 (ArrowB.map m.b);
+\definition BeforeOnto: \Prop := Modules.Surjective (bundle B) B1 (ArrowB.map m.b);
+\definition AfterInjective: \Prop := Modules.Injective (bundle D) D1 (ArrowD.map m.d);
+\definition AfterOnto: \Prop := Modules.Surjective (bundle D) D1 (ArrowD.map m.d);
+\definition LastInjective: \Prop := Modules.Injective (bundle E) E1 (ArrowE.map m.e);
+\definition middleMap: _ := ArrowC.map m.c;
+\definition isomorphism[h: Commutative][left: LeftOnto][beforeInj: BeforeInjective][beforeOnto: BeforeOnto]
+  [afterInj: AfterInjective][afterOnto: AfterOnto][last: LastInjective]: _ :=
+  Five.isomorphism (diagram h) left beforeInj beforeOnto afterInj afterOnto last;

@@ -64,3 +64,5 @@
 }
 
 \module OneColumn;
+
+\module Rebased(A: IntegerModules.Bundle, basis: IntegerModules.Isomorphism[V := Free.Carrier, W := A.Carrier, source := Free.space, target := A.space].Isomorphism);

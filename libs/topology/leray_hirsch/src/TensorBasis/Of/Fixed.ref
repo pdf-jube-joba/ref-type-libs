@@ -1,0 +1,42 @@
+\import Pairing.Fixed[q := q, beta := beta, closed := closed] \as Pair;
+\module Positive(p: N.Nat^) {
+  \definition m: N.Nat^ := Nat.add q p;
+  \definition z: I.Int^ := I.Int^::ofNat p;
+  \definition degree: I.Int^ := I.Int^::ofNat m;
+  \definition same: degree = Degree.shift q z := trans!{I.Int^} _ _ _
+    (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ (Arithmetic.addComm q p)) (sym!{I.Int^} _ _ (Degree.natural q p));
+  \import Native.At[C := Base.complex, k := p] \as BaseGroup;
+  \import Native.At[C := Product.complex, k := m] \as TotalGroup;
+  \import Modules.Hom[V := BaseGroup.Cohomology, W := TotalGroup.Cohomology, source := BaseGroup.cohomologySpace, target := TotalGroup.cohomologySpace]
+    .Composition[U := (source z).Carrier, domain := (source z).space] \as First;
+  \import Modules.Hom[V := TotalGroup.Cohomology, W := (target degree).Carrier, source := TotalGroup.cohomologySpace, target := (target degree).space]
+    .Composition[U := (source z).Carrier, domain := (source z).space] \as Second;
+  \import Modules.Hom[V := (target degree).Carrier, W := (target (Degree.shift q z)).Carrier, source := (target degree).space, target := (target (Degree.shift q z)).space]
+    .Composition[U := (source z).Carrier, domain := (source z).space] \as Third;
+  \definition native: _ := Second.compose Output.PositiveCohomology[n := m].backward
+    (First.compose Pair.Cohomology[p := p].linear Input.PositiveCohomology[n := p].forward);
+  \definition linear: _ := Third.compose Regrade.At[m := degree, n := Degree.shift q z, same := same].map native;
+}
+\module Term(z: I.Int^) {
+  \import Modules.Hom[V := (source z).Carrier, W := (target (Degree.shift q z)).Carrier, source := (source z).space, target := (target (Degree.shift q z)).space] \as Maps;
+  \definition Map: \Set := Maps.Map;
+  \definition zero: Map := Maps.zeroMap;
+}
+\definition map: \forall (z: I.Int^) -> Term[z := z].Map :=
+  \induction (z: I.Int^) \return Term[z := z].Map \with {
+    | ofNat: \fun (p: N.Nat^) => Positive[p := p].linear
+    | negSucc: \fun (p: N.Nat^) => Term[z := I.Int^::negSucc p].zero
+  };
+\module To(input, output: I.Int^, same: Degree.shift q input = output) {
+  \definition shifted: I.Int^ := Degree.shift q input;
+  \import Modules.Hom[V := (target shifted).Carrier, W := (target output).Carrier, source := (target shifted).space, target := (target output).space]
+    .Composition[U := (source input).Carrier, domain := (source input).space] \as Compose;
+  \definition linear: _ := Compose.compose Regrade.At[m := shifted, n := output, same := same].map (map input);
+}
+\module At(z: I.Int^) {
+  \definition unshifted: I.Int^ := Degree.unshift q z;
+  \definition shifted: I.Int^ := Degree.shift q unshifted;
+  \import Modules.Hom[V := (target shifted).Carrier, W := (target z).Carrier, source := (target shifted).space, target := (target z).space]
+    .Composition[U := (source unshifted).Carrier, domain := (source unshifted).space] \as Compose;
+  \definition linear: _ := Compose.compose Regrade.At[m := shifted, n := z, same := Degree.shiftUnshift q z].map (map unshifted);
+}

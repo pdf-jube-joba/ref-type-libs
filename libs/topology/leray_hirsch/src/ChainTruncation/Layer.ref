@@ -9,6 +9,8 @@
 \import \parent.Of[C := C, kept := (\fun (n: N.Nat^) => Bounds.Lt n cutoff), downward := Downward cutoff] \as Lower;
 \import \parent.Of[C := C, kept := (\fun (n: N.Nat^) => Bounds.Lt n (N.Nat^::succ cutoff)), downward := Downward (N.Nat^::succ cutoff)] \as Upper;
 \definition below: Chains.Complex := Lower.complex;
+\definition zeroBelow[n: N.Nat^][outside: Logic.Not (Bounds.Lt n cutoff)][x: below.family.Carrier n]:
+  x = (below.family.space n).zero := Lower.At[n := n].zero outside x;
 \definition through: Chains.Complex := Upper.complex;
 \definition outsideNext: \forall (n: N.Nat^) -> Logic.Not (n = cutoff) -> Logic.Not (Bounds.Lt n cutoff) -> Logic.Not (Bounds.Lt n (N.Nat^::succ cutoff)) :=
   \fun (n: N.Nat^)(different: Logic.Not (n = cutoff))(outside: Logic.Not (Bounds.Lt n cutoff))(inside: Bounds.Lt n (N.Nat^::succ cutoff)) =>

@@ -1,0 +1,14 @@
+\definition z: I.Int^ := I.Int^::ofNat q;
+\import Signed.Isomorphism[C := Source.complex, D := Powers.complex].On[e := cochains].At[z := z] \as ToPowers;
+\import Signed.At[C := Source.complex, z := z] \as Input;
+\import Signed.At[C := Powers.complex, z := z] \as Output;
+\import Powers.Degree[z := z] \as Classes;
+\import Scalars.Isomorphism[V := Input.Cohomology, W := Output.Cohomology, source := Input.cohomologySpace, target := Output.cohomologySpace]
+  .Composition[U := Classes.classes.Carrier, final := Classes.classes.space] \as Composition;
+\definition isomorphism: _ := Composition.compose Classes.isomorphism ToPowers.isomorphism;
+\import Signed.Map[C := Source.complex, D := Powers.complex].At[k := z] \as Induced;
+\definition onClass: \forall (x: Input.Closed) ->
+  isomorphism.forward.apply (Input.classOf x) = Classes.evaluate ((Induced.cyclesMap cochains.forward).apply x) :=
+  \fun (x: Input.Closed) => trans!{{Classes.classes.Carrier}} _ _ _
+    (congr!{Output.Cohomology {Classes.classes.Carrier}} Classes.map.apply _ _ (Induced.onClass cochains.forward x))
+    (Classes.onClass ((Induced.cyclesMap cochains.forward).apply x));

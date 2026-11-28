@@ -1,0 +1,50 @@
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].congr;
+\definition bidegree[n: N.Nat^]: N.Nat^ := N.Basic[].Def[].add q n;
+\import Hom.Native[P := A] \as BaseLeft;
+\import Hom.Native[P := B] \as BaseMiddle;
+\import Hom.Native[P := C] \as BaseRight;
+\import Hom.Native[P := LeftTotal.complex] \as TensorLeft;
+\import Hom.Native[P := MiddleTotal.complex] \as TensorMiddle;
+\import Hom.Native[P := RightTotal.complex] \as TensorRight;
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := A, D := D] \as LeftPair;
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := B, D := D] \as MiddlePair;
+\import \root.TensorCochainCup[K := K, ring := ring].Of[C := C, D := D] \as RightPair;
+\import LeftPair.Fixed[q := q, beta := beta, closed := closed] \as LeftCup;
+\import MiddlePair.Fixed[q := q, beta := beta, closed := closed] \as MiddleCup;
+\import RightPair.Fixed[q := q, beta := beta, closed := closed] \as RightCup;
+\import \root.CochainTail[K := K, ring := baseRing]
+  .ShortExact[A := TensorRight.complex, B := TensorMiddle.complex, C := TensorLeft.complex, s := tensorSequence, cutoff := q] \as Tail;
+\import Cochains.ShortExact[A := BaseRight.complex, B := BaseMiddle.complex, C := BaseLeft.complex] \as Base;
+\import Cochains.ShortExact[A := TensorRight.complex, B := TensorMiddle.complex, C := TensorLeft.complex] \as Total;
+\import Base.Morphism[A1 := Tail.left, B1 := Tail.middle, C1 := Tail.right]
+  .Diagram[s := baseSequence, t := Tail.sequence, a := RightCup.map, b := MiddleCup.map, c := LeftCup.map] \as Diagram;
+\import RightPair.Along[B := B, f := s.projection] \as OnProjection;
+\import MiddlePair.Along[B := A, f := s.inclusion] \as OnInclusion;
+\definition commutative: Diagram.Commutative := Diagram.Commutative {
+  left := \fun (n: N.Nat^)(x: BaseRight.Carrier n) =>
+    sym!{{TensorMiddle.Carrier (bidegree n)}} _ _ (OnProjection.At[p := n, q := q].Closed[beta := beta, closed := closed].cochainLaw x),
+  right := \fun (n: N.Nat^)(x: BaseMiddle.Carrier n) => OnInclusion.At[p := n, q := q].Closed[beta := beta, closed := closed].cochainLaw x,
+};
+\module At(p: N.Nat^) {
+  \definition next: N.Nat^ := N.Nat^::succ p;
+  \definition degree: N.Nat^ := bidegree p;
+  \import Cochains.At[C := BaseLeft.complex, k := p] \as Input;
+  \import Cochains.At[C := LeftCup.target, k := p] \as Middle;
+  \import Cochains.At[C := RightCup.target, k := next] \as Upper;
+  \import Cochains.At[C := TensorRight.complex, k := bidegree next] \as Output;
+  \import Cochains.Map[C := BaseLeft.complex, D := LeftCup.target].At[k := p] \as LeftMap;
+  \import Cochains.Map[C := BaseRight.complex, D := RightCup.target].At[k := next] \as RightMap;
+  \import \root.CochainTail[K := K, ring := baseRing].Of[C := TensorRight.complex].Drop[cutoff := q].At[q := next] \as Include;
+  \import Base.With[s := baseSequence].At[n := p] \as BaseConnecting;
+  \import Total.With[s := tensorSequence].At[n := degree] \as TensorConnecting;
+  \import LeftCup.Cohomology[p := p] \as Start;
+  \import RightCup.Cohomology[p := next] \as End;
+  \definition connectingLaw: \forall (a: Input.Cohomology) ->
+    TensorConnecting.connecting.apply (Start.linear.apply a) = End.linear.apply (BaseConnecting.connecting.apply a) :=
+    \fun (a: Input.Cohomology) => trans!{Output.Cohomology} _ _ _
+      (Tail.At[n := p].connectingLaw ((LeftMap.induced LeftCup.map).apply a))
+      (congr!{Upper.Cohomology Output.Cohomology} Include.forward.apply _ _
+        (Diagram.At[n := p].naturality commutative a));
+}

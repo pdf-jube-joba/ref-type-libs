@@ -55,3 +55,5 @@
   \import Tensor.Split[r := retraction] \as TensorSequence;
   \definition exact: _ := TensorSequence.sequence;
 }
+
+\module Cohomology(D: Chains.Complex, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

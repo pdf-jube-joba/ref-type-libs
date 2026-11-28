@@ -1,0 +1,37 @@
+\import Modules.Sums[I := Index] \as Sums;
+\module From(source: Modules.Family[Index], target: Modules.Bundle) {
+  \import Sums.Vector[V := target.Carrier, space := target.space] \as Sum;
+  \definition Components: \Set := \forall (i: Index) -> Modules.MapBetween (at source i) target;
+  \definition value[f: Components][x: (bundle source).Carrier]: target.Carrier := Sum.sum indices (\fun (i: Index) => (f i).apply (x i));
+  \import Modules.Hom[V := (bundle source).Carrier, W := target.Carrier, source := (bundle source).space, target := target.space] \as Linear;
+  \use Equality.trans;
+  \definition map[f: Components]: Linear.Map := Linear.Map {
+    apply := value f,
+    addition := \fun (x, y: (bundle source).Carrier) => trans!{target.Carrier} _ _ _
+      (Sum.congruent indices (\fun (i: Index) => (f i).apply ((source.space i).add (x i) (y i)))
+        (\fun (i: Index) => target.space.add ((f i).apply (x i)) ((f i).apply (y i)))
+        (\fun (i: Index) => (f i).addition (x i) (y i)))
+      (Sum.addition indices (\fun (i: Index) => (f i).apply (x i)) (\fun (i: Index) => (f i).apply (y i))),
+    scalar := \fun (a: K)(x: (bundle source).Carrier) => trans!{target.Carrier} _ _ _
+      (Sum.congruent indices (\fun (i: Index) => (f i).apply ((source.space i).smul a (x i)))
+        (\fun (i: Index) => target.space.smul a ((f i).apply (x i)))
+        (\fun (i: Index) => (f i).scalar a (x i)))
+      (Sum.scalar indices a (\fun (i: Index) => (f i).apply (x i))),
+  };
+}
+\module Square(A, B: Modules.Family[Index], V, W: Modules.Bundle) {
+  \import \parent.From[source := A, target := V] \as Left;
+  \import \parent.From[source := B, target := W] \as Right;
+  \import \parent.\parent.Maps[source := A, target := B] \as P;
+  \import Sums.Vector[V := W.Carrier, space := W.space] \as Sum;
+  \import Sums.Vector[V := V.Carrier, space := V.space].Mapping[W := W.Carrier, target := W.space] \as Linearity;
+  \use Equality.trans;
+  \use Equality.sym;
+  \definition law[f: P.Data][g: Modules.MapBetween V W][a: Left.Components][b: Right.Components]
+    [same: \forall (i: Index)(x: A.Carrier i) -> (b i).apply ((f i).apply x) = g.apply ((a i).apply x)]:
+    \forall (x: (bundle A).Carrier) -> (Right.map b).apply ((P.map f).apply x) = g.apply ((Left.map a).apply x) :=
+    \fun (x: (bundle A).Carrier) => trans!{W.Carrier} _ _ _
+      (Sum.congruent indices (\fun (i: Index) => (b i).apply ((f i).apply (x i)))
+        (\fun (i: Index) => g.apply ((a i).apply (x i))) (\fun (i: Index) => same i (x i)))
+      (sym!{W.Carrier} _ _ (Linearity.law g indices (\fun (i: Index) => (a i).apply (x i))));
+}

@@ -1,0 +1,9 @@
+\import Dual.On[A := A, B := B, C := C].With[s := s] \as Base;
+\import Double.TensorSplitSequence[C := A, E := B, F := C, D := D].With[sequence := s] \as Tensor;
+\import Double.Tensor[C := A, D := D] \as LeftTensor;
+\import Double.Tensor[C := B, D := D] \as MiddleTensor;
+\import Double.Tensor[C := C, D := D] \as RightTensor;
+\import Double.Total[C := LeftTensor.complex] \as LeftTotal;
+\import Double.Total[C := MiddleTensor.complex] \as MiddleTotal;
+\import Double.Total[C := RightTensor.complex] \as RightTotal;
+\module Split(r: Base.Retraction);

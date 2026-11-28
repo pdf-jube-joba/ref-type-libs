@@ -1,0 +1,16 @@
+\import \root.TensorBasis[K := K, ring := ring].Of[P := B, Q := Q] \as Restricted;
+\import Hom.Native[P := B] \as BaseSource;
+\import Double.Tensor[C := B, D := Q] \as TensorSource;
+\import Double.Total[C := TensorSource.complex] \as TotalSource;
+\import Hom.Native[P := TotalSource.complex] \as ProductSource;
+\import Modules.End[V := K, space := Modules.scalarModule] \as Identity;
+\import Double.TensorMapping[C := B, D := P, E := Q, F := Q].With[f := f, g := Chains.End[C := Q].identity] \as TensorMap;
+\import Hom.NativeMapping[P := B, Q := P, L := coefficients].On[f := f, u := Identity.identity] \as BaseMap;
+\import Hom.NativeMapping[P := TotalSource.complex, Q := Total.complex, L := coefficients].On[f := TensorMap.total, u := Identity.identity] \as ProductMap;
+\import Native.Map[C := Base.complex, D := BaseSource.complex].ZeroExtension[f := BaseMap.map] \as BaseSigned;
+\import Native.Map[C := Product.complex, D := ProductSource.complex].ZeroExtension[f := ProductMap.map] \as ProductSigned;
+\import Native.ZeroExtension[C := BaseSource.complex] \as SourceInput;
+\import Native.ZeroExtension[C := ProductSource.complex] \as SourceOutput;
+\definition basePull[z: I.Int^]: _ := Signed.Map[C := Input.complex, D := SourceInput.complex].At[k := z].induced BaseSigned.map;
+\definition tensorPull[z: I.Int^]: _ := Signed.Map[C := Output.complex, D := SourceOutput.complex].At[k := z].induced ProductSigned.map;
+\module Fixed(q: N.Nat^, beta: Fiber.Carrier q, closed: Fiber.apply q beta = (Fiber.space (N.Nat^::succ q)).zero);

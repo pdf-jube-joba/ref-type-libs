@@ -1,0 +1,41 @@
+\import Chains.Map[C := B, D := C].At[n := n] \as ChainProjection;
+\import ZModules.Hom[V := C.family.Carrier n, W := K, source := C.family.space n, target := Scalars.coefficients.space] \as Linear;
+\definition injective: \forall (h, k: HC.Carrier n) -> inclusion.apply n h = inclusion.apply n k -> h = k :=
+  \fun (h, k: HC.Carrier n)(same: _) => HC.At[n := n].ext h k (\fun (x: C.family.Carrier n) => \block {
+    \takefrom y: \Cast[B.family.Carrier n] ({ y: B.family.Carrier n \where s.projection.apply n y = x }) \by s.onto n x \then
+    \let equal: s.projection.apply n y = x := \bysub(B.family.Carrier n,
+      { y: B.family.Carrier n \where s.projection.apply n y = x }, y) \then
+    \return \idelim s.projection.apply n y = x \with z: C.family.Carrier n => h.apply z = k.apply z \by {
+      base: congr!{{HB.Carrier n} K} (\fun (g: HB.Carrier n) => g.apply y) _ _ same, equality: equal
+    }
+  });
+\import ZModules.Hom[V := A.family.Carrier n, W := K, source := A.family.space n, target := Scalars.coefficients.space]
+  .Composition[U := B.family.Carrier n, domain := B.family.space n] \as Extend;
+\definition onto[r: Retraction]: \forall (h: HA.Carrier n) -> \exists (k: HB.Carrier n \where projection.apply n k = h) :=
+  \fun (h: HA.Carrier n) => Logic.existsIntro[HB.Carrier n, { k: HB.Carrier n \where projection.apply n k = h }]
+    (Extend.compose h (r.apply n)) (HA.At[n := n].ext (projection.apply n (Extend.compose h (r.apply n))) h
+      (\fun (x: A.family.Carrier n) => congr!{{A.family.Carrier n} K} h.apply _ _ (r.law n x)));
+\definition zero: \forall (h: HC.Carrier n) -> projection.apply n (inclusion.apply n h) = (HA.space n).zero :=
+  \fun (h: HC.Carrier n) => HA.At[n := n].ext (projection.apply n (inclusion.apply n h)) (HA.space n).zero
+    (\fun (x: A.family.Carrier n) => trans!{K} _ _ _
+      (congr!{{C.family.Carrier n} K} h.apply _ _ (s.zero n x)) (Linear.zeroPreserved h));
+\definition middle: ZModules.Bundle := ZModules.Bundle { Carrier := B.family.Carrier n, space := B.family.space n };
+\definition range: ZModules.Bundle := ZModules.Bundle { Carrier := C.family.Carrier n, space := C.family.space n };
+\import ZModules.SurjectiveDescent[A := middle, B := range, U := Scalars.coefficients] \as Descent;
+\module Factor(h: HB.Carrier n) {
+  \import Descent.On[q := ChainProjection.linear s.projection, f := h] \as Descend;
+  \definition kills[vanishes: projection.apply n h = (HA.space n).zero]: Descend.KillsKernel := \block {
+    \fun (x: B.family.Carrier n)(zero: s.projection.apply n x = (C.family.space n).zero) \then
+    \takefrom y: \Cast[A.family.Carrier n] ({ y: A.family.Carrier n \where s.inclusion.apply n y = x }) \by s.kernelImage n x zero \then
+    \return trans!{K} _ _ _
+      (congr!{{B.family.Carrier n} K} h.apply _ _
+        (sym!{{B.family.Carrier n}} _ _ (\bysub(A.family.Carrier n, { y: A.family.Carrier n \where s.inclusion.apply n y = x }, y))))
+      (congr!{{HA.Carrier n} K} (\fun (g: HA.Carrier n) => g.apply y) _ _ vanishes)
+  };
+  \definition kernelImage[vanishes: projection.apply n h = (HA.space n).zero]: \exists (g: HC.Carrier n \where inclusion.apply n g = h) :=
+    Logic.existsIntro[HC.Carrier n, { g: HC.Carrier n \where inclusion.apply n g = h }]
+      (Descend.map (s.onto n) (kills vanishes))
+      (HB.At[n := n].ext (inclusion.apply n (Descend.map (s.onto n) (kills vanishes))) h (Descend.onImage (s.onto n) (kills vanishes)));
+}
+\definition kernelImage: \forall (h: HB.Carrier n) -> projection.apply n h = (HA.space n).zero -> \exists (g: HC.Carrier n \where inclusion.apply n g = h) :=
+  \fun (h: HB.Carrier n)(vanishes: projection.apply n h = (HA.space n).zero) => Factor[h := h].kernelImage vanishes;

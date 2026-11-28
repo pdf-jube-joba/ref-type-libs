@@ -12,3 +12,5 @@
   downward: \forall (n: N.Nat^) -> kept (N.Nat^::succ n) -> kept n);
 
 \module Layer(C: Chains.Complex, cutoff: N.Nat^);
+
+\module Comparison(C, D: Chains.Complex, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

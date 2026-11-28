@@ -1,0 +1,49 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import Finite.Enumeration[] \as FiniteEnumeration;
+\import \root.ProductExact[K := K, ring := ring, Index := Index] \as Exact;
+\import Exact.SumMaps[indices := Finite.elements count].From[source := family, target := range] \as Values;
+\definition ProductComparison: _ := Values.map components;
+\definition domain: Modules.Bundle := Exact.bundle family;
+\import Sum.FiniteSupport[] \as Coordinates;
+\import Modules.FinitelySupported[Index := Index, family := family] \as Supported;
+\import std.Data[].List[] \as Lists;
+\import Lists.Distinct[A := Index] \as Enumeration;
+\import singular_cellular_algebra.Algebra[].Refinement[A := domain.Carrier, S := Supported.submodule.carrier] \as Refinement;
+\definition full[x: domain.Carrier]: Supported.Supports (Finite.elements count) x :=
+  \fun (i: Index)(missing: Logic.Not (\In[Index] (Enumeration.keys (Finite.elements count)) i)) => Logic.falseElim _ (missing (Finite.exhaustive count i));
+\definition combine[x: domain.Carrier]: Sum.Carrier := Coordinates.combination (Finite.elements count) x;
+\definition recovery: \forall (x: domain.Carrier) -> Coordinates.coordinates (combine x) = x :=
+  \fun (x: domain.Carrier) => Coordinates.recover (Finite.elements count) (FiniteEnumeration.distinct count) x (full x);
+\definition reconstruction: \forall (x: Sum.Carrier) -> combine (Coordinates.coordinates x) = x :=
+  \fun (x: Sum.Carrier) => Coordinates.injective (combine (Coordinates.coordinates x)) x
+    (Refinement.ext (Coordinates.forward.apply (combine (Coordinates.coordinates x))) (Coordinates.forward.apply x) (recovery (Coordinates.coordinates x)));
+\import Modules.Hom[V := domain.Carrier, W := Sum.Carrier, source := domain.space, target := Sum.space] \as IntoSum;
+\definition linear: IntoSum.Map := IntoSum.Map {
+  apply := combine, addition := Coordinates.combinationAddition (Finite.elements count), scalar := Coordinates.combinationScalar (Finite.elements count),
+};
+\import Modules.Hom[V := Sum.Carrier, W := domain.Carrier, source := Sum.space, target := domain.space] \as OutOfSum;
+\definition coordinates: OutOfSum.Map := OutOfSum.Map {
+  apply := Coordinates.coordinates, addition := Coordinates.coordinatesAddition, scalar := Coordinates.coordinatesScalar,
+};
+\import Modules.Isomorphism[V := domain.Carrier, W := Sum.Carrier, source := domain.space, target := Sum.space] \as Iso;
+\definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+  forward := linear, backward := coordinates, leftInverse := recovery, rightInverse := reconstruction,
+};
+\import Modules.Sums[I := Index].Vector[V := Sum.Carrier, space := Sum.space].Mapping[W := range.Carrier, target := range.space] \as ApplySum;
+\import Modules.Sums[I := Index].Vector[V := range.Carrier, space := range.space] \as TargetSum;
+\definition formula: \forall (x: domain.Carrier) -> comparison.apply (combine x) = ProductComparison.apply x :=
+  \fun (x: domain.Carrier) => trans!{range.Carrier} _ _ _
+    (ApplySum.law comparison (Finite.elements count) (Coordinates.term x))
+    (TargetSum.congruent (Finite.elements count)
+      (\fun (i: Index) => comparison.apply (Coordinates.term x i))
+      (\fun (i: Index) => (components i).apply (x i)) (\fun (i: Index) => onSummand i (x i)));
+
+\module Regrade(degreesBefore: Index -> I.Int^, same: \forall (i: Index) -> degreesBefore i = sourceDegree i);
+\import Modules.Isomorphism[V := domain.Carrier, W := range.Carrier, source := domain.space, target := range.space]
+  .OfBijective[f := ProductComparison] \as Comparison;
+\definition Injective: \Prop := Comparison.Injective;
+\definition Onto: \Prop := Comparison.Onto;
+\structure Bijective: \Prop := { injective: Injective, onto: Onto };
+\definition invert[h: Bijective]: _ := Comparison.isomorphism h.injective h.onto;
+
+\module Vanishing;

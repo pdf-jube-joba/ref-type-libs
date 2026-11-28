@@ -1,0 +1,71 @@
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Casting;
+\definition raw: Modules.Family[Index] := Modules.Family[Index] {
+  Carrier := \fun (i: Index) => (source (degreesBefore i)).Carrier,
+  space := \fun (i: Index) => (source (degreesBefore i)).space,
+};
+\definition input: Modules.Bundle := Exact.bundle raw;
+\definition sourceFamily: Modules.Family[I.Int^] := Modules.Family[I.Int^] {
+  Carrier := \fun (a: I.Int^) => (source a).Carrier, space := \fun (a: I.Int^) => (source a).space,
+};
+\import \root.Transport[K := K, ring := ring].For[Index := I.Int^, family := sourceFamily] \as SourceTransport;
+\import Exact.Maps[source := raw, target := family] \as Convert;
+\import Exact.Maps[source := family, target := raw] \as Reverse;
+\import Modules.Product[Index := Index, family := raw] \as Originals;
+\import Modules.Product[Index := Index, family := family] \as Regraded;
+\module Term(i: Index);
+\definition forward: _ := Convert.map (\fun (i: Index) => Term[i := i].forward);
+\definition backward: _ := Reverse.map (\fun (i: Index) => Term[i := i].backward);
+\import Modules.Isomorphism[V := input.Carrier, W := domain.Carrier, source := input.space, target := domain.space] \as SourceIso;
+\definition coordinates: SourceIso.Isomorphism := SourceIso.Isomorphism {
+  forward := forward, backward := backward,
+  leftInverse := \fun (x: input.Carrier) => Originals.ext _ _ (\fun (i: Index) => Term[i := i].leftInverse (x i)),
+  rightInverse := \fun (x: domain.Carrier) => Regraded.ext _ _ (\fun (i: Index) => Term[i := i].rightInverse (x i)),
+};
+\import Exact.SumMaps[indices := Finite.elements count].From[source := raw, target := range] \as Values;
+\definition comparison: _ := Values.map (\fun (i: Index) => Term[i := i].linear);
+\import Modules.Sums[I := Index].Vector[V := range.Carrier, space := range.space] \as Sums;
+\definition law: \forall (x: input.Carrier) -> comparison.apply x = ProductComparison.apply (coordinates.forward.apply x) :=
+  \fun (x: input.Carrier) => Sums.congruent (Finite.elements count)
+    (\fun (i: Index) => Term[i := i].linear.apply (x i))
+    (\fun (i: Index) => (components i).apply (Term[i := i].forward.apply (x i)))
+    (\fun (i: Index) => Term[i := i].law (x i));
+\import std.Logic[].Proposition[] \as Logic;
+\import Modules.Isomorphism[V := input.Carrier, W := range.Carrier, source := input.space, target := range.space]
+  .OfBijective[f := comparison] \as Raw;
+\definition Injective: \Prop := Raw.Injective;
+\definition Onto: \Prop := Raw.Onto;
+\definition injective[h: \forall (x, y: domain.Carrier) -> ProductComparison.apply x = ProductComparison.apply y -> x = y]: Injective :=
+  \fun (x, y: input.Carrier)(same: _) => trans!{input.Carrier} _ _ _
+    (sym!{input.Carrier} _ _ (coordinates.leftInverse x))
+    (trans!{input.Carrier} _ _ _
+      (congr!{domain.Carrier input.Carrier} coordinates.backward.apply _ _
+        (h (coordinates.forward.apply x) (coordinates.forward.apply y) (trans!{range.Carrier} _ _ _
+          (sym!{range.Carrier} _ _ (law x)) (trans!{range.Carrier} _ _ _ same (law y)))))
+      (coordinates.leftInverse y));
+\definition onto[h: \forall (y: range.Carrier) -> \exists (x: domain.Carrier \where ProductComparison.apply x = y)]: Onto := \block {
+  \fun (y: range.Carrier) \then
+  \takefrom x: \Cast[domain.Carrier] ({ x: domain.Carrier \where ProductComparison.apply x = y }) \by h y \then
+  \return Logic.existsIntro[input.Carrier, { v: input.Carrier \where comparison.apply v = y }] (coordinates.backward.apply x)
+    (trans!{range.Carrier} _ _ _ (law (coordinates.backward.apply x)) (trans!{range.Carrier} _ _ _
+      (congr!{domain.Carrier range.Carrier} ProductComparison.apply _ _ (coordinates.rightInverse x))
+      (\bysub(domain.Carrier, { x: domain.Carrier \where ProductComparison.apply x = y }, x))))
+};
+\definition corrected: \forall (x: domain.Carrier) -> comparison.apply (coordinates.backward.apply x) = ProductComparison.apply x :=
+  \fun (x: domain.Carrier) => trans!{range.Carrier} _ _ _ (law (coordinates.backward.apply x))
+    (congr!{domain.Carrier range.Carrier} ProductComparison.apply _ _ (coordinates.rightInverse x));
+\definition ungradeInjective[h: Injective]:
+  \forall (x, y: domain.Carrier) -> ProductComparison.apply x = ProductComparison.apply y -> x = y :=
+  \fun (x, y: domain.Carrier)(same: _) => trans!{domain.Carrier} _ _ _
+    (sym!{domain.Carrier} _ _ (coordinates.rightInverse x))
+    (trans!{domain.Carrier} _ _ _
+      (congr!{input.Carrier domain.Carrier} coordinates.forward.apply _ _
+        (h (coordinates.backward.apply x) (coordinates.backward.apply y)
+          (trans!{range.Carrier} _ _ _ (corrected x) (trans!{range.Carrier} _ _ _ same (sym!{range.Carrier} _ _ (corrected y))))))
+      (coordinates.rightInverse y));
+\definition ungradeOnto[h: Onto]: \forall (y: range.Carrier) -> \exists (x: domain.Carrier \where ProductComparison.apply x = y) := \block {
+  \fun (y: range.Carrier) \then
+  \takefrom x: \Cast[input.Carrier] ({ x: input.Carrier \where comparison.apply x = y }) \by h y \then
+  \return Logic.existsIntro[domain.Carrier, { v: domain.Carrier \where ProductComparison.apply v = y }] (coordinates.forward.apply x)
+    (trans!{range.Carrier} _ _ _ (sym!{range.Carrier} _ _ (law x))
+      (\bysub(input.Carrier, { x: input.Carrier \where comparison.apply x = y }, x)))
+};
