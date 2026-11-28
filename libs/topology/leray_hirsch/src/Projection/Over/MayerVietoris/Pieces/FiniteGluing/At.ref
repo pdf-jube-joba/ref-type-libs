@@ -1,0 +1,94 @@
+\definition next: I.Int^ := Indices.next z;
+\definition before[i: Index]: I.Int^ := Degrees.unshift (degree i) z;
+\definition after[i: Index]: I.Int^ := Indices.next (before i);
+\definition lowerSame[i: Index]: before i = Degrees.unshift (degree i) z := \refl(before i);
+\definition upperSame[i: Index]: after i = Degrees.unshift (degree i) next := sym!{I.Int^} _ _ (Degrees.unshiftNext (degree i) z);
+\import Target.Degree[z := z] \as T0;
+\import Target.Degree[z := next] \as T1;
+\import Target.At[z := z] \as M0;
+\import Target.At[z := next] \as M1;
+\import Z.ExactFive[A := T0.directSum, B := T0.intersection, C := T1.whole, D := T1.directSum, E := T1.intersection] \as TargetRow;
+\definition target: TargetRow.Sequence := TargetRow.Sequence {
+  first := M0.difference, second := M0.connecting, third := M1.restriction, last := M1.difference,
+  zeroB := M0.exactAtIntersection.zero, zeroC := M0.exactAtWhole.zero, zeroD := M1.exactAtSum.zero,
+  kernelB := M0.exactAtIntersection.kernelImage, kernelC := M0.exactAtWhole.kernelImage, kernelD := M1.exactAtSum.kernelImage,
+};
+\module Term(i: Index) {
+  \definition q: N.Nat^ := degree i;
+  \definition p: I.Int^ := Degrees.unshift q z;
+  \definition p1: I.Int^ := Indices.next p;
+  \definition same: p1 = Degrees.unshift q next := sym!{I.Int^} _ _ (Degrees.unshiftNext q z);
+  \import Source.Degree[z := p] \as S0;
+  \import Source.Degree[z := p1] \as S1;
+  \import Source.At[z := p] \as M0;
+  \import Source.At[z := p1] \as M1;
+  \definition first: Z.Bundle := S0.directSum;
+  \definition second: Z.Bundle := S0.intersection;
+  \definition third: Z.Bundle := S1.whole;
+  \definition fourth: Z.Bundle := S1.directSum;
+  \definition last: Z.Bundle := S1.intersection;
+  \import Z.ExactFive[A := first, B := second, C := third, D := fourth, E := last] \as Row;
+  \definition sequence: Row.Sequence := Row.Sequence {
+    first := M0.difference, second := M0.connecting, third := M1.restriction, last := M1.difference,
+    zeroB := M0.exactAtIntersection.zero, zeroC := M0.exactAtWhole.zero, zeroD := M1.exactAtSum.zero,
+    kernelB := M0.exactAtIntersection.kernelImage, kernelC := M0.exactAtWhole.kernelImage, kernelD := M1.exactAtSum.kernelImage,
+  };
+  \import \parent.\parent.\parent.Summand[q := q, u := classes i] \as Component;
+  \import Component.At[z := z].Regraded[d := p, same := lowerSame i] \as Lower;
+  \import Component.At[z := z].Integer[] \as LowerNative;
+  \import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+  \import Component.At[z := next].Regraded[d := p1, same := same] \as Upper;
+  \import Component.Connecting[].At[z := z] \as Connecting;
+  \definition a: _ := Lower.pair;
+  \definition b: _ := Lower.overlap;
+  \definition c: _ := Upper.whole;
+  \definition d: _ := Upper.pair;
+  \definition e: _ := Upper.overlap;
+  \definition firstLaw: _ := Lower.difference;
+  \definition secondLaw: \forall (x: second.Carrier) -> c.apply (sequence.second.apply x) = target.second.apply (b.apply x) :=
+    \fun (x: second.Carrier) => trans!{{T1.whole.Carrier}} _ _ _
+      (sym!{{T1.whole.Carrier}} _ _ (Connecting.law x))
+      (congr!{{second.Carrier} {T1.whole.Carrier}} (\fun (v: second.Carrier) => target.second.apply (LowerNative.overlapMap.apply v)) _ _
+        (sym!{{second.Carrier}} _ _ (Transport.castRefl Lower.overlapFamily.Carrier p x)));
+  \definition thirdLaw: _ := Upper.restriction;
+  \definition lastLaw: _ := Upper.difference;
+}
+\definition first: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].first.Carrier, space := \fun (i: Index) => Term[i := i].first.space,
+};
+\definition second: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].second.Carrier, space := \fun (i: Index) => Term[i := i].second.space,
+};
+\definition third: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].third.Carrier, space := \fun (i: Index) => Term[i := i].third.space,
+};
+\definition fourth: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].fourth.Carrier, space := \fun (i: Index) => Term[i := i].fourth.space,
+};
+\definition last: Z.Family[Index] := Z.Family[Index] {
+  Carrier := \fun (i: Index) => Term[i := i].last.Carrier, space := \fun (i: Index) => Term[i := i].last.space,
+};
+\import Exact.Five[A := first, B := second, C := third, D := fourth, E := last]
+  .With[rows := (\fun (i: Index) => Term[i := i].sequence)]
+  .To[A1 := T0.directSum, B1 := T0.intersection, C1 := T1.whole, D1 := T1.directSum, E1 := T1.intersection,
+    t := target, indices := Finite.elements count] \as Compare;
+\definition maps: Compare.Maps := Compare.Maps {
+  a := \fun (i: Index) => Term[i := i].a,
+  b := \fun (i: Index) => Term[i := i].b,
+  c := \fun (i: Index) => Term[i := i].c,
+  d := \fun (i: Index) => Term[i := i].d,
+  e := \fun (i: Index) => Term[i := i].e,
+};
+\import Compare.WithMaps[m := maps] \as Diagram;
+\definition commutative: Diagram.Commutative := Diagram.Commutative {
+  first := \fun (i: Index) => Term[i := i].firstLaw,
+  second := \fun (i: Index) => Term[i := i].secondLaw,
+  third := \fun (i: Index) => Term[i := i].thirdLaw,
+  last := \fun (i: Index) => Term[i := i].lastLaw,
+};
+\definition middle: _ := Diagram.middleMap;
+\definition fiveLemma[left: Diagram.LeftOnto][beforeInj: Diagram.BeforeInjective][beforeOnto: Diagram.BeforeOnto]
+  [afterInj: Diagram.AfterInjective][afterOnto: Diagram.AfterOnto][end: Diagram.LastInjective]: _ :=
+  Diagram.isomorphism commutative left beforeInj beforeOnto afterInj afterOnto end;
+
+\module Glued;

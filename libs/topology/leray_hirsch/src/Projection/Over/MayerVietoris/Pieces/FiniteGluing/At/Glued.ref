@@ -1,0 +1,24 @@
+\import \parent.\parent.Level[z := z, before := before, same := lowerSame] \as Lower;
+\import \parent.\parent.Level[z := next, before := after, same := upperSame] \as Upper;
+\import Lower.Known[] \as LowerComparison;
+\import Upper.Known[] \as UpperComparison;
+\definition LocalLower: \Prop := LowerComparison.Here;
+\definition LocalUpper: \Prop := UpperComparison.Here;
+\definition raw[lower: LocalLower][upper: LocalUpper]: _ :=
+  fiveLemma (LowerComparison.pairOnto lower) (LowerComparison.overlapInjective lower) (LowerComparison.overlapOnto lower)
+    (UpperComparison.pairInjective upper) (UpperComparison.pairOnto upper) (UpperComparison.overlapInjective upper);
+\definition injective[lower: LocalLower][upper: LocalUpper]: Z.Injective Upper.wholeDomain T1.whole Upper.wholeMap :=
+  \fun (a, b: Upper.wholeDomain.Carrier)(same: _) => trans!{{Upper.wholeDomain.Carrier}} _ _ _
+    (sym!{{Upper.wholeDomain.Carrier}} _ _ ((raw lower upper).leftInverse a))
+    (trans!{{Upper.wholeDomain.Carrier}} _ _ _
+      (congr!{{T1.whole.Carrier} {Upper.wholeDomain.Carrier}} (raw lower upper).backward.apply _ _ same)
+      ((raw lower upper).leftInverse b));
+\import std.Logic[].Proposition[] \as Logic;
+\definition onto[lower: LocalLower][upper: LocalUpper]: Z.Surjective Upper.wholeDomain T1.whole Upper.wholeMap :=
+  \fun (y: T1.whole.Carrier) => Logic.existsIntro[Upper.wholeDomain.Carrier,
+    { x: Upper.wholeDomain.Carrier \where Upper.wholeMap.apply x = y }] ((raw lower upper).backward.apply y) ((raw lower upper).rightInverse y);
+\definition bijective[lower: LocalLower][upper: LocalUpper]: UpperComparison.WholeBijective :=
+  UpperComparison.WholeBijective { injective := UpperComparison.wholeInjective (injective lower upper),
+    onto := UpperComparison.wholeOnto (onto lower upper) };
+\definition isomorphism[lower: LocalLower][upper: LocalUpper]: _ :=
+  UpperComparison.directIsomorphism (bijective lower upper);

@@ -41,3 +41,25 @@
       (consequence (composition.backward.apply y)) (composition.rightInverse y),
   };
 }
+\definition onCoordinates: \forall (x: Source.Carrier) -> linear.apply x = finite.apply (coordinates.apply x) :=
+  \fun (x: Source.Carrier) => trans!{range.Carrier} _ _ _
+    (congr!{Source.Carrier range.Carrier} linear.apply _ _ (sym!{Source.Carrier} _ _ (coordinateIsomorphism.leftInverse x)))
+    (formula (coordinates.apply x));
+\import Modules.Isomorphism[V := Source.Carrier, W := range.Carrier,
+  source := Source.space, target := range.space] \as Original;
+\module FromDirect(iso: Original.Isomorphism, law: \forall (x: Source.Carrier) -> iso.forward.apply x = linear.apply x) {
+  \import Modules.Isomorphism[V := Source.Carrier, W := domain.Carrier, source := Source.space, target := domain.space].Inverse[] \as Inverse;
+  \import Modules.Isomorphism[V := domain.Carrier, W := Source.Carrier, source := domain.space, target := Source.space]
+    .Composition[U := range.Carrier, final := range.space] \as Compose;
+  \definition composition: _ := Compose.compose iso (Inverse.inverse coordinateIsomorphism);
+  \definition consequence: \forall (x: domain.Carrier) -> finite.apply x = composition.forward.apply x :=
+    \fun (x: domain.Carrier) => trans!{range.Carrier} _ _ _
+      (sym!{range.Carrier} _ _ (formula x)) (sym!{range.Carrier} _ _ (law (coordinateIsomorphism.backward.apply x)));
+  \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+    forward := finite, backward := composition.backward,
+    leftInverse := \fun (x: domain.Carrier) => trans!{domain.Carrier} _ _ _
+      (congr!{range.Carrier domain.Carrier} composition.backward.apply _ _ (consequence x)) (composition.leftInverse x),
+    rightInverse := \fun (y: range.Carrier) => trans!{range.Carrier} _ _ _
+      (consequence (composition.backward.apply y)) (composition.rightInverse y),
+  };
+}

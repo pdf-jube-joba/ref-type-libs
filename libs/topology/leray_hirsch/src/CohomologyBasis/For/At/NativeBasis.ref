@@ -1,0 +1,47 @@
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\import Native.At[C := C, k := q] \as NativeH;
+\definition family[n: N.Nat^]: \Set := Native.At[C := C, k := n].Cohomology;
+\definition classOf[n: N.Nat^][x: Reindex.cycles n]: family n :=
+  Native.At[C := C, k := n].classOf x;
+\definition nativeGenerators[i: Indices]: NativeH.Cohomology :=
+  Transport.cast family (degrees i) q (degreeLaw i) (classOf (degrees i) (cycles i));
+\import Free.To[W := NativeH.Cohomology, target := NativeH.cohomologySpace] \as ExtendNative;
+\definition linear: _ := ExtendNative.extension nativeGenerators;
+\import Modules.Isomorphism[V := Free.Carrier, W := NativeH.Cohomology, source := Free.space, target := NativeH.cohomologySpace]
+  .OfBijective[f := linear] \as NativeIso;
+\definition IsBasis: \Prop := Logic.And[NativeIso.Injective, NativeIso.Onto];
+\import Modules.Hom[V := NativeH.Cohomology, W := Carrier, source := NativeH.cohomologySpace, target := space]
+  .Composition[U := Free.Carrier, domain := Free.space] \as Compose;
+\definition toSigned: _ := Extend.PositiveCohomology[n := q].backward;
+\definition generatorLaw: \forall (i: Indices) -> toSigned.apply (nativeGenerators i) = class i :=
+  \fun (i: Indices) => trans!{Carrier} _ _ _
+    (congr!{NativeH.Cohomology Carrier} toSigned.apply _ _
+      (Transport.natural Reindex.cycles family classOf (degrees i) q (degreeLaw i) (cycles i)))
+    (Extend.PositiveCohomology[n := q].onNaturalClass (representative i));
+\definition equality: Compose.compose toSigned linear = comparison :=
+  Extension.ext (Compose.compose toSigned linear) comparison (\fun (i: Indices) => trans!{Carrier} _ _ _
+    (congr!{NativeH.Cohomology Carrier} toSigned.apply _ _ (ExtendNative.onGenerator nativeGenerators i))
+    (trans!{Carrier} _ _ _ (generatorLaw i) (sym!{Carrier} _ _ (onGenerator i))));
+\import Modules.Isomorphism[V := Carrier, W := NativeH.Cohomology, source := space, target := NativeH.cohomologySpace].Inverse[] \as Reverse;
+\import Modules.Isomorphism[V := Free.Carrier, W := NativeH.Cohomology, source := Free.space, target := NativeH.cohomologySpace]
+  .Composition[U := Carrier, final := space] \as Product;
+\definition transportIsomorphism[h: IsBasis]: _ :=
+  Product.compose (Reverse.inverse Extend.PositiveCohomology[n := q].isomorphism) (NativeIso.isomorphism h.left h.right);
+\definition forwardEquality[h: IsBasis][x: Free.Carrier]: comparison.apply x = (transportIsomorphism h).forward.apply x :=
+  congr!{{Modules.Hom[V := Free.Carrier, W := Carrier, source := Free.space, target := space].Map} Carrier}
+    (\fun (f: Modules.Hom[V := Free.Carrier, W := Carrier, source := Free.space, target := space].Map) => f.apply x) _ _
+    (sym!{{Modules.Hom[V := Free.Carrier, W := Carrier, source := Free.space, target := space].Map}} _ _ equality);
+\definition signedBasis[h: IsBasis]: Logic.And[Iso.Injective, Iso.Onto] :=
+  Logic.And[_, _] {
+    left := \fun (x, y: Free.Carrier)(same: comparison.apply x = comparison.apply y) => trans!{Free.Carrier} _ _ _
+      (sym!{Free.Carrier} _ _ ((transportIsomorphism h).leftInverse x))
+      (trans!{Free.Carrier} _ _ _
+        (congr!{Carrier Free.Carrier} (transportIsomorphism h).backward.apply _ _
+          (trans!{Carrier} _ _ _ (sym!{Carrier} _ _ (forwardEquality h x)) (trans!{Carrier} _ _ _ same (forwardEquality h y))))
+        ((transportIsomorphism h).leftInverse y)),
+    right := \fun (y: Carrier) => Logic.existsIntro[Free.Carrier, { x: Free.Carrier \where comparison.apply x = y }]
+      ((transportIsomorphism h).backward.apply y)
+      (trans!{Carrier} _ _ _ (forwardEquality h ((transportIsomorphism h).backward.apply y)) ((transportIsomorphism h).rightInverse y)),
+  };

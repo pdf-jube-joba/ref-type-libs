@@ -1,0 +1,43 @@
+\definition Index: \Set := Finite.Fin count;
+\definition newClasses[i: Index]: NewProduct.Cohomology[].Group (degree i) := restricted (degree i) (classes i);
+\import \root.ProductExact[K := K, ring := ring, Index := Index] \as Products;
+\import Old.Comparison[count := count].With[degree := degree, classes := classes] \as Source;
+\import New.Comparison[count := count].With[degree := degree, classes := newClasses] \as Target;
+\module At(z: I.Int^) {
+  \import Source.At[z := z] \as Input;
+  \import Target.At[z := z] \as Output;
+  \import Input.ProductCoordinates[] \as InputCoordinates;
+  \import Output.ProductCoordinates[] \as OutputCoordinates;
+  \import Products.Maps[source := Input.family, target := Output.family] \as Product;
+  \definition coordinates: _ := Product.map (\fun (i: Index) => baseRestriction (Input.inputDegree i));
+  \import Modules.Sums[I := Index].Vector[V := InputCoordinates.range.Carrier, space := InputCoordinates.range.space]
+    .Mapping[W := OutputCoordinates.range.Carrier, target := OutputCoordinates.range.space] \as Sums;
+  \import Modules.Sums[I := Index].Vector[V := OutputCoordinates.range.Carrier, space := OutputCoordinates.range.space] \as Result;
+  \definition onInput: \forall (i: Index)(a: Input.family.Carrier i) ->
+    (totalRestriction z).apply ((Input.components i).apply a) =
+    (Output.components i).apply ((baseRestriction (Input.inputDegree i)).apply a) :=
+    \fun (i: Index) => \parent.\parent.Shift[q := degree i, u := classes i].At[z := z].law;
+  \definition productLaw: \forall (x: InputCoordinates.domain.Carrier) ->
+    (totalRestriction z).apply (InputCoordinates.finite.apply x) = OutputCoordinates.finite.apply (coordinates.apply x) :=
+    \fun (x: InputCoordinates.domain.Carrier) => trans!{{OutputCoordinates.range.Carrier}} _ _ _
+      (Sums.law (totalRestriction z) (Finite.elements count) (\fun (i: Index) => (Input.components i).apply (x i)))
+      (Result.congruent (Finite.elements count)
+        (\fun (i: Index) => (totalRestriction z).apply ((Input.components i).apply (x i)))
+        (\fun (i: Index) => (Output.components i).apply (coordinates.apply x i))
+        (\fun (i: Index) => onInput i (x i)));
+  \import Modules.DirectSum[Index := Index, family := Input.family] \as InputSum;
+  \import Modules.DirectSum[Index := Index, family := Output.family] \as OutputSum;
+  \import Modules.Hom[V := InputCoordinates.domain.Carrier, W := OutputCoordinates.domain.Carrier,
+    source := InputCoordinates.domain.space, target := OutputCoordinates.domain.space]
+    .Composition[U := InputSum.Carrier, domain := InputSum.space] \as First;
+  \import Modules.Hom[V := OutputCoordinates.domain.Carrier, W := OutputSum.Carrier,
+    source := OutputCoordinates.domain.space, target := OutputSum.space].Composition[U := InputSum.Carrier, domain := InputSum.space] \as Second;
+  \definition map: _ := Second.compose Output.coordinateIsomorphism.backward (First.compose coordinates Input.coordinates);
+  \definition law: \forall (a: InputSum.Carrier) ->
+    (totalRestriction z).apply (Input.linear.apply a) = Output.linear.apply (map.apply a) :=
+    \fun (a: InputSum.Carrier) => trans!{{OutputCoordinates.range.Carrier}} _ _ _
+      (congr!{{InputCoordinates.range.Carrier} {OutputCoordinates.range.Carrier}} (totalRestriction z).apply _ _
+        (InputCoordinates.onCoordinates a))
+      (trans!{{OutputCoordinates.range.Carrier}} _ _ _ (productLaw (Input.coordinates.apply a))
+        (sym!{{OutputCoordinates.range.Carrier}} _ _ (OutputCoordinates.formula (coordinates.apply (Input.coordinates.apply a)))));
+}

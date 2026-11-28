@@ -1,0 +1,29 @@
+\import \root.NilpotentComparison[K := K, ring := scalars].On[V := Product.Carrier, space := Product.space].With[t := t] \as Nilpotent;
+\definition Filtered[n: N.Nat^][x: Product.Carrier]: \Prop := \forall (i: Index) -> Nat.Le n (degree i) -> x i = (family.space i).zero;
+\definition Decreases: \Prop := \forall (i: Index)(x: Product.Carrier) ->
+  (\forall (j: Index) -> Nat.Lt (degree i) (degree j) -> x j = (family.space j).zero) -> t.apply x i = (family.space i).zero;
+\definition decrease[h: Decreases][n: N.Nat^][x: Product.Carrier]: Filtered (N.Nat^::succ n) x -> Filtered n (t.apply x) :=
+  \fun (high: Filtered (N.Nat^::succ n) x)(i: Index)(lower: Nat.Le n (degree i)) =>
+    h i x (\fun (j: Index)(larger: Nat.Lt (degree i) (degree j)) => high j
+      (Nat.leTrans (N.Nat^::succ n) (N.Nat^::succ (degree i)) (degree j)
+        (Nat.leSuccSucc n (degree i) lower) (Nat.succLeOfLt (degree j) (degree i) larger)));
+\definition powerCommute: \forall (n: N.Nat^)(x: Product.Carrier) -> Nilpotent.power n (t.apply x) = Nilpotent.power (N.Nat^::succ n) x :=
+  \induction (n: N.Nat^) \return \forall (x: Product.Carrier) -> Nilpotent.power n (t.apply x) = Nilpotent.power (N.Nat^::succ n) x \with {
+    | zero: \fun (x: Product.Carrier) => \refl(t.apply x)
+    | succ: \fun (n: N.Nat^)(previous: \forall (x: Product.Carrier) -> Nilpotent.power n (t.apply x) = Nilpotent.power (N.Nat^::succ n) x)
+      (x: Product.Carrier) => congr!{{Product.Carrier} {Product.Carrier}} t.apply _ _ (previous x)
+  };
+\definition vanishesOn[h: Decreases]: \forall (n: N.Nat^)(x: Product.Carrier) -> Filtered n x -> Nilpotent.power n x = Product.zero :=
+  \induction (n: N.Nat^) \return \forall (x: Product.Carrier) -> Filtered n x -> Nilpotent.power n x = Product.zero \with {
+    | zero: \fun (x: Product.Carrier)(all: Filtered N.Nat^::zero x) => Product.ext x Product.zero
+        (\fun (i: Index) => all i (Nat.zeroLe (degree i)))
+    | succ: \fun (n: N.Nat^)(previous: \forall (x: Product.Carrier) -> Filtered n x -> Nilpotent.power n x = Product.zero)
+      (x: Product.Carrier)(high: Filtered (N.Nat^::succ n) x) => trans!{{Product.Carrier}} _ _ _
+        (sym!{{Product.Carrier}} _ _ (powerCommute n x)) (previous (t.apply x) (decrease h n x high))
+  };
+\definition topFiltered[x: Product.Carrier]: Filtered top x :=
+  \fun (i: Index)(high: Nat.Le top (degree i)) => Logic.falseElim _
+    (Nat.ltIrrefl (degree i) (Nat.ltOfSuccLe (degree i) (degree i)
+      (Nat.leTrans (N.Nat^::succ (degree i)) top (degree i) (Nat.succLeOfLt top (degree i) (degreeBelow i)) high)));
+\definition isomorphism[h: Decreases]: _ :=
+  Nilpotent.isomorphism top (\fun (x: Product.Carrier) => vanishesOn h top x (topFiltered x));

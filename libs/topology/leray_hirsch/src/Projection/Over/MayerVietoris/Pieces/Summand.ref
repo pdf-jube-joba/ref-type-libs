@@ -31,4 +31,7 @@
       (congr!{{OverlapClasses.Group q} {OverlapProjection.totalFamily.Carrier z}}
         (\fun (c: OverlapClasses.Group q) => (fromRight z c).apply ((OverlapRight.baseRestriction input).apply a)) _ _ (Agree.law u));
   \module Integer;
+  \module Regraded(d: I.Int^, same: d = input);
 }
+
+\module Connecting;

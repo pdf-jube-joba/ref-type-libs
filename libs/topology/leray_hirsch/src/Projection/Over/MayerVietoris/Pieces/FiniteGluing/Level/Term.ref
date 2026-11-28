@@ -1,0 +1,43 @@
+\definition d: I.Int^ := before i;
+\definition input: I.Int^ := Degrees.unshift (degree i) z;
+\import Source.Degree[z := d] \as S;
+\import \parent.\parent.\parent.Summand[q := degree i, u := classes i].At[z := z] \as Compare;
+\import Compare.Regraded[d := d, same := same i] \as Raw;
+\import \parent.\parent.\parent.Groups[z := input] \as Input;
+\import Z.Biproduct[V := Input.baseLeft.Carrier, W := Input.baseRight.Carrier, left := Input.baseLeft.space, right := Input.baseRight.space] \as InputPair;
+\definition pairBundle: Z.Bundle := S.directSum;
+\definition overlapBundle: Z.Bundle := S.intersection;
+\definition wholeBundle: Z.Bundle := S.whole;
+\definition pair: _ := Raw.pair;
+\definition overlap: _ := Raw.overlap;
+\definition whole: _ := Raw.whole;
+\definition pairValue[x: pairBundle.Carrier]: InputPair.Carrier := Casting.cast Raw.pairFamily.Carrier d input (same i) x;
+\definition overlapValue[x: overlapBundle.Carrier]: O.family.Carrier i := Casting.cast Raw.overlapFamily.Carrier d input (same i) x;
+\definition wholeValue[x: wholeBundle.Carrier]: W.family.Carrier i := Casting.cast Raw.wholeFamily.Carrier d input (same i) x;
+\definition leftValue[x: pairBundle.Carrier]: L.family.Carrier i := InputPair.first (pairValue x);
+\definition rightValue[x: pairBundle.Carrier]: R.family.Carrier i := InputPair.second (pairValue x);
+\definition pairFrom[a: L.family.Carrier i][b: R.family.Carrier i]: pairBundle.Carrier :=
+  Casting.cast Raw.pairFamily.Carrier input d (sym!{I.Int^} _ _ (same i)) (InputPair.make a b);
+\definition overlapFrom[a: O.family.Carrier i]: overlapBundle.Carrier :=
+  Casting.cast Raw.overlapFamily.Carrier input d (sym!{I.Int^} _ _ (same i)) a;
+\definition wholeFrom[a: W.family.Carrier i]: wholeBundle.Carrier :=
+  Casting.cast Raw.wholeFamily.Carrier input d (sym!{I.Int^} _ _ (same i)) a;
+\import std.Data[].Pair[].Prop[A := Input.baseLeft.Carrier, B := Input.baseRight.Carrier] \as Eq;
+\definition pairInverse: \forall (x: pairBundle.Carrier) -> pairFrom (leftValue x) (rightValue x) = x :=
+  \fun (x: pairBundle.Carrier) => trans!{{pairBundle.Carrier}} _ _ _
+    (congr!{InputPair.Carrier {pairBundle.Carrier}} (Casting.cast Raw.pairFamily.Carrier input d (sym!{I.Int^} _ _ (same i))) _ _ (Eq.eta (pairValue x)))
+    (Casting.castInverse Raw.pairFamily.Carrier d input (same i) x);
+\definition pairRoundtrip[a: L.family.Carrier i][b: R.family.Carrier i]: pairValue (pairFrom a b) = InputPair.make a b :=
+  Casting.castInverse Raw.pairFamily.Carrier input d (sym!{I.Int^} _ _ (same i)) (InputPair.make a b);
+\definition pairLeft[a: L.family.Carrier i][b: R.family.Carrier i]: leftValue (pairFrom a b) = a :=
+  congr!{InputPair.Carrier {L.family.Carrier i}} InputPair.first _ _ (pairRoundtrip a b);
+\definition pairRight[a: L.family.Carrier i][b: R.family.Carrier i]: rightValue (pairFrom a b) = b :=
+  congr!{InputPair.Carrier {R.family.Carrier i}} InputPair.second _ _ (pairRoundtrip a b);
+\definition leftOverlap: \forall (x: overlapBundle.Carrier) -> overlapFrom (overlapValue x) = x :=
+  Casting.castInverse Raw.overlapFamily.Carrier d input (same i);
+\definition rightOverlap: \forall (a: O.family.Carrier i) -> overlapValue (overlapFrom a) = a :=
+  Casting.castInverse Raw.overlapFamily.Carrier input d (sym!{I.Int^} _ _ (same i));
+\definition leftWhole: \forall (x: wholeBundle.Carrier) -> wholeFrom (wholeValue x) = x :=
+  Casting.castInverse Raw.wholeFamily.Carrier d input (same i);
+\definition rightWhole: \forall (a: W.family.Carrier i) -> wholeValue (wholeFrom a) = a :=
+  Casting.castInverse Raw.wholeFamily.Carrier input d (sym!{I.Int^} _ _ (same i));

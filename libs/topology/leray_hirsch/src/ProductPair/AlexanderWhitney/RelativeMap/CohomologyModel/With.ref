@@ -12,6 +12,11 @@
 \import Comparison.FiniteBasis[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Model;
 \import Project.Comparison[count := count].With[degree := degrees, classes := lift] \as Actual;
 \import \root.ProductExact[K := K, ring := ring, Index := Index] \as Products;
+\import \root.CohomologyBasis[K := K, ring := ring].For[C := Fiber.complex, count := count, degrees := degrees,
+  cycles := (\fun (i: Index) => \into[Fiber.Carrier (degrees i)](cycles i, C.At[C := Fiber.complex, k := degrees i].cycles.carrier) \by { closed i })] \as Graded;
+\definition NativeBasis: \Prop := \forall (q: N.Nat^) -> Graded.At[q := q].NativeBasis[].IsBasis;
+\definition signedBasis[h: NativeBasis]: Basis :=
+  \fun (q: N.Nat^) => Graded.At[q := q].NativeBasis[].signedBasis (h q);
 \module At(z: I.Int^) {
   \import \parent.\parent.At[z := z] \as Comparison;
   \import Model.At[z := z] \as Domain;
@@ -41,5 +46,8 @@
     \definition product: _ := Proof.isomorphism (\fun (v: Input.domain.Carrier) => sym!{{Output.range.Carrier}} _ _ (agreement v));
     \import Output.With[iso := product, law := (\fun (v: Output.domain.Carrier) => \refl(Output.finite.apply v))] \as Direct;
     \definition isomorphism: _ := Direct.isomorphism;
+  }
+  \module ProvedNative(h: NativeBasis) {
+    \definition isomorphism: _ := \parent.Proved[h := signedBasis h].isomorphism;
   }
 }

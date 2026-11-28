@@ -1,0 +1,52 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].Pair[] \as Pair;
+\import N.Basic[].Def[] \as Nat;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.eq_reason_in;
+\import topological_constructions.Product[A := X, B := F] \as Product;
+\import singular_cap.External[A := X, B := F, left := base, right := fiber, R := K, ring := ring] \as External;
+\import singular_products.Cochains[A := X, source := base, R := K, ring := ring] \as Base;
+\import singular_products.Cochains[A := F, source := fiber, R := K, ring := ring] \as Fiber;
+\import singular_products.Cochains[A := Product.CarrierSet, source := External.topology, R := K, ring := ring] \as Total;
+\import Base.Cohomology[] \as B;
+\import Fiber.Cohomology[] \as H;
+\import Total.Cohomology[] \as T;
+\import H.Pullback[B := Product.CarrierSet, target := External.topology] \as Pull;
+\import H.Pullback[B := X, target := base] \as ToConstant;
+\import Product.Universal[X := F] \as Into;
+\definition constant[y: F]: X := x;
+\definition constantContinuous: _ := topology.Maps[A := F, B := X].constantContinuous fiber base x;
+\definition slice[y: F]: Product.CarrierSet := Pair.pair X F x y;
+\definition continuous: _ := Into.pairContinuous fiber base fiber constant (\fun (y: F) => y)
+  constantContinuous (topology.Maps[A := F, B := F].Identity[].continuous fiber);
+\definition restrict[n: N.Nat^]: T.Group n -> H.Group n := Pull.apply n slice continuous;
+\import singular_cohomology.Maps[A := F, B := Product.CarrierSet, source := fiber, target := External.topology]
+  .Composition[C := X, final := base].Coefficients[M := Fiber.integerCoefficients] \as Left;
+\import singular_cohomology.Maps[A := F, B := Product.CarrierSet, source := fiber, target := External.topology]
+  .Composition[C := F, final := fiber].Coefficients[M := Fiber.integerCoefficients] \as Right;
+\import Total.Cohomology[].Pullback[B := X, target := base] \as BasePull;
+\import Total.Cohomology[].Pullback[B := F, target := fiber] \as FiberPull;
+\import singular_cohomology.Identity[A := F, source := fiber].Coefficients[M := Fiber.integerCoefficients] \as Identity;
+\definition leftRestriction[n: N.Nat^][a: B.Group n]:
+  restrict n (BasePull.apply n External.leftProjection External.leftContinuous a) = ToConstant.apply n constant constantContinuous a :=
+  sym!{{H.Group n}} _ _ (Left.onCohomology slice continuous External.leftProjection External.leftContinuous n a);
+\definition rightRestriction[n: N.Nat^][a: H.Group n]:
+  restrict n (FiberPull.apply n External.rightProjection External.rightContinuous a) = a :=
+  trans!{{H.Group n}} _ _ _
+    (sym!{{H.Group n}} _ _ (Right.onCohomology slice continuous External.rightProjection External.rightContinuous n a))
+    (Identity.At[n := n].cohomologyIdentity a);
+\module Degree(p, q: N.Nat^) {
+  \definition n: N.Nat^ := Nat.add p q;
+  \import H.Cup[p := p, q := q] \as Cup;
+  \import External.Cohomology[p := p, q := q] \as Product;
+  \definition law: \forall (a: B.Group p)(b: H.Group q) ->
+    restrict n (Product.apply a b) = Cup.apply (ToConstant.apply p constant constantContinuous a) b :=
+    \fun (a: B.Group p)(b: H.Group q) => trans!{{H.Group n}} _ _ _
+      (Pull.Cup[p := p, q := q].law slice continuous (BasePull.apply p External.leftProjection External.leftContinuous a)
+        (FiberPull.apply q External.rightProjection External.rightContinuous b))
+      (congr!{{H.Group p} {H.Group q} {H.Group n}} Cup.apply _ _ _ _ (leftRestriction p a) (rightRestriction q b));
+}
+\module Positive(p: N.Nat^);

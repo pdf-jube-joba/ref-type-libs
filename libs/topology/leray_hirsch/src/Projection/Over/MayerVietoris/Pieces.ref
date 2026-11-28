@@ -39,3 +39,6 @@
 \module Summand(q: N.Nat^, u: TotalCohomology.Group q);
 
 \module Groups(z: I.Int^);
+
+\module FiniteGluing(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

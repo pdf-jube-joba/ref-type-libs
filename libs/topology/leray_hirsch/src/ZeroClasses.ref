@@ -1,0 +1,64 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.eq_reason_in;
+\definition zero: N.Nat^ := N.Nat^::zero;
+\definition scalars: std.Alg[].Ring[].Ring[K] := std.Alg[].Ring[].commutativeRingAsRing K ring;
+\import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Product;
+\import Product.Cohomology[] \as Groups;
+\import Groups.Cup[p := zero, q := zero] \as Cup;
+\import Product.Cup[p := zero, q := zero] \as CochainCup;
+\import Product.Unit[] \as CochainUnit;
+\import Groups.Unit[] \as ClassUnit;
+\import cohomology_thom.ZeroEvaluation[A := A, source := source, K := K, ring := ring] \as C03;
+\import singular_cohomology.Zero[A := A, source := source].With[coefficients := Product.integerCoefficients] \as Point;
+\import Point.Functions[] \as Functions;
+\import algebraic_topology.PathComponent[A := A, source := source] \as Path;
+\import singular_cohomology.Cochains[A := A, source := source].With[coefficients := Product.integerCoefficients] \as Cochains;
+\import chain_complexes.Cochain[].Over[R := I.Int^, ring := Integers.ring].At[C := Cochains.complex, k := zero] \as H;
+\import singular_cohomology.Simplices[A := A, source := source] \as Simplices;
+\import singular_cohomology.Chains[A := A, source := source] \as Chains;
+\import Simplices.Cut[p := zero, q := zero] \as Faces;
+\import Simplices.CutRightUnit[p := zero] \as Front;
+\import Simplices.CutLeftUnit[p := zero] \as Back;
+\import Equality.Transport[A := N.Nat^] \as Transport;
+\definition Carrier: \Set := Groups.Group zero;
+\definition PathComponents: \Set := Path.Carrier;
+\definition componentOf: A -> PathComponents := Path.class;
+\definition one: Carrier := ClassUnit.class;
+\definition mul: Carrier -> Carrier -> Carrier := Cup.apply;
+\definition evaluate: Carrier -> A -> K := C03.value;
+\definition assign[f: PathComponents -> K]: Carrier := Functions.isomorphism.forward.apply f;
+\definition onAssigned: \forall (f: PathComponents -> K)(x: A) -> evaluate (assign f) x = f (componentOf x) :=
+  \fun (f: PathComponents -> K)(x: A) => congr!{{PathComponents -> K} K} (\fun (g: PathComponents -> K) => g (componentOf x)) _ _
+    (Functions.isomorphism.leftInverse f);
+\definition onOne: \forall (x: A) -> evaluate one x = scalars.one :=
+  \fun (x: A) => trans!{K} _ _ _ (C03.onClasses ClassUnit.cycle x) (CochainUnit.onSimplex (Point.constant x));
+\definition evaluateProduct: \forall (a, b: H.CycleCarrier)(x: A) ->
+  Point.value (CochainCup.apply a b) x = scalars.mul (Point.value a x) (Point.value b x) :=
+  \fun (a, b: H.CycleCarrier)(x: A) => trans!{K} _ _ _ (CochainCup.onSimplex a b (Point.constant x))
+    (congr!{K K K} scalars.mul _ _ _ _
+      (congr!{{Simplices.Carrier zero} K} (\fun (s: Simplices.Carrier zero) => a.apply (Chains.generator zero s)) _ _
+        (Front.law (Point.constant x)))
+      (congr!{{Simplices.Carrier zero} K} (\fun (s: Simplices.Carrier zero) => b.apply (Chains.generator zero s)) _ _
+        (trans!{{Simplices.Carrier zero}} _ _ _ (Back.law (Point.constant x))
+          (Transport.castRefl Simplices.Carrier zero (Point.constant x)))));
+\definition onCycleProducts: \forall (a, b: H.CycleCarrier)(x: A) ->
+  evaluate (mul (H.classOf a) (H.classOf b)) x = scalars.mul (evaluate (H.classOf a) x) (evaluate (H.classOf b) x) :=
+  \fun (a, b: H.CycleCarrier)(x: A) => eq_reason_in!{K _
+    "=" _ "by" { congr!{Carrier K} (\fun (c: Carrier) => evaluate c x) _ _ (Cup.onClasses a b) }
+    "=" _ "by" { C03.onClasses (Cup.cycle a b) x }
+    "=" _ "by" { evaluateProduct a b x }
+    "=" _ "by" { congr!{K K K} scalars.mul _ _ _ _
+      (sym!{K} _ _ (C03.onClasses a x)) (sym!{K} _ _ (C03.onClasses b x)) }
+  };
+\definition onProducts: \forall (a, b: Carrier)(x: A) ->
+  evaluate (mul a b) x = scalars.mul (evaluate a x) (evaluate b x) :=
+  H.classInduction (\fun (a: Carrier) => \forall (b: Carrier)(x: A) -> evaluate (mul a b) x = scalars.mul (evaluate a x) (evaluate b x))
+    (\fun (a: H.CycleCarrier) => H.classInduction (\fun (b: Carrier) => \forall (x: A) ->
+      evaluate (mul (H.classOf a) b) x = scalars.mul (evaluate (H.classOf a) x) (evaluate b x)) (onCycleProducts a));
+\definition detected: \forall (a, b: Carrier) -> (\forall (x: A) -> evaluate a x = evaluate b x) -> a = b := C03.detected;

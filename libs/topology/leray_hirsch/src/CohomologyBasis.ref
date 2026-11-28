@@ -32,5 +32,6 @@
       .OfBijective[f := comparison] \as Iso;
     \definition IsBasis: \Prop := Logic.And[Iso.Injective, Iso.Onto];
     \definition isomorphism[h: IsBasis]: _ := Iso.isomorphism h.left h.right;
+    \module NativeBasis;
   }
 }

@@ -168,6 +168,12 @@ cohomology. This gives the isomorphism for product bundles with classes
 pulled back from a homogeneous fiber basis. The comparison summands
 on the Mayer–Vietoris left and right pieces restrict to the same classes
 on the overlap. The restriction and signed difference squares are
-formalized in integer degrees. The remaining steps are to assemble the
-five-term Mayer–Vietoris diagram and apply it using the change of
-lifts on chart pairs and the finite chart cover.
+formalized in integer degrees. The resulting five-term diagram
+has an exact finite product of shifted rows as its source and the
+relative Mayer–Vietoris row as its target. The five lemma establishes
+the comparison isomorphism on the union from the comparisons on
+the two pieces and their overlap in the relevant degrees. The package
+also verifies nilpotence for endomorphisms strictly lowering a finite
+degree filtration and evaluation of degree-zero classes as functions
+on path components. The remaining steps are change of lifts on chart
+pairs and transport of the gluing lemma through the finite chart cover.

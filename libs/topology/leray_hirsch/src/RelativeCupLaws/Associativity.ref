@@ -1,0 +1,58 @@
+\import singular_cohomology.Simplices[A := A, source := source].CutAssociativity[p := p, q := q, r := r] \as Geometry;
+\definition n: N.Nat^ := Geometry.leftDegree;
+\definition m: N.Nat^ := Geometry.rightDegree;
+\definition same: m = n := Geometry.same;
+\import Relative.RelativeCup[p := p, q := q] \as First;
+\import Relative.RelativeCup[p := Geometry.pq, q := r] \as Then;
+\import Absolute.Cup[p := q, q := r] \as Middle;
+\import Relative.RelativeCup[p := p, q := Geometry.qr] \as Once;
+\import Relative.Comparison[n := n] \as Compare;
+\import Absolute.Cup[p := Geometry.pq, q := r] \as ThenAbsolute;
+\import Absolute.Associativity[p := p, q := q, r := r] \as Assoc;
+\definition cochainLaw: \forall (a: cochains p)(b: Absolute.Carrier q)(c: Absolute.Carrier r) ->
+  Then.left (First.left a b) c = Transport.cast cochains m n same (Once.left a (Middle.apply b c)) :=
+  \fun (a: cochains p)(b: Absolute.Carrier q)(c: Absolute.Carrier r) => Compare.injective _ _ (eq_reason_in!{{Absolute.Carrier n} _
+    "=" _ "by" { Then.leftRestriction (First.left a b) c }
+    "=" _ "by" { congr!{{Absolute.Carrier Geometry.pq} {Absolute.Carrier n}}
+      (\fun (u: Absolute.Carrier Geometry.pq) => ThenAbsolute.apply u c) _ _ (First.leftRestriction a b) }
+    "=" _ "by" { Assoc.law (restrict p a) b c }
+    "=" _ "by" { congr!{{Absolute.Carrier m} {Absolute.Carrier n}} (Transport.cast Absolute.Carrier m n same) _ _
+      (sym!{{Absolute.Carrier m}} _ _ (Once.leftRestriction a (Middle.apply b c))) }
+    "=" _ "by" { Transport.natural cochains Absolute.Carrier restrict m n same (Once.left a (Middle.apply b c)) }
+  });
+\import Relative.Cohomology[p := p, q := q].Left[] \as Pq;
+\import Relative.Cohomology[p := Geometry.pq, q := r].Left[] \as Pqr;
+\import AbsoluteClasses.Cup[p := q, q := r] \as Qr;
+\import Relative.Cohomology[p := p, q := Geometry.qr].Left[] \as PqrOnce;
+\import Signed.At[C := Pair.complex, z := I.Int^::ofNat p] \as P;
+\import Signed.At[C := Pair.complex, z := I.Int^::ofNat n] \as Output;
+\import Native.At[C := Whole.complex, k := q] \as Q;
+\import Native.At[C := Whole.complex, k := r] \as R;
+\import singular_cellular_algebra.Algebra[].Refinement[A := cochains n, S := Output.cycles.carrier] \as Eq;
+\definition forget: \forall (k: N.Nat^) -> cycles k -> cochains k := \fun (k: N.Nat^)(x: cycles k) => x;
+\definition lawOnCycles: \forall (a: cycles p)(b: Q.CycleCarrier)(c: R.CycleCarrier) ->
+  Pqr.cycle (Pq.cycle a b) c = Transport.cast cycles m n same (PqrOnce.cycle a (Qr.cycle b c)) :=
+  \fun (a: cycles p)(b: Q.CycleCarrier)(c: R.CycleCarrier) => Eq.ext (Pqr.cycle (Pq.cycle a b) c)
+    (Transport.cast cycles m n same (PqrOnce.cycle a (Qr.cycle b c)))
+    (trans!{{cochains n}} _ _ _ (cochainLaw a b c)
+      (Transport.natural cycles cochains forget m n same (PqrOnce.cycle a (Qr.cycle b c))));
+\definition onCohomology[a: classes p][b: AbsoluteClasses.Group q][c: AbsoluteClasses.Group r]: \Prop :=
+  Pqr.apply (Pq.apply a b) c = Transport.cast classes m n same (PqrOnce.apply a (Qr.apply b c));
+\definition onClasses: \forall (a: cycles p)(b: Q.CycleCarrier)(c: R.CycleCarrier) ->
+  onCohomology (P.classOf a) (Q.classOf b) (R.classOf c) :=
+  \fun (a: cycles p)(b: Q.CycleCarrier)(c: R.CycleCarrier) => eq_reason_in!{{classes n} _
+    "=" _ "by" { congr!{{classes Geometry.pq} {classes n}}
+      (\fun (u: classes Geometry.pq) => Pqr.apply u (R.classOf c)) _ _ (Pq.onClasses a b) }
+    "=" _ "by" { Pqr.onClasses (Pq.cycle a b) c }
+    "=" _ "by" { congr!{{cycles n} {classes n}} (class n) _ _ (lawOnCycles a b c) }
+    "=" _ "by" { sym!{{classes n}} _ _ (Transport.natural cycles classes class m n same (PqrOnce.cycle a (Qr.cycle b c))) }
+    "=" _ "by" { congr!{{classes m} {classes n}} (Transport.cast classes m n same) _ _
+      (sym!{{classes m}} _ _ (trans!{{classes m}} _ _ _
+        (congr!{{AbsoluteClasses.Group Geometry.qr} {classes m}}
+          (PqrOnce.apply (P.classOf a)) _ _ (Qr.onClasses b c))
+        (PqrOnce.onClasses a (Qr.cycle b c)))) }
+  };
+\definition law: \forall (a: classes p)(b: AbsoluteClasses.Group q)(c: AbsoluteClasses.Group r) -> onCohomology a b c :=
+  P.classInduction (\fun (a: classes p) => \forall (b: AbsoluteClasses.Group q)(c: AbsoluteClasses.Group r) -> onCohomology a b c)
+    (\fun (a: cycles p) => Q.classInduction (\fun (b: AbsoluteClasses.Group q) => \forall (c: AbsoluteClasses.Group r) -> onCohomology (P.classOf a) b c)
+      (\fun (b: Q.CycleCarrier) => R.classInduction (\fun (c: AbsoluteClasses.Group r) => onCohomology (P.classOf a) (Q.classOf b) c) (onClasses a b)));

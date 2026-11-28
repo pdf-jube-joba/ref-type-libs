@@ -1,0 +1,17 @@
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Z;
+\import chain_complexes.Integer[] \as Indices;
+\import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients] \as Source;
+\import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients] \as Target;
+\definition Index: \Set := Finite.Fin count;
+\import \root.ProductExact[K := I.Int^, ring := Integers.commutativeRing, Index := Index] \as Exact;
+\module At(z: I.Int^);
+
+\definition leftLifted[i: Index]: LeftClasses.Group (degree i) := leftLift (degree i) (classes i);
+\definition rightLifted[i: Index]: RightClasses.Group (degree i) := rightLift (degree i) (classes i);
+\definition overlapLifted[i: Index]: OverlapClasses.Group (degree i) := overlapLift (degree i) (classes i);
+\import LeftProjection.Comparison[count := count].With[degree := degree, classes := leftLifted] \as LeftComparison;
+\import RightProjection.Comparison[count := count].With[degree := degree, classes := rightLifted] \as RightComparison;
+\import OverlapProjection.Comparison[count := count].With[degree := degree, classes := overlapLifted] \as OverlapComparison;
+\import WholeProjection.Comparison[count := count].With[degree := degree, classes := classes] \as WholeComparison;
+\module Level(z: I.Int^, before: Index -> I.Int^, same: \forall (i: Index) -> before i = Degrees.unshift (degree i) z);

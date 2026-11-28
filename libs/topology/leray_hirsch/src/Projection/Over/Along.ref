@@ -47,3 +47,7 @@
         _ _ (projectionLaw (I.Int^::ofNat p) a));
 }
 \module Shift(q: N.Nat^, u: TotalCohomology.Group q);
+
+\import std.Data[].FinSet[] \as Finite;
+\module FiniteComparison(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));
