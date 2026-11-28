@@ -1,0 +1,20 @@
+\structure Restricted: \Set := { base: Local i, fiber: Total.Fiber base };
+\import std.Data[].Pair[] \as Product;
+\import std.Data[].Pair[].Prop[A := Local i, B := G] \as Pairs;
+\definition trivialize[p: Restricted]: Product.Times^[Local i, G] := Product.pair (Local i) G p.base (Total.coordinate p.base (index i p.base) p.fiber);
+\definition untrivialize[p: Product.Times^[Local i, G]]: Restricted := Restricted {
+  base := Product.first (Local i) G p, fiber := Total.decode (Product.first (Local i) G p) (index i (Product.first (Local i) G p)) (Product.second (Local i) G p),
+};
+\definition leftInverse: \forall (p: Restricted) -> untrivialize (trivialize p) = p :=
+  \induction (p: Restricted) \return untrivialize (trivialize p) = p \with {
+    | # : \fun (x: Local i)(u: Total.Fiber x) =>
+      congr!{{Total.Fiber x} Restricted} (Restricted::# x) _ _ (Total.decodeEncode x (index i x) u)
+  };
+\definition rightInverse: \forall (p: Product.Times^[Local i, G]) -> trivialize (untrivialize p) = p :=
+  \fun (p: Product.Times^[Local i, G]) => Pairs.ext (trivialize (untrivialize p)) p (\refl(Product.first (Local i) G p))
+    (Total.encodeDecode (Product.first (Local i) G p) (index i (Product.first (Local i) G p)) (Product.second (Local i) G p));
+\definition transitionFormula: \forall (j: I)(t: Open.Carrier \parent.\parent.\parent.Overlap[i := i, j := j].domain)(g: G) ->
+  Total.coordinate (\parent.\parent.\parent.Overlap[i := i, j := j].left t) (index j (\parent.\parent.\parent.Overlap[i := i, j := j].right t))
+    (Total.decode (\parent.\parent.\parent.Overlap[i := i, j := j].left t) (index i (\parent.\parent.\parent.Overlap[i := i, j := j].left t)) g) =
+  group.op (transition bundle.cocycle i j t) g :=
+  \fun (j: I)(t: Open.Carrier \parent.\parent.\parent.Overlap[i := i, j := j].domain)(g: G) => \refl(group.op (transition bundle.cocycle i j t) g);

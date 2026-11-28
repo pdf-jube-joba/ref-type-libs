@@ -1,0 +1,7 @@
+\import \root.Principal[X := X, G := H, Index := Index, group := liftedGroup] \as Lifted;
+\import algebra.Hom[A := H, B := G] \as Hom;
+\definition homLaws: Hom.MonoidLaws[_, _, projection] := Hom.monoidLaws _ _ projection;
+\definition Coherent[data: Lifted.Cocycle]: \Prop :=
+  \forall (x: X)(i, j: Index x) -> projection (data.change x i j) = cocycle.change x i j;
+\definition Structure: \Set := \Cast[Lifted.Cocycle] ({ data: Lifted.Cocycle \where Coherent data });
+\module With(data: Structure);

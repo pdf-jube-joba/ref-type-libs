@@ -1,0 +1,16 @@
+\definition bundle: SpinBundles.Bundle := SpinBundles.Bundle { cocycle := structure.lift, regular := structure.regular };
+\import SpinBundles.Of[bundle := bundle] \as Principal;
+\import SpinLift.With[data := structure.lift] \as Lift;
+\import \root.Principal[X := M.Point, G := E.Spin, Index := Cover.Index, group := E.spinGroup].Of[cocycle := structure.lift] \as Total;
+\definition Point: \Set := Total.Point;
+\definition Fiber[x: M.Point]: \Set := Total.Fiber x;
+\definition liftMap[p: Point]: FrameTotal.Point := Lift.map p;
+\definition frame[x: M.Point][u: Fiber x]: FrameTotal.Fiber x := Lift.fiberMap x u;
+\definition act[x: M.Point][u: Fiber x][g: E.Spin]: Fiber x := Total.act x u g;
+\definition equivariant: \forall (x: M.Point)(u: Fiber x)(g: E.Spin) ->
+  frame x (act x u g) = FrameTotal.act x (frame x u) (spinProjection g) := Lift.equivariant;
+\definition surjective: \forall (x: M.Point)(u: FrameTotal.Fiber x) -> \exists Lift.PreimageInFiber x u := \block {
+  \fun (x: M.Point)(u: FrameTotal.Fiber x) \then
+  \takefrom i: Cover.Index x \by cover.covers x \then
+  \return Lift.surjective spinSurjective x i u
+};

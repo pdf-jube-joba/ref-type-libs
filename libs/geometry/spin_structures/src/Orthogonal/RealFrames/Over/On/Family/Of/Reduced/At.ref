@@ -1,0 +1,33 @@
+\import GL.Frames[V := F x, space := space x] \as FiberFrames;
+\definition frame[i: Atlas.Index x][u: Total.Fiber x]: FiberFrames.Frame := FiberFrames.act (localFrame x i) (include (u i));
+\definition independent: \forall (i, j: Atlas.Index x)(u: Total.Fiber x) -> frame i u = frame j u :=
+  \fun (i, j: Atlas.Index x)(u: Total.Fiber x) => eq_reason_in!{{FiberFrames.Frame} _
+    "=" _ "by" { congr!{{FiberFrames.Frame} {FiberFrames.Frame}} (\fun (f: FiberFrames.Frame) => FiberFrames.act f (include (u i))) _ _
+      (sym!{{FiberFrames.Frame}} _ _ (FiberFrames.transitive (localFrame x j) (localFrame x i))) }
+    "=" _ "by" { FiberFrames.actProduct (localFrame x j) (realChange x i j) (include (u i)) }
+    "=" _ "by" { congr!{{GL.Carrier} {FiberFrames.Frame}} (FiberFrames.act (localFrame x j)) _ _
+      (congr!{{GL.Carrier} {GL.Carrier}} (\fun (a: GL.Carrier) => GL.multiply a (include (u i))) _ _ (sym!{{GL.Carrier}} _ _ (reduction.agrees x i j))) }
+    "=" _ "by" { congr!{{GL.Carrier} {FiberFrames.Frame}} (FiberFrames.act (localFrame x j)) _ _
+      (sym!{{GL.Carrier}} _ _ (includeProduct (reduction.change x i j) (u i))) }
+    "=" _ "by" { congr!{{E.SO} {FiberFrames.Frame}} (\fun (a: E.SO) => FiberFrames.act (localFrame x j) (include a)) _ _
+      (Total.compatible x u i j) }
+  };
+\definition coordinateFrame[i: Atlas.Index x][g: E.SO]: FiberFrames.Frame := FiberFrames.act (localFrame x i) (include g);
+\definition inCoordinates: \forall (i: Atlas.Index x)(g: E.SO) -> frame i (Total.decode x i g) = coordinateFrame i g :=
+  \fun (i: Atlas.Index x)(g: E.SO) => congr!{{E.SO} {FiberFrames.Frame}} (coordinateFrame i) _ _ (Total.encodeDecode x i g);
+\definition unique: \forall (i: Atlas.Index x)(u, v: Total.Fiber x) -> frame i u = frame i v -> u = v :=
+  \fun (i: Atlas.Index x)(u, v: Total.Fiber x)(same: _) => Total.coordinateInjective x i u v
+    (inclusionInjective (u i) (v i) (FiberFrames.free (localFrame x i) (include (u i)) (include (v i)) same));
+\definition metric[i: Atlas.Index x][v, w: F x]: R.Real := E.dot ((localFrame x i).forward.apply v) ((localFrame x i).forward.apply w);
+\definition sameMetric: \forall (i, j: Atlas.Index x)(v, w: F x) -> metric i v w = metric j v w := \block {
+  \fun (i, j: Atlas.Index x)(v, w: F x) \then
+  \let a: GL.Vector := (localFrame x i).forward.apply v \then
+  \let b: GL.Vector := (localFrame x i).forward.apply w \then
+  \let coordinate: \forall (u: F x) -> (reduction.change x i j).value.apply ((localFrame x i).forward.apply u) = (localFrame x j).forward.apply u :=
+    \fun (u: F x) => trans!{{GL.Vector}} _ _ _
+      (congr!{{GL.Carrier} {GL.Vector}} (\fun (g: GL.Carrier) => g.forward.apply ((localFrame x i).forward.apply u)) _ _ (reduction.agrees x i j))
+      (congr!{{F x} {GL.Vector}} (localFrame x j).forward.apply _ _ ((localFrame x i).leftInverse u)) \then
+  \return trans!{{R.Real}} _ _ _
+    (sym!{{R.Real}} _ _ (Isometries.preserves (reduction.change x i j) a b))
+    (congr!{{GL.Vector} {GL.Vector} {R.Real}} E.dot _ _ _ _ (coordinate v) (coordinate w))
+};

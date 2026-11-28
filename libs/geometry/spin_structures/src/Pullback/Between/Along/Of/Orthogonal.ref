@@ -1,0 +1,16 @@
+\import lie_groups.Euclidean[n := r] \as E;
+\import \root.Orthogonal[r := r].Plots[n := m] \as OldPlots;
+\import \root.Orthogonal[r := r].Plots[n := n] \as NewPlots;
+\import \root.Pullback[n := n, m := m].OrthogonalPlots[r := r] \as Composition;
+\import Original.SmoothPrincipal[G := E.SO, group := E.specialOrthogonalGroup, Regular := OldPlots.Orthogonal] \as OriginalFrames;
+\import Original.SmoothPrincipal[G := E.Spin, group := E.spinGroup, Regular := OldPlots.Spin] \as OriginalSpin;
+\import Original.SmoothPrincipal[G := E.SpinC, group := E.spinCGroup, Regular := OldPlots.SpinC] \as OriginalSpinC;
+\import \parent.Group[G := E.SO, group := E.specialOrthogonalGroup] \as FramePullback;
+\import \parent.Group[G := E.SO, group := E.specialOrthogonalGroup].Smooth[before := OldPlots.Orthogonal, after := NewPlots.Orthogonal] \as FrameSmooth;
+\import \parent.Group[G := E.Spin, group := E.spinGroup].Smooth[before := OldPlots.Spin, after := NewPlots.Spin] \as SpinSmooth;
+\import \parent.Group[G := E.SpinC, group := E.spinCGroup].Smooth[before := OldPlots.SpinC, after := NewPlots.SpinC] \as SpinCSmooth;
+\import \root.Orthogonal[r := r] \as Projections;
+\import \root.Orthogonal[r := r].Over[n := m].On[M := Y].Covered[I := I, cover := cover] \as Old;
+\import \root.Orthogonal[r := r].Over[n := n].On[M := X].Covered[I := Index, cover := pulledCover] \as New;
+\import Pulled.SmoothPrincipal[G := E.SO, group := E.specialOrthogonalGroup, Regular := NewPlots.Orthogonal] \as PulledFrames;
+\module Of(frameBundle: OriginalFrames.Bundle);

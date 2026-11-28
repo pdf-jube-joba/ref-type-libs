@@ -1,0 +1,47 @@
+\definition Coordinates[x: X]: \Set := Index x -> G;
+\definition Compatible[x: X][u: Coordinates x]: \Prop :=
+  \forall (i, j: Index x) -> Group.mul (cocycle.change x i j) (u i) = u j;
+\definition Fiber[x: X]: \Set := \Cast[Coordinates x] ({ u: Coordinates x \where Compatible x u });
+\definition compatible[x: X][u: Fiber x]: Compatible x u := \bysub(Coordinates x, Fiber x, u);
+\structure Point: \Set := { base: X, fiber: Fiber base };
+\definition coordinate[x: X][i: Index x][u: Fiber x]: G := u i;
+\definition assemble[x: X][i: Index x][g: G][j: Index x]: G := Group.mul (cocycle.change x i j) g;
+\definition decode[x: X][i: Index x][g: G]: Fiber x := \into[Coordinates x](assemble x i g, Fiber x) \by {
+  \fun (j, k: Index x) => trans!{G} _ _ _
+    (sym!{G} _ _ (Group.assoc (cocycle.change x j k) (cocycle.change x i j) g))
+    (congr!{G G} (\fun (a: G) => Group.mul a g) _ _ (cocycle.composition x i j k))
+};
+\definition decodeEncode: \forall (x: X)(i: Index x)(u: Fiber x) -> decode x i (coordinate x i u) = u :=
+  \fun (x: X)(i: Index x)(u: Fiber x) => \axiom:funext(assemble x i (coordinate x i u), u, \fun (j: Index x) => compatible x u i j);
+\definition encodeDecode: \forall (x: X)(i: Index x)(g: G) -> coordinate x i (decode x i g) = g :=
+  \fun (x: X)(i: Index x)(g: G) => trans!{G} _ _ _
+    (congr!{G G} (\fun (a: G) => Group.mul a g) _ _ (cocycle.identity x i)) (Group.oneLeft g);
+\definition section[x: X][i: Index x]: Fiber x := decode x i Group.one;
+\definition right[x: X][u: Fiber x][g: G][i: Index x]: G := Group.mul (u i) g;
+\definition act[x: X][u: Fiber x][g: G]: Fiber x := \into[Coordinates x](right x u g, Fiber x) \by {
+  \fun (i, j: Index x) => trans!{G} _ _ _
+    (sym!{G} _ _ (Group.assoc (cocycle.change x i j) (u i) g))
+    (congr!{G G} (\fun (a: G) => Group.mul a g) _ _ (compatible x u i j))
+};
+\definition actionIdentity: \forall (x: X)(u: Fiber x) -> act x u Group.one = u :=
+  \fun (x: X)(u: Fiber x) => \axiom:funext(right x u Group.one, u, \fun (i: Index x) => Group.oneRight (u i));
+\definition actionProduct: \forall (x: X)(u: Fiber x)(g, h: G) -> act x (act x u g) h = act x u (Group.mul g h) :=
+  \fun (x: X)(u: Fiber x)(g, h: G) => \axiom:funext(right x (act x u g) h, right x u (Group.mul g h), \fun (i: Index x) => Group.assoc (u i) g h);
+\definition coordinateInjective: \forall (x: X)(i: Index x)(u, v: Fiber x) -> u i = v i -> u = v :=
+  \fun (x: X)(i: Index x)(u, v: Fiber x)(same: _) => eq_reason_in!{{Fiber x} _
+    "=" _ "by" { sym!{{Fiber x}} _ _ (decodeEncode x i u) }
+    "=" _ "by" { congr!{G {Fiber x}} (decode x i) _ _ same }
+    "=" _ "by" { decodeEncode x i v }
+  };
+\definition free: \forall (x: X)(i: Index x)(u: Fiber x)(g, h: G) -> act x u g = act x u h -> g = h :=
+  \fun (x: X)(i: Index x)(u: Fiber x)(g, h: G)(same: _) =>
+    Group.cancelLeft (u i) g h (congr!{{Fiber x} G} (coordinate x i) _ _ same);
+\definition transporter[x: X][i: Index x][u, v: Fiber x]: G := Group.mul (Group.inv (u i)) (v i);
+\definition transitive: \forall (x: X)(i: Index x)(u, v: Fiber x) -> act x u (transporter x i u v) = v :=
+  \fun (x: X)(i: Index x)(u, v: Fiber x) => coordinateInjective x i _ _ (eq_reason_in!{G _
+    "=" _ "by" { sym!{G} _ _ (Group.assoc (u i) (Group.inv (u i)) (v i)) }
+    "=" _ "by" { congr!{G G} (\fun (a: G) => Group.mul a (v i)) _ _ (Group.invRight (u i)) }
+    "=" _ "by" { Group.oneLeft (v i) }
+  });
+\module Lift(H: \Set, liftedGroup: std.Alg[].Alg[].Group[H],
+  projection: algebra.Hom[A := H, B := G].GroupMap liftedGroup group);

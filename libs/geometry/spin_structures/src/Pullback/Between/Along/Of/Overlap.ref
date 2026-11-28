@@ -1,0 +1,33 @@
+\import Pulled.Overlap[i := i, j := j] \as SourceOverlap;
+\import Original.Overlap[i := i.target, j := j.target] \as TargetOverlap;
+\import SourceCharts.Transition[left := i.chart, right := j.chart] \as SourceChange;
+\import TargetCharts.Transition[left := cover.chart i.target, right := cover.chart j.target] \as TargetChange;
+\import Maps.Coordinates[f := f, left := i.chart, right := cover.chart i.target] \as InCharts;
+\definition all: SourceOpen.Included i.chart.image InCharts.domain :=
+  \fun (v: Fin.Fin n -> R.Real)(inside: _) => \block {
+    \let t: SourceOpen.Carrier i.chart.image := \into[Fin.Fin n -> R.Real](v, i.chart.image.points) \by { inside } \then
+    \return InCharts.intro t (i.inside (SourceCharts.point i.chart t))
+  };
+\definition chartwise: InCharts.Smooth := (\bysub(Maps.ContinuousMap, { g: Maps.ContinuousMap \where Maps.Chartwise g }, f)) i.chart (cover.chart i.target)
+  (\bysub(SourceCharts.Chart, X.atlas.charts, i.chart))
+  (\bysub(TargetCharts.Chart, Y.atlas.charts, cover.chart i.target));
+\definition chartMap: calculus.Maps[n := n, m := m].Map i.chart.image (cover.chart i.target).image :=
+  calculus.Maps[n := n, m := m].Restriction[U := i.chart.image, V := InCharts.domain, W := (cover.chart i.target).image].input all (InCharts.map chartwise);
+\definition included: SourceOpen.Included SourceOverlap.domain i.chart.image :=
+  \fun (v: Fin.Fin n -> R.Real)(member: _) =>
+    SourceChange.inLeftImage (\into[Fin.Fin n -> R.Real](v, SourceOverlap.domain.points) \by { member });
+\definition unrestricted: calculus.Maps[n := n, m := m].Map SourceOverlap.domain (cover.chart i.target).image :=
+  calculus.Maps[n := n, m := m].Restriction[U := SourceOverlap.domain, V := i.chart.image, W := (cover.chart i.target).image].input included chartMap;
+\definition returns: \forall (t: SourceOpen.Carrier SourceOverlap.domain) ->
+    TargetCharts.point (cover.chart i.target) (unrestricted.apply t) = Maps.apply f (SourceOverlap.left t) :=
+  \fun (t: SourceOpen.Carrier SourceOverlap.domain) =>
+    InCharts.returnsPoint (SourceOpen.inclusion i.chart.image InCharts.domain all (SourceChange.leftCoordinate t));
+\definition inside: \forall (t: SourceOpen.Carrier SourceOverlap.domain) -> \In[Fin.Fin m -> R.Real] TargetOverlap.domain.points (unrestricted.apply t) :=
+  \fun (t: SourceOpen.Carrier SourceOverlap.domain) => TargetChange.intro (unrestricted.apply t)
+    (\idelim Maps.apply f (SourceOverlap.left t) = TargetCharts.point (cover.chart i.target) (unrestricted.apply t)
+      \with y: Y.Point => TargetCharts.Contains (cover.chart j.target) y \by {
+        base: j.inside (SourceOverlap.right t), equality: sym!{{Y.Point}} _ _ (returns t)
+      });
+\import calculus.Maps[n := n, m := m].Corestriction[U := SourceOverlap.domain, V := (cover.chart i.target).image,
+  W := TargetOverlap.domain, f := unrestricted, inside := inside] \as Corestrict;
+\definition map: calculus.Maps[n := n, m := m].Map SourceOverlap.domain TargetOverlap.domain := Corestrict.map;

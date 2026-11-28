@@ -1,0 +1,7 @@
+\import manifolds.Dimension[n := n].Chart[M := M.Point, space := M.space] \as Charts;
+\definition Chart: \Set := \Cast[Charts.Chart] M.atlas.charts;
+\structure Cover[I: \Set]: \Set := {
+  chart: I -> Chart,
+  covers: \forall (x: M.Point) -> \exists ( i: I \where Charts.Contains (chart i) x ),
+};
+\module OnCover(I: \Set, cover: Cover[I]);

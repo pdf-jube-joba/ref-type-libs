@@ -1,0 +1,7 @@
+\import \root.Principal[X := M.Point, G := G, Index := Index, group := group] \as Principal;
+\definition transition[cocycle: Principal.Cocycle][i, j: I][t: Open.Carrier \parent.Overlap[i := i, j := j].domain]: G :=
+  cocycle.change (\parent.Overlap[i := i, j := j].left t) (index i (\parent.Overlap[i := i, j := j].left t)) (index j (\parent.Overlap[i := i, j := j].right t));
+\definition Smooth[cocycle: Principal.Cocycle]: \Prop := \forall (i, j: I) ->
+  Regular \parent.Overlap[i := i, j := j].domain (transition cocycle i j);
+\structure Bundle: \Set := { cocycle: Principal.Cocycle, regular: Smooth cocycle };
+\module Of(bundle: Bundle);

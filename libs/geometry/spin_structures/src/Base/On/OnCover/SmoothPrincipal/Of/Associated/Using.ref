@@ -1,0 +1,35 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\import bundle_operations.Operations[].Over[K := C.Complex, field := C.Algebra[].field, conjugation := linear_algebra.Hermitian[].Complex[].scalar,
+  scalar := vector_bundles.Bundles[].Complex[].scalar].Cocycle[X := M.Point, I := I, baseSpace := M.space,
+    domain := \fun (i: I) => (cover.chart i).domain, dimension := \fun (i: I) => s] \as LinearCocycle;
+\definition rho: G -> GL.Carrier := representation.homomorphism;
+\definition laws: Hom.MonoidLaws[_, _, rho] := Hom.monoidLaws _ _ representation.homomorphism;
+\definition data: LinearCocycle.Data := LinearCocycle.Data {
+  transition := \fun (x: M.Point)(i, j: LinearCocycle.Index x) => rho (bundle.cocycle.change x i j),
+};
+\definition cocycle: LinearCocycle.Cocycle := \into[LinearCocycle.Data](data, LinearCocycle.Cocycle) \by {
+  LinearCocycle.Laws[data] {
+    identity := \fun (x: M.Point)(i: LinearCocycle.Index x)(v: GL.Vector) =>
+      congr!{{GL.Carrier} {GL.Vector}} (\fun (g: GL.Carrier) => g.forward.apply v) _ _
+        (trans!{{GL.Carrier}} _ _ _ (congr!{G {GL.Carrier}} rho _ _ (bundle.cocycle.identity x i)) laws.unit),
+    composition := \fun (x: M.Point)(i, j, k: LinearCocycle.Index x)(v: GL.Vector) =>
+      congr!{{GL.Carrier} {GL.Vector}} (\fun (g: GL.Carrier) => g.forward.apply v) _ _
+        (trans!{{GL.Carrier}} _ _ _ (sym!{{GL.Carrier}} _ _ (laws.operation (bundle.cocycle.change x j k) (bundle.cocycle.change x i j)))
+          (congr!{G {GL.Carrier}} rho _ _ (bundle.cocycle.composition x i j k))),
+  }
+};
+\import LinearCocycle.With[cocycle := cocycle] \as Glued;
+\definition Fiber: M.Point -> \Set := Glued.Fiber;
+\definition fiberSpace: \forall (x: M.Point) -> Spaces.VectorSpace (Fiber x) := Glued.fiberSpace;
+\import Complex.On[M := M].Family[F := Fiber, space := fiberSpace] \as Result;
+\definition local[i: I]: Result.Local := Result.Local {
+  chart := cover.chart i,
+  frame := \fun (x: Local i) => Glued.At[x := x].Frame[i := index i x].isomorphism,
+};
+\definition atlas: Result.Data[I] := Result.Data[I] { local := local, covers := cover.covers };
+\module Change(i, j: I);
+\definition associated: Result.Bundle[I] := Result.Bundle[I] {
+  atlas := atlas, regular := \fun (i, j: I) => Change[i := i, j := j].regular,
+};

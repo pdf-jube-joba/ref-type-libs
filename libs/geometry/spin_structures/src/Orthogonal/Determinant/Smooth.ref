@@ -1,0 +1,6 @@
+\import \parent.\parent.Plots[n := n] \as Plots;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\module On(U: Open.OpenSet, f: Open.Carrier U -> E.SpinC, regular: Plots.SpinC U f);
+\definition smooth: \forall (U: Open.OpenSet)(f: Open.Carrier U -> E.SpinC) -> Plots.SpinC U f ->
+  smooth_bundles.ComplexLinear[r := N.Nat^::succ N.Nat^::zero].Smooth[d := n].Regular U (\fun (x: Open.Carrier U) => action (f x)) :=
+  \fun (U: Open.OpenSet)(f: Open.Carrier U -> E.SpinC)(regular: Plots.SpinC U f) => On[U := U, f := f, regular := regular].value;

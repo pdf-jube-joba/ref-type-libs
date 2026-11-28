@@ -1,0 +1,2 @@
+\import manifolds.Dimension[n := n].Smooth[] \as Manifolds;
+\module On(M: Manifolds.Manifold);

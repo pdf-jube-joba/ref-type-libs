@@ -1,0 +1,3 @@
+\import manifolds.Dimension[n := n].Smooth[] \as Model;
+\import \parent.Regular[n := n] \as Regularity;
+\module On(M: Model.Manifold);

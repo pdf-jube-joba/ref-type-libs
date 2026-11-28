@@ -1,0 +1,30 @@
+\import \parent.\parent.\parent.Coefficient[v := v, a := a] \as Evaluation;
+\import \parent.\parent.\parent.Coefficient[v := v, a := a].On[n := n] \as Plot;
+\definition evaluated[p: Representation.CarrierPair]: C.Complex :=
+  combine (Evaluation.value (Representation.first p)) (Evaluation.value (Representation.second p));
+\definition value[g: E.SpinC]: C.Complex := evaluated (Coefficients.image g);
+\definition raw: \forall (g: E.Spin)(z: Circle.Circle) -> evaluated (Coefficients.raw g z) = Def.mul z (Evaluation.value g.value) :=
+  \fun (g: E.Spin)(z: Circle.Circle) => eq_reason_in!{{C.Complex} _
+    "=" _ "by" { congr!{{C.Complex} {C.Complex} {C.Complex}} combine _ _ _ _
+      (Evaluation.scale (C.re z) g.value) (Evaluation.scale (C.im z) g.value) }
+    "=" _ "by" { scaled z (Evaluation.value g.value) }
+  };
+\definition formula: \forall (g: E.SpinC) -> value g = (spinC g).forward.apply v a :=
+  Extension.induction (\fun (g: E.SpinC) => value g = (spinC g).forward.apply v a)
+    (\fun (g: E.Spin)(z: Circle.Circle) => eq_reason_in!{{C.Complex} _
+      "=" _ "by" { congr!{{Representation.CarrierPair} {C.Complex}} evaluated _ _ (Coefficients.onClass g z) }
+      "=" _ "by" { raw g z }
+      "=" _ "by" { sym!{{C.Complex}} _ _ (Evaluation.scales z (Spin.action g).value) }
+      "=" _ "by" { congr!{{Units.Unit} {C.Complex}} (\fun (u: Units.Unit) => Evaluation.evaluation u.value) _ _
+        (sym!{{Units.Unit}} _ _ (SpinC.onClass g z)) }
+    });
+\definition realInput[x: Open.Carrier U]: Clifford.Carrier := Representation.first (Coefficients.image (f x));
+\definition imaginaryInput[x: Open.Carrier U]: Clifford.Carrier := Representation.second (Coefficients.image (f x));
+\definition smooth: ComplexSmooth.Smooth (\fun (x: Open.Carrier U) => (spinC (f x)).forward.apply v a) :=
+  ComplexSmooth.equalSmooth (\fun (x: Open.Carrier U) => value (f x)) _
+    (\fun (x: Open.Carrier U) => formula (f x))
+    (ComplexSmooth.plus (\fun (x: Open.Carrier U) => Evaluation.value (realInput x))
+      (\fun (x: Open.Carrier U) => Def.mul Def.i (Evaluation.value (imaginaryInput x)))
+      (Plot.smooth U realInput (ComplexPlots.real U f regular))
+      (ComplexSmooth.times (\fun (x: Open.Carrier U) => Def.i) (\fun (x: Open.Carrier U) => Evaluation.value (imaginaryInput x))
+        (ComplexSmooth.constant Def.i) (Plot.smooth U imaginaryInput (ComplexPlots.imaginary U f regular))));

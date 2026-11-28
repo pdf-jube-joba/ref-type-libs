@@ -1,0 +1,12 @@
+\import algebra.Groups[].On[G := G, group := group] \as Group;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\structure Cocycle: \Set := {
+  change: \forall (x: X)(i, j: Index x) -> G,
+  identity: \forall (x: X)(i: Index x) -> change x i i = Group.one,
+  composition: \forall (x: X)(i, j, k: Index x) -> Group.mul (change x j k) (change x i j) = change x i k,
+};
+\module Of(cocycle: Cocycle);

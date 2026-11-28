@@ -1,0 +1,16 @@
+\import Result.Using[I := I, data := atlas].Change[i := i, j := j] \as Change;
+\import \parent.\parent.\parent.\parent.\parent.Overlap[i := i, j := j] \as Base;
+\definition represented[t: Open.Carrier Base.domain]: GL.Carrier := rho (transition bundle.cocycle i j t);
+\definition smooth: smooth_bundles.ComplexLinear[r := s].Smooth[d := n].Regular Base.domain represented :=
+  representation.smooth Base.domain (transition bundle.cocycle i j) (bundle.regular i j);
+\definition formula: \forall (t: Open.Carrier Base.domain)(v: GL.Vector) -> (Change.matrix t).apply v = (represented t).forward.apply v :=
+  \fun (t: Open.Carrier Base.domain)(v: GL.Vector) => Glued.At[x := Change.x t].Frame[i := index i (Change.x t)].assembledValue v (index j (Change.y t));
+\definition matrixSmooth: Change.Regular := \fun (v: GL.Vector)(a: Fin.Fin s) =>
+  smooth_bundles.ComplexCalculus[n := n].On[U := Base.domain].equalSmooth
+    (\fun (t: Open.Carrier Base.domain) => (represented t).forward.apply v a)
+    (\fun (t: Open.Carrier Base.domain) => (Change.matrix t).apply v a)
+    (\fun (t: Open.Carrier Base.domain) => sym!{{C.Complex}} _ _ (congr!{{GL.Vector} {C.Complex}} (\fun (w: GL.Vector) => w a) _ _ (formula t v)))
+    (smooth v a);
+\import tangent_bundles.FrameBundle[n := n, r := Complex.realRank].Over[M := M].Family[F := Fiber, space := Result.realSpace].Using[
+  I := I, data := Result.Using[I := I, data := atlas].realData].Change[i := i, j := j] \as RealChange;
+\definition regular: RealChange.Regular := Change.toReal matrixSmooth;

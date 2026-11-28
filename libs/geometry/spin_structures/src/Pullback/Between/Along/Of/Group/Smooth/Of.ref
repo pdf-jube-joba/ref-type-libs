@@ -1,0 +1,4 @@
+\module Change(i, j: Index);
+\definition pullback: New.Bundle := New.Bundle {
+  cocycle := cocycle bundle.cocycle, regular := \fun (i, j: Index) => Change[i := i, j := j].smooth,
+};

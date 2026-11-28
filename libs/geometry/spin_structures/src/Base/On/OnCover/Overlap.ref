@@ -1,0 +1,4 @@
+\import Charts.Transition[left := cover.chart i, right := cover.chart j] \as ChartChange;
+\definition domain: Open.OpenSet := ChartChange.domain;
+\definition left[t: Open.Carrier domain]: Local i := Charts.point (cover.chart i) (ChartChange.leftCoordinate t);
+\definition right[t: Open.Carrier domain]: Local j := ChartChange.overlapPoint t;

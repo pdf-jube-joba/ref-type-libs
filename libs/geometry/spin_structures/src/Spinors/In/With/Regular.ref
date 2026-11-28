@@ -1,0 +1,11 @@
+\import \root.Orthogonal[r := rank].Plots[n := n] \as Plots;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import smooth_bundles.ComplexLinear[r := s].Smooth[d := n] \as TargetSmooth;
+\definition smoothSpin: \forall (U: Open.OpenSet)(f: Open.Carrier U -> E.Spin) -> Plots.Spin U f ->
+  TargetSmooth.Regular U (\fun (x: Open.Carrier U) => spin (f x)) :=
+  \fun (U: Open.OpenSet)(f: Open.Carrier U -> E.Spin)(regular: Plots.Spin U f)(v: GL.Vector)(a: Fin.Fin s) =>
+    \parent.Coefficient[v := v, a := a].On[n := n].smooth U (\fun (x: Open.Carrier U) => (f x).value) regular;
+\module On(U: Open.OpenSet, f: Open.Carrier U -> E.SpinC, regular: Plots.SpinC U f);
+\definition smoothSpinC: \forall (U: Open.OpenSet)(f: Open.Carrier U -> E.SpinC) -> Plots.SpinC U f ->
+  TargetSmooth.Regular U (\fun (x: Open.Carrier U) => spinC (f x)) :=
+  \fun (U: Open.OpenSet)(f: Open.Carrier U -> E.SpinC)(regular: Plots.SpinC U f) => On[U := U, f := f, regular := regular].smooth;

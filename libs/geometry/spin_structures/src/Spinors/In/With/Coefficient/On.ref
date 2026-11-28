@@ -1,0 +1,21 @@
+\import \root.CliffordEvaluation[n := n].On[r := rank] \as Evaluation;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import lie_groups.CliffordPlots[d := n].Dimension[n := rank] \as Plots;
+\definition real: Evaluation.Functional := Evaluation.Functional {
+  apply := \fun (x: Clifford.Carrier) => C.re (value x),
+  add := \fun (x, y: Clifford.Carrier) => congr!{{C.Complex} {R.Real}} C.re _ _ (add x y),
+  scale := \fun (z: R.Real)(x: Clifford.Carrier) => trans!{{R.Real}} _ _ _
+    (congr!{{C.Complex} {R.Real}} C.re _ _ (scale z x)) (RealCoordinates.scalarReal z (value x)),
+};
+\definition imaginary: Evaluation.Functional := Evaluation.Functional {
+  apply := \fun (x: Clifford.Carrier) => C.im (value x),
+  add := \fun (x, y: Clifford.Carrier) => congr!{{C.Complex} {R.Real}} C.im _ _ (add x y),
+  scale := \fun (z: R.Real)(x: Clifford.Carrier) => trans!{{R.Real}} _ _ _
+    (congr!{{C.Complex} {R.Real}} C.im _ _ (scale z x)) (RealCoordinates.scalarImag z (value x)),
+};
+\definition smooth[U: Open.OpenSet][f: Open.Carrier U -> Clifford.Carrier][regular: Plots.Plot U f]:
+    smooth_bundles.ComplexCalculus[n := n].On[U := U].Smooth (\fun (x: Open.Carrier U) => value (f x)) :=
+  smooth_bundles.ComplexCalculus[n := n].On[U := U].SmoothLaws[\fun (x: Open.Carrier U) => value (f x)] {
+    real := \root.CliffordEvaluation[n := n].smooth rank U f real regular,
+    imaginary := \root.CliffordEvaluation[n := n].smooth rank U f imaginary regular,
+  };

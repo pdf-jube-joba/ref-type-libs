@@ -1,0 +1,10 @@
+\import Structures.Spin[structure := lift] \as Lift;
+\import SpinBundles.Of[bundle := Lift.bundle].Associated[s := s] \as Associations;
+\definition representation: Associations.Representation := Associations.Representation {
+  homomorphism := spin, smooth := Regularity.smoothSpin,
+};
+\import Associations.Using[representation := representation] \as Glued;
+\definition Fiber: M.Point -> \Set := Glued.Fiber;
+\definition fiberSpace: \forall (x: M.Point) -> Spaces.VectorSpace (Fiber x) := Glued.fiberSpace;
+\import smooth_bundles.Complex[n := n, r := s].On[M := M].Family[F := Fiber, space := fiberSpace] \as Bundle;
+\definition spinorBundle: Bundle.Bundle[I] := Glued.associated;

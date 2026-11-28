@@ -1,0 +1,20 @@
+\import real.Analysis[] \as R;
+\import linear_algebra.Commutative[K := R.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing R.Real R.Algebra[].field] \as Spaces;
+\import smooth_bundles.GeneralLinear[K := R.Real, field := R.Algebra[].field, conjugation := linear_algebra.Hermitian[].Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar, n := r] \as GL;
+\import lie_groups.Classical[].On[V := E.Vector, space := E.space].Orthogonal[form := E.form] \as Isometries;
+\import lie_algebras.Field[K := R.Real, field := R.Algebra[].field].Endomorphisms[V := E.Vector, space := E.space] \as End;
+\import Spaces.Isomorphism[V := E.Vector, W := E.Vector, source := E.space, target := E.space] \as Iso;
+\import algebra.Groups[].Units[A := End.Carrier, ring := End.ring] \as Units;
+\definition include[g: E.SO]: GL.Carrier := Iso.Isomorphism {
+  forward := g.value, backward := g.inverse,
+  leftInverse := Isometries.leftInverse g, rightInverse := Isometries.rightInverse g,
+};
+\definition inclusionInjective: \forall (g, h: E.SO) -> include g = include h -> g = h :=
+  \fun (g, h: E.SO)(same: _) => Units.ext g h (congr!{{GL.Carrier} {GL.Map}} (\fun (u: GL.Carrier) => u.forward) _ _ same);
+\definition includeOne: include E.specialOrthogonalGroup.unit = GL.identity :=
+  GL.ext _ _ (\fun (v: GL.Vector) => \refl(v));
+\definition includeProduct: \forall (g, h: E.SO) -> include (E.specialOrthogonalGroup.op g h) = GL.multiply (include g) (include h) :=
+  \fun (g, h: E.SO) => GL.ext (include (E.specialOrthogonalGroup.op g h)) (GL.multiply (include g) (include h))
+    (\fun (v: GL.Vector) => \refl(g.value.apply (h.value.apply v)));
+\module Over(n: N.Nat^);

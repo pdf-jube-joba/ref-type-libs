@@ -1,0 +1,61 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import lie_groups.Euclidean[n := r] \as E;
+\import E.PinRepresentation[] \as PinAction;
+\import \root.Orthogonal[r := r] \as Projection;
+\import lie_groups.SpinGroup[n := r] \as SpinGeometry;
+\import clifford.Circle[] \as Circle;
+\import real.Analysis[] \as R;
+\import complex.Complex[] \as C;
+\import clifford.Euclidean[n := r] \as Algebra;
+\import clifford.Field[K := R.Real, field := R.Algebra[].field].On[V := E.Vector, space := E.space].Of[form := E.form] \as Clifford;
+\import Clifford.Pin[] \as Pins;
+\import clifford.ComplexExtension[G := E.Spin, group := E.spinGroup].By[sign := Pins.spinInvolution] \as Extension;
+\import lie_groups.ComplexGroup[n := r].Over[G := E.Spin, group := E.spinGroup, embedding := SpinGeometry.embedding,
+  injective := SpinGeometry.embeddingInjective, sign := Pins.spinInvolution, compatible := SpinGeometry.compatible] \as ComplexGeometry;
+\import Clifford.Reversion[] \as Reverse;
+\import Algebra.PinNorm[] \as Norm;
+\import clifford.ComplexRepresentation[n := r] \as Parts;
+\import Parts.By[G := E.Spin, group := E.spinGroup, embedding := SpinGeometry.embedding, injective := SpinGeometry.embeddingInjective,
+  sign := Pins.spinInvolution, compatible := SpinGeometry.compatible] \as Coefficients;
+\import Coefficients.Algebra[] \as Operations;
+\definition term[a: Algebra.Carrier][v: E.Vector]: Algebra.Carrier :=
+  Clifford.mul (Clifford.mul a (Clifford.iota v)) (Reverse.map a);
+\definition raw[p: Parts.CarrierPair][v: E.Vector]: Algebra.Carrier :=
+  Clifford.add (term (Parts.first p) v) (term (Parts.second p) v);
+\definition scaled: \forall (s: E.Spin)(v: E.Vector)(c: R.Real) ->
+  term (Clifford.scale c s.value) v = Clifford.scale (R.mul c c) (Clifford.mul (Clifford.mul s.value (Clifford.iota v)) s.inverse) :=
+  \fun (s: E.Spin)(v: E.Vector)(c: R.Real) => eq_reason_in!{{Algebra.Carrier} _
+    "=" _ "by" { congr!{{Algebra.Carrier} {Algebra.Carrier} {Algebra.Carrier}} Clifford.mul _ _ _ _
+      (sym!{{Algebra.Carrier}} _ _ (Clifford.algebra.scalarMulLeft c s.value (Clifford.iota v))) (Reverse.onScale c s.value) }
+    "=" _ "by" { Operations.scaleProduct c c (Clifford.mul s.value (Clifford.iota v)) (Reverse.map s.value) }
+    "=" _ "by" { congr!{{Algebra.Carrier} {Algebra.Carrier}}
+      (\fun (a: Algebra.Carrier) => Clifford.scale (R.mul c c) (Clifford.mul (Clifford.mul s.value (Clifford.iota v)) a)) _ _
+      (Norm.norm (Pins.inclusion s)) }
+  };
+\definition rawClass: \forall (s: E.Spin)(z: Circle.Circle)(v: E.Vector) ->
+  raw (Coefficients.raw s z) v = Clifford.iota ((Projection.spin s).value.apply v) :=
+  \fun (s: E.Spin)(z: Circle.Circle)(v: E.Vector) => \block {
+    \let a: Algebra.Carrier := Clifford.mul (Clifford.mul s.value (Clifford.iota v)) s.inverse \then
+    \return eq_reason_in!{{Algebra.Carrier} _
+      "=" _ "by" { congr!{{Algebra.Carrier} {Algebra.Carrier} {Algebra.Carrier}} Clifford.add _ _ _ _ (scaled s v (C.re z)) (scaled s v (C.im z)) }
+      "=" _ "by" { sym!{{Algebra.Carrier}} _ _ (Clifford.vectorSpace.scalarAdd (R.mul (C.re z) (C.re z)) (R.mul (C.im z) (C.im z)) a) }
+      "=" _ "by" { congr!{{R.Real} {Algebra.Carrier}} (\fun (c: R.Real) => Clifford.scale c a) _ _ (\bysub(C.Complex, Circle.predicate, z)) }
+      "=" _ "by" { Clifford.vectorSpace.scalarOne a }
+      "=" _ "by" { PinAction.spinOnVector s v }
+    }
+  };
+\definition value[g: E.SpinC][v: E.Vector]: Algebra.Carrier := raw (Coefficients.image g) v;
+\definition formula: \forall (g: E.SpinC)(v: E.Vector) -> value g v = Clifford.iota ((Projection.spinC g).value.apply v) :=
+  Extension.induction (\fun (g: E.SpinC) => \forall (v: E.Vector) -> value g v = Clifford.iota ((Projection.spinC g).value.apply v))
+    (\fun (s: E.Spin)(z: Circle.Circle)(v: E.Vector) => eq_reason_in!{{Algebra.Carrier} _
+      "=" _ "by" { congr!{{Parts.CarrierPair} {Algebra.Carrier}} (\fun (p: Parts.CarrierPair) => raw p v) _ _ (Coefficients.onClass s z) }
+      "=" _ "by" { rawClass s z v }
+      "=" _ "by" { congr!{{E.SO} {Algebra.Carrier}} (\fun (g: E.SO) => Clifford.iota (g.value.apply v)) _ _
+        (sym!{{E.SO}} _ _ (Projection.spinCOnClass s z)) }
+    });
+\module Smooth(n: N.Nat^);

@@ -1,0 +1,13 @@
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import E.Plots[d := n] \as OrthogonalPlots;
+\import E.PinPlots[d := n] \as PinPlots;
+\import ComplexGeometry.Plots[d := n] \as SpinCPlots;
+\definition Orthogonal[U: Open.OpenSet][f: Open.Carrier U -> E.SO]: \Prop :=
+  OrthogonalPlots.Plot U (\fun (x: Open.Carrier U) => f x);
+\definition Spin[U: Open.OpenSet][f: Open.Carrier U -> E.Spin]: \Prop :=
+  PinPlots.Plot U (\fun (x: Open.Carrier U) => Pins.inclusion (f x));
+\definition SpinC[U: Open.OpenSet][f: Open.Carrier U -> E.SpinC]: \Prop := SpinCPlots.Plot U f;
+\definition projectSpin: \forall (U: Open.OpenSet)(f: Open.Carrier U -> E.Spin) -> Spin U f ->
+  Orthogonal U (\fun (x: Open.Carrier U) => spin (f x)) :=
+  \fun (U: Open.OpenSet)(f: Open.Carrier U -> E.Spin)(regular: Spin U f) =>
+    PinPlots.projection U (\fun (x: Open.Carrier U) => Pins.inclusion (f x)) regular;

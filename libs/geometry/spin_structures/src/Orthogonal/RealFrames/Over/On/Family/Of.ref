@@ -1,0 +1,19 @@
+\import \root.Base[n := n].On[M := M] \as Base;
+\definition cover: Base.Cover[I] := Base.Cover[I] {
+  chart := \fun (i: I) => (bundle.atlas.local i).chart, covers := bundle.atlas.covers,
+};
+\import Base.OnCover[I := I, cover := cover] \as Atlas;
+\import \root.Orthogonal[r := r].Plots[n := n] \as Plots;
+\import Atlas.SmoothPrincipal[G := E.SO, group := E.specialOrthogonalGroup, Regular := Plots.Orthogonal] \as FrameAtlas;
+\import smooth_bundles.Real[n := n, r := r].On[M := M].Family[F := F, space := space].Of[I := I, bundle := bundle].Frames[] \as AllFrames;
+\definition localFrame[x: M.Point][i: Atlas.Index x]: AllFrames.Fiber x :=
+  (bundle.atlas.local i).frame (\into[M.Point](x, (cover.chart i).domain) \by {
+    \bysub(I, Atlas.Index x, i)
+  });
+\definition realChange[x: M.Point][i, j: Atlas.Index x]: GL.Carrier :=
+  GL.Frames[V := F x, space := space x].change (localFrame x i) (localFrame x j);
+\structure Reduction: \Set := {
+  change: \forall (x: M.Point)(i, j: Atlas.Index x) -> E.SO,
+  agrees: \forall (x: M.Point)(i, j: Atlas.Index x) -> include (change x i j) = realChange x i j,
+};
+\module Reduced(reduction: Reduction);

@@ -1,0 +1,32 @@
+\import \parent.\parent.\parent.\parent.Overlap[i := i, j := j] \as Comparison;
+\import Pulled.Overlap[i := i, j := j] \as SourceOverlap;
+\import Original.Overlap[i := i.target, j := j.target] \as TargetOverlap;
+\definition oldValue[t: SourceOpen.Carrier SourceOverlap.domain]: G := Old.transition bundle.cocycle i.target j.target (Comparison.map.apply t);
+\definition newValue[t: SourceOpen.Carrier SourceOverlap.domain]: G := New.transition (cocycle bundle.cocycle) i j t;
+\definition InBoth[y: Y.Point]: \Prop := Logic.And[TargetCharts.Contains (cover.chart i.target) y, TargetCharts.Contains (cover.chart j.target) y];
+\definition Common: \Set := \Cast[Y.Point] ({ y: Y.Point \where InBoth y });
+\definition common[y: Common]: G := \block {
+  \let inside: InBoth y := \bysub(Y.Point, Common, y) \then
+  \let li: Original.Local i.target := \into[Y.Point](y, (cover.chart i.target).domain) \by { inside.left } \then
+  \let lj: Original.Local j.target := \into[Y.Point](y, (cover.chart j.target).domain) \by { inside.right } \then
+  \return bundle.cocycle.change y (Original.index i.target li) (Original.index j.target lj)
+};
+\definition original[t: SourceOpen.Carrier SourceOverlap.domain]: Common :=
+  \into[Y.Point](TargetOverlap.left (Comparison.map.apply t), Common) \by {
+    Logic.And[_, _] {
+      left := \bysub(Y.Point, (cover.chart i.target).domain, TargetOverlap.left (Comparison.map.apply t)),
+      right := \bysub(Y.Point, (cover.chart j.target).domain, TargetOverlap.right (Comparison.map.apply t)),
+    }
+  };
+\definition pulled[t: SourceOpen.Carrier SourceOverlap.domain]: Common :=
+  \into[Y.Point](Maps.apply f (SourceOverlap.left t), Common) \by {
+    Logic.And[_, _] { left := i.inside (SourceOverlap.left t), right := j.inside (SourceOverlap.right t) }
+  };
+\definition same: \forall (t: SourceOpen.Carrier SourceOverlap.domain) -> oldValue t = newValue t :=
+  \fun (t: SourceOpen.Carrier SourceOverlap.domain) => congr!{Common G} common (original t) (pulled t) (Comparison.returns t);
+\definition smooth: after SourceOverlap.domain newValue :=
+  \idelim oldValue = newValue \with h: (SourceOpen.Carrier SourceOverlap.domain -> G) => after SourceOverlap.domain h \by {
+    base: composes SourceOverlap.domain TargetOverlap.domain Comparison.map (Old.transition bundle.cocycle i.target j.target)
+      (bundle.regular i.target j.target),
+    equality: \axiom:funext(oldValue, newValue, same)
+  };

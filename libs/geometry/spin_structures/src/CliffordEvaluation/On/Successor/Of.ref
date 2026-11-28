@@ -1,0 +1,11 @@
+\import Step.Components[U := U, f := f] \as Components;
+\definition smooth: Smooth.SmoothOn U (\fun (x: Open.Carrier U) => ell.apply (f x)) :=
+  Plots.smoothEqual U
+    (\fun (x: Open.Carrier U) => R.add ((left ell).apply (Components.left x)) ((right ell).apply (Components.right x)))
+    (\fun (x: Open.Carrier U) => ell.apply (f x))
+    (\fun (x: Open.Carrier U) => trans!{{R.Real}} _ _ _
+      (sym!{{R.Real}} _ _ (ell.add (Inclusion.map (Components.left x)) (shifted (Components.right x))))
+      (congr!{{Next.Carrier} {R.Real}} ell.apply _ _ (Spanning.recover (f x))))
+    (Operations.addSmooth U _ _
+      (previous U Components.left (left ell) (Components.leftPlot regular))
+      (previous U Components.right (right ell) (Components.rightPlot regular)));

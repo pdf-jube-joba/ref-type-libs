@@ -1,0 +1,18 @@
+\import \parent.On[r := N.Nat^::zero] \as Zero;
+\import clifford.Euclidean[n := N.Nat^::zero] \as E;
+\import clifford.Field[K := R.Real, field := Scalars.field].On[V := E.Vector, space := E.space].Of[form := E.form] \as Algebra;
+\import clifford.EuclideanCoordinates[].Zero[] \as Coefficients;
+\definition evaluation: \forall (ell: Zero.Functional)(a: E.Carrier) ->
+  R.mul (Coefficients.read a) (ell.apply Algebra.one) = ell.apply a :=
+  \fun (ell: Zero.Functional)(a: E.Carrier) => eq_reason_in!{{R.Real} _
+    "=" _ "by" { sym!{{R.Real}} _ _ (ell.scale (Coefficients.read a) Algebra.one) }
+    "=" _ "by" { congr!{{E.Carrier} {R.Real}} ell.apply _ _
+      (E.ring.semiring.multiplicative.rightIdentity (E.scalar (Coefficients.read a))) }
+    "=" _ "by" { congr!{{E.Carrier} {R.Real}} ell.apply _ _ (Coefficients.recover a) }
+  };
+\definition smooth: Zero.Law := \fun (U: Open.OpenSet)(f: Open.Carrier U -> E.Carrier)(ell: Zero.Functional)(regular: _) =>
+  Plots.smoothEqual U
+    (\fun (x: Open.Carrier U) => R.mul (Coefficients.read (f x)) (ell.apply Algebra.one))
+    (\fun (x: Open.Carrier U) => ell.apply (f x))
+    (\fun (x: Open.Carrier U) => evaluation ell (f x))
+    (Operations.mulSmooth U _ _ (regular (Fin.zero N.Nat^::zero)) (Operations.constantSmooth U (ell.apply Algebra.one)));
