@@ -26,3 +26,4 @@
   Continuous.Of[f := Scalar[f := Top.coefficient omega].continuous].value;
 \module Exact(f: Smooth.SmoothFunction U);
 \module Simplex(m: N.Nat^, V: calculus.Real[].Multivariable[n := m].Open[].OpenSet, sigma: calculus.Maps[n := One.dimension, m := m].Map U V);
+\module Path(m: N.Nat^);

@@ -1,0 +1,3 @@
+\import manifolds.SmoothMap[n := One.dimension, m := m].Between[M := domain, N := target] \as Maps;
+\import differential_forms.Forms[n := m].On[M := target] \as TargetForms;
+\module Along(sigma: Maps.Map);

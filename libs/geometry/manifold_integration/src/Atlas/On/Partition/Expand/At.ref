@@ -1,0 +1,37 @@
+\definition other: Piece := partition.pieces i;
+\definition product: Functions.Smooth := Functions.times piece.weight other.weight;
+\definition leftWithin: Sets.Subset (Functions.support product) (Functions.support piece.weight) :=
+  Support.supportWithinClosed M.space product (Functions.support piece.weight) (Support.supportClosed M.space piece.weight)
+    (\fun (x: M.Point)(outside: _) => trans!{Real.Real} _ _ _
+      (congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (other.weight x)) _ _ (Support.zeroOutsideSupport M.space piece.weight x outside))
+      (Laws.fieldMulZeroLeft (other.weight x)));
+\definition rightWithin: Sets.Subset (Functions.support product) (Functions.support other.weight) :=
+  Support.supportWithinClosed M.space product (Functions.support other.weight) (Support.supportClosed M.space other.weight)
+    (\fun (x: M.Point)(outside: _) => trans!{Real.Real} _ _ _
+      (congr!{Real.Real Real.Real} (Real.mul (piece.weight x)) _ _ (Support.zeroOutsideSupport M.space other.weight x outside))
+      (Laws.fieldMulZeroRight (piece.weight x)));
+\definition compact: Sets.IsCompactIn M.space (Functions.support product) :=
+  Support.compactSupportWithin M.space product (Functions.support piece.weight) piece.compact leftWithin;
+\definition onLeft: Sets.Subset (Functions.support product) piece.chart.domain := Sets.subsetTrans _ _ _ leftWithin piece.within;
+\definition onRight: Sets.Subset (Functions.support product) other.chart.domain := Sets.subsetTrans _ _ _ rightWithin other.within;
+\definition data: Piece := Piece { chart := piece.chart, positive := piece.positive, weight := product, compact := compact, within := onLeft };
+\import \parent.\parent.PieceIntegral[piece := data] \as Refined;
+\definition representative: Integral.Representatives := Chart.representative (Refined.form piece.chart) Refined.supported;
+\definition inside[x: Open.Carrier piece.chart.image]:
+  representative x = Real.mul (other.weight (Charts.point piece.chart x)) (Real.mul (piece.weight (Charts.point piece.chart x)) (Coordinates.coefficient (omega piece.chart) x)) :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { Localization.inside (Coordinates.coefficient (Refined.form piece.chart)) Refined.supported x }
+    "=" { Real.mul (Real.mul (piece.weight (Charts.point piece.chart x)) (other.weight (Charts.point piece.chart x))) (Coordinates.coefficient (omega piece.chart) x) } "by" { Refined.coefficient piece.chart x }
+    "=" { Real.mul (Real.mul (other.weight (Charts.point piece.chart x)) (piece.weight (Charts.point piece.chart x))) (Coordinates.coefficient (omega piece.chart) x) } "by" {
+      congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.mul a (Coordinates.coefficient (omega piece.chart) x)) _ _
+        (Laws.fieldMulComm (piece.weight (Charts.point piece.chart x)) (other.weight (Charts.point piece.chart x))) }
+    "=" _ "by" { Laws.fieldMulAssoc (other.weight (Charts.point piece.chart x)) (piece.weight (Charts.point piece.chart x)) (Coordinates.coefficient (omega piece.chart) x) }
+  };
+\definition outside[x: Change.Point]: Logic.Not (ModelSets.Member piece.chart.image.points x) -> representative x = Real.zero :=
+  Localization.outside (Coordinates.coefficient (Refined.form piece.chart)) Refined.supported x;
+\import \parent.\parent.\parent.Compact[omega := Refined.form, K := Functions.support product, compact := compact] \as Supported;
+\import Supported.Compare[left := piece.chart, right := other.chart, onLeft := onLeft, onRight := onRight, vanishes := Refined.vanishes] \as Comparison;
+\definition otherIntegral: Real.Real := Supported.In[chart := other.chart, contains := onRight, vanishes := Refined.vanishes].integral;
+\definition swapChart: Refined.integral = otherIntegral :=
+  Comparison.independent (orientation.preserving piece.chart other.chart piece.positive other.positive);
+\definition integral: Real.Real := Refined.integral;

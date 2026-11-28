@@ -1,0 +1,26 @@
+\import Charts.Transition[left := left, right := right] \as Transition;
+\import Forms.Pair[left := left, right := right] \as Overlap;
+\import LocalForms.On[U := Transition.domain] \as Source;
+\import LocalForms.On[U := right.image] \as Target;
+\import Target.At[k := n] \as TargetOps;
+\import LocalForms.Pullback[m := n, U := Transition.domain, V := right.image, f := Overlap.transition] \as Pullback;
+\import Pullback.At[k := n] \as Algebra;
+\definition original: Overlap.Agreement n omega :=
+  (\bysub(Forms.Family n, { eta: Forms.Family n \where Forms.Compatible n eta }, omega)) left right;
+\definition agrees: Overlap.Agreement n family :=
+  Source.ext n (Overlap.restrict n family) (Overlap.transport n family)
+    (\fun (x: Open.Carrier Transition.domain)(args: Fin.Fin n -> Model.Point) => \block {
+      \let a: Real.Real := weight (Charts.point left (Transition.leftCoordinate x)) \then
+      \let b: Real.Real := weight (Charts.point right (Transition.apply x)) \then
+      \return eq_reason_in!{Real.Real {Overlap.restrict n family x args}
+        "=" {Real.mul a (Overlap.restrict n omega x args)} "by" { \refl(Overlap.restrict n family x args) }
+        "=" {Real.mul b (Overlap.transport n omega x args)} "by" {
+          congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _
+            (congr!{{M.Point} Real.Real} weight _ _ (sym!{M.Point} _ _ (Transition.returnsPoint x)))
+            (congr!{{Source.Form n} Real.Real} (\fun (eta: Source.Form n) => eta x args) _ _ original) }
+        "=" {Pullback.apply n (TargetOps.scale b (omega right)) x args} "by" {
+          sym!{Real.Real} _ _ (congr!{{Source.Form n} Real.Real} (\fun (eta: Source.Form n) => eta x args) _ _
+            (Algebra.scalar b (omega right))) }
+        "=" {Overlap.transport n family x args} "by" { \refl(Overlap.transport n family x args) }
+      }
+    });
