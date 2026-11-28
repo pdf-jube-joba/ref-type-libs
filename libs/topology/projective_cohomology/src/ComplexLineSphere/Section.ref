@@ -75,3 +75,4 @@
     (topology.Composition[A := Spheres.Carrier Degrees.two, B := Projective.Space, C := Family.Point].composeContinuous
       (Spheres.topology Degrees.two) Projective.topology Realification.bundle.totalSpace onSphere section homeomorphism.backwardContinuous continuous);
 \module Relative;
+\module Frame;

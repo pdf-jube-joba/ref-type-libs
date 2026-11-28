@@ -40,6 +40,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `ComplexLineSphere.PulledHopf` | The underlying real bundle of the sphere model line is the pullback of the realified projective tautological line |
 | `ComplexLineSphere.Equator` | In the standard two-sphere model, the second complex frame coordinate on the equator is the first multiplied by the inverse unit-circle coordinate |
 | `ComplexLineSphere.Section.Relative.Forgetting` | The projected coordinate section on the standard two-sphere pulls the punctured-bundle Thom class back to a relative class whose absolute image is the tautological Euler class |
+| `ComplexLineSphere.Section.Frame.Thom` | The projected north frame defines a continuous complex trivialization, and its standard local disk class equals the restriction of the canonical Thom class |
 | `RealPlane.ModTwo` | The Euler generator and its square pull back to the two distinguished positive-degree classes of the real projective plane model |
 | `ZeroDegree` | Evaluation of constant classes and surjectivity of degree-zero pullback from a path-connected source |
 

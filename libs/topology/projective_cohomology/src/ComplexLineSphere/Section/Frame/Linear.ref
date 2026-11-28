@@ -1,0 +1,39 @@
+\definition coordinate[v: Projective.Line x]: C.Complex := Arithmetic.mul (Arithmetic.inv (alpha x)) (v first);
+\definition vector[a: C.Complex]: Projective.Line x := (Projective.lineBundle.space x).smul a (column x);
+\definition right[a: C.Complex]: coordinate (vector a) = a :=
+  eq_reason_in!{C.Complex _
+    "=" _ "by" { congr!{C.Complex C.Complex} (Arithmetic.mul (Arithmetic.inv (alpha x))) _ _ (ComplexLaws.mulComm a (alpha x)) }
+    "=" _ "by" { sym!{C.Complex} _ _ (ComplexLaws.mulAssoc (Arithmetic.inv (alpha x)) (alpha x) a) }
+    "=" _ "by" { congr!{C.Complex C.Complex} (\fun (b: C.Complex) => Arithmetic.mul b a) _ _ (ComplexLaws.inverseNonzero (alpha x) (nonzero x)) }
+    "=" _ "by" { ComplexLaws.mulOneLeft a }
+  };
+\definition linear[a: C.Complex][v: Projective.Line x]: coordinate ((Projective.lineBundle.space x).smul a v) = Arithmetic.mul a (coordinate v) :=
+  ComplexLaws.mulSwap (Arithmetic.inv (alpha x)) a (v first);
+\definition columnUnit: coordinate (column x) = Arithmetic.one := ComplexLaws.inverseNonzero (alpha x) (nonzero x);
+\import LineBundle.At[x := x] \as LineBasis;
+\module With(basis: LineBasis.Basis);
+\definition left[v: Projective.Line x]: vector (coordinate v) = v := \block {
+  \takefrom basis: LineBasis.Basis \by Model.rank x \then
+  \return With[basis := basis].left v
+};
+\definition index: Fin.Fin Degrees.one := Fin.zero std.Data[].Nat[].Nat^::zero;
+\definition constant[a: C.Complex]: Bundles.Vector Degrees.one := \fun (_: Fin.Fin Degrees.one) => a;
+\import linear_algebra.Commutative[K := C.Complex, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing C.Complex C.Algebra[].field] \as Modules;
+\import Modules.Linear[V := Projective.Line x, W := Bundles.Vector Degrees.one, source := Projective.lineBundle.space x, target := Bundles.coordinates Degrees.one] \as Forward;
+\import Modules.Linear[V := Bundles.Vector Degrees.one, W := Projective.Line x, source := Bundles.coordinates Degrees.one, target := Projective.lineBundle.space x] \as Backward;
+\import Modules.Isomorphism[V := Projective.Line x, W := Bundles.Vector Degrees.one, source := Projective.lineBundle.space x, target := Bundles.coordinates Degrees.one] \as Iso;
+\definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+  forward := Forward.Map {
+    apply := \fun (v: Projective.Line x) => constant (coordinate v),
+    preservesAdd := \fun (v, w: Projective.Line x) => congr!{C.Complex {Bundles.Vector Degrees.one}} constant _ _ (ComplexLaws.mulAddLeft (Arithmetic.inv (alpha x)) (v first) (w first)),
+    preservesScale := \fun (a: C.Complex)(v: Projective.Line x) => congr!{C.Complex {Bundles.Vector Degrees.one}} constant _ _ (linear a v)
+  },
+  backward := Backward.Map {
+    apply := \fun (v: Bundles.Vector Degrees.one) => vector (v index),
+    preservesAdd := \fun (v, w: Bundles.Vector Degrees.one) => (Projective.lineBundle.space x).scalarAdd (v index) (w index) (column x),
+    preservesScale := \fun (a: C.Complex)(v: Bundles.Vector Degrees.one) => (Projective.lineBundle.space x).scalarAssoc a (v index) (column x)
+  },
+  leftInverse := left,
+  rightInverse := \fun (v: Bundles.Vector Degrees.one) => \axiom:funext(constant (coordinate (vector (v index))), v, \fun (i: Fin.Fin Degrees.one) =>
+    trans!{C.Complex} _ _ _ (right (v index)) (congr!{{Fin.Fin Degrees.one} {C.Complex}} v _ _ (sym!{{Fin.Fin Degrees.one}} _ _ (Fin.singletonValue i))))
+};

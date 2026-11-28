@@ -1,0 +1,79 @@
+\import Native.With[data := Projective.lineBundle] \as Bundle;
+\definition data: Bundle.ChartData := Bundle.ChartData { domain := domain, dimension := Degrees.one,
+  frame := \fun (x: Point) => \parent.Linear[x := x].isomorphism };
+\import Bundle.In[c := data] \as Frame;
+\import Native.Of[bundle := Projective.lineBundle] \as LineOperations;
+\definition totalDomain: \Pow Native.Point := { p: Native.Point \where \In[Projective.Space] domain p.base };
+\definition totalOpen: topology.Topology[Carrier := Native.Point].IsOpenIn Projective.lineBundle.totalSpace totalDomain :=
+  LineOperations.projectionContinuous domain open;
+\definition baseContinuous: topology.Continuity[A := Frame.TotalPoint, B := Point].Continuous Frame.localTopology topology Frame.base :=
+  topology.Continuity[A := Frame.TotalPoint, B := Projective.Space].Corestriction[S := domain].corestrictContinuous
+    Frame.localTopology Projective.topology Frame.base
+    (topology.Continuity[A := Native.Point, B := Projective.Space].Restriction[S := totalDomain].restrictContinuous
+      Projective.lineBundle.totalSpace Projective.topology Native.projection LineOperations.projectionContinuous);
+\definition alphaContinuous: topology.Continuity[A := Point, B := C.Complex].Continuous topology topological_algebra.Complex[].topology (\fun (x: Point) => alpha x) :=
+  topology.Continuity[A := Projective.Space, B := C.Complex].Restriction[S := domain].restrictContinuous
+    Projective.topology topological_algebra.Complex[].topology alpha (Model.regular (Vector.basis first) first);
+\definition inverse[x: Point]: C.Complex := Arithmetic.inv (alpha x);
+\definition inverseContinuous: topology.Continuity[A := Point, B := C.Complex].Continuous topology topological_algebra.Complex[].topology inverse :=
+  topological_algebra.Complex[].Functions[A := Point].inverseContinuous topology (\fun (x: Point) => alpha x) alphaContinuous nonzero;
+\definition invAt[p: Frame.TotalPoint]: C.Complex := inverse (Frame.base p);
+\definition invContinuous: topology.Continuity[A := Frame.TotalPoint, B := C.Complex].Continuous Frame.localTopology topological_algebra.Complex[].topology invAt :=
+  topology.Composition[A := Frame.TotalPoint, B := Point, C := C.Complex].composeContinuous
+    Frame.localTopology topology topological_algebra.Complex[].topology Frame.base inverse baseContinuous inverseContinuous;
+\definition ambient[p: Frame.TotalPoint]: Vector.Vector := p.vector;
+\definition ambientContinuous: topology.Continuity[A := Frame.TotalPoint, B := Vector.Vector].Continuous Frame.localTopology (Bundles.coordinateTopology Projective.ambient) ambient :=
+  topology.Continuity[A := Native.Point, B := Vector.Vector].Restriction[S := totalDomain].restrictContinuous
+    Projective.lineBundle.totalSpace (Bundles.coordinateTopology Projective.ambient) (\fun (p: Native.Point) => p.vector) Projection.vectorContinuous;
+\definition firstValue[p: Frame.TotalPoint]: C.Complex := p.vector first;
+\definition firstContinuous: topology.Continuity[A := Frame.TotalPoint, B := C.Complex].Continuous Frame.localTopology topological_algebra.Complex[].topology firstValue :=
+  topology.Composition[A := Frame.TotalPoint, B := Vector.Vector, C := C.Complex].composeContinuous
+    Frame.localTopology (Bundles.coordinateTopology Projective.ambient) topological_algebra.Complex[].topology ambient
+    (\fun (v: Vector.Vector) => v first) ambientContinuous (Coordinates.evaluationContinuous topological_algebra.Complex[].topology first);
+\definition nativeValue[p: Frame.TotalPoint]: C.Complex := Arithmetic.mul (invAt p) (firstValue p);
+\import hermitian_frames.Hermitian[].Over[K := C.Complex, field := C.Algebra[].field, scalar := Hermitian.Complex[].scalar,
+  topological := Hermitian.Complex[].topological] \as HermitianFunctions;
+\definition valueContinuous: topology.Continuity[A := Frame.TotalPoint, B := C.Complex].Continuous Frame.localTopology topological_algebra.Complex[].topology nativeValue :=
+  HermitianFunctions.Functions[X := Frame.TotalPoint].multiplication Frame.localTopology invAt firstValue invContinuous firstContinuous;
+\definition framed[p: Frame.TotalPoint]: Bundles.Vector Degrees.one := (data.frame (Frame.base p)).forward.apply p.vector;
+\import topological_algebra.Coordinates[K := C.Complex, I := Fin.Fin Degrees.one] \as RankOne;
+\definition framedContinuous: topology.Continuity[A := Frame.TotalPoint, B := Bundles.Vector Degrees.one].Continuous Frame.localTopology
+  (Bundles.coordinateTopology Degrees.one) framed := RankOne.Universal[A := Frame.TotalPoint].continuous
+    Frame.localTopology topological_algebra.Complex[].topology framed (\fun (_: Fin.Fin Degrees.one) => valueContinuous);
+\import topological_constructions.Product[A := Point, B := Bundles.Vector Degrees.one] \as Product;
+\definition forward: topology.Continuity[A := Frame.TotalPoint, B := Frame.ProductPoint].Continuous Frame.localTopology Frame.productTopology Frame.forward :=
+  Product.Universal[X := Frame.TotalPoint].pairContinuous Frame.localTopology topology (Bundles.coordinateTopology Degrees.one)
+    Frame.base framed baseContinuous framedContinuous;
+\import std.Data[].Pair[] \as Pair;
+\definition at[p: Frame.ProductPoint]: Point := Pair.first Point (Bundles.Vector Degrees.one) p;
+\definition atContinuous: topology.Continuity[A := Frame.ProductPoint, B := Point].Continuous Frame.productTopology topology at :=
+  Product.Maps[].firstContinuous topology (Bundles.coordinateTopology Degrees.one);
+\definition inBase[p: Frame.ProductPoint]: Projective.Space := at p;
+\definition inBaseContinuous: topology.Continuity[A := Frame.ProductPoint, B := Projective.Space].Continuous Frame.productTopology Projective.topology inBase :=
+  topology.Composition[A := Frame.ProductPoint, B := Point, C := Projective.Space].composeContinuous
+    Frame.productTopology topology Projective.topology at (\fun (x: Point) => x) atContinuous
+    (topology.Continuity[A := Point, B := Projective.Space].Corestriction[S := domain].inclusionContinuous Projective.topology);
+\definition scalarValue[p: Frame.ProductPoint]: C.Complex := (Pair.second Point (Bundles.Vector Degrees.one) p) (Fin.zero std.Data[].Nat[].Nat^::zero);
+\definition scalarContinuous: topology.Continuity[A := Frame.ProductPoint, B := C.Complex].Continuous Frame.productTopology topological_algebra.Complex[].topology scalarValue :=
+  topology.Composition[A := Frame.ProductPoint, B := Bundles.Vector Degrees.one, C := C.Complex].composeContinuous Frame.productTopology
+    (Bundles.coordinateTopology Degrees.one) topological_algebra.Complex[].topology (Pair.second Point (Bundles.Vector Degrees.one))
+    (\fun (v: Bundles.Vector Degrees.one) => v (Fin.zero std.Data[].Nat[].Nat^::zero))
+    (Product.Maps[].secondContinuous topology (Bundles.coordinateTopology Degrees.one))
+    (RankOne.evaluationContinuous topological_algebra.Complex[].topology (Fin.zero std.Data[].Nat[].Nat^::zero));
+\definition basis[p: Frame.ProductPoint]: Vector.Vector := column (inBase p);
+\import HermitianFunctions.At[n := Projective.ambient].Families[X := Frame.ProductPoint] \as CoordinatesFamily;
+\definition basisContinuous: CoordinatesFamily.Continuous Frame.productTopology basis :=
+  \fun (i: Fin.Fin Projective.ambient) => topology.Composition[A := Frame.ProductPoint, B := Projective.Space, C := C.Complex].composeContinuous
+    Frame.productTopology Projective.topology topological_algebra.Complex[].topology inBase (\fun (x: Projective.Space) => column x i)
+    inBaseContinuous (Model.regular (Vector.basis first) i);
+\definition embedded[p: Frame.ProductPoint]: Vector.Vector := (Frame.backward p).vector;
+\definition embeddedContinuous: topology.Continuity[A := Frame.ProductPoint, B := Vector.Vector].Continuous Frame.productTopology
+  (Bundles.coordinateTopology Projective.ambient) embedded := Coordinates.Universal[A := Frame.ProductPoint].continuous
+    Frame.productTopology topological_algebra.Complex[].topology embedded (CoordinatesFamily.scale Frame.productTopology scalarValue basis scalarContinuous basisContinuous);
+\definition backward: topology.Continuity[A := Frame.ProductPoint, B := Frame.TotalPoint].Continuous Frame.productTopology Frame.localTopology Frame.backward :=
+  topology.Continuity[A := Frame.ProductPoint, B := Native.Point].Corestriction[S := totalDomain].corestrictContinuous
+    Frame.productTopology Projective.lineBundle.totalSpace Frame.backward
+    (Projection.Universal[Y := Frame.ProductPoint, source := Frame.productTopology].continuous Frame.backward inBaseContinuous embeddedContinuous);
+\definition chart: Bundle.Chart := \into[Bundle.ChartData](data, Bundle.Chart) \by {
+  Frame.Laws { baseOpen := open, totalOpen := totalOpen, forwardContinuous := forward, backwardContinuous := backward }
+};

@@ -1,0 +1,35 @@
+\import LineBasis.With[basis := basis] \as Basis;
+\import LineBundle.Integral[].Charts[].Transition[x := x, source := Basis.frame, target := Basis.frame] \as Singleton;
+\definition unit: Projective.Line x := Basis.frame.backward.apply Singleton.axis;
+\definition scalar[v: Projective.Line x]: C.Complex := Singleton.value (Basis.frame.forward.apply v);
+\definition expands[v: Projective.Line x]: (Projective.lineBundle.space x).smul (scalar v) unit = v :=
+  eq_reason_in!{{Projective.Line x} _
+    "=" _ "by" { sym!{{Projective.Line x}} _ _ (Basis.frame.backward.preservesScale (scalar v) Singleton.axis) }
+    "=" _ "by" { congr!{{Bundles.Vector Degrees.one} {Projective.Line x}} Basis.frame.backward.apply _ _
+      (Singleton.reconstruct (Basis.frame.forward.apply v)) }
+    "=" _ "by" { Basis.frame.leftInverse v }
+  };
+\definition coefficient[v: Projective.Line x]: coordinate v = Arithmetic.mul (scalar v) (coordinate unit) :=
+  trans!{C.Complex} _ _ _ (congr!{{Projective.Line x} {C.Complex}} coordinate _ _ (sym!{{Projective.Line x}} _ _ (expands v))) (linear (scalar v) unit);
+\definition product: Arithmetic.mul (coordinate unit) (scalar (column x)) = Arithmetic.one :=
+  trans!{C.Complex} _ _ _ (ComplexLaws.mulComm (coordinate unit) (scalar (column x)))
+    (trans!{C.Complex} _ _ _ (sym!{C.Complex} _ _ (coefficient (column x))) columnUnit);
+\definition multiplies[v: Projective.Line x]: Arithmetic.mul (coordinate v) (scalar (column x)) = scalar v :=
+  eq_reason_in!{C.Complex _
+    "=" _ "by" { congr!{C.Complex C.Complex} (\fun (a: C.Complex) => Arithmetic.mul a (scalar (column x))) _ _ (coefficient v) }
+    "=" _ "by" { ComplexLaws.mulAssoc (scalar v) (coordinate unit) (scalar (column x)) }
+    "=" _ "by" { congr!{C.Complex C.Complex} (Arithmetic.mul (scalar v)) _ _ product }
+    "=" _ "by" { ComplexLaws.mulOneRight (scalar v) }
+  };
+\definition scalarEqual[v, w: Projective.Line x][equal: coordinate v = coordinate w]: scalar v = scalar w :=
+  trans!{C.Complex} (scalar v) (Arithmetic.mul (coordinate v) (scalar (column x))) (scalar w)
+    (sym!{C.Complex} _ _ (multiplies v))
+    (trans!{C.Complex} (Arithmetic.mul (coordinate v) (scalar (column x))) (Arithmetic.mul (coordinate w) (scalar (column x))) (scalar w)
+      (congr!{C.Complex C.Complex} (\fun (a: C.Complex) => Arithmetic.mul a (scalar (column x))) _ _ equal) (multiplies w));
+\definition injective[v, w: Projective.Line x][equal: coordinate v = coordinate w]: v = w :=
+  trans!{{Projective.Line x}} _ _ _ (sym!{{Projective.Line x}} _ _ (expands v))
+    (trans!{{Projective.Line x}} _ _ _
+      (congr!{C.Complex {Projective.Line x}} (\fun (a: C.Complex) => (Projective.lineBundle.space x).smul a unit) _ _ (scalarEqual v w equal))
+      (expands w));
+\definition left[v: Projective.Line x]: vector (coordinate v) = v :=
+  injective (vector (coordinate v)) v (right (coordinate v));

@@ -1,0 +1,31 @@
+\import C.Def[] \as Arithmetic;
+\import C.Prop[] \as ComplexLaws;
+\import topology.Maps[A := Projective.Space, B := Spheres.Carrier Degrees.two] \as Into;
+\definition domain: \Pow Projective.Space := Into.Preimage homeomorphism.forward Base.left;
+\import topology.Topology[Carrier := Projective.Space].Subspace[S := domain] \as Domain;
+\definition Point: \Set := Domain.CarrierSet;
+\definition topology: topology.Topology[Carrier := Point].Topology := Domain.topology Projective.topology;
+\definition open: topology.Topology[Carrier := Projective.Space].IsOpenIn Projective.topology domain :=
+  homeomorphism.forwardContinuous Base.left Base.leftOpen;
+\definition first: Fin.Fin Projective.ambient := Fin.zero Degrees.one;
+\definition column[x: Projective.Space]: Projective.Line x := Projection.At[x := x].project.apply (Vector.basis first);
+\definition alpha[x: Projective.Space]: C.Complex := column x first;
+\definition coefficient[x: Point]: alpha x = Matrix.a (homeomorphism.forward x) :=
+  trans!{C.Complex} _ _ _
+    (congr!{{Projective.Space} {C.Complex}} alpha _ _ (sym!{{Projective.Space}} _ _ (homeomorphism.leftInverse x)))
+    (Matrix.Projection[].Comparison[].firstEntry (homeomorphism.forward x));
+\definition positive[x: Point]: D.Lt R.zero (C.re (alpha x)) :=
+  \idelim C.re (Matrix.a (homeomorphism.forward x)) = C.re (alpha x) \with a: R.Real => D.Lt R.zero a \by {
+    base: R.Estimates[].halfOfPositive (R.add R.one (height (homeomorphism.forward x)))
+      (\idelim R.add R.one (R.neg R.one) = R.zero \with v: R.Real => D.Lt v (R.add R.one (height (homeomorphism.forward x))) \by {
+        base: Laws.ltAddLeft R.one (R.neg R.one) (height (homeomorphism.forward x)) (\bysub(Projective.Space, domain, x)),
+        equality: Laws.addNegRight R.one
+      }),
+    equality: congr!{C.Complex R.Real} C.re _ _ (sym!{C.Complex} _ _ (coefficient x))
+  };
+\definition nonzero[x: Point]: Arithmetic.NonZero (alpha x) :=
+  \fun (zero: alpha x = Arithmetic.zero) => D.Order[].ltNotEq _ _ (positive x)
+    (congr!{C.Complex R.Real} C.re _ _ (sym!{C.Complex} _ _ zero));
+\module Linear(x: Point);
+\module Trivialization;
+\module Thom;
