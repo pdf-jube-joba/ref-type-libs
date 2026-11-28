@@ -1,0 +1,111 @@
+\import std.Data[].Nat[] \as N;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Cochains;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset] \as Pair;
+\import Pair.Reduced[] \as ReducedPair;
+\import Pair.With[coefficients := coefficients] \as Relative;
+\import Relative.PairSequence[] \as Ordinary;
+\import ReducedPair.With[coefficients := coefficients] \as Reduced;
+\import topology.Topology[Carrier := A].Subspace[S := subset] \as Subspace;
+\definition partTopology: topology.Topology[Carrier := Pair.SubspaceCarrier].Topology := Subspace.topology source;
+\import \parent.AugmentationMap[A := A, source := source] \as Whole;
+\import \parent.AugmentationMap[A := Pair.SubspaceCarrier, source := partTopology] \as Part;
+\import singular_cohomology.Chains[A := A, source := source] \as WholeChains;
+\import singular_cohomology.Chains[A := Pair.SubspaceCarrier, source := partTopology] \as PartChains;
+\import WholeChains.Reduced[] \as WholeRed;
+\import PartChains.Reduced[] \as PartRed;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Native;
+\import Native.ZeroExtension[C := WholeChains.complex] \as WholeOrd;
+\import Native.ZeroExtension[C := PartChains.complex] \as PartOrd;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.Integer[P := WholeRed.complex, N := coefficients] \as WholeReduced;
+\import Hom.Integer[P := PartRed.complex, N := coefficients] \as PartReduced;
+\import Hom.Integer[P := WholeOrd.complex, N := coefficients] \as WholeOrdinary;
+\import Hom.Integer[P := PartOrd.complex, N := coefficients] \as PartOrdinary;
+\import singular_cohomology.Maps[A := Pair.SubspaceCarrier, B := A, source := partTopology, target := source] \as Included;
+\definition natural: \forall (z: I.Int^)(x: PartRed.Carrier z) -> Whole.apply z (ReducedPair.inclusionMap.apply z x) = Pair.inclusionMap.apply z (Part.apply z x) :=
+  \induction (z: I.Int^) \return \forall (x: PartRed.Carrier z) -> Whole.apply z (ReducedPair.inclusionMap.apply z x) = Pair.inclusionMap.apply z (Part.apply z x) \with {
+    | ofNat: \fun (n: N.Nat^)(x: PartRed.Carrier (I.Int^::ofNat n)) =>
+        \refl(WholeOrd.Positive[n := n].intro ((Included.push Pair.inclusion Pair.inclusionContinuous).apply n x))
+    | negSucc: \fun (n: N.Nat^)(x: PartRed.Carrier (I.Int^::negSucc n)) => \refl((WholeOrd.space (I.Int^::negSucc n)).zero)
+  };
+\definition quotientLaw: \forall (z: I.Int^)(x: WholeRed.Carrier z) -> Pair.class z (Whole.apply z x) = ReducedPair.projectionMap.apply z x :=
+  \induction (z: I.Int^) \return \forall (x: WholeRed.Carrier z) -> Pair.class z (Whole.apply z x) = ReducedPair.projectionMap.apply z x \with {
+    | ofNat: \fun (n: N.Nat^)(x: WholeRed.Carrier (I.Int^::ofNat n)) =>
+        \refl(Pair.class (I.Int^::ofNat n) (WholeOrd.Positive[n := n].intro x))
+    | negSucc: \fun (n: N.Nat^)(x: WholeRed.Carrier (I.Int^::negSucc n)) => ReducedPair.Negative[n := n].equal _ _
+  };
+\definition ordinaryInclusion[z: I.Int^][u: Relative.Carrier z]: WholeOrdinary.Carrier z := Ordinary.inclusion.apply z u;
+\definition augmentedFromOrdinary[z: I.Int^][u: Relative.Carrier z]: WholeReduced.Carrier z := Whole.cochains.apply z (ordinaryInclusion z u);
+\definition augmentedInclusion[z: I.Int^][u: Relative.Carrier z]: WholeReduced.Carrier z := Reduced.pullback.apply z u;
+\definition ordinaryValue[z: I.Int^][u: Relative.Carrier z][x: WholeRed.Carrier z]:
+  (augmentedFromOrdinary z u).apply x = u.apply (Pair.class z (Whole.apply z x)) :=
+  \refl(u.apply (Pair.class z (Whole.apply z x)));
+\definition augmentedValue[z: I.Int^][u: Relative.Carrier z][x: WholeRed.Carrier z]:
+  (augmentedInclusion z u).apply x = u.apply (ReducedPair.projectionMap.apply z x) :=
+  \refl(u.apply (ReducedPair.projectionMap.apply z x));
+\definition valueLaw[z: I.Int^][u: Relative.Carrier z][x: WholeRed.Carrier z]:
+  (augmentedFromOrdinary z u).apply x = (augmentedInclusion z u).apply x :=
+  trans!{I.Int^} _ _ _ (ordinaryValue z u x)
+    (trans!{I.Int^} _ _ _ (congr!{{Pair.Carrier z} I.Int^} u.apply _ _ (quotientLaw z x))
+      (sym!{I.Int^} _ _ (augmentedValue z u x)));
+\definition includeLaw[z: I.Int^][u: Relative.Carrier z]: Whole.cochains.apply z (Ordinary.sequence.inclusion.apply z u) = Reduced.sequence.inclusion.apply z u :=
+  trans!{{WholeReduced.Carrier z}} (augmentedFromOrdinary z u) (augmentedInclusion z u) (Reduced.sequence.inclusion.apply z u)
+    (WholeReduced.At[z := z].ext (augmentedFromOrdinary z u) (augmentedInclusion z u) (\fun (x: WholeRed.Carrier z) => valueLaw z u x))
+    (sym!{{WholeReduced.Carrier z}} _ _
+      (congr!{{Cochains.Map[C := Relative.complex, D := WholeReduced.complex].Map} {WholeReduced.Carrier z}}
+        (\fun (f: Cochains.Map[C := Relative.complex, D := WholeReduced.complex].Map) => f.apply z u) _ _ Reduced.inclusionLaw));
+\definition restrictedAugmented[z: I.Int^][u: WholeOrdinary.Carrier z]: PartReduced.Carrier z := Reduced.sequence.projection.apply z (Whole.cochains.apply z u);
+\definition augmentedRestriction[z: I.Int^][u: WholeOrdinary.Carrier z]: PartReduced.Carrier z := Part.cochains.apply z (Ordinary.sequence.projection.apply z u);
+\definition restrictedAugmentedValue[z: I.Int^][u: WholeOrdinary.Carrier z][x: PartRed.Carrier z]:
+  (restrictedAugmented z u).apply x = u.apply (Whole.apply z (ReducedPair.inclusionMap.apply z x)) :=
+  \refl(u.apply (Whole.apply z (ReducedPair.inclusionMap.apply z x)));
+\definition augmentedRestrictionValue[z: I.Int^][u: WholeOrdinary.Carrier z][x: PartRed.Carrier z]:
+  (augmentedRestriction z u).apply x = u.apply (Pair.inclusionMap.apply z (Part.apply z x)) :=
+  \refl(u.apply (Pair.inclusionMap.apply z (Part.apply z x)));
+\definition restrictionValueLaw[z: I.Int^][u: WholeOrdinary.Carrier z][x: PartRed.Carrier z]:
+  (restrictedAugmented z u).apply x = (augmentedRestriction z u).apply x :=
+  trans!{I.Int^} _ _ _ (restrictedAugmentedValue z u x)
+    (trans!{I.Int^} _ _ _ (congr!{{WholeOrd.Carrier z} I.Int^} u.apply _ _ (natural z x))
+      (sym!{I.Int^} _ _ (augmentedRestrictionValue z u x)));
+\definition restrictionLaw[z: I.Int^][u: WholeOrdinary.Carrier z]:
+  restrictedAugmented z u = augmentedRestriction z u :=
+  PartReduced.At[z := z].ext (restrictedAugmented z u) (augmentedRestriction z u) (\fun (x: PartRed.Carrier z) => restrictionValueLaw z u x);
+\import Cochains.End[C := Relative.complex] \as Identity;
+\import Cochains.ShortExact[A := Relative.complex, B := WholeOrdinary.complex, C := PartOrdinary.complex]
+  .Morphism[A1 := Relative.complex, B1 := WholeReduced.complex, C1 := PartReduced.complex]
+  .Diagram[s := Ordinary.sequence, t := Reduced.sequence, a := Identity.identity, b := Whole.cochains, c := Part.cochains] \as Comparison;
+\definition commutes: Comparison.Commutative := Comparison.Commutative { left := includeLaw, right := restrictionLaw };
+\module At(z: I.Int^) {
+  \definition next: I.Int^ := chain_complexes.Integer[].next z;
+  \import Cochains.At[C := Relative.complex, z := next] \as Output;
+  \import Cochains.At[C := PartOrdinary.complex, z := z] \as Input;
+  \import Cochains.At[C := PartReduced.complex, z := z] \as RedInput;
+  \import Cochains.Map[C := PartOrdinary.complex, D := PartReduced.complex].At[k := z] \as OnPart;
+  \import Cochains.ShortExact[A := Relative.complex, B := WholeOrdinary.complex, C := PartOrdinary.complex].At[s := Ordinary.sequence, k := z] \as From;
+  \import Cochains.ShortExact[A := Relative.complex, B := WholeReduced.complex, C := PartReduced.complex].At[s := Reduced.sequence, k := z] \as To;
+  \definition ordinaryConnecting[u: Input.Cohomology]: Output.Cohomology := From.connecting.apply u;
+  \definition reducedConnecting[u: RedInput.Cohomology]: Output.Cohomology := To.connecting.apply u;
+  \definition law[u: Input.Cohomology]: From.connecting.apply u = To.connecting.apply ((OnPart.induced Part.cochains).apply u) :=
+    trans!{Output.Cohomology} _ _ _
+      (sym!{Output.Cohomology} _ _ (Identity.At[k := next].identityOnCohomology (From.connecting.apply u)))
+      (sym!{Output.Cohomology} _ _ (Comparison.At[k := z].naturality commutes u));
+  \definition cycles[u: Input.Closed]: RedInput.Closed := (OnPart.cyclesMap Part.cochains).apply u;
+  \definition onCycle[u: Input.Closed]: From.connecting.apply (Input.classOf u) = To.connecting.apply (RedInput.classOf (cycles u)) :=
+    trans!{Output.Cohomology} _ _ _ (law (Input.classOf u))
+      (congr!{RedInput.Cohomology Output.Cohomology} To.connecting.apply _ _ (OnPart.onClass Part.cochains u));
+  \import Cochains.At[C := Relative.complex, z := z] \as RelativeH;
+  \import Cochains.At[C := WholeReduced.complex, z := z] \as AbsoluteReduced;
+  \import Cochains.Map[C := Relative.complex, D := WholeOrdinary.complex].At[k := z] \as OrdForget;
+  \import Cochains.Map[C := Relative.complex, D := WholeReduced.complex].At[k := z] \as ReducedForget;
+  \import Cochains.Map[C := WholeOrdinary.complex, D := WholeReduced.complex].At[k := z] \as OnWhole;
+  \definition ordinaryForget[q: RelativeH.Cohomology]: _ := (OrdForget.induced Ordinary.sequence.inclusion).apply q;
+  \definition reducedForget[q: RelativeH.Cohomology]: AbsoluteReduced.Cohomology := (ReducedForget.induced Reduced.pullback).apply q;
+  \definition onWhole[u: Cochains.At[C := WholeOrdinary.complex, z := z].Cohomology]: AbsoluteReduced.Cohomology := (OnWhole.induced Whole.cochains).apply u;
+  \definition forgetLaw[q: RelativeH.Cohomology]: onWhole (ordinaryForget q) = reducedForget q :=
+    trans!{AbsoluteReduced.Cohomology} _ _ _ (Comparison.Inclusion[k := z].naturality commutes q)
+      (trans!{AbsoluteReduced.Cohomology} _ _ _
+        (congr!{RelativeH.Cohomology AbsoluteReduced.Cohomology} (ReducedForget.induced Reduced.sequence.inclusion).apply _ _ (Identity.At[k := z].identityOnCohomology q))
+        (congr!{{Cochains.Map[C := Relative.complex, D := WholeReduced.complex].Map} AbsoluteReduced.Cohomology}
+          (\fun (f: Cochains.Map[C := Relative.complex, D := WholeReduced.complex].Map) => (ReducedForget.induced f).apply q) _ _ Reduced.inclusionLaw));
+}

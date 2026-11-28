@@ -1,0 +1,50 @@
+\import std.Data[].Nat[] \as N;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Cochains;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset] \as Pair;
+\import topology.Topology[Carrier := A].Subspace[S := subset] \as Boundary;
+\definition boundaryTopology: topology.Topology[Carrier := Pair.SubspaceCarrier].Topology := Boundary.topology source;
+\definition degree: N.Nat^ := N.Nat^::succ n;
+\definition z: I.Int^ := I.Int^::ofNat degree;
+\definition next: I.Int^ := chain_complexes.Integer[].next z;
+\import \parent.PairAugmentation[A := A, source := source, subset := subset] \as Comparison;
+\import singular_cohomology.Cochains[A := Pair.SubspaceCarrier, source := boundaryTopology].With[coefficients := coefficients] \as Native;
+\import Native.Reduced[].Positive[n := n] \as ReducedCompare;
+\import Native.Integer[] \as Ordinary;
+\import singular_cohomology.Chains[A := Pair.SubspaceCarrier, source := boundaryTopology] \as BoundaryChains;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.ZeroExtension[P := BoundaryChains.complex, N := coefficients].Cohomology[n := degree] \as OrdinaryCompare;
+\import Hom.On[P := BoundaryChains.complex, N := coefficients].At[n := degree] \as NativeCochain;
+\import Cochains.At[C := Pair.With[coefficients := coefficients].complex, z := next] \as Target;
+\import Cochains.At[C := Ordinary.complex, z := z] \as Input;
+\import \parent.AugmentationMap[A := Pair.SubspaceCarrier, source := boundaryTopology] \as Augmentation;
+\import BoundaryChains.Reduced[] \as ReducedChains;
+\import Hom.Integer[P := ReducedChains.complex, N := coefficients] \as ReducedCochains;
+\import Cochains.Map[C := Ordinary.complex, D := ReducedCochains.complex].At[k := z] \as OnPart;
+\import Cochains.At[C := ReducedCochains.complex, z := z] \as ReducedAt;
+\import chain_complexes.Cochain[].Over[R := I.Int^, ring := Integers.ring].At[C := Native.complex, k := degree] \as NaturalAt;
+\definition OrdinaryClass: \Set := Input.Cohomology;
+\definition ReducedClass: \Set := ReducedAt.Cohomology;
+\definition NaturalClass: \Set := Native.cohomology degree;
+\definition ordinaryToNatural[u: OrdinaryClass]: NaturalClass := OrdinaryCompare.isomorphism.forward.apply u;
+\definition reducedToNatural[u: ReducedClass]: NaturalClass := ReducedCompare.isomorphism.forward.apply u;
+\definition naturalToReduced[u: NaturalClass]: ReducedClass := ReducedCompare.isomorphism.backward.apply u;
+\definition toReducedInverse[u: ReducedClass]: naturalToReduced (reducedToNatural u) = u := ReducedCompare.isomorphism.leftInverse u;
+\definition lift[u: Input.Closed]: ReducedAt.Closed := (OnPart.cyclesMap Augmentation.cochains).apply u;
+\definition underlying[u: Input.Closed]: ReducedCompare.toNatural (lift u) = OrdinaryCompare.restrict u :=
+  NativeCochain.ext _ _ (\fun (x: BoundaryChains.Carrier degree) => \refl((lift u).apply x));
+\definition reduced[u: OrdinaryClass]: ReducedClass := (OnPart.induced Augmentation.cochains).apply u;
+\definition onClass[u: Input.Closed]: reducedToNatural (reduced (Input.classOf u)) = ordinaryToNatural (Input.classOf u) :=
+  trans!{NaturalClass} _ _ _ (congr!{ReducedClass NaturalClass} reducedToNatural _ _ (OnPart.onClass Augmentation.cochains u))
+    (trans!{NaturalClass} _ _ _ (ReducedCompare.onIntegerClass (lift u))
+      (trans!{NaturalClass} _ _ _
+        (congr!{{NaturalAt.CycleCarrier} NaturalClass} NaturalAt.classOf _ _ (underlying u))
+        (sym!{NaturalClass} _ _ (OrdinaryCompare.onClass u))));
+\definition naturalLaw: \forall (q: OrdinaryClass) -> reducedToNatural (reduced q) = ordinaryToNatural q :=
+  Input.classInduction (\fun (q: OrdinaryClass) => reducedToNatural (reduced q) = ordinaryToNatural q) onClass;
+\definition reducedConnecting[u: ReducedClass]: Target.Cohomology := Comparison.At[z := z].reducedConnecting u;
+\definition ordinaryConnecting[u: OrdinaryClass]: Target.Cohomology := Comparison.At[z := z].ordinaryConnecting u;
+\definition onClasses[u: OrdinaryClass]: ordinaryConnecting u = reducedConnecting (naturalToReduced (ordinaryToNatural u)) :=
+  trans!{Target.Cohomology} _ _ _ (Comparison.At[z := z].law u)
+    (congr!{ReducedClass Target.Cohomology} reducedConnecting _ _
+      (trans!{ReducedClass} _ _ _ (sym!{ReducedClass} _ _ (toReducedInverse (reduced u)))
+        (congr!{NaturalClass ReducedClass} naturalToReduced _ _ (naturalLaw u))));
