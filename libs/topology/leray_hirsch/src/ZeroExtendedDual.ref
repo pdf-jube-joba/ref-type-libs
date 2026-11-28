@@ -1,0 +1,62 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as ZModules;
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Modules;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\import chain_complexes.Integer[] \as Degrees;
+\import Degrees.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Signed;
+\definition coefficients: Modules.Bundle := Modules.Bundle { Carrier := K, space := Modules.scalarModule };
+\import Modules.AbelianHom[N := coefficients] \as Restricted;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\module On(C: Chains.Complex) {
+  \import Chains.ZeroExtension[C := C] \as Chain;
+  \import Hom.Native[P := C] \as Ordinary;
+  \import Native.ZeroExtension[C := Ordinary.complex] \as Source;
+  \import Hom.On[P := Chain.complex] \as Target;
+  \module At(z: I.Int^) {
+    \import Modules.Isomorphism[V := Source.Carrier z, W := Target.Carrier z, source := Source.space z, target := Target.space z] \as Iso;
+    \definition Isomorphism: \Set := Iso.Isomorphism;
+  }
+  \module Positive(n: N.Nat^);
+  \module Negative(n: N.Nat^);
+  \definition terms: \forall (z: I.Int^) -> At[z := z].Isomorphism :=
+    \induction (z: I.Int^) \return At[z := z].Isomorphism \with {
+      | ofNat: \fun (n: N.Nat^) => Positive[n := n].isomorphism
+      | negSucc: \fun (n: N.Nat^) => Negative[n := n].isomorphism
+    };
+  \module Step(n: N.Nat^);
+  \module NegativeStep(n: N.Nat^);
+  \import Signed.Isomorphism[C := Source.complex, D := Target.complex].Degreewise[isomorphisms := terms] \as Compare;
+  \definition commutes: Compare.Commutes :=
+    \induction (z: I.Int^) \return \forall (h: Source.Carrier z) ->
+      Target.apply z ((terms z).forward.apply h) = (terms (Degrees.next z)).forward.apply (Source.apply z h) \with {
+        | ofNat: \fun (n: N.Nat^) => Step[n := n].law
+        | negSucc: \fun (n: N.Nat^) => NegativeStep[n := n].law
+      };
+  \definition isomorphism: _ := Compare.isomorphism commutes;
+  \module Cohomology(z: I.Int^) {
+    \definition comparison: _ := Signed.Isomorphism[C := Source.complex, D := Target.complex].On[e := isomorphism].At[z := z].isomorphism;
+    \import Signed.At[C := Source.complex, z := z] \as Input;
+    \import Signed.At[C := Target.complex, z := z] \as Output;
+    \import Signed.Map[C := Source.complex, D := Target.complex].At[k := z] \as Maps;
+    \definition InputCycle: \Set := Input.Closed;
+    \definition OutputCycle: \Set := Output.Closed;
+    \definition sourceClass: InputCycle -> Input.Cohomology := Input.classOf;
+    \definition targetClass: OutputCycle -> Output.Cohomology := Output.classOf;
+    \definition transport[x: InputCycle]: OutputCycle := (Maps.cyclesMap isomorphism.forward).apply x;
+    \definition onClass: \forall (x: InputCycle) -> comparison.forward.apply (sourceClass x) = targetClass (transport x) :=
+      Maps.onClass isomorphism.forward;
+
+  }
+}
+
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as SignedChains;
+
+\module Along(A, B: SignedChains.Complex, e: SignedChains.Isomorphism[C := A, D := B].Isomorphism);

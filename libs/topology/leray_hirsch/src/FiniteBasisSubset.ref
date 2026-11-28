@@ -101,6 +101,9 @@
   \definition map: _ := Compose.compose f Project.map;
   \import Modules.Sums[I := Index].Vector[V := Ambient.Carrier, space := Ambient.space].Mapping[W := W, target := target] \as Apply;
   \import Modules.Sums[I := Index].Vector[V := W, space := target] \as Values;
+  \definition term[i: Index]: W := map.apply (Ambient.generator i);
+  \definition onPresent[s: \Cast[Index] S]: term s = f.apply (generator s) :=
+    congr!{Carrier W} f.apply _ _ (Project.onSelected s);
   \definition sum: \forall (v: Vectors.Vector) -> f.apply (assemble v) =
     Values.sum (Finite.elements count) (\fun (i: Index) => target.smul (v i) (map.apply (Ambient.generator i))) :=
     \fun (v: Vectors.Vector) => trans!{W} _ _ _

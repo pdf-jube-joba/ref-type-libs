@@ -64,3 +64,7 @@
 \module FiniteBasisSubset(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], count: std.Data[].Nat[].Nat^, S: \Pow (std.Data[].FinSet[].Fin count));
 
 \module CohomologyBasis(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module ZeroExtendedDual(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module NonnegativePart;

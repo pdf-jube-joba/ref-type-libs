@@ -1,0 +1,23 @@
+\import \root.CohomologyBasis[K := K, ring := ring] \as Basis;
+\import chain_complexes.Cochain[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as Native;
+\definition representatives[i: Finite.Fin count]: Native.At[C := Fiber.complex, k := degrees i].CycleCarrier :=
+  \into[Fiber.Carrier (degrees i)](cycles i, Native.At[C := Fiber.complex, k := degrees i].cycles.carrier) \by { closed i };
+\import Basis.For[C := Fiber.complex, count := count, degrees := degrees, cycles := representatives] \as FiberClasses;
+\definition GradedBasis: \Prop := \forall (q: N.Nat^) -> FiberClasses.At[q := q].IsBasis;
+\module Column(p: N.Nat^) {
+  \import \parent.\parent.\parent.\parent.Layer[C := C, cutoff := p] \as Layer;
+  \import Layer.At[n := p] \as Term;
+  \import Modules.Free[Generators := Generators p] \as Free;
+  \import Modules.Isomorphism[V := Term.Carrier, W := C.family.Carrier p, source := Term.space, target := C.family.space p].Inverse[] \as Inverse;
+  \import Modules.Isomorphism[V := Free.Carrier, W := C.family.Carrier p, source := Free.space, target := C.family.space p]
+    .Composition[U := Term.Carrier, final := Term.space] \as Compose;
+  \definition change: _ := Compose.compose (Inverse.inverse (Term.identification (\refl(p)))) (baseBasis p);
+  \import Layer.Comparison[D := D, K := K, ring := ring, Generators := Generators p, baseBasis := change]
+    .With[count := count, degrees := degrees, cycles := cycles, closed := closed] \as Local;
+  \definition bijective[h: GradedBasis]: \parent.\parent.Cutoff[p := p].GradedIso := Local.bijective h;
+}
+\definition stratum[h: GradedBasis]: \forall (p: N.Nat^) -> \parent.Cutoff[p := p].GradedIso :=
+  \fun (p: N.Nat^) => Column[p := p].bijective h;
+\module At(z: I.Int^) {
+  \definition isomorphism[h: GradedBasis]: _ := \parent.\parent.Stable[].At[z := z].With[layer := stratum h].isomorphism;
+}

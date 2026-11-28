@@ -1,0 +1,12 @@
+\definition z: I.Int^ := I.Int^::negSucc n;
+\import ZModules.Hom[V := Chain.Carrier z, W := K, source := Chain.space z, target := Restricted.coefficients.space] \as Maps;
+\import Modules.Hom[V := Source.Carrier z, W := Target.Carrier z, source := Source.space z, target := Target.space z] \as Forward;
+\import Modules.Hom[V := Target.Carrier z, W := Source.Carrier z, source := Target.space z, target := Source.space z] \as Backward;
+\definition zero: \forall (h: Target.Carrier z) -> h = (Target.space z).zero :=
+  \fun (h: Target.Carrier z) => Target.At[z := z].ext h (Target.space z).zero
+    (\fun (x: Chain.Carrier z) => trans!{K} _ _ _ (congr!{{Chain.Carrier z} K} h.apply _ _ (Chain.Negative[n := n].zero x)) (Maps.zeroPreserved h));
+\definition isomorphism: \parent.At[z := z].Isomorphism := \parent.At[z := z].Isomorphism {
+  forward := Forward.zeroMap, backward := Backward.zeroMap,
+  leftInverse := \fun (h: Source.Carrier z) => sym!{{Source.Carrier z}} _ _ (Source.Negative[n := n].zero h),
+  rightInverse := \fun (h: Target.Carrier z) => sym!{{Target.Carrier z}} _ _ (zero h),
+};

@@ -152,20 +152,20 @@ of the overlap sum and the whole-space comparison on the vector of
 componentwise connecting classes.
 
 The pair homeomorphism over a chart and the comparison isomorphism
-for an empty base are formalized. The map on a matching summand of a concentrated layer is now
-computed after the sign change. Its value at a free base generator
-is the base cochain value times the signed fiber class. The
-remaining algebraic step is to sum these formulas and use the
-fiber basis to show bijectivity on the layer. Naturality of the
-finite comparison along each cutoff inclusion and stabilization in
-the three degrees around the current degree give the unrestricted
-comparison from the layerwise bijectivity predicate. For the relative base chain complex
-$P_*=C_*(V,W;\mathbb Z)$, this should show that the map with
-components $(x,y)\mapsto a_i(x)u_i(y)$ induces an isomorphism from the
-direct sum of shifted cohomology groups of
-$\operatorname{Hom}_{\mathbb Z}(P_*,K)$ to the cohomology of
-$\operatorname{Hom}_{\mathbb Z}(\operatorname{Tot}(P_*\otimes C_*(F;\mathbb Z)),K)$.
-The triangular change of lifts on chart pairs and the assembly of
-the restriction and difference squares in the five-term
-Mayer–Vietoris diagram also remain. These results would instantiate
-the finite-cover induction with the isomorphism predicate.
+for an empty base are formalized. The layer calculation now shows bijectivity of the entire finite
+comparison. On a matching summand, evaluation at a free base generator
+gives the base cochain value times the signed fiber class. The other
+summands vanish. The graded fiber basis recovers the coefficients
+for each base generator, and free extension gives the inverse. The
+cutoff induction and stabilization give the unrestricted comparison
+for any degreewise free nonnegative base chain complex and any finite
+homogeneous cocycle basis of the fiber cohomology.
+
+For the relative base chain complex $P_*=C_*(V,W;\mathbb Z)$, the
+remaining product comparison step is to compose this algebraic
+isomorphism with the relative Alexander–Whitney isomorphism and
+identify the induced map with the external cup comparison on
+relative singular cohomology. The triangular change of lifts on chart
+pairs and the assembly of the restriction and difference squares in
+the five-term Mayer–Vietoris diagram also remain. These results would
+instantiate the finite-cover induction with the isomorphism predicate.

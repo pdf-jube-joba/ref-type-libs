@@ -51,3 +51,5 @@
           equality: sym!{I.Int^} _ _ same
         }) same degree x;
 }
+
+\module Representative(p: N.Nat^);

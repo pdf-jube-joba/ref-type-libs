@@ -1,0 +1,206 @@
+\use Logic.either;
+\definition z: I.Int^ := deg q;
+\import \parent.\parent.NativeDegree[q := q] \as Model;
+\import FiberBasis.At[q := q] \as BasisAt;
+\import \root.FiniteBasisSubset[K := K, ring := ring, count := count, S := BasisAt.Selected] \as Coefficients;
+\import Coefficients.To[W := BasisAt.Carrier, target := BasisAt.space, f := BasisAt.comparison] \as Assemble;
+\import FiniteComparison.At[z := z] \as P;
+\import P.Product[] \as Product;
+\definition Domain: \Set := Product.domain.Carrier;
+\definition Range: \Set := P.range.Carrier;
+\definition FiberClasses: \Set := BasisAt.Carrier;
+\definition activeDegree[i: Index]: \Prop := degrees i = q;
+\definition inputDegree[i: Index]: I.Int^ := P.sourceDegree i;
+\definition shiftTo[i: Index][same: activeDegree i]: active = inputDegree i := Model.level (degrees i) same;
+\definition ungrade[i: Index][same: activeDegree i][x: P.family.Carrier i]: family active :=
+  Transport.cast family (inputDegree i) active (sym!{I.Int^} _ _ (shiftTo i same)) x;
+\definition grade[i: Index][same: activeDegree i][x: family active]: P.family.Carrier i :=
+  Transport.cast family active (inputDegree i) (shiftTo i same) x;
+\definition values[i: Index][same: activeDegree i][a: P.family.Carrier i][g: Generators]: K :=
+  Evaluation.evaluation (ungrade i same a) g;
+\definition zeroOnMissing[i: Index][missing: Logic.Not (activeDegree i)][a: P.family.Carrier i]:
+  a = (P.family.space i).zero := BaseLayer.outside (inputDegree i) (Model.different (degrees i) missing) a;
+\definition recoveredValue[i: Index][same: activeDegree i][v: Generators -> K][g: Generators]:
+  values i same (grade i same (BaseLayer.class (Evaluation.extend v))) g = v g :=
+  trans!{K} _ _ _
+    (congr!{{family active} K} (\fun (x: family active) => Evaluation.evaluation x g) _ _
+      (Transport.castInverse family active (inputDegree i) (shiftTo i same) (BaseLayer.class (Evaluation.extend v))))
+    (Evaluation.retrieve v g);
+\definition recoverInput[i: Index][same: activeDegree i][a, b: P.family.Carrier i]
+  [equal: \forall (g: Generators) -> values i same a g = values i same b g]: a = b :=
+  trans!{{P.family.Carrier i}} _ _ _
+    (sym!{{P.family.Carrier i}} _ _ (Transport.castInverse family (inputDegree i) active (sym!{I.Int^} _ _ (shiftTo i same)) a))
+    (trans!{{P.family.Carrier i}} _ _ _
+      (congr!{{family active} {P.family.Carrier i}} (grade i same) _ _
+        (Evaluation.injective (ungrade i same a) (ungrade i same b) equal))
+      (Transport.castInverse family (inputDegree i) active (sym!{I.Int^} _ _ (shiftTo i same)) b));
+\definition EntryLaws[i: Index][a: P.family.Carrier i][g: Generators][c: K]: \Prop :=
+  Logic.And[(\forall (e: activeDegree i) -> c = values i e a g), (Logic.Not (activeDegree i) -> c = coefficients.space.zero)];
+\definition Entry[i: Index][a: P.family.Carrier i][g: Generators]: \Set := \Cast[K] ({ c: K \where EntryLaws i a g c });
+\definition entryLaw[i: Index][a: P.family.Carrier i][g: Generators][c: Entry i a g]: EntryLaws i a g c :=
+  \bysub(K, { x: K \where EntryLaws i a g x }, c);
+\definition existsEntry[i: Index][a: P.family.Carrier i][g: Generators]: \exists Entry i a g :=
+  either!{{Classical.excludedMiddle (activeDegree i)} {\exists Entry i a g}
+    {\fun (e: activeDegree i) => Logic.existsIntro[K, { c: K \where EntryLaws i a g c }] (values i e a g)
+      (Logic.And[_, _] {
+        left := \fun (same: activeDegree i) => \refl(values i same a g),
+        right := \fun (missing: Logic.Not (activeDegree i)) => Logic.falseElim _ (missing e),
+      })}
+    {\fun (missing: Logic.Not (activeDegree i)) => Logic.existsIntro[K, { c: K \where EntryLaws i a g c }] coefficients.space.zero
+      (Logic.And[_, _] {
+        left := \fun (e: activeDegree i) => Logic.falseElim _ (missing e),
+        right := \fun (unused: Logic.Not (activeDegree i)) => \refl(coefficients.space.zero),
+      })}
+  };
+\module Unique(i: Index, a: P.family.Carrier i, g: Generators) {
+  \import singular_cellular_algebra.Algebra[].Refinement[A := K, S := { c: K \where EntryLaws i a g c }] \as Refined;
+  \definition law: \forall (x, y: Entry i a g) -> x = y :=
+    \fun (x, y: Entry i a g) => Refined.ext x y
+      (either!{{Classical.excludedMiddle (activeDegree i)} {Refined.forget x = Refined.forget y}
+        {\fun (e: activeDegree i) => trans!{K} _ _ _ ((entryLaw i a g x).left e) (sym!{K} _ _ ((entryLaw i a g y).left e))}
+        {\fun (missing: Logic.Not (activeDegree i)) => trans!{K} _ _ _
+          ((entryLaw i a g x).right missing) (sym!{K} _ _ ((entryLaw i a g y).right missing))}
+      });
+}
+\definition entry[i: Index][a: P.family.Carrier i][g: Generators]: Entry i a g :=
+  \choice Entry i a g \by { existence: existsEntry i a g, uniqueness: Unique[i := i, a := a, g := g].law };
+\definition vector[x: Domain][g: Generators][i: Index]: K := entry i (x i) g;
+\definition supported[x: Domain][g: Generators]: Coefficients.Stable (vector x g) :=
+  \fun (i: Index)(missing: Logic.Not (activeDegree i)) => (entryLaw i (x i) g (entry i (x i) g)).right missing;
+\definition radial[y: Range][g: Generators]: FiberClasses := Model.view.forward.apply y g;
+\import Scalars.Hom[V := Range, W := FiberClasses, source := P.range.space, target := BasisAt.space] \as Mappings;
+\definition evaluate[g: Generators]: Mappings.Map := Mappings.Map {
+  apply := \fun (y: Range) => radial y g,
+  addition := \fun (x, y: Range) => congr!{{Model.Range} FiberClasses} (\fun (f: Model.Range) => f g) _ _
+    (Model.view.forward.addition x y),
+  scalar := \fun (r: K)(x: Range) => congr!{{Model.Range} FiberClasses} (\fun (f: Model.Range) => f g) _ _
+    (Model.view.forward.scalar r x),
+};
+\import Scalars.Laws[V := FiberClasses, space := BasisAt.space] \as FiberLaws;
+\import Scalars.Hom[V := FiberClasses, W := FiberClasses, source := BasisAt.space, target := BasisAt.space] \as Signs;
+\module Term(i: Index) {
+  \import Scalars.Hom[V := P.family.Carrier i, W := Range, source := P.family.space i, target := P.range.space] \as Maps;
+  \definition zero[missing: Logic.Not (activeDegree i)][a: P.family.Carrier i][g: Generators]:
+    radial ((P.components i).apply a) g = BasisAt.space.zero :=
+    trans!{FiberClasses} _ _ _
+      (congr!{{P.family.Carrier i} FiberClasses} (\fun (x: P.family.Carrier i) => radial ((P.components i).apply x) g) _ _
+        (zeroOnMissing i missing a))
+      (trans!{FiberClasses} _ _ _
+        (congr!{Range FiberClasses} (evaluate g).apply _ _ (Maps.zeroPreserved (P.components i)))
+        (Mappings.zeroPreserved (evaluate g)));
+  \definition actual[a: P.family.Carrier i][g: Generators]: FiberClasses :=
+    Model.sign.apply (BasisAt.space.smul (entry i a g) (Assemble.term i));
+  \definition matched[e: activeDegree i][a: P.family.Carrier i][g: Generators]:
+    radial ((P.components i).apply a) g = actual a g :=
+    eq_reason_in!{FiberClasses _
+      "=" _ "by" { Model.matched (degrees i) e (representatives i) a g }
+      "=" _ "by" { congr!{K FiberClasses FiberClasses}
+        (\fun (r: K)(y: FiberClasses) => Model.sign.apply (BasisAt.space.smul r y)) _ _ _ _
+        (sym!{K} _ _ ((entryLaw i a g (entry i a g)).left e))
+        (sym!{FiberClasses} _ _ (trans!{FiberClasses} _ _ _
+          (Assemble.onPresent (\into[Index](i, BasisAt.Selected) \by { e }))
+          (BasisAt.onGenerator (\into[Index](i, BasisAt.Selected) \by { e })))) }
+    };
+  \definition missing[h: Logic.Not (activeDegree i)][a: P.family.Carrier i][g: Generators]:
+    radial ((P.components i).apply a) g = actual a g :=
+    trans!{FiberClasses} _ _ _ (zero h a g)
+      (sym!{FiberClasses} _ _ (trans!{FiberClasses} _ _ _
+        (congr!{K FiberClasses} (\fun (r: K) => Model.sign.apply (BasisAt.space.smul r (Assemble.term i))) _ _
+          ((entryLaw i a g (entry i a g)).right h))
+        (trans!{FiberClasses} _ _ _ (congr!{FiberClasses FiberClasses} Model.sign.apply _ _ (FiberLaws.zeroScale (Assemble.term i)))
+          (Signs.zeroPreserved Model.sign))));
+  \definition law[a: P.family.Carrier i][g: Generators]: radial ((P.components i).apply a) g = actual a g :=
+    either!{{Classical.excludedMiddle (activeDegree i)} {_}
+      {\fun (e: activeDegree i) => matched e a g}
+      {\fun (h: Logic.Not (activeDegree i)) => missing h a g}
+    };
+}
+\import Scalars.Sums[I := Index].Vector[V := Range, space := P.range.space].Mapping[W := FiberClasses, target := BasisAt.space] \as EvalSum;
+\import Scalars.Sums[I := Index].Vector[V := FiberClasses, space := BasisAt.space] \as Sums;
+\import Sums.Mapping[W := FiberClasses, target := BasisAt.space] \as SignSum;
+\definition rule: \forall (x: Domain)(g: Generators) ->
+  radial (Product.ProductComparison.apply x) g = Model.sign.apply (BasisAt.comparison.apply (Coefficients.assemble (vector x g))) :=
+  \fun (x: Domain)(g: Generators) => eq_reason_in!{FiberClasses _
+    "=" _ "by" { EvalSum.law (evaluate g) (Finite.elements count) (\fun (i: Index) => (P.components i).apply (x i)) }
+    "=" _ "by" { Sums.congruent (Finite.elements count)
+      (\fun (i: Index) => radial ((P.components i).apply (x i)) g)
+      (\fun (i: Index) => Term[i := i].actual (x i) g)
+      (\fun (i: Index) => Term[i := i].law (x i) g) }
+    "=" _ "by" { sym!{FiberClasses} _ _ (SignSum.law Model.sign (Finite.elements count)
+      (\fun (i: Index) => BasisAt.space.smul (vector x g i) (Assemble.term i))) }
+    "=" _ "by" { congr!{FiberClasses FiberClasses} Model.sign.apply _ _ (sym!{FiberClasses} _ _ (Assemble.sum (vector x g))) }
+  };
+\definition fiberIsomorphism: _ := BasisAt.isomorphism basis;
+\definition coefficientsOf[y: Range][g: Generators][i: Index]: K :=
+  Coefficients.coordinates (fiberIsomorphism.backward.apply (Model.sign.apply (radial y g))) i;
+\definition extract: \forall (x: Domain)(g: Generators)(i: Index) -> coefficientsOf (Product.ProductComparison.apply x) g i = vector x g i :=
+  \fun (x: Domain)(g: Generators)(i: Index) => eq_reason_in!{K _
+    "=" _ "by" { congr!{FiberClasses K} (\fun (y: FiberClasses) => Coefficients.coordinates (fiberIsomorphism.backward.apply (Model.sign.apply y)) i) _ _ (rule x g) }
+    "=" _ "by" { congr!{FiberClasses K} (\fun (y: FiberClasses) => Coefficients.coordinates (fiberIsomorphism.backward.apply y) i) _ _
+      (Model.signInverse (BasisAt.comparison.apply (Coefficients.assemble (vector x g)))) }
+    "=" _ "by" { congr!{Coefficients.Carrier K} (\fun (y: Coefficients.Carrier) => Coefficients.coordinates y i) _ _
+      (fiberIsomorphism.leftInverse (Coefficients.assemble (vector x g))) }
+    "=" _ "by" { Coefficients.coordinatesAssemble (vector x g) (supported x g) i }
+  };
+\definition recoverComponent[i: Index][x, y: Domain][same: Product.ProductComparison.apply x = Product.ProductComparison.apply y]: x i = y i :=
+  either!{{Classical.excludedMiddle (activeDegree i)} {x i = y i}
+    {\fun (e: activeDegree i) => recoverInput i e (x i) (y i)
+      (\fun (g: Generators) => eq_reason_in!{K _
+        "=" _ "by" { sym!{K} _ _ ((entryLaw i (x i) g (entry i (x i) g)).left e) }
+        "=" _ "by" { sym!{K} _ _ (extract x g i) }
+        "=" _ "by" { congr!{Range K} (\fun (u: Range) => coefficientsOf u g i) _ _ same }
+        "=" _ "by" { extract y g i }
+        "=" _ "by" { (entryLaw i (y i) g (entry i (y i) g)).left e }
+      })}
+    {\fun (h: Logic.Not (activeDegree i)) => trans!{{P.family.Carrier i}} _ _ _ (zeroOnMissing i h (x i))
+      (sym!{{P.family.Carrier i}} _ _ (zeroOnMissing i h (y i)))}
+  };
+\import Scalars.Product[Index := Index, family := P.family] \as Tuple;
+\definition injective: Product.Injective := \fun (x, y: Domain)(same: _) =>
+  Tuple.ext x y (\fun (i: Index) => recoverComponent i x y same);
+\definition Chosen[y: Range][i: Index]: \Set := \Cast[P.family.Carrier i]
+  ({ a: P.family.Carrier i \where \forall (e: activeDegree i)(g: Generators) -> values i e a g = coefficientsOf y g i });
+\definition choiceExists[y: Range][i: Index]: \exists Chosen y i :=
+  either!{{Classical.excludedMiddle (activeDegree i)} {\exists Chosen y i}
+    {\fun (e: activeDegree i) => Logic.existsIntro[P.family.Carrier i,
+      { a: P.family.Carrier i \where \forall (h: activeDegree i)(g: Generators) -> values i h a g = coefficientsOf y g i }]
+      (grade i e (BaseLayer.class (Evaluation.extend (\fun (g: Generators) => coefficientsOf y g i))))
+      (\fun (h: activeDegree i)(g: Generators) => recoveredValue i h (\fun (u: Generators) => coefficientsOf y u i) g)}
+    {\fun (h: Logic.Not (activeDegree i)) => Logic.existsIntro[P.family.Carrier i,
+      { a: P.family.Carrier i \where \forall (e: activeDegree i)(g: Generators) -> values i e a g = coefficientsOf y g i }]
+      (P.family.space i).zero (\fun (e: activeDegree i)(g: Generators) => Logic.falseElim _ (h e))}
+  };
+\definition chosenVector[y: Range][w: \forall (i: Index) -> Chosen y i][g: Generators][i: Index]:
+  vector w g i = coefficientsOf y g i :=
+  either!{{Classical.excludedMiddle (activeDegree i)} {_}
+    {\fun (e: activeDegree i) => trans!{K} _ _ _ ((entryLaw i (w i) g (entry i (w i) g)).left e)
+      ((\bysub(P.family.Carrier i,
+        { a: P.family.Carrier i \where \forall (h: activeDegree i)(g: Generators) -> values i h a g = coefficientsOf y g i }, w i)) e g)}
+    {\fun (h: Logic.Not (activeDegree i)) => trans!{K} _ _ _ (supported w g i h)
+      (sym!{K} _ _ (Coefficients.coordinateSupport (fiberIsomorphism.backward.apply (Model.sign.apply (radial y g))) i h))}
+  };
+\definition mapped[y: Range][w: \forall (i: Index) -> Chosen y i][g: Generators]:
+  radial (Product.ProductComparison.apply w) g = radial y g :=
+  eq_reason_in!{FiberClasses _
+    "=" _ "by" { rule w g }
+    "=" _ "by" { congr!{{Index -> K} FiberClasses}
+      (\fun (r: Index -> K) => Model.sign.apply (BasisAt.comparison.apply (Coefficients.assemble r))) _ _
+      (\axiom:funext(vector w g, coefficientsOf y g, \fun (i: Index) => chosenVector y w g i)) }
+    "=" _ "by" { congr!{Coefficients.Carrier FiberClasses}
+      (\fun (u: Coefficients.Carrier) => Model.sign.apply (BasisAt.comparison.apply u)) _ _
+      (Coefficients.assembleCoordinates (fiberIsomorphism.backward.apply (Model.sign.apply (radial y g)))) }
+    "=" _ "by" { congr!{FiberClasses FiberClasses} Model.sign.apply _ _ (fiberIsomorphism.rightInverse (Model.sign.apply (radial y g))) }
+    "=" _ "by" { Model.signInverse (radial y g) }
+  };
+\definition onto: Product.Onto := \block {
+  \fun (y: Range) \then
+  \takefrom w: \forall (i: Index) -> Chosen y i \by
+    \axiom:classicalIndefiniteChoice(Index, (Chosen y), (choiceExists y)) \then
+  \let image: Range := Product.ProductComparison.apply w \then
+  \let same: Model.view.forward.apply image = Model.view.forward.apply y :=
+    \axiom:funext(Model.view.forward.apply image, Model.view.forward.apply y, \fun (g: Generators) => mapped y w g) \then
+  \return Logic.existsIntro[Domain, { x: Domain \where Product.ProductComparison.apply x = y }] w
+    (trans!{Range} _ _ _ (sym!{Range} _ _ (Model.view.leftInverse image))
+      (trans!{Range} _ _ _ (congr!{{Model.Range} Range} Model.view.backward.apply _ _ same) (Model.view.leftInverse y)))
+};
+\definition bijective: Product.Bijective := Product.Bijective { injective := injective, onto := onto };

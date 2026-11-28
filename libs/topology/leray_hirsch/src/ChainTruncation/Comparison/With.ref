@@ -30,3 +30,7 @@
   };
 
 \module Stable;
+
+\module Free(Generators: N.Nat^ -> \Set,
+  baseBasis: \forall (n: N.Nat^) -> Modules.Isomorphism[V := Modules.Free[Generators := Generators n].Carrier, W := C.family.Carrier n,
+    source := Modules.Free[Generators := Generators n].space, target := C.family.space n].Isomorphism);

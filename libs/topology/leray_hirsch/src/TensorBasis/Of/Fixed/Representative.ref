@@ -1,0 +1,61 @@
+\use std.Logic[].Equality[].eq_reason_in;
+\definition b: I.Int^ := I.Int^::ofNat p;
+\definition n: N.Nat^ := Nat.add p q;
+\definition z: I.Int^ := I.Int^::ofNat n;
+\definition isoDegree: Degree.shift q b = z := Degree.natural q p;
+\definition input: I.Int^ := Degree.unshift q z;
+\definition same: b = input := trans!{I.Int^} _ _ _ (sym!{I.Int^} _ _ (Degree.unshiftShift q b))
+  (congr!{I.Int^ I.Int^} (Degree.unshift q) _ _ isoDegree);
+\import Native.At[C := Base.complex, k := p] \as BaseClasses;
+\import Native.At[C := Product.complex, k := n] \as TargetClasses;
+\import Pairing.At[p := p, q := q] \as Raw;
+\import Pair.At[p := p] \as Cup;
+\import Pair.Cohomology[p := p] \as NativeCup;
+\import Native.Map[C := Base.complex, D := Pair.target].At[k := p] \as Induced;
+\import \root.CohomologyReindex[K := K, ring := baseRing].On[C := Product.complex] \as Reindex;
+\import std.Logic[].Equality[].Transport[A := N.Nat^] \as Natural;
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Integer;
+\definition Cycle: \Set := BaseClasses.CycleCarrier;
+\definition TargetCycle: \Set := TargetClasses.CycleCarrier;
+\definition ModelClass: \Set := BaseClasses.Cohomology;
+\definition rawTarget: N.Nat^ := Nat.add q p;
+\definition swap: rawTarget = n := Arithmetic.addComm q p;
+\definition rawCycle[a: Cycle]: Reindex.cycles rawTarget := (Induced.cyclesMap Pair.map).apply a;
+\definition lifted[a: Cycle]: TargetCycle :=
+  Natural.cast Reindex.cycles rawTarget n swap (rawCycle a);
+\definition underlying: \forall (a: Cycle) -> lifted a = Raw.total a beta :=
+  \fun (a: Cycle) => eq_reason_in!{{Product.Carrier n} _
+    "=" _ "by" { Reindex.cycleLaw rawTarget n swap (rawCycle a) }
+    "=" _ "by" { Natural.castComposition Product.Carrier n rawTarget n Cup.same swap (Raw.total a beta) }
+    "=" _ "by" { Natural.castRefl Product.Carrier n (Raw.total a beta) }
+  };
+\definition rawSigned: I.Int^ := I.Int^::ofNat rawTarget;
+\definition shiftDegree: I.Int^ := Degree.shift q b;
+\definition rawShift: rawSigned = shiftDegree := \parent.Positive[p := p].same;
+\definition toSigned[a: Cycle]: (source b).Carrier := Input.PositiveCohomology[n := p].backward.apply (BaseClasses.classOf a);
+\definition fromCocycle[a: Cycle]: (source input).Carrier :=
+  Integer.cast (\fun (d: I.Int^) => (source d).Carrier) b input same (toSigned a);
+\definition result[a: Cycle]: (target z).Carrier := Reindex.signed n (lifted a);
+\import \parent.At[z := z] \as Fixed;
+\import \parent.To[input := b, output := z, same := isoDegree] \as Adjusted;
+\definition adjustedOnClass: \forall (a: Cycle) -> Adjusted.linear.apply (toSigned a) = result a :=
+  \fun (a: Cycle) => eq_reason_in!{{(target z).Carrier} _
+    "=" _ "by" { Integer.castComposition Reindex.classes rawSigned shiftDegree z rawShift isoDegree
+      (Output.PositiveCohomology[n := rawTarget].backward.apply
+        (NativeCup.linear.apply (Input.PositiveCohomology[n := p].forward.apply (toSigned a)))) }
+    "=" _ "by" { congr!{BaseClasses.Cohomology {(target z).Carrier}}
+      (\fun (u: BaseClasses.Cohomology) => Integer.cast Reindex.classes rawSigned z
+        (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ swap)
+        (Output.PositiveCohomology[n := rawTarget].backward.apply (NativeCup.linear.apply u))) _ _
+      (Input.PositiveCohomology[n := p].rightInverse (BaseClasses.classOf a)) }
+    "=" _ "by" { congr!{{Reindex.classes rawSigned} {(target z).Carrier}}
+      (Integer.cast Reindex.classes rawSigned z (congr!{N.Nat^ I.Int^} I.Int^::ofNat _ _ swap)) _ _
+      (trans!{{Reindex.classes rawSigned}} _ _ _
+        (congr!{{Native.At[C := Product.complex, k := rawTarget].Cohomology} {Reindex.classes rawSigned}}
+          Output.PositiveCohomology[n := rawTarget].backward.apply _ _ (NativeCup.onClass a))
+        (Output.PositiveCohomology[n := rawTarget].onNaturalClass (rawCycle a))) }
+    "=" _ "by" { Reindex.classesLaw rawTarget n swap (rawCycle a) }
+  };
+\definition onClass: \forall (a: Cycle) -> Fixed.linear.apply (fromCocycle a) = result a :=
+  \fun (a: Cycle) => trans!{{(target z).Carrier}} _ _ _
+    (Fixed.fromDegree b same isoDegree (toSigned a)) (adjustedOnClass a);

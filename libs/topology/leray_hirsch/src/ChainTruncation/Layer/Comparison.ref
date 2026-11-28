@@ -34,3 +34,7 @@
   trans!{I.Int^} _ _ _ (sym!{I.Int^} _ _ (Degree.unshiftShift q active))
     (congr!{I.Int^ I.Int^} (Degree.unshift q) _ _ (Degree.natural q cutoff));
 \module NativeDegree(q: N.Nat^);
+
+\module With(count: N.Nat^, degrees: Finite.Fin count -> N.Nat^,
+  cycles: \forall (i: Finite.Fin count) -> Fiber.Carrier (degrees i),
+  closed: \forall (i: Finite.Fin count) -> Fiber.apply (degrees i) (cycles i) = (Fiber.space (N.Nat^::succ (degrees i))).zero);

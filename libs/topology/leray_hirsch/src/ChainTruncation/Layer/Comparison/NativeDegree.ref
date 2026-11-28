@@ -8,6 +8,7 @@
 \definition signInverse: \forall (x: H.Cohomology) -> sign.apply (sign.apply x) = x :=
   Sign.involutive (Nat.mul cutoff q);
 \definition classSpace: Scalars.Space H.Cohomology := H.cohomologySpace;
+\definition Range: \Set := Total.range.Carrier;
 \definition view: _ := Total.isomorphism;
 \definition level[d: N.Nat^][same: d = q]: active = Degree.unshift d z :=
   \idelim q = d \with t: N.Nat^ => active = Degree.unshift t z \by {

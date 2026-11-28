@@ -1,0 +1,18 @@
+\import Hom.On[P := A] \as Target;
+\import Hom.On[P := B] \as Source;
+\import Modules.End[V := K, space := Modules.scalarModule] \as Identity;
+\import Hom.Mapping[P := A, Q := B, L := coefficients].On[f := e.forward, u := Identity.identity] \as Pull;
+\import Hom.Mapping[P := B, Q := A, L := coefficients].On[f := e.backward, u := Identity.identity] \as Push;
+\import Signed.Isomorphism[C := Source.complex, D := Target.complex] \as Iso;
+\definition data: Iso.Data := Iso.Data { forward := Pull.map, backward := Push.map };
+\definition isomorphism: Iso.Isomorphism := \into[Iso.Data](data, Iso.Isomorphism) \by {
+  Iso.Laws[data] {
+    leftInverse := \fun (z: I.Int^)(h: Source.Carrier z) => Source.At[z := z].ext (Push.map.apply z (Pull.map.apply z h)) h
+      (\fun (x: B.family.Carrier z) => congr!{{B.family.Carrier z} K} h.apply _ _ (e.rightInverse z x)),
+    rightInverse := \fun (z: I.Int^)(h: Target.Carrier z) => Target.At[z := z].ext (Pull.map.apply z (Push.map.apply z h)) h
+      (\fun (x: A.family.Carrier z) => congr!{{A.family.Carrier z} K} h.apply _ _ (e.leftInverse z x)),
+  }
+};
+\module At(z: I.Int^) {
+  \definition comparison: _ := Iso.On[e := isomorphism].At[z := z].isomorphism;
+}
