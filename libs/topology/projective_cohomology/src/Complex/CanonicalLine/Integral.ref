@@ -28,3 +28,4 @@
   cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]);
 \module Canonical;
 \module Punctured;
+\module PlaneCoordinates;

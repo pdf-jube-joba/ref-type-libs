@@ -1,0 +1,16 @@
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := Degrees.two] \as PairDisk;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import std.Data[].Pair[] \as Pair;
+\import topological_constructions.Product[A := Point.Carrier, B := Plane.Coordinate] \as ProductSpace;
+\definition vector[p: PairDisk.DiskCarrier]: Plane.Disk :=
+  \into[Plane.Coordinate](Pair.second Point.Carrier Plane.Coordinate p, Plane.ClosedBall) \by {
+    \bysub(PairDisk.Point, PairDisk.disk, p)
+  };
+\definition vectorContinuous: topology.Continuity[A := PairDisk.DiskCarrier, B := Plane.Disk].Continuous
+  PairDisk.diskTopology Plane.diskTopology vector :=
+  topology.Continuity[A := PairDisk.DiskCarrier, B := Plane.Coordinate].Corestriction[S := Plane.ClosedBall].corestrictContinuous
+    PairDisk.diskTopology Plane.topology vector
+    (topology.Continuity[A := PairDisk.Point, B := Plane.Coordinate].Restriction[S := PairDisk.disk].restrictContinuous
+      PairDisk.totalTopology Plane.topology (Pair.second Point.Carrier Plane.Coordinate)
+      (ProductSpace.Maps[].secondContinuous Point.topology Plane.topology));

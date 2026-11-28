@@ -76,3 +76,4 @@
       (Spheres.topology Degrees.two) Projective.topology Realification.bundle.totalSpace onSphere section homeomorphism.backwardContinuous continuous);
 \module Relative;
 \module Frame;
+\module Nonzero;

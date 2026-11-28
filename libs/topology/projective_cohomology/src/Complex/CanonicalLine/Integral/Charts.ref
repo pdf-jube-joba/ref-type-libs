@@ -45,3 +45,5 @@
 \module Patch(U: \Pow Space, frames: At U Degrees.one);
 \module Compatibility(U, V: \Pow Space, first: At U Degrees.one, second: At V Degrees.one, x: Space,
   inFirst: Base.Member U x, inSecond: Base.Member V x);
+\module RealPatch(U: \Pow Space, frames: At U Degrees.one);
+\module ScalarCoordinates;

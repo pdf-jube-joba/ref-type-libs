@@ -5,21 +5,14 @@
 \import std.Data[].Pair[] \as Pair;
 \import dedekind_reals.DedekindReal[] \as D;
 \import topological_constructions.Product[A := Point.Carrier, B := Plane.Coordinate] \as ProductSpace;
-\definition vector[p: PairDisk.DiskCarrier]: Plane.Disk :=
-  \into[Plane.Coordinate](Pair.second Point.Carrier Plane.Coordinate p, Plane.ClosedBall) \by {
-    \bysub(PairDisk.Point, PairDisk.disk, p)
-  };
+\import \parent.PlaneCoordinates[] \as Coordinates;
+\definition vector[p: PairDisk.DiskCarrier]: Plane.Disk := Coordinates.vector p;
 \definition point[v: Plane.Disk]: PairDisk.DiskCarrier :=
   \into[PairDisk.Point](Pair.pair Point.Carrier Plane.Coordinate Point.point v, PairDisk.disk) \by {
     \bysub(Plane.Coordinate, Plane.ClosedBall, v)
   };
 \definition vectorContinuous: topology.Continuity[A := PairDisk.DiskCarrier, B := Plane.Disk].Continuous
-  PairDisk.diskTopology Plane.diskTopology vector :=
-  topology.Continuity[A := PairDisk.DiskCarrier, B := Plane.Coordinate].Corestriction[S := Plane.ClosedBall].corestrictContinuous
-    PairDisk.diskTopology Plane.topology vector
-    (topology.Continuity[A := PairDisk.Point, B := Plane.Coordinate].Restriction[S := PairDisk.disk].restrictContinuous
-      PairDisk.totalTopology Plane.topology (Pair.second Point.Carrier Plane.Coordinate)
-      (ProductSpace.Maps[].secondContinuous Point.topology Plane.topology));
+  PairDisk.diskTopology Plane.diskTopology vector := Coordinates.vectorContinuous;
 \definition pointContinuous: topology.Continuity[A := Plane.Disk, B := PairDisk.DiskCarrier].Continuous
   Plane.diskTopology PairDisk.diskTopology point :=
   topology.Continuity[A := Plane.Disk, B := PairDisk.Point].Corestriction[S := PairDisk.disk].corestrictContinuous

@@ -2,21 +2,10 @@
 \import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
 \definition Sphere: \Set := Spheres.Carrier Degrees.two;
 \definition sphereTopology: topology.Topology[Carrier := Sphere].Topology := Spheres.topology Degrees.two;
-\definition remaining[s: \Cast[Sphere] Base.right]: D.Lt R.zero (R.sub R.one (height s)) :=
-  R.Estimates[].Product[].subPositive R.one (height s) (\bysub(Sphere, Base.right, s));
-\definition squaredPositive[s: \Cast[Sphere] Base.right]: D.Lt R.zero (Disk.squared (sphereSection s)) :=
-  \idelim R.mul R.half (R.sub R.one (height s)) = Disk.squared (sphereSection s) \with x: R.Real => D.Lt R.zero x \by {
-    base: R.Estimates[].halfOfPositive (R.sub R.one (height s)) (remaining s),
-    equality: sym!{R.Real} _ _ (squaredOnSphere s)
-  };
-\definition positive[s: \Cast[Sphere] Base.right]: D.Lt R.zero (Disk.norm (sphereSection s)) :=
-  D.Order[].ltOfLeNotEq _ _ (Disk.normNonnegative (sphereSection s))
-    (\fun (zero: R.zero = Disk.norm (sphereSection s)) => D.Order[].ltNotEq _ _ (squaredPositive s)
-      (eq_reason_in!{R.Real _
-        "=" _ "by" { sym!{R.Real} _ _ (Laws.fieldMulZeroLeft R.zero) }
-        "=" _ "by" { congr!{R.Real R.Real R.Real} R.mul _ _ _ _ zero zero }
-        "=" _ "by" { Disk.normSquared (sphereSection s) }
-      }));
+\import \parent.Nonzero[] \as Nonzero;
+\definition remaining[s: \Cast[Sphere] Base.right]: D.Lt R.zero (R.sub R.one (height s)) := Nonzero.remaining s;
+\definition squaredPositive[s: \Cast[Sphere] Base.right]: D.Lt R.zero (Disk.squared (sphereSection s)) := Nonzero.squaredPositive s;
+\definition positive[s: \Cast[Sphere] Base.right]: D.Lt R.zero (Disk.norm (sphereSection s)) := Nonzero.positive s;
 \import singular_cohomology.Relative[A := Sphere, source := sphereTopology, subset := Base.right].Maps[B := Disk.DiskBundle]
   .Over[target := Disk.diskTopology, targetSubset := Punctured.subset] \as Pairs;
 \definition pair: Pairs.Map := \into[Sphere -> Disk.DiskBundle](sphereSection, Pairs.Map) \by {
