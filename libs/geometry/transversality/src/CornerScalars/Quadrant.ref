@@ -1,0 +1,29 @@
+\import R.Order[] \as Order;
+\import Line.Rays[] \as Rays;
+\import Coordinates.Finite[] \as Finite;
+\import topology.Continuity[A := Model.Point, B := Real.Real] \as Scalars;
+
+\definition Failure[x: Model.Point]: \Pow Model.Coordinate :=
+  { i: Model.Coordinate \where Logic.And[\In[Model.Coordinate] C i, R.Lt (x i) Real.zero] };
+\definition failure[x: Model.Point]: Logic.Not (Model.Nonnegative C x) -> \exists \Cast[Model.Coordinate] (Failure x) :=
+  \fun (outside: _) => Finite.doubleNegElim (\exists \Cast[Model.Coordinate] (Failure x))
+    (\fun (none: _) => outside
+      (\fun (i: Model.Coordinate)(constrained: \In[Model.Coordinate] C i) =>
+        Order.leOfNotLtReverse Real.zero (x i) (\fun (less: _) =>
+          none (Logic.existsIntro[Model.Coordinate, Failure x] i (Logic.And[_, _]::# constrained less)))));
+\definition complementOpen: Coordinates.IsOpenIn Ambient.topology (Coordinates.Complement (Model.quadrant C)) :=
+  Coordinates.openOfNeighborhoods Ambient.topology (Coordinates.Complement (Model.quadrant C)) (\block {
+    \fun (x: Model.Point)(outside: Logic.Not (Model.Nonnegative C x)) \then
+    \takefrom i: \Cast[Model.Coordinate] (Failure x) \by failure x outside \then
+    \let law: Logic.And[\In[Model.Coordinate] C i, R.Lt (x i) Real.zero] := \bysub(Model.Coordinate, Failure x, i) \then
+    \let V: \Pow Model.Point := Scalars.Preimage (\fun (y: Model.Point) => y i) (Rays.Below Real.zero) \then
+    \return Logic.existsIntro[\Pow Model.Point, { W: \Pow Model.Point \where
+      Coordinates.OpenNeighborhood[Ambient.topology, x, Coordinates.Complement (Model.quadrant C), W] }] V
+      (Coordinates.OpenNeighborhood[Ambient.topology, x, Coordinates.Complement (Model.quadrant C), V] {
+        open := Ambient.coordinateContinuous i (Rays.Below Real.zero) (Rays.belowOpen Real.zero),
+        contains := law.right,
+        within := \fun (y: Model.Point)(negative: _)(nonnegative: Model.Nonnegative C y) =>
+          R.ltNotLeReverse (y i) Real.zero negative (nonnegative i law.left),
+      })
+  });
+\definition closed: Coordinates.IsClosedIn Ambient.topology (Model.quadrant C) := complementOpen;

@@ -1,0 +1,24 @@
+\import Real.Distance[] \as Distance;
+\import Real.Estimates[] \as Estimates;
+\definition component[i: Fin.Fin m]: Function := \fun (x: M.Point) => f x i;
+\definition continuousComponent[i: Fin.Fin m]: Continuity.Continuous M.space Line.topology (component i) :=
+  \fun (V: \Pow Real.Real)(open: LineSets.IsOpenIn Line.topology V) =>
+    continuous _ (Geometry.coordinateContinuous i V open);
+\module Scalar(i: Fin.Fin m) {
+  \import \root.CornerScalars[n := n].On[M := M].Approximate[f := component i, continuous := continuousComponent i] \as Approximation;
+  \definition Choice[radius: Real.Real]: \Set := Approximation.Approximation radius;
+  \definition choose[compact: Space.IsCompact M.space][radius: Real.Real][positive: R.Lt Real.zero radius]: \exists Choice radius :=
+    Approximation.exists compact radius positive;
+  \definition smooth[radius: Real.Real][g: Choice radius]: IsSmooth g := Functions.regular g;
+  \definition close[radius: Real.Real][g: Choice radius][x: M.Point]: R.Lt (Distance.distance (f x i) (g x)) radius :=
+    (\bysub(Functions.Smooth, { g: Functions.Smooth \where Approximation.Close g radius }, g)) x;
+}
+\structure Result[radius: Real.Real, K: \Pow M.Point]: \Set := {
+  map: Maps.Map,
+  neighborhood: \Pow M.Point,
+  neighborhoodOpen: Space.IsOpenIn M.space neighborhood,
+  contains: Space.Subset K neighborhood,
+  agrees: \forall (x: M.Point) -> Space.Member neighborhood x -> (map.apply x \of Target.Point) = f x,
+  close: \forall (x: M.Point) -> R.Lt (Def.pointDistance (f x) (map.apply x)) radius,
+};
+\module Relative(K, U: \Pow M.Point, closed: Space.IsClosedIn M.space K, open: Space.IsOpenIn M.space U, included: Space.Subset K U);

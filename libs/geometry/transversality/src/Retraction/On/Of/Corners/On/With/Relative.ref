@@ -1,0 +1,3 @@
+\import Approximation.Relative[K := K, U := U, closed := closed, open := open, included := inside] \as Approximate;
+\module In(W: \Pow Graphs.CarrierSet, openWindow: GraphSets.IsOpenIn Graph.graphTopology W,
+  around: \forall (x: X.Point) -> GraphSets.Member W (Graph.graph x (f x)));

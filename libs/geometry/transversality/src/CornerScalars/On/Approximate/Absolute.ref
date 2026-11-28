@@ -1,0 +1,26 @@
+\definition tolerance: Real.Real := Real.mul Real.half radius;
+\definition tolerancePositive: R.Lt Real.zero tolerance := Estimates.halfOfPositive radius positive;
+\definition ball[a: M.Point]: \Pow Real.Real := Metrics.Ball Metric.metric (f a) tolerance;
+\definition around[a: M.Point]: \Pow M.Point := Continuity.Preimage f (ball a);
+\definition family: \Pow (\Pow M.Point) := { V: \Pow M.Point \where \exists ( a: M.Point \where V = around a ) };
+\definition center[a: M.Point]: Space.Member (around a) a :=
+  Metrics.ballCenter Metric.metric (f a) tolerance tolerancePositive;
+\definition aroundOpen[a: M.Point]: Space.IsOpenIn M.space (around a) :=
+  continuous (ball a) (MetricTopology.ballOpenIn Metric.metric (f a) tolerance);
+\definition openMember[V: \Pow M.Point]: Space.FamilyMember family V -> Space.IsOpenIn M.space V := \block {
+  \fun (member: _) \then
+  \takefrom a: \Cast[M.Point] ({ a: M.Point \where V = around a }) \by member \then
+  \return \idelim around a = V \with W: \Pow M.Point => Space.IsOpenIn M.space W \by {
+    base: aroundOpen a, equality: sym!{\Pow M.Point} _ _ (\bysub(M.Point, { a: M.Point \where V = around a }, a))
+  }
+};
+\definition cover: Space.IsOpenCover[M.space, family, Space.Whole] := Space.IsOpenCover[M.space, family, Space.Whole] {
+  open := openMember,
+  covers := \fun (x: M.Point)(whole: _) => Space.unionMemberOf family (around x) x
+    (Logic.existsIntro[M.Point, { a: M.Point \where around x = around a }] x (\refl(around x))) (center x),
+};
+\module With(partition: Functions.FinitePartition[family]);
+\definition exists[compact: Space.IsCompact M.space]: \exists Approximation radius := \block {
+  \takefrom partition: Functions.FinitePartition[family] \by \parent.\parent.Partitions[family := family].existsFinitePartition compact cover \then
+  \return With[partition := partition].exists
+};

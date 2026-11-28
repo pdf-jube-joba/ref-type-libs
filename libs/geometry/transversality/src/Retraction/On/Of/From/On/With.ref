@@ -7,6 +7,7 @@
 \import metric_spaces.MetricSpace[Carrier := Coordinates.Point] \as Metric;
 \import manifolds.SmoothMap[n := d, m := m].Between[M := Tube.smoothManifold, N := M] \as Retractions;
 \import manifolds.SmoothMap[n := n, m := d].Between[M := X, N := Ambient.smoothManifold] \as IntoAmbient;
+\import Topological.With[neighborhood := neighborhood] \as Uniform;
 \module Window(W: \Pow Graphs.CarrierSet, open: GraphSets.IsOpenIn graphTopology W,
   around: \forall (x: X.Point) -> GraphSets.Member W (graph x (f x)));
 \module Send(g: IntoAmbient.Map, within: \forall (x: X.Point) -> AmbientSets.Member neighborhood.image.points (g.apply x));

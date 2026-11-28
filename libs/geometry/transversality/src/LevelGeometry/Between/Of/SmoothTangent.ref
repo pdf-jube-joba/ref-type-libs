@@ -1,0 +1,57 @@
+\use Equality.congr;
+\import manifolds.Dimension[n := Nat.add m n].Chart[M := M.Point, space := M.space] \as SourceCharts;
+\import tangent_bundles.Dimension[n := n].On[M := preimage] \as FiberBundle;
+\import tangent_bundles.Dimension[n := Nat.add m n].On[M := M] \as AmbientBundle;
+\import tangent_bundles.Dimension[n := m].On[M := T] \as TargetBundle;
+\import tangent_bundles.Map[n := n, m := Nat.add m n].Between[M := preimage, N := M].Of[f := Smooth.inclusion] \as Inclusion;
+\import tangent_bundles.Map[n := Nat.add m n, m := m].Between[M := M, N := T].Of[f := f] \as RegularMap;
+\import manifolds.SmoothMap[n := FiberBundle.dimension, m := AmbientBundle.dimension]
+  .Between[M := FiberBundle.manifold, N := AmbientBundle.manifold] \as InclusionMaps;
+\import manifolds.SmoothMap[n := AmbientBundle.dimension, m := TargetBundle.dimension]
+  .Between[M := AmbientBundle.manifold, N := TargetBundle.manifold] \as DifferentialMaps;
+\import manifolds.Differential[n := n, m := Nat.add m n].Between[M := preimage, N := M] \as InclusionDifferential;
+\definition inclusion: InclusionMaps.Map := Inclusion.map;
+\definition differential: DifferentialMaps.Map := RegularMap.map;
+\definition inclusionFormula[p: FiberBundle.Point]:
+  inclusion.apply p = AmbientBundle.include p.base (InclusionDifferential.At[f := Smooth.inclusion, x := p.base].value.apply p.vector) :=
+  congr!{{FiberBundle.Point -> AmbientBundle.Point} {AmbientBundle.Point}} (\fun (g: FiberBundle.Point -> AmbientBundle.Point) => g p)
+    _ _ Inclusion.pointwise;
+\definition differentialFormula[p: AmbientBundle.Point]:
+  differential.apply p = TargetBundle.include (Maps.apply f p.base) (Differential.At[f := f, x := p.base].value.apply p.vector) :=
+  congr!{{AmbientBundle.Point -> TargetBundle.Point} {TargetBundle.Point}} (\fun (g: AmbientBundle.Point -> TargetBundle.Point) => g p)
+    _ _ RegularMap.pointwise;
+\module OnFiber(x: Level.Fiber) {
+  \import PreimageTangent.At[x := x] \as Domain;
+  \import TargetTangent.At[x := Maps.apply f x] \as Range;
+  \import InclusionDifferential.At[f := Smooth.inclusion, x := x] \as I;
+  \import Differential.At[f := f, x := x] \as D;
+  \definition inKernel[v: Domain.Vector]: D.value.apply (I.value.apply v) = Range.space.zero := \block {
+    \takefrom slice: \Cast[Level.Slice] ({ s: Level.Slice \where SourceCharts.Contains s.source x }) \by Level.covers regular x \then
+    \return Smooth.At[x := x].InSlice[slice := slice, contains := \bysub(Level.Slice, { s: Level.Slice \where
+      SourceCharts.Contains s.source x }, slice)].inside v
+  };
+  \import SourceTangent.At[x := x] \as Ambient;
+  \module InSlice(slice: Level.Slice, contains: SourceCharts.Contains slice.source x) {
+    \import Smooth.At[x := x].InSlice[slice := slice, contains := contains] \as Compare;
+    \definition lift[u: Ambient.Vector][zero: D.value.apply u = Range.space.zero]:
+      \exists (v: Domain.Vector \where I.value.apply v = u) :=
+      Logic.existsIntro[Domain.Vector, { v: Domain.Vector \where I.value.apply v = u }] (Compare.decode.apply u)
+        (Compare.right (\into[Ambient.Vector](u, Smooth.At[x := x].kernel.carrier) \by { zero }));
+  }
+  \definition coversKernel[u: Ambient.Vector][zero: D.value.apply u = Range.space.zero]:
+    \exists (v: Domain.Vector \where I.value.apply v = u) := \block {
+    \takefrom slice: \Cast[Level.Slice] ({ s: Level.Slice \where SourceCharts.Contains s.source x }) \by Level.covers regular x \then
+    \let result: \exists (v: Domain.Vector \where I.value.apply v = u) :=
+      InSlice[slice := slice, contains := \bysub(Level.Slice, { s: Level.Slice \where SourceCharts.Contains s.source x }, slice)].lift u zero \then
+    \return result
+  };
+  \definition compositionOnZeroSection[v: Domain.Vector]:
+    differential.apply (inclusion.apply (FiberBundle.include x v)) = TargetBundle.zero (Maps.apply f x) := \block {
+    \let p: FiberBundle.Point := FiberBundle.include x v \then
+    \let image: AmbientBundle.Point := AmbientBundle.include x (I.value.apply v) \then
+    \return trans!{TargetBundle.Point} _ _ _
+      (congr!{AmbientBundle.Point TargetBundle.Point} differential.apply _ _ (inclusionFormula p))
+      (trans!{TargetBundle.Point} _ _ _ (differentialFormula image)
+        (congr!{Range.Vector TargetBundle.Point} (TargetBundle.include (Maps.apply f x)) _ _ (inKernel v)))
+  };
+}

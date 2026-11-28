@@ -1,0 +1,96 @@
+\definition q: Euclidean.Positive := \into[Real.Real](Real.mul Real.half (Real.mul Real.half r), { q: Real.Real \where R.Lt Real.zero q }) \by {
+  Estimates.halfOfPositive (Real.mul Real.half r) (Estimates.halfOfPositive r ball.positive)
+};
+\import Euclidean.LocalBump[a := At.center, q := q] \as Bump;
+\import Bump.Support[] \as Support;
+\definition radiusEquality: Bump.radius = Real.mul Real.half r := trans!{Real.Real} _ _ _
+  (Laws.fieldMulAdd q Real.one Real.one)
+  (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _ (Algebra.mulOneRight q) (Algebra.mulOneRight q))
+    (Estimates.halfTwice (Real.mul Real.half r)));
+\definition ambientInside[u: Model.Point]: Coordinates.Member Bump.envelope u -> Coordinates.Member region.domain.points u :=
+  \fun (member: _) => ball.included u (R.leLtTrans _ _ _
+    (R.leReplaceLeft _ _ _ (Norm.distanceSymmetric At.center u) member)
+    (R.ltReplaceLeft _ _ _ (sym!{Real.Real} _ _ radiusEquality) (Estimates.halfStrict r ball.positive)));
+\import \root.CornerScalars[n := n].Quadrant[C := c.constraints] \as Quadrant;
+\definition K: \Pow Model.Point := Coordinates.Intersection Bump.envelope (Model.quadrant c.constraints);
+\definition Kclosed: Coordinates.IsClosedIn Ambient.topology K :=
+  Coordinates.Finite[].intersectionClosed Ambient.topology Bump.envelope (Model.quadrant c.constraints) Support.envelopeClosed Quadrant.closed;
+\definition Kcompact: Coordinates.IsCompactIn Ambient.topology K :=
+  Coordinates.Compactness[].closedSubset Ambient.topology Bump.envelope K Support.envelopeCompact Kclosed
+    (\fun (u: Model.Point)(inK: Coordinates.Member K u) => inK.left);
+\import Coordinates.Subspace[S := K] \as Kspace;
+\definition Small: \Set := Kspace.CarrierSet;
+\import topology.Topology[Carrier := Small] \as SmallSets;
+\definition smallTopology: SmallSets.Topology := Kspace.topology Ambient.topology;
+\definition chartPoint[u: Small]: Model.Carrier c.constraints region.domain :=
+  \into[Open.Carrier region.domain](\into[Model.Point](u, region.domain.points) \by {
+    ambientInside u (\bysub(Model.Point, K, u)).left
+  }, Model.region c.constraints region.domain) \by { (\bysub(Model.Point, K, u)).right };
+\definition intoChart[u: Small]: Model.Carrier c.constraints c.image := Ranges.include region.domain region.included (chartPoint u);
+\definition imagePoint[u: Small]: M.Point := Charts.point c (intoChart u);
+\import manifold_gluing.ChartMap[n := n].On[M := M].Of[c := c] \as Plot;
+\import Model.Topology[C := c.constraints, U := c.image].Into[X := Small, source := smallTopology, f := intoChart] \as Into;
+\definition imageContinuous: topology.Continuity[A := Small, B := M.Point].Continuous smallTopology M.space imagePoint :=
+  topology.Composition[A := Small, B := Model.Carrier c.constraints c.image, C := M.Point].composeContinuous
+    smallTopology (Model.regionTopology c.constraints c.image) M.space intoChart (Charts.point c)
+    (Into.continuous (topology.Continuity[A := Small, B := Model.Point].Corestriction[S := K].inclusionContinuous Ambient.topology))
+    Plot.continuous;
+\import topology.Maps[A := Small, B := M.Point] \as Images;
+\definition envelope: \Pow M.Point := Images.Image imagePoint SmallSets.Whole;
+\definition envelopeCompact: Space.IsCompactIn M.space envelope := topology.Compactness[A := Small, B := M.Point].continuousImage
+  smallTopology M.space imagePoint imageContinuous SmallSets.Whole (Kspace.Properties[].compact Ambient.topology Kcompact);
+\definition envelopeClosed: Space.IsClosedIn M.space envelope := Compact.compactClosed M.space M.hausdorff envelope envelopeCompact;
+\definition envelopeInU: Space.Subset envelope U := \fun (y: M.Point)(inside: _) => Images.imageElim imagePoint SmallSets.Whole y
+  (Space.Member U y)
+  (\fun (u: Small)(whole: _)(same: imagePoint u = y) => \idelim imagePoint u = y \with z: M.Point => Space.Member U z \by {
+    base: region.within (chartPoint u), equality: same
+  }) inside;
+\definition envelopeInChart: Space.Subset envelope c.domain := \fun (y: M.Point)(inside: _) => Images.imageElim imagePoint SmallSets.Whole y
+  (Space.Member c.domain y)
+  (\fun (u: Small)(whole: _)(same: imagePoint u = y) => \idelim imagePoint u = y \with z: M.Point => Space.Member c.domain z \by {
+    base: \bysub(M.Point, c.domain, Charts.point c (intoChart u)), equality: same
+  }) inside;
+
+\import std.Set[].Extension[A := M.Point, B := Real.Real, domain := c.domain] \as Extend;
+\definition onChart[y: Charts.LocalPoint c]: Real.Real := Bump.value (Charts.coordinate c y);
+\definition value: Function := Extend.extend onChart Real.zero;
+\definition valueAt[y: Charts.LocalPoint c]: value y = onChart y := Extend.inside onChart Real.zero y;
+\definition supported: Space.Subset (Functions.Nonzero value) envelope := \block {
+  \fun (y: M.Point)(nonzero: Logic.Not (value y = Real.zero)) \then
+  \let inChart: Space.Member c.domain y := Finite.doubleNegElim (Space.Member c.domain y)
+    (\fun (outside: _) => nonzero (Extend.outside onChart Real.zero y outside)) \then
+  \let point: Charts.LocalPoint c := \into[M.Point](y, c.domain) \by { inChart } \then
+  \let v: Model.Carrier c.constraints c.image := Charts.coordinate c point \then
+  \let u: Small := \into[Model.Point](v, K) \by {
+    Logic.And[_, _]::# (Bump.nonzeroWithin v (\fun (zero: _) => nonzero (trans!{Real.Real} _ _ _ (valueAt point) zero)))
+      (\bysub(Open.Carrier c.image, Model.region c.constraints c.image, v))
+  } \then
+  \return \idelim imagePoint u = y \with z: M.Point => Space.Member envelope z \by {
+    base: Images.imageMember imagePoint SmallSets.Whole u (\refl(u)),
+    equality: Charts.pointCoordinate c point
+  }
+};
+\definition zeroAway[y: M.Point]: Logic.Not (Space.Member envelope y) -> value y = Real.zero :=
+  \fun (outside: _) => Finite.doubleNegElim (value y = Real.zero) (\fun (nonzero: _) => outside (supported y nonzero));
+\module Plateau;
+\module AtOther(d: Chart, y: Charts.LocalPoint d);
+\definition bounded[y: M.Point]: Logic.And[R.Le Real.zero (value y), R.Le (value y) Real.one] :=
+  Extend.preserves ({ r: Real.Real \where Logic.And[R.Le Real.zero r, R.Le r Real.one] }) onChart Real.zero
+    (\fun (point: Charts.LocalPoint c) => Bump.bounded (Charts.coordinate c point))
+    (Logic.And[_, _]::# (R.leRefl Real.zero) Laws.oneNonnegative) y;
+\definition supportWithin: Space.Subset (Functions.support value) envelope :=
+  Closure.least M.space (Functions.Nonzero value) envelope envelopeClosed supported;
+\definition smooth: IsSmooth value := \fun (d: Chart)(z: Charts.LocalPoint d)(whole: _) => AtOther[d := d, y := z].exists;
+\import Plateau[] \as Region;
+\definition bump: Functions.Bump[family] := Functions.Bump[family] {
+  value := \into[Function](value, calculus.smooth) \by { smooth },
+  openSet := U, inCover := Logic.Or[_, _]::left member,
+  supportWithin := Space.subsetTrans _ _ _ supportWithin envelopeInU,
+  supportCompact := Compact.closedSubset M.space envelope (Functions.support value) envelopeCompact
+    (Closure.closed M.space (Functions.Nonzero value)) supportWithin,
+  oneRegion := Region.plateau, regionOpen := Region.openPlateau, oneOn := Region.oneOn,
+  lower := \fun (y: M.Point) => (bounded y).left,
+  upper := \fun (y: M.Point) => (bounded y).right,
+};
+\definition exists: \exists ( b: Functions.Bump[family] \where Space.Member b.oneRegion x ) :=
+  Logic.existsIntro[Functions.Bump[family], { b: Functions.Bump[family] \where Space.Member b.oneRegion x }] bump Region.contains;

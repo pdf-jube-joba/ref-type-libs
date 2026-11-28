@@ -1,0 +1,2 @@
+\import sard.Corners[n := n, m := m].Between[M := M, N := N].Of[f := f] \as Sard;
+\module At(x: M.Point);

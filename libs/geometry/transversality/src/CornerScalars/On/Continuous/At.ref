@@ -1,0 +1,9 @@
+\import \root.CornerScalars[n := n].On[M := M].At[c := c, x := x] \as Point;
+\import Space.Subspace[S := c.domain].Open[] \as ChartImage;
+\definition Neighborhood: \Set := \Cast[\Pow M.Point] ({ V: \Pow M.Point \where Space.OpenNeighborhood[M.space, x, Continuity.Preimage f W, V] });
+\module Using(e: Point.Extension[f]);
+\definition exists: (\exists Point.Extension[f]) -> \exists Neighborhood := \block {
+  \fun (regular: \exists Point.Extension[f]) \then
+  \takefrom e: Point.Extension[f] \by regular \then
+  \return Using[e := e].exists
+};

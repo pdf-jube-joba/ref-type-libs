@@ -25,6 +25,8 @@
   agrees: \forall (x: X.Point) -> XS.Member neighborhood x -> map.apply x = f x,
   near: \forall (x: X.Point) -> GraphSets.Member W (graph x (map.apply x)),
 };
+\import \root.Retraction[m := m, k := k].On[M := M].Of[e := e]
+  .Topological[X := X.Point, source := X.space, f := f, continuous := continuous] \as Topological;
 \module With(neighborhood: Neighborhood);
 
 \module Relative(K, U: \Pow X.Point, closed: XS.IsClosedIn X.space K, open: XS.IsOpenIn X.space U, included: XS.Subset K U);

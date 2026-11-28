@@ -1,0 +1,22 @@
+\import metric_spaces.RealMetric[] \as Metric;
+\import metric_spaces.MetricSpace[Carrier := Real.Real].Topology[] \as LineTopology;
+\import topology.Topology[Carrier := Real.Real] \as LineSets;
+\definition nonzero: \Pow M.Point := Functions.Nonzero f;
+\definition open: IsSmooth f -> Space.IsOpenIn M.space nonzero :=
+  \fun (smooth: IsSmooth f) =>
+    \parent.Continuous[f := f].continuous smooth (LineSets.Complement (LineSets.Singleton Real.zero))
+      (LineTopology.singletonClosed Metric.metric Real.zero);
+\module At(c: Chart, x: Charts.LocalPoint c) {
+  \import \parent.\parent.At[c := c, x := x] \as Local;
+  \definition exists: Logic.Not (f x = Real.zero) -> (\exists Local.Extension[f]) ->
+    \exists Local.Extension[\fun (y: M.Point) => Laws.fieldInv (f y)] := \block {
+      \fun (nonzero: Logic.Not (f x = Real.zero))(smooth: \exists Local.Extension[f]) \then
+      \takefrom e: Local.Extension[f] \by smooth \then
+      \return \exact(Local.Reciprocal[f := f, extension := e, nonzero := nonzero].result,
+        Local.Extension[\fun (y: M.Point) => Laws.fieldInv (f y)])
+    };
+}
+\definition smooth[U: \Pow M.Point]: IsSmoothOn f U ->
+  IsSmoothOn (\fun (x: M.Point) => Laws.fieldInv (f x)) (Space.Intersection U nonzero) :=
+  \fun (regular: IsSmoothOn f U)(c: Chart)(x: Charts.LocalPoint c)(inBoth: Space.Member (Space.Intersection U nonzero) x) =>
+    At[c := c, x := x].exists inBoth.right (regular c x inBoth.left);

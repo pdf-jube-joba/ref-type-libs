@@ -1,0 +1,28 @@
+\import \parent.Components[f := f] \as Original;
+\definition square: Functions.Smooth := Functions.times bump bump;
+\import \parent.\parent.Invert[f := square] \as Inverse;
+\import \parent.\parent.Restrict[U := Inverse.nonzero, open := Inverse.open (Functions.regular square)] \as Active;
+\import \root.CornerScalars[n := n].On[M := Active.manifold].Euclidean[m := m] \as ActiveEuclidean;
+\definition normalized[x: Active.Point]: Target.Point :=
+  Def.scale (Laws.fieldInv (square x)) (Original.vector x);
+\definition inverseSmooth: Active.Smooth (Active.restrict (\fun (x: M.Point) => Laws.fieldInv (square x))) :=
+  Active.smooth (\fun (x: M.Point) => Laws.fieldInv (square x))
+    (\fun (c: Chart)(x: Charts.LocalPoint c)(nonzero: Space.Member Inverse.nonzero x) =>
+      Inverse.smooth Space.Whole (Functions.regular square) c x (Logic.And[_, _]::# (\refl(x)) nonzero));
+\definition inverse[x: Active.Point]: Real.Real := Laws.fieldInv (square x);
+\definition original[i: Fin.Fin m][x: Active.Point]: Real.Real := Original.vector x i;
+\module Coordinate(i: Fin.Fin m, c: Active.Chart, x: Active.LocalPoint c) {
+  \import \root.CornerScalars[n := n].On[M := Active.manifold].At[c := c, x := x] \as Local;
+  \definition extension: \exists Local.Extension[\fun (y: Active.Point) => normalized y i] :=
+    Local.multiply inverse (original i)
+      (inverseSmooth c x (\refl(x)))
+      (Active.smooth (Original.coordinate i) (\fun (a: Chart)(y: Charts.LocalPoint a)(inside: _) => Original.smooth i a y (\refl(y))) c x (\refl(x)));
+}
+\definition regular: ActiveEuclidean.SmoothEverywhere normalized :=
+  \fun (i: Fin.Fin m)(c: Active.Chart)(x: Active.LocalPoint c)(whole: _) =>
+    Coordinate[i := i, c := c, x := x].extension;
+\import boundary_manifolds.SmoothMap[n := n, m := m].Between[M := Active.manifold, N := Euclidean.manifold] \as ActiveMaps;
+\definition map: ActiveMaps.Map := ActiveEuclidean.Build[g := normalized, regular := regular].map;
+\module Values;
+\definition active: \Pow M.Point := Inverse.nonzero;
+\definition open: Space.IsOpenIn M.space active := Inverse.open (Functions.regular square);

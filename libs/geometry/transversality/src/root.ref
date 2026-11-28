@@ -9,3 +9,5 @@
 \module LevelGeometry(n, m: std.Data[].Nat[].Nat^);
 \module FaceParameters(d, r, m: std.Data[].Nat[].Nat^);
 \module Preimage(n, m, p: std.Data[].Nat[].Nat^);
+\module CornerScalars(n: std.Data[].Nat[].Nat^);
+\module CornerDerivative(n, m: std.Data[].Nat[].Nat^);

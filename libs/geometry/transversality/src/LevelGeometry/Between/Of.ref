@@ -10,3 +10,4 @@
 \import manifolds.Differential[n := Nat.add m n, m := m].Between[M := M, N := T] \as Differential;
 \module At(x: Level.Fiber);
 \module Project(r: std.Data[].Nat[].Nat^);
+\module SmoothTangent;

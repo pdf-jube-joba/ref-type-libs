@@ -1,0 +1,15 @@
+\definition Choice[i: Fin.Fin m]: \Set := \parent.\parent.Scalar[i := i].Choice radius;
+\module Coordinate(i: Fin.Fin m, chosen: Choice i) {
+  \import \root.CornerScalars[n := n].On[M := M].Approximate[f := component i, continuous := continuousComponent i] \as Scalar;
+  \import Scalar.Relative[K := K, U := U, closed := closed, open := open, included := included]
+    .With[cutoff := cutoff, radius := radius, ordinary := chosen, regular := regular i] \as Improved;
+  \definition value: Functions.Smooth := Improved.map;
+  \definition agrees[x: M.Point]: Space.Member cutoff.neighborhood x -> value x = f x i := Improved.agrees x;
+  \definition close[x: M.Point]: R.Lt (Distance.distance (f x i) (value x)) radius := Improved.close x;
+}
+\module Using(chosen: \forall (i: Fin.Fin m) -> Choice i);
+\definition exists[compact: Space.IsCompact M.space]: \exists Result[radius, K] := \block {
+  \takefrom chosen: (\forall (i: Fin.Fin m) -> Choice i) \by
+    \axiom:classicalIndefiniteChoice(Fin.Fin m, Choice, \fun (i: Fin.Fin m) => \parent.\parent.Scalar[i := i].choose compact radius positive) \then
+  \return \exact(Using[chosen := chosen].result, Result[radius, K])
+};

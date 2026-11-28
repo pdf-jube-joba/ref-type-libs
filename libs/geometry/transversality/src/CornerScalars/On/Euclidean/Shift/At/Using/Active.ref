@@ -1,0 +1,52 @@
+\import \root.CornerScalars[n := n].On[M := M].Euclidean[m := m].Normalize[f := f, bump := bump] \as Normalized;
+\import manifold_gluing.OpenManifold[n := n].On[M := M].Within[U := Normalized.active, open := Normalized.open] \as Region;
+\definition activePoint: Region.Point := \into[M.Point](x, Normalized.active) \by { nonzero };
+\import Region.In[c := c] \as OriginalChart;
+\definition here: Logic.Not (LocalShift.weight Old.center = Real.zero) :=
+  \fun (vanishes: LocalShift.weight Old.center = Real.zero) =>
+    nonzero (trans!{Real.Real} _ _ _
+      (sym!{Real.Real} _ _ (congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _
+        (trans!{Real.Real} _ _ _ (bumpFormula Old.center) (congr!{M.Point Real.Real} (\fun (y: M.Point) => bump y) _ _ centerPoint))
+        (trans!{Real.Real} _ _ _ (bumpFormula Old.center) (congr!{M.Point Real.Real} (\fun (y: M.Point) => bump y) _ _ centerPoint))))
+      vanishes);
+\import Smooth.Nonvanishing[U := domain, f := LocalShift.weight] \as Nonvanishing;
+\definition localCenter: Open.Carrier Nonvanishing.domain :=
+  \into[Model.Point](Old.center, Nonvanishing.domain.points) \by { Nonvanishing.intro Old.center here };
+\import LocalShift.Active[] \as LocalActive;
+\import LocalActive.At[a := a] \as ActiveShift;
+\import ActiveShift.AtPoint[x := localCenter] \as Transfer;
+\import \root.Perturbation[n := n, m := m].On[U := Nonvanishing.domain, f := LocalActive.normalized].At[parameter := a] \as Translate;
+\definition shiftedZero: shifted x = Def.origin -> ActiveShift.restricted.apply localCenter = Def.origin :=
+  \fun (zero: _) => trans!{Target.Point} _ _ _ (shiftedFormula Old.center)
+    (trans!{Target.Point} _ _ _ (congr!{M.Point Target.Point} shifted _ _ centerPoint) zero);
+\definition normalizedFormula[u: Open.Carrier Nonvanishing.domain][quadrant: Model.Nonnegative c.constraints u]:
+  (LocalActive.normalized.apply u \of Target.Point) =
+    Def.scale (Laws.fieldInv (weight (Scalar.actual domain included
+      (\into[Open.Carrier domain](Nonvanishing.input u, Model.region c.constraints domain) \by { quadrant }))))
+      (Original.vector (Scalar.actual domain included
+        (\into[Open.Carrier domain](Nonvanishing.input u, Model.region c.constraints domain) \by { quadrant }))) := \block {
+  \let p: Model.Carrier c.constraints domain := \into[Open.Carrier domain](Nonvanishing.input u, Model.region c.constraints domain) \by { quadrant } \then
+  \let weightEqual: LocalShift.weight p = weight (Scalar.actual domain included p) :=
+    congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _ (bumpFormula p) (bumpFormula p) \then
+  \return congr!{Real.Real Target.Point Target.Point} Def.scale _ _ _ _
+    (congr!{Real.Real Real.Real} Laws.fieldInv _ _ weightEqual) (formula p)
+};
+\definition normalizedAt: (LocalActive.normalized.apply localCenter \of Target.Point) = Normalized.normalized activePoint :=
+  trans!{Target.Point} _ _ _ (normalizedFormula localCenter (\bysub(Open.Carrier domain, Model.region c.constraints domain, Old.center)))
+    (congr!{M.Point Target.Point} (\fun (y: M.Point) => Def.scale (Laws.fieldInv (weight y)) (Original.vector y)) _ _ centerPoint);
+\definition atParameter: shifted x = Def.origin -> Normalized.map.apply activePoint = Normalized.Values[].point a :=
+  \fun (zero: _) => TargetModel.equality TargetModel.unconstrained Output.whole
+    (Normalized.map.apply activePoint) (Normalized.Values[].point a)
+    (trans!{Target.Point} _ _ _ (sym!{Target.Point} _ _ normalizedAt)
+      (Translate.originalValue localCenter (Transfer.zeroShifted (shiftedZero zero))));
+\definition Representative: \Set := OriginalChart.Representative;
+\definition representative: \exists Representative := OriginalChart.exists;
+\module In(representative: Representative);
+\import Normalized.Values[] \as GoodValues;
+\definition chartRegular[good: GoodValues.Regular a][zero: shifted x = Def.origin][y: Target.Point]:
+  \exists (v: Model.Point \where Logic.And[Model.Tangential c.constraints Scalar.center v, New.jacobian.apply v = y]) := \block {
+  \takefrom patch: Representative \by representative \then
+  \let result: \exists (v: Model.Point \where Logic.And[Model.Tangential c.constraints Scalar.center v, New.jacobian.apply v = y]) :=
+    In[representative := patch].regular good zero y \then
+  \return result
+};

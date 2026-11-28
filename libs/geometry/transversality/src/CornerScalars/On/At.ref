@@ -1,0 +1,46 @@
+\import manifold_gluing.QuadrantNeighborhood[n := n].On[C := c.constraints, U := c.image] \as ChartNeighborhood;
+\import manifold_gluing.ChartMap[n := n].On[M := M].Of[c := c] \as ChartMap;
+\definition center: Model.Carrier c.constraints c.image := Charts.coordinate c x;
+\definition actual[V: Open.OpenSet][included: Open.Included V c.image][u: Model.Carrier c.constraints V]: M.Point :=
+  Charts.point c (ChartNeighborhood.include V included u);
+
+\structure Extension[f: Function]: \Set := {
+  domain: Open.OpenSet,
+  included: Open.Included domain c.image,
+  contains: Coordinates.Member domain.points center,
+  value: Open.ScalarFunction domain,
+  smooth: Smooth.SmoothOn domain value,
+  agrees: \forall (u: Model.Carrier c.constraints domain) -> value u = f (actual domain included u),
+};
+
+\definition constant[a: Real.Real]: \exists Extension[\fun (x: M.Point) => a] :=
+  \exact(Extension[\fun (x: M.Point) => a] {
+    domain := c.image, included := \fun (u: Model.Point)(member: _) => member,
+    contains := \bysub(Model.Point, c.image.points, center),
+    value := \fun (u: Open.Carrier c.image) => a,
+    smooth := Operations.constantSmooth c.image a,
+    agrees := \fun (u: Model.Carrier c.constraints c.image) => \refl(a),
+  }, Extension[\fun (x: M.Point) => a]);
+
+\definition SmoothBinary[op: Real.Real -> Real.Real -> Real.Real]: \Prop :=
+  \forall (V: Open.OpenSet)(f, g: Open.ScalarFunction V) -> Smooth.SmoothOn V f -> Smooth.SmoothOn V g ->
+    Smooth.SmoothOn V (\fun (u: Open.Carrier V) => op (f u) (g u));
+\module Combine(f, g: Function, left: Extension[f], right: Extension[g]);
+\definition combine[op: Real.Real -> Real.Real -> Real.Real]: SmoothBinary op ->
+  \forall (f, g: Function) -> \exists Extension[f] -> \exists Extension[g] ->
+  \exists Extension[\fun (p: M.Point) => op (f p) (g p)] :=
+  \fun (smooth: _)(f, g: Function)(left: _)(right: _) => \block {
+    \takefrom p: Extension[f] \by left \then
+    \takefrom q: Extension[g] \by right \then
+    \return \exact(Combine[f := f, g := g, left := p, right := q].extension op smooth,
+      Extension[\fun (p: M.Point) => op (f p) (g p)])
+  };
+\definition add[f, g: Function]: \exists Extension[f] -> \exists Extension[g] ->
+  \exists Extension[\fun (p: M.Point) => Real.add (f p) (g p)] :=
+  combine Real.add Operations.addSmooth f g;
+\definition multiply[f, g: Function]: \exists Extension[f] -> \exists Extension[g] ->
+  \exists Extension[\fun (p: M.Point) => Real.mul (f p) (g p)] :=
+  combine Real.mul Operations.mulSmooth f g;
+
+\module Near(U: \Pow M.Point, open: Space.IsOpenIn M.space U, contains: Space.Member U x);
+\module Reciprocal(f: Function, extension: Extension[f], nonzero: Logic.Not (f x = Real.zero));

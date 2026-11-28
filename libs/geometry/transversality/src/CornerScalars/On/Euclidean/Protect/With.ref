@@ -1,0 +1,51 @@
+\definition bump: Functions.Smooth := Functions.complement cutoff.value;
+\import \parent.\parent.Relative[f := f, bump := bump] \as Perturb;
+\definition fixed[x: M.Point]: Space.Member cutoff.neighborhood x -> bump x = Real.zero :=
+  \fun (inside: _) => trans!{Real.Real} _ _ _
+    (congr!{Real.Real Real.Real} (Real.sub Real.one) _ _ (cutoff.oneOn x inside)) (Laws.subSelf Real.one);
+\definition protectedOfZero[x: M.Point]: bump x = Real.zero -> Space.Member U x :=
+  \fun (zero: _) => cutoff.supportWithin x
+    (Closure.contains M.space (Functions.Nonzero cutoff.value) x
+      (\fun (vanishes: cutoff.value x = Real.zero) =>
+        Laws.zeroNeOne (trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ vanishes) (sym!{Real.Real} _ _
+          (Distance.subZeroEq Real.one (cutoff.value x) zero)))));
+\definition lower[x: M.Point]: R.Le Real.zero (bump x) :=
+  Distance.subNonnegative Real.one (cutoff.value x) (cutoff.upper x);
+\definition upper[x: M.Point]: R.Le (bump x) Real.one :=
+  R.leReplaceRight _ _ _ (Laws.subZeroRight Real.one)
+    (Laws.addMonotoneLeft (Real.neg (cutoff.value x)) (Real.neg Real.zero) Real.one
+      (Laws.negAntitone Real.zero (cutoff.value x) (cutoff.lower x)));
+\definition bounded[x: M.Point]: R.Le (Real.mul (bump x) (bump x)) Real.one :=
+  R.leTrans _ (bump x) Real.one
+    (R.leReplaceRight _ _ _
+      (trans!{Real.Real} _ _ _ (Laws.fieldMulComm (bump x) Real.one) (Laws.fieldMulOneLeft (bump x)))
+      (Estimates.mulMonotone (bump x) (bump x) Real.one (lower x) (upper x))) (upper x);
+\definition ball[radius: Real.Real]: Output.OpenSet :=
+  Output.Topology[].ofOpen (Metrics.Ball Norm.metric Def.origin radius) (Balls.ballOpenIn Norm.metric Def.origin radius);
+\definition fixedRegular[given: RegularOnProtected]: Perturb.Fixed :=
+  \fun (x: M.Point)(zero: bump x = Real.zero)(atLevel: _) => given x (protectedOfZero x zero)
+    (TargetModel.equality TargetModel.unconstrained Output.whole (f.apply x) origin atLevel);
+\module WithParameter(a: Target.Point) {
+  \import \root.CornerScalars[n := n].On[M := M].Euclidean[m := m].Shift[f := f, bump := bump, a := a] \as Shifted;
+  \definition result[radius: Real.Real][regular: Perturb.At[a := a].Regular][near: R.Lt (Def.pointDistance Def.origin a) radius]: Result[radius] :=
+    Result[radius] {
+      map := Shifted.map,
+      neighborhood := cutoff.neighborhood,
+      neighborhoodOpen := cutoff.neighborhoodOpen,
+      contains := cutoff.contains,
+      agrees := \fun (x: M.Point)(inside: _) => TargetModel.equality TargetModel.unconstrained Output.whole
+        (Shifted.map.apply x) (f.apply x) (Shifted.fixed x (fixed x inside)),
+      regular := regular,
+      close := \fun (x: M.Point) => Shifted.close x radius (bounded x) near,
+    };
+}
+\definition exists[radius: Real.Real][positive: R.Lt Real.zero radius][given: RegularOnProtected]: \exists Result[radius] := \block {
+  \let center: Output.Carrier (ball radius) :=
+    \into[Target.Point](Def.origin, (ball radius).points) \by { Metrics.ballCenter Norm.metric Def.origin radius positive } \then
+  \takefrom a: \Cast[Output.Carrier (ball radius)] ({ p: Output.Carrier (ball radius) \where Perturb.At[a := p].Regular })
+    \by Perturb.dense (fixedRegular given) (ball radius) center \then
+  \let result: Result[radius] := WithParameter[a := a].result radius
+    (\bysub(Output.Carrier (ball radius), { p: Output.Carrier (ball radius) \where Perturb.At[a := p].Regular }, a))
+    (\bysub(Target.Point, (ball radius).points, a)) \then
+  \return \exact(result, Result[radius])
+};

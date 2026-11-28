@@ -1,0 +1,26 @@
+\import topology.Topology[Carrier := Model.Carrier c.constraints c.image] \as ChartSpace;
+\definition preimage: \Pow (Model.Carrier c.constraints c.image) :=
+  { u: Model.Carrier c.constraints c.image \where Space.Member U (Charts.point c u) };
+\definition preimageOpen: ChartSpace.IsOpenIn (Model.regionTopology c.constraints c.image) preimage :=
+  ChartMap.continuous U open;
+\definition centerInside: ChartSpace.Member preimage center :=
+  \idelim x = Charts.point c center \with y: M.Point => Space.Member U y \by {
+    base: contains, equality: sym!{M.Point} _ _ (Charts.pointCoordinate c x)
+  };
+\definition exists: \exists ChartNeighborhood.Neighborhood[preimage, center] :=
+  ChartNeighborhood.At[W := preimage, open := preimageOpen, a := center, inside := centerInside].exists;
+\module Within(neighborhood: ChartNeighborhood.Neighborhood[preimage, center]) {
+  \definition zero[f: Function][zeroOn: \forall (y: M.Point) -> Space.Member U y -> f y = Real.zero]: Extension[f] :=
+    Extension[f] {
+      domain := neighborhood.domain, included := neighborhood.included, contains := neighborhood.contains,
+      value := \fun (u: Open.Carrier neighborhood.domain) => Real.zero,
+      smooth := Operations.constantSmooth neighborhood.domain Real.zero,
+      agrees := \fun (u: Model.Carrier c.constraints neighborhood.domain) =>
+        sym!{Real.Real} _ _ (zeroOn (actual neighborhood.domain neighborhood.included u) (neighborhood.within u)),
+    };
+}
+\definition zero[f: Function]: (\forall (y: M.Point) -> Space.Member U y -> f y = Real.zero) -> \exists Extension[f] :=
+  \fun (zeroOn: _) => \block {
+    \takefrom neighborhood: ChartNeighborhood.Neighborhood[preimage, center] \by exists \then
+    \return \exact(Within[neighborhood := neighborhood].zero f zeroOn, Extension[f])
+  };

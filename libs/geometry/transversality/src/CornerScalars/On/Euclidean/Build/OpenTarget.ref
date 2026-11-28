@@ -1,0 +1,26 @@
+\import boundary_manifolds.Dimension[n := m].Quadrant[C := TargetModel.unconstrained, U := V] \as Range;
+\definition intoOpen[x: M.Point]: Range.Point :=
+  \into[Output.Carrier V](\into[Target.Point](g x, V.points) \by { inside x },
+    TargetModel.region TargetModel.unconstrained V) \by { TargetModel.unconstrainedNonnegative (g x) };
+\import TargetModel.Topology[C := TargetModel.unconstrained, U := V].Into[X := M.Point, source := M.space, f := intoOpen] \as Corestrict;
+\import boundary_manifolds.Dimension[n := m].Chart[M := Range.Point, space := Range.topology] \as RangeCharts;
+\import boundary_manifolds.SmoothMap[n := n, m := m].Between[M := M, N := Range.manifold] \as Restricted;
+\definition data: Restricted.Data := Restricted.Data { apply := intoOpen };
+\module At(c: Charts.Chart, x: M.Point, inChart: Charts.Contains c x, member: \In[Charts.Chart] M.atlas.charts c);
+\module With(c: Charts.Chart, d: RangeCharts.Chart, x: M.Point, inChart: Charts.Contains c x) {
+  \import Restricted.At[function := intoOpen, left := c, right := d, x := x, contains := inChart] \as Local;
+  \definition extension: \In[Charts.Chart] M.atlas.charts c -> \In[RangeCharts.Chart] Range.manifold.atlas.charts d -> \exists Local.Extension :=
+    \fun (left: \In[Charts.Chart] M.atlas.charts c)(right: \In[RangeCharts.Chart] Range.manifold.atlas.charts d) =>
+    \idelim Range.chart = d \with target: RangeCharts.Chart =>
+      \exists Restricted.At[function := intoOpen, left := c, right := target, x := x, contains := inChart].Extension \by {
+        base: \parent.At[c := c, x := x, inChart := inChart, member := left].exists,
+        equality: sym!{RangeCharts.Chart} d Range.chart right
+      };
+}
+\definition map: Restricted.Map := \into[Restricted.Data](data, Restricted.Map) \by {
+  Restricted.Laws[data] {
+    continuous := Corestrict.continuous coordinatesContinuous,
+    smooth := \fun (c: Charts.Chart)(d: RangeCharts.Chart)(x: M.Point)(local: Charts.Contains c x)
+      (left: _)(right: _)(target: _) => With[c := c, d := d, x := x, inChart := local].extension left right,
+  }
+};

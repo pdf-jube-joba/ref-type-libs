@@ -1,0 +1,14 @@
+\import Maps.At[function := into, left := c, right := Euclidean.chart, x := x, contains := inChart] \as Original;
+\import Restricted.At[function := intoOpen, left := c, right := Range.chart, x := x, contains := inChart] \as Result;
+\import manifold_gluing.QuadrantNeighborhood[n := n].On[C := c.constraints, U := c.image] \as Neighborhoods;
+\definition convert[e: Original.Extension]: Result.Extension := Result.Extension {
+  neighborhood := e.neighborhood, included := e.included, contains := e.contains,
+  map := e.map,
+  inside := \fun (u: Model.Carrier c.constraints e.neighborhood) =>
+    \refl(intoOpen (Charts.point c (Neighborhoods.include e.neighborhood e.included u))),
+  agrees := e.agrees,
+};
+\definition exists: \exists Result.Extension := \block {
+  \takefrom e: Original.Extension \by \parent.\parent.At[c := c, x := x, inChart := inChart, atlasMember := member].exists \then
+  \return \exact(convert e, Result.Extension)
+};

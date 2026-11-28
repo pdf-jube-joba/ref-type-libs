@@ -1,0 +1,27 @@
+\import \parent.Normalize[f := f, bump := bump].Values[] \as Normalized;
+\import sard.Corners[n := n, m := m].Between[M := M, N := Euclidean.manifold].Of[f := f] \as Original;
+\import boundary_manifolds.Tangent[n := n].On[M := M] \as Tangent;
+\definition Fixed: \Prop := \forall (x: M.Point) -> bump x = Real.zero -> (f.apply x \of Target.Point) = Def.origin -> Original.TangentialSurjective x;
+\definition origin: Euclidean.Point := Normalized.point Def.origin;
+\module At(a: Target.Point) {
+  \import \parent.\parent.Shift[f := f, bump := bump, a := a] \as Shift;
+  \import sard.Corners[n := n, m := m].Between[M := M, N := Euclidean.manifold].Of[f := Shift.map] \as Perturbed;
+  \definition Regular: \Prop := Perturbed.TangentialRegular origin;
+  \definition regular[fixed: Fixed][good: Normalized.Regular a]: Regular :=
+    \fun (x: M.Point)(atZero: Shift.map.apply x = origin) => \block {
+      \takefrom c: Tangent.At[x := x].Chart \by Tangent.At[x := x].chartExists \then
+      \let chart: Chart := \into[Charts.Chart](c, M.atlas.charts) \by { Tangent.At[x := x].member c } \then
+      \let local: Charts.LocalPoint chart := Tangent.At[x := x].localPoint c \then
+      \let zero: Shift.shifted x = Def.origin := congr!{Euclidean.Point Target.Point} (\fun (p: Euclidean.Point) => p) _ _ atZero \then
+      \let result: Perturbed.TangentialSurjective x := Shift.At[c := chart, x := local].regular
+        (\fun (off: bump x = Real.zero) => fixed x off (trans!{Target.Point} _ _ _ (sym!{Target.Point} _ _ (Shift.fixed x off)) zero))
+        good zero \then
+      \return result
+    };
+}
+\definition dense[fixed: Fixed][W: Output.OpenSet][center: Output.Carrier W]:
+   \exists (a: Output.Carrier W \where At[a := a].Regular) := \block {
+  \takefrom a: \Cast[Output.Carrier W] ({ p: Output.Carrier W \where Normalized.Regular p }) \by Normalized.regularIn W center \then
+  \return Logic.existsIntro[Output.Carrier W, { p: Output.Carrier W \where At[a := p].Regular }] a
+    (At[a := a].regular fixed (\bysub(Output.Carrier W, { p: Output.Carrier W \where Normalized.Regular p }, a)))
+};

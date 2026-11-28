@@ -1,0 +1,25 @@
+\import Graph.With[neighborhood := neighborhood] \as TubeGraph;
+\import Ambient.Subspace[U := neighborhood.image] \as Tube;
+\import compact_embeddings.Bridge[n := d, m := m].Between[M := Tube.smoothManifold, N := M] \as Boundaryless;
+\import Boundaryless.Of[f := neighborhood.retraction] \as Lifted;
+\import boundary_manifolds.Boundaryless[n := d].Of[M := Tube.smoothManifold] \as Source;
+\import topology.Topology[Carrier := Tube.Point] \as TubeSets;
+\import boundary_manifolds.Ambient[n := d].Over[M := Tube.smoothManifold, S := TubeSets.Whole] \as Charts;
+\import boundary_manifolds.Dimension[n := d].Chart[M := Source.manifold.Point, space := Source.manifold.space] \as CornerCharts;
+\import manifolds.Dimension[n := d].Chart[M := Tube.Point, space := Tube.smoothManifold.space] \as OrdinaryCharts;
+\import manifolds.Dimension[n := d].Atlas[M := Tube.Point, space := Tube.smoothManifold.space] \as OrdinaryAtlas;
+\definition standard: Source.OldChart := \into[OrdinaryCharts.Chart](Tube.standard, Tube.smoothManifold.atlas.charts) \by {
+  OrdinaryAtlas.includedInSaturation Tube.atlas Tube.standard (\refl(Tube.standard))
+};
+\definition patch: Charts.Adapted := Source.InChart[c := standard].patch;
+\import Charts.On[patch := patch] \as TubeChart;
+\definition chart: \Cast[CornerCharts.Chart] Source.manifold.atlas.charts :=
+  \into[CornerCharts.Chart](TubeChart.chart, Source.manifold.atlas.charts) \by {
+    Logic.existsIntro[Charts.Adapted, { p: Charts.Adapted \where TubeChart.chart = Charts.On[patch := p].chart }]
+      patch (\refl(TubeChart.chart))
+  };
+\import manifold_gluing.ChartMap[n := d].On[M := Source.manifold].Of[c := chart] \as IntoTube;
+\import boundary_manifolds.Dimension[n := d].Quadrant[C := boundary_manifolds.Model[n := d].unconstrained, U := neighborhood.image] \as OpenTarget;
+\definition chartFormula[u: OpenTarget.Point]: (IntoTube.map.apply u \of Tube.Point) = (u \of Tube.Point) := \refl(u);
+\module Relative(K, U: \Pow X.Point, closed: XS.IsClosedIn X.space K,
+  open: XS.IsOpenIn X.space U, inside: XS.Subset K U);

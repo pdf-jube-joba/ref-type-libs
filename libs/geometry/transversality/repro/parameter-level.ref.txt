@@ -1,0 +1,25 @@
+\module Repro {
+\inductive Nat: \VType := | zero: Nat | succ: Nat -> Nat ;
+\module Models(n: Nat^) {
+  \structure Model := { index: Nat^, };
+}
+\module Library(n: Nat^) {
+  \definition dimension: Nat^ := n;
+  \import \root.Repro[].Models[n := dimension] \as Source;
+  \module Between(M: Source.Model) {
+    \module Level {
+      \definition answer: Nat^ := M.index;
+    }
+  }
+}
+\module Caller(n: Nat^) {
+  \import \root.Repro[].Library[n := n] \as Lib;
+  \import \root.Repro[].Models[n := Lib.dimension] \as Source;
+  \module Between(M: Source.Model) {
+    \module Level {
+      \import Lib.Between[M := M].Level[] \as Value;
+      \definition answer: Nat^ := Value.answer;
+    }
+  }
+}
+}

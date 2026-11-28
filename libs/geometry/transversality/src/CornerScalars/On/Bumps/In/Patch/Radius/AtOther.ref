@@ -1,0 +1,13 @@
+\import \root.CornerScalars[n := n].On[M := M].At[c := d, x := y] \as Here;
+\import Charts.At[x := y, left := d, right := c, inLeft := \bysub(M.Point, d.domain, y)] \as Change;
+\module In(e: Change.Extension);
+\definition exists: \exists Here.Extension[value] :=
+  either!{{(Classical.excludedMiddle (Space.Member c.domain y))} {\exists Here.Extension[value]}
+    {\fun (inside: Space.Member c.domain y) => \block {
+      \takefrom e: Change.Extension \by M.atlas.compatible d c y (\bysub(M.Point, d.domain, y)) inside (chartMember d) (chartMember c) \then
+      \return \exact(In[e := e].extension, Here.Extension[value])
+    }}
+    {\fun (outside: Logic.Not (Space.Member c.domain y)) =>
+      Here.Near[U := Space.Complement envelope, open := envelopeClosed, contains := \fun (member: Space.Member envelope y) => outside (envelopeInChart y member)]
+        .zero value (\fun (z: M.Point)(away: _) => zeroAway z away)}
+  };
