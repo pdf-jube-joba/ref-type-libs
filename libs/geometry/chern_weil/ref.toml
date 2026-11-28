@@ -1,0 +1,14 @@
+[package]
+name = "chern_weil"
+
+[dependencies]
+std = { path = "../../std" }
+real = { path = "../../real/basic" }
+linear_algebra = { path = "../../algebra/linear_algebra" }
+calculus = { path = "../../analysis/calculus" }
+euclidean_forms = { path = "../euclidean_forms" }
+bundle_connections = { path = "../bundle_connections" }
+manifolds = { path = "../manifolds" }
+smooth_bundles = { path = "../smooth_bundles" }
+differential_forms = { path = "../differential_forms" }
+chain_complexes = { path = "../../algebra/homological/chain_complexes" }

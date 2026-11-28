@@ -1,0 +1,20 @@
+\import \root.Global[n := n, r := r].On[M := M].Atlas[I := I, chart := Bundle.chart, covers := bundle.atlas.covers] \as Atlas;
+\definition chartwise[i: I]: Euclidean.LocalForm (Bundle.chart i).image two :=
+  \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].TraceForm[].form;
+\module OnOverlap(i, j: I);
+\definition agrees: \forall (i, j: I) -> Atlas.Overlap[c := Bundle.chart i, d := Bundle.chart j].agrees two (chartwise i) (chartwise j) :=
+  \fun (i, j: I) => OnOverlap[i := i, j := j].law;
+\import Atlas.Glue[k := two, forms := chartwise, overlaps := agrees] \as Glue;
+\definition form: BaseForms.Form two := Glue.global;
+\definition coordinates: \forall (i: I) -> form (Bundle.chart i) = chartwise i := Glue.comparison;
+\import BaseForms.ExteriorDerivative[k := two] \as Derivative;
+\import BaseForms.At[k := three] \as Global3;
+\definition closed: Derivative.apply form = Global3.zero :=
+  Atlas.At[k := three].ext (Derivative.apply form) Global3.zero (\fun (i: I) =>
+    trans!{{Euclidean.LocalForm (Bundle.chart i).image three}} _ _ _
+      (congr!{{Euclidean.LocalForm (Bundle.chart i).image two} {Euclidean.LocalForm (Bundle.chart i).image three}}
+        Euclidean.On[U := (Bundle.chart i).image].ExteriorDerivative[k := two].apply _ _ (coordinates i))
+      \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].TraceForm[].closed);
+\import BaseForms.DeRham[].At[k := two] \as DeRham;
+\definition deRhamClass: DeRham.H :=
+  DeRham.classOf (\into[BaseForms.Form two](form, DeRham.Cycle) \by { closed });

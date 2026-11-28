@@ -1,0 +1,26 @@
+\import \root.Global[n := n, r := r].On[M := M].Atlas[I := I, chart := Bundle.chart, covers := bundle.atlas.covers] \as Atlas;
+\import \parent.Curvature[connection := previous].TraceForm[] \as Previous;
+\import \parent.Curvature[connection := current].TraceForm[] \as Current;
+\definition localDifference[i: I]: \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Matrix one :=
+  \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].ConnectionTrace[].difference (current i).matrix (previous i).matrix;
+\definition chartwise[i: I]: Euclidean.LocalForm (Bundle.chart i).image one :=
+  \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Trace[k := one].apply (localDifference i);
+\module OnOverlap(i, j: I);
+\definition agrees: \forall (i, j: I) -> Atlas.Agreement (Bundle.chart i) (Bundle.chart j) one (chartwise i) (chartwise j) :=
+  \fun (i, j: I) => OnOverlap[i := i, j := j].law;
+\import Atlas.Glue[k := one, forms := chartwise, overlaps := agrees] \as Glue;
+\definition form: BaseForms.Form one := Glue.global;
+\definition coordinates: \forall (i: I) -> form (Bundle.chart i) = chartwise i := Glue.comparison;
+\import BaseForms.ExteriorDerivative[k := one] \as D;
+\import BaseForms.At[k := two] \as Forms;
+\definition difference: BaseForms.Form two := Forms.plus Current.form (Forms.space.neg Previous.form);
+\module OnChart(i: I);
+\definition differential: D.apply form = difference :=
+  Atlas.At[k := two].ext (D.apply form) difference (\fun (i: I) => OnChart[i := i].law);
+\import BaseForms.DeRham[] \as DeRham;
+\import chain_complexes.Cochain[].Over[R := R.Real, ring := Spaces.ring].At[C := DeRham.complex, k := two] \as H;
+\definition exact: DeRham.Exact two difference :=
+  std.Logic[].Proposition[].existsIntro[BaseForms.Form one, { eta: BaseForms.Form one \where D.apply eta = difference }] form differential;
+\definition connectionIndependence: Current.deRhamClass = Previous.deRhamClass :=
+  H.classEqual (\into[BaseForms.Form two](Current.form, H.CycleCarrier) \by { Current.closed })
+    (\into[BaseForms.Form two](Previous.form, H.CycleCarrier) \by { Previous.closed }) exact;

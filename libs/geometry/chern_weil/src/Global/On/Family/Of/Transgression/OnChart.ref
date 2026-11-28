@@ -1,0 +1,28 @@
+\import \root.Local[n := n, r := r].On[U := (Bundle.chart i).image] \as Local;
+\import Euclidean.On[U := (Bundle.chart i).image] \as Scalar;
+\import Local.Curvature[connection := current i].TraceForm[] \as CurrentTrace;
+\import Local.Curvature[connection := previous i].TraceForm[] \as PreviousTrace;
+\import Local.Trace[k := one] \as Trace;
+\import Scalar.At[k := one] \as Forms1;
+\import Scalar.At[k := two] \as Forms2;
+\import Scalar.ExteriorDerivative[k := one] \as LocalD;
+\import Spaces.Linear[V := Scalar.Form one, W := Scalar.Form two, source := Forms1.space, target := Forms2.space].Operations[] \as LinearD;
+\definition localDerivative: LocalD.apply (chartwise i) = Forms2.plus CurrentTrace.form (Forms2.space.neg PreviousTrace.form) :=
+  eq_reason_in!{{Scalar.Form two} _
+    "=" {LocalD.apply (Forms1.plus CurrentTrace.primitive (Forms1.space.neg PreviousTrace.primitive))} "by" {
+      congr!{{Scalar.Form one} {Scalar.Form two}} LocalD.apply _ _
+        (trans!{{Scalar.Form one}} _ _ _ (Trace.addition (current i).matrix (Local.At[k := one].negative (previous i).matrix))
+          (congr!{{Scalar.Form one} {Scalar.Form one}} (Forms1.plus CurrentTrace.primitive) _ _ (Trace.negative (previous i).matrix))) }
+    "=" _ "by" { LocalD.addition CurrentTrace.primitive (Forms1.space.neg PreviousTrace.primitive) }
+    "=" _ "by" { congr!{{Scalar.Form two} {Scalar.Form two} {Scalar.Form two}} Forms2.plus _ _ _ _
+      CurrentTrace.localDerivative (trans!{{Scalar.Form two}} _ _ _ (LinearD.preservesNeg LocalD.map PreviousTrace.primitive)
+        (congr!{{Scalar.Form two} {Scalar.Form two}} Forms2.space.neg _ _ PreviousTrace.localDerivative)) }
+  };
+\definition law: D.apply form (Bundle.chart i) = difference (Bundle.chart i) :=
+  eq_reason_in!{{Scalar.Form two} _
+    "=" _ "by" { congr!{{Scalar.Form one} {Scalar.Form two}} LocalD.apply _ _ (coordinates i) }
+    "=" _ "by" { localDerivative }
+    "=" _ "by" { congr!{{Scalar.Form two} {Scalar.Form two} {Scalar.Form two}} Forms2.plus _ _ _ _
+      (sym!{{Scalar.Form two}} _ _ (Current.coordinates i))
+      (congr!{{Scalar.Form two} {Scalar.Form two}} Forms2.space.neg _ _ (sym!{{Scalar.Form two}} _ _ (Previous.coordinates i))) }
+  };

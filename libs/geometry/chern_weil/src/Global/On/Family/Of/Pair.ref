@@ -1,0 +1,11 @@
+\import Bundle.Pair[i := i, j := j] \as Change;
+\import manifolds.Dimension[n := n].Chart[M := M.Point, space := M.space].Transition[left := Change.c, right := Change.d] \as Transition;
+\import \root.Local[n := n, r := r].On[U := Transition.domain] \as Overlap;
+\import \root.Local[n := n, r := r].Restriction[U := Transition.domain, V := Change.c.image, included := Change.included] \as Restriction;
+\import \root.Transport[n := n, m := n, r := r].Between[U := Transition.domain, V := Change.d.image].Pullback[f := Change.map] \as Pullback;
+\import Overlap.Functions[] \as MatrixFunctions;
+\import Overlap.Product[p := zero, q := two] \as Left;
+\import Overlap.Product[p := two, q := zero] \as Right;
+\definition transition: Overlap.Matrix zero := MatrixFunctions.forms Change.transition;
+\definition Agreement[forms: Data two]: \Prop :=
+  Left.apply transition (Restriction.apply two (forms i)) = Right.apply (Pullback.apply two (forms j)) transition;

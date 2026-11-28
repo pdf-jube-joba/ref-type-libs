@@ -1,0 +1,104 @@
+\import \parent.At[k := one] \as M1;
+\import \parent.At[k := two] \as M2;
+\import \parent.Differential[k := zero] \as D0;
+\import \parent.Differential[k := one] \as D1;
+\import \parent.Product[p := zero, q := one] \as P01;
+\import \parent.Product[p := one, q := zero] \as P10;
+\import \parent.Product[p := one, q := one] \as P11;
+\import \parent.Product[p := zero, q := two] \as P02;
+\import \parent.Product[p := two, q := zero] \as P20;
+\import \parent.Leibniz[p := zero, q := one] \as Rule01;
+\import \parent.Leibniz[p := one, q := zero] \as Rule10;
+\import \parent.Associativity[p := zero, q := one, s := one] \as Assoc011;
+\import \parent.Associativity[p := one, q := zero, s := one] \as Assoc101;
+\import \parent.Associativity[p := one, q := one, s := zero] \as Assoc110;
+\import Scalar.At[k := two] \as Forms2;
+\import Spaces.Laws[V := Scalar.Form two, space := Forms2.space] \as Laws2;
+\definition differentialLeft: \forall (T: Matrix zero)(A: Matrix one) ->
+  D1.apply (P01.apply T A) = M2.plus (P11.apply (D0.apply T) A) (P02.apply T (D1.apply A)) :=
+  \fun (T: Matrix zero)(A: Matrix one) => trans!{{Matrix two}} _ _ _ (Rule01.law T A)
+    (ext two _ _ (\fun (a, b: Fin.Fin r) =>
+      congr!{{Scalar.Form two} {Scalar.Form two} {Scalar.Form two}} Forms2.plus _ _ _ _
+        (\transporteq two \with k: _ => Scalar.Form k \by { base: P11.apply (D0.apply T) A a b })
+        (Forms2.space.scalarOne (P02.apply T (D1.apply A) a b))));
+\definition differentialRight: \forall (B: Matrix one)(T: Matrix zero) ->
+  D1.apply (P10.apply B T) = M2.plus (P20.apply (D1.apply B) T) (M2.negative (P11.apply B (D0.apply T))) :=
+  \fun (B: Matrix one)(T: Matrix zero) => trans!{{Matrix two}} _ _ _ (Rule10.law B T)
+    (ext two _ _ (\fun (a, b: Fin.Fin r) =>
+      congr!{{Scalar.Form two} {Scalar.Form two} {Scalar.Form two}} Forms2.plus _ _ _ _
+        (\transporteq two \with k: _ => Scalar.Form k \by { base: P20.apply (D1.apply B) T a b })
+        (Laws2.minusOneScale (P11.apply B (D0.apply T) a b))));
+\definition assocLeft: \forall (T: Matrix zero)(A, B: Matrix one) ->
+  P11.apply (P01.apply T A) B = P02.apply T (P11.apply A B) :=
+  \fun (T: Matrix zero)(A, B: Matrix one) => ext two _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form two}} _ _ _
+    (sym!{{Scalar.Form two}} _ _ (\transporteq two \with k: _ => Scalar.Form k \by { base: P11.apply (P01.apply T A) B a b }))
+    (Assoc011.law T A B a b));
+\definition assocMiddle: \forall (A: Matrix one)(T: Matrix zero)(B: Matrix one) ->
+  P11.apply (P10.apply A T) B = P11.apply A (P01.apply T B) :=
+  \fun (A: Matrix one)(T: Matrix zero)(B: Matrix one) => ext two _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form two}} _ _ _
+    (sym!{{Scalar.Form two}} _ _ (\transporteq two \with k: _ => Scalar.Form k \by { base: P11.apply (P10.apply A T) B a b }))
+    (Assoc101.law A T B a b));
+\definition assocRight: \forall (A, B: Matrix one)(T: Matrix zero) ->
+  P20.apply (P11.apply A B) T = P11.apply A (P10.apply B T) :=
+  \fun (A, B: Matrix one)(T: Matrix zero) => ext two _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form two}} _ _ _
+    (sym!{{Scalar.Form two}} _ _ (\transporteq two \with k: _ => Scalar.Form k \by { base: P20.apply (P11.apply A B) T a b }))
+    (Assoc110.law A B T a b));
+\definition law: \forall (T: Matrix zero)(source, target: Connections.Connection) ->
+  P01.apply T source.matrix = M1.plus (D0.apply T) (P10.apply target.matrix T) ->
+  P02.apply T (\parent.Curvature[connection := source].value) =
+  P20.apply (\parent.Curvature[connection := target].value) T :=
+  \fun (T: Matrix zero)(source, target: Connections.Connection)(same: _) => \block {
+    \let A: Matrix one := source.matrix \then
+    \let B: Matrix one := target.matrix \then
+    \let dt: Matrix one := D0.apply T \then
+    \let bt: Matrix one := P10.apply B T \then
+    \let x: Matrix two := P02.apply T (D1.apply A) \then
+    \let y: Matrix two := P11.apply dt A \then
+    \let z: Matrix two := P11.apply bt A \then
+    \let u: Matrix two := P20.apply (D1.apply B) T \then
+    \let v: Matrix two := P11.apply B dt \then
+    \let w: Matrix two := P11.apply B bt \then
+    \let relation: P01.apply T A = M1.plus dt bt := same \then
+    \let left: P02.apply T (\parent.Curvature[connection := source].value) = M2.plus (D1.apply (P01.apply T A)) z :=
+      eq_reason_in!{{Matrix two} _
+        "=" {M2.plus x (P02.apply T (P11.apply A A))} "by" { P02.additionRight T (D1.apply A) (P11.apply A A) }
+        "=" _ "by" { congr!{{Matrix two} {Matrix two}} (M2.plus x) _ _ (sym!{{Matrix two}} _ _ (assocLeft T A A)) }
+        "=" _ "by" { congr!{{Matrix one} {Matrix two}} (\fun (C: Matrix one) => M2.plus x (P11.apply C A)) _ _ relation }
+        "=" {M2.plus x (M2.plus y z)} "by" {
+          congr!{{Matrix two} {Matrix two}} (M2.plus x) _ _ (P11.additionLeft dt bt A) }
+        "=" {M2.plus (M2.plus y x) z} "by" { ext two _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form two}} _ _ _
+          (sym!{{Scalar.Form two}} _ _ (Laws2.assoc (x a b) (y a b) (z a b)))
+          (congr!{{Scalar.Form two} {Scalar.Form two}} (\fun (f: Scalar.Form two) => Forms2.plus f (z a b)) _ _
+            (Laws2.comm (x a b) (y a b)))) }
+        "=" _ "by" { congr!{{Matrix two} {Matrix two}} (\fun (C: Matrix two) => M2.plus C z) _ _
+          (sym!{{Matrix two}} _ _ (differentialLeft T A)) }
+      } \then
+    \let differential: D1.apply (P01.apply T A) = M2.plus u (M2.negative v) :=
+      eq_reason_in!{{Matrix two} _
+        "=" _ "by" { congr!{{Matrix one} {Matrix two}} D1.apply _ _ relation }
+        "=" _ "by" { D1.addition dt bt }
+        "=" _ "by" { congr!{{Matrix two} {Matrix two} {Matrix two}} M2.plus _ _ _ _
+          (D0.square T) (differentialRight B T) }
+        "=" _ "by" { ext two _ _ (\fun (a, b: Fin.Fin r) => Laws2.zeroLeft (M2.plus u (M2.negative v) a b)) }
+      } \then
+    \let multiply: z = M2.plus v w := eq_reason_in!{{Matrix two} _
+      "=" _ "by" { assocMiddle B T A }
+      "=" _ "by" { congr!{{Matrix one} {Matrix two}} (P11.apply B) _ _ relation }
+      "=" _ "by" { P11.additionRight B dt bt }
+    } \then
+    \return eq_reason_in!{{Matrix two} {P02.apply T (\parent.Curvature[connection := source].value)}
+      "=" _ "by" { left }
+      "=" {M2.plus (M2.plus u (M2.negative v)) (M2.plus v w)} "by" {
+        congr!{{Matrix two} {Matrix two} {Matrix two}} M2.plus _ _ _ _ differential multiply }
+      "=" {M2.plus u w} "by" { ext two _ _ (\fun (a, b: Fin.Fin r) => eq_reason_in!{{Scalar.Form two} _
+        "=" _ "by" { Laws2.assoc (u a b) (Laws2.negative (v a b)) (Forms2.plus (v a b) (w a b)) }
+        "=" _ "by" { congr!{{Scalar.Form two} {Scalar.Form two}} (Forms2.plus (u a b)) _ _
+          (sym!{{Scalar.Form two}} _ _ (Laws2.assoc (Laws2.negative (v a b)) (v a b) (w a b))) }
+        "=" _ "by" { congr!{{Scalar.Form two} {Scalar.Form two}}
+          (\fun (f: Scalar.Form two) => Forms2.plus (u a b) (Forms2.plus f (w a b))) _ _ (Laws2.inverseLeft (v a b)) }
+        "=" _ "by" { congr!{{Scalar.Form two} {Scalar.Form two}} (Forms2.plus (u a b)) _ _ (Laws2.zeroLeft (w a b)) }
+      }) }
+      "=" _ "by" { congr!{{Matrix two} {Matrix two}} (M2.plus u) _ _ (sym!{{Matrix two}} _ _ (assocRight B B T)) }
+      "=" _ "by" { sym!{{Matrix two}} _ _ (P20.additionLeft (D1.apply B) (P11.apply B B) T) }
+    }
+  };

@@ -1,0 +1,36 @@
+\definition total: N.Nat^ := Nat.add p q;
+\definition next: N.Nat^ := N.Nat^::succ total;
+\import \parent.Product[p := p, q := q] \as Product;
+\import \parent.Product[p := N.Nat^::succ p, q := q] \as Left;
+\import \parent.Product[p := p, q := N.Nat^::succ q] \as Right;
+\import \parent.Differential[k := p] \as DP;
+\import \parent.Differential[k := q] \as DQ;
+\import \parent.Differential[k := total] \as D;
+\import Scalar.Leibniz[p := p, q := q] \as ScalarLaw;
+\import \parent.At[k := next] \as Result;
+\import Scalar.At[k := total] \as Input;
+\import Scalar.At[k := next] \as Output;
+\import Scalar.At[k := Nat.add (N.Nat^::succ p) q] \as SourceLeft;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form next, space := Output.space] \as Sums;
+\import Scalar.Wedge[p := p, q := q] \as Wedge;
+\import Scalar.Wedge[p := p, q := N.Nat^::succ q] \as RightWedge;
+\import Scalar.Wedge[p := N.Nat^::succ p, q := q] \as LeftWedge;
+\import Scalar.ExteriorDerivative[k := total] \as ScalarD;
+\import Scalar.Regrade[k := Nat.add (N.Nat^::succ p) q, l := next] \as Degree;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form total, space := Input.space].Mapping[W := Scalar.Form next, target := Output.space] \as DSum;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form (Nat.add (N.Nat^::succ p) q), space := SourceLeft.space].Mapping[W := Scalar.Form next, target := Output.space] \as RegradeSum;
+\definition left[A: Matrix (N.Nat^::succ p)][B: Matrix q][a, b: Fin.Fin r]: Scalar.Form next :=
+  Degree.cast (Left.apply A B a b) ScalarLaw.degree;
+\definition law: \forall (A: Matrix p)(B: Matrix q) ->
+  D.apply (Product.apply A B) = Result.plus (left (DP.apply A) B) (Result.scale (Sign.value p) (Right.apply A (DQ.apply B))) :=
+  \fun (A: Matrix p)(B: Matrix q) => ext next _ _ (\fun (a, b: Fin.Fin r) => eq_reason_in!{{Scalar.Form next} _
+    "=" _ "by" { DSum.law ScalarD.map (Fin.elements r) (\fun (c: Fin.Fin r) => Wedge.apply (A a c) (B c b)) }
+    "=" _ "by" { Sums.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => ScalarLaw.law (A a c) (B c b)) }
+    "=" _ "by" { Sums.addition (Fin.elements r)
+      (\fun (c: Fin.Fin r) => ScalarLaw.left (DP.apply A a c) (B c b))
+      (\fun (c: Fin.Fin r) => Output.scale (Sign.value p) (ScalarLaw.right (A a c) (DQ.apply B c b))) }
+    "=" _ "by" { congr!{{Scalar.Form next} {Scalar.Form next} {Scalar.Form next}} Output.plus _ _ _ _
+      (sym!{{Scalar.Form next}} _ _ (RegradeSum.law (Degree.map ScalarLaw.degree) (Fin.elements r)
+        (\fun (c: Fin.Fin r) => LeftWedge.apply (DP.apply A a c) (B c b))))
+      (Sums.scalar (Fin.elements r) (Sign.value p) (\fun (c: Fin.Fin r) => RightWedge.apply (A a c) (DQ.apply B c b))) }
+  });

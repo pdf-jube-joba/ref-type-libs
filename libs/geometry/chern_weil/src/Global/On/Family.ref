@@ -1,0 +1,3 @@
+\import SmoothBundles.Family[F := F, space := space] \as Bundles;
+\import RealConnections.Family[F := F, space := space] \as Connections;
+\module Of(I: \Set, bundle: Bundles.Bundle[I]);

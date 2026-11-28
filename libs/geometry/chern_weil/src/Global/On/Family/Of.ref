@@ -1,0 +1,8 @@
+\import Connections.Of[I := I, bundle := bundle] \as Bundle;
+\definition Data[k: N.Nat^]: \Set := \forall (i: I) -> \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Matrix k;
+\module Pair(i, j: I);
+\definition Compatible[forms: Data two]: \Prop :=
+  \forall (i, j: I) -> Pair[i := i, j := j].Agreement forms;
+\definition EndomorphismTwoForm: \Set := \Cast[Data two] ({ forms: Data two \where Compatible forms });
+\module Curvature(connection: Bundle.Connection);
+\module Transgression(previous, current: Bundle.Connection);

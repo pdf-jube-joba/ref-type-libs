@@ -1,0 +1,21 @@
+\import bundle_connections.MatrixCalculus[n := n, r := r].On[U := U] \as Matrices;
+\import bundle_connections.GlobalForms[n := n, r := r].On[U := U] \as BundleForms;
+\import BundleForms.WedgeAction[k := zero] \as Sums1;
+\import Scalar.DegreeZero[] \as DegreeZero;
+\import Scalar.At[k := one] \as Forms1;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form one, space := Forms1.space] \as FormsSums1;
+\import \parent.Product[p := zero, q := one] \as P01;
+\import \parent.Product[p := one, q := zero] \as P10;
+\import Scalar.Wedge[p := zero, q := one] \as W01;
+\import BundleForms.Multiply[k := one] \as Scalar1;
+\definition forms[T: Matrices.Matrix0][a, b: Fin.Fin r]: Scalar.Form zero := DegreeZero.apply (T a b);
+\definition left: \forall (T: Matrices.Matrix0)(A: Matrix one) -> P01.apply (forms T) A = Matrices.product01 T A :=
+  \fun (T: Matrices.Matrix0)(A: Matrix one) => ext one _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form one}} _ _ _
+    (FormsSums1.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => trans!{{Scalar.Form one}} _ _ _
+      (sym!{{Scalar.Form one}} _ _ (\transporteq one \with k: _ => Scalar.Form k \by { base: W01.apply (DegreeZero.apply (T a c)) (A c b) }))
+      (Scalar1.law (T a c) (A c b))))
+    (sym!{{Scalar.Form one}} _ _ (Sums1.sumOne (\fun (c: Fin.Fin r) => Forms1.multiply (T a c) (A c b)))));
+\definition right: \forall (A: Matrix one)(T: Matrices.Matrix0) -> P10.apply A (forms T) = Matrices.product10 A T :=
+  \fun (A: Matrix one)(T: Matrices.Matrix0) => ext one _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form one}} _ _ _
+    (FormsSums1.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => Scalar1.rightLaw (T c b) (A a c)))
+    (sym!{{Scalar.Form one}} _ _ (Sums1.sumOne (\fun (c: Fin.Fin r) => Forms1.multiply (T c b) (A a c)))));

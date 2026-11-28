@@ -1,0 +1,31 @@
+\import Bundle.Pair[i := i, j := j] \as Change;
+\import manifolds.Dimension[n := n].Chart[M := M.Point, space := M.space].Transition[left := Change.c, right := Change.d] \as Domain;
+\import \root.Local[n := n, r := r].On[U := Domain.domain] \as Overlap;
+\import \root.Local[n := n, r := r].Restriction[U := Domain.domain, V := Change.c.image, included := Change.included] \as Restriction;
+\import \root.Transport[n := n, m := n, r := r].Between[U := Domain.domain, V := Change.d.image].Pullback[f := Change.map] \as Pullback;
+\import \root.Global[n := n, r := r].On[M := M].Family[F := F, space := space].Of[I := I, bundle := bundle].Pair[i := i, j := j] \as Frame;
+\import Overlap.TraceGauge[k := two] \as TraceGauge;
+\import Overlap.Trace[k := two] \as Trace;
+\import Overlap.Product[p := zero, q := two] \as P02;
+\import Overlap.Product[p := two, q := zero] \as P20;
+\definition source: Overlap.Matrix two := Restriction.apply two (local i);
+\definition target: Overlap.Matrix two := Pullback.apply two (local j);
+\definition intertwines: TraceGauge.left Change.transition source = TraceGauge.right target Change.transition :=
+  eq_reason_in!{{Overlap.Matrix two} _
+    "=" {P02.apply Frame.transition source} "by" {
+      Overlap.ext two _ _ (\fun (a, b: Fin.Fin r) => sym!{{Euclidean.LocalForm Domain.domain two}} _ _
+        (trans!{{Euclidean.LocalForm Domain.domain two}} _ _ _
+          (sym!{{Euclidean.LocalForm Domain.domain two}} _ _ (\transporteq two \with k: _ => Euclidean.LocalForm Domain.domain k \by {
+            base: P02.apply Frame.transition source a b }))
+          (TraceGauge.leftWedge Change.transition source a b))) }
+    "=" {P20.apply target Frame.transition} "by" { compatible i j }
+    "=" _ "by" { TraceGauge.rightWedge target Change.transition }
+  };
+\import \root.Global[n := n, r := r].On[M := M].Atlas[I := I, chart := Bundle.chart, covers := bundle.atlas.covers].Overlap[c := Bundle.chart i, d := Bundle.chart j] \as ChartPair;
+\definition law: ChartPair.agrees two (chartwise i) (chartwise j) :=
+  eq_reason_in!{{Euclidean.LocalForm Domain.domain two} _
+    "=" _ "by" { Restriction.trace two (local i) }
+    "=" {Trace.apply (Pullback.apply two (local j))} "by" {
+      TraceGauge.law Change.transition Change.inverse source target Change.Inverse[].left Change.Inverse[].right intertwines }
+    "=" _ "by" { sym!{{Euclidean.LocalForm Domain.domain two}} _ _ (Pullback.trace two (local j)) }
+  };

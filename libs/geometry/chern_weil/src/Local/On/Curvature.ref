@@ -1,0 +1,73 @@
+\import \parent.At[k := two] \as Two;
+\import \parent.At[k := three] \as Three;
+\import \parent.Differential[k := one] \as D1;
+\import \parent.Differential[k := two] \as D2;
+\import \parent.Product[p := one, q := one] \as P11;
+\import \parent.Product[p := one, q := two] \as P12;
+\import \parent.Product[p := two, q := one] \as P21;
+\import \parent.Associativity[p := one, q := one, s := one] \as Assoc;
+\import \parent.Leibniz[p := one, q := one] \as Leibniz;
+\import Scalar.At[k := three] \as Forms3;
+\import Spaces.Laws[V := Scalar.Form three, space := Forms3.space] \as Laws3;
+\definition A: Matrix one := connection.matrix;
+\definition value: Matrix two := Two.plus (D1.apply A) (P11.apply A A);
+\definition covariant[F: Matrix two]: Matrix three :=
+  Three.plus (Three.plus (D2.apply F) (P12.apply A F)) (Three.negative (P21.apply F A));
+\definition leftDerivative: Matrix three := P21.apply (D1.apply A) A;
+\definition rightDerivative: Matrix three := P12.apply A (D1.apply A);
+\definition triple: Matrix three := P12.apply A (P11.apply A A);
+\definition differentialWedge: D2.apply (P11.apply A A) = Three.plus leftDerivative (Three.negative rightDerivative) :=
+  trans!{{Matrix three}} _ _ _ (Leibniz.law A A)
+    (ext three _ _ (\fun (a, b: Fin.Fin r) =>
+      congr!{{Scalar.Form three} {Scalar.Form three} {Scalar.Form three}} Forms3.plus _ _ _ _
+        (\transporteq three \with k: _ => Scalar.Form k \by { base: leftDerivative a b })
+        (Laws3.minusOneScale (rightDerivative a b))));
+\definition differentialCurvature: D2.apply value = Three.plus leftDerivative (Three.negative rightDerivative) :=
+  eq_reason_in!{{Matrix three} {D2.apply value}
+    "=" _ "by" { D2.addition (D1.apply A) (P11.apply A A) }
+    "=" _ "by" { congr!{{Matrix three} {Matrix three}} (\fun (F: Matrix three) => Three.plus F (D2.apply (P11.apply A A))) _ _ (D1.square A) }
+    "=" {D2.apply (P11.apply A A)} "by" { ext three _ _ (\fun (a, b: Fin.Fin r) => Laws3.zeroLeft (D2.apply (P11.apply A A) a b)) }
+    "=" _ "by" { differentialWedge }
+  };
+\definition leftProduct: P12.apply A value = Three.plus rightDerivative triple :=
+  P12.additionRight A (D1.apply A) (P11.apply A A);
+\definition rightProduct: P21.apply value A = Three.plus leftDerivative triple :=
+  trans!{{Matrix three}} _ _ _ (P21.additionLeft (D1.apply A) (P11.apply A A) A)
+    (congr!{{Matrix three} {Matrix three}} (Three.plus leftDerivative) _ _
+      (ext three _ _ (\fun (a, b: Fin.Fin r) =>
+        trans!{{Scalar.Form three}} _ _ _
+          (sym!{{Scalar.Form three}} _ _ (\transporteq three \with k: _ => Scalar.Form k \by { base: P21.apply (P11.apply A A) A a b }))
+          (Assoc.law A A A a b))));
+\definition cancel: \forall (x, y, z: Scalar.Form three) ->
+  Forms3.plus (Forms3.plus x (Laws3.negative y)) (Forms3.plus y z) = Forms3.plus x z :=
+  \fun (x, y, z: Scalar.Form three) => eq_reason_in!{{Scalar.Form three} _
+    "=" _ "by" { Laws3.assoc x (Laws3.negative y) (Forms3.plus y z) }
+    "=" _ "by" { congr!{{Scalar.Form three} {Scalar.Form three}} (Forms3.plus x) _ _
+      (sym!{{Scalar.Form three}} _ _ (Laws3.assoc (Laws3.negative y) y z)) }
+    "=" _ "by" { congr!{{Scalar.Form three} {Scalar.Form three}}
+      (\fun (v: Scalar.Form three) => Forms3.plus x (Forms3.plus v z)) _ _ (Laws3.inverseLeft y) }
+    "=" _ "by" { congr!{{Scalar.Form three} {Scalar.Form three}} (Forms3.plus x) _ _ (Laws3.zeroLeft z) }
+  };
+\definition bianchi: covariant value = Three.origin :=
+  ext three _ _ (\fun (a, b: Fin.Fin r) => \block {
+    \let at: Matrix three -> Scalar.Form three := \fun (F: Matrix three) => F a b \then
+    \let x: Scalar.Form three := leftDerivative a b \then
+    \let y: Scalar.Form three := rightDerivative a b \then
+    \let z: Scalar.Form three := triple a b \then
+    \return eq_reason_in!{{Scalar.Form three} {covariant value a b}
+      "=" {Forms3.plus (Forms3.plus (Forms3.plus x (Laws3.negative y)) (Forms3.plus y z))
+        (Laws3.negative (Forms3.plus x z))} "by" {
+        congr!{{Scalar.Form three} {Scalar.Form three} {Scalar.Form three}} Forms3.plus _ _ _ _
+          (congr!{{Scalar.Form three} {Scalar.Form three} {Scalar.Form three}} Forms3.plus _ _ _ _
+            (congr!{{Matrix three} {Scalar.Form three}} at _ _ differentialCurvature)
+            (congr!{{Matrix three} {Scalar.Form three}} at _ _ leftProduct))
+          (congr!{{Matrix three} {Scalar.Form three}} (\fun (F: Matrix three) => Laws3.negative (at F)) _ _ rightProduct) }
+      "=" _ "by" { congr!{{Scalar.Form three} {Scalar.Form three}} (\fun (v: Scalar.Form three) =>
+        Forms3.plus v (Laws3.negative (Forms3.plus x z))) _ _ (cancel x y z) }
+      "=" _ "by" { Laws3.comm (Forms3.plus x z) (Laws3.negative (Forms3.plus x z)) }
+      "=" _ "by" { Laws3.inverseLeft (Forms3.plus x z) }
+    }
+  });
+\module Coordinates;
+\module TraceForm;
+\module QuadraticTrace;

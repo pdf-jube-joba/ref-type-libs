@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Primary implementation: `chern_weil`.
+- Primary implementation: [`chern_weil`](../libs/geometry/chern_weil/README.md).
 - Construct curvature, the Bianchi identity, and closed forms obtained by evaluating conjugation-invariant polynomials.
 - Construct transgression forms between connections; prove connection independence and naturality of de Rham classes.
 - Construct normalized Chern, Pontryagin, and Euler forms; expose direct-sum and product formulas.

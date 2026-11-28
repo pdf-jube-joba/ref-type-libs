@@ -1,0 +1,26 @@
+\import Scalar.CoordinateBasis[].At[k := one] \as Basis;
+\import Basis.Differential[] \as ExteriorDifferential;
+\import Scalar.At[k := two] \as Forms2;
+\import Spaces.Sums[I := Fin.Fin n].Vector[V := Scalar.Form two, space := Forms2.space] \as Directions;
+\import Spaces.Sums[I := Basis.Tuple].Vector[V := Scalar.Form two, space := Forms2.space] \as Coefficients;
+\import Scalar.Wedge[p := one, q := one] \as Wedge;
+\definition expression[indices: Basis.Enumeration][a, b: Fin.Fin r]: Scalar.Form two :=
+  Forms2.plus
+    (Directions.sum (Fin.elements n) (\fun (j: Fin.Fin n) =>
+      Coefficients.sum indices (ExteriorDifferential.contribution j (A a b))))
+    (Two.sum (\fun (c: Fin.Fin r) => Wedge.apply
+      (Basis.assemble indices (Scalar.coefficient one (A a c)))
+      (Basis.assemble indices (Scalar.coefficient one (A c b)))));
+\definition comparison: \forall (indices: Basis.Enumeration) -> value = expression indices :=
+  \fun (indices: Basis.Enumeration) => ext two _ _ (\fun (a, b: Fin.Fin r) =>
+    congr!{{Scalar.Form two} {Scalar.Form two} {Scalar.Form two}} Forms2.plus _ _ _ _
+      (ExteriorDifferential.formula (A a b) indices)
+      (congr!{{Fin.Fin r -> Scalar.Form two} {Scalar.Form two}} Two.sum _ _
+        (\axiom:funext(
+          (\fun (c: Fin.Fin r) => Wedge.apply (A a c) (A c b)),
+          (\fun (c: Fin.Fin r) => Wedge.apply
+            (Basis.assemble indices (Scalar.coefficient one (A a c)))
+            (Basis.assemble indices (Scalar.coefficient one (A c b)))),
+          \fun (c: Fin.Fin r) => congr!{{Scalar.Form one} {Scalar.Form one} {Scalar.Form two}} Wedge.apply _ _ _ _
+            (sym!{{Scalar.Form one}} _ _ (Basis.reconstruction (A a c) indices))
+            (sym!{{Scalar.Form one}} _ _ (Basis.reconstruction (A c b) indices))))));

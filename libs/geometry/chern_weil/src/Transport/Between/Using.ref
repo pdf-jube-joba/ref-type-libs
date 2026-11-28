@@ -1,0 +1,60 @@
+\import Target.Product[p := one, q := one] \as TargetProduct;
+\import SourceForms.Wedge[p := one, q := one] \as SourceWedge;
+\import TargetForms.Wedge[p := one, q := one] \as TargetWedge;
+\import SourceForms.ExteriorDerivative[k := one] \as SourceD;
+\import TargetForms.ExteriorDerivative[k := one] \as TargetD;
+\import SourceForms.At[k := two] \as Output;
+\definition apply[k: N.Nat^][A: Target.Matrix k][a, b: Fin.Fin r]: SourceForms.Form k := (maps k).apply (A a b);
+\definition connection[A: TargetConnections.Connection]: SourceConnections.Connection :=
+  SourceConnections.Connection { matrix := apply one A.matrix };
+\module Trace(k: N.Nat^) {
+  \import TargetForms.At[k := k] \as InputForms;
+  \import SourceForms.At[k := k] \as OutputForms;
+  \import Spaces.Sums[I := Fin.Fin r].Vector[V := TargetForms.Form k, space := InputForms.space].Mapping[W := SourceForms.Form k, target := OutputForms.space] \as TraceSum;
+  \definition law: \forall (A: Target.Matrix k) ->
+    (maps k).apply (Target.Trace[k := k].apply A) = Source.Trace[k := k].apply (apply k A) :=
+    \fun (A: Target.Matrix k) => TraceSum.law (maps k) (Fin.elements r) (\fun (a: Fin.Fin r) => A a a);
+}
+\module Product(p, q: N.Nat^) {
+  \definition total: N.Nat^ := std.Data[].Nat[].Basic[].Def[].add p q;
+  \import Target.Product[p := p, q := q] \as TargetProduct;
+  \import Source.Product[p := p, q := q] \as SourceProduct;
+  \import TargetForms.Wedge[p := p, q := q] \as TargetWedge;
+  \import SourceForms.Wedge[p := p, q := q] \as SourceWedge;
+  \import TargetForms.At[k := total] \as Input;
+  \import SourceForms.At[k := total] \as Output;
+  \import Spaces.Sums[I := Fin.Fin r].Vector[V := SourceForms.Form total, space := Output.space] \as Sums;
+  \import Spaces.Sums[I := Fin.Fin r].Vector[V := TargetForms.Form total, space := Input.space].Mapping[W := SourceForms.Form total, target := Output.space] \as SumMap;
+  \definition law:
+    (\forall (omega: TargetForms.Form p)(eta: TargetForms.Form q) ->
+      (maps total).apply (TargetWedge.apply omega eta) = SourceWedge.apply ((maps p).apply omega) ((maps q).apply eta)) ->
+    \forall (A: Target.Matrix p)(B: Target.Matrix q) ->
+      apply total (TargetProduct.apply A B) = SourceProduct.apply (apply p A) (apply q B) :=
+    \fun (wedge: _)(A: Target.Matrix p)(B: Target.Matrix q) => Source.ext total _ _ (\fun (a, b: Fin.Fin r) =>
+      trans!{{SourceForms.Form total}} _ _ _
+        (SumMap.law (maps total) (Fin.elements r) (\fun (c: Fin.Fin r) => TargetWedge.apply (A a c) (B c b)))
+        (Sums.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => wedge (A a c) (B c b))));
+}
+\definition curvature:
+  (\forall (omega: TargetForms.Form one) -> SourceD.apply ((maps one).apply omega) = (maps two).apply (TargetD.apply omega)) ->
+  (\forall (omega, eta: TargetForms.Form one) -> (maps two).apply (TargetWedge.apply omega eta) = SourceWedge.apply ((maps one).apply omega) ((maps one).apply eta)) ->
+  \forall (A: TargetConnections.Connection) -> apply two (Target.Curvature[connection := A].value) = Source.Curvature[connection := connection A].value :=
+  \fun (commutes: _)(multiplicative: _)(A: TargetConnections.Connection) => Source.ext two _ _ (\fun (a, b: Fin.Fin r) =>
+    trans!{{SourceForms.Form two}} _ _ _
+      ((maps two).preservesAdd (TargetD.apply (A.matrix a b)) (TargetProduct.apply A.matrix A.matrix a b))
+      (congr!{{SourceForms.Form two} {SourceForms.Form two} {SourceForms.Form two}} Output.plus _ _ _ _
+        (sym!{{SourceForms.Form two}} _ _ (commutes (A.matrix a b)))
+        (congr!{{Source.Matrix two} {SourceForms.Form two}} (\fun (G: Source.Matrix two) => G a b) _ _
+          (Product[p := one, q := one].law multiplicative A.matrix A.matrix))));
+\import SourceForms.At[k := one] \as Output1;
+\import TargetForms.At[k := one] \as Input1;
+\import Spaces.Linear[V := TargetForms.Form one, W := SourceForms.Form one, source := Input1.space, target := Output1.space].Operations[] \as OneMaps;
+\import Source.ConnectionTrace[] \as SourceTrace;
+\import Target.ConnectionTrace[] \as TargetTrace;
+\definition difference: \forall (A, B: Target.Matrix one) ->
+  apply one (TargetTrace.difference A B) = SourceTrace.difference (apply one A) (apply one B) :=
+  \fun (A, B: Target.Matrix one) => Source.ext one _ _ (\fun (a, b: Fin.Fin r) =>
+    trans!{{SourceForms.Form one}} _ _ _
+      ((maps one).preservesAdd (A a b) (Input1.space.neg (B a b)))
+      (congr!{{SourceForms.Form one} {SourceForms.Form one}} (Output1.plus ((maps one).apply (A a b))) _ _
+        (OneMaps.preservesNeg (maps one) (B a b))));

@@ -1,0 +1,9 @@
+\definition next: N.Nat^ := N.Nat^::succ k;
+\import Scalar.ExteriorDerivative[k := k] \as D;
+\import \parent.At[k := k] \as Source;
+\import \parent.At[k := next] \as Target;
+\definition apply[A: Matrix k][a, b: Fin.Fin r]: Scalar.Form next := derivative k A a b;
+\definition addition: \forall (A, B: Matrix k) -> apply (Source.plus A B) = Target.plus (apply A) (apply B) :=
+  \fun (A, B: Matrix k) => ext next _ _ (\fun (a, b: Fin.Fin r) => D.addition (A a b) (B a b));
+\definition square: \forall (A: Matrix k) -> derivative next (apply A) = \parent.At[k := N.Nat^::succ next].origin :=
+  \fun (A: Matrix k) => ext (N.Nat^::succ next) _ _ (\fun (a, b: Fin.Fin r) => Scalar.Square[k := k].law (A a b));

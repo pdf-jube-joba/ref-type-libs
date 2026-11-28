@@ -1,0 +1,39 @@
+\definition from: N.Nat^ := Nat.add p q;
+\definition total: N.Nat^ := Nat.add q p;
+\import \parent.Product[p := p, q := q] \as Forward;
+\import \parent.Product[p := q, q := p] \as Reverse;
+\import \parent.Trace[k := from] \as OldTrace;
+\import \parent.Trace[k := total] \as NewTrace;
+\import Scalar.Wedge[p := p, q := q] \as Left;
+\import Scalar.Wedge[p := q, q := p] \as Right;
+\import Scalar.At[k := from] \as Input;
+\import Scalar.At[k := total] \as Output;
+\import Scalar.GradedCommutativity[p := p, q := q] \as Graded;
+\import Scalar.Regrade[k := from, l := total] \as Degree;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form total, space := Output.space] \as Sums;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form from, space := Input.space].Mapping[W := Scalar.Form total, target := Output.space] \as RegradeSum;
+\definition sign: R.Real := Sign.value (Nat.mul p q);
+\definition law: \forall (A: Matrix p)(B: Matrix q) ->
+  NewTrace.apply (Reverse.apply B A) = Output.scale sign (Degree.cast (OldTrace.apply (Forward.apply A B)) Graded.degree) :=
+  \fun (A: Matrix p)(B: Matrix q) => \block {
+    \let term: Fin.Fin r -> Fin.Fin r -> Scalar.Form from :=
+      \fun (a, b: Fin.Fin r) => Left.apply (A a b) (B b a) \then
+    \let cast: Scalar.Form from -> Scalar.Form total := (Degree.map Graded.degree).apply \then
+    \return eq_reason_in!{{Scalar.Form total} _
+      "=" _ "by" { Sums.exchange (Fin.elements r) (Fin.elements r) (\fun (b, a: Fin.Fin r) => Right.apply (B b a) (A a b)) }
+      "=" {Sums.sum (Fin.elements r) (\fun (a: Fin.Fin r) =>
+        Sums.sum (Fin.elements r) (\fun (b: Fin.Fin r) => Output.scale sign (cast (term a b))))} "by" {
+        Sums.congruent (Fin.elements r) _ _ (\fun (a: Fin.Fin r) =>
+          Sums.congruent (Fin.elements r) _ _ (\fun (b: Fin.Fin r) => Graded.law (A a b) (B b a))) }
+      "=" {Sums.sum (Fin.elements r) (\fun (a: Fin.Fin r) =>
+        Output.scale sign (cast (Forward.apply A B a a)))} "by" {
+        Sums.congruent (Fin.elements r) _ _ (\fun (a: Fin.Fin r) => trans!{{Scalar.Form total}} _ _ _
+          (Sums.scalar (Fin.elements r) sign (\fun (b: Fin.Fin r) => cast (term a b)))
+          (congr!{{Scalar.Form total} {Scalar.Form total}} (Output.scale sign) _ _
+            (sym!{{Scalar.Form total}} _ _ (RegradeSum.law (Degree.map Graded.degree) (Fin.elements r) (term a))))) }
+      "=" _ "by" { Sums.scalar (Fin.elements r) sign (\fun (a: Fin.Fin r) => cast (Forward.apply A B a a)) }
+      "=" _ "by" { congr!{{Scalar.Form total} {Scalar.Form total}} (Output.scale sign) _ _
+        (sym!{{Scalar.Form total}} _ _ (RegradeSum.law (Degree.map Graded.degree) (Fin.elements r)
+          (\fun (a: Fin.Fin r) => Forward.apply A B a a))) }
+    }
+  };

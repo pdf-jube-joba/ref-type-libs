@@ -95,6 +95,7 @@ Use `real.Analysis` for shared numerical lemmas, `Def` / `Prop` to separate oper
 | [geometry/bundle_operations](geometry/bundle_operations/README.md) | `bundle_operations` | Cocycle gluing, direct sums/tensors/duals/Hom/exterior powers, realification/complexification and pullback |
 | [geometry/smooth_bundles](geometry/smooth_bundles/README.md) | `smooth_bundles` | Real/complex smooth bundles and metrics, duals/tensors/exterior powers, smooth frame actions/local diffeomorphisms, representation-associated bundles, tangent/normal comparisons |
 | [geometry/bundle_connections](geometry/bundle_connections/README.md) | `bundle_connections` | Real/complex bundle connections, bundle-valued forms and induced connections, metric-compatible and Levi–Civita connections |
+| [geometry/chern_weil](geometry/chern_weil/README.md) | `chern_weil` | Curvature, Bianchi identity, and closed trace forms for real vector bundles |
 | [geometry/bundle_complements](geometry/bundle_complements/README.md) | `bundle_complements` | Metrics/finite embeddings from finite partitions, orthogonal complements, continuous-projection images and sets of isomorphism classes |
 | [geometry/bundle_extension](geometry/bundle_extension/README.md) | `bundle_extension` | Tietze, neighborhood extension of bundles/maps/isomorphisms over closed subspaces, shrinking comparisons and stabilization |
 | [geometry/grassmannians](geometry/grassmannians/README.md) | `grassmannians` | Finite Grassmannians, graph coordinates, universal bundles and stabilization |
