@@ -1,0 +1,105 @@
+\import manifold_gluing.HalfSpaceDouble[n := p] \as Target;
+\import manifold_gluing.Reflection[n := p] \as Reflection;
+\import manifold_gluing.BoundaryInclusion[n := n].On[M := B].With[cover := cover] \as Boundary;
+\import manifold_gluing.DiffeomorphismIdentity[n := n].On[M := Boundary.manifold] \as Identity;
+\import manifold_gluing.BoundarySeam[n := n].Between[M := B,N := B].With[leftCover := cover,rightCover := cover].Along[d := Identity.value] \as Seam;
+\import topological_constructions.Pushout[A := B.Point,B := B.Point,C := Boundary.manifold.Point].Of[u := Seam.left,v := Seam.right] \as Pushout;
+\import Pushout.Universal[D := Target.AmbientPoint] \as Descent;
+\definition left: B.Point -> Seam.Point := Seam.inl;
+\definition right: B.Point -> Seam.Point := Seam.inr;
+\import boundary_manifolds.SmoothMap[n := dimension,m := Half.dimension].Between[M := B,N := Half.manifold] \as Maps;
+\definition laws: Neat.Laws[f] := \bysub(Maps.Map,{ g: Maps.Map \where Neat.Laws[g] },f);
+\definition positive[x: B.Point]: Target.AmbientPoint := Half.coordinates (Maps.apply f x);
+\definition negative[x: B.Point]: Target.AmbientPoint := Target.reflect (positive x);
+\definition agrees: Descent.Compatible positive negative := \fun (b: Boundary.manifold.Point) =>
+  sym!{{Target.AmbientPoint}} _ _ (Target.compatible
+    (\into[Target.AmbientPoint](positive (Boundary.apply b),Target.Zero) \by {
+      (Coordinates.boundaryCriterion (Maps.apply f (Boundary.apply b))).ltr
+        ((laws.boundary (Boundary.apply b)).ltr (\bysub(B.Point,BoundarySet.points,(b \of BoundarySet.Point))))
+    }));
+\definition value: Seam.Point -> Target.AmbientPoint := Descent.apply positive negative agrees;
+\definition onLeft[x: B.Point]: value (Seam.inl x) = positive x := Descent.onLeft positive negative agrees x;
+\definition onRight[x: B.Point]: value (Seam.inr x) = negative x := Descent.onRight positive negative agrees x;
+\definition inCoordinates[x,y: Target.AmbientPoint][same: x = y]: (x \of Model.Point) = (y \of Model.Point) :=
+  congr!{{Target.AmbientPoint} {Model.Point}} (\fun (v: Target.AmbientPoint) => v) x y same;
+\definition positiveContinuous: topology.Continuity[A := B.Point,B := Target.AmbientPoint].Continuous B.space Target.ambient positive :=
+  topology.Continuity[A := B.Point,B := Model.Point].Corestriction[S := Open.whole.points].corestrictContinuous B.space CoordinateSpace.topology positive
+    (topology.Composition[A := B.Point,B := Half.manifold.Point,C := Model.Point].composeContinuous B.space Half.manifold.space CoordinateSpace.topology
+      (Maps.apply f) Half.value (\bysub(Maps.Data,Maps.Map,(f \of Maps.Map))).continuous Coordinates.valueContinuous);
+\definition continuous: topology.Continuity[A := Seam.Point,B := Target.AmbientPoint].Continuous Seam.topology Target.ambient value :=
+  Descent.continuous B.space B.space Target.ambient positive negative agrees positiveContinuous
+    (topology.Composition[A := B.Point,B := Target.AmbientPoint,C := Target.AmbientPoint].composeContinuous B.space Target.ambient Target.ambient
+      positive Target.reflect positiveContinuous Reflection.continuous);
+\definition height[y: Seam.Point]: R.Real := value y Half.normal;
+\definition leftHeight[x: B.Point]: height (Seam.inl x) = Half.height (Maps.apply f x) :=
+  trans!{{R.Real}} _ _ _
+    (congr!{{Target.AmbientPoint} {R.Real}} (\fun (v: Target.AmbientPoint) => v Half.normal) _ _ (onLeft x))
+    (Half.last (Maps.apply f x));
+\definition rightHeight[x: B.Point]: height (Seam.inr x) = R.neg (Half.height (Maps.apply f x)) :=
+  trans!{{R.Real}} _ _ _
+    (congr!{{Target.AmbientPoint} {R.Real}} (\fun (v: Target.AmbientPoint) => v Half.normal) _ _ (onRight x))
+    (trans!{{R.Real}} _ _ _ (Reflection.normalSign (positive x))
+      (congr!{{R.Real} {R.Real}} R.neg _ _ (Half.last (Maps.apply f x))));
+\definition leftNonnegative[x: B.Point]: O.Le R.zero (height (Seam.inl x)) :=
+  O.leReplaceRight _ _ _ (sym!{{R.Real}} _ _ (leftHeight x)) (Half.nonnegative (Maps.apply f x));
+\definition rightZero[x: B.Point][member: O.Le R.zero (height (Seam.inr x))]: Half.height (Maps.apply f x) = R.zero := \block {
+  \let h: R.Real := Half.height (Maps.apply f x) \then
+  \let opposite: O.Le R.zero (R.neg h) := O.leReplaceRight _ _ _ (rightHeight x) member \then
+  \let nonpositive: O.Le h R.zero := O.leReplaceLeft _ _ _ (Arithmetic.negInvolutive h)
+    (O.leReplaceRight _ _ _ Arithmetic.negZero (Arithmetic.negAntitone R.zero (R.neg h) opposite)) \then
+  \return O.leAntisym h R.zero nonpositive (Half.nonnegative (Maps.apply f x))
+};
+\definition sourceBoundary[x: B.Point][zero: Half.height (Maps.apply f x) = R.zero]: \In[B.Point] BoundarySet.points x :=
+  (laws.boundary x).rtl ((Coordinates.boundaryCriterion (Maps.apply f x)).rtl
+    (trans!{{R.Real}} _ _ _ (Half.last (Maps.apply f x)) zero));
+\import BoundarySet.Build[cover := cover] \as OrdinaryBoundary;
+\import boundary_manifolds.Boundaryless[n := n].Of[M := OrdinaryBoundary.manifold] \as BoundaryConversion;
+\definition seamPoint[x: B.Point][member: \In[B.Point] BoundarySet.points x]: Boundary.manifold.Point :=
+  BoundaryConversion.forward (\into[B.Point](x,BoundarySet.points) \by { member });
+\definition seamValue[x: B.Point][zero: Half.height (Maps.apply f x) = R.zero]: Seam.inl x = Seam.inr x :=
+  Seam.glued (seamPoint x (sourceBoundary x zero));
+\definition covered[y: Seam.Point]: O.Le R.zero (height y) -> \exists (x: B.Point \where Seam.inl x = y) :=
+  Pushout.induction (\fun (y: Seam.Point) => O.Le R.zero (height y) -> \exists (x: B.Point \where Seam.inl x = y))
+    (\fun (x: B.Point)(member: _) => Logic.existsIntro[B.Point,{ w: B.Point \where Seam.inl w = Seam.inl x }] x (\refl(Seam.inl x)))
+    (\fun (x: B.Point)(member: _) => Logic.existsIntro[B.Point,{ w: B.Point \where Seam.inl w = Seam.inr x }] x (seamValue x (rightZero x member))) y;
+\definition positiveInjective[x,y: B.Point][same: (positive x \of Model.Point) = (positive y \of Model.Point)]: x = y :=
+  laws.embedding.injective x y (Coordinates.valueInjective (Maps.apply f x) (Maps.apply f y) same);
+\definition reflectInjective[x,y: B.Point][same: negative x = negative y]: x = y :=
+  positiveInjective x y (trans!{{Model.Point}} _ _ _ (sym!{{Model.Point}} _ _ (Reflection.involution (positive x)))
+    (trans!{{Model.Point}} _ _ _ (congr!{{Target.AmbientPoint} {Model.Point}} (\fun (v: Target.AmbientPoint) => Reflection.flip v) _ _ same) (Reflection.involution (positive y))));
+\definition cross[x,y: B.Point][same: value (Seam.inl x) = value (Seam.inr y)]: Seam.inl x = Seam.inr y := \block {
+  \let nonnegative: O.Le R.zero (height (Seam.inr y)) := O.leReplaceRight _ _ _
+    (congr!{{Target.AmbientPoint} {R.Real}} (\fun (v: Target.AmbientPoint) => v Half.normal) _ _ same) (leftNonnegative x) \then
+  \let zero: Half.height (Maps.apply f y) = R.zero := rightZero y nonnegative \then
+  \let fixed: (negative y \of Model.Point) = (positive y \of Model.Point) :=
+    Reflection.fixesZero (positive y) (trans!{{R.Real}} _ _ _ (Half.last (Maps.apply f y)) zero) \then
+  \let equal: x = y := positiveInjective x y
+    (trans!{{Model.Point}} _ _ _ (sym!{{Model.Point}} _ _ (inCoordinates _ _ (onLeft x)))
+      (trans!{{Model.Point}} _ _ _ (inCoordinates _ _ same) (trans!{{Model.Point}} _ _ _ (inCoordinates _ _ (onRight y)) fixed))) \then
+  \return trans!{{Seam.Point}} _ _ _ (congr!{{B.Point} {Seam.Point}} Seam.inl _ _ equal) (seamValue y zero)
+};
+\definition sameLeft[x,y: B.Point][same: value (left x) = value (left y)]: left x = left y := \block {
+  \let values: positive x = positive y := trans!{{Target.AmbientPoint}} (positive x) (value (left x)) (positive y)
+    (sym!{{Target.AmbientPoint}} (value (left x)) (positive x) (onLeft x))
+    (trans!{{Target.AmbientPoint}} (value (left x)) (value (left y)) (positive y) same (onLeft y)) \then
+  \return congr!{{B.Point} {Seam.Point}} left x y (positiveInjective x y (inCoordinates (positive x) (positive y) values))
+};
+\definition sameRight[x,y: B.Point][same: value (right x) = value (right y)]: right x = right y := \block {
+  \let values: negative x = negative y := trans!{{Target.AmbientPoint}} (negative x) (value (right x)) (negative y)
+    (sym!{{Target.AmbientPoint}} (value (right x)) (negative x) (onRight x))
+    (trans!{{Target.AmbientPoint}} (value (right x)) (value (right y)) (negative y) same (onRight y)) \then
+  \return congr!{{B.Point} {Seam.Point}} right x y (reflectInjective x y values)
+};
+\definition fromLeft[x: B.Point]: \forall (y: Seam.Point) -> value (left x) = value y -> left x = y :=
+  Pushout.induction (\fun (y: Seam.Point) => value (left x) = value y -> left x = y)
+    (\fun (y: B.Point)(same: value (left x) = value (left y)) => sameLeft x y same)
+    (\fun (y: B.Point)(same: value (left x) = value (right y)) => cross x y same);
+\definition fromRight[x: B.Point]: \forall (y: Seam.Point) -> value (right x) = value y -> right x = y :=
+  Pushout.induction (\fun (y: Seam.Point) => value (right x) = value y -> right x = y)
+    (\fun (y: B.Point)(same: value (right x) = value (left y)) =>
+      sym!{{Seam.Point}} (left y) (right x) (cross y x (sym!{{Target.AmbientPoint}} (value (right x)) (value (left y)) same)))
+    (\fun (y: B.Point)(same: value (right x) = value (right y)) => sameRight x y same);
+\definition injective: \forall (x,y: Seam.Point) -> value x = value y -> x = y :=
+  Pushout.induction (\fun (x: Seam.Point) => \forall (y: Seam.Point) -> value x = value y -> x = y)
+    fromLeft fromRight;
+\module WithCollar(compact: topology.Topology[Carrier := B.Point].IsCompact B.space);

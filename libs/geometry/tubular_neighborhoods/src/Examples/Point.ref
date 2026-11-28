@@ -1,0 +1,73 @@
+\import std.Data[].FinSet[] \as Fin;
+\import compact_embeddings.Examples[].Point[].At[a := a] \as Embedded;
+\import compact_embeddings.HalfSpace[k := zero] \as Half;
+\import compact_embeddings.Neat[n := zero] \as Neat;
+\import manifolds.Dimension[n := zero].Examples[].Euclidean[] \as Space;
+\import boundary_manifolds.Boundaryless[n := zero].Of[M := Space.smoothManifold] \as Corners;
+\import boundary_manifolds.MapIdentity[n := zero].On[M := Corners.manifold] \as Identity;
+\import boundary_manifolds.NeatIdentity[n := zero].On[M := Corners.manifold] \as NeatIdentity;
+\import calculus.Real[].OneDimension[] \as One;
+\import calculus.Real[].Multivariable[n := One.dimension].Open[] \as Open;
+\import boundary_manifolds.Model[n := One.dimension] \as LineModel;
+\definition time: Neat.halfLine.Point := \into[Open.Carrier Open.whole](Open.Whole[].point (\fun (i: One.Index) => a),LineModel.region Neat.constraints Open.whole) \by {
+  LineModel.halfSpaceNonnegative One.index (\fun (i: One.Index) => a) (Order.Order[].leOfLt R.zero a positive)
+};
+\import Neat.Constant[M := Corners.manifold,c := time] \as Constant;
+\import Neat.Graph[k := zero].Between[M := Corners.manifold,E := Corners.manifold] \as Graphs;
+\import Graphs.Of[f := Identity.map,h := Constant.map] \as Graph;
+\import boundary_manifolds.Tangent[n := zero].On[M := Corners.manifold] \as Tangent;
+\import boundary_manifolds.Neat[n := zero,m := One.dimension].Between[M := Corners.manifold,N := Neat.halfLine] \as HeightNeat;
+\import boundary_manifolds.Tangent[n := One.dimension].On[M := Neat.halfLine].At[x := time] \as Target;
+\definition noHeightBoundary: Logic.Not Target.Cones[].Boundary := \fun (boundary: _) =>
+  Order.Order[].ltNotEq R.zero a positive (sym!{{R.Real}} _ _ ((Neat.LineAt[t := time].boundary).ltr boundary));
+\definition heightInward: \forall (v: Target.Vector) -> Target.Cones[].Inward v :=
+  topology.Topology[Carrier := Neat.halfLine.Point].Finite[].doubleNegElim _ noHeightBoundary;
+\module At(x: Corners.manifold.Point) {
+  \import Tangent.At[x := x] \as Source;
+  \import HeightNeat.At[f := Constant.map,x := x] \as Height;
+  \definition inward: \forall (v: Source.Vector) -> Source.Cones[].Inward v :=
+    topology.Topology[Carrier := Corners.manifold.Point].Finite[].doubleNegElim _ Corners.At[x := x].noBoundary;
+  \definition normal: Height.NormalOnto := \fun (w: Target.Vector) =>
+    Logic.existsIntro[Source.Vector, { v: Source.Vector \where Target.Cones[].Tangential (Height.difference v w) }] Source.Operations[].origin
+      (Logic.And[_, _]::# (heightInward _) (heightInward _));
+  \definition tangent[v: Source.Vector]: Source.Cones[].Tangential v :=
+    Logic.And[_, _]::# (inward v) (inward (Source.Operations[].negative v));
+}
+\definition height: Graphs.HeightLaws[Constant.map] := Graphs.HeightLaws[Constant.map] {
+  boundary := \fun (x: Corners.manifold.Point) => Logic.PropEquiv[_, _] {
+    ltr := \fun (b: _) => Logic.falseElim _ (Corners.At[x := x].noBoundary b),
+    rtl := \fun (b: _) => Logic.falseElim _ (noHeightBoundary b),
+  },
+  normal := \fun (x: Corners.manifold.Point) => At[x := x].normal,
+  reflects := \fun (x: Corners.manifold.Point)(v: Tangent.Vector x)(member: _) => At[x := x].tangent v,
+};
+\import boundary_manifolds.Immersion[n := zero,m := Half.dimension].Between[M := Corners.manifold,N := Half.manifold] \as Embeddings;
+\import Graph.First[laws := NeatIdentity.embedding] \as EmbeddedGraph;
+\import Graph.With[embedded := Embeddings.embeddingLaws EmbeddedGraph.embedding,noBoundary := Half.noBoundary,height := height] \as Result;
+\import \root.Euclidean[n := zero,k := one].On[M := Space.smoothManifold].Of[e := Embedded.embedding] \as Euclidean;
+\import Euclidean.HalfSpace[p := zero,dimension := \refl(One.dimension),B := Corners.manifold] \as Model;
+\import Euclidean.Neat[j := Model.j] \as Slice;
+\import linear_algebra.Euclidean[n := One.dimension] \as E;
+\definition heightValue[x: Space.smoothManifold.Point]: Slice.height x = a := \refl(a);
+\definition extension: Model.Extension[Result.neat] := Model.Extension[Result.neat] {
+  base := Corners.backward,
+  agrees := \fun (x: Corners.manifold.Point) => \axiom:funext((\fun (i: One.Index) => a),Model.coordinates (Result.neat.apply x),
+    \fun (i: One.Index) => trans!{{R.Real}} _ _ _ (sym!{{R.Real}} _ _ (Half.last (Result.neat.apply x)))
+      (congr!{{One.Index} {R.Real}} (Model.coordinates (Result.neat.apply x)) _ _ (sym!{{One.Index}} _ _ (Fin.singletonValue i)))),
+  covers := \fun (x: Space.smoothManifold.Point)(member: _) =>
+    Logic.existsIntro[Corners.manifold.Point, { y: Corners.manifold.Point \where Corners.backward y = x }] (Corners.forward x) (\refl(x)),
+  transverse := \fun (x: Space.smoothManifold.Point)(vanishes: _) =>
+    Logic.falseElim _ (Order.Order[].ltNotEq R.zero a positive (sym!{{R.Real}} _ _ vanishes)),
+};
+\import Model.Of[f := Result.neat,extension := extension] \as Extended;
+\import Slice.Crossing[transverse := extension.transverse] \as Regular;
+\import topological_algebra.Euclidean[].Zero[] \as Singleton;
+\import topology.Topology[Carrier := Space.smoothManifold.Point] \as Topology;
+\definition compact: Topology.IsCompact Space.smoothManifold.space :=
+  \idelim Topology.Singleton Singleton.origin = Topology.Whole \with U: \Pow Space.smoothManifold.Point => Topology.IsCompactIn Space.smoothManifold.space U \by {
+    base: Topology.Compactness[].singletonCompact Space.smoothManifold.space Singleton.origin,
+    equality: \axiom:setext((Topology.Singleton Singleton.origin),Topology.Whole,
+      \fun (x: Space.smoothManifold.Point)(member: _) => \refl(x),
+      \fun (x: Space.smoothManifold.Point)(member: _) => Singleton.unique x Singleton.origin)
+  };
+\definition tube: \exists Regular.Result := Extended.exists compact;

@@ -1,0 +1,2 @@
+\import boundary_manifolds.Boundary[n := n].Of[M := B] \as BoundarySet;
+\module With(cover: BoundarySet.Cover);

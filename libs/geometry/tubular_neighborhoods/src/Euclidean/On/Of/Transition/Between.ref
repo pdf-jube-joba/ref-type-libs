@@ -1,0 +1,34 @@
+\definition image: Open.OpenSet := Open.intersection left.image right.image;
+\definition imageContains[x: M.Point]: T.Member image.points (Maps.apply e x) :=
+  Logic.And[_, _]::#
+    (\idelim L.endpoint (zero x) = Maps.apply e x \with y: E.Vector => T.Member left.image.points y \by {
+      base: left.into (\into[Normal.Point](zero x,left.domain) \by { left.section x }), equality: L.atZero x
+    })
+    (\idelim Rgt.endpoint (zero x) = Maps.apply e x \with y: E.Vector => T.Member right.image.points y \by {
+      base: right.into (\into[Normal.Point](zero x,right.domain) \by { right.section x }), equality: Rgt.atZero x
+    });
+\import L.OnImage[t := left,V := image,included := Open.intersectionLeft left.image right.image,contains := imageContains] \as First;
+\import Rgt.OnImage[t := right,V := image,included := Open.intersectionRight left.image right.image,contains := imageContains] \as Second;
+\import L.Restriction[t := First.restricted] \as From;
+\import Rgt.Restriction[t := Second.restricted] \as To;
+\import manifolds.OpenSubmanifold[n := d].On[M := Normal.manifold] \as NormalOpen;
+\import NormalOpen.In[U := From.openDomain] \as Left;
+\import NormalOpen.In[U := To.openDomain] \as Right;
+\import Ambient.Subspace[U := image] \as Common;
+\import manifolds.Diffeomorphism[n := d,m := d].Between[M := Right.manifold,N := Common.smoothManifold] \as RightTube;
+\import manifolds.Diffeomorphism[n := d,m := d].Between[M := Left.manifold,N := Right.manifold] \as Change;
+\definition transition: Change.Diffeomorphism :=
+  manifolds.DiffeomorphismComposition[n := d,m := d,l := d].Between[M := Left.manifold,N := Common.smoothManifold,P := Right.manifold].Of[
+    d := From.diffeomorphism,e := RightTube.Of[d := To.diffeomorphism].inverse].compose;
+\definition intertwines[q: Left.Point]: Rgt.endpoint (transition.forward.apply q) = L.endpoint q :=
+  Second.restricted.right (From.send q);
+\definition firstCenter[x: M.Point]: Left.Point :=
+  \into[Normal.Point](zero x,First.restricted.domain) \by { First.restricted.section x };
+\definition secondCenter[x: M.Point]: Right.Point :=
+  \into[Normal.Point](zero x,Second.restricted.domain) \by { Second.restricted.section x };
+\definition fixesZero[x: M.Point]: transition.forward.apply (firstCenter x) = secondCenter x :=
+  trans!{{Right.Point}} _ _ _
+    (congr!{{Open.Carrier image} {Right.Point}} (To.diffeomorphism.backward.apply) _ _
+      (boundary_manifolds.Refinement[A := E.Vector].equality image.points (From.send (firstCenter x)) (To.send (secondCenter x))
+        (trans!{{E.Vector}} _ _ _ (L.atZero x) (sym!{{E.Vector}} _ _ (Rgt.atZero x)))))
+    ((RightTube.laws To.diffeomorphism).leftInverse (secondCenter x));

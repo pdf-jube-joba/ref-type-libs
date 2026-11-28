@@ -6,3 +6,6 @@
 \module Product(A,B,D,F: \Set, a: topology.Structures[].Topology[A], b: topology.Structures[].Topology[B],
   d: topology.Structures[].Topology[D], f: topology.Structures[].Topology[F], s: \Pow D, t: \Pow F);
 \module Line;
+\module Examples;
+\module HalfSpaceCoordinates(p: std.Data[].Nat[].Nat^);
+\module ReflectedDouble(n: std.Data[].Nat[].Nat^);

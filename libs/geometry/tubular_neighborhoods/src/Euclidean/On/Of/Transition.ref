@@ -1,0 +1,3 @@
+\import \parent.With[lift := a] \as L;
+\import \parent.With[lift := b] \as Rgt;
+\module Between(left: L.Neighborhood,right: Rgt.Neighborhood);

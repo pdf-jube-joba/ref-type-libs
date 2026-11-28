@@ -1,0 +1,62 @@
+\import calculus.Real[].OneDimension[] \as One;
+\import compact_embeddings.Neat[n := p] \as Height;
+\import calculus.Real[].Multivariable[n := One.dimension].Open[] \as LineOpen;
+\import boundary_manifolds.Model[n := One.dimension] \as LineModel;
+\import manifolds.Dimension[n := p].Examples[].Euclidean[] \as HalfOrdinary;
+\import boundary_manifolds.Boundaryless[n := p].Of[M := HalfOrdinary.smoothManifold] \as HalfEuclidean;
+\import topology.Homeomorphism[A := HalfOrdinary.smoothManifold.Point,B := HalfEuclidean.manifold.Point] \as LeftComparison;
+\import topological_constructions.Product[A := HalfEuclidean.manifold.Point,B := Height.halfLine.Point] \as PairSpace;
+\import topological_algebra.Euclidean[].Dimension[n := Half.dimension].Topology[] \as ModelTopology;
+\import topological_algebra.Euclidean[].Dimension[n := One.dimension].Topology[] \as LineTopology;
+\import topological_algebra.Euclidean[].Dimension[n := d].Topology[] \as Ambient;
+\import metric_spaces.RealLine[] \as RealLine;
+\import topology.Continuity[A := Half.manifold.Point,B := E.Vector] \as MapTopology;
+\import topology.Topology[Carrier := E.Vector] \as Vectors;
+\import Fin.Sum[m := p,n := One.dimension] \as Indices;
+\import calculus.Blocks[n := p,m := One.dimension] \as Blocks;
+\definition coordinatesContinuous: MapTopology.Continuous Half.manifold.space Ambient.topology coordinates :=
+  \fun (U: \Pow E.Vector)(open: _) =>
+    topological_algebra.Coordinates[K := R.Real,I := Fin.Fin d].Universal[A := Half.manifold.Point].continuous
+      Half.manifold.space RealLine.topology coordinates
+      (\fun (i: Fin.Fin d) => topology.Composition[A := Half.manifold.Point,B := Model.Point,C := R.Real].composeContinuous
+        Half.manifold.space ModelTopology.topology RealLine.topology Half.value (\fun (v: Model.Point) => v (toIndex i))
+        HalfCoordinates.valueContinuous (ModelTopology.coordinateContinuous (toIndex i))) U (Ambient.metricOpen U open);
+\definition points: \Pow E.Vector := { v: E.Vector \where O.Le R.zero (v j) };
+\import Vectors.Subspace[S := points] \as Positive;
+\definition Point: \Set := Positive.CarrierSet;
+\definition topology: topology.Structures[].Topology[Point] := Positive.topology Ambient.topology;
+\definition forward[y: Half.manifold.Point]: Point := \into[E.Vector](coordinates y,points) \by { nonnegative y };
+\definition backward[v: Point]: Half.manifold.Point := point v (\bysub(E.Vector,points,v));
+\definition forwardContinuous: topology.Continuity[A := Half.manifold.Point,B := Point].Continuous Half.manifold.space topology forward :=
+  MapTopology.Corestriction[S := points].corestrictContinuous Half.manifold.space Ambient.topology forward coordinatesContinuous;
+\definition inclusion: topology.Continuity[A := Point,B := E.Vector].Continuous topology Ambient.topology (\fun (v: Point) => v) :=
+  topology.Continuity[A := Point,B := E.Vector].Corestriction[S := points].inclusionContinuous Ambient.topology;
+\definition evaluation[i: Fin.Fin Half.dimension]: topology.Continuity[A := Point,B := R.Real].Continuous topology RealLine.topology
+  (\fun (v: Point) => v (fromIndex i)) :=
+  topology.Composition[A := Point,B := E.Vector,C := R.Real].composeContinuous topology Ambient.topology RealLine.topology
+    (\fun (v: Point) => v) (\fun (v: E.Vector) => v (fromIndex i)) inclusion (Ambient.coordinateContinuous (fromIndex i));
+\definition left[v: Point]: HalfOrdinary.smoothManifold.Point := Blocks.left (coordinateInput v (\bysub(E.Vector,points,v)));
+\definition right[v: Point]: Height.halfLine.Point := Half.second (coordinateInput v (\bysub(E.Vector,points,v)));
+\import topological_algebra.Euclidean[].Dimension[n := p].Topology[] \as LeftTopology;
+\definition leftContinuous: topology.Continuity[A := Point,B := HalfOrdinary.smoothManifold.Point].Continuous topology HalfOrdinary.smoothManifold.space left :=
+  \fun (U: \Pow HalfOrdinary.smoothManifold.Point)(open: _) =>
+    topological_algebra.Coordinates[K := R.Real,I := Fin.Fin p].Universal[A := Point].continuous topology RealLine.topology left
+      (\fun (i: Fin.Fin p) => evaluation (Indices.left i)) U (LeftTopology.metricOpen U open);
+\definition rightContinuous: topology.Continuity[A := Point,B := Height.halfLine.Point].Continuous topology Height.halfLine.space right :=
+  LineModel.Topology[C := Height.constraints,U := LineOpen.whole].Into[X := Point,source := topology,f := right].continuous
+    (\fun (U: \Pow LineModel.Point)(open: _) =>
+      topological_algebra.Coordinates[K := R.Real,I := One.Index].Universal[A := Point].continuous topology RealLine.topology
+        (\fun (v: Point) => right v) (\fun (i: One.Index) => evaluation (Indices.right i)) U (LineTopology.metricOpen U open));
+\definition backwardContinuous: topology.Continuity[A := Point,B := Half.manifold.Point].Continuous topology Half.manifold.space backward :=
+  PairSpace.Universal[X := Point].pairContinuous topology HalfEuclidean.manifold.space Height.halfLine.space
+    (\fun (v: Point) => HalfEuclidean.forward (left v)) right
+    (topology.Composition[A := Point,B := HalfOrdinary.smoothManifold.Point,C := HalfEuclidean.manifold.Point].composeContinuous
+      topology HalfOrdinary.smoothManifold.space HalfEuclidean.manifold.space left HalfEuclidean.forward leftContinuous
+      (LeftComparison.laws _ _ HalfEuclidean.comparison).forwardContinuous) rightContinuous;
+\definition homeomorphism: topology.Homeomorphism[A := Half.manifold.Point,B := Point].Homeomorphism[Half.manifold.space,topology] :=
+  topology.Homeomorphism[A := Half.manifold.Point,B := Point].Homeomorphism[Half.manifold.space,topology] {
+    forward := forward, backward := backward, forwardContinuous := forwardContinuous, backwardContinuous := backwardContinuous,
+    leftInverse := \fun (y: Half.manifold.Point) => pointCoordinates y (nonnegative y),
+    rightInverse := \fun (v: Point) => boundary_manifolds.Refinement[A := E.Vector].equality points (forward (backward v)) v
+      (coordinatesPoint v (\bysub(E.Vector,points,v))),
+  };
