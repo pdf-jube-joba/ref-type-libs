@@ -1,0 +1,5 @@
+\import boundary_manifolds.Face[n := d, r := r].Global[F := F, M := M] \as Faces;
+\import \root.Faces[n := dimension, m := m].Between[M := M, T := T] \as Sard;
+\import boundary_manifolds.SmoothMap[n := dimension, m := m].Between[M := M, N := T] \as Maps;
+\definition restrict[f: Maps.Map][face: Faces.Face][right: Sard.Chart]: Sard.Restriction[right] :=
+  Sard.Of[f := f].FaceDimension[d := d].From[F := F].Restricted[inclusion := face].restriction right;

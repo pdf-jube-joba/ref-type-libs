@@ -1,0 +1,11 @@
+\import boundary_manifolds.MapComposition[n := d, m := n, l := m].Between[M := F, N := M, P := T].Of[
+  f := inclusion, g := f] \as Composition;
+\import boundary_manifolds.SmoothMap[n := d, m := m].Between[M := F, N := T] \as MapsOnFace;
+\definition map: MapsOnFace.Map := Composition.map;
+\import \root.Corners[n := d, m := m].Between[M := F, N := T].Of[f := map] \as Values;
+\definition restriction[right: Chart]: Restriction[right] := Restriction[right] {
+  regular := { y: T.Point \where Values.Regular y },
+  exceptional := Values.InChart[right := right].criticalCoordinates,
+  null := Values.sard right,
+  outside := Values.InChart[right := right].regularAt,
+};

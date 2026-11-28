@@ -1,0 +1,20 @@
+\import \parent.\parent.At[a := Section.apply b] \as Full;
+\import Remainders.Differential[U := U, V := RangeOpen.whole, f := h, a := Section.apply b] \as Jacobian;
+\import calculus.Vector[n := n, m := m] \as Vectors;
+\definition derivative: \forall (v: Fiber.Point) -> (SliceValues.differential b).apply v =
+  Jacobian.value.apply (Input.rightLinear.apply v) :=
+  \fun (v: Fiber.Point) =>
+    trans!{Range.Point} _ _ _
+      (congr!{Vectors.LinearMap Range.Point} (\fun (d: Vectors.LinearMap) => d.apply v) _ _ (Composition.At[a := b].jacobian))
+      (congr!{SourceSpace.Point Range.Point} Jacobian.value.apply _ _
+        (congr!{{calculus.Vector[n := n, m := Input.dimension].LinearMap} SourceSpace.Point}
+          (\fun (d: calculus.Vector[n := n, m := Input.dimension].LinearMap) => d.apply v) _ _ (Section.At[a := b].law)));
+
+\definition surjective: SliceValues.SurjectiveAt b -> Whole.SurjectiveAt (Section.apply b) :=
+  \fun (surjective: SliceValues.SurjectiveAt b) =>
+    Full.sectionSurjective (\fun (y: Range.Point) => \block {
+      \takefrom v: \Cast[Fiber.Point] ({ v: Fiber.Point \where (SliceValues.differential b).apply v = y }) \by surjective y \then
+      \return Logic.existsIntro[Fiber.Point, { v: Fiber.Point \where Jacobian.value.apply (Input.rightLinear.apply v) = y }] v
+        (trans!{Range.Point} _ _ _ (sym!{Range.Point} _ _ (derivative v))
+          (\bysub(Fiber.Point, { v: Fiber.Point \where (SliceValues.differential b).apply v = y }, v)))
+    });

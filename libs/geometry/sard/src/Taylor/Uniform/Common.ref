@@ -1,0 +1,28 @@
+\definition All[r, b: Real.Real]: \Prop := \forall (i: Fin.Fin q) -> P i r b;
+
+\definition exists: (\forall (i: Fin.Fin q) -> Weaken (P i)) ->
+  (\forall (i: Fin.Fin q) -> \exists Witness (P i)) -> \exists Witness All := \block {
+  \fun (weaken: \forall (i: Fin.Fin q) -> Weaken (P i))(each: \forall (i: Fin.Fin q) -> \exists Witness (P i)) \then
+  \takefrom w: \forall (i: Fin.Fin q) -> Witness (P i) \by
+    \axiom:classicalIndefiniteChoice(Fin.Fin q, (\fun (i: Fin.Fin q) => Witness (P i)), each) \then
+  \let radii: Fin.Fin q -> Real.Real := \fun (i: Fin.Fin q) => (w i).radius \then
+  \let bounds: Fin.Fin q -> Real.Real := \fun (i: Fin.Fin q) => (w i).bound \then
+  \let r: Real.Real := Sums.Bounds[].minimum q radii \then
+  \let sum: Real.Real := Sums.sum q bounds \then
+  \let b: Real.Real := Real.add sum Real.one \then
+  \let nonnegative: \forall (i: Fin.Fin q) -> R.Le Real.zero (bounds i) :=
+    \fun (i: Fin.Fin q) => Order.leOfLt _ _ (laws (P i) (w i)).positiveBound \then
+  \let data: Data := Data { radius := r, bound := b } \then
+  \return \exact(\into[Data](data, Witness All) \by {
+    LawsOf[All, data] {
+      positiveRadius := Sums.Bounds[].positive q radii (\fun (i: Fin.Fin q) => (laws (P i) (w i)).positiveRadius),
+      positiveBound := R.leLtTrans _ _ _ (Sums.nonnegative q bounds nonnegative)
+        (Real.SquareRoot[].addPositive sum Real.one Product.onePositive),
+      law := \fun (i: Fin.Fin q) =>
+        weaken i (radii i) (bounds i) r b (Sums.Bounds[].coordinate q radii i)
+          (R.leTrans _ _ _ (Sums.coordinateUpper q bounds nonnegative i)
+            (Distance.leAddOfNonnegative sum Real.one Laws.oneNonnegative))
+          (laws (P i) (w i)).law,
+    }
+  }, Witness All)
+};

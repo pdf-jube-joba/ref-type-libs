@@ -1,0 +1,31 @@
+\import Maps.Coordinates[f := f, left := left, right := right] \as Coordinates;
+\import calculus.Maps[n := n, m := m] \as Calculus;
+\import SourceCharts.Of[chart := left] \as Geometry;
+
+\definition chartSmooth: Coordinates.Smooth :=
+  (\bysub(Maps.ContinuousMap, { h: Maps.ContinuousMap \where Maps.Chartwise h }, f)) left right
+    (\bysub(SourceCharts.Chart, SourceChart, left)) (\bysub(TargetCharts.Chart, TargetChart, right));
+\definition map: Calculus.Map Coordinates.domain right.image := Coordinates.map chartSmooth;
+\import Euclidean.On[U := Coordinates.domain, V := right.image, f := map] \as Local;
+
+\definition region: \Pow Domain := Subspace.Trace left.domain;
+
+\module At(x: Domain, contains: SourceCharts.Contains left x);
+
+\definition included: OutputSets.Subset (Images.Image coordinate (DomainSets.Intersection criticalPoints region)) Local.criticalValues :=
+  \fun (y: Output.Point) =>
+    Images.imageElim coordinate (DomainSets.Intersection criticalPoints region) y (OutputSets.Member Local.criticalValues y)
+      (\fun (x: Domain)(inside: DomainSets.Member (DomainSets.Intersection criticalPoints region) x)(same: coordinate x = y) =>
+        \idelim coordinate x = y \with z: Output.Point => OutputSets.Member Local.criticalValues z \by {
+          base: At[x := x, contains := inside.right].criticalValue inside.left, equality: same });
+
+\definition localNull: Euclidean.Sard -> \forall (x: Domain) -> SourceCharts.Contains left x ->
+  \exists ( U: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology U,
+    Logic.And[DomainSets.Member U x, Null.Null (Images.Image coordinate (DomainSets.Intersection criticalPoints U))]] ) :=
+  \fun (sard: Euclidean.Sard)(x: Domain)(contains: SourceCharts.Contains left x) =>
+    Logic.existsIntro[\Pow Domain, { U: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology U,
+      Logic.And[DomainSets.Member U x, Null.Null (Images.Image coordinate (DomainSets.Intersection criticalPoints U))]] }]
+      region (Logic.And[_, _]::# (Subspace.traceOpen M.space left.domain left.open)
+        (Logic.And[_, _]::# contains
+          (Null.included (Images.Image coordinate (DomainSets.Intersection criticalPoints region)) Local.criticalValues included
+            (sard Coordinates.domain right.image map))));

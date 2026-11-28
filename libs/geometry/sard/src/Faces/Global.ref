@@ -1,0 +1,4 @@
+\definition dimension: N.Nat^ := std.Data[].Nat[].Basic[].Def[].add r d;
+\import boundary_manifolds.Dimension[n := d] \as FaceModel;
+\import boundary_manifolds.Dimension[n := dimension] \as AmbientModel;
+\module In(F: FaceModel.Manifold, M: AmbientModel.Manifold, T: Target.Manifold);

@@ -1,0 +1,73 @@
+\import R.Order[] \as Order;
+\import Real.Distance[] \as Distance;
+\import Estimates.Product[] \as Product;
+\import Space.Def[] \as Coordinates;
+\import Open.Analysis[] \as Analysis;
+\import Open.Smooth[].Properties[] \as Smooth;
+
+\structure Data: \Set := { radius: Real.Real, bound: Real.Real, };
+\structure LawsOf[P: Real.Real -> Real.Real -> \Prop, data: Data]: \Prop := {
+  positiveRadius: R.Lt Real.zero data.radius,
+  positiveBound: R.Lt Real.zero data.bound,
+  law: P data.radius data.bound,
+};
+\definition Witness[P: Real.Real -> Real.Real -> \Prop]: \Set :=
+  \Cast[Data] ({ data: Data \where LawsOf[P, data] });
+\definition laws[P: Real.Real -> Real.Real -> \Prop][w: Witness P]: LawsOf[P, w] :=
+  \bysub(Data, { d: Data \where LawsOf[P, d] }, w);
+
+\definition Weaken[P: Real.Real -> Real.Real -> \Prop]: \Prop :=
+  \forall (r, b, s, c: Real.Real) -> R.Le s r -> R.Le b c -> P r b -> P s c;
+
+\module Common(q: N.Nat^, P: Fin.Fin q -> Real.Real -> Real.Real -> \Prop);
+
+\definition Local: \forall (k: N.Nat^) -> Partials.Function U -> Real.Real -> Real.Real -> \Prop :=
+  \induction (k: N.Nat^) \return Partials.Function U -> Real.Real -> Real.Real -> \Prop \with {
+    | zero: \fun (f: Partials.Function U)(r, b: Real.Real) =>
+      \forall (x: Open.Carrier U) -> R.Lt (Coordinates.pointDistance x a) r -> R.Le (Real.distance (f x) Real.zero) b
+    | succ: \fun (k: N.Nat^)(previous: _)(f: Partials.Function U)(r, b: Real.Real) =>
+      \forall (i: Fin.Fin n) -> previous (Partials.derivative U f i) r b
+  };
+
+\definition weaken: \forall (k: N.Nat^)(f: Partials.Function U) -> Weaken (Local k f) :=
+  \induction (k: N.Nat^) \return \forall (f: Partials.Function U) -> Weaken (Local k f) \with {
+    | zero: \fun (f: Partials.Function U)(r, b, s, c: Real.Real)(radius: R.Le s r)(bound: R.Le b c)
+      (bounded: Local N.Nat^::zero f r b)(x: Open.Carrier U)(near: R.Lt (Coordinates.pointDistance x a) s) =>
+        R.leTrans _ _ _ (bounded x (R.ltLeTrans _ _ _ near radius)) bound
+    | succ: \fun (k: N.Nat^)(previous: _)(f: Partials.Function U)(r, b, s, c: Real.Real)
+      (radius: R.Le s r)(bound: R.Le b c)(bounded: Local (N.Nat^::succ k) f r b)(i: Fin.Fin n) =>
+        previous (Partials.derivative U f i) r b s c radius bound (bounded i)
+  };
+
+\definition smoothLocal: \forall (f: Partials.Function U) -> \exists Witness (Local N.Nat^::zero f) := \block {
+  \fun (f: Partials.Function U) \then
+  \let continuous: Analysis.ContinuousAt U f a :=
+    Smooth.continuous U f (\bysub(Open.ScalarFunction U, { g: Open.ScalarFunction U \where Open.Smooth[].SmoothOn U g }, f)) a \then
+  \takefrom r: \Cast[Real.Real] ({ d: Real.Real \where Analysis.ContinuityControl[U, f, a, Real.one, d] })
+    \by continuous Real.one Product.onePositive \then
+  \let control: Analysis.ContinuityControl[U, f, a, Real.one, r] :=
+    \bysub(Real.Real, { d: Real.Real \where Analysis.ContinuityControl[U, f, a, Real.one, d] }, r) \then
+  \let b: Real.Real := Real.add Real.one (Real.distance (f a) Real.zero) \then
+  \let data: Data := Data { radius := r, bound := b } \then
+  \return \exact(\into[Data](data, Witness (Local N.Nat^::zero f)) \by {
+    LawsOf[Local N.Nat^::zero f, data] {
+      positiveRadius := control.positive,
+      positiveBound := R.ltLeTrans _ _ _ Product.onePositive
+        (Distance.leAddOfNonnegative Real.one (Real.distance (f a) Real.zero) (Distance.distanceNonnegative (f a) Real.zero)),
+      law := \fun (x: Open.Carrier U)(near: R.Lt (Coordinates.pointDistance x a) r) =>
+        R.leTrans _ _ _
+          (Distance.distanceTriangle (f x) (f a) Real.zero)
+          (Laws.addMonotoneRight (Real.distance (f x) (f a)) Real.one (Real.distance (f a) Real.zero)
+            (Order.leOfLt _ _ (control.estimate x near))),
+    }
+  }, Witness (Local N.Nat^::zero f))
+};
+
+\definition exists: \forall (k: N.Nat^)(f: Partials.Function U) -> \exists Witness (Local k f) :=
+  \induction (k: N.Nat^) \return \forall (f: Partials.Function U) -> \exists Witness (Local k f) \with {
+    | zero: smoothLocal
+    | succ: \fun (k: N.Nat^)(previous: _)(f: Partials.Function U) =>
+      Common[q := n, P := \fun (i: Fin.Fin n) => Local k (Partials.derivative U f i)].exists
+        (\fun (i: Fin.Fin n) => weaken k (Partials.derivative U f i))
+        (\fun (i: Fin.Fin n) => previous (Partials.derivative U f i))
+  };

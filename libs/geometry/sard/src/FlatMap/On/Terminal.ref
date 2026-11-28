@@ -1,0 +1,23 @@
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Order[] \as Order;
+\import Real.Estimates[] \as Estimates;
+\import Estimates.Product[] \as Product;
+\import Real.Distance[] \as Distance;
+\import Real.Algebra[] \as Algebra;
+\use Equality.eq_reason_in;
+\import Domain.Def[] \as Coordinates;
+\import Domain.Norm[] \as Norm;
+\import \root.CubicalCover[A := Open.Carrier U, m := q, f := apply] \as Bounds;
+\import Bounds.Iterated[] \as Iterated;
+\import euclidean_measure.Euclidean[n := q] \as E;
+\import functional_analysis.Measure[A := Output.Point] \as Measure;
+\import metric_spaces.MetricSpace[Carrier := Domain.Point] \as Metric;
+\import \root.Null[m := p].Cube[] \as DomainCube;
+\import Null.Cube[] \as TargetCube;
+\import Open.Topology[].Of[U := U] \as DomainTopology;
+\definition order: N.Nat^ := N.Nat^::succ p;
+\definition points: \Pow (Open.Carrier U) := Part p;
+\module At(a: Open.Carrier U);
+\definition theorem: Null.Null (Images.Image apply points) :=
+  Cover.local (Subspace.Properties[].secondCountable Domain.Topology[].topology Domain.Countability[].secondCountable)
+    points (\fun (a: Open.Carrier U)(_: DomainSets.Member points a) => At[a := a].localNull);

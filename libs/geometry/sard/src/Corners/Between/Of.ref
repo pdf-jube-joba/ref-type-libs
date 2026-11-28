@@ -1,0 +1,15 @@
+\definition Surjective[x: M.Point]: \Prop :=
+  \forall (v: TargetTangent.At[x := Maps.apply f x].Vector) ->
+    \exists ( u: SourceTangent.At[x := x].Vector \where Differential.At[f := f, x := x].value.apply u = v );
+\import \root.Values[A := M.Point, B := N.Point, f := Maps.apply f, surjective := Surjective] \as Values;
+\definition criticalValues: \Pow N.Point := Values.criticalValues;
+\definition Regular[y: N.Point]: \Prop := Values.Regular y;
+\definition SourceChart: \Set := \Cast[SourceCharts.Chart] M.atlas.charts;
+\definition TargetChart: \Set := \Cast[TargetCharts.Chart] N.atlas.charts;
+\module InChart(right: TargetChart);
+\definition criticalNull: Euclidean.Sard -> \forall (right: TargetChart) ->
+  Null.Null InChart[right := right].criticalCoordinates :=
+  \fun (sard: Euclidean.Sard)(right: TargetChart) => InChart[right := right].chartNull sard;
+
+\definition sard: \forall (right: TargetChart) -> Null.Null InChart[right := right].criticalCoordinates :=
+  criticalNull (\root.Proof[].theorem n m);

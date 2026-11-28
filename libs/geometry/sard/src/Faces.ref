@@ -1,0 +1,10 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import boundary_manifolds.Dimension[n := n] \as Source;
+\import boundary_manifolds.Dimension[n := m] \as Target;
+\import boundary_manifolds.Model[n := m] \as TargetModel;
+\import \root.Null[m := m] \as Null;
+\import \root.Simultaneous[m := m] \as Simultaneous;
+\import topology.Topology[Carrier := TargetModel.Point] \as Sets;
+\module Between(M: Source.Manifold, T: Target.Manifold);
+\module Global(d, r: N.Nat^);

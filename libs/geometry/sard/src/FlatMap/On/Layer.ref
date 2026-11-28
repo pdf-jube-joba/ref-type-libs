@@ -1,0 +1,7 @@
+\definition points: \Pow (Open.Carrier U) :=
+  { x: Open.Carrier U \where Logic.And[Flat (N.Nat^::succ k) x, Logic.Not (Flat (N.Nat^::succ (N.Nat^::succ k)) x)] };
+\module At(a: Open.Carrier U);
+\definition theorem: Smaller.Sard -> Null.Null (Images.Image apply points) :=
+  \fun (sard: Smaller.Sard) =>
+    Cover.local (Subspace.Properties[].secondCountable Domain.Topology[].topology Domain.Countability[].secondCountable)
+      points (\fun (a: Open.Carrier U)(member: DomainSets.Member points a) => At[a := a].localNull sard member);

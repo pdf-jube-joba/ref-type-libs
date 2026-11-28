@@ -1,0 +1,53 @@
+\import functional_analysis.Measure[A := Real.Real].Sigma[] \as Classical;
+
+\definition failedCoordinate: \forall (k: N.Nat^)(f: Partials.Function U) ->
+  Logic.Not (Flat U a (N.Nat^::succ k) f) ->
+  \exists ( i: Fin.Fin n \where Logic.Not (Logic.And[Partials.derivative U f i a = Real.zero, Flat U a k (Partials.derivative U f i)]) ) :=
+  \fun (k: N.Nat^)(f: Partials.Function U)(failure: Logic.Not (Flat U a (N.Nat^::succ k) f)) =>
+    Classical.doubleNegative _ (\fun (none: Logic.Not (\exists ( i: Fin.Fin n \where
+      Logic.Not (Logic.And[Partials.derivative U f i a = Real.zero, Flat U a k (Partials.derivative U f i)]) ))) =>
+      failure (\fun (i: Fin.Fin n) =>
+        Classical.doubleNegative _ (\fun (bad: Logic.Not (Logic.And[Partials.derivative U f i a = Real.zero,
+          Flat U a k (Partials.derivative U f i)])) =>
+            none (Logic.existsIntro[Fin.Fin n, { j: Fin.Fin n \where Logic.Not (Logic.And[
+              Partials.derivative U f j a = Real.zero, Flat U a k (Partials.derivative U f j)]) }] i bad))));
+
+\definition transition: \forall (k: N.Nat^)(f: Partials.Function U) ->
+  Flat U a k f -> Logic.Not (Flat U a (N.Nat^::succ k) f) -> \exists Transition[U, a, k, f] :=
+  \induction (k: N.Nat^) \return \forall (f: Partials.Function U) ->
+    Flat U a k f -> Logic.Not (Flat U a (N.Nat^::succ k) f) -> \exists Transition[U, a, k, f] \with {
+    | zero: \fun (f: Partials.Function U)(_: Flat U a N.Nat^::zero f)
+      (failure: Logic.Not (Flat U a (N.Nat^::succ N.Nat^::zero) f)) => \block {
+        \takefrom i: \Cast[Fin.Fin n] ({ i: Fin.Fin n \where Logic.Not (Logic.And[
+          Partials.derivative U f i a = Real.zero, Flat U a N.Nat^::zero (Partials.derivative U f i)]) })
+          \by failedCoordinate N.Nat^::zero f failure \then
+        \let bad: Logic.Not (Logic.And[Partials.derivative U f i a = Real.zero, Logic.True]) :=
+          \bysub(Fin.Fin n, { j: Fin.Fin n \where Logic.Not (Logic.And[
+            Partials.derivative U f j a = Real.zero, Flat U a N.Nat^::zero (Partials.derivative U f j)]) }, i) \then
+        \return \exact(Transition[U, a, N.Nat^::zero, f] {
+          function := f,
+          direction := i,
+          nonzero := \fun (zero: Partials.derivative U f i a = Real.zero) => bad (Logic.And[_, _]::# zero Logic.True::intro),
+          vanishes := \fun (x: Open.Carrier U)(zero: f x = Real.zero)(_: Logic.True) => zero,
+        }, Transition[U, a, N.Nat^::zero, f])
+      }
+    | succ: \fun (k: N.Nat^)(prev: _)(f: Partials.Function U)(flat: Flat U a (N.Nat^::succ k) f)
+      (failure: Logic.Not (Flat U a (N.Nat^::succ (N.Nat^::succ k)) f)) => \block {
+        \takefrom i: \Cast[Fin.Fin n] ({ i: Fin.Fin n \where Logic.Not (Logic.And[
+          Partials.derivative U f i a = Real.zero, Flat U a (N.Nat^::succ k) (Partials.derivative U f i)]) })
+          \by failedCoordinate (N.Nat^::succ k) f failure \then
+        \let g: Partials.Function U := Partials.derivative U f i \then
+        \let bad: Logic.Not (Logic.And[g a = Real.zero, Flat U a (N.Nat^::succ k) g]) :=
+          \bysub(Fin.Fin n, { j: Fin.Fin n \where Logic.Not (Logic.And[
+            Partials.derivative U f j a = Real.zero, Flat U a (N.Nat^::succ k) (Partials.derivative U f j)]) }, i) \then
+        \takefrom w: Transition[U, a, k, g] \by
+          prev g (flat i).right (\fun (good: Flat U a (N.Nat^::succ k) g) => bad (Logic.And[_, _]::# (flat i).left good)) \then
+        \return \exact(Transition[U, a, N.Nat^::succ k, f] {
+          function := w.function,
+          direction := w.direction,
+          nonzero := w.nonzero,
+          vanishes := \fun (x: Open.Carrier U)(_: f x = Real.zero)(higher: Flat U x (N.Nat^::succ k) f) =>
+            w.vanishes x (higher i).left (higher i).right,
+        }, Transition[U, a, N.Nat^::succ k, f])
+      }
+  };

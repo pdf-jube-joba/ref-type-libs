@@ -1,0 +1,2 @@
+\import boundary_manifolds.Dimension[n := d] \as Model;
+\module From(F: Model.Manifold);

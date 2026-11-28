@@ -1,0 +1,16 @@
+\import Maps.At[function := Maps.apply f, left := left, right := right, x := x, contains := contains] \as Local;
+\definition sourceMember: \In[SourceCharts.Chart] M.atlas.charts left :=
+  \bysub(SourceCharts.Chart, SourceChart, left);
+\definition targetMember: \In[TargetCharts.Chart] N.atlas.charts right :=
+  \bysub(TargetCharts.Chart, TargetChart, right);
+\definition smooth: \exists Local.Extension :=
+  f.smooth left right x contains sourceMember targetMember (\bysub(M.Point, preimage, x));
+\module Patch(e: Local.Extension);
+
+\definition localNull: Euclidean.Sard ->
+  \exists ( W: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology W,
+    Logic.And[DomainSets.Member W x, Null.Null (Images.Image coordinate (DomainSets.Intersection criticalPoints W))]] ) := \block {
+    \fun (sard: Euclidean.Sard) \then
+      \takefrom e: Local.Extension \by smooth \then
+      \return Patch[e := e].localNull sard
+  };

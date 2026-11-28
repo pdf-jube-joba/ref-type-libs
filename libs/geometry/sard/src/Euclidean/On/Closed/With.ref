@@ -1,0 +1,67 @@
+\definition columns: Columns.Matrix := \fun (i: Fin.Fin n)(j: Fin.Fin m) => vectors j i;
+\definition rightInverse: calculus.Vector[n := m, m := n].LinearMap := Columns.asLinear (Fin.elements m) columns;
+\import RangeCoordinates.Kronecker[] \as Kronecker;
+\import Spaces.Sums[I := Fin.Fin m].Single[] \as Isolate;
+\import Spaces.Sums[I := Fin.Fin m].Prop[] \as Sums;
+\import Spaces.FiniteCoordinateEnumeration[].At[n := m] \as Indices;
+\definition onBasis: \forall (j: Fin.Fin m) -> rightInverse.apply (Basis.vectors j) = vectors j :=
+  \fun (j: Fin.Fin m) => \axiom:funext(rightInverse.apply (Basis.vectors j), vectors j,
+    \fun (i: Fin.Fin n) =>
+      trans!{Real.Real} _ _ _
+        (Sums.congruent (Fin.elements m)
+          (\fun (k: Fin.Fin m) => Real.mul (vectors k i) (Kronecker.delta j k))
+          (\fun (k: Fin.Fin m) => Real.mul (Kronecker.delta j k) (vectors k i))
+          (\fun (k: Fin.Fin m) => Laws.fieldMulComm (vectors k i) (Kronecker.delta j k)))
+        (Isolate.extract (Fin.elements m) (Spaces.FiniteCoordinateEnumeration[].distinct m) j (Indices.exhaustive j)
+          (\fun (k: Fin.Fin m) => vectors k i)));
+
+\definition restricted[x: Source.Carrier U]: calculus.Vector[n := m, m := m].LinearMap := Compose.compose (differential x) rightInverse;
+\definition entries[x: Source.Carrier U]: Square.Matrix := Square.Representation[].entries (restricted x);
+\definition smoothEntries: Families.Regular DomainTopology.topology entries :=
+  \fun (i, j: Fin.Fin m) =>
+    DomainTopology.Continuity[].topological (\fun (x: Source.Carrier U) => entries x i j)
+      (Smooth.continuous U (\fun (x: Source.Carrier U) => entries x i j)
+        (Maps.FixedDifferential[U := U, V := V, f := f, v := rightInverse.apply (Basis.vectors j)].smooth i));
+
+\definition atBase: entries a = Square.identity :=
+  \axiom:funext(entries a, Square.identity, \fun (i: Fin.Fin m) =>
+    \axiom:funext(entries a i, Square.identity i, \fun (j: Fin.Fin m) =>
+      congr!{Codomain.Point Real.Real} (\fun (v: Codomain.Point) => v i) _ _
+        (trans!{Codomain.Point} _ _ _
+          (congr!{Domain.Point Codomain.Point} (differential a).apply _ _ (onBasis j))
+          (\bysub(Domain.Point, { v: Domain.Point \where (differential a).apply v = Basis.vectors j }, vectors j)))));
+
+\definition region: \Pow (Source.Carrier U) :=
+  { x: Source.Carrier U \where Inverse.Nonzero (entries x) };
+
+\definition open: DomainSets.IsOpenIn DomainTopology.topology region :=
+  Families.determinantContinuous DomainTopology.topology entries smoothEntries
+    (Scalars.Complement (Scalars.Singleton Real.zero))
+    (metric_spaces.MetricSpace[Carrier := Real.Real].Topology[].singletonClosed metric_spaces.RealMetric[].metric Real.zero);
+
+\definition contains: DomainSets.Member region a :=
+  \fun (zero: Square.determinant (entries a) = Real.zero) =>
+    Laws.zeroNotOne (trans!{Real.Real} _ _ _
+      (sym!{Real.Real} _ _ zero)
+      (trans!{Real.Real} _ _ _
+        (congr!{Square.Matrix Real.Real} Square.determinant _ _ atBase) Square.atIdentity));
+
+\definition surjectiveAt: \forall (x: Source.Carrier U) -> DomainSets.Member region x -> SurjectiveAt x :=
+  \fun (x: Source.Carrier U)(nonzero: DomainSets.Member region x)(y: Codomain.Point) => \block {
+    \let B: Inverse.Nonsingular := \into[Square.Matrix](entries x, Inverse.Nonsingular) \by { nonzero } \then
+    \let inv: Square.Operations[].Inverse (entries x) := Inverse.inverse B \then
+    \let w: Codomain.Point := (Square.linear inv).apply y \then
+    \return Logic.existsIntro[Domain.Point, { v: Domain.Point \where (differential x).apply v = y }]
+      (rightInverse.apply w)
+      (inverse_implicit.Euclidean[n := m].LinearInverse[d := restricted x].right inv y)
+  };
+
+\definition neighborhood: \exists ( W: \Pow (Source.Carrier U) \where
+  DomainSets.OpenNeighborhood[DomainTopology.topology, a, DomainSets.Complement criticalPoints, W] ) :=
+  Logic.existsIntro[\Pow (Source.Carrier U), { W: \Pow (Source.Carrier U) \where
+    DomainSets.OpenNeighborhood[DomainTopology.topology, a, DomainSets.Complement criticalPoints, W] }] region
+    (DomainSets.OpenNeighborhood[DomainTopology.topology, a, DomainSets.Complement criticalPoints, region] {
+      open := open,
+      contains := contains,
+      within := \fun (x: Source.Carrier U)(member: DomainSets.Member region x)(critical: CriticalAt x) => critical (surjectiveAt x member),
+    });

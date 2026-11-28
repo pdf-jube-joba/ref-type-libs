@@ -1,0 +1,46 @@
+\import Source.Subspace[S := left.domain] \as ChartSubset;
+\import topology.Topology[Carrier := SourceCharts.LocalPoint left] \as ChartDomain;
+\import topology.Topology[Carrier := SourceModel.Carrier left.constraints left.image] \as ChartRange;
+\import topology.Homeomorphism[A := SourceCharts.LocalPoint left, B := SourceModel.Carrier left.constraints left.image] \as ChartHomeomorphism;
+\import topology.Continuity[A := SourceCharts.LocalPoint left, B := SourceModel.Carrier left.constraints left.image] \as ChartContinuity;
+\import topology.Topology[Carrier := InputOpen.Carrier left.image].Subspace[S := SourceModel.region left.constraints left.image] \as CoordinateSubset;
+\import topology.Topology[Carrier := Input.Point].Subspace[S := left.image.points] \as AmbientSubset;
+\import InputOpen.Topology[].Of[U := left.image] \as ImageTopology;
+
+\definition imageRegion: \Pow (SourceModel.Carrier left.constraints left.image) := CoordinateSubset.Trace (AmbientSubset.Trace e.neighborhood.points);
+\definition domainRegion: \Pow (SourceCharts.LocalPoint left) := ChartContinuity.Preimage (SourceCharts.coordinate left) imageRegion;
+\definition domainRegionOpen: ChartDomain.IsOpenIn (SourceCharts.domainTopology left.domain) domainRegion :=
+  (ChartHomeomorphism.laws (SourceCharts.domainTopology left.domain) (SourceModel.regionTopology left.constraints left.image)
+    left.coordinates).forwardContinuous imageRegion
+      (CoordinateSubset.traceOpen ImageTopology.topology (AmbientSubset.Trace e.neighborhood.points)
+        (AmbientSubset.traceOpen Input.Topology[].topology e.neighborhood.points (InputOpen.Topology[].open e.neighborhood)));
+\definition ambientRegion: \Pow M.Point := ChartSubset.Open[].image domainRegion;
+\definition region: \Pow Domain := Subspace.Trace ambientRegion;
+\definition regionOpen: DomainSets.IsOpenIn domainTopology region :=
+  Subspace.traceOpen M.space ambientRegion
+    (ChartSubset.Open[].imageOpen M.space left.open domainRegion domainRegionOpen);
+\definition regionContains: DomainSets.Member region x :=
+  ChartSubset.Open[].imageMember domainRegion Local.local e.contains;
+
+\import Euclidean.On[U := e.neighborhood, V := OutputOpen.whole, f := e.map] \as Extended;
+\module AtPoint(y: Domain, z: SourceCharts.LocalPoint left, inside: ChartDomain.Member domainRegion z, same: z = y);
+
+\definition included: OutputSets.Subset (Images.Image coordinate (DomainSets.Intersection criticalPoints region)) Extended.criticalValues :=
+  \fun (v: Output.Point) =>
+    Images.imageElim coordinate (DomainSets.Intersection criticalPoints region) v (OutputSets.Member Extended.criticalValues v)
+      (\fun (y: Domain)(member: DomainSets.Member (DomainSets.Intersection criticalPoints region) y)(value: coordinate y = v) =>
+        ChartSubset.Open[].imageElim domainRegion y (OutputSets.Member Extended.criticalValues v)
+          (\fun (z: SourceCharts.LocalPoint left)(inside: ChartDomain.Member domainRegion z)(same: z = y) =>
+            \idelim coordinate y = v \with u: Output.Point => OutputSets.Member Extended.criticalValues u \by {
+              base: AtPoint[y := y, z := z, inside := inside, same := same].critical member.left,
+              equality: value }) member.right);
+
+\definition localNull: Euclidean.Sard ->
+  \exists ( W: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology W,
+    Logic.And[DomainSets.Member W x, Null.Null (Images.Image coordinate (DomainSets.Intersection criticalPoints W))]] ) :=
+  \fun (sard: Euclidean.Sard) =>
+    Logic.existsIntro[\Pow Domain, { W: \Pow Domain \where Logic.And[DomainSets.IsOpenIn domainTopology W,
+      Logic.And[DomainSets.Member W x, Null.Null (Images.Image coordinate (DomainSets.Intersection criticalPoints W))]] }]
+      region (Logic.And[_, _]::# regionOpen (Logic.And[_, _]::# regionContains
+        (Null.included (Images.Image coordinate (DomainSets.Intersection criticalPoints region)) Extended.criticalValues included
+          (sard e.neighborhood OutputOpen.whole e.map))));

@@ -1,0 +1,12 @@
+\import Euclidean.On[U := U, V := V, f := f] \as Values;
+\definition criticalNull: Null.Null Values.criticalValues := \root.Proof[].theorem n m U V f;
+
+\definition dense: \forall (W: Output.OpenSet)(a: Output.Carrier W) ->
+  \exists ( y: Output.Carrier W \where Values.RegularValue y ) :=
+  \fun (W: Output.OpenSet)(a: Output.Carrier W) => \block {
+    \takefrom y: \Cast[Output.Carrier W] ({ y: Output.Carrier W \where Logic.Not (Sets.Member Values.criticalValues y) })
+      \by Null.Open[].avoids Values.criticalValues criticalNull W a \then
+    \return Logic.existsIntro[Output.Carrier W, { y: Output.Carrier W \where Values.RegularValue y }] y
+      (Values.regularOfOutside y (\bysub(Output.Carrier W, { y: Output.Carrier W \where
+        Logic.Not (Sets.Member Values.criticalValues y) }, y)))
+  };

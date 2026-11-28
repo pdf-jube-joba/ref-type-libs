@@ -1,0 +1,85 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\import \root.Null[m := m] \as Null;
+\import topological_algebra.Euclidean[].Dimension[n := m] \as Output;
+\import topology.Topology[Carrier := Output.Point] \as OutputSets;
+\import functional_analysis.Measure[A := Output.Point] \as OutputMeasure;
+\import topology.Topology[Carrier := A] \as Source;
+\import Source.Countability[] \as Count;
+\import topology.Maps[A := A, B := Output.Point] \as Maps;
+
+\definition indexed: \forall (S: \Pow A)(parts: N.Nat^ -> \Pow A) ->
+  Source.Subset S (Source.Countability[].IndexedUnion parts) ->
+  (\forall (i: N.Nat^) -> Null.Null (Maps.Image f (parts i))) ->
+  Null.Null (Maps.Image f S) :=
+  \fun (S: \Pow A)(parts: N.Nat^ -> \Pow A)(cover: Source.Subset S (Count.IndexedUnion parts))
+    (null: \forall (i: N.Nat^) -> Null.Null (Maps.Image f (parts i))) => \block {
+      \let images: N.Nat^ -> \Pow Output.Point := \fun (i: N.Nat^) => Maps.Image f (parts i) \then
+      \let T: \Pow Output.Point := OutputMeasure.union images \then
+      \let included: OutputSets.Subset (Maps.Image f S) T :=
+        \fun (y: Output.Point)(member: OutputSets.Member (Maps.Image f S) y) => \block {
+          \takefrom x: \Cast[A] ({ x: A \where Logic.And[Source.Member S x, f x = y] }) \by member \then
+          \let witness: Logic.And[Source.Member S x, f x = y] :=
+            \bysub(A, { x: A \where Logic.And[Source.Member S x, f x = y] }, x) \then
+          \return Count.indexedUnionElim parts x (OutputSets.Member T y)
+            (\fun (i: N.Nat^)(inside: Source.Member (parts i) x) =>
+              Logic.existsIntro[N.Nat^, { k: N.Nat^ \where OutputSets.Member (images k) y }] i
+                (Logic.existsIntro[A, { z: A \where Logic.And[Source.Member (parts i) z, f z = y] }]
+                  x (Logic.And[_, _]::# inside witness.right)))
+            (cover x witness.left)
+        } \then
+      \return Null.included (Maps.Image f S) T included (Null.union images null)
+    };
+
+\definition LocallyNull[S: \Pow A]: \Prop :=
+  \forall (x: A) -> Source.Member S x ->
+    \exists ( U: \Pow A \where Logic.And[Source.IsOpenIn space U,
+      Logic.And[Source.Member U x, Null.Null (Maps.Image f (Source.Intersection S U))]] );
+
+\definition local: Source.IsSecondCountable space -> \forall (S: \Pow A) -> LocallyNull S ->
+  Null.Null (Maps.Image f S) := \block {
+    \fun (secondCountable: Source.IsSecondCountable space)(S: \Pow A)(law: LocallyNull S) \then
+    \let good: \Pow (\Pow A) :=
+      { U: \Pow A \where Logic.And[Source.IsOpenIn space U, Null.Null (Maps.Image f (Source.Intersection S U))] } \then
+    \let cover: Source.IsOpenCover[space, good, S] := Source.IsOpenCover[space, good, S] {
+      open := \fun (U: \Pow A)(member: Source.FamilyMember good U) => member.left,
+      covers := \fun (x: A)(member: Source.Member S x) => \block {
+        \takefrom U: \Cast[\Pow A] ({ U: \Pow A \where Logic.And[Source.IsOpenIn space U,
+          Logic.And[Source.Member U x, Null.Null (Maps.Image f (Source.Intersection S U))]] }) \by law x member \then
+        \let data: Logic.And[Source.IsOpenIn space U,
+          Logic.And[Source.Member U x, Null.Null (Maps.Image f (Source.Intersection S U))]] :=
+          \bysub(\Pow A, { U: \Pow A \where Logic.And[Source.IsOpenIn space U,
+            Logic.And[Source.Member U x, Null.Null (Maps.Image f (Source.Intersection S U))]] }, U) \then
+        \return Source.unionMemberOf good U x (Logic.And[_, _]::# data.left data.right.right) data.right.left
+      },
+    } \then
+    \takefrom selected: \Cast[N.Nat^ -> \Pow A] ({ F: N.Nat^ -> \Pow A \where Logic.And[
+      \forall (i: N.Nat^) -> Logic.Or[Source.FamilyMember good (F i), F i = Source.Empty],
+      Source.Subset S (Count.IndexedUnion F)] })
+      \by Count.secondCountableLindelof space secondCountable good S cover \then
+    \let data: Logic.And[\forall (i: N.Nat^) -> Logic.Or[Source.FamilyMember good (selected i), selected i = Source.Empty],
+      Source.Subset S (Count.IndexedUnion selected)] :=
+      \bysub(N.Nat^ -> \Pow A, { F: N.Nat^ -> \Pow A \where Logic.And[
+        \forall (i: N.Nat^) -> Logic.Or[Source.FamilyMember good (F i), F i = Source.Empty],
+        Source.Subset S (Count.IndexedUnion F)] }, selected) \then
+    \let parts: N.Nat^ -> \Pow A := \fun (i: N.Nat^) => Source.Intersection S (selected i) \then
+    \let partsCover: Source.Subset S (Count.IndexedUnion parts) :=
+      \fun (x: A)(inS: Source.Member S x) => Count.indexedUnionElim selected x (Source.Member (Count.IndexedUnion parts) x)
+        (\fun (i: N.Nat^)(inside: Source.Member (selected i) x) =>
+          Count.indexedUnionMember parts i x (Logic.And[_, _]::# inS inside)) (data.right x inS) \then
+    \let partsNull: \forall (i: N.Nat^) -> Null.Null (Maps.Image f (parts i)) :=
+      \fun (i: N.Nat^) => Logic.orElim _ _ (Null.Null (Maps.Image f (parts i))) (data.left i)
+        (\fun (goodSet: Source.FamilyMember good (selected i)) => goodSet.right)
+        (\fun (equal: selected i = Source.Empty) =>
+          Null.included (Maps.Image f (parts i)) OutputSets.Empty
+            (\fun (y: Output.Point)(member: OutputSets.Member (Maps.Image f (parts i)) y) => \block {
+              \takefrom x: \Cast[A] ({ x: A \where Logic.And[Source.Member (parts i) x, f x = y] }) \by member \then
+              \let witness: Logic.And[Source.Member (parts i) x, f x = y] :=
+                \bysub(A, { x: A \where Logic.And[Source.Member (parts i) x, f x = y] }, x) \then
+              \return \idelim selected i = Source.Empty \with U: \Pow A => Source.Member U x \by {
+                base: witness.left.right, equality: equal }
+            }) Null.empty) \then
+    \return indexed S parts partsCover partsNull
+  };

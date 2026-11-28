@@ -1,0 +1,63 @@
+\definition r: Real.Real := Real.mul Real.half rho;
+\definition positive: R.Lt Real.zero r := Estimates.halfOfPositive rho ball.positive;
+\definition nonnegative: R.Le Real.zero r := Order.leOfLt _ _ positive;
+\definition box: SourceMeasure.Box := Cube.box a r nonnegative;
+\definition K: \Pow Domain.Point := SourceMeasure.points box;
+\definition Box: \Set := \Cast[Domain.Point] K;
+\import AmbientSets.Subspace[S := K] \as BoxSubset;
+\import topology.Topology[Carrier := Box] \as BoxSets;
+\definition boxTopology: BoxSets.Topology := BoxSubset.topology Ambient.topology;
+\definition insideDomain: \forall (x: Box) -> \In[Domain.Point] U.points x :=
+  \fun (x: Box) => ball.included x
+    (R.leLtTrans _ _ _
+      (R.leReplaceLeft _ _ _ (Norm.distanceSymmetric a x) (Cube.distance a r nonnegative x (\bysub(Domain.Point, K, x))))
+      (Estimates.halfStrict rho ball.positive));
+\definition embed[x: Box]: Source.Carrier U := \into[Domain.Point](x, U.points) \by { insideDomain x };
+\import topology.Continuity[A := Box, B := Domain.Point].Corestriction[S := U.points] \as IntoDomain;
+\import topology.Continuity[A := Box, B := Domain.Point].Corestriction[S := K] \as FromBox;
+\import topology.Continuity[A := Box, B := Source.Carrier U] \as Inclusion;
+\definition continuousEmbed: Inclusion.Continuous boxTopology DomainTopology.topology embed :=
+  IntoDomain.corestrictContinuous boxTopology Ambient.topology embed (FromBox.inclusionContinuous Ambient.topology);
+\definition critical: \Pow Box := Inclusion.Preimage embed criticalPoints;
+\definition criticalClosed: BoxSets.IsClosedIn boxTopology critical :=
+  Inclusion.closedPreimage boxTopology DomainTopology.topology embed continuousEmbed criticalPoints \parent.\parent.Closed[].regularOpen;
+\definition compact: BoxSets.IsCompactIn boxTopology critical :=
+  BoxSets.Compactness[].closedCompact boxTopology (BoxSubset.Properties[].compact Ambient.topology (Boxes.compact box))
+    critical criticalClosed;
+
+\definition evaluate[x: Box]: Codomain.Point := apply (embed x);
+\import topology.Maps[A := Box, B := Codomain.Point] \as BoxImages;
+\definition image: \Pow Codomain.Point := BoxImages.Image evaluate critical;
+\definition imageClosed: Sets.IsClosedIn Codomain.Topology[].topology image :=
+  Sets.Compactness[].compactClosed Codomain.Topology[].topology Codomain.Topology[].hausdorff image
+    (topology.Compactness[A := Box, B := Codomain.Point].continuousImage boxTopology Codomain.Topology[].topology evaluate
+      (\fun (W: \Pow Codomain.Point)(open: Sets.IsOpenIn Codomain.Topology[].topology W) =>
+        continuousEmbed (Continuous.Preimage apply W) (continuous W open)) critical compact);
+\definition imageIncluded: Sets.Subset image criticalValues :=
+  \fun (y: Codomain.Point) => BoxImages.imageElim evaluate critical y (Sets.Member criticalValues y)
+    (\fun (x: Box)(rank: BoxSets.Member critical x)(same: evaluate x = y) =>
+      Logic.existsIntro[Source.Carrier U, { x: Source.Carrier U \where Logic.And[Maps.apply U V f x = y, CriticalAt x] }]
+        (embed x) (Logic.And[_, _]::# same rank));
+
+\definition region: \Pow (Source.Carrier U) := DomainSubset.Trace (Metric.Ball Norm.metric a r);
+\definition regionOpen: DomainSets.IsOpenIn DomainTopology.topology region :=
+  DomainSubset.traceOpen Ambient.topology (Metric.Ball Norm.metric a r) (Metric.Topology[].ballOpenIn Norm.metric a r);
+\definition regionContains: DomainSets.Member region a :=
+  R.ltReplaceLeft Real.zero (Coordinates.pointDistance a a) r (sym!{Real.Real} _ _ (Norm.distanceSelf a)) positive;
+\definition regionImage: Sets.Subset (Images.Image apply (DomainSets.Intersection criticalPoints region)) image :=
+  \fun (y: Codomain.Point) => Images.imageElim apply (DomainSets.Intersection criticalPoints region) y (Sets.Member image y)
+    (\fun (x: Source.Carrier U)(member: DomainSets.Member (DomainSets.Intersection criticalPoints region) x)(same: apply x = y) =>
+      Logic.existsIntro[Box, { x: Box \where Logic.And[BoxSets.Member critical x, evaluate x = y] }]
+        (\into[Domain.Point](x, K) \by { Cube.member a r nonnegative x (Order.leOfLt _ _ member.right) })
+        (Logic.And[_, _]::# member.left same));
+
+\definition localNull: ClosedPartsNull ->
+  \exists ( W: \Pow (Source.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+    Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection criticalPoints W))]] ) :=
+  \fun (null: ClosedPartsNull) =>
+    Logic.existsIntro[\Pow (Source.Carrier U), { W: \Pow (Source.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+      Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection criticalPoints W))]] }] region
+      (Logic.And[_, _]::# regionOpen
+        (Logic.And[_, _]::# regionContains
+          (Null.included (Images.Image apply (DomainSets.Intersection criticalPoints region)) image regionImage
+            (null image imageIncluded imageClosed))));

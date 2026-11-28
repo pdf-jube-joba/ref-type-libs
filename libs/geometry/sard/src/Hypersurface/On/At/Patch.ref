@@ -1,0 +1,64 @@
+\import Product.LocalFiber[U := U, f := g, a := a, local := form] \as Fiber;
+\import Maps.Restriction[U := form.domain, V := U, W := V] \as Restriction;
+\definition restricted: Maps.Map form.domain V := Restriction.input form.included f;
+\import Charts.Composition[U := form.parameters, V := form.domain, f := Fiber.parametrization].After[
+  l := targetDimension, W := V, g := restricted] \as Composition;
+\definition composed: ParamMaps.Map form.parameters V := Composition.compose;
+\import Smaller.On[U := form.parameters, V := V, f := composed] \as Underlying;
+\definition region: \Pow (Open.Carrier U) := Subspace.Trace form.domain.points;
+
+\definition parameterCritical: \forall (p: Parameter.Carrier form.parameters) ->
+  RankZero (Fiber.source (Charts.apply form.parameters form.domain Fiber.parametrization p)) -> Underlying.CriticalAt p :=
+  \fun (p: Parameter.Carrier form.parameters)(zero: RankZero (Fiber.source (Charts.apply form.parameters form.domain Fiber.parametrization p)))
+    (surjective: Underlying.SurjectiveAt p) => \block {
+      \let x: Open.Carrier form.domain := Charts.apply form.parameters form.domain Fiber.parametrization p \then
+      \let target: TargetSpace.Point := \fun (_: Fin.Fin targetDimension) => Real.one \then
+      \takefrom v: \Cast[ParameterSpace.Point] ({ v: ParameterSpace.Point \where (Underlying.differential p).apply v = target }) \by surjective target \then
+      \let input: SourceSpace.Point := (Charts.Differential[U := form.parameters, V := form.domain, f := Fiber.parametrization, a := p].value).apply v \then
+      \let equal: (Underlying.differential p).apply v = TargetSpace.Def[].origin :=
+        trans!{TargetSpace.Point} _ _ _
+          (congr!{{calculus.Vector[n := n, m := targetDimension].LinearMap} TargetSpace.Point}
+            (\fun (d: calculus.Vector[n := n, m := targetDimension].LinearMap) => d.apply v) _ _ (Composition.At[a := p].jacobian))
+          (trans!{TargetSpace.Point} _ _ _
+            (congr!{{calculus.Vector[n := Product.dimension, m := targetDimension].LinearMap} TargetSpace.Point}
+              (\fun (d: calculus.Vector[n := Product.dimension, m := targetDimension].LinearMap) => d.apply input) _ _
+              (Restriction.differential form.included f x))
+            (zero input)) \then
+      \return dedekind_reals.DedekindReal[].Arithmetic[].Prop[].zeroNotOne
+        (congr!{TargetSpace.Point Real.Real} (\fun (w: TargetSpace.Point) => w (Fin.zero m)) _ _
+          (trans!{TargetSpace.Point} _ _ _ (sym!{TargetSpace.Point} _ _ equal)
+            (\bysub(ParameterSpace.Point, { v: ParameterSpace.Point \where (Underlying.differential p).apply v = target }, v))))
+    };
+
+\definition imageIncluded: ScalarMaps.apply U Line.whole g a = value ->
+  TargetSets.Subset (Images.Image apply (Sets.Intersection points region)) Underlying.criticalValues :=
+  \fun (level: ScalarMaps.apply U Line.whole g a = value)(y: TargetSpace.Point) =>
+    Images.imageElim apply (Sets.Intersection points region) y (TargetSets.Member Underlying.criticalValues y)
+      (\fun (x: Open.Carrier U)(inside: Sets.Member (Sets.Intersection points region) x)(same: apply x = y) => \block {
+        \let u: Open.Carrier form.domain := \into[SourceSpace.Point](x, form.domain.points) \by { inside.right } \then
+        \let z: Parameter.Carrier form.parameters := Fiber.coordinate u \then
+        \let returns: Charts.apply form.parameters form.domain Fiber.parametrization z = u :=
+          Fiber.pointCoordinate u (trans!{ScalarSpace.Point} _ _ _ inside.left.left (sym!{ScalarSpace.Point} _ _ level)) \then
+        \let inFiber: RankZero (Fiber.source (Charts.apply form.parameters form.domain Fiber.parametrization z)) :=
+          \idelim u = Charts.apply form.parameters form.domain Fiber.parametrization z
+            \with w: Open.Carrier form.domain => RankZero (Fiber.source w) \by {
+              base: inside.left.right, equality: sym!{{Open.Carrier form.domain}} _ _ returns } \then
+        \let valueEqual: ParamMaps.apply form.parameters V composed z = y :=
+          trans!{TargetSpace.Point} _ _ _
+            (congr!{{Open.Carrier form.domain} TargetSpace.Point}
+              (\fun (w: Open.Carrier form.domain) => Maps.apply form.domain V restricted w) _ _ returns) same \then
+        \return \idelim ParamMaps.apply form.parameters V composed z = y
+          \with v: TargetSpace.Point => TargetSets.Member Underlying.criticalValues v \by {
+            base: Underlying.criticalValue z (parameterCritical z inFiber), equality: valueEqual }
+      });
+
+\definition localNull: Smaller.Sard -> ScalarMaps.apply U Line.whole g a = value ->
+  \exists ( W: \Pow (Open.Carrier U) \where Logic.And[Sets.IsOpenIn Domain.topology W,
+    Logic.And[Sets.Member W a, Null.Null (Images.Image apply (Sets.Intersection points W))]] ) :=
+  \fun (sard: Smaller.Sard)(level: ScalarMaps.apply U Line.whole g a = value) =>
+    Logic.existsIntro[\Pow (Open.Carrier U), { W: \Pow (Open.Carrier U) \where Logic.And[Sets.IsOpenIn Domain.topology W,
+      Logic.And[Sets.Member W a, Null.Null (Images.Image apply (Sets.Intersection points W))]] }]
+      region (Logic.And[_, _]::# (Subspace.traceOpen SourceSpace.Topology[].topology form.domain.points (Open.Topology[].open form.domain))
+        (Logic.And[_, _]::# form.contains
+          (Null.included (Images.Image apply (Sets.Intersection points region)) Underlying.criticalValues (imageIncluded level)
+            (sard form.parameters V composed))));

@@ -1,0 +1,14 @@
+\import Taylor.Uniform[U := U, a := a] \as Uniform;
+\definition Each[j: Fin.Fin q]: Real.Real -> Real.Real -> \Prop := Uniform.Local order (component j);
+\definition All[r, b: Real.Real]: \Prop := \forall (j: Fin.Fin q) -> Each j r b;
+\module Using(controls: Uniform.Witness All, rho: Real.Real, ball: Open.BallInside[U.points, a, rho]);
+
+\definition localNull: \exists ( W: \Pow (Open.Carrier U) \where Logic.And[DomainSets.IsOpenIn DomainTopology.topology W,
+  Logic.And[DomainSets.Member W a, Null.Null (Images.Image apply (DomainSets.Intersection points W))]] ) := \block {
+  \takefrom controls: Uniform.Witness All \by Uniform.Common[q := q, P := Each].exists
+    (\fun (j: Fin.Fin q) => Uniform.weaken order (component j))
+    (\fun (j: Fin.Fin q) => Uniform.exists order (component j)) \then
+  \takefrom rho: \Cast[Real.Real] ({ r: Real.Real \where Open.BallInside[U.points, a, r] })
+    \by U.open a (\bysub(Domain.Point, U.points, a)) \then
+  \return Using[controls := controls, rho := rho, ball := \bysub(Real.Real, { r: Real.Real \where Open.BallInside[U.points, a, r] }, rho)].localNull
+};

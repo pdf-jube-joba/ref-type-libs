@@ -1,0 +1,25 @@
+\import Full.On[U := U, V := V, f := f] \as Given;
+\import Open.Topology[].Of[U := U] \as Domain;
+\definition apply[x: Open.Carrier U]: TargetSpace.Point := Maps.apply U V f x;
+\import \root.Cover[A := Open.Carrier U, m := targetDimension, space := Domain.topology, f := apply] \as Cover;
+\import topology.Topology[Carrier := Open.Carrier U] \as Sets;
+\import topology.Maps[A := Open.Carrier U, B := TargetSpace.Point] \as Images;
+\import topology.Topology[Carrier := SourceSpace.Point].Subspace[S := U.points] \as Subspace;
+
+\definition RankZero[x: Open.Carrier U]: \Prop :=
+  \forall (v: SourceSpace.Point) -> (Given.differential x).apply v = TargetSpace.Def[].origin;
+
+\definition points: \Pow (Open.Carrier U) :=
+  { x: Open.Carrier U \where Logic.And[ScalarMaps.apply U Line.whole g x = value, RankZero x] };
+
+\module At(a: Open.Carrier U);
+
+\definition theorem: Smaller.Sard ->
+  (\forall (a: Open.Carrier U) -> Sets.Member points a ->
+    Product.Submersion[U := U, f := g, a := a].Surjective) ->
+  Null.Null (Images.Image apply points) :=
+  \fun (sard: Smaller.Sard)(regular: _) =>
+    Cover.local
+      (Subspace.Properties[].secondCountable SourceSpace.Topology[].topology SourceSpace.Countability[].secondCountable)
+      points (\fun (a: Open.Carrier U)(inside: Sets.Member points a) =>
+        At[a := a].localNull sard inside.left (regular a inside));

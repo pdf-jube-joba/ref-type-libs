@@ -1,0 +1,50 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import euclidean_measure.Euclidean[n := m] \as E;
+\import E.MeasureConstruction[] \as Lebesgue;
+\import functional_analysis.Measure[A := E.Point] \as Measure;
+\import topology.Topology[Carrier := E.Point] \as Sets;
+
+\definition Null[S: \Pow E.Point]: \Prop := E.outer S = Measure.zero;
+
+\definition included: \forall (S, T: \Pow E.Point) -> Sets.Subset S T -> Null T -> Null S :=
+  \fun (S, T: \Pow E.Point)(sub: Sets.Subset S T)(null: Null T) =>
+    \axiom:setext(E.outer S, Measure.zero,
+      \fun (r: real.Analysis[].Real)(inside: Measure.below (E.outer S) r) =>
+        \idelim E.outer T = Measure.zero \with v: Measure.Value => Measure.below v r \by {
+          base: E.monotone S T sub r inside, equality: null },
+      (E.outerNonnegative S).negative);
+
+\definition empty: Null Sets.Empty := E.outerEmpty;
+
+\definition toMeasureNull: \forall (S: \Pow E.Point) -> Null S -> Measure.Null Lebesgue.measure S :=
+  \fun (S: \Pow E.Point)(null: Null S) =>
+    Logic.existsIntro[\Pow E.Point, { T: \Pow E.Point \where Measure.NullCover[Lebesgue.measure, S, T] }] S
+      (Measure.NullCover[Lebesgue.measure, S, S] {
+        measurable := E.nullCaratheodory S null,
+        measure := null,
+        included := \fun (x: E.Point)(inside: Sets.Member S x) => inside,
+      });
+
+\definition ofMeasureNull: \forall (S: \Pow E.Point) -> Measure.Null Lebesgue.measure S -> Null S := \block {
+  \fun (S: \Pow E.Point)(null: Measure.Null Lebesgue.measure S) \then
+  \takefrom T: \Cast[\Pow E.Point] ({ T: \Pow E.Point \where Measure.NullCover[Lebesgue.measure, S, T] }) \by null \then
+  \let cover: Measure.NullCover[Lebesgue.measure, S, T] :=
+    \bysub(\Pow E.Point, { T: \Pow E.Point \where Measure.NullCover[Lebesgue.measure, S, T] }, T) \then
+  \return included S T cover.included cover.measure
+};
+
+\definition union: \forall (sets: N.Nat^ -> \Pow E.Point) -> (\forall (i: N.Nat^) -> Null (sets i)) -> Null (Measure.union sets) :=
+  \fun (sets: N.Nat^ -> \Pow E.Point)(null: \forall (i: N.Nat^) -> Null (sets i)) =>
+    ofMeasureNull (Measure.union sets)
+      (Lebesgue.nullUnion sets (\fun (i: N.Nat^) => toMeasureNull (sets i) (null i)));
+
+\definition pair: \forall (S, T: \Pow E.Point) -> Null S -> Null T -> Null (Measure.Sigma[].pairUnion S T) :=
+  E.nullPairUnion;
+
+\module Open;
+\module Cube;

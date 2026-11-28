@@ -1,0 +1,9 @@
+\import Scalar.On[U := U, h := Maps.coordinateFunction U V f j] \as Component;
+\import Fin.Permutations[n := targetDimension] \as Permutations;
+\definition head: Fin.Fin targetDimension := Fin.zero m;
+\definition permutation: Permutations.Permutation := Permutations.Operations[].transposition
+  (Permutations.Swap { first := head, second := j });
+\import change_of_variables.Linear[n := targetDimension].Permutation[p := permutation] \as Swap;
+\import Fin.Transposition[n := targetDimension, a := head, b := j] \as Transposition;
+\definition atHead: permutation.forward head = j := Transposition.onFirst;
+\module At(a: Open.Carrier U);

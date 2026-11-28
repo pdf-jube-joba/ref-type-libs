@@ -1,0 +1,44 @@
+\import calculus.Vector[n := LeftBlocks.dimension, m := targetDimension] \as Vectors;
+\import calculus.Vector[n := G02.dimension, m := targetDimension] \as OriginalVectors;
+\import calculus.Vector[n := targetDimension, m := targetDimension] \as EndVectors;
+\import Composite.Differential[U := parameter, V := Output.whole, f := reordered, a := x] \as Reordered;
+\import Composite.Differential[U := parameter, V := V, f := original, a := x] \as OriginalDerivative;
+\import InputMaps.Differential[U := parameter, V := form.domain, f := back, a := x] \as BackDerivative;
+
+\definition swapSymmetric: \forall (y: Range.Point) -> Swap.point y = Swap.backpoint y :=
+  \fun (y: Range.Point) => \refl(Swap.point y);
+
+\definition derivative: \forall (v: ProductSpace.Point) ->
+  (NormalValues.differential x).apply v = Swap.point ((Given.differential (originalPoint x)).apply (BackDerivative.value.apply v)) :=
+  \fun (v: ProductSpace.Point) =>
+    trans!{Range.Point} _ _ _
+      (congr!{Vectors.LinearMap Range.Point} (\fun (d: Vectors.LinearMap) => d.apply v) _ _
+        (sym!{Vectors.LinearMap} _ _
+          (Reordered.Compare[W := Output.whole, g := Normal.map].equal
+            (\axiom:funext(Composite.apply parameter Output.whole reordered,
+              Composite.apply parameter Output.whole Normal.map, agreement)))))
+      (trans!{Range.Point} _ _ _
+        (congr!{Vectors.LinearMap Range.Point} (\fun (d: Vectors.LinearMap) => d.apply v) _ _ (Reorder.At[a := x].jacobian))
+        (trans!{Range.Point} _ _ _
+          (congr!{EndVectors.LinearMap Range.Point} (\fun (d: EndVectors.LinearMap) => d.apply (OriginalDerivative.value.apply v)) _ _
+            (PermutationMap.differential (Composite.apply parameter V original x)))
+          (congr!{Range.Point Range.Point} Swap.point _ _
+            (trans!{Range.Point} _ _ _
+              (congr!{Vectors.LinearMap Range.Point} (\fun (d: Vectors.LinearMap) => d.apply v) _ _ (Original.At[a := x].jacobian))
+              (congr!{OriginalVectors.LinearMap Range.Point}
+                (\fun (d: OriginalVectors.LinearMap) => d.apply (BackDerivative.value.apply v)) _ _
+                (Restriction.differential form.included f (base x)))))));
+
+\definition critical: Given.CriticalAt (originalPoint x) -> NormalValues.CriticalAt x :=
+  \fun (critical: Given.CriticalAt (originalPoint x))(surjective: NormalValues.SurjectiveAt x) =>
+    critical (\fun (y: Range.Point) => \block {
+      \takefrom v: \Cast[ProductSpace.Point] ({ v: ProductSpace.Point \where (NormalValues.differential x).apply v = Swap.point y })
+        \by surjective (Swap.point y) \then
+      \let u: Domain.Point := BackDerivative.value.apply v \then
+      \let eq: Swap.point ((Given.differential (originalPoint x)).apply u) = Swap.point y :=
+        trans!{Range.Point} _ _ _ (sym!{Range.Point} _ _ (derivative v))
+          (\bysub(ProductSpace.Point, { v: ProductSpace.Point \where (NormalValues.differential x).apply v = Swap.point y }, v)) \then
+      \return Logic.existsIntro[Domain.Point, { u: Domain.Point \where (Given.differential (originalPoint x)).apply u = y }] u
+        (trans!{Range.Point} _ _ _ (sym!{Range.Point} _ _ (Swap.left ((Given.differential (originalPoint x)).apply u)))
+          (trans!{Range.Point} _ _ _ (congr!{Range.Point Range.Point} Swap.backpoint _ _ eq) (Swap.left y)))
+    });

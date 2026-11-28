@@ -1,0 +1,70 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Data[].Bool[] \as Bool;
+\import real.Analysis[] \as Real;
+\import Real.Estimates[] \as Estimates;
+\import Real.Distance[] \as Distance;
+\import dedekind_reals.DedekindReal[] \as R;
+\import R.Order[] \as Order;
+\import R.Arithmetic[].Prop[] \as Laws;
+\import topological_algebra.Euclidean[].Dimension[n := m].Norm[] \as Norm;
+\import topological_algebra.Euclidean[].Dimension[n := m].Def[] \as Coordinates;
+
+\definition lower: \forall (x, r: Real.Real) -> R.Le Real.zero r -> R.Le (Real.sub x r) x :=
+  \fun (x, r: Real.Real)(nonnegative: R.Le Real.zero r) =>
+    Estimates.distanceLeLower x x r
+      (R.leReplaceLeft Real.zero (Distance.distance x x) r (sym!{Real.Real} _ _ (Distance.distanceSelf x)) nonnegative);
+
+\definition upper: \forall (x, r: Real.Real) -> R.Le Real.zero r -> R.Le x (Real.add x r) :=
+  \fun (x, r: Real.Real)(nonnegative: R.Le Real.zero r) =>
+    Estimates.distanceLeUpper x x r
+      (R.leReplaceLeft Real.zero (Distance.distance x x) r (sym!{Real.Real} _ _ (Distance.distanceSelf x)) nonnegative);
+
+\definition box[a: E.Point][r: Real.Real][nonnegative: R.Le Real.zero r]: E.Box :=
+  E.Box {
+    active := Bool.Bool^::true,
+    left := \fun (i: Fin.Fin m) => Real.sub (a i) r,
+    right := \fun (i: Fin.Fin m) => Real.add (a i) r,
+    ordered := \fun (i: Fin.Fin m) => R.leTrans _ _ _ (lower (a i) r nonnegative) (upper (a i) r nonnegative),
+  };
+
+\definition member: \forall (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r)(x: E.Point) ->
+  R.Le (Coordinates.pointDistance a x) r -> Sets.Member (E.points (box a r nonnegative)) x :=
+  \fun (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r)(x: E.Point)(near: R.Le (Coordinates.pointDistance a x) r) =>
+    Logic.And[_, _]::# (\refl(Bool.Bool^::true))
+      (\fun (i: Fin.Fin m) =>
+        (\fun (b: R.Le (Real.distance (a i) (x i)) r) =>
+          Logic.And[_, _]::# (Estimates.distanceLeLower (a i) (x i) r b) (Estimates.distanceLeUpper (a i) (x i) r b))
+          (R.leTrans _ _ _ (Norm.coordinateDistance a x i) near));
+
+\definition distance: \forall (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r)(x: E.Point) ->
+  Sets.Member (E.points (box a r nonnegative)) x -> R.Le (Coordinates.pointDistance a x) r :=
+  \fun (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r)(x: E.Point)(inside: Sets.Member (E.points (box a r nonnegative)) x) =>
+    Norm.finiteUpper m (Coordinates.subPoint a x) r nonnegative
+      (\fun (i: Fin.Fin m) => R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Norm.distanceDifference (a i) (x i)))
+        (Estimates.distanceLeOfInterval (a i) (x i) r (inside.right i).left (inside.right i).right));
+
+\definition width: \forall (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r)(i: Fin.Fin m) ->
+  Real.sub ((box a r nonnegative).right i) ((box a r nonnegative).left i) = Real.add r r :=
+  \fun (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r)(i: Fin.Fin m) =>
+    trans!{Real.Real} _ _ _
+      (Estimates.subAdd (a i) r (a i) (Real.neg r))
+      (trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real Real.Real} Real.add _ _ _ _ (Laws.subSelf (a i))
+          (Real.Algebra[].subNeg r r))
+        (Laws.addZeroLeft (Real.add r r)));
+
+\definition productPower: \forall (k: N.Nat^)(r: Real.Real) ->
+  E.product k (\fun (_: Fin.Fin k) => r) = Real.Geometric[q := r].value k :=
+  \induction (k: N.Nat^) \return \forall (r: Real.Real) ->
+    E.product k (\fun (_: Fin.Fin k) => r) = Real.Geometric[q := r].value k \with {
+    | zero: \fun (r: Real.Real) => \refl(Real.one)
+    | succ: \fun (k: N.Nat^)(prior: _)(r: Real.Real) =>
+      congr!{Real.Real Real.Real} (Real.mul r) _ _ (prior r)
+  };
+
+\definition volume: \forall (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r) ->
+  E.volume (box a r nonnegative) = Real.Geometric[q := Real.add r r].value m :=
+  \fun (a: E.Point)(r: Real.Real)(nonnegative: R.Le Real.zero r) =>
+    trans!{Real.Real} _ _ _
+      (E.productCongruent m _ _ (width a r nonnegative))
+      (productPower m (Real.add r r));

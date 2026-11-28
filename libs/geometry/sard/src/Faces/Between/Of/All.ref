@@ -1,0 +1,24 @@
+\import Ambient.InChart[right := right] \as Main;
+\definition faceValues[i: N.Nat^]: \Pow TargetModel.Point := (faces i).exceptional;
+\definition exceptional: \Pow TargetModel.Point := Simultaneous.exception Main.criticalCoordinates boundary.exceptional faceValues;
+\definition exceptionalNull: Null.Null exceptional :=
+  Simultaneous.null Main.criticalCoordinates boundary.exceptional faceValues
+    (Ambient.sard right) boundary.null (\fun (i: N.Nat^) => (faces i).null);
+
+\structure Regular[y: T.Point]: \Prop := {
+  ambient: Ambient.Regular y,
+  boundaryRegular: TargetSets.Member boundary.regular y,
+  faceRegular: \forall (i: N.Nat^) -> TargetSets.Member (faces i).regular y,
+};
+
+\definition regularAt: \forall (u: TargetModel.Carrier right.constraints right.image) ->
+  Logic.Not (Sets.Member exceptional u) -> Regular[TargetCharts.point right u] :=
+  \fun (u: TargetModel.Carrier right.constraints right.image)(outside: Logic.Not (Sets.Member exceptional u)) => \block {
+    \let good: Simultaneous.Avoids[Main.criticalCoordinates, boundary.exceptional, faceValues, u] :=
+      Simultaneous.outside Main.criticalCoordinates boundary.exceptional faceValues u outside \then
+    \return Regular[TargetCharts.point right u] {
+      ambient := Main.regularAt u good.main,
+      boundaryRegular := boundary.outside u good.boundary,
+      faceRegular := \fun (i: N.Nat^) => (faces i).outside u (good.face i),
+    }
+  };

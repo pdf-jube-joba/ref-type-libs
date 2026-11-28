@@ -1,0 +1,14 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as Reals;
+\import linear_algebra.Commutative[K := Reals.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Reals.Real (Reals.Algebra[].field)] \as Spaces;
+\definition dimension: N.Nat^ := std.Data[].Nat[].Basic[].Def[].add m n;
+\import manifolds.Dimension[n := dimension].Smooth[] \as Source;
+\import manifolds.Dimension[n := m].Smooth[] \as Values;
+\import manifolds.Dimension[n := r].Smooth[] \as Parameter;
+\import inverse_implicit.Product[n := n, m := m] \as G02;
+\module Between(M: Source.Manifold, T: Values.Manifold, P: Parameter.Manifold);

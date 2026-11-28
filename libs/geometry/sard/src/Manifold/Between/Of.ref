@@ -1,0 +1,38 @@
+\definition Surjective[x: M.Point]: \Prop :=
+  \forall (v: TargetTangent.At[x := Maps.apply f x].Vector) ->
+    \exists ( u: SourceTangent.At[x := x].Vector \where Differential.At[f := f, x := x].value.apply u = v );
+
+\import \root.Values[A := M.Point, B := N.Point, f := Maps.apply f, surjective := Surjective] \as Values;
+\definition criticalValues: \Pow N.Point := Values.criticalValues;
+\definition Regular[y: N.Point]: \Prop := Values.Regular y;
+
+\definition TargetChart: \Set :=
+  \Cast[TargetCharts.Chart] N.atlas.charts;
+
+\module InChart(right: TargetChart);
+
+\definition criticalNull: Euclidean.Sard -> \forall (chart: TargetChart) ->
+  Null.Null InChart[right := chart].criticalCoordinates :=
+  \fun (sard: Euclidean.Sard)(chart: TargetChart) => InChart[right := chart].chartNull sard;
+
+\definition dense: Euclidean.Sard -> \forall (U: \Pow N.Point) -> Target.IsOpenIn N.space U ->
+  \forall (a: N.Point) -> Target.Member U a -> \exists ( y: N.Point \where Logic.And[Target.Member U y, Regular y] ) :=
+  \block {
+    \fun (sard: Euclidean.Sard)(U: \Pow N.Point)(open: Target.IsOpenIn N.space U)
+      (a: N.Point)(inside: Target.Member U a) \then
+    \takefrom chart: \Cast[TargetCharts.Chart]
+      ({ c: TargetCharts.Chart \where Logic.And[\In[TargetCharts.Chart] N.atlas.charts c, TargetCharts.Contains c a] })
+      \by N.atlas.covers a \then
+    \let laws: Logic.And[\In[TargetCharts.Chart] N.atlas.charts chart, TargetCharts.Contains chart a] :=
+      \bysub(TargetCharts.Chart, { c: TargetCharts.Chart \where Logic.And[\In[TargetCharts.Chart] N.atlas.charts c,
+        TargetCharts.Contains c a] }, chart) \then
+    \let chosen: TargetChart := \into[TargetCharts.Chart](chart, TargetChart) \by { laws.left } \then
+    \return InChart[right := chosen].dense sard U open a inside laws.right
+  };
+
+\definition sard: \forall (chart: TargetChart) -> Null.Null InChart[right := chart].criticalCoordinates :=
+  criticalNull (\root.Proof[].theorem n m);
+
+\definition regularDense: \forall (U: \Pow N.Point) -> Target.IsOpenIn N.space U ->
+  \forall (a: N.Point) -> Target.Member U a -> \exists ( y: N.Point \where Logic.And[Target.Member U y, Regular y] ) :=
+  dense (\root.Proof[].theorem n m);
