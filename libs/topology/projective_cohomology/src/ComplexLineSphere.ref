@@ -4,3 +4,4 @@
 \import bott_product.Bott[].ProjectiveLine[].Homeomorphism[] \as Sphere;
 \definition homeomorphism: topology.Homeomorphism[A := Projective.Space, B := Spheres.Carrier Degrees.two].Homeomorphism[
   Projective.topology, Spheres.topology Degrees.two] := Sphere.homeomorphism;
+\module Equator(w: Spheres.Carrier Degrees.one);
