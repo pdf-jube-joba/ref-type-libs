@@ -1,0 +1,67 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\definition basePart: \Pow Y := { y: Y \where Base.Member U (f y) };
+\definition totalPart: \Pow Carrier := { p: Carrier \where \In[Y] basePart (baseMap p) };
+\import singular_cohomology.Relative[A := Y, source := source, subset := basePart] \as SourceBase;
+\import singular_cohomology.Relative[A := Carrier, source := topology, subset := totalPart] \as SourceTotal;
+\import SourceBase.Maps[B := X].Over[target := base, targetSubset := U] \as BaseMaps;
+\import SourceTotal.Maps[B := E].Over[target := total, targetSubset := preimage U] \as TotalMaps;
+\definition basePairMap: BaseMaps.Map := \into[Y -> X](f, BaseMaps.Map) \by {
+  BaseMaps.Laws[f] { continuous := regular, contained := \fun (y: SourceBase.SubspaceCarrier) => \bysub(Y, basePart, y) }
+};
+\definition totalPairMap: TotalMaps.Map := \into[Carrier -> E](totalMap, TotalMaps.Map) \by {
+  TotalMaps.Laws[totalMap] {
+    continuous := totalContinuous,
+    contained := \fun (p: SourceTotal.SubspaceCarrier) =>
+      \idelim f (baseMap p) = projection (totalMap p) \with x: X => Base.Member U x \by {
+        base: \bysub(Carrier, totalPart, p), equality: square p
+      },
+  }
+};
+\import \root.PairMap[A := Y, B := X, source := source, target := base, part := basePart, boundary := U,
+  f := basePairMap, K := K, ring := ring] \as BasePull;
+\import \root.PairMap[A := Carrier, B := E, source := topology, target := total, part := totalPart, boundary := preimage U,
+  f := totalPairMap, K := K, ring := ring] \as TotalPull;
+\import \root.Projection[X := Y, E := Carrier, base := source, total := topology, projection := baseMap, continuous := baseContinuous]
+  .Over[U := basePart, K := K, ring := ring] \as New;
+\import \root.Projection[X := X, E := E, base := base, total := total, projection := projection, continuous := continuous]
+  .Over[U := U, K := K, ring := ring] \as Old;
+\import TotalMaps.Composition[C := X].Over[final := base, finalSubset := U] \as AlongTotal;
+\import SourceTotal.Maps[B := Y].Over[target := source, targetSubset := basePart]
+  .Composition[C := X].Over[final := base, finalSubset := U] \as AlongBase;
+\import SourceTotal.Maps[B := X].Over[target := base, targetSubset := U] \as Direct;
+\import singular_cellular_algebra.Algebra[].Refinement[A := Carrier -> X, S := { h: Carrier -> X \where Direct.Laws[h] }] \as Refinement;
+\definition compositeLaw: AlongTotal.compose totalPairMap Old.pairProjection = AlongBase.compose New.pairProjection basePairMap :=
+  \axiom:funext((\fun (p: Carrier) => projection (totalMap p)), (\fun (p: Carrier) => f (baseMap p)),
+    (\fun (p: Carrier) => sym!{X} _ _ (square p)));
+\import singular_products.Cochains[A := E, source := total, R := K, ring := ring] \as OldProduct;
+\import singular_products.Cochains[A := Carrier, source := topology, R := K, ring := ring] \as NewProduct;
+\import NewProduct.Cohomology[].Pullback[B := E, target := total] \as AbsolutePull;
+\definition lift[q: N.Nat^]: OldProduct.Cohomology[].Group q -> NewProduct.Cohomology[].Group q :=
+  AbsolutePull.apply q totalMap totalContinuous;
+\definition projectionLaw: \forall (z: I.Int^)(a: Old.baseFamily.Carrier z) ->
+  TotalPull.At[z := z].linear.apply ((Old.projectionPullback z).apply a) =
+  (New.projectionPullback z).apply (BasePull.At[z := z].linear.apply a) :=
+  \fun (z: I.Int^)(a: Old.baseFamily.Carrier z) => trans!{{New.totalFamily.Carrier z}} _ _ _
+    (sym!{{New.totalFamily.Carrier z}} _ _ (AlongTotal.On[f := totalPairMap, g := Old.pairProjection].With[coefficients := OldProduct.integerCoefficients].law z a))
+    (trans!{{New.totalFamily.Carrier z}} _ _ _
+      (congr!{Direct.Map {New.totalFamily.Carrier z}}
+        (\fun (h: Direct.Map) => \root.PairMap[A := Carrier, B := X, source := topology, target := base, part := totalPart, boundary := U,
+          f := h, K := K, ring := ring].At[z := z].linear.apply a) _ _ compositeLaw)
+      (AlongBase.On[f := New.pairProjection, g := basePairMap].With[coefficients := OldProduct.integerCoefficients].law z a));
+\module Degree(p, q: N.Nat^) {
+  \import Old.Component[p := p, q := q] \as Source;
+  \import New.Component[p := p, q := q] \as Target;
+  \definition law: \forall (u: Source.Factor)(a: Source.Domain) ->
+    TotalPull.At[z := I.Int^::ofNat Source.degree].linear.apply (Source.apply u a) =
+    Target.apply (lift q u) (BasePull.At[z := I.Int^::ofNat p].linear.apply a) :=
+    \fun (u: Source.Factor)(a: Source.Domain) => trans!{Target.Range} _ _ _
+      (TotalPull.Cup[p := p, q := q].Cohomology[].law ((Old.projectionPullback (I.Int^::ofNat p)).apply a) u)
+      (congr!{{New.totalFamily.Carrier (I.Int^::ofNat p)} Target.Range}
+        (\fun (b: New.totalFamily.Carrier (I.Int^::ofNat p)) => Target.cup b (lift q u))
+        _ _ (projectionLaw (I.Int^::ofNat p) a));
+}

@@ -1,0 +1,17 @@
+\import std.Data[].Pair[] \as Pair;
+\module On(U: \Pow X) {
+  \import Base.Subspace[S := U] \as LocalBase;
+  \import Total.Subspace[S := preimage U] \as LocalTotal;
+  \import topological_constructions.Product[A := LocalBase.CarrierSet, B := F] \as Product;
+  \definition chartTarget: Product.ProductTopology := Product.topology (LocalBase.topology base) fiber;
+  \definition basePoint[p: Product.CarrierSet]: X := Pair.first LocalBase.CarrierSet F p;
+  \structure Chart: \Set := {
+    coordinates: topology.Homeomorphism[A := LocalTotal.CarrierSet, B := Product.CarrierSet].Homeomorphism[LocalTotal.topology total, chartTarget],
+    overBase: \forall (e: LocalTotal.CarrierSet) ->
+      basePoint (coordinates.forward e) = projection e,
+  };
+}
+\definition LocallyTrivial: \Prop := \forall (x: X) ->
+  \exists ( U: \Pow X \where std.Logic[].Proposition[].And[Base.Member U x,
+    std.Logic[].Proposition[].And[Base.IsOpenIn base U, \exists On[U := U].Chart]] );
+\module Cover(trivial: LocallyTrivial);

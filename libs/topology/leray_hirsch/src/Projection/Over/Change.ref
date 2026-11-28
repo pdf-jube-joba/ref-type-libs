@@ -1,0 +1,32 @@
+\import cohomology_thom.CoefficientChange[].OnSpace[A := X, source := base, R := K, S := L, ring := ring, targetRing := targetRing] \as BaseChange;
+\definition baseMorphism: BaseChange.Morphism := BaseChange.Morphism {
+  linear := morphism.linear, multiply := morphism.multiply, unit := morphism.unit,
+};
+\import \root.PairCoefficients[A := E, source := total, subset := preimage U, K := K, L := L, ring := ring, targetRing := targetRing,
+  morphism := morphism] \as TargetCoefficients;
+\import \root.PairCoefficients[A := X, source := base, subset := U, K := K, L := L, ring := ring, targetRing := targetRing,
+  morphism := baseMorphism] \as SourceCoefficients;
+\import \root.Projection[X := X, E := E, base := base, total := total, projection := projection, continuous := continuous]
+  .Over[U := U, K := L, ring := targetRing] \as New;
+\import singular_products.Cochains[A := X, source := base, R := L, ring := targetRing] \as NewBaseProduct;
+\import Pairs.On[f := pairProjection].Integer[] \as PairChains;
+\import cohomology_thom.CoefficientChange[].On[C := BasePair.complex, M := BaseProduct.integerCoefficients,
+  N := NewBaseProduct.integerCoefficients, u := morphism.linear].Along[D := TotalPair.complex, f := PairChains.map] \as Pull;
+\definition projectionLaw: \forall (z: I.Int^)(a: baseFamily.Carrier z) ->
+  (TargetCoefficients.relative z).apply ((projectionPullback z).apply a) =
+  (New.projectionPullback z).apply ((SourceCoefficients.relative z).apply a) :=
+  \fun (z: I.Int^) => Pull.At[z := z].law;
+\module Degree(p, q: N.Nat^) {
+  \import \parent.\parent.Component[p := p, q := q] \as Old;
+  \import New.Component[p := p, q := q] \as Target;
+  \use std.Logic[].Equality[].trans;
+  \use std.Logic[].Equality[].congr;
+  \definition law: \forall (u: Old.Factor)(a: Old.Domain) ->
+    (TargetCoefficients.relative (I.Int^::ofNat Old.degree)).apply (Old.apply u a) =
+    Target.apply ((TargetCoefficients.absolute q).apply u) ((SourceCoefficients.relative (I.Int^::ofNat p)).apply a) :=
+    \fun (u: Old.Factor)(a: Old.Domain) => trans!{Target.Range} _ _ _
+      (TargetCoefficients.Cup[p := p, q := q].Cohomology[].law ((projectionPullback (I.Int^::ofNat p)).apply a) u)
+      (congr!{{New.totalFamily.Carrier (I.Int^::ofNat p)} Target.Range}
+        (\fun (b: New.totalFamily.Carrier (I.Int^::ofNat p)) => Target.cup b ((TargetCoefficients.absolute q).apply u))
+        _ _ (projectionLaw (I.Int^::ofNat p) a));
+}

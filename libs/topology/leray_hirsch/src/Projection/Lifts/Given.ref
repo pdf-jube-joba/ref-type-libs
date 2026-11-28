@@ -1,0 +1,2 @@
+\definition LiftsBasis: \Prop := \forall (x: X)(q: N.Nat^) ->
+  \parent.Fiber[x := x].Basis[degree := degree, classes := classes, q := q].IsBasis;

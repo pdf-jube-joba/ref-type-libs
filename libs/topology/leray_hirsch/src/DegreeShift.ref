@@ -1,0 +1,36 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import chain_complexes.Integer[] \as Integer;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\definition shift: N.Nat^ -> I.Int^ -> I.Int^ := cohomology_thom.LocalDisk[].shift;
+\definition unshift: N.Nat^ -> I.Int^ -> I.Int^ :=
+  \induction (q: N.Nat^) \return I.Int^ -> I.Int^ \with {
+    | zero: \fun (z: I.Int^) => z
+    | succ: \fun (q: N.Nat^)(prior: I.Int^ -> I.Int^)(z: I.Int^) => prior (Integer.previous z)
+  };
+\definition shiftUnshift: \forall (q: N.Nat^)(z: I.Int^) -> shift q (unshift q z) = z :=
+  \induction (q: N.Nat^) \return \forall (z: I.Int^) -> shift q (unshift q z) = z \with {
+    | zero: \fun (z: I.Int^) => \refl(z)
+    | succ: \fun (q: N.Nat^)(prior: \forall (z: I.Int^) -> shift q (unshift q z) = z)(z: I.Int^) =>
+      trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} Integer.next _ _ (prior (Integer.previous z))) (Integer.nextPrevious z)
+  };
+\definition unshiftShift: \forall (q: N.Nat^)(z: I.Int^) -> unshift q (shift q z) = z :=
+  \induction (q: N.Nat^) \return \forall (z: I.Int^) -> unshift q (shift q z) = z \with {
+    | zero: \fun (z: I.Int^) => \refl(z)
+    | succ: \fun (q: N.Nat^)(prior: \forall (z: I.Int^) -> unshift q (shift q z) = z)(z: I.Int^) =>
+      trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} (unshift q) _ _ (Integer.previousNext (shift q z))) (prior z)
+  };
+\definition natural: \forall (q, p: N.Nat^) -> shift q (I.Int^::ofNat p) = I.Int^::ofNat (N.Basic[].Def[].add p q) :=
+  cohomology_thom.LocalDisk[].shiftNatural;
+\definition unshiftNext: \forall (q: N.Nat^)(z: I.Int^) -> unshift q (Integer.next z) = Integer.next (unshift q z) :=
+  \induction (q: N.Nat^) \return \forall (z: I.Int^) -> unshift q (Integer.next z) = Integer.next (unshift q z) \with {
+    | zero: \fun (z: I.Int^) => \refl(Integer.next z)
+    | succ: \fun (q: N.Nat^)(prior: \forall (z: I.Int^) -> unshift q (Integer.next z) = Integer.next (unshift q z))(z: I.Int^) =>
+      trans!{I.Int^} _ _ _ (congr!{I.Int^ I.Int^} (unshift q) _ _ (Integer.previousNext z))
+        (trans!{I.Int^} _ _ _
+          (congr!{I.Int^ I.Int^} (unshift q) _ _ (sym!{I.Int^} _ _ (Integer.nextPrevious z)))
+          (prior (Integer.previous z)))
+  };

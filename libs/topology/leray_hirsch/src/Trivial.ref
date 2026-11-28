@@ -1,0 +1,21 @@
+\import std.Data[].Nat[] \as N;
+\import singular_cap.External[A := X, B := F, left := base, right := fiber, R := K, ring := ring] \as External;
+\import topological_constructions.Product[A := X, B := F] \as Product;
+\import topology.Topology[Carrier := F] \as FiberSpace;
+\import \root.Projection[X := X, E := Product.CarrierSet, base := base, total := External.topology,
+  projection := External.leftProjection, continuous := External.leftContinuous] \as Bundle;
+\import singular_products.Cochains[A := F, source := fiber, R := K, ring := ring].Cohomology[] \as FiberCohomology;
+\import singular_products.Cochains[A := Product.CarrierSet, source := External.topology, R := K, ring := ring]
+  .Cohomology[].Pullback[B := F, target := fiber] \as Pull;
+\definition lift[q: N.Nat^]: FiberCohomology.Group q -> _ := Pull.apply q External.rightProjection External.rightContinuous;
+\module Over(U: \Pow X) {
+  \import Bundle.Over[U := U, K := K, ring := ring] \as Comparison;
+  \import External.Relative[leftSubset := U, rightSubset := FiberSpace.Empty] \as Relative;
+  \module Degree(p, q: N.Nat^) {
+    \import Comparison.Component[p := p, q := q] \as Component;
+    \import Relative.Cohomology[p := p, q := q] \as Product;
+    \definition law: \forall (a: Component.Domain)(b: FiberCohomology.Group q) ->
+      Component.apply (lift q b) a = Product.left a b :=
+      \fun (a: Component.Domain)(b: FiberCohomology.Group q) => \refl(Product.left a b);
+  }
+}

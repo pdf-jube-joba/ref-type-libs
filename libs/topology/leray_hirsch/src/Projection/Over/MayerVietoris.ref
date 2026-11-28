@@ -1,0 +1,41 @@
+\import singular_excision.MayerVietoris[A := E].Over[source := total] \as Covers;
+\import singular_excision.MayerVietoris[A := X].Over[source := base] \as BaseCovers;
+\definition data: Covers.Data := Covers.Data {
+  left := preimage cover.left,
+  right := preimage cover.right,
+};
+\definition totalCover: Covers.Cover := \into[Covers.Data](data, Covers.Cover) \by {
+  Covers.Laws[data] {
+    leftOpen := continuous cover.left (BaseCovers.laws cover).leftOpen,
+    rightOpen := continuous cover.right (BaseCovers.laws cover).rightOpen,
+    covered := \fun (e: E) => (BaseCovers.laws cover).covered (projection e),
+  }
+};
+\import cohomology_thom.RelativeMayerVietoris[].OpenCover[A := X, source := base, subset := U].On[cover := cover] \as BaseMV;
+\import cohomology_thom.RelativeMayerVietoris[].OpenCover[A := E, source := total, subset := preimage U].On[cover := totalCover] \as TotalMV;
+\definition leftContains: \forall (e: TotalMV.Left) -> \In[X] cover.left (projection e) :=
+  \fun (e: TotalMV.Left) => \bysub(E, data.left, e);
+\definition rightContains: \forall (e: TotalMV.Right) -> \In[X] cover.right (projection e) :=
+  \fun (e: TotalMV.Right) => \bysub(E, data.right, e);
+\import BaseMV.From[B := E, target := total, part := preimage U, otherCover := totalCover]
+  .Along[f := pairProjection, leftContains := leftContains, rightContains := rightContains] \as Projection;
+\import Projection.With[coefficients := BaseProduct.integerCoefficients] \as Natural;
+\definition overlapProjection: _ := Projection.overlapMap;
+\module At(z: I.Int^) {
+  \import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients].At[z := z] \as Domain;
+  \import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients].At[z := z] \as Range;
+  \import \root.PairMap[A := TotalMV.Overlap, B := BaseMV.Overlap, source := TotalMV.overlapTopology, target := BaseMV.overlapTopology,
+    part := TotalMV.overlapPart, boundary := BaseMV.overlapPart, f := overlapProjection, K := K, ring := ring] \as Overlap;
+  \definition baseConnecting: _ := Domain.connecting;
+  \definition totalConnecting: _ := Range.connecting;
+  \definition overlapPullback: _ := Overlap.At[z := z].linear;
+  \definition next: I.Int^ := chain_complexes.Integer[].next z;
+  \import singular_cohomology.Relative[A := BaseMV.Overlap, source := BaseMV.overlapTopology, subset := BaseMV.overlapPart]
+    .With[coefficients := BaseProduct.integerCoefficients].At[z := z] \as Input;
+  \definition connectingLaw: \forall (a: Input.Carrier) ->
+    totalConnecting.apply (overlapPullback.apply a) = (projectionPullback next).apply (baseConnecting.apply a) :=
+    Natural.Ordinary[z := z].law;
+}
+
+\import std.Data[].FinSet[] \as Finite;
+\module Shifted(count: N.Nat^, degree: Finite.Fin count -> N.Nat^);

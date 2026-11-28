@@ -1,0 +1,22 @@
+\import std.Logic[].Equality[] \as Equality;
+\import std.Logic[].Proposition[] \as Logic;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\module Degree(n: N.Nat^) {
+  \import Modules.Free[Generators := Generators n] \as Free;
+  \import Complexes.At[C := C, k := n] \as Target;
+  \definition free: Modules.Bundle := Free.bundle;
+  \definition classes: Modules.Bundle := Modules.Bundle { Carrier := Target.Cohomology, space := Target.cohomologySpace };
+  \definition cycles: Modules.Bundle := Modules.Bundle { Carrier := Target.CycleCarrier, space := Target.cycleSpace };
+  \definition classOf: Modules.MapBetween cycles classes := Target.classLinear;
+  \definition generator: Generators n -> free.Carrier := Free.generator;
+  \definition Basis: \Set := Modules.Isomorphism[V := free.Carrier, W := classes.Carrier, source := free.space, target := classes.space].Isomorphism;
+}
+\definition family: Complexes.Family := Complexes.Family {
+  Carrier := \fun (n: N.Nat^) => \parent.For[C := C, Generators := Generators].Degree[n := n].free.Carrier,
+  space := \fun (n: N.Nat^) => \parent.For[C := C, Generators := Generators].Degree[n := n].free.space,
+};
+\import Complexes.ZeroDifferential[family := family] \as Zero;
+\definition complex: Complexes.Complex := Zero.complex;
+\module With(basis: \forall (n: N.Nat^) -> \parent.Degree[n := n].Basis);

@@ -1,0 +1,51 @@
+\import std.Data[].FinSet[] \as Finite;
+\definition Index: \Set := Finite.Fin count;
+\module With(degree: Index -> N.Nat^, classes: \forall (i: Index) -> TotalCohomology.Group (degree i)) {
+  \module At(z: I.Int^) {
+    \definition inputDegree[i: Index]: I.Int^ := Degrees.unshift (degree i) z;
+    \definition family: Modules.Family[Index] := Modules.Family[Index] {
+      Carrier := \fun (i: Index) => baseFamily.Carrier (inputDegree i),
+      space := \fun (i: Index) => baseFamily.space (inputDegree i),
+    };
+    \import Modules.DirectSum[Index := Index, family := family] \as Source;
+    \import Source.To[W := totalFamily.Carrier z, target := totalFamily.space z] \as Universal;
+    \definition components: Universal.Components :=
+      \fun (i: Index) => \parent.\parent.\parent.Shifted[q := degree i, u := classes i].To[z := z].linear;
+    \definition linear: _ := Universal.extension components;
+    \import Source.FiniteSupport[] \as Coordinates;
+    \import Modules.Product[Index := Index, family := family] \as Product;
+    \import Modules.FinitelySupported[Index := Index, family := family] \as Supported;
+    \import std.Data[].List[] \as Lists;
+    \import Lists.Distinct[A := Index] \as Enumeration;
+    \import std.Logic[].Proposition[] \as Logic;
+    \definition allSupported[v: Product.Carrier]: Supported.Finite v :=
+      Logic.existsIntro[Lists.List[Index], { xs: Lists.List[Index] \where Supported.Supports xs v }] (Finite.elements count)
+        (\fun (i: Index)(missing: Logic.Not (\In[Index] (Enumeration.keys (Finite.elements count)) i)) =>
+          Logic.falseElim _ (missing (Finite.exhaustive count i)));
+    \import Modules.Hom[V := Source.Carrier, W := Product.Carrier, source := Source.space, target := Product.space] \as IntoProduct;
+    \definition coordinates: IntoProduct.Map := IntoProduct.Map {
+      apply := Coordinates.coordinates,
+      addition := Coordinates.coordinatesAddition,
+      scalar := Coordinates.coordinatesScalar,
+    };
+    \import Modules.Isomorphism[V := Source.Carrier, W := Product.Carrier, source := Source.space, target := Product.space]
+      .OfBijective[f := coordinates] \as CoordinateIso;
+    \import singular_cellular_algebra.Algebra[].Refinement[A := Product.Carrier, S := Supported.submodule.carrier] \as Refinement;
+    \definition coordinateInjective: CoordinateIso.Injective :=
+      \fun (x, y: Source.Carrier)(same: coordinates.apply x = coordinates.apply y) =>
+        Coordinates.injective x y (Refinement.ext (Coordinates.forward.apply x) (Coordinates.forward.apply y) same);
+    \definition coordinateOnto: CoordinateIso.Onto :=
+      \fun (v: Product.Carrier) => \block {
+        \let supported: Supported.Carrier := \into[Product.Carrier](v, Supported.submodule.carrier) \by { allSupported v } \then
+        \takefrom x: \Cast[Source.Carrier] ({ x: Source.Carrier \where Coordinates.forward.apply x = supported })
+          \by Coordinates.onto supported \then
+        \return Logic.existsIntro[Source.Carrier, { x: Source.Carrier \where coordinates.apply x = v }] x
+          (Refinement.forgetEquality (Coordinates.forward.apply x) supported
+            (\bysub(Source.Carrier, { y: Source.Carrier \where Coordinates.forward.apply y = supported }, x)))
+      };
+    \definition coordinateIsomorphism: _ := CoordinateIso.isomorphism coordinateInjective coordinateOnto;
+    \definition onSummand: \forall (i: Index)(a: family.Carrier i) ->
+      linear.apply (Source.Injection[i := i].map.apply a) = (components i).apply a :=
+      Universal.onInjection components;
+  }
+}

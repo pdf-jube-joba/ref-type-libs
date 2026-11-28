@@ -1,0 +1,28 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\definition degree: std.Data[].Nat[].Nat^ := std.Data[].Nat[].Basic[].Def[].add p q;
+\import singular_cap.CochainPair[A := A, source := source, subset := part, R := K, ring := ring] \as SourceCup;
+\import singular_cap.CochainPair[A := B, source := target, subset := boundary, R := K, ring := ring] \as TargetCup;
+\import SourceCup.RelativeCup[p := p, q := q] \as SourceProduct;
+\import TargetCup.RelativeCup[p := p, q := q] \as TargetProduct;
+\import SourceCup.Comparison[n := degree] \as SourceOutput;
+\import SourceCup.Comparison[n := p] \as SourceInput;
+\import TargetCup.Comparison[n := p] \as TargetInput;
+\import cohomology_thom.RelativePullback[].On[A := A, source := source, subset := part, R := K, ring := ring].To[B := B, target := target, part := boundary].Along[f := f] \as Relative;
+\import Source.Pullback[B := B, target := target] \as Absolute;
+\definition continuous: _ := (Pairs.laws f).continuous;
+\import Source.Cup[p := p, q := q] \as Product;
+\definition cochainLaw: \forall (a: TargetRelative.Carrier (I.Int^::ofNat p))(u: Target.Carrier q) ->
+  map.apply (I.Int^::ofNat degree) (TargetProduct.left a u) =
+  SourceProduct.left (map.apply (I.Int^::ofNat p) a) (Absolute.apply q f continuous u) :=
+  \fun (a: TargetRelative.Carrier (I.Int^::ofNat p))(u: Target.Carrier q) => SourceOutput.injective _ _
+    (eq_reason_in!{{Source.Carrier degree} _
+      "=" _ "by" { Relative.Compare[n := degree].law (TargetProduct.left a u) }
+      "=" _ "by" { congr!{{Target.Carrier degree} {Source.Carrier degree}} (Absolute.apply degree f continuous) _ _ (TargetProduct.leftRestriction a u) }
+      "=" _ "by" { Absolute.Cup[p := p, q := q].law f continuous (TargetInput.from a) u }
+      "=" _ "by" { congr!{{Source.Carrier p} {Source.Carrier degree}} (\fun (b: Source.Carrier p) => Product.apply b (Absolute.apply q f continuous u)) _ _ (sym!{{Source.Carrier p}} _ _ (Relative.Compare[n := p].law a)) }
+      "=" _ "by" { sym!{{Source.Carrier degree}} _ _ (SourceProduct.leftRestriction (map.apply (I.Int^::ofNat p) a) (Absolute.apply q f continuous u)) }
+    });
+\module Cohomology;

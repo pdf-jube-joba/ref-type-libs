@@ -1,0 +1,22 @@
+\definition degree: N.Nat^ := N.Basic[].Def[].add p q;
+\import singular_cap.CochainPair[A := A, source := source, subset := subset, R := K, ring := ring] \as SourcePair;
+\import singular_cap.CochainPair[A := A, source := source, subset := subset, R := L, ring := targetRing] \as TargetPair;
+\import SourcePair.RelativeCup[p := p, q := q] \as SourceCup;
+\import TargetPair.RelativeCup[p := p, q := q] \as TargetCup;
+\import SourcePair.Comparison[n := p] \as Input;
+\import TargetPair.Comparison[n := p] \as TargetInput;
+\import TargetPair.Comparison[n := degree] \as Output;
+\import Change.Cup[p := p, q := q] \as Ordinary;
+\import Target.Cup[p := p, q := q] \as Product;
+\definition cochainLaw: \forall (a: SourceRelative.Carrier (I.Int^::ofNat p))(u: Source.Carrier q) ->
+  Relative.cochainMap.apply (I.Int^::ofNat degree) (SourceCup.left a u) =
+  TargetCup.left (Relative.cochainMap.apply (I.Int^::ofNat p) a) (Change.apply q u) :=
+  \fun (a: SourceRelative.Carrier (I.Int^::ofNat p))(u: Source.Carrier q) => Output.injective _ _
+    (eq_reason_in!{{Target.Carrier degree} _
+      "=" _ "by" { Relative.Compare[n := degree].law (SourceCup.left a u) }
+      "=" _ "by" { congr!{{Source.Carrier degree} {Target.Carrier degree}} (Change.apply degree) _ _ (SourceCup.leftRestriction a u) }
+      "=" _ "by" { Ordinary.law (Input.from a) u }
+      "=" _ "by" { congr!{{Target.Carrier p} {Target.Carrier degree}} (\fun (b: Target.Carrier p) => Product.apply b (Change.apply q u)) _ _ (sym!{{Target.Carrier p}} _ _ (Relative.Compare[n := p].law a)) }
+      "=" _ "by" { sym!{{Target.Carrier degree}} _ _ (TargetCup.leftRestriction (Relative.cochainMap.apply (I.Int^::ofNat p) a) (Change.apply q u)) }
+    });
+\module Cohomology;

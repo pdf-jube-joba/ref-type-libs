@@ -1,0 +1,35 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\module Map(z: I.Int^) {
+  \definition Map: \Set := Modules.Hom[V := baseFamily.Carrier z, W := totalFamily.Carrier (Degrees.shift q z),
+    source := baseFamily.space z, target := totalFamily.space (Degrees.shift q z)].Map;
+}
+\module Positive(p: N.Nat^) {
+  \import \parent.\parent.Component[p := p, q := q] \as Product;
+  \definition z: I.Int^ := I.Int^::ofNat p;
+  \definition targetDegree: I.Int^ := I.Int^::ofNat Product.degree;
+  \definition regrade: targetDegree = Degrees.shift q z := sym!{I.Int^} _ _ (Degrees.natural q p);
+  \import Modules.Hom[V := totalFamily.Carrier targetDegree, W := totalFamily.Carrier (Degrees.shift q z),
+    source := totalFamily.space targetDegree, target := totalFamily.space (Degrees.shift q z)]
+    .Composition[U := baseFamily.Carrier z, domain := baseFamily.space z] \as Compose;
+  \definition linear: \parent.Map[z := z].Map := Compose.compose (Reindex.At[m := targetDegree, n := Degrees.shift q z, same := regrade].map) (Product.linear u);
+}
+\module Negative(k: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::negSucc k;
+  \import Modules.Hom[V := baseFamily.Carrier z, W := totalFamily.Carrier (Degrees.shift q z),
+    source := baseFamily.space z, target := totalFamily.space (Degrees.shift q z)] \as Maps;
+  \definition linear: \parent.Map[z := z].Map := Maps.zeroMap;
+}
+\definition map: \forall (z: I.Int^) -> Map[z := z].Map :=
+  \induction (z: I.Int^) \return Map[z := z].Map \with {
+    | ofNat: \fun (p: N.Nat^) => Positive[p := p].linear
+    | negSucc: \fun (k: N.Nat^) => Negative[k := k].linear
+  };
+\module To(z: I.Int^) {
+  \definition input: I.Int^ := Degrees.unshift q z;
+  \definition output: I.Int^ := Degrees.shift q input;
+  \import Modules.Hom[V := totalFamily.Carrier output, W := totalFamily.Carrier z,
+    source := totalFamily.space output, target := totalFamily.space z]
+    .Composition[U := baseFamily.Carrier input, domain := baseFamily.space input] \as Compose;
+  \definition linear: _ := Compose.compose (Reindex.At[m := output, n := z, same := Degrees.shiftUnshift q z].map) (map input);
+}

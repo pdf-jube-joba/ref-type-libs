@@ -1,0 +1,6 @@
+\import Modules.Hom[V := family.Carrier m, W := family.Carrier n, source := family.space m, target := family.space n] \as Maps;
+\definition map: Maps.Map := Maps.Map {
+  apply := Casting.cast family.Carrier m n same,
+  addition := Casting.binaryNatural family.Carrier family.Carrier family.Carrier (\fun (i: Index) => (family.space i).add) m n same,
+  scalar := \fun (r: K)(x: family.Carrier m) => Casting.natural family.Carrier family.Carrier (\fun (i: Index)(v: family.Carrier i) => (family.space i).smul r v) m n same x,
+};

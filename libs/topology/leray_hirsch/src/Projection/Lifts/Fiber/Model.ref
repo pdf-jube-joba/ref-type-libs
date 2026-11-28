@@ -1,0 +1,14 @@
+\definition Generators[q: N.Nat^]: \Set := \parent.Basis[degree := degree, classes := classes, q := q].Indices;
+\import singular_cohomology.Cochains[A := Carrier, source := topology].OverRing[R := K, ring := ring]
+  .With[coefficients := FiberProduct.coefficients] \as Cochains;
+\import \root.CocycleModel[K := K, ring := ring].For[C := Cochains.complex, Generators := Generators] \as Model;
+\definition basis: \forall (q: N.Nat^) -> Model.Degree[n := q].Basis :=
+  \fun (q: N.Nat^) => \parent.Basis[degree := degree, classes := classes, q := q].isomorphism (based q);
+\import Model.With[basis := basis] \as Representatives;
+\definition Lifts: \Set := Representatives.Lifts;
+\definition existsLifts: \exists Lifts := Representatives.existsLifts;
+\module Given(lifts: Lifts) {
+  \import Representatives.Given[lifts := lifts] \as Realization;
+  \definition map: _ := Realization.map;
+  \definition isomorphism[q: N.Nat^]: _ := Realization.At[n := q].isomorphism;
+}

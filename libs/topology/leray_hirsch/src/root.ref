@@ -1,0 +1,22 @@
+\module Projection(X, E: \Set, base: topology.Topology[Carrier := X].Topology,
+  total: topology.Topology[Carrier := E].Topology, projection: E -> X,
+  continuous: topology.Continuity[A := E, B := X].Continuous total base projection);
+
+\module PairMap(A, B: \Set, source: topology.Topology[Carrier := A].Topology,
+  target: topology.Topology[Carrier := B].Topology, part: \Pow A, boundary: \Pow B,
+  f: singular_cohomology.Relative[A := A, source := source, subset := part].Maps[B := B].Over[target := target, targetSubset := boundary].Map,
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module DegreeShift;
+\module Transport(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module Trivial(X, F: \Set, base: topology.Topology[Carrier := X].Topology,
+  fiber: topology.Topology[Carrier := F].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module PairCoefficients(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+  K, L: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], targetRing: std.Alg[].Ring[].CommutativeRing[L],
+  morphism: cohomology_thom.CoefficientChange[].OnSpace[A := A, source := source, R := K, S := L, ring := ring, targetRing := targetRing].Morphism);
+
+\module ProductExact(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], Index: \Set);
+
+\module CocycleModel(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

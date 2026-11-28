@@ -1,0 +1,63 @@
+\import Complexes.Map[C := complex, D := C] \as Maps;
+\definition apply[n: N.Nat^][x: family.Carrier n]: C.family.Carrier n := (lifts n).map.apply x;
+\definition closed: \forall (n: N.Nat^)(x: family.Carrier n) -> C.differential.apply n (apply n x) = (C.family.space (N.Nat^::succ n)).zero :=
+  \fun (n: N.Nat^)(x: family.Carrier n) => \bysub(C.family.Carrier n,
+    (Complexes.At[C := C, k := n].cycles).carrier, (lifts n).map.apply x);
+\module Step(n: N.Nat^) {
+  \import Modules.Hom[V := family.Carrier n, W := C.family.Carrier n, source := family.space n, target := C.family.space n] \as Map;
+  \definition linear: Map.Map := Map.Map {
+    apply := apply n,
+    addition := \fun (x, y: family.Carrier n) => (lifts n).map.addition x y,
+    scalar := \fun (r: K)(x: family.Carrier n) => (lifts n).map.scalar r x,
+  };
+  \definition zero: apply n (family.space n).zero = (C.family.space n).zero := Map.zeroPreserved linear;
+}
+\definition map: Maps.Map := Maps.Map {
+  apply := apply,
+  addition := \fun (n: N.Nat^) => \parent.Given[lifts := lifts].Step[n := n].linear.addition,
+  scalar := \fun (n: N.Nat^) => \parent.Given[lifts := lifts].Step[n := n].linear.scalar,
+  commutes := \fun (n: N.Nat^)(x: family.Carrier n) => trans!{{C.family.Carrier (N.Nat^::succ n)}} _ _ _
+    (closed n x)
+    (sym!{{C.family.Carrier (N.Nat^::succ n)}} _ _ (\parent.Given[lifts := lifts].Step[n := N.Nat^::succ n].zero)),
+};
+\module At(n: N.Nat^) {
+  \import Maps.At[k := n] \as Induced;
+  \import Complexes.At[C := C, k := n] \as Target;
+  \import Complexes.At[C := complex, k := n] \as Source;
+  \import Zero.At[k := n] \as BasisClasses;
+  \definition law: \forall (x: family.Carrier n) ->
+    (Induced.induced map).apply (BasisClasses.forward.apply x) = (basis n).forward.apply x :=
+    \fun (x: family.Carrier n) => trans!{Target.Cohomology} _ _ _
+      (Induced.onClass map (BasisClasses.cycles.apply x))
+      ((lifts n).law x);
+  \import Modules.Isomorphism[V := Source.Cohomology, W := Target.Cohomology, source := Source.cohomologySpace, target := Target.cohomologySpace]
+    .OfBijective[f := Induced.induced map] \as Inverse;
+  \definition coordinates: \forall (a: Source.Cohomology) ->
+    (basis n).forward.apply (BasisClasses.backward.apply a) = (Induced.induced map).apply a :=
+    \fun (a: Source.Cohomology) => trans!{Target.Cohomology} _ _ _
+      (sym!{Target.Cohomology} _ _ (law (BasisClasses.backward.apply a)))
+      (congr!{Source.Cohomology Target.Cohomology} (Induced.induced map).apply _ _ (BasisClasses.rightInverse a));
+  \definition sourceCoordinates: \forall (a: Source.Cohomology) ->
+    (basis n).backward.apply ((Induced.induced map).apply a) = BasisClasses.backward.apply a :=
+    \fun (a: Source.Cohomology) => trans!{{family.Carrier n}} _ _ _
+      (congr!{Target.Cohomology {family.Carrier n}} (basis n).backward.apply _ _ (sym!{Target.Cohomology} _ _ (coordinates a)))
+      ((basis n).leftInverse (BasisClasses.backward.apply a));
+  \definition recover: \forall (a: Source.Cohomology) ->
+    BasisClasses.forward.apply ((basis n).backward.apply ((Induced.induced map).apply a)) = a :=
+    \fun (a: Source.Cohomology) => trans!{Source.Cohomology} _ _ _
+      (congr!{{family.Carrier n} Source.Cohomology} BasisClasses.forward.apply _ _ (sourceCoordinates a))
+      (BasisClasses.rightInverse a);
+  \definition injective: Inverse.Injective :=
+    \fun (a, b: Source.Cohomology)(same: _) => trans!{Source.Cohomology} _ _ _
+      (sym!{Source.Cohomology} _ _ (recover a))
+      (trans!{Source.Cohomology} _ _ _
+        (congr!{Target.Cohomology Source.Cohomology}
+          (\fun (y: Target.Cohomology) => BasisClasses.forward.apply ((basis n).backward.apply y)) _ _ same)
+        (recover b));
+  \definition onto: Inverse.Onto :=
+    \fun (y: Target.Cohomology) =>
+      Logic.existsIntro[Source.Cohomology, { x: Source.Cohomology \where (Induced.induced map).apply x = y }]
+        (BasisClasses.forward.apply ((basis n).backward.apply y))
+        (trans!{Target.Cohomology} _ _ _ (law ((basis n).backward.apply y)) ((basis n).rightInverse y));
+  \definition isomorphism: _ := Inverse.isomorphism injective onto;
+}

@@ -1,0 +1,36 @@
+\import SourceCup.Cohomology[p := p, q := q].Left[] \as NewCup;
+\import TargetCup.Cohomology[p := p, q := q].Left[] \as OldCup;
+\import Complexes.At[C := TargetRelative.complex, z := I.Int^::ofNat p] \as OldRelative;
+\import Complexes.At[C := SourceRelative.complex, z := I.Int^::ofNat p] \as NewRelative;
+\import Complexes.At[C := SourceRelative.complex, z := I.Int^::ofNat degree] \as Output;
+\import singular_cohomology.Cochains[A := B, source := target].OverRing[R := K, ring := ring].With[coefficients := Target.coefficients] \as AbsoluteTarget;
+\import singular_cohomology.Cochains[A := A, source := source].OverRing[R := K, ring := ring].With[coefficients := Source.coefficients] \as AbsoluteSource;
+\import chain_complexes.Cochain[].Over[R := K, ring := Rings.commutativeRingAsRing K ring] \as Ordinary;
+\import Ordinary.At[C := AbsoluteTarget.complex, k := q] \as OldAbsolute;
+\import Ordinary.At[C := AbsoluteSource.complex, k := q] \as NewAbsolute;
+\import Source.Cohomology[].Pullback[B := B, target := target] \as AbsolutePull;
+\import Complexes.Map[C := TargetRelative.complex, D := SourceRelative.complex].At[k := I.Int^::ofNat p] \as Input;
+\import Complexes.Map[C := TargetRelative.complex, D := SourceRelative.complex].At[k := I.Int^::ofNat degree] \as Result;
+\import singular_cellular_algebra.Algebra[].Refinement[A := SourceRelative.Carrier (I.Int^::ofNat degree), S := Output.cycles.carrier] \as Closed;
+\definition onClasses: \forall (a: OldRelative.Closed)(u: OldAbsolute.CycleCarrier) ->
+  (Result.induced map).apply (OldCup.apply (OldRelative.classOf a) (OldAbsolute.classOf u)) =
+  NewCup.apply ((Input.induced map).apply (OldRelative.classOf a)) (AbsolutePull.apply q f continuous (OldAbsolute.classOf u)) :=
+  \fun (a: OldRelative.Closed)(u: OldAbsolute.CycleCarrier) => eq_reason_in!{Output.Cohomology _
+    "=" _ "by" { congr!{{TargetRelative.cohomology degree} Output.Cohomology} (Result.induced map).apply _ _ (OldCup.onClasses a u) }
+    "=" _ "by" { Result.onClass map (OldCup.cycle a u) }
+    "=" _ "by" { congr!{Output.Closed Output.Cohomology} Output.classOf _ _ (Closed.ext ((Result.cyclesMap map).apply (OldCup.cycle a u)) (NewCup.cycle ((Input.cyclesMap map).apply a) (AbsolutePull.At[n := q].cycle f continuous u)) (cochainLaw a u)) }
+    "=" _ "by" { sym!{Output.Cohomology} _ _ (NewCup.onClasses ((Input.cyclesMap map).apply a) (AbsolutePull.At[n := q].cycle f continuous u)) }
+    "=" _ "by" { congr!{NewRelative.Cohomology NewAbsolute.Cohomology Output.Cohomology} NewCup.apply _ _ _ _
+      (sym!{NewRelative.Cohomology} _ _ (Input.onClass map a))
+      (sym!{NewAbsolute.Cohomology} _ _ (AbsolutePull.At[n := q].onClass f continuous u)) }
+  };
+\definition law: \forall (a: OldRelative.Cohomology)(u: OldAbsolute.Cohomology) ->
+  (Result.induced map).apply (OldCup.apply a u) =
+  NewCup.apply ((Input.induced map).apply a) (AbsolutePull.apply q f continuous u) :=
+  OldRelative.classInduction
+    (\fun (a: OldRelative.Cohomology) => \forall (u: OldAbsolute.Cohomology) -> (Result.induced map).apply (OldCup.apply a u) =
+      NewCup.apply ((Input.induced map).apply a) (AbsolutePull.apply q f continuous u))
+    (\fun (a: OldRelative.Closed) => OldAbsolute.classInduction
+      (\fun (u: OldAbsolute.Cohomology) => (Result.induced map).apply (OldCup.apply (OldRelative.classOf a) u) =
+        NewCup.apply ((Input.induced map).apply (OldRelative.classOf a)) (AbsolutePull.apply q f continuous u))
+      (onClasses a));

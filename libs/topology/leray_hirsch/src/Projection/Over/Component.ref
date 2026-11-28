@@ -1,0 +1,23 @@
+\definition degree: N.Nat^ := N.Basic[].Def[].add p q;
+\import Action.Cohomology[p := p, q := q].Left[] \as Cup;
+\import Pull.At[z := I.Int^::ofNat p] \as BasePullback;
+\definition Domain: \Set := BaseRelative.cohomology p;
+\definition Range: \Set := TotalRelative.cohomology degree;
+\definition Factor: \Set := TotalCohomology.Group q;
+\definition domainSpace: Modules.Space Domain := BaseRelative.cohomologySpace p;
+\definition rangeSpace: Modules.Space Range := TotalRelative.cohomologySpace degree;
+\definition cup: TotalRelative.cohomology p -> Factor -> Range := Cup.apply;
+\definition apply[u: Factor][a: Domain]: Range := cup (BasePullback.linear.apply a) u;
+\import Modules.Hom[V := Domain, W := Range, source := domainSpace, target := rangeSpace] \as Maps;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.congr;
+\definition linear[u: Factor]: Maps.Map := Maps.Map {
+  apply := apply u,
+  addition := \fun (a, b: Domain) => trans!{Range} _ _ _
+    (congr!{{TotalRelative.cohomology p} Range} (\fun (c: TotalRelative.cohomology p) => Cup.apply c u) _ _ (BasePullback.linear.addition a b))
+    (Cup.bilinear.addLeft (BasePullback.linear.apply a) (BasePullback.linear.apply b) u),
+  scalar := \fun (r: K)(a: Domain) => trans!{Range} _ _ _
+    (congr!{{TotalRelative.cohomology p} Range} (\fun (c: TotalRelative.cohomology p) => Cup.apply c u) _ _ (BasePullback.linear.scalar r a))
+    (Cup.bilinear.scaleLeft r (BasePullback.linear.apply a) u),
+};

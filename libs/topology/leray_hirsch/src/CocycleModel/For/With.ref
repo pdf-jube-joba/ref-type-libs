@@ -1,0 +1,40 @@
+\module In(n: N.Nat^) {
+  \import \parent.\parent.Degree[n := n] \as Degree;
+  \import Complexes.At[C := C, k := n] \as H;
+  \import Modules.Free[Generators := Generators n] \as Free;
+  \import Free.To[W := H.CycleCarrier, target := H.cycleSpace] \as Lifts;
+  \import Free.To[W := H.Cohomology, target := H.cohomologySpace] \as Classes;
+  \definition representative[g: Generators n]: \Set :=
+    \Cast[H.CycleCarrier] ({ z: H.CycleCarrier \where H.classOf z = (basis n).forward.apply (Free.generator g) });
+  \definition classRepresented: \forall (q: H.Cohomology) -> \exists (z: H.CycleCarrier \where H.classOf z = q) :=
+    H.classInduction (\fun (q: H.Cohomology) => \exists (z: H.CycleCarrier \where H.classOf z = q))
+      (\fun (z: H.CycleCarrier) => Logic.existsIntro[H.CycleCarrier, { h: H.CycleCarrier \where H.classOf h = H.classOf z }] z (\refl(H.classOf z)));
+  \definition representatives: \exists (\forall (g: Generators n) -> representative g) :=
+    \axiom:classicalIndefiniteChoice(Generators n, representative, \fun (g: Generators n) => classRepresented ((basis n).forward.apply (Free.generator g)));
+  \structure Lift: \Set := {
+    map: Modules.MapBetween Degree.free Degree.cycles,
+    law: \forall (x: Degree.free.Carrier) -> Degree.classOf.apply (map.apply x) = (basis n).forward.apply x,
+  };
+  \import Modules.Hom[V := Degree.cycles.Carrier, W := Degree.classes.Carrier, source := Degree.cycles.space, target := Degree.classes.space]
+    .Composition[U := Degree.free.Carrier, domain := Degree.free.space] \as Compose;
+  \definition existsLift: \exists Lift := \block {
+    \takefrom reps: \forall (g: Generators n) -> representative g \by representatives \then
+    \let values: Generators n -> H.CycleCarrier := \fun (g: Generators n) => reps g \then
+    \let choice: Modules.MapBetween Degree.free Degree.cycles := Lifts.extension values \then
+    \let same: Compose.compose H.classLinear choice = (basis n).forward :=
+      Classes.ext (Compose.compose H.classLinear choice) (basis n).forward
+        (\fun (g: Generators n) => trans!{H.Cohomology} _ _ _
+          (congr!{H.CycleCarrier H.Cohomology} H.classOf _ _ (Lifts.onGenerator values g))
+          (\bysub(H.CycleCarrier, { z: H.CycleCarrier \where H.classOf z = (basis n).forward.apply (Free.generator g) }, reps g))) \then
+    \return \exact(Lift {
+      map := choice,
+      law := \fun (x: Degree.free.Carrier) => congr!{{Modules.MapBetween Degree.free Degree.classes} H.Cohomology}
+        (\fun (f: Modules.MapBetween Degree.free Degree.classes) => f.apply x) _ _ same,
+    }, Lift)
+  };
+}
+\definition Lifts: \Set := \forall (n: N.Nat^) -> \parent.With[basis := basis].In[n := n].Lift;
+\definition existsLifts: \exists Lifts :=
+  \axiom:classicalIndefiniteChoice(N.Nat^, (\fun (n: N.Nat^) => \parent.With[basis := basis].In[n := n].Lift),
+    (\fun (n: N.Nat^) => \parent.With[basis := basis].In[n := n].existsLift));
+\module Given(lifts: Lifts);

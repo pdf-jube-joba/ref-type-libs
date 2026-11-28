@@ -1,0 +1,14 @@
+\definition subset: \Pow E := { e: E \where projection e = x };
+\import Total.Subspace[S := subset] \as Subspace;
+\definition Carrier: \Set := Subspace.CarrierSet;
+\definition topology: topology.Topology[Carrier := Carrier].Topology := Subspace.topology total;
+\definition inclusion[e: Carrier]: E := e;
+\import topology.Continuity[A := Carrier, B := E].Corestriction[S := subset] \as Inclusion;
+\definition continuous: _ := Inclusion.inclusionContinuous total;
+\import singular_products.Cochains[A := Carrier, source := topology, R := K, ring := ring] \as FiberProduct;
+\import FiberProduct.Cohomology[] \as Cohomology;
+\import Cohomology.Pullback[B := E, target := total] \as Pull;
+\definition restrict[q: N.Nat^]: TotalCohomology.Group q -> Cohomology.Group q := Pull.apply q inclusion continuous;
+\module Basis(degree: Index -> N.Nat^, classes: Classes degree, q: N.Nat^);
+\module Model(degree: Index -> N.Nat^, classes: Classes degree,
+  based: \forall (q: N.Nat^) -> \parent.Basis[degree := degree, classes := classes, q := q].IsBasis);

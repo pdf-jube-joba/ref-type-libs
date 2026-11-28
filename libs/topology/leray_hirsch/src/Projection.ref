@@ -1,0 +1,8 @@
+\import topology.Topology[Carrier := X] \as Base;
+\import topology.Topology[Carrier := E] \as Total;
+\definition preimage[U: \Pow X]: \Pow E := { e: E \where Base.Member U (projection e) };
+\module Charts(F: \Set, fiber: topology.Topology[Carrier := F].Topology);
+\module Over(U: \Pow X, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+\module Lifts(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], count: std.Data[].Nat[].Nat^);
+\module Pullback(Y: \Set, source: topology.Topology[Carrier := Y].Topology, f: Y -> X,
+  regular: topology.Continuity[A := Y, B := X].Continuous source base f);
