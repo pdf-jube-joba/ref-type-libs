@@ -1,0 +1,7 @@
+\import \parent.In[chart := left, contains := onLeft, vanishes := vanishes] \as Left;
+\import \parent.In[chart := right, contains := onRight, vanishes := vanishes] \as Right;
+\import \parent.\parent.Pair[left := left, right := right] \as Pair;
+\import Left.Overlap[other := right, alsoContains := onRight] \as LeftOverlap;
+\import Right.Overlap[other := left, alsoContains := onLeft] \as RightOverlap;
+\import Pair.For[omega := omega, sourceSupport := Left.supported, targetSupport := Right.supported].In[onLeft := LeftOverlap.within, onRight := RightOverlap.within] \as Comparison;
+\definition independent[orientation: Pair.Preserving]: Left.integral = Right.integral := Comparison.same orientation;

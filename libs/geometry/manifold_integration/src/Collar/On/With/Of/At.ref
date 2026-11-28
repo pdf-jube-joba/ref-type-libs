@@ -1,0 +1,17 @@
+\import manifold_gluing.HomotopyVelocity[n := dimension].On[M := M].Of[h := collar.deformation.homotopy].At[x := Inclusion.apply b] \as Velocity;
+\import manifold_gluing.BoundaryForms[n := n].On[M := M].With[cover := cover].At[b := b] \as BoundaryForms;
+\definition boundaryPoint: Atlas.Point := \into[M.Point](Inclusion.apply b, Atlas.points) \by { \bysub(M.Point, Atlas.points, b) };
+\import manifold_gluing.TransverseVelocity[n := n].On[M := M].Of[h := collar.deformation.homotopy].At[x := boundaryPoint, c := c, contains := contains] \as Normal;
+\import boundary_manifolds.Tangent[n := dimension].On[M := M].At[x := Inclusion.apply b] \as Ambient;
+\import boundary_manifolds.Tangent[n := n].On[M := Inclusion.manifold].At[x := b] \as Domain;
+\definition inward: Ambient.Vector := Velocity.value;
+\definition inwardCoefficient: Real.Real := Normal.coefficient;
+\definition positive: R.Lt Real.zero inwardCoefficient :=
+  Normal.positive (collar.deformation.strict (Inclusion.apply b) (\bysub(M.Point, Atlas.points, b)));
+\definition outwardCoefficient: Real.Real := Real.neg inwardCoefficient;
+\definition negative: R.Lt outwardCoefficient Real.zero := Laws.negativeNegOfPositive inwardCoefficient positive;
+\definition outwardForm[omega: BoundaryForms.AmbientForm]: BoundaryForms.Form :=
+  BoundaryForms.outward omega inward;
+\definition orientationSign[omega: BoundaryForms.AmbientForm][arguments: std.Data[].FinSet[].Fin n -> Domain.Vector]:
+  outwardForm omega arguments = Real.neg (BoundaryForms.inward omega inward arguments) :=
+  BoundaryForms.oppositeValue omega inward arguments;

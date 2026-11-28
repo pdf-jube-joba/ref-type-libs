@@ -1,0 +1,87 @@
+\definition targetFunction: CompactFunctions.SmoothCompact := TargetLocalization.extend (TargetCoordinates.coefficient omega) supported;
+\import ChangeChart.Compact[f := targetFunction, within := supported.within] \as Substitution;
+\definition substitutable[x: Open.Carrier U]:
+  Substitution.local x =
+    Real.mul (Jacobian.absolute x) (TargetCoordinates.coefficient omega (Maps.apply U V e.forward x)) :=
+  trans!{Real.Real} _ _ _
+    (trans!{Real.Real} _ _ _
+      (sym!{Real.Real} _ _ (SourceLocalization.inside Substitution.local Substitution.conditions x))
+      (Substitution.inside x))
+    (congr!{Real.Real Real.Real} (Real.mul (Jacobian.absolute x)) _ _
+      (TargetLocalization.inside (TargetCoordinates.coefficient omega) supported (Maps.apply U V e.forward x)));
+\definition preservingCoefficient[orientation: Preserving]:
+  (Substitution.local \of Open.ScalarFunction U) = (SourceCoordinates.coefficient (pullback omega) \of Open.ScalarFunction U) :=
+  \axiom:funext(Substitution.local, SourceCoordinates.coefficient (pullback omega), \fun (x: Open.Carrier U) => eq_reason_in!{Real.Real { Substitution.local x }
+    "=" _ "by" { substitutable x }
+    "=" _ "by" { congr!{Real.Real Real.Real} (\fun (a: Real.Real) =>
+        Real.mul a (TargetCoordinates.coefficient omega (Maps.apply U V e.forward x))) _ _
+        (Absolute.absOfNonnegative (Jacobian.signed x) (orientation x)) }
+    "=" _ "by" { sym!{Real.Real} _ _ (TopForm.coordinate omega x) }
+  });
+\definition preservingSupport[orientation: Preserving]: Source.Supported (pullback omega) :=
+  \idelim (Substitution.local \of Open.ScalarFunction U) = (SourceCoordinates.coefficient (pullback omega) \of Open.ScalarFunction U)
+    \with f: Open.ScalarFunction U => SourceLocalization.Conditions[f] \by {
+      base: Substitution.conditions, equality: preservingCoefficient orientation
+    };
+\definition preserving[orientation: Preserving]:
+  Source.integral (pullback omega) (preservingSupport orientation) = Target.integral omega supported :=
+  eq_reason_in!{Real.Real { Source.integral (pullback omega) (preservingSupport orientation) }
+    "=" { Integral.integral Substitution.representative } "by" {
+      \idelim (Substitution.local \of Open.ScalarFunction U) = (SourceCoordinates.coefficient (pullback omega) \of Open.ScalarFunction U)
+        \with f: Open.ScalarFunction U => \forall (valid: SourceLocalization.Conditions[f]) ->
+          Integral.integral (SourceLocalization.representative f valid) = Integral.integral Substitution.representative \by {
+            base: \fun (valid: SourceLocalization.Conditions[Substitution.local]) => \refl(Integral.integral Substitution.representative),
+            equality: preservingCoefficient orientation
+          } (preservingSupport orientation)
+    }
+    "=" _ "by" { change_of_variables.Change[].theorem n U V e targetFunction supported.within }
+  };
+
+\import CompactFunctions.SmoothOperations[] \as Operations;
+\import functional_analysis.Support[A := Change.Point] \as Support;
+\import Change.Compact[] \as Compact;
+\definition reversedFunction: CompactFunctions.SmoothCompact := Operations.scale (Real.neg Real.one) Substitution.value;
+\definition reversingValue[x: Change.Point]: reversedFunction x = Real.neg (Substitution.value x) :=
+  trans!{Real.Real} _ _ _ (Laws.fieldMulNegLeft Real.one (Substitution.value x))
+    (congr!{Real.Real Real.Real} Real.neg _ _ (Laws.fieldMulOneLeft (Substitution.value x)));
+\definition reversingWithin: Sets.Subset (Supports.support reversedFunction) U.points :=
+  \fun (x: Change.Point)(member: Sets.Member (Supports.support reversedFunction) x) =>
+    Substitution.carrierWithin x
+      (Support.supportWithinClosed Ambient.topology reversedFunction Substitution.carrier Substitution.carrierClosed
+        (\fun (y: Change.Point)(outside: _) => trans!{Real.Real} _ _ _ (reversingValue y)
+          (trans!{Real.Real} _ _ _ (congr!{Real.Real Real.Real} Real.neg _ _ (Substitution.zeroOutside y outside)) Laws.negZero))
+        x member);
+\definition reversingCoefficient[orientation: Reversing][x: Open.Carrier U]:
+  SourceCoordinates.coefficient (pullback omega) x = reversedFunction x :=
+  eq_reason_in!{Real.Real _
+    "=" _ "by" { TopForm.coordinate omega x }
+    "=" {Real.neg (Real.mul (Real.neg (Jacobian.signed x))
+        (TargetCoordinates.coefficient omega (Maps.apply U V e.forward x)))} "by" {
+      sym!{Real.Real} _ _ (trans!{Real.Real} _ _ _
+        (congr!{Real.Real Real.Real} Real.neg _ _ (Laws.fieldMulNegLeft (Jacobian.signed x)
+          (TargetCoordinates.coefficient omega (Maps.apply U V e.forward x))))
+        (Laws.negInvolutive _)) }
+    "=" {Real.neg (Real.mul (Jacobian.absolute x) (TargetCoordinates.coefficient omega (Maps.apply U V e.forward x)))} "by" {
+      congr!{Real.Real Real.Real} (\fun (a: Real.Real) => Real.neg (Real.mul a
+        (TargetCoordinates.coefficient omega (Maps.apply U V e.forward x)))) _ _
+        (sym!{Real.Real} _ _ (Absolute.absOfNegative (Jacobian.signed x) (orientation x))) }
+    "=" {Real.neg (Substitution.local x)} "by" {
+      congr!{Real.Real Real.Real} Real.neg _ _ (sym!{Real.Real} _ _ (substitutable x)) }
+    "=" {Real.neg (Substitution.value x)} "by" {
+      congr!{Real.Real Real.Real} Real.neg _ _
+        (sym!{Real.Real} _ _ (SourceLocalization.inside Substitution.local Substitution.conditions x)) }
+    "=" _ "by" { sym!{Real.Real} _ _ (reversingValue x) }
+  };
+\module Reversed(orientation: Reversing) {
+  \import Source.Represented[omega := pullback omega, f := reversedFunction, within := reversingWithin, agrees := reversingCoefficient orientation] \as Representation;
+  \definition support: Source.Supported (pullback omega) := Representation.support;
+  \definition theorem:
+    Source.integral (pullback omega) support = Real.neg (Target.integral omega supported) :=
+    eq_reason_in!{Real.Real _
+      "=" _ "by" { Representation.integralLaw support }
+      "=" {Integral.integral (Negation.representative Substitution.representative)} "by" {
+        IntegralEquality.integralPointwise (Compact.representative reversedFunction) (Negation.representative Substitution.representative) reversingValue }
+      "=" {Real.neg (Integral.integral Substitution.representative)} "by" { Negation.integralNeg Substitution.representative }
+      "=" _ "by" { congr!{Real.Real Real.Real} Real.neg _ _ (change_of_variables.Change[].theorem n U V e targetFunction supported.within) }
+    };
+}

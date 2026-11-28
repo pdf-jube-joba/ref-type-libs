@@ -1,0 +1,9 @@
+\import topology.Topology[Carrier := M.Point] \as Sets;
+\import Sets.Subspace[S := K] \as Carrier;
+\import Carrier.Properties[] \as CarrierProperties;
+\definition Contains[chart: Forms.Chart]: \Prop := Sets.Subset K chart.domain;
+\definition Vanishes: \Prop := \forall (chart: Forms.Chart)(a: Open.Carrier chart.image) ->
+  Logic.Not (Sets.Member K (Charts.point chart a)) ->
+  change_of_variables.Euclidean[n := n].TopCoordinates[U := chart.image].coefficient (omega chart) a = Real.zero;
+\module In(chart: Forms.Chart, contains: Contains chart, vanishes: Vanishes);
+\module Compare(left, right: Forms.Chart, onLeft: Contains left, onRight: Contains right, vanishes: Vanishes);

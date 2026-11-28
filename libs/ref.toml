@@ -51,6 +51,7 @@ packages = [
     "geometry/manifolds",
     "geometry/boundary_manifolds",
     "geometry/manifold_gluing",
+    "geometry/manifold_integration",
     "geometry/compact_embeddings",
     "geometry/inverse_implicit",
     "geometry/sard",

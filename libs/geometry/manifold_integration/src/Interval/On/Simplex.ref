@@ -1,0 +1,25 @@
+\import euclidean_forms.Euclidean[n := m].On[U := V] \as Target;
+\import calculus.Real[].Multivariable[n := m].Open[].Smooth[].Algebra[U := V] \as TargetFunctions;
+\import Target.DegreeZero[] \as Functions;
+\import Target.ExteriorDerivative[k := N.Nat^::zero] \as D;
+\import euclidean_forms.Euclidean[n := One.dimension].Pullback[m := m, U := U, V := V, f := sigma] \as Pullback;
+\import Pullback.DegreeZero[] \as Naturality;
+\import calculus.Maps[n := One.dimension, m := m] \as Maps;
+\definition start: calculus.Real[].Multivariable[n := m].Open[].Carrier V := Maps.apply U V sigma left;
+\definition finish: calculus.Real[].Multivariable[n := m].Open[].Carrier V := Maps.apply U V sigma right;
+\definition cochain[omega: Target.Form One.dimension]: Real.Real := integral (Pullback.apply One.dimension omega);
+\definition coboundary[f: Target.Form N.Nat^::zero]: Real.Real := Real.sub (Functions.function f finish) (Functions.function f start);
+\definition stokes[f: Target.Form N.Nat^::zero]: cochain (D.apply f) = coboundary f := \block {
+  \let g: TargetFunctions.Function := Functions.function f \then
+  \let h: Smooth.SmoothFunction U := Naturality.compose g \then
+  \let same: Functions.apply g = f := Functions.isomorphism.rightInverse f \then
+  \return eq_reason_in!{Real.Real {cochain (D.apply f)}
+    "=" {cochain (D.apply (Functions.apply g))} "by" {
+      congr!{{Target.Form N.Nat^::zero} Real.Real} (\fun (eta: Target.Form N.Nat^::zero) => cochain (D.apply eta)) _ _ (sym!{{Target.Form N.Nat^::zero}} _ _ same) }
+    "=" {integral (Forms.ExteriorDerivative[k := N.Nat^::zero].apply (Pullback.apply N.Nat^::zero (Functions.apply g)))} "by" {
+      congr!{{Forms.Form One.dimension} Real.Real} integral _ _ (sym!{{Forms.Form One.dimension}} _ _ (Naturality.onFunction g)) }
+    "=" {integral (Forms.ExteriorDerivative[k := N.Nat^::zero].apply (Forms.DegreeZero[].apply h))} "by" {
+      congr!{{Forms.Form N.Nat^::zero} Real.Real} (\fun (eta: Forms.Form N.Nat^::zero) => integral (Forms.ExteriorDerivative[k := N.Nat^::zero].apply eta)) _ _ (Naturality.function g) }
+    "=" {coboundary f} "by" { \parent.Exact[f := h].stokes }
+  }
+};

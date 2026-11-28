@@ -1,0 +1,4 @@
+\import manifold_gluing.CollarEmbedding[n := n].On[M := M].With[cover := cover] \as Collars;
+\import manifold_gluing.BoundaryInclusion[n := n].On[M := M].With[cover := cover] \as Inclusion;
+\definition exists[compact: Sets.IsCompact M.space]: \exists Collars.Construction := Collars.exists compact;
+\module Of(collar: Collars.Construction);

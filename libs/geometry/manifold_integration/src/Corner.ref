@@ -1,0 +1,6 @@
+\import std.Data[].Nat[] \as N;
+\import real.Analysis[] \as Real;
+\import dedekind_reals.DedekindReal[].Arithmetic[].Prop[] \as Laws;
+\import real.Analysis[].Algebra[] \as Algebra;
+\import linear_algebra.Commutative[K := Real.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing Real.Real Algebra.field] \as Spaces;
+\module On(V: \Set, space: Spaces.VectorSpace V);

@@ -1,0 +1,9 @@
+\import Models.Chart[M := M.Point, space := M.space] \as Charts;
+\import differential_forms.Forms[n := n].On[M := M] \as Forms;
+\module Pair(left, right: Forms.Chart);
+\structure Orientation: \Set := {
+  positive: \Pow Forms.Chart,
+  covers: \forall (x: M.Point) -> \exists (c: Forms.Chart \where Logic.And[\In[Forms.Chart] positive c, Charts.Contains c x]),
+  preserving: \forall (left, right: Forms.Chart) -> \In[Forms.Chart] positive left -> \In[Forms.Chart] positive right -> Pair[left := left, right := right].Preserving,
+};
+\module Compact(omega: Forms.Form n, K: \Pow M.Point, compact: topology.Topology[Carrier := M.Point].IsCompactIn M.space K);

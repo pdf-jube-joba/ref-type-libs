@@ -1,0 +1,4 @@
+\import Collars.From[deformation := collar.deformation].Of[regular := collar.regular] \as Embedding;
+\definition Width: \Set := Embedding.Width;
+\definition existsWidth: \exists Width := Embedding.existsWidth;
+\module At(b: Inclusion.manifold.Point, c: Atlas.Chart, contains: Charts.Contains c (Inclusion.apply b));

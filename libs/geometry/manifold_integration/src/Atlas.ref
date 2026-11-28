@@ -1,0 +1,17 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import real.Analysis[] \as Real;
+\import manifolds.Dimension[n := n] \as Models;
+\import Models.Smooth[] \as SmoothModels;
+\import calculus.Real[].Multivariable[n := n] \as Model;
+\import Model.Open[] \as Open;
+\import calculus.Maps[n := n, m := n] \as Maps;
+\import calculus.Diffeomorphism[n := n, m := n] \as Diffeomorphisms;
+\import euclidean_forms.Euclidean[n := n] \as LocalForms;
+\import \root.Euclidean[n := n] \as Integration;
+\module On(M: SmoothModels.Manifold);
