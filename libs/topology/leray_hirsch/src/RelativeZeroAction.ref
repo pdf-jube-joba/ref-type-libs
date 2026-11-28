@@ -22,6 +22,9 @@
     .OverRing[R := K, ring := ring].With[coefficients := Product.coefficients] \as Pair;
   \definition original: KModules.Space Carrier := Pair.cohomologySpace p;
   \definition act[b: Scalars.Carrier][a: Carrier]: Carrier := Cup.apply a b;
+  \definition actScalar: \forall (r: K)(x: Carrier)(b: Scalars.Carrier) ->
+    act b (original.smul r x) = original.smul r (act b x) :=
+    \fun (r: K)(x: Carrier)(b: Scalars.Carrier) => Cup.bilinear.scaleLeft r x b;
   \definition associativity: \forall (a, b: Scalars.Carrier)(x: Carrier) -> act (Scalars.mul a b) x = act a (act b x) :=
     \fun (a, b: Scalars.Carrier)(x: Carrier) => trans!{Carrier} _ _ _
       (congr!{{Scalars.Carrier} Carrier} (\fun (c: Scalars.Carrier) => act c x) _ _ (Scalars.Ring[].commutative a b))
@@ -36,3 +39,5 @@
     vectorAdd := \fun (a: Scalars.Carrier)(x, y: Carrier) => Cup.bilinear.addLeft x y a,
   };
 }
+
+\module Signed(z: I.Int^);

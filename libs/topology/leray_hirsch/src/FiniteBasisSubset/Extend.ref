@@ -1,0 +1,92 @@
+\use Equality.eq_reason_in;
+\import Modules.Hom[V := Ambient.Carrier, W := Ambient.Carrier, source := Ambient.space, target := Ambient.space] \as FullMaps;
+\import Modules.End[V := Ambient.Carrier, space := Ambient.space] \as FullIdentity;
+\import Ambient.To[W := Ambient.Carrier, target := Ambient.space] \as Universal;
+\import Modules.Hom[V := Carrier, W := Carrier, source := space, target := space] \as BlockMaps;
+\import Modules.Isomorphism[V := Carrier, W := Carrier, source := space, target := space] \as Block;
+\import Modules.Isomorphism[V := Ambient.Carrier, W := Ambient.Carrier, source := Ambient.space, target := Ambient.space] \as Full;
+\import Selected.To[W := Ambient.Carrier, target := Ambient.space] \as BlockUniversal;
+\import Modules.Hom[V := Carrier, W := Carrier, source := space, target := space]
+  .Composition[U := Ambient.Carrier, domain := Ambient.space] \as SelectedCompose;
+\import Modules.Hom[V := Carrier, W := Ambient.Carrier, source := space, target := Ambient.space]
+  .Composition[U := Ambient.Carrier, domain := Ambient.space] \as IncludeCompose;
+\definition replacement[f: BlockMaps.Map]: FullMaps.Map :=
+  IncludeCompose.compose Subset.inclusion (SelectedCompose.compose f Project.map);
+\definition map[f: BlockMaps.Map]: FullMaps.Map :=
+  FullMaps.plus (replacement f) (FullMaps.plus FullIdentity.identity (FullMaps.negative mask));
+\import algebra.Group[].Of[Carrier := Ambient.Carrier, group := AmbientLaws.additive] \as Add;
+\definition preserves[f: BlockMaps.Map]: \forall (u: Carrier) -> (map f).apply (Subset.inclusion.apply u) = Subset.inclusion.apply (f.apply u) :=
+  \fun (u: Carrier) => eq_reason_in!{Ambient.Carrier _
+    "=" _ "by" { congr!{Ambient.Carrier Ambient.Carrier Ambient.Carrier} Ambient.space.add _ _ _ _
+      (congr!{Carrier Ambient.Carrier} (\fun (v: Carrier) => Subset.inclusion.apply (f.apply v)) _ _ (Project.leftInverse u))
+      (congr!{Carrier Ambient.Carrier} (\fun (v: Carrier) => Add.difference (Subset.inclusion.apply u) (Subset.inclusion.apply v)) _ _
+        (Project.leftInverse u)) }
+    "=" _ "by" { congr!{Ambient.Carrier Ambient.Carrier} (Ambient.space.add (Subset.inclusion.apply (f.apply u))) _ _
+      (Add.inverseRight (Subset.inclusion.apply u)) }
+    "=" _ "by" { Add.zeroRight (Subset.inclusion.apply (f.apply u)) }
+  };
+\definition inside[f: BlockMaps.Map][i: Subset.Selected]: (map f).apply (Ambient.generator i) = Subset.inclusion.apply (f.apply (generator i)) :=
+  trans!{Ambient.Carrier} _ _ _ (congr!{Ambient.Carrier Ambient.Carrier} (map f).apply _ _ (sym!{Ambient.Carrier} _ _ (Subset.onGenerator i)))
+    (preserves f (generator i));
+\import Modules.Hom[V := Carrier, W := Ambient.Carrier, source := space, target := Ambient.space] \as InclusionMaps;
+\definition outside[f: BlockMaps.Map][i: Index][h: Logic.Not (\In[Index] S i)]: (map f).apply (Ambient.generator i) = Ambient.generator i :=
+  eq_reason_in!{Ambient.Carrier _
+    "=" _ "by" { congr!{Ambient.Carrier Ambient.Carrier Ambient.Carrier} Ambient.space.add _ _ _ _
+      (congr!{Carrier Ambient.Carrier} (\fun (u: Carrier) => Subset.inclusion.apply (f.apply u)) _ _ (Project.outside i h))
+      (congr!{Carrier Ambient.Carrier} (\fun (u: Carrier) => Add.difference (Ambient.generator i) (Subset.inclusion.apply u)) _ _ (Project.outside i h)) }
+    "=" _ "by" { congr!{Ambient.Carrier Ambient.Carrier Ambient.Carrier} Ambient.space.add _ _ _ _
+      (trans!{Ambient.Carrier} _ _ _ (congr!{Carrier Ambient.Carrier} Subset.inclusion.apply _ _ (BlockMaps.zeroPreserved f))
+        (InclusionMaps.zeroPreserved Subset.inclusion))
+      (congr!{Ambient.Carrier Ambient.Carrier} (Add.difference (Ambient.generator i)) _ _ (InclusionMaps.zeroPreserved Subset.inclusion)) }
+    "=" _ "by" { Add.zeroLeft (Add.difference (Ambient.generator i) Ambient.space.zero) }
+    "=" _ "by" { congr!{Ambient.Carrier Ambient.Carrier} (Ambient.space.add (Ambient.generator i)) _ _ Add.negZero }
+    "=" _ "by" { Add.zeroRight (Ambient.generator i) }
+  };
+\import FullMaps.Composition[U := Ambient.Carrier, domain := Ambient.space] \as Compose;
+\definition inverseLaw[f, g: BlockMaps.Map][law: \forall (u: Carrier) -> g.apply (f.apply u) = u]:
+  \forall (u: Ambient.Carrier) -> (map g).apply ((map f).apply u) = u := \block {
+  \let lhs: FullMaps.Map := Compose.compose (map g) (map f) \then
+  \let same: lhs = FullIdentity.identity := Universal.ext lhs FullIdentity.identity (\fun (i: Index) =>
+    either!{{Classical.excludedMiddle (\In[Index] S i)} {(map g).apply ((map f).apply (Ambient.generator i)) = Ambient.generator i}
+      {\fun (h: \In[Index] S i) => \block {
+        \let j: Subset.Selected := \into[Index](i, S) \by { h } \then
+        \return eq_reason_in!{Ambient.Carrier _
+          "=" _ "by" { congr!{Ambient.Carrier Ambient.Carrier} (map g).apply _ _ (inside f j) }
+          "=" _ "by" { preserves g (f.apply (generator j)) }
+          "=" _ "by" { congr!{Carrier Ambient.Carrier} Subset.inclusion.apply _ _ (law (generator j)) }
+          "=" _ "by" { Subset.onGenerator j }
+        }
+      }}
+      {\fun (h: Logic.Not (\In[Index] S i)) => trans!{Ambient.Carrier} _ _ _
+        (congr!{Ambient.Carrier Ambient.Carrier} (map g).apply _ _ (outside f i h)) (outside g i h)}
+    }) \then
+  \return \fun (u: Ambient.Carrier) => congr!{FullMaps.Map Ambient.Carrier} (\fun (g: FullMaps.Map) => g.apply u) _ _ same
+};
+\definition full[e: Block.Isomorphism]: Full.Isomorphism := Full.Isomorphism {
+  forward := map e.forward, backward := map e.backward,
+  leftInverse := inverseLaw e.forward e.backward e.leftInverse,
+  rightInverse := inverseLaw e.backward e.forward e.rightInverse,
+};
+\import Modules.FiniteCoordinates[n := count] \as Coordinates;
+\import Modules.Isomorphism[V := Ambient.Carrier, W := Coordinates.Carrier, source := Ambient.space, target := Coordinates.space].Inverse[] \as Back;
+\import Modules.Isomorphism[V := Coordinates.Carrier, W := Ambient.Carrier, source := Coordinates.space, target := Ambient.space]
+  .Composition[U := Ambient.Carrier, final := Ambient.space] \as First;
+\import Modules.Isomorphism[V := Coordinates.Carrier, W := Ambient.Carrier, source := Coordinates.space, target := Ambient.space]
+  .Composition[U := Coordinates.Carrier, final := Coordinates.space] \as Last;
+\definition isomorphism[e: Block.Isomorphism]: _ :=
+  Last.compose Coordinates.Free[].isomorphism (First.compose (full e) (Back.inverse Coordinates.Free[].isomorphism));
+
+\definition forwardBasis[e: Block.Isomorphism][i: Index]:
+  (isomorphism e).forward.apply (Coordinates.basis i) = Coordinates.Free[].forward.apply ((map e.forward).apply (Ambient.generator i)) :=
+  congr!{Ambient.Carrier Coordinates.Carrier} (\fun (x: Ambient.Carrier) => Coordinates.Free[].forward.apply ((map e.forward).apply x)) _ _
+    (trans!{Ambient.Carrier} _ _ _
+      (congr!{Coordinates.Carrier Ambient.Carrier} Coordinates.Free[].isomorphism.backward.apply _ _
+        (sym!{Coordinates.Carrier} _ _ (Coordinates.Free[].onGenerator i)))
+      (Coordinates.Free[].isomorphism.leftInverse (Ambient.generator i)));
+\definition backwardBasis[e: Block.Isomorphism][i: Index]:
+  (isomorphism e).backward.apply (Coordinates.basis i) = Coordinates.Free[].forward.apply ((map e.backward).apply (Ambient.generator i)) :=
+  congr!{Ambient.Carrier Coordinates.Carrier} (\fun (x: Ambient.Carrier) => Coordinates.Free[].forward.apply ((map e.backward).apply x)) _ _
+    (trans!{Ambient.Carrier} _ _ _
+      (congr!{Coordinates.Carrier Ambient.Carrier} Coordinates.Free[].isomorphism.backward.apply _ _
+        (sym!{Coordinates.Carrier} _ _ (Coordinates.Free[].onGenerator i)))
+      (Coordinates.Free[].isomorphism.leftInverse (Ambient.generator i)));

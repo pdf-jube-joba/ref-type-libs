@@ -28,3 +28,5 @@
   \takefrom b: \forall (c: PathComponents) -> PointInverse.Inverse (components a c) \by componentInverses h \then
   \return \exact(Chosen[b := b].inverseData, ClassesInverse.Inverse a)
 };
+
+\module Supported(included: \Pow Index);

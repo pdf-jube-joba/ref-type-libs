@@ -113,3 +113,4 @@
         (\fun (i: Index) => target.smul (v i) (map.apply (Ambient.generator i)))
         (\fun (i: Index) => map.scalar (v i) (Ambient.generator i)));
 }
+\module Extend;

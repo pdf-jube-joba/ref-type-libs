@@ -1,0 +1,31 @@
+\definition HasSupport[m: ClassesMatrix.Matrix]: \Prop := \forall (i, j: Index) ->
+  Logic.Not (\In[Index] included i) -> \In[Index] included j -> m i j = (Groups.moduleSpace zero).zero;
+\definition PointSupport[m: PointMatrix.Matrix]: \Prop := \forall (i, j: Index) ->
+  Logic.Not (\In[Index] included i) -> \In[Index] included j -> m i j = scalars.zero;
+\definition PointCertificate[c: PathComponents]: \Set :=
+  \Cast[PointInverse.Inverse (components a c)] ({ m: PointInverse.Inverse (components a c) \where PointSupport m.inverse });
+\definition AllPoints: \Prop := \forall (x: A) -> \exists PointCertificate (componentOf x);
+\definition All: \Set := \forall (c: PathComponents) -> PointCertificate c;
+\definition choose[h: AllPoints]: \exists All := \axiom:classicalIndefiniteChoice(PathComponents, PointCertificate,
+  Path.induction (\fun (c: PathComponents) => \exists PointCertificate c) h);
+\structure Result: \Set := {
+  certificate: ClassesInverse.Inverse a,
+  supported: HasSupport certificate.inverse,
+};
+\module At(b: All) {
+  \definition inverseAt[c: PathComponents]: PointInverse.Inverse (components a c) := b c;
+  \import \parent.\parent.Chosen[b := inverseAt] \as LiftedInverse;
+  \definition supported: HasSupport LiftedInverse.inverseMatrix :=
+    \fun (i, j: Index)(outside: Logic.Not (\In[Index] included i))(inside: \In[Index] included j) => detected _ _
+      (\fun (x: A) => eq_reason_in!{K _
+        "=" _ "by" { congr!{PointMatrix.Matrix K} (\fun (m: PointMatrix.Matrix) => m i j) _ _ (LiftedInverse.pointLaw x) }
+        "=" _ "by" { (\bysub(PointInverse.Inverse (components a (componentOf x)),
+          PointCertificate (componentOf x), b (componentOf x))) i j outside inside }
+        "=" _ "by" { sym!{K} _ _ (onZero x) }
+      });
+  \definition result: Result := Result { certificate := LiftedInverse.inverseData, supported := supported };
+}
+\definition existsResult[h: AllPoints]: \exists Result := \block {
+  \takefrom b: All \by choose h \then
+  \return \exact(At[b := b].result, Result)
+};

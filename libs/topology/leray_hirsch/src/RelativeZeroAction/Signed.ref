@@ -1,0 +1,55 @@
+\import singular_products.Cochains[A := A, source := source, R := K, ring := ring] \as Product;
+\import singular_cohomology.Relative[A := A, source := source, subset := subset]
+  .OverRing[R := K, ring := ring].With[coefficients := Product.coefficients] \as Pair;
+\import cohomology_thom.RelativeMayerVietoris[].Pair[A := A, source := source, subset := subset] \as C03;
+\definition Carrier: \Set := Pair.At[z := z].Carrier;
+\definition original: KModules.Space Carrier := Pair.At[z := z].space;
+\module Negative(n: N.Nat^) {
+  \definition index: I.Int^ := I.Int^::negSucc n;
+  \definition Carrier: \Set := Pair.At[z := index].Carrier;
+  \definition original: KModules.Space Carrier := Pair.At[z := index].space;
+  \definition allZero: \forall (x: Carrier) -> x = original.zero :=
+    C03.Negative[n := n].With[coefficients := Product.integerCoefficients].zero;
+  \import KModules.Laws[V := Carrier, space := original] \as Laws;
+  \definition space: Modules.Space Carrier := Rings.RingModule[Scalars.Carrier, Carrier, coefficientRing] {
+    zero := original.zero, add := original.add, neg := original.neg, smul := \fun (b: Scalars.Carrier)(x: Carrier) => original.zero,
+    additive := original.additive,
+    scalarOne := \fun (x: Carrier) => sym!{Carrier} _ _ (allZero x),
+    scalarAssoc := \fun (a, b: Scalars.Carrier)(x: Carrier) => \refl(original.zero),
+    scalarAdd := \fun (a, b: Scalars.Carrier)(x: Carrier) => sym!{Carrier} _ _ (Laws.zeroLeft original.zero),
+    vectorAdd := \fun (a: Scalars.Carrier)(x, y: Carrier) => sym!{Carrier} _ _ (Laws.zeroLeft original.zero),
+  };
+  \definition scale: \forall (r: K)(a: Carrier)(u: Scalars.Carrier) ->
+    space.smul u (original.smul r a) = original.smul r (space.smul u a) :=
+    \fun (r: K)(a: Carrier)(u: Scalars.Carrier) => sym!{Carrier} _ _ (Laws.scaleZero r);
+}
+\definition family: \forall (d: I.Int^) -> Modules.Space (Pair.At[z := d].Carrier) :=
+  \induction (d: I.Int^) \return Modules.Space (Pair.At[z := d].Carrier) \with {
+    | ofNat: \fun (p: N.Nat^) => \parent.At[p := p].space
+    | negSucc: \fun (n: N.Nat^) => Negative[n := n].space
+  };
+\definition scaleAt: \forall (d: I.Int^)(r: K)(a: Pair.At[z := d].Carrier)(u: Scalars.Carrier) ->
+  (family d).smul u (Pair.At[z := d].space.smul r a) = Pair.At[z := d].space.smul r ((family d).smul u a) :=
+  \induction (d: I.Int^) \return \forall (r: K)(a: Pair.At[z := d].Carrier)(u: Scalars.Carrier) ->
+    (family d).smul u (Pair.At[z := d].space.smul r a) = Pair.At[z := d].space.smul r ((family d).smul u a) \with {
+    | ofNat: \fun (p: N.Nat^)(r: K)(a: Pair.At[z := I.Int^::ofNat p].Carrier)(u: Scalars.Carrier) =>
+      \parent.At[p := p].actScalar r a u
+    | negSucc: \fun (n: N.Nat^) => Negative[n := n].scale
+  };
+\definition data[d: I.Int^]: Rings.RingModuleData[Scalars.Carrier, Pair.At[z := d].Carrier, coefficientRing] :=
+  Rings.RingModuleData[Scalars.Carrier, Pair.At[z := d].Carrier, coefficientRing] {
+    zero := Pair.At[z := d].space.zero, add := Pair.At[z := d].space.add, neg := Pair.At[z := d].space.neg,
+    smul := (family d).smul,
+  };
+\definition laws: \forall (d: I.Int^) -> Rings.RingModuleLaws[Scalars.Carrier, Pair.At[z := d].Carrier, coefficientRing, data d] :=
+  \induction (d: I.Int^) \return Rings.RingModuleLaws[Scalars.Carrier, Pair.At[z := d].Carrier, coefficientRing, data d] \with {
+    | ofNat: \fun (p: N.Nat^) => \bysub(Rings.RingModuleData[Scalars.Carrier, Pair.At[z := I.Int^::ofNat p].Carrier, coefficientRing],
+        Modules.Space (Pair.At[z := I.Int^::ofNat p].Carrier), \parent.At[p := p].space)
+    | negSucc: \fun (n: N.Nat^) => \bysub(Rings.RingModuleData[Scalars.Carrier, Pair.At[z := I.Int^::negSucc n].Carrier, coefficientRing],
+        Modules.Space (Pair.At[z := I.Int^::negSucc n].Carrier), Negative[n := n].space)
+  };
+\definition space: Modules.Space Carrier :=
+  \into[Rings.RingModuleData[Scalars.Carrier, Carrier, coefficientRing]](data z, Modules.Space Carrier) \by { laws z };
+\definition act[b: Scalars.Carrier][x: Carrier]: Carrier := space.smul b x;
+\definition scale: \forall (r: K)(a: Carrier)(u: Scalars.Carrier) -> act u (original.smul r a) = original.smul r (act u a) := scaleAt z;
+\module Matrices(count: N.Nat^);

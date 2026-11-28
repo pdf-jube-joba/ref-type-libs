@@ -1,0 +1,36 @@
+\import std.Data[].FinSet[] \as Finite;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Classical[] \as Classical;
+\use Logic.either;
+\import Scalars.Ring[] \as Ring;
+\definition Index: \Set := Finite.Fin count;
+\import commutative_algebra.Modules[R := Scalars.Carrier, ring := Ring.ordinary].Matrix[m := count, n := count] \as Square;
+\import Square.Invertible[] \as Inverse;
+\import Square.Composition[k := count] \as Multiply;
+\import Square.End[] \as Identity;
+\import \root.ModuleMatrix[R := Scalars.Carrier, ring := Ring.ordinary, count := count].On[V := Carrier, space := space] \as Action;
+\import KModules.Functions[X := Index, V := Carrier, target := original] \as Vectors;
+\import KModules.Sums[I := Index].Vector[V := Carrier, space := original] \as Sum;
+\import KModules.Hom[V := Vectors.Carrier, W := Vectors.Carrier, source := Vectors.space, target := Vectors.space] \as Maps;
+\definition linear[a: Square.Matrix]: Maps.Map := Maps.Map {
+  apply := Action.apply a,
+  addition := (Action.linear a).addition,
+  scalar := \fun (r: K)(x: Vectors.Carrier) => Vectors.ext _ _ (\fun (i: Index) => trans!{Carrier} _ _ _
+    (Sum.congruent (Finite.elements count)
+      (\fun (j: Index) => act (a i j) (original.smul r (x j)))
+      (\fun (j: Index) => original.smul r (act (a i j) (x j)))
+      (\fun (j: Index) => scale r (x j) (a i j)))
+    (Sum.scalar (Finite.elements count) r (\fun (j: Index) => act (a i j) (x j)))),
+};
+\import KModules.Isomorphism[V := Vectors.Carrier, W := Vectors.Carrier, source := Vectors.space, target := Vectors.space] \as Iso;
+\module On(a: Square.Matrix, chosen: Inverse.Inverse a) {
+  \definition raw: Inverse.Data := chosen;
+  \definition laws: Inverse.Laws[a, raw] := \bysub(Inverse.Data, { d: Inverse.Data \where Inverse.Laws[a, d] }, chosen);
+  \import Action.Isomorphism[a := a, b := raw.inverse] \as Proof;
+  \definition ordinary: _ := Proof.isomorphism laws.leftInverse laws.rightInverse;
+  \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+    forward := linear a, backward := linear raw.inverse,
+    leftInverse := ordinary.leftInverse, rightInverse := ordinary.rightInverse,
+  };
+}
+\module Support(a: Square.Matrix, included: \Pow Index);
