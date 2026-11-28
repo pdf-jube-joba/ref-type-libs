@@ -1,0 +1,61 @@
+\import std.Data[].Bool[] \as B;
+\import \parent.Charts[] \as Charts;
+\import Geometry.Local[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two] \as Rank;
+\import Rank.Orientation[] \as Orientations;
+\import std.Logic[].Proposition[] \as Logic;
+\definition point[x: Space][c: Charts.LocalChart[x]]: \Cast[Space] c.domain :=
+  \into[Space](x, c.domain) \by { c.contains };
+\definition value[x: Space][c: Charts.LocalChart[x]]: Rank.FiberClass x :=
+  Charts.Patch[U := c.domain, frames := c.frames].fiberClass (point x c);
+\structure Witness[x: Space, u: Rank.FiberClass x]: \Set := {
+  chart: Charts.LocalChart[x],
+  same: value x chart = u
+};
+\definition positiveClasses[x: Space]: \Pow (Rank.FiberClass x) :=
+  { u: Rank.FiberClass x \where \exists Witness[x, u] };
+\definition PositiveClass[x: Space]: \Set := \Cast[Rank.FiberClass x] (positiveClasses x);
+\definition localClass[x: Space][c: Charts.LocalChart[x]]: PositiveClass x :=
+  \into[Rank.FiberClass x](value x c, positiveClasses x) \by {
+    \exact(Witness[x, value x c] { chart := c, same := \refl(value x c) }, Witness[x, value x c])
+  };
+\definition exists[x: Space]: \exists PositiveClass x := \block {
+  \takefrom c: Charts.LocalChart[x] \by Charts.existsAt x \then
+  \return \exact(localClass x c, PositiveClass x)
+};
+\definition agrees[x: Space][c, e: Charts.LocalChart[x]]: value x c = value x e :=
+  Charts.Compatibility[U := c.domain, V := e.domain, first := c.frames, second := e.frames,
+    x := x, inFirst := c.contains, inSecond := e.contains].Relative[].classLaw;
+\definition unique[x: Space]: \forall (u, v: PositiveClass x) -> u = v := \block {
+  \fun (u, v: PositiveClass x) \then
+  \takefrom c: Witness[x, u] \by \bysub(Rank.FiberClass x, positiveClasses x, u) \then
+  \takefrom e: Witness[x, v] \by \bysub(Rank.FiberClass x, positiveClasses x, v) \then
+  \return trans!{{Rank.FiberClass x}} _ _ _ (sym!{{Rank.FiberClass x}} _ _ c.same)
+    (trans!{{Rank.FiberClass x}} _ _ _ (agrees x c.chart e.chart) e.same)
+};
+\definition chosen[x: Space]: PositiveClass x := \choice PositiveClass x \by {
+  existence: exists x, uniqueness: unique x
+};
+\definition fiber[x: Space]: Rank.FiberClass x := chosen x;
+\module Local(x: Space, c: Charts.LocalChart[x]) {
+  \import Charts.Patch[U := c.domain, frames := c.frames] \as Patch;
+  \definition local: Orientations.LocalOrientation[x, fiber] :=
+    Orientations.LocalOrientation[x, fiber] {
+      chart := Patch.realChart,
+      contains := c.contains,
+      rank := Patch.realRank,
+      reverse := B.Bool^::false,
+      normalized := \fun (y: \Cast[Space] c.domain) => unique y
+        (localClass y (Charts.LocalChart[y] {
+          domain := c.domain, contains := \bysub(Space, c.domain, y), frames := c.frames
+        })) (chosen y)
+    };
+}
+\definition orientation: Orientations.SignedOrientation :=
+  Orientations.SignedOrientation {
+    fiber := fiber,
+    locally := \block {
+      \fun (x: Space) \then
+      \takefrom c: Charts.LocalChart[x] \by Charts.existsAt x \then
+      \return \exact(Local[x := x, c := c].local, Orientations.LocalOrientation[x, fiber])
+    }
+  };

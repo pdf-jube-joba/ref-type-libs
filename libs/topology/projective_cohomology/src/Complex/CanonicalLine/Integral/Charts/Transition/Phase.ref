@@ -1,0 +1,71 @@
+\import Numbers.Absolute[] \as Absolute;
+\import Numbers.Def[] \as ComplexArithmetic;
+\import sphere_maps.Circle[] \as Circle;
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\use Equality.eq_reason_in;
+\definition length: R.Real := Absolute.abs coefficient;
+\definition lengthNonzero: Logic.Not (length = R.zero) :=
+  \fun (zero: _) => nonzero (Absolute.zeroOfAbsZero coefficient zero);
+\definition lengthPositive: D.Lt R.zero length := Absolute.positive coefficient nonzero;
+\definition reciprocal: R.Real := Laws.fieldInv length;
+\definition inverseProduct: R.mul reciprocal length = R.one := Laws.fieldInverseNonzero length lengthNonzero;
+\definition reciprocalNonnegative: D.Le R.zero reciprocal :=
+  D.Order[].leOfLt R.zero reciprocal (R.Estimates[].Product[].invPositive length lengthPositive);
+\definition realNorm[a: R.Real]: ComplexArithmetic.normSq (ComplexArithmetic.ofReal a) = R.mul a a :=
+  trans!{R.Real} _ _ _
+    (congr!{R.Real R.Real} (R.add (R.mul a a)) _ _ (Laws.fieldMulZeroLeft R.zero))
+    (Laws.addZeroRight (R.mul a a));
+\definition realAbs[a: R.Real][nonnegative: D.Le R.zero a]: Absolute.abs (ComplexArithmetic.ofReal a) = a :=
+  sym!{R.Real} _ _ (R.SquareRoot[].unique (ComplexArithmetic.normSq (ComplexArithmetic.ofReal a)) a nonnegative
+    (trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (realNorm a))
+      (sym!{R.Real} _ _ (R.Distance[].maxOfLe R.zero (ComplexArithmetic.normSq (ComplexArithmetic.ofReal a))
+        (Arithmetic.normSqNonnegative (ComplexArithmetic.ofReal a))))));
+\definition unitAbs[u: Circle.Carrier]: Absolute.abs u = R.one :=
+  trans!{R.Real} _ _ _
+    (congr!{R.Real R.Real} R.SquareRoot[].sqrt _ _ (Circle.norm u))
+    R.SquareRoot[].sqrtOne;
+\definition unitValue: Scalar := ComplexArithmetic.mul (ComplexArithmetic.ofReal reciprocal) coefficient;
+\definition unitLength: Absolute.abs unitValue = R.one :=
+  trans!{R.Real} _ _ _ (Absolute.multiplicative (ComplexArithmetic.ofReal reciprocal) coefficient)
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (\fun (a: R.Real) => R.mul a length) _ _ (realAbs reciprocal reciprocalNonnegative))
+      inverseProduct);
+\definition unit: Circle.Carrier := \into[Scalar](unitValue, Circle.unit) \by {
+  trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (Absolute.square unitValue))
+    (trans!{R.Real} _ _ _ (congr!{R.Real R.Real R.Real} R.mul _ _ _ _ unitLength unitLength)
+      (R.Algebra[].mulOneRight R.one))
+};
+\definition recover: ComplexArithmetic.mul (ComplexArithmetic.ofReal length) unit = coefficient :=
+  eq_reason_in!{Scalar _
+    "=" _ "by" { sym!{Scalar} _ _ (Arithmetic.mulAssoc (ComplexArithmetic.ofReal length) (ComplexArithmetic.ofReal reciprocal) coefficient) }
+    "=" _ "by" { congr!{Scalar Scalar} (\fun (z: Scalar) => ComplexArithmetic.mul z coefficient) _ _
+      (Arithmetic.ofRealMul length reciprocal) }
+    "=" _ "by" { congr!{R.Real Scalar} (\fun (a: R.Real) => ComplexArithmetic.mul (ComplexArithmetic.ofReal a) coefficient) _ _
+      (trans!{R.Real} _ _ _ (Laws.fieldMulComm length reciprocal) inverseProduct) }
+    "=" _ "by" { Arithmetic.mulOneLeft coefficient }
+  };
+\definition action[u, v: Circle.Carrier][a: R.Real][nonnegative: D.Le R.zero a]:
+  v = ComplexArithmetic.mul (ComplexArithmetic.ofReal a) (ComplexArithmetic.mul coefficient u) -> v = Circle.multiply unit u := \block {
+    \fun (same: _) \then
+    \let lengthLaw: R.one = R.mul a length := eq_reason_in!{R.Real _
+      "=" _ "by" { sym!{R.Real} _ _ (unitAbs v) }
+      "=" _ "by" { congr!{Scalar R.Real} Absolute.abs _ _ same }
+      "=" _ "by" { Absolute.multiplicative (ComplexArithmetic.ofReal a) (ComplexArithmetic.mul coefficient u) }
+      "=" _ "by" { congr!{R.Real R.Real R.Real} R.mul _ _ _ _ (realAbs a nonnegative)
+        (trans!{R.Real} _ _ _ (Absolute.multiplicative coefficient u)
+          (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} (R.mul length) _ _ (unitAbs u)) (R.Algebra[].mulOneRight length))) }
+    } \then
+    \return eq_reason_in!{Scalar _
+      "=" _ "by" { same }
+      "=" _ "by" { congr!{Scalar Scalar} (\fun (z: Scalar) => ComplexArithmetic.mul (ComplexArithmetic.ofReal a) (ComplexArithmetic.mul z u)) _ _
+        (sym!{Scalar} _ _ recover) }
+      "=" _ "by" { congr!{Scalar Scalar} (ComplexArithmetic.mul (ComplexArithmetic.ofReal a)) _ _
+        (Arithmetic.mulAssoc (ComplexArithmetic.ofReal length) unit u) }
+      "=" _ "by" { sym!{Scalar} _ _ (Arithmetic.mulAssoc (ComplexArithmetic.ofReal a) (ComplexArithmetic.ofReal length) (Circle.multiply unit u)) }
+      "=" _ "by" { congr!{Scalar Scalar} (\fun (z: Scalar) => ComplexArithmetic.mul z (Circle.multiply unit u)) _ _
+        (Arithmetic.ofRealMul a length) }
+      "=" _ "by" { congr!{R.Real Scalar} (\fun (b: R.Real) => ComplexArithmetic.mul (ComplexArithmetic.ofReal b) (Circle.multiply unit u)) _ _
+        (sym!{R.Real} _ _ lengthLaw) }
+      "=" _ "by" { Arithmetic.mulOneLeft (Circle.multiply unit u) }
+    }
+  };

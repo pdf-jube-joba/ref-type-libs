@@ -1,0 +1,95 @@
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import Numbers.Def[] \as C;
+\import Numbers.Prop[] \as Arithmetic;
+\import sphere_maps.Circle[] \as Circle;
+\import std.Logic[].Proposition[] \as Logic;
+\use Equality.eq_reason_in;
+\definition p: \Cast[Space] U := \into[Space](x, U) \by { inFirst };
+\definition q: \Cast[Space] V := \into[Space](x, V) \by { inSecond };
+\import \parent.Patch[U := U, frames := first] \as First;
+\import \parent.Patch[U := V, frames := second] \as Second;
+\import First.AtPoint[x := p] \as Old;
+\import Second.AtPoint[x := q] \as New;
+\import Old.Angular[] \as OldAngle;
+\import New.Angular[] \as NewAngle;
+\import \parent.Transition[x := x, source := First.nativeChart.frame p, target := Second.nativeChart.frame q] \as Transition;
+\import Transition.Phase[] \as Phase;
+\definition rawLaw[w: Line x]: NewAngle.value w = C.mul Transition.coefficient (OldAngle.value w) :=
+  trans!{Numbers.Complex} _ _ _
+    (congr!{{Line x} {Numbers.Complex}} NewAngle.value _ _
+      (sym!{{Line x}} _ _ ((First.nativeChart.frame p).leftInverse w)))
+    (trans!{Numbers.Complex} _ _ _
+      (Transition.action ((First.nativeChart.frame p).forward.apply w))
+      (Arithmetic.mulComm (OldAngle.value w) Transition.coefficient));
+\definition oldAngle[w: Line x][unit: OldAngle.squared w = R.one]: Circle.Carrier :=
+  Old.angle (OldAngle.fromUnit w unit);
+\definition newAngle[w: Line x][unit: OldAngle.squared w = R.one]: Circle.Carrier :=
+  New.angle (NewAngle.fromUnit w unit);
+\definition oldScaleNonzero[w: Line x][unit: OldAngle.squared w = R.one]: Logic.Not (OldAngle.scale w = R.zero) :=
+  \fun (zero: _) => R.Algebra[].field.nontrivial (eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (Laws.fieldMulZeroLeft R.zero) }
+    "=" _ "by" { sym!{R.Real} _ _ (Phase.realNorm R.zero) }
+    "=" _ "by" { congr!{Numbers.Complex R.Real} C.normSq _ _ (sym!{Numbers.Complex} _ _
+      (eq_reason_in!{Numbers.Complex _
+        "=" _ "by" { OldAngle.formula w unit }
+        "=" _ "by" { congr!{R.Real Numbers.Complex} (\fun (s: R.Real) => C.mul (C.ofReal s) (OldAngle.value w)) _ _ zero }
+        "=" _ "by" { Arithmetic.mulZeroLeft (OldAngle.value w) }
+      })) }
+    "=" _ "by" { Circle.norm (oldAngle w unit) }
+  });
+\definition inverse[w: Line x]: R.Real := Laws.fieldInv (OldAngle.scale w);
+\definition ratio[w: Line x]: R.Real := R.mul (NewAngle.scale w) (inverse w);
+\definition ratioNonnegative[w: Line x]: D.Le R.zero (ratio w) :=
+  Laws.fieldMulNonnegative (NewAngle.scale w) (inverse w) (NewAngle.nonnegative w)
+    (OldAngle.inverseNonnegative (OldAngle.scale w) (OldAngle.nonnegative w));
+\definition recover[w: Line x][unit: OldAngle.squared w = R.one]:
+  OldAngle.value w = C.mul (C.ofReal (inverse w)) (oldAngle w unit) :=
+  sym!{Numbers.Complex} _ _ (eq_reason_in!{Numbers.Complex _
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.ofReal (inverse w))) _ _ (OldAngle.formula w unit) }
+    "=" _ "by" { sym!{Numbers.Complex} _ _ (Arithmetic.mulAssoc (C.ofReal (inverse w)) (C.ofReal (OldAngle.scale w)) (OldAngle.value w)) }
+    "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (u: Numbers.Complex) => C.mul u (OldAngle.value w)) _ _
+      (Arithmetic.ofRealMul (inverse w) (OldAngle.scale w)) }
+    "=" _ "by" { congr!{R.Real Numbers.Complex} (\fun (a: R.Real) => C.mul (C.ofReal a) (OldAngle.value w)) _ _
+      (Laws.fieldInverseNonzero (OldAngle.scale w) (oldScaleNonzero w unit)) }
+    "=" _ "by" { Arithmetic.mulOneLeft (OldAngle.value w) }
+  });
+\definition rotation[w: Line x][unit: OldAngle.squared w = R.one]: newAngle w unit = Circle.multiply Phase.unit (oldAngle w unit) :=
+  Phase.action (oldAngle w unit) (newAngle w unit) (ratio w) (ratioNonnegative w)
+    (eq_reason_in!{Numbers.Complex _
+      "=" _ "by" { NewAngle.formula w unit }
+      "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.ofReal (NewAngle.scale w))) _ _ (rawLaw w) }
+      "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (a: Numbers.Complex) => C.mul (C.ofReal (NewAngle.scale w)) (C.mul Transition.coefficient a)) _ _
+        (recover w unit) }
+      "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.ofReal (NewAngle.scale w))) _ _
+        (sym!{Numbers.Complex} _ _ (Arithmetic.mulAssoc Transition.coefficient (C.ofReal (inverse w)) (oldAngle w unit))) }
+      "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (z: Numbers.Complex) => C.mul (C.ofReal (NewAngle.scale w)) (C.mul z (oldAngle w unit))) _ _
+        (Arithmetic.mulComm Transition.coefficient (C.ofReal (inverse w))) }
+      "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (C.mul (C.ofReal (NewAngle.scale w))) _ _
+        (Arithmetic.mulAssoc (C.ofReal (inverse w)) Transition.coefficient (oldAngle w unit)) }
+      "=" _ "by" { sym!{Numbers.Complex} _ _ (Arithmetic.mulAssoc (C.ofReal (NewAngle.scale w)) (C.ofReal (inverse w))
+        (C.mul Transition.coefficient (oldAngle w unit))) }
+      "=" _ "by" { congr!{Numbers.Complex Numbers.Complex} (\fun (z: Numbers.Complex) => C.mul z (C.mul Transition.coefficient (oldAngle w unit))) _ _
+        (Arithmetic.ofRealMul (NewAngle.scale w) (inverse w)) }
+    });
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].Family[X := Space, F := Line] \as Family;
+\import Geometry.Fiber[x := x] \as Actual;
+\import topology.Topology[Carrier := Actual.Carrier].Subspace[S := Actual.boundary] \as Boundary;
+\import Equality.Transport[A := Space] \as FiberCast;
+\definition boundaryRotation[v: Boundary.CarrierSet]: New.angle v = Circle.multiply Phase.unit (Old.angle v) := \block {
+  \let same: v.base = x := \bysub(Disk.DiskBundle, Actual.subset, v) \then
+  \let w: Line x := FiberCast.cast Line v.base x same v.vector \then
+  \let pointEqual: Family.include x w = v := Family.ext _ _ (sym!{Space} _ _ same)
+    (FiberCast.castInverse Line v.base x same v.vector) \then
+  \let unit: OldAngle.squared w = R.one := trans!{R.Real} _ _ _
+    (congr!{{Family.Point} {R.Real}} Disk.squared _ _ pointEqual) (\bysub(Actual.Carrier, Actual.boundary, v)) \then
+  \let sameBoundary: OldAngle.fromUnit w unit = v := pointEqual \then
+  \return trans!{{Circle.Carrier}} _ _ _
+    (congr!{{Boundary.CarrierSet} {Circle.Carrier}} New.angle _ _
+      (sym!{{Boundary.CarrierSet}} _ _ sameBoundary))
+    (trans!{{Circle.Carrier}} _ _ _ (rotation w unit)
+      (congr!{{Boundary.CarrierSet} {Circle.Carrier}} (\fun (p: Boundary.CarrierSet) => Circle.multiply Phase.unit (Old.angle p))
+        _ _ sameBoundary))
+};
+\module Relative;

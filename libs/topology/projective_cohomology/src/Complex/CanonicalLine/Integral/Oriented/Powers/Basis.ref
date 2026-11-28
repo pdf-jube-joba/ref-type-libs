@@ -1,0 +1,56 @@
+\import \parent.\parent.\parent.Unit[] \as Unit;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := I.Int^, ring := Rings.commutativeRingAsRing I.Int^ Integers.commutativeRing] \as Modules;
+\definition Injective[k: N.Nat^]: \Prop :=
+  \forall (a, b: I.Int^) -> monomial k a = monomial k b -> a = b;
+\definition Onto[k: N.Nat^]: \Prop :=
+  \forall (u: H.Group (d k)) -> \exists (a: I.Int^ \where monomial k a = u);
+\definition previousBound[k: N.Nat^][bound: Basic.Le (N.Nat^::succ k) dimension]: Basic.Le k dimension :=
+  Basic.leTrans k (N.Nat^::succ k) dimension (Basic.leSelfSucc k) bound;
+\definition advanceMonomial[k: N.Nat^][a: I.Int^]: advance k (monomial k a) = monomial (N.Nat^::succ k) a :=
+  \parent.Step[k := k].scale a (power k);
+\definition injectiveStep[k: N.Nat^][previous: Injective k][bound: Basic.Le (N.Nat^::succ k) dimension]: Injective (N.Nat^::succ k) :=
+  \fun (a, b: I.Int^)(same: monomial (N.Nat^::succ k) a = monomial (N.Nat^::succ k) b) => previous a b
+    (trans!{{H.Group (d k)}} _ _ _ (sym!{{H.Group (d k)}} _ _ (\parent.Step[k := k].left bound (monomial k a)))
+      (trans!{{H.Group (d k)}} _ _ _
+        (congr!{{H.Group (d (N.Nat^::succ k))} {H.Group (d k)}} (\parent.Step[k := k].inverse bound) _ _
+          (trans!{{H.Group (d (N.Nat^::succ k))}} _ _ _ (advanceMonomial k a)
+            (trans!{{H.Group (d (N.Nat^::succ k))}} _ _ _ same (sym!{{H.Group (d (N.Nat^::succ k))}} _ _ (advanceMonomial k b)))))
+        (\parent.Step[k := k].left bound (monomial k b))));
+\definition ontoStep[k: N.Nat^][previous: Onto k][bound: Basic.Le (N.Nat^::succ k) dimension]: Onto (N.Nat^::succ k) := \block {
+  \fun (u: H.Group (d (N.Nat^::succ k))) \then
+  \let v: H.Group (d k) := \parent.Step[k := k].inverse bound u \then
+  \takefrom a: \Cast[I.Int^] ({ a: I.Int^ \where monomial k a = v }) \by previous v \then
+  \return Logic.existsIntro[I.Int^, { a: I.Int^ \where monomial (N.Nat^::succ k) a = u }] a
+    (trans!{{H.Group (d (N.Nat^::succ k))}} _ _ _
+      (sym!{{H.Group (d (N.Nat^::succ k))}} _ _ (advanceMonomial k a))
+      (trans!{{H.Group (d (N.Nat^::succ k))}} _ _ _
+        (congr!{{H.Group (d k)} {H.Group (d (N.Nat^::succ k))}} (advance k) _ _
+          (\bysub(I.Int^, { b: I.Int^ \where monomial k b = v }, a)))
+        (\parent.Step[k := k].right bound u)))
+};
+\definition injective: \forall (k: N.Nat^) -> Basic.Le k dimension -> Injective k :=
+  \induction (k: N.Nat^) \return Basic.Le k dimension -> Injective k \with {
+    | zero: \fun (bound: Basic.Le N.Nat^::zero dimension) => Unit.injective
+    | succ: \fun (k: N.Nat^)(previous: Basic.Le k dimension -> Injective k)(bound: Basic.Le (N.Nat^::succ k) dimension) =>
+      injectiveStep k (previous (previousBound k bound)) bound
+  };
+\definition onto: \forall (k: N.Nat^) -> Basic.Le k dimension -> Onto k :=
+  \induction (k: N.Nat^) \return Basic.Le k dimension -> Onto k \with {
+    | zero: \fun (bound: Basic.Le N.Nat^::zero dimension) => Unit.surjective
+    | succ: \fun (k: N.Nat^)(previous: Basic.Le k dimension -> Onto k)(bound: Basic.Le (N.Nat^::succ k) dimension) =>
+      ontoStep k (previous (previousBound k bound)) bound
+  };
+\module Degree(k: N.Nat^) {
+  \import Modules.Hom[V := I.Int^, W := H.Group (d k), source := Modules.scalarModule, target := H.moduleSpace (d k)] \as Maps;
+  \definition linear: Maps.Map := Maps.Map {
+    apply := monomial k,
+    addition := \fun (a, b: I.Int^) => (H.moduleSpace (d k)).scalarAdd a b (power k),
+    scalar := \fun (a, b: I.Int^) => (H.moduleSpace (d k)).scalarAssoc a b (power k)
+  };
+  \import Modules.Isomorphism[V := I.Int^, W := H.Group (d k), source := Modules.scalarModule, target := H.moduleSpace (d k)]
+    .OfBijective[f := linear] \as Iso;
+  \definition isomorphism[bound: Basic.Le k dimension]: _ :=
+    Iso.isomorphism (injective k bound) (onto k bound);
+}

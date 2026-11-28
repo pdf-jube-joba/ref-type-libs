@@ -1,0 +1,4 @@
+\import Geometry.Oriented[K := I.Int^, ring := Integers.commutativeRing, n := Degrees.two, orientation := orientation, complex := cw] \as Thom;
+\definition euler: H.Group Degrees.two := Thom.euler;
+\module Cup(k: N.Nat^);
+\module Powers;

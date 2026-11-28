@@ -1,0 +1,35 @@
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Proposition[] \as Logic;
+\import Numbers.Prop[] \as Arithmetic;
+\definition Scalar: \Set := Numbers.Complex;
+\definition Vector: \Set := Bundles.Vector Degrees.one;
+\definition field: Fields.Field[Scalar] := Numbers.Algebra[].field;
+\definition index: Fin.Fin Degrees.one := Fin.zero N.Nat^::zero;
+\definition axis: Vector := \fun (_: Fin.Fin Degrees.one) => field.one;
+\definition value[v: Vector]: Scalar := v index;
+\definition reconstruct[v: Vector]: (Bundles.coordinates Degrees.one).smul (value v) axis = v :=
+  \axiom:funext((Bundles.coordinates Degrees.one).smul (value v) axis, v, \fun (i: Fin.Fin Degrees.one) =>
+    trans!{Scalar} _ _ _ (Arithmetic.mulOneRight (v index))
+      (congr!{{Fin.Fin Degrees.one} {Scalar}} v _ _ (sym!{{Fin.Fin Degrees.one}} _ _ (Fin.singletonValue i))));
+\definition transition[v: Vector]: Vector := target.forward.apply (source.backward.apply v);
+\definition coefficient: Scalar := value (transition axis);
+\definition action[v: Vector]: value (transition v) = field.mul (value v) coefficient :=
+  trans!{Scalar} _ _ _
+    (congr!{Vector Scalar} (\fun (w: Vector) => value (transition w)) _ _ (sym!{Vector} _ _ (reconstruct v)))
+    (trans!{Scalar} _ _ _
+      (congr!{{Line x} Scalar} (\fun (w: Line x) => value (target.forward.apply w)) _ _ (source.backward.preservesScale (value v) axis))
+      (congr!{Vector Scalar} value _ _ (target.forward.preservesScale (value v) (source.backward.apply axis))));
+\definition nonzero: Logic.Not (coefficient = field.zero) :=
+  \fun (vanishes: _) => field.nontrivial (sym!{Scalar} _ _
+    (congr!{Vector Scalar} value _ _
+      (trans!{Vector} _ _ _ (sym!{Vector} _ _ (source.rightInverse axis))
+        (trans!{Vector} _ _ _
+          (congr!{{Line x} Vector} source.forward.apply _ _ (sym!{{Line x}} _ _ (target.leftInverse (source.backward.apply axis))))
+          (trans!{Vector} _ _ _
+            (congr!{Vector Vector} (\fun (v: Vector) => source.forward.apply (target.backward.apply v)) _ _
+              (\axiom:funext(transition axis, (Bundles.coordinates Degrees.one).zero, \fun (i: Fin.Fin Degrees.one) =>
+                trans!{Scalar} _ _ _ (congr!{{Fin.Fin Degrees.one} {Scalar}} (transition axis) _ _ (Fin.singletonValue i)) vanishes)))
+            (trans!{Vector} _ _ _
+              (congr!{{Line x} Vector} source.forward.apply _ _ target.backward.preservesZero)
+              source.forward.preservesZero))))));
+\module Phase;

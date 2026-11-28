@@ -48,3 +48,12 @@
     | succ: \fun (k: N.Nat^)(previous: _) (lt: _) =>
       Logic.existsIntro[N.Nat^, { j: N.Nat^ \where N.Nat^::succ j = N.Nat^::succ k }] k (\refl(N.Nat^::succ k))
   };
+\definition doubleAdd[p: N.Nat^]: \forall (q: N.Nat^) -> Nat.add (double p) (double q) = double (Nat.add p q) :=
+  \induction (q: N.Nat^) \return Nat.add (double p) (double q) = double (Nat.add p q) \with {
+    | zero: \refl(double p)
+    | succ: \fun (q: N.Nat^)(previous: Nat.add (double p) (double q) = double (Nat.add p q)) =>
+      trans!{N.Nat^} _ _ _ (congr!{N.Nat^ N.Nat^} (Nat.add (double p)) _ _ (doubleSucc q))
+        (trans!{N.Nat^} _ _ _
+          (congr!{N.Nat^ N.Nat^} (\fun (x: N.Nat^) => N.Nat^::succ (N.Nat^::succ x)) _ _ previous)
+          (sym!{N.Nat^} _ _ (doubleSucc (Nat.add p q))))
+  };

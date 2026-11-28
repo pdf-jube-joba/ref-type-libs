@@ -1,0 +1,29 @@
+\import \parent.\parent.Cup[k := k] \as Cup;
+\import H.Cup[p := d k, q := Degrees.two] \as Product;
+\definition destination: N.Nat^ := d (N.Nat^::succ k);
+\definition up: H.Group (next k) -> H.Group destination := CastDegree.cast H.Group (next k) destination (castLaw k);
+\definition down: H.Group destination -> H.Group (next k) := CastDegree.cast H.Group destination (next k) (Degrees.doubleSucc k);
+\definition leftCast[u: H.Group (next k)]: down (up u) = u :=
+  CastDegree.castInverse H.Group (next k) destination (castLaw k) u;
+\definition rightCast[u: H.Group destination]: up (down u) = u :=
+  CastDegree.castInverse H.Group destination (next k) (Degrees.doubleSucc k) u;
+\definition scale[a: I.Int^][u: H.Group (d k)]:
+  advance k ((H.moduleSpace (d k)).smul a u) = (H.moduleSpace destination).smul a (advance k u) :=
+  trans!{{H.Group destination}} _ _ _
+    (congr!{{H.Group (next k)} {H.Group destination}} up _ _ (Product.laws.scaleLeft a u euler))
+    (CastDegree.natural H.Group H.Group (\fun (n: N.Nat^)(v: H.Group n) => (H.moduleSpace n).smul a v)
+      (next k) destination (castLaw k) (Product.apply u euler));
+\definition inverse[bound: Basic.Le (N.Nat^::succ k) dimension][u: H.Group destination]: H.Group (d k) :=
+  (Cup.isomorphism bound).backward.apply (down u);
+\definition left[bound: Basic.Le (N.Nat^::succ k) dimension][u: H.Group (d k)]: inverse bound (advance k u) = u :=
+  trans!{{H.Group (d k)}} _ _ _
+    (congr!{{H.Group (next k)} {H.Group (d k)}} (Cup.isomorphism bound).backward.apply _ _
+      (trans!{{H.Group (next k)}} _ _ _ (leftCast (Product.apply u euler))
+        (sym!{{H.Group (next k)}} _ _ (Cup.law bound u))))
+    ((Cup.isomorphism bound).leftInverse u);
+\definition right[bound: Basic.Le (N.Nat^::succ k) dimension][u: H.Group destination]: advance k (inverse bound u) = u :=
+  trans!{{H.Group destination}} _ _ _
+    (congr!{{H.Group (next k)} {H.Group destination}} up _ _
+      (trans!{{H.Group (next k)}} _ _ _ (sym!{{H.Group (next k)}} _ _ (Cup.law bound (inverse bound u)))
+        ((Cup.isomorphism bound).rightInverse (down u))))
+    (rightCast u);

@@ -1,0 +1,39 @@
+\import std.Alg[].Ring[] \as Rings;
+\import module_theory.Module[].Over[R := I.Int^, ring := Rings.commutativeRingAsRing I.Int^ Integers.commutativeRing] \as Modules;
+\definition coefficient[g: H.Group Degrees.two][a: I.Int^]: H.Group (Terms.d k) :=
+  \parent.\parent.EvenPowers[generator := g].monomial k a;
+\definition Injective[g: H.Group Degrees.two]: \Prop :=
+  \forall (a, b: I.Int^) -> coefficient g a = coefficient g b -> a = b;
+\definition Onto[g: H.Group Degrees.two]: \Prop :=
+  \forall (u: H.Group (Terms.d k)) -> \exists (a: I.Int^ \where coefficient g a = u);
+\module With(cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]) {
+  \import \parent.\parent.\parent.Oriented[orientation := Orientation.orientation, cw := cw] \as Oriented;
+  \definition injective[bound: Basic.Le k dimension]: Injective generator :=
+    \idelim Oriented.euler = generator \with g: H.Group Degrees.two => Injective g \by {
+      base: Oriented.Powers[].Basis[].injective k bound, equality: \parent.\parent.Compare[cw := cw].euler
+    };
+  \definition onto[bound: Basic.Le k dimension]: Onto generator :=
+    \idelim Oriented.euler = generator \with g: H.Group Degrees.two => Onto g \by {
+      base: Oriented.Powers[].Basis[].onto k bound, equality: \parent.\parent.Compare[cw := cw].euler
+    };
+}
+\definition injective: Basic.Le k dimension -> Injective generator := \block {
+  \fun (bound: Basic.Le k dimension) \then
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return With[cw := cw].injective bound
+};
+\definition onto: Basic.Le k dimension -> Onto generator := \block {
+  \fun (bound: Basic.Le k dimension) \then
+  \takefrom cw: algebraic_topology.CW[A := Space].FiniteComplex[topology] \by cwExists \then
+  \return With[cw := cw].onto bound
+};
+\import Modules.Hom[V := I.Int^, W := H.Group (Terms.d k), source := Modules.scalarModule, target := H.moduleSpace (Terms.d k)] \as Maps;
+\definition linear: Maps.Map := Maps.Map {
+  apply := monomial k,
+  addition := \fun (a, b: I.Int^) => (H.moduleSpace (Terms.d k)).scalarAdd a b (power k),
+  scalar := \fun (a, b: I.Int^) => (H.moduleSpace (Terms.d k)).scalarAssoc a b (power k)
+};
+\import Modules.Isomorphism[V := I.Int^, W := H.Group (Terms.d k), source := Modules.scalarModule, target := H.moduleSpace (Terms.d k)]
+  .OfBijective[f := linear] \as Iso;
+\definition isomorphism[bound: Basic.Le k dimension]: _ :=
+  Iso.isomorphism (injective bound) (onto bound);

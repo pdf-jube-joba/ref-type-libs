@@ -32,3 +32,4 @@ cohomology_examples = { path = "../examples/finite_models" }
 bott_product = { path = "../bott_product" }
 commutative_algebra = { path = "../../algebra/commutative_algebra" }
 singular_cap = { path = "../singular/cap" }
+sphere_maps = { path = "../spheres" }

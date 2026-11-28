@@ -1,0 +1,55 @@
+\import dedekind_reals.DedekindReal[] \as D;
+\import D.Arithmetic[].Prop[] \as Laws;
+\import Numbers.Def[] \as Arithmetic;
+\import Numbers.Prop[] \as ComplexLaws;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].Family[X := Space, F := Line] \as Family;
+\definition squared[w: Line x]: R.Real := Disk.squared (Family.include x w);
+\definition fromUnit[w: Line x][unit: squared w = R.one]: Boundary.CarrierSet := \block {
+  \let v: Disk.DiskBundle := \into[Family.Point](Family.include x w, Disk.ClosedBall) \by {
+    D.leReplaceLeft R.one (squared w) R.one (sym!{R.Real} _ _ unit) (D.leRefl R.one)
+  } \then
+  \let p: Actual.Carrier := \into[Disk.DiskBundle](v, Actual.subset) \by { \refl(x) } \then
+  \return \into[Actual.Carrier](p, Actual.boundary) \by { unit }
+};
+\definition raw[w: Line x]: Plane.Coordinate := (realChart.frame x).forward.apply w;
+\definition scale[w: Line x]: R.Real := R.mul (R.SquareRoot[].sqrt (squared w))
+  (Laws.fieldInv (R.SquareRoot[].sqrt (Plane.normSquared (raw w))));
+\import D.Order[] \as Order;
+\import std.Logic[].Classical[] \as Classical;
+\use std.Logic[].Proposition[].either;
+\definition inverseNonnegative[a: R.Real][nonnegative: D.Le R.zero a]: D.Le R.zero (Laws.fieldInv a) :=
+  either!{{Classical.excludedMiddle (a = R.zero)} {D.Le R.zero (Laws.fieldInv a)}
+    {\fun (same: a = R.zero) => D.leReplaceRight R.zero R.zero (Laws.fieldInv a)
+      (sym!{R.Real} _ _ (trans!{R.Real} _ _ _ (congr!{R.Real R.Real} Laws.fieldInv _ _ same) (trans!{R.Real} _ _ _ (Laws.fieldInvNonnegative R.zero (D.leRefl R.zero)) Laws.invZero))) (D.leRefl R.zero)}
+    {\fun (different: _) => Order.leOfLt _ _ (R.Estimates[].Product[].invPositive a
+      (Order.ltOfLeNotEq R.zero a nonnegative (\fun (same: _) => different (sym!{R.Real} _ _ same))))}
+  };
+\definition nonnegative[w: Line x]: D.Le R.zero (scale w) :=
+  Laws.fieldMulNonnegative (R.SquareRoot[].sqrt (squared w))
+    (Laws.fieldInv (R.SquareRoot[].sqrt (Plane.normSquared (raw w))))
+    (R.SquareRoot[].nonnegative (squared w))
+    (inverseNonnegative (R.SquareRoot[].sqrt (Plane.normSquared (raw w))) (R.SquareRoot[].nonnegative (Plane.normSquared (raw w))));
+\definition normalized[w: Line x][unit: squared w = R.one]:
+  coordinate (fromUnit w unit) = raw ((Realification.bundle.space x).smul (scale w) w) :=
+  ChartFiber.vectorFormula (fromUnit w unit);
+\import Scalars.RealCoordinates[n := Degrees.one] \as Coordinates;
+\import std.Data[].FinSet[] \as Fin;
+\definition index: Fin.Fin Degrees.one := Fin.zero N.Nat^::zero;
+\import linear_algebra.Hermitian[].Over[K := R.Real, field := R.Algebra[].field, scalar := Hermitian.Real[].scalar].Finite[n := Degrees.one] \as E;
+\import E.Blocks[m := Degrees.one] \as Blocks;
+\definition first[v: Bundles.Vector Degrees.one]: E.Vector := \fun (i: Fin.Fin Degrees.one) => Numbers.re (v i);
+\definition second[v: Bundles.Vector Degrees.one]: E.Vector := \fun (i: Fin.Fin Degrees.one) => Numbers.im (v i);
+\definition realCoordinates[v: Bundles.Vector Degrees.one]: Circle.Coordinates[].ambientForward (Coordinates.frame.forward.apply v) = v index :=
+  ComplexLaws.ext _ _
+    (congr!{{E.Vector} {R.Real}} (\fun (a: E.Vector) => a index) _ _ (Blocks.leftJoin (first v) (second v)))
+    (congr!{{E.Vector} {R.Real}} (\fun (a: E.Vector) => a index) _ _ (Blocks.rightJoin (first v) (second v)));
+\definition value[w: Line x]: Numbers.Complex := (nativeChart.frame x).forward.apply w index;
+\definition formula[w: Line x][unit: squared w = R.one]:
+  angle (fromUnit w unit) = Arithmetic.mul (Arithmetic.ofReal (scale w)) (value w) :=
+  trans!{Numbers.Complex} _ _ _
+    (congr!{{Plane.Coordinate} {Numbers.Complex}} Circle.Coordinates[].ambientForward _ _ (normalized w unit))
+    (trans!{Numbers.Complex} _ _ _
+      (realCoordinates ((nativeChart.frame x).forward.apply ((lineBundle.space x).smul (Arithmetic.ofReal (scale w)) w)))
+      (congr!{{Bundles.Vector Degrees.one} {Numbers.Complex}} (\fun (v: Bundles.Vector Degrees.one) => v index) _ _
+        ((nativeChart.frame x).forward.preservesScale (Arithmetic.ofReal (scale w)) w)));

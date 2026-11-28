@@ -29,3 +29,4 @@
   \return \parent.Schubert[disks := choices.disks, symbols := choices.symbols, exhaustive := choices.exhaustive]
     .Additive[].At[i := i].basisExists
 };
+\module Ordinary(k: N.Nat^);

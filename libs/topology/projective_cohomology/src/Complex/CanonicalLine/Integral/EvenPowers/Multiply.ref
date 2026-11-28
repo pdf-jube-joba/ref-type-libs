@@ -1,0 +1,31 @@
+\use Equality.eq_reason_in;
+\definition total[q: N.Nat^]: N.Nat^ := Nat.add p q;
+\definition cup[q: N.Nat^][a: H.Group (d p)][b: H.Group (d q)]: H.Group (d (total q)) :=
+  CastDegree.cast H.Group (Nat.add (d p) (d q)) (d (total q)) (Degrees.doubleAdd p q) (H.Cup[p := d p, q := d q].apply a b);
+\definition Law[q: N.Nat^]: \Prop := cup q (power p) (power q) = power (total q);
+\module Step(q: N.Nat^);
+\definition powers: \forall (q: N.Nat^) -> Law q :=
+  \induction (q: N.Nat^) \return Law q \with {
+    | zero: trans!{{H.Group (d p)}} _ _ _
+        (congr!{{H.Group (d p)} {H.Group (d p)}} (CastDegree.cast H.Group (d p) (d p) (Degrees.doubleAdd p N.Nat^::zero))
+          _ _ (H.Unit[].Right[p := d p].law (power p)))
+        (CastDegree.castRefl H.Group (d p) (power p))
+    | succ: \fun (q: N.Nat^)(previous: Law q) => Step[q := q].law previous
+  };
+\module Monomials(q: N.Nat^) {
+  \definition raw: N.Nat^ := Nat.add (d p) (d q);
+  \definition degree: N.Nat^ := d (total q);
+  \definition cast: H.Group raw -> H.Group degree := CastDegree.cast H.Group raw degree (Degrees.doubleAdd p q);
+  \import H.Cup[p := d p, q := d q] \as Product;
+  \definition law[a, b: I.Int^]: cup q (monomial p a) (monomial q b) = monomial (total q) (Integers.commutativeRing.base.mul a b) :=
+    eq_reason_in!{{H.Group degree} _
+      "=" _ "by" { congr!{{H.Group raw} {H.Group degree}} cast _ _ (Product.laws.scaleLeft a (power p) (monomial q b)) }
+      "=" _ "by" { congr!{{H.Group raw} {H.Group degree}} (\fun (v: H.Group raw) => cast ((H.moduleSpace raw).smul a v)) _ _
+        (Product.laws.scaleRight b (power p) (power q)) }
+      "=" _ "by" { congr!{{H.Group raw} {H.Group degree}} cast _ _
+        (sym!{{H.Group raw}} _ _ ((H.moduleSpace raw).scalarAssoc a b (Product.apply (power p) (power q)))) }
+      "=" _ "by" { CastDegree.natural H.Group H.Group (\fun (n: N.Nat^)(v: H.Group n) => (H.moduleSpace n).smul (Integers.commutativeRing.base.mul a b) v)
+        raw degree (Degrees.doubleAdd p q) (Product.apply (power p) (power q)) }
+      "=" _ "by" { congr!{{H.Group degree} {H.Group degree}} ((H.moduleSpace degree).smul (Integers.commutativeRing.base.mul a b)) _ _ (powers q) }
+    };
+}

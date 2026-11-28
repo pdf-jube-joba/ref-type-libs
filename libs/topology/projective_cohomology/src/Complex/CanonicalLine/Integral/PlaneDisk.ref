@@ -1,0 +1,76 @@
+\import thom_spaces.Thom[].CWType[].Point[] \as Point;
+\import thom_spaces.Thom[].DiskSuspension[X := Point.Carrier, space := Point.topology, n := Degrees.two] \as PairDisk;
+\import algebraic_topology.Euclidean[].Dimension[n := Degrees.two] \as Plane;
+\import algebraic_topology.Spheres[] \as Spheres;
+\import std.Data[].Pair[] \as Pair;
+\import dedekind_reals.DedekindReal[] \as D;
+\import topological_constructions.Product[A := Point.Carrier, B := Plane.Coordinate] \as ProductSpace;
+\definition vector[p: PairDisk.DiskCarrier]: Plane.Disk :=
+  \into[Plane.Coordinate](Pair.second Point.Carrier Plane.Coordinate p, Plane.ClosedBall) \by {
+    \bysub(PairDisk.Point, PairDisk.disk, p)
+  };
+\definition point[v: Plane.Disk]: PairDisk.DiskCarrier :=
+  \into[PairDisk.Point](Pair.pair Point.Carrier Plane.Coordinate Point.point v, PairDisk.disk) \by {
+    \bysub(Plane.Coordinate, Plane.ClosedBall, v)
+  };
+\definition vectorContinuous: topology.Continuity[A := PairDisk.DiskCarrier, B := Plane.Disk].Continuous
+  PairDisk.diskTopology Plane.diskTopology vector :=
+  topology.Continuity[A := PairDisk.DiskCarrier, B := Plane.Coordinate].Corestriction[S := Plane.ClosedBall].corestrictContinuous
+    PairDisk.diskTopology Plane.topology vector
+    (topology.Continuity[A := PairDisk.Point, B := Plane.Coordinate].Restriction[S := PairDisk.disk].restrictContinuous
+      PairDisk.totalTopology Plane.topology (Pair.second Point.Carrier Plane.Coordinate)
+      (ProductSpace.Maps[].secondContinuous Point.topology Plane.topology));
+\definition pointContinuous: topology.Continuity[A := Plane.Disk, B := PairDisk.DiskCarrier].Continuous
+  Plane.diskTopology PairDisk.diskTopology point :=
+  topology.Continuity[A := Plane.Disk, B := PairDisk.Point].Corestriction[S := PairDisk.disk].corestrictContinuous
+    Plane.diskTopology PairDisk.totalTopology point
+    (ProductSpace.Universal[X := Plane.Disk].pairContinuous Plane.diskTopology Point.topology Plane.topology
+      (\fun (_: Plane.Disk) => Point.point) (\fun (v: Plane.Disk) => v)
+      (topology.Maps[A := Plane.Disk, B := Point.Carrier].constantContinuous Plane.diskTopology Point.topology Point.point)
+      (topology.Continuity[A := Plane.Disk, B := Plane.Coordinate].Corestriction[S := Plane.ClosedBall].inclusionContinuous Plane.topology));
+\import topology.Homeomorphism[A := Plane.Disk, B := PairDisk.DiskCarrier] \as Compare;
+\definition homeomorphism: Compare.Homeomorphism[Plane.diskTopology, PairDisk.diskTopology] :=
+  Compare.Homeomorphism[Plane.diskTopology, PairDisk.diskTopology] {
+    forward := point, backward := vector, forwardContinuous := pointContinuous, backwardContinuous := vectorContinuous,
+    leftInverse := \fun (v: Plane.Disk) => \refl(v),
+    rightInverse := \fun (p: PairDisk.DiskCarrier) => Pair.Prop[A := Point.Carrier, B := Plane.Coordinate].ext (point (vector p)) p
+      (sym!{{Point.Carrier}} _ _ (Point.unique (Pair.first Point.Carrier Plane.Coordinate p)))
+      (\refl(Pair.second Point.Carrier Plane.Coordinate p))
+  };
+\import algebraic_topology.Contraction[A := Plane.Disk, source := Plane.diskTopology].Transport[B := PairDisk.DiskCarrier]
+  .Over[target := PairDisk.diskTopology].Along[homeomorphism := homeomorphism] \as Contract;
+\definition contraction: _ := Contract.apply Plane.Contraction[].contraction;
+\import singular_cohomology.Relative[A := PairDisk.DiskCarrier, source := PairDisk.diskTopology, subset := PairDisk.boundary] \as PairTheory;
+\import PairTheory.With[coefficients := Product.integerCoefficients] \as Relative;
+\import Relative.PairSequence[].LongExact[z := I.Int^::ofNat Degrees.one] \as Sequence;
+\import singular_cohomology.Calculations[A := PairDisk.DiskCarrier, source := PairDisk.diskTopology]
+  .With[coefficients := Product.integerCoefficients].Contractible[] \as Model;
+\import singular_cohomology.Cochains[A := PairDisk.DiskCarrier, source := PairDisk.diskTopology].With[coefficients := Product.integerCoefficients] \as Ordinary;
+\import Ordinary.Integer[] \as Signed;
+\import Abelian.Isomorphism[V := Signed.cohomology (I.Int^::ofNat Degrees.two), W := Ordinary.cohomology Degrees.two,
+  source := Signed.cohomologySpace (I.Int^::ofNat Degrees.two), target := Ordinary.cohomologySpace Degrees.two].Vanishing[] \as Transfer;
+\definition absoluteZero: _ := Transfer.sourceZero Signed.At[n := Degrees.two].isomorphism
+  (Model.Positive[n := Degrees.one].zero contraction);
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring].Map[C := Relative.complex, D := Signed.complex].At[k := I.Int^::ofNat Degrees.two] \as Forget;
+\definition forget: _ := Forget.induced Relative.PairSequence[].inclusion;
+\definition connectingOnto[u: Relative.At[z := I.Int^::ofNat Degrees.two].Carrier]: _ :=
+  Sequence.exactAtRelative u (absoluteZero (forget.apply u));
+\definition sphereIntoDisk[v: Spheres.Carrier Degrees.one]: Plane.Disk :=
+  \into[Plane.Coordinate](v, Plane.ClosedBall) \by {
+    D.leReplaceLeft R.one (Plane.normSquared v) R.one (sym!{R.Real} _ _ (\bysub(Plane.Coordinate, Plane.Boundary, v))) (D.leRefl R.one)
+  };
+\definition boundaryPoint[v: Spheres.Carrier Degrees.one]: PairTheory.SubspaceCarrier :=
+  \into[PairDisk.DiskCarrier](point (sphereIntoDisk v), PairDisk.boundary) \by { \bysub(Plane.Coordinate, Plane.Boundary, v) };
+\import topology.Topology[Carrier := PairDisk.DiskCarrier].Subspace[S := PairDisk.boundary] \as Boundary;
+\definition boundaryTopology: topology.Topology[Carrier := PairTheory.SubspaceCarrier].Topology := Boundary.topology PairDisk.diskTopology;
+\definition sphereIntoDiskContinuous: topology.Continuity[A := Spheres.Carrier Degrees.one, B := Plane.Disk].Continuous
+  (Spheres.topology Degrees.one) Plane.diskTopology sphereIntoDisk :=
+  topology.Continuity[A := Spheres.Carrier Degrees.one, B := Plane.Coordinate].Corestriction[S := Plane.ClosedBall].corestrictContinuous
+    (Spheres.topology Degrees.one) Plane.topology sphereIntoDisk
+    (topology.Continuity[A := Spheres.Carrier Degrees.one, B := Plane.Coordinate].Corestriction[S := Plane.Boundary].inclusionContinuous Plane.topology);
+\definition boundaryPointContinuous: topology.Continuity[A := Spheres.Carrier Degrees.one, B := PairTheory.SubspaceCarrier].Continuous
+  (Spheres.topology Degrees.one) boundaryTopology boundaryPoint :=
+  topology.Continuity[A := Spheres.Carrier Degrees.one, B := PairDisk.DiskCarrier].Corestriction[S := PairDisk.boundary].corestrictContinuous
+    (Spheres.topology Degrees.one) PairDisk.diskTopology boundaryPoint
+    (topology.Composition[A := Spheres.Carrier Degrees.one, B := Plane.Disk, C := PairDisk.DiskCarrier].composeContinuous
+      (Spheres.topology Degrees.one) Plane.diskTopology PairDisk.diskTopology sphereIntoDisk point sphereIntoDiskContinuous pointContinuous);

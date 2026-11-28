@@ -20,3 +20,10 @@
 \module Boundary;
 \module Exact(k: N.Nat^);
 \module Unit;
+\module PlaneDisk;
+\module Charts;
+\module Orientation;
+\module EvenPowers(generator: H.Group Degrees.two);
+\module Oriented(orientation: Geometry.Local[K := I.Int^, ring := Integers.commutativeRing].Rank[n := Degrees.two].Orientation[].SignedOrientation,
+  cw: algebraic_topology.CW[A := Space].FiniteComplex[topology]);
+\module Canonical;
