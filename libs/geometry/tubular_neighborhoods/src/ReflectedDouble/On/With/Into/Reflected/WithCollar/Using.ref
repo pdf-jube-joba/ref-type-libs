@@ -87,3 +87,4 @@
     (boundary_manifolds.Refinement[A := Seam.Point].equality OrdinaryInterior.points (ordinaryBase b) x
       (\bysub(B.Point,{ b: B.Point \where left b = (x \of Seam.Point) },b)))
 };
+\module Smooth;

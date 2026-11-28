@@ -1,0 +1,36 @@
+\import boundary_manifolds.Tangent[n := n].On[M := M].At[x := x] \as Domain;
+\import boundary_manifolds.Tangent[n := n].On[M := ambient].At[x := map.apply x] \as Range;
+\definition input: Domain.Chart := \into[Charts.Chart](chart,Domain.Chart) \by {
+  Domain.ChartLaws[chart] { member := member,contains := covers x }
+};
+\import Models.Chart[M := Free.Point,space := Free.topology] \as FreeCharts;
+\definition output: Range.Chart := \into[FreeCharts.Chart](Free.chart,Range.Chart) \by {
+  Range.ChartLaws[Free.chart] { member := \refl(Free.chart),contains := \refl(map.apply x) }
+};
+\import boundary_manifolds.SmoothMap[n := n,m := n].Between[M := M,N := ambient] \as Maps;
+\import Maps.At[function := Maps.apply map,left := input,right := output,x := x,contains := Domain.contains input] \as Expression;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\definition extension: Expression.Extension := Expression.Extension {
+  neighborhood := chart.image,included := \fun (u: Model.Point)(inside: _) => inside,
+  contains := \bysub(Model.Point,chart.image.points,Expression.source),map := identity,
+  inside := \fun (u: Quadrant.Point) => \refl(map.apply (Charts.point chart u)),
+  agrees := \fun (u: Quadrant.Point) => sym!{{Model.Point}} _ _
+    (congr!{{Quadrant.Point} {Model.Point}} (\fun (z: Quadrant.Point) => z) _ _ (Local.rightInverse u)),
+};
+\import boundary_manifolds.Differential[n := n,m := n].Between[M := M,N := ambient].At[f := map,x := x] \as Derivative;
+\import Derivative.InCharts[left := input,right := output] \as Matrix;
+\import calculus.Vector[n := n,m := n] \as Vectors;
+\import calculus.Identity[n := n] \as LinearIdentity;
+\definition jacobian: Matrix.jacobian = LinearIdentity.linear :=
+  trans!{{Vectors.LinearMap}} _ _ _ (Expression.ofExtension Matrix.smooth extension) (Identity.differential included Expression.source);
+\import Domain.Coordinate[chart := input] \as A;
+\import Range.Coordinate[chart := output] \as B;
+\definition coordinates[v: Domain.Vector]: B.decode (Derivative.value.apply v) = A.decode v :=
+  trans!{{Model.Point}} _ _ _ (Derivative.coordinates input output v)
+    (congr!{{Vectors.LinearMap} {Model.Point}} (\fun (l: Vectors.LinearMap) => l.apply (A.decode v)) _ _ jacobian);
+\definition injective[u,v: Domain.Vector][same: Derivative.value.apply u = Derivative.value.apply v]: u = v :=
+  A.injective u v (trans!{{Model.Point}} _ _ _ (sym!{{Model.Point}} _ _ (coordinates u))
+    (trans!{{Model.Point}} _ _ _ (congr!{{Range.Vector} {Model.Point}} B.decode _ _ same) (coordinates v)));

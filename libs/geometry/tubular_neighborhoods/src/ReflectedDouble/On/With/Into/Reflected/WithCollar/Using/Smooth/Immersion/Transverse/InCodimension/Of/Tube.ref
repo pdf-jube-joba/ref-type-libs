@@ -1,0 +1,17 @@
+\definition ambientDimension: Nat.Nat^ := NormalBundle.ambientDimension;
+\import manifolds.Immersion[n := dimension,m := ambientDimension].Between[M := ordinary,N := NormalBundle.ambient] \as Embeddings;
+\import NormalBundle.On[M := ordinary].Of[i := Embeddings.asImmersion result] \as Normal;
+\import Embedded.With[lift := Regular.horizontalLift].Restriction[t := t.tube] \as OpenTube;
+\import manifolds.OpenSubmanifold[n := ambientDimension].On[M := Normal.manifold].In[U := OpenTube.openDomain] \as Domain;
+\import manifolds.Dimension[n := ambientDimension].Examples[].Euclidean[].Subspace[U := t.tube.image] \as Image;
+\definition diffeomorphism: manifolds.Diffeomorphism[n := ambientDimension,m := ambientDimension].Between[M := Domain.manifold,N := Image.smoothManifold].Diffeomorphism :=
+  OpenTube.diffeomorphism;
+\import Extended.Tube[t := t] \as Boundary;
+\import Regular.HalfTube[result := t] \as Restricted;
+\import linear_algebra.Euclidean[n := ambientDimension] \as Coordinates;
+\definition forward[q: Boundary.domain]: (diffeomorphism.forward.apply (Restricted.normal q) \of Coordinates.Vector) =
+  HalfTube.coordinates (Boundary.send q) :=
+  sym!{{Coordinates.Vector}} _ _ (Boundary.outputCoordinates (Restricted.forward q));
+\definition backward[y: Boundary.range]: (diffeomorphism.backward.apply (Restricted.target (Boundary.input y)) \of Normal.Point) =
+  (Boundary.undo y \of Normal.Point) :=
+  \refl(Boundary.undo y \of Normal.Point);

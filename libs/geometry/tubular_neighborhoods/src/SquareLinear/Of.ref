@@ -1,0 +1,7 @@
+\import E.Gram[k := n] \as Gram;
+\module OfFactor(factor: Gram.Factorization[a]);
+\definition onto[injective: Gram.Injective a][w: E.Vector]: \exists (v: E.Vector \where a.apply v = w) := \block {
+  \takefrom factor: Gram.Factorization[a] \by inverse_implicit.Gram[n := n,m := n].existence a injective \then
+  \let proof: a.apply (Gram.Of[A := a,factor := factor].inverse.apply w) = w := OfFactor[factor := factor].rightInverse w \then
+  \return Logic.existsIntro[E.Vector,{ v: E.Vector \where a.apply v = w }] (Gram.Of[A := a,factor := factor].inverse.apply w) proof
+};

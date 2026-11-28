@@ -1,0 +1,11 @@
+\import OrdinaryMap.Differential[x := ordinaryBase x,c := c,contains := contains] \as Differential;
+\definition witness[v: BoundaryWitness]: \parent.\parent.OrdinaryAt[x := ordinaryBase x].Exists := \block {
+  \let tangent: OrdinaryTangent.Vector (ordinaryBase x) := Differential.vector v \then
+  \let formula: \parent.\parent.OrdinaryAt[x := ordinaryBase x].value tangent = \parent.\parent.FreeAt[y := map.apply (ordinaryBase x)].decode (CornerDerivative.value.apply v) Half.normal :=
+    trans!{{R.Real}} _ _ _ (congr!{{Model.Point} {R.Real}} (\fun (w: Model.Point) => w Half.normal) _ _ (Differential.coordinates tangent))
+      (congr!{{Domain.Vector (ordinaryBase x)} {R.Real}}
+        (\fun (w: Domain.Vector (ordinaryBase x)) => \parent.\parent.FreeAt[y := map.apply (ordinaryBase x)].decode (CornerDerivative.value.apply w) Half.normal)
+        _ _ (Differential.inverseOld v)) \then
+  \return Logic.existsIntro[OrdinaryTangent.Vector (ordinaryBase x),{ w: OrdinaryTangent.Vector (ordinaryBase x) \where \parent.\parent.OrdinaryAt[x := ordinaryBase x].value w = R.one }]
+    tangent (trans!{{R.Real}} _ _ _ formula (\bysub(Domain.Vector (ordinaryBase x),BoundaryWitness,v)))
+};

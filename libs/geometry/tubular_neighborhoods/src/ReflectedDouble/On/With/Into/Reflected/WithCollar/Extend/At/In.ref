@@ -1,0 +1,37 @@
+\definition data: Logic.And[\In[BaseCharts.Chart] BoundaryModel.manifold.atlas.charts c,BaseCharts.Contains c b] :=
+  \bysub(BaseCharts.Chart,Chart,c);
+\definition left: Parameters.LeftChart := \into[BaseCharts.Chart](c,Parameters.LeftChart) \by { data.left };
+\definition right: Parameters.RightChart := \into[TimeCharts.Chart](Time.chart,Parameters.RightChart) \by { Time.chartMember };
+\definition pair: Parameters.Index := Pair.pair Parameters.LeftChart Parameters.RightChart left right;
+\definition chart: Charts.Chart := Parameters.chart pair;
+\definition member: \In[Charts.Chart] Parameters.manifold.atlas.charts chart :=
+  Logic.existsIntro[Parameters.Index,{ i: Parameters.Index \where chart = Parameters.chart i }] pair (\refl(chart));
+\definition contains: Charts.Contains chart (lateral b) :=
+  Logic.And[_, _]::# data.right (\refl(Time.zero));
+\import SmoothMaps.At[function := SmoothMaps.apply map,left := chart,right := Free.chart,x := lateral b,contains := contains] \as Local;
+\definition Extension: \Set := Local.Extension;
+\definition exists: \exists Extension :=
+  map.smooth chart Free.chart (lateral b) contains member (\refl(Free.chart)) (\refl(map.apply (lateral b)));
+\definition centerHeight: Local.source index = R.zero :=
+  Indices.Tuples[A := R.Real].atRight
+    (BaseCharts.coordinate left (\into[BoundaryModel.manifold.Point](b,left.domain) \by { data.right })) Time.zero One.index;
+\import calculus.Real[].Multivariable[n := dimension].Space[].Def[] \as Coordinate;
+\import calculus.Real[].Multivariable[n := dimension].Space[].Prop[] \as CoordinateLaws;
+\structure Window[ext: Extension]: \Set := {
+  radius: R.Real,positive: O.Lt R.zero radius,
+  within: \forall (t: R.Real) -> O.Lt (R.Distance[].distance t R.zero) radius ->
+    \In[SourceModel.Point] ext.neighborhood.points (Coordinate.replace Local.source index t),
+};
+\definition window[ext: Extension]: \exists Window[ext] := \block {
+  \takefrom r: \Cast[R.Real] ({ r: R.Real \where SourceOpen.BallInside[ext.neighborhood.points,Local.source,r] }) \by
+    ext.neighborhood.open Local.source ext.contains \then
+  \let bounds: SourceOpen.BallInside[ext.neighborhood.points,Local.source,r] :=
+    \bysub(R.Real,{ r: R.Real \where SourceOpen.BallInside[ext.neighborhood.points,Local.source,r] },r) \then
+  \return \exact(Window[ext] {
+    radius := r,positive := bounds.positive,
+    within := \fun (t: R.Real)(near: _) => bounds.included (Coordinate.replace Local.source index t)
+      (O.ltReplaceLeft _ _ _ (trans!{{R.Real}} _ _ _
+        (congr!{{R.Real} {R.Real}} (R.Distance[].distance t) _ _ (sym!{{R.Real}} _ _ centerHeight))
+        (sym!{{R.Real}} _ _ (CoordinateLaws.replaceDistance Local.source index t))) near),
+  },Window[ext])
+};

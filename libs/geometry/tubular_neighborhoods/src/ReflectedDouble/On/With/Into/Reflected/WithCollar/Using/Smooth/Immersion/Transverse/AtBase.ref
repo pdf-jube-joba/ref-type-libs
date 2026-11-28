@@ -1,0 +1,47 @@
+\import SourceTangent.At[x := x] \as Source;
+\import ChartCoordinates.Differential[x := f.apply x] \as Raw;
+\import boundary_manifolds.Tangent[n := Half.dimension].On[M := Half.manifold].At[x := f.apply x] \as HalfTarget;
+\import HalfTarget.Coordinate[chart := Raw.input] \as HalfDecode;
+\import boundary_manifolds.Neat[n := dimension,m := Half.dimension].Between[M := B,N := Half.manifold].At[f := f,x := x] \as Neat;
+\import boundary_manifolds.Differential[n := dimension,m := Half.dimension].Between[M := B,N := Half.manifold].At[f := f,x := x] \as Embedded;
+\import manifold_gluing.SmoothChainRule[n := dimension,m := Half.dimension,l := Half.dimension].Between[M := B,N := Half.manifold,P := Values.ambient]
+  .Of[f := f,g := Standard.map] \as Composition;
+\definition active: Model.Active Raw.input.constraints (HalfTarget.coordinate Raw.input) Half.normal :=
+  Logic.And[_, _]::# Standard.selected zero;
+\module In(chart: Source.Chart);
+\definition positiveNormal: \parent.SideAt[h := Positive.map,x := x].Exists := \block {
+  \takefrom chart: Source.Chart \by Source.chartExists \then
+  \return In[chart := chart].exists
+};
+\definition leftNormal: \parent.SideAt[h := LeftFactor.map,x := x].Exists :=
+  \idelim Positive.map = LeftFactor.map \with h: SideMaps.Map => \parent.SideAt[h := h,x := x].Exists \by {
+    base: positiveNormal,equality: Equal.ext Positive.map LeftFactor.map (\fun (t: B.Point) => sym!{{Free.Point}} _ _ (leftValue t))
+  };
+\import boundary_manifolds.Differential[n := dimension,m := dimension].Between[M := B,N := Gluing.manifold double].At[f := double.left,x := x] \as LeftDerivative;
+\import boundary_manifolds.Differential[n := dimension,m := Half.dimension].Between[M := Gluing.manifold double,N := Values.ambient]
+  .At[f := map,x := ordinaryBase x] \as CornerDerivative;
+\import manifold_gluing.SmoothChainRule[n := dimension,m := dimension,l := Half.dimension].Between[M := B,N := Gluing.manifold double,P := Values.ambient]
+  .Of[f := double.left,g := map] \as FullChain;
+\definition BoundaryWitness: \Set := \Cast[Domain.Vector (ordinaryBase x)] ({ v: Domain.Vector (ordinaryBase x) \where
+  \parent.FreeAt[y := map.apply (ordinaryBase x)].decode (CornerDerivative.value.apply v) Half.normal = R.one });
+\definition cornerNormal: \exists BoundaryWitness := \block {
+  \takefrom v: \Cast[Source.Vector] ({ v: Source.Vector \where \parent.SideAt[h := LeftFactor.map,x := x].value v = R.one }) \by leftNormal \then
+  \let value: \parent.SideAt[h := LeftFactor.map,x := x].value v = R.one :=
+    \bysub(Source.Vector,{ v: Source.Vector \where \parent.SideAt[h := LeftFactor.map,x := x].value v = R.one },v) \then
+  \let correct: \parent.FreeAt[y := map.apply (ordinaryBase x)].decode (CornerDerivative.value.apply (LeftDerivative.value.apply v)) Half.normal = R.one :=
+    trans!{{R.Real}} _ _ _
+      (sym!{{R.Real}} _ _ (congr!{{FreeTangent.Vector (map.apply (ordinaryBase x))} {R.Real}}
+        (\fun (w: FreeTangent.Vector (map.apply (ordinaryBase x))) => \parent.FreeAt[y := map.apply (ordinaryBase x)].decode w Half.normal)
+        _ _ (FullChain.At[x := x].pointwise v))) value \then
+  \return \exact(\into[Domain.Vector (ordinaryBase x)](LeftDerivative.value.apply v,BoundaryWitness) \by { correct },BoundaryWitness)
+};
+\module Convert(c: OrdinaryInterior.Chart,contains: Charts.Contains c (ordinaryBase x));
+\definition exists: \parent.OrdinaryAt[x := ordinaryBase x].Exists := \block {
+  \takefrom c: \Cast[Charts.Chart] ({ c: Charts.Chart \where Logic.And[\In[Charts.Chart] (Gluing.manifold double).atlas.charts c,Charts.Contains c (ordinaryBase x)] })
+    \by (Gluing.manifold double).atlas.covers (ordinaryBase x) \then
+  \let member: Logic.And[\In[Charts.Chart] (Gluing.manifold double).atlas.charts c,Charts.Contains c (ordinaryBase x)] :=
+    \bysub(Charts.Chart,{ c: Charts.Chart \where Logic.And[\In[Charts.Chart] (Gluing.manifold double).atlas.charts c,Charts.Contains c (ordinaryBase x)] },c) \then
+  \let chart: OrdinaryInterior.Chart := \into[Charts.Chart](c,(Gluing.manifold double).atlas.charts) \by { member.left } \then
+  \takefrom v: BoundaryWitness \by cornerNormal \then
+  \return Convert[c := chart,contains := member.right].witness v
+};

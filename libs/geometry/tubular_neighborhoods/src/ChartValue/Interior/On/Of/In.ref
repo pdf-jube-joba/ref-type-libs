@@ -1,0 +1,8 @@
+\import Interior.In[c := c] \as Restricted;
+\import SmoothMaps.Coordinates[f := continuous,left := Restricted.chart,right := Euclidean.standard] \as Coordinates;
+\import boundary_manifolds.Dimension[n := n].Chart[M := Free.Point,space := Free.topology] \as FreeCharts;
+\import calculus.Maps[n := r,m := n] \as Calculus;
+\definition scalar[i: Fin.Fin n][u: SourceOpen.Carrier Coordinates.domain]: R.Real := Coordinates.apply u i;
+\module At(u: SourceOpen.Carrier Coordinates.domain,i: Fin.Fin n);
+\definition smooth: Coordinates.Smooth := \fun (i: Fin.Fin n) =>
+  SourceOpen.LocalSmooth[U := Coordinates.domain,f := scalar i].smooth (\fun (u: SourceOpen.Carrier Coordinates.domain) => At[u := u,i := i].local);

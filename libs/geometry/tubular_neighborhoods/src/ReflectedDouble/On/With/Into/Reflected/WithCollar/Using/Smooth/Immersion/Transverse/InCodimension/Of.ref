@@ -1,0 +1,24 @@
+\import \parent.\parent.Ambient[d := NormalBundle.ambientDimension] \as Domain;
+\definition result: Domain.Certified := certified NormalBundle.ambientDimension size;
+\definition laws: Domain.Laws[result] := Domain.laws result;
+\import \root.Euclidean[n := dimension,k := k] \as Tubular;
+\import Tubular.On[M := ordinary].Of[e := result] \as Embedded;
+\import Embedded.HalfSpace[p := p,dimension := size,B := B] \as HalfTube;
+\import Embedded.Neat[j := HalfTube.j] \as Height;
+\definition extension: HalfTube.Extension[f] := HalfTube.Extension[f] {
+  base := ordinaryBase,agrees := laws.agrees size,covers := laws.covers size,
+  transverse := \fun (x: ordinary.Point)(zero: _) => \block {
+    \takefrom v: \Cast[OrdinaryTangent.Vector x] ({ v: OrdinaryTangent.Vector x \where
+      Domain.At[h := result,x := x].coordinates v HalfTube.j = R.one }) \by laws.transverse size x zero \then
+    \let one: Domain.At[h := result,x := x].coordinates v HalfTube.j = R.one :=
+      \bysub(OrdinaryTangent.Vector x,{ v: OrdinaryTangent.Vector x \where Domain.At[h := result,x := x].coordinates v HalfTube.j = R.one },v) \then
+    \return Logic.existsIntro[OrdinaryTangent.Vector x,{ w: OrdinaryTangent.Vector x \where
+      Logic.Not (Domain.At[h := result,x := x].coordinates w HalfTube.j = R.zero) }] v
+      (\fun (vanishes: _) => Arithmetic.zeroNotOne
+        (trans!{{R.Real}} _ _ _ (sym!{{R.Real}} _ _ vanishes) one))
+  },
+};
+\import HalfTube.Of[f := f,extension := extension] \as Extended;
+\import Height.Crossing[transverse := extension.transverse] \as Regular;
+\definition tube: \exists Regular.Result := Extended.exists ordinaryCompact;
+\module Tube(t: Regular.Result);

@@ -1,0 +1,12 @@
+\definition Chart: \Set := \Cast[BaseCharts.Chart] ({ c: BaseCharts.Chart \where Logic.And[
+  \In[BaseCharts.Chart] BoundaryModel.manifold.atlas.charts c,BaseCharts.Contains c b] });
+\module In(c: Chart);
+\structure Patch: \Set := {
+  chart: Chart,
+  extension: In[c := chart].Extension,
+};
+\definition exists: \exists Patch := \block {
+  \takefrom chart: Chart \by BoundaryModel.manifold.atlas.covers b \then
+  \takefrom extension: In[c := chart].Extension \by In[c := chart].exists \then
+  \return \exact(Patch { chart := chart,extension := extension },Patch)
+};

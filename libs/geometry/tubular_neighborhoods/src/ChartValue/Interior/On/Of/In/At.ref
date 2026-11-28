@@ -1,0 +1,10 @@
+\definition point: Restricted.Domain := SourceCharts.point Restricted.chart (Coordinates.leftCoordinate u);
+\definition contains: OldCharts.Contains c point := \bysub(source.Point,Restricted.domain,point);
+\import CornerMaps.At[function := CornerMaps.apply f,left := c,right := Free.chart,x := point,contains := contains] \as Corner;
+\import SourceOpen.LocalSmooth[U := Coordinates.domain,f := scalar i] \as Local;
+\module Of(extension: Corner.Extension);
+\definition local: \exists \Cast[Local.Patch] (Local.Patches u) := \block {
+  \takefrom extension: Corner.Extension \by f.smooth c Free.chart point contains (\bysub(OldCharts.Chart,M.atlas.charts,c))
+    (\refl(Free.chart)) (\refl(CornerMaps.apply f point)) \then
+  \return Of[extension := extension].local
+};

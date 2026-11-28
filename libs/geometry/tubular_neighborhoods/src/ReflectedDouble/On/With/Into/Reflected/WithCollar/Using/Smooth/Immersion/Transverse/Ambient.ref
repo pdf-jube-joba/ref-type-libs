@@ -1,0 +1,27 @@
+\import std.Data[].FinSet[] \as Fin;
+\import Nat.Basic[].Prop[] \as Bounds;
+\import manifolds.Dimension[n := d].Examples[].Euclidean[] \as EuclideanTarget;
+\import linear_algebra.Euclidean[n := d] \as E;
+\import manifolds.Immersion[n := dimension,m := d].Between[M := ordinary,N := EuclideanTarget.smoothManifold] \as Embeddings;
+\definition input[size: Half.dimension = d][i: Fin.Fin d]: Fin.Fin Half.dimension :=
+  \into[Nat.Nat^](i,Fin.Fin Half.dimension) \by {
+    \idelim d = Half.dimension \with a: Nat.Nat^ => Bounds.Lt i a \by {
+      base: Fin.bound d i,equality: sym!{{Nat.Nat^}} _ _ size
+    }
+  };
+\definition normal[size: Half.dimension = d]: Fin.Fin d :=
+  \into[Nat.Nat^](Half.normal,Fin.Fin d) \by {
+    \idelim Half.dimension = d \with a: Nat.Nat^ => Bounds.Lt Half.normal a \by {
+      base: Fin.bound Half.dimension Half.normal,equality: size
+    }
+  };
+\module At(h: Embeddings.Embedding,x: ordinary.Point);
+\definition Embedding: \Set := Embeddings.Embedding;
+\structure Laws[h: Embedding]: \Prop := {
+  agrees: \forall (size: Half.dimension = d)(x: B.Point) -> h.apply (ordinaryBase x) = (\fun (i: Fin.Fin d) => Half.value (f.apply x) (input size i)),
+  covers: \forall (size: Half.dimension = d)(x: ordinary.Point) -> O.Le R.zero (h.apply x (normal size)) -> \exists (b: B.Point \where ordinaryBase b = x),
+  transverse: \forall (size: Half.dimension = d)(x: ordinary.Point) -> h.apply x (normal size) = R.zero ->
+    \exists (v: OrdinaryTangent.Vector x \where At[h := h,x := x].coordinates v (normal size) = R.one),
+};
+\definition Certified: \Set := \Cast[Embedding] ({ h: Embedding \where Laws[h] });
+\definition laws[h: Certified]: Laws[h] := \bysub(Embedding,{ h: Embedding \where Laws[h] },h);

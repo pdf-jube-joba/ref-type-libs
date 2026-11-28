@@ -1,0 +1,7 @@
+\import boundary_manifolds.Dimension[n := n] \as Models;
+\import boundary_manifolds.Model[n := n] \as Model;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\import Models.Quadrant[C := Model.unconstrained,U := Open.whole] \as Free;
+\definition ambient: Models.Manifold := Free.manifold;
+\module On(M: Models.Manifold);
+\module Interior(r: std.Data[].Nat[].Nat^);

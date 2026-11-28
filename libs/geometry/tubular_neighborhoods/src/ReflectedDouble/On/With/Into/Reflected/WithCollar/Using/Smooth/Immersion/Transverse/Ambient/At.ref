@@ -1,0 +1,10 @@
+\import manifolds.Tangent[n := d].On[M := EuclideanTarget.smoothManifold].At[x := h.apply x] \as Target;
+\import manifolds.Dimension[n := d].Chart[M := E.Vector,space := EuclideanTarget.smoothManifold.space] \as Charts;
+\import manifolds.Dimension[n := d].Atlas[M := E.Vector,space := EuclideanTarget.smoothManifold.space] \as Atlas;
+\definition chart: Target.Chart := \into[Charts.Chart](EuclideanTarget.standard,Target.Chart) \by {
+  Target.ChartLaws[EuclideanTarget.standard] {
+    member := Atlas.includedInSaturation EuclideanTarget.atlas EuclideanTarget.standard (\refl(EuclideanTarget.standard)),contains := \refl(h.apply x)
+  }
+};
+\import manifolds.Differential[n := dimension,m := d].Between[M := ordinary,N := EuclideanTarget.smoothManifold].At[f := h,x := x] \as Derivative;
+\definition coordinates[v: OrdinaryTangent.Vector x]: E.Vector := Target.Coordinate[chart := chart].decode (Derivative.value.apply v);

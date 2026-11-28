@@ -1,0 +1,14 @@
+\import manifold_gluing.ChartModel[n := n].On[M := M].At[c := chart,member := member,covers := covers] \as Local;
+\import Models.Quadrant[C := chart.constraints,U := chart.image] \as Quadrant;
+\import calculus.Maps[n := n,m := n] \as Calculus;
+\import calculus.Identity[n := n].Between[U := chart.image,V := Open.whole] \as Identity;
+\definition included: Open.Included chart.image Open.whole := \fun (x: Model.Point)(inside: _) => \refl(x);
+\definition identity: Calculus.Map chart.image Open.whole := Identity.map included;
+\import boundary_manifolds.QuadrantMap[n := n,m := n].Of[C := chart.constraints,D := Model.unconstrained,
+  U := chart.image,V := Open.whole,f := identity,preserves := \fun (x: Quadrant.Point) => Model.unconstrainedNonnegative x] \as Include;
+\definition map: boundary_manifolds.SmoothMap[n := n,m := n].Between[M := M,N := ambient].Map :=
+  boundary_manifolds.MapComposition[n := n,m := n,l := n].Between[M := M,N := Quadrant.manifold,P := ambient]
+    .Of[f := Local.forwardMap,g := Include.map].map;
+\module Differential(x: M.Point);
+\definition immersion: boundary_manifolds.Immersion[n := n,m := n].Between[M := M,N := ambient].IsImmersion map :=
+  \fun (x: M.Point)(v,w: boundary_manifolds.Tangent[n := n].On[M := M].Vector x)(same: _) => Differential[x := x].injective v w same;

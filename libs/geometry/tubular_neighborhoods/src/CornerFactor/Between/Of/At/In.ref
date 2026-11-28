@@ -1,0 +1,21 @@
+\import Domain.Coordinate[chart := a] \as Source;
+\import Middle.Coordinate[chart := b] \as Target;
+\import Differential.InCharts[left := a,right := b] \as Matrix;
+\import \root.SquareLinear[n := n].Of[a := Matrix.jacobian] \as Square;
+\definition coordinates[v: E.Vector]: Target.decode (Differential.value.apply (Source.encode v)) = Matrix.jacobian.apply v :=
+  trans!{{E.Vector}} _ _ _ (Differential.coordinates a b (Source.encode v))
+    (congr!{{E.Vector} {E.Vector}} Matrix.jacobian.apply _ _ (Source.decodeEncode v));
+\definition injective[first: Chain.FirstInjective][u,v: E.Vector][same: Matrix.jacobian.apply u = Matrix.jacobian.apply v]: u = v :=
+  trans!{{E.Vector}} _ _ _ (sym!{{E.Vector}} _ _ (Source.decodeEncode u))
+    (trans!{{E.Vector}} _ _ _
+      (congr!{{Domain.Vector} {E.Vector}} Source.decode _ _
+        (first (Source.encode u) (Source.encode v)
+          (Target.injective _ _ (trans!{{E.Vector}} _ _ _ (coordinates u)
+            (trans!{{E.Vector}} _ _ _ same (sym!{{E.Vector}} _ _ (coordinates v)))))))
+    (Source.decodeEncode v));
+\definition onto[first: Chain.FirstInjective][w: Middle.Vector]: \exists (v: Domain.Vector \where Differential.value.apply v = w) := \block {
+  \takefrom v: \Cast[E.Vector] ({ v: E.Vector \where Matrix.jacobian.apply v = Target.decode w }) \by Square.onto (injective first) (Target.decode w) \then
+  \return Logic.existsIntro[Domain.Vector,{ z: Domain.Vector \where Differential.value.apply z = w }] (Source.encode v)
+    (Target.injective _ _ (trans!{{E.Vector}} _ _ _ (coordinates v)
+      (\bysub(E.Vector,{ z: E.Vector \where Matrix.jacobian.apply z = Target.decode w },v))))
+};
