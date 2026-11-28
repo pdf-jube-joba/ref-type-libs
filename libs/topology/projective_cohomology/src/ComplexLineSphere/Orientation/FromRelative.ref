@@ -1,0 +1,44 @@
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Cochains;
+\definition degree: I.Int^ := I.Int^::ofNat Degrees.two;
+\import Global.With[coefficients := coefficients] \as Relative;
+\import Global.Reduced[].With[coefficients := coefficients] \as ReducedPair;
+\import Cochains.At[C := Relative.complex, z := degree] \as Source;
+\import singular_cohomology.Chains[A := Sphere, source := sphereTopology].Reduced[] \as ReducedChains;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing].Integer[P := ReducedChains.complex, N := coefficients] \as ReducedAbsolute;
+\import Cochains.Map[C := Relative.complex, D := ReducedAbsolute.complex].At[k := degree] \as ReducedPull;
+\import Ordinary.Reduced[].Positive[n := Degrees.one] \as Compare;
+\import singular_cap.CochainPair[A := Sphere, source := sphereTopology, subset := Geometry.right, R := I.Int^,
+  ring := Integers.commutativeRing].Comparison[n := Degrees.two].Cohomology[] \as Absolute;
+\import singular_cohomology.Chains[A := Sphere, source := sphereTopology] \as Chains;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring].ZeroExtension[C := Chains.complex] \as Extended;
+\import Cochains.At[C := ReducedAbsolute.complex, z := degree] \as ReducedH;
+\import chain_complexes.Cochain[].Over[R := I.Int^, ring := Integers.ring].At[C := Ordinary.complex, k := Degrees.two] \as Natural;
+\definition fromReduced[h: Source.Closed]: Natural.CycleCarrier := Compare.toNatural ((ReducedPull.cyclesMap ReducedPair.pullback).apply h);
+\definition fromPair[h: Source.Closed]: Natural.CycleCarrier := Absolute.cycle h;
+\definition fromReducedValue[h: Source.Closed][x: Chains.Carrier Degrees.two]: (fromReduced h).apply x = h.apply (Global.class degree (Extended.Positive[n := Degrees.two].intro x)) :=
+  \refl(h.apply (Global.class degree (Extended.Positive[n := Degrees.two].intro x)));
+\definition fromPairValue[h: Source.Closed][x: Chains.Carrier Degrees.two]: (fromPair h).apply x = h.apply (Global.class degree (Extended.Positive[n := Degrees.two].intro x)) :=
+  \refl(h.apply (Global.class degree (Extended.Positive[n := Degrees.two].intro x)));
+\import Modules.Hom[V := Chains.Carrier Degrees.two, W := I.Int^, source := Chains.space Degrees.two, target := coefficients.space] \as Naturals;
+\definition raw[h: Source.Closed]: fromReduced h = fromPair h :=
+  Naturals.ext (fromReduced h) (fromPair h) (\fun (x: Chains.Carrier Degrees.two) =>
+    trans!{I.Int^} _ _ _ (fromReducedValue h x) (sym!{I.Int^} _ _ (fromPairValue h x)));
+\definition onClass[h: Source.Closed]: Compare.isomorphism.forward.apply
+  ((Forget.isomorphism SphereCover.rightContraction).forward.apply (Source.classOf h)) = Absolute.map.apply (Source.classOf h) :=
+  trans!{Natural.Cohomology} _ _ _
+    (congr!{ReducedH.Cohomology Natural.Cohomology} Compare.isomorphism.forward.apply _ _ (Forget.onForward SphereCover.rightContraction (Source.classOf h)))
+    (trans!{Natural.Cohomology} _ _ _
+      (congr!{ReducedH.Cohomology Natural.Cohomology} Compare.isomorphism.forward.apply _ _ (ReducedPull.onClass ReducedPair.pullback h))
+      (trans!{Natural.Cohomology} _ _ _
+        (Compare.onIntegerClass ((ReducedPull.cyclesMap ReducedPair.pullback).apply h))
+        (trans!{Natural.Cohomology} _ _ _
+          (Natural.equalClass (fromReduced h) (fromPair h) (raw h))
+          (sym!{Natural.Cohomology} _ _ (Absolute.onClass h)))));
+\definition law: \forall (u: Source.Cohomology) -> Compare.isomorphism.forward.apply
+  ((Forget.isomorphism SphereCover.rightContraction).forward.apply u) = Absolute.map.apply u :=
+  Source.classInduction (\fun (u: Source.Cohomology) => Compare.isomorphism.forward.apply
+    ((Forget.isomorphism SphereCover.rightContraction).forward.apply u) = Absolute.map.apply u) onClass;
+\definition forget[u: Source.Cohomology]: Ordinary.cohomology Degrees.two := Absolute.map.apply u;
+\definition standardImage: Absolute.map.apply globalClass = standard :=
+  trans!{{Ordinary.cohomology Degrees.two}} _ _ _ (sym!{{Ordinary.cohomology Degrees.two}} _ _ (law globalClass))
+    (congr!{{ReducedH.Cohomology} {Ordinary.cohomology Degrees.two}} Compare.isomorphism.forward.apply _ _ fromGlobal);
