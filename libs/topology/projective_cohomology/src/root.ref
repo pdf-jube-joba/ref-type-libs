@@ -11,3 +11,5 @@
   topological: hermitian_frames.Hermitian[].ScalarTopology[K, field, scalar],
   n: std.Data[].Nat[].Nat^);
 \module ZeroDegree(X: \Set, space: topology.Topology[Carrier := X].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+\module RealPlane;
+\module ComplexLineSphere;

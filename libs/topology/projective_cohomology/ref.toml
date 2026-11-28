@@ -26,3 +26,7 @@ cohomology_models = { path = "../examples/cohomology" }
 module_theory = { path = "../../algebra/module_theory" }
 resolutions = { path = "../../algebra/homological/resolutions" }
 double_complexes = { path = "../../algebra/homological/double_complexes" }
+dedekind_reals = { path = "../../real/dedekind" }
+topological_constructions = { path = "../constructions" }
+cohomology_examples = { path = "../examples/finite_models" }
+bott_product = { path = "../bott_product" }

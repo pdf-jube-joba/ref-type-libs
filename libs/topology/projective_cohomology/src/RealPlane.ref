@@ -1,0 +1,107 @@
+\import std.Data[].Nat[] \as N;
+\import \root.Degrees[] \as Degrees;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Logic.either;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.eq_reason_in;
+\import algebraic_topology.Spheres[] \as Spheres;
+\import Spheres.Antipodal[n := Degrees.two] \as Antipodal;
+\import cohomology_examples.ProjectivePlane[].Geometry[] \as Plane;
+\import \root.Real[dimension := Degrees.two] \as Projective;
+\import Projective.CanonicalLine[].Hopf[] \as Hopf;
+\import Hopf.Standard[] \as Standard;
+\import grassmannians.ProjectiveReal[n := N.Nat^::succ Degrees.two] \as ModelSpace;
+\import grassmannians.Real[n := N.Nat^::succ Degrees.two, k := Degrees.one].Model[] \as Model;
+\import algebraic_topology.Euclidean[].Dimension[n := N.Nat^::succ Degrees.two] \as Coordinates;
+\import real.Analysis[] \as R;
+\import dedekind_reals.DedekindReal[] \as Numbers;
+\import Numbers.Order[] \as Order;
+\import Numbers.Arithmetic[].Prop[] \as Arithmetic;
+\import hermitian_frames.Hermitian[] \as H;
+\import H.Over[K := R.Real, field := R.Algebra[].field, scalar := H.Real[].scalar, topological := H.Real[].topological].At[n := N.Nat^::succ Degrees.two] \as Matrices;
+\import \root.UnitProjection[K := R.Real, field := R.Algebra[].field, scalar := H.Real[].scalar, topological := H.Real[].topological, n := N.Nat^::succ Degrees.two] \as Projection;
+\import linear_algebra.Hermitian[].Over[K := R.Real, field := R.Algebra[].field, scalar := H.Real[].scalar].Finite[n := N.Nat^::succ Degrees.two] \as E;
+\definition project[x: Plane.Sphere]: Projective.Space := Hopf.projection (Standard.fromStandard x);
+\definition continuous: topology.Continuity[A := Plane.Sphere, B := Projective.Space].Continuous (Spheres.topology Degrees.two) Projective.topology project :=
+  topology.Composition[A := Plane.Sphere, B := Hopf.Sphere, C := Projective.Space].composeContinuous
+    (Spheres.topology Degrees.two) Hopf.sphereTopology Projective.topology Standard.fromStandard Hopf.projection
+    (topology.Homeomorphism[A := Plane.Sphere, B := Hopf.Sphere].laws (Spheres.topology Degrees.two) Hopf.sphereTopology Standard.homeomorphism).forwardContinuous
+    Hopf.projectionContinuous;
+\definition surjective: \forall (p: Projective.Space) -> \exists (x: Plane.Sphere \where project x = p) := \block {
+  \fun (p: Projective.Space) \then
+  \takefrom v: \Cast[Hopf.Sphere] ({ x: Hopf.Sphere \where Hopf.projection x = p }) \by Hopf.surjective p \then
+  \return Logic.existsIntro[Plane.Sphere, { x: Plane.Sphere \where project x = p }] (Standard.toStandard v)
+    (\bysub(Hopf.Sphere, { x: Hopf.Sphere \where Hopf.projection x = p }, v))
+};
+\definition fixesAntipodal[x: Plane.Sphere]: (Model.projection (project x)).map.apply (Antipodal.apply x) = Antipodal.apply x :=
+  trans!{Coordinates.Coordinate} _ _ _
+    ((Model.projection (project x)).map.preservesScale (R.neg R.one) x)
+    (congr!{Coordinates.Coordinate Coordinates.Coordinate} (Coordinates.Contraction[].scale (R.neg R.one)) _ _
+      (Hopf.fixed (Standard.fromStandard x)));
+\definition antipodal[x: Plane.Sphere]: project (Antipodal.apply x) = project x :=
+  Model.ext _ _ (sym!{Matrices.Map} _ _
+    (Projection.At[v := Antipodal.apply x, unit := Hopf.unit (Standard.fromStandard (Antipodal.apply x))]
+      .Recover[P := Model.projection (project x), hasRank := Model.rank (project x), fixes := fixesAntipodal x].law));
+\definition sign[a: R.Real]: R.mul a a = R.one -> Logic.Or[a = R.one, a = R.neg R.one] :=
+  \fun (squared: R.mul a a = R.one) => either!{{(Order.leTotal R.zero a)} {Logic.Or[a = R.one, a = R.neg R.one]}
+    {\fun (nonnegative: _) => Logic.Or[_, _]::left
+      (R.SquareRoot[].squaresInjective a R.one nonnegative Arithmetic.oneNonnegative
+        (trans!{R.Real} _ _ _ squared (sym!{R.Real} _ _ (R.Algebra[].mulOneRight R.one))))}
+    {\fun (nonpositive: _) => Logic.Or[_, _]::right (trans!{R.Real} _ _ _
+      (sym!{R.Real} _ _ (Arithmetic.negInvolutive a))
+      (congr!{R.Real R.Real} R.neg _ _
+        (R.SquareRoot[].squaresInjective (R.neg a) R.one
+          (Numbers.leReplaceLeft (R.neg R.zero) R.zero (R.neg a) Arithmetic.negZero (Arithmetic.negAntitone a R.zero nonpositive))
+          Arithmetic.oneNonnegative
+          (trans!{R.Real} _ _ _ (Arithmetic.fieldMulNegBoth a a)
+            (trans!{R.Real} _ _ _ squared (sym!{R.Real} _ _ (R.Algebra[].mulOneRight R.one)))))))}
+  };
+\module Fiber(x, y: Plane.Sphere, same: project x = project y) {
+  \definition coefficient: R.Real := E.dot y x;
+  \definition expand: x = Coordinates.Contraction[].scale coefficient y := eq_reason_in!{Coordinates.Coordinate { x }
+    "=" { (Model.projection (project x)).map.apply x } "by" {
+      sym!{Coordinates.Coordinate} ((Model.projection (project x)).map.apply x) x (Hopf.fixed (Standard.fromStandard x))
+    }
+    "=" { (Model.projection (project y)).map.apply x } "by" {
+      congr!{Projective.Space Coordinates.Coordinate} (\fun (p: Projective.Space) => (Model.projection p).map.apply x) (project x) (project y) same
+    }
+    "=" { Coordinates.Contraction[].scale coefficient y } "by" { \refl(Coordinates.Contraction[].scale coefficient y) }
+  };
+  \definition squared: R.mul coefficient coefficient = R.one := eq_reason_in!{R.Real _
+    "=" _ "by" { sym!{R.Real} _ _ (R.Algebra[].mulOneRight (R.mul coefficient coefficient)) }
+    "=" _ "by" { congr!{R.Real R.Real} (R.mul (R.mul coefficient coefficient)) _ _
+      (sym!{R.Real} _ _ (\bysub(Coordinates.Coordinate, Coordinates.Boundary, y))) }
+    "=" _ "by" { sym!{R.Real} _ _ (Coordinates.Contraction[].normScale coefficient y) }
+    "=" _ "by" { congr!{Coordinates.Coordinate R.Real} Coordinates.normSquared _ _ (sym!{Coordinates.Coordinate} _ _ expand) }
+    "=" _ "by" { \bysub(Coordinates.Coordinate, Coordinates.Boundary, x) }
+  };
+  \definition relation: Logic.Or[x = y, x = Antipodal.apply y] :=
+    either!{{(sign coefficient squared)} {Logic.Or[x = y, x = Antipodal.apply y]}
+      {\fun (positive: coefficient = R.one) => Logic.Or[_, _]::left
+        (trans!{Coordinates.Coordinate} _ _ _ expand
+          (trans!{Coordinates.Coordinate} _ _ _
+            (congr!{R.Real Coordinates.Coordinate} (\fun (a: R.Real) => Coordinates.Contraction[].scale a y) _ _ positive)
+            (E.space.scalarOne y)))}
+      {\fun (negative: coefficient = R.neg R.one) => Logic.Or[_, _]::right
+        (trans!{Coordinates.Coordinate} _ _ _ expand
+          (congr!{R.Real Coordinates.Coordinate} (\fun (a: R.Real) => Coordinates.Contraction[].scale a y) _ _ negative))}
+    };
+}
+\import cohomology_examples.Involution[A := Plane.Sphere, source := Spheres.topology Degrees.two, flip := Antipodal.apply, square := Antipodal.involution] \as Involution;
+\import topological_constructions.RelationQuotient[A := Plane.Sphere, relation := Involution.Equivalent].Classification[B := Projective.Space, q := project] \as Classification;
+\definition respects: Classification.Respects :=
+  \fun (x, y: Plane.Sphere)(related: Involution.Equivalent x y) =>
+    either!{related {project x = project y}
+      {\fun (same: x = y) => congr!{Plane.Sphere Projective.Space} project _ _ same}
+      {\fun (same: x = Antipodal.apply y) => trans!{Projective.Space} _ _ _
+        (congr!{Plane.Sphere Projective.Space} project _ _ same) (antipodal y)}
+    };
+\import topological_constructions.CompactQuotient[A := Plane.Sphere, B := Projective.Space,
+  source := Spheres.topology Degrees.two, target := Projective.topology, q := project] \as Compact;
+\definition homeomorphism: topology.Homeomorphism[A := Plane.Carrier, B := Projective.Space].Homeomorphism[Plane.topology, Projective.topology] :=
+  Classification.homeomorphism (Spheres.topology Degrees.two) Projective.topology Involution.laws respects
+    (\fun (x, y: Plane.Sphere)(same: project x = project y) => Fiber[x := x, y := y, same := same].relation)
+    (Compact.quotientMap Coordinates.Compactness[].sphere ModelSpace.hausdorff continuous surjective);
