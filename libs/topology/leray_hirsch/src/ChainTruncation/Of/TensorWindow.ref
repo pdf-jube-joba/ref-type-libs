@@ -1,0 +1,53 @@
+\import double_complexes.DoubleComplex[].Over[R := I.Int^, ring := Integers.ring] \as Double;
+\import Double.Tensor[C := complex, D := D] \as Truncated;
+\import Double.Tensor[C := C, D := D] \as Entire;
+\import Double.Total[C := Truncated.complex] \as Source;
+\import Double.Total[C := Entire.complex] \as Target;
+\import Double.TensorMapping[C := complex, D := C, E := D, F := D]
+  .With[f := inclusion, g := Chains.End[C := D].identity] \as Inclusion;
+\definition map: _ := Inclusion.total;
+\import N.Basic[].Prop[] \as Arithmetic;
+\definition Kept[n: N.Nat^]: \Prop := \forall (p: N.Nat^) -> Arithmetic.Le p n -> kept p;
+\module At(n: N.Nat^, support: Kept n) {
+  \import Double.Coordinates[C := Truncated.complex].Degree[n := n] \as SC;
+  \import Double.Coordinates[C := Truncated.complex].Product[n := n] \as Assembly;
+  \import Double.Coordinates[C := Entire.complex].Degree[n := n] \as TC;
+  \import Double.Map[C := Truncated.complex, D := Entire.complex].Total[f := Inclusion.map].Coordinates[n := n] \as Coordinates;
+  \import Source.Degree[n := n] \as S;
+  \import Target.Degree[n := n] \as T;
+  \module Component(i: Double.Index n) {
+    \import \parent.\parent.\parent.At[n := i.first] \as Retained;
+    \import Modules.Tensor[V := complex.family.Carrier i.first, W := D.family.Carrier i.second,
+      left := complex.family.space i.first, right := D.family.space i.second]
+      .Mapping[U := C.family.Carrier i.first, Z := D.family.Carrier i.second,
+        targetLeft := C.family.space i.first, targetRight := D.family.space i.second] \as Component;
+    \import Modules.Identity[V := D.family.Carrier i.second, space := D.family.space i.second] \as Identity;
+    \import Component.Isomorphism[leftIso := Retained.full (support i.first (Double.firstBound n i)), rightIso := Identity.isomorphism] \as Comparison;
+    \definition isomorphism: _ := Comparison.isomorphism;
+  }
+  \definition preimage[x: T.Carrier]: S.Carrier := Assembly.fromProduct.apply (\fun (i: Double.Index n) =>
+    Component[i := i].isomorphism.backward.apply (TC.coordinate i x));
+  \definition leftInverse: \forall (x: S.Carrier) -> preimage (map.apply n x) = x :=
+    \fun (x: S.Carrier) => SC.ext (preimage (map.apply n x)) x (\fun (i: Double.Index n) =>
+      trans!{{S.family.Carrier i}} _ _ _
+        (Assembly.coordinate (\fun (j: Double.Index n) => Component[i := j].isomorphism.backward.apply (TC.coordinate j (map.apply n x))) i)
+        (trans!{{S.family.Carrier i}} _ _ _
+          (congr!{{T.family.Carrier i} {S.family.Carrier i}} Component[i := i].isomorphism.backward.apply _ _ (Coordinates.law i x))
+          (Component[i := i].isomorphism.leftInverse (SC.coordinate i x))));
+  \definition rightInverse: \forall (x: T.Carrier) -> map.apply n (preimage x) = x :=
+    \fun (x: T.Carrier) => TC.ext (map.apply n (preimage x)) x (\fun (i: Double.Index n) =>
+      trans!{{T.family.Carrier i}} _ _ _ (Coordinates.law i (preimage x))
+        (trans!{{T.family.Carrier i}} _ _ _
+          (congr!{{S.family.Carrier i} {T.family.Carrier i}} Component[i := i].isomorphism.forward.apply _ _
+            (Assembly.coordinate (\fun (j: Double.Index n) => Component[i := j].isomorphism.backward.apply (TC.coordinate j x)) i))
+          (Component[i := i].isomorphism.rightInverse (TC.coordinate i x))));
+  \import Chains.Map[C := Source.complex, D := Target.complex].At[n := n] \as Native;
+  \import Modules.Isomorphism[V := S.Carrier, W := T.Carrier, source := S.space, target := T.space]
+    .OfBijective[f := Native.linear map] \as Iso;
+  \definition injective: Iso.Injective := \fun (x, y: S.Carrier)(same: _) => trans!{S.Carrier} _ _ _
+    (sym!{S.Carrier} _ _ (leftInverse x)) (trans!{S.Carrier} _ _ _ (congr!{T.Carrier S.Carrier} preimage _ _ same) (leftInverse y));
+  \definition onto: Iso.Onto := \fun (x: T.Carrier) => Logic.existsIntro[S.Carrier, { y: S.Carrier \where map.apply n y = x }] (preimage x) (rightInverse x);
+  \definition isomorphism: _ := Iso.isomorphism injective onto;
+}
+
+\module Cohomology(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

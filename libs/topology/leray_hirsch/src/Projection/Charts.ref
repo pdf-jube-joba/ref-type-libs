@@ -10,6 +10,7 @@
     overBase: \forall (e: LocalTotal.CarrierSet) ->
       basePoint (coordinates.forward e) = projection e,
   };
+  \module Paired(subset: \Pow X, chart: Chart);
 }
 \definition LocallyTrivial: \Prop := \forall (x: X) ->
   \exists ( U: \Pow X \where std.Logic[].Proposition[].And[Base.Member U x,

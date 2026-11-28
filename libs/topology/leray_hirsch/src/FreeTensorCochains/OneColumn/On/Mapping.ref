@@ -1,0 +1,50 @@
+\import Cochains.Map[C := V, D := FiberCochains.complex] \as FiberMaps;
+\import std.Logic[].Proposition[] \as Logic;
+\import \root.CohomologyPowers[K := K, ring := ring, Index := Generators].On[C := V] \as Model;
+\import Model.Mapping[D := FiberCochains.complex, f := j] \as Component;
+\import Cochains.Map[C := Powers.complex, D := TensorCochains.complex].Composition[B := Model.complex] \as Compose;
+\definition map: _ := Compose.compose isomorphism.backward Component.map;
+\module Degree(z: I.Int^) {
+  \import Cochains.At[C := Model.complex, z := z] \as Input;
+  \import Cochains.At[C := Powers.complex, z := z] \as Intermediate;
+  \import Cochains.At[C := TensorCochains.complex, z := z] \as Output;
+  \import Cochains.Map[C := Model.complex, D := TensorCochains.complex].At[k := z] \as Result;
+  \import Cochains.Isomorphism[C := TensorCochains.complex, D := Powers.complex].On[e := isomorphism].At[z := z] \as Reverse;
+  \import Modules.Isomorphism[V := Output.Cohomology, W := Intermediate.Cohomology, source := Output.cohomologySpace, target := Intermediate.cohomologySpace]
+    .Inverse[] \as Inverse;
+  \import Component.At[z := z] \as AtComponent;
+  \import FiberMaps.At[k := z] \as Local;
+  \import \parent.\parent.At[z := z] \as Column;
+  \import Modules.Isomorphism[V := Input.Cohomology, W := Intermediate.Cohomology, source := Input.cohomologySpace, target := Intermediate.cohomologySpace]
+    .Composition[U := Output.Cohomology, final := Output.cohomologySpace] \as Composition;
+  \definition degreeIsomorphism[h: Local.Bijective[j]]: _ :=
+    Composition.compose (Inverse.inverse Reverse.isomorphism) AtComponent.From[bijective := h].isomorphism;
+  \definition formula: \forall (h: Local.Bijective[j])(x: Input.Cohomology) ->
+    (Result.induced map).apply x = (degreeIsomorphism h).forward.apply x :=
+    \fun (h: Local.Bijective[j])(x: Input.Cohomology) =>
+      Compose.At[k := z].compositionOnCohomology isomorphism.backward Component.map x;
+  \definition injective[h: Local.Bijective[j]]: \forall (a, b: Input.Cohomology) ->
+    (Result.induced map).apply a = (Result.induced map).apply b -> a = b :=
+    \fun (a, b: Input.Cohomology)(equal: _) => trans!{Input.Cohomology} _ _ _
+      (sym!{Input.Cohomology} _ _ ((degreeIsomorphism h).leftInverse a))
+      (trans!{Input.Cohomology} _ _ _
+        (congr!{Output.Cohomology Input.Cohomology} (degreeIsomorphism h).backward.apply _ _
+          (trans!{Output.Cohomology} _ _ _ (sym!{Output.Cohomology} _ _ (formula h a))
+            (trans!{Output.Cohomology} _ _ _ equal (formula h b))))
+        ((degreeIsomorphism h).leftInverse b));
+  \definition onto[h: Local.Bijective[j]]: \forall (b: Output.Cohomology) ->
+    \exists (a: Input.Cohomology \where (Result.induced map).apply a = b) :=
+    \fun (b: Output.Cohomology) => Logic.existsIntro[Input.Cohomology,
+      { a: Input.Cohomology \where (Result.induced map).apply a = b }] ((degreeIsomorphism h).backward.apply b)
+      (trans!{Output.Cohomology} _ _ _ (formula h ((degreeIsomorphism h).backward.apply b)) ((degreeIsomorphism h).rightInverse b));
+  \definition bijective[h: Local.Bijective[j]]: Result.Bijective[map] :=
+    Result.Bijective[map] { injective := injective h, onto := onto h };
+  \definition onBasis: \forall (x: Model.family.Carrier z)(g: Generators)(y: Q.family.Carrier z) ->
+    (map.apply z x).apply (Column.tensor (Free.generator g) y) = (j.apply z (x g)).apply y :=
+    \fun (x: Model.family.Carrier z)(g: Generators)(y: Q.family.Carrier z) =>
+      congr!{{Powers.family.Carrier z} K} (\fun (v: Powers.family.Carrier z) => (v g).apply y) _ _
+        (isomorphism.rightInverse z (Component.map.apply z x));
+}
+\import Cochains.Map[C := Model.complex, D := TensorCochains.complex] \as Result;
+\definition quasiIsomorphism: FiberMaps.QuasiIsomorphism j -> Result.QuasiIsomorphism map :=
+  \fun (h: FiberMaps.QuasiIsomorphism j)(z: I.Int^) => Degree[z := z].bijective (h z);

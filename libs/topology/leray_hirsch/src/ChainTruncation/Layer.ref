@@ -40,3 +40,5 @@
 \module Sequence;
 
 \module TensorColumn(D: Chains.Complex);
+
+\module Stable(D: Chains.Complex, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

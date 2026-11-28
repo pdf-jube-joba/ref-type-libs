@@ -1,0 +1,22 @@
+\use std.Logic[].Equality[].congr;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\import \root.EmptyPair[A := X, source := base, subset := U, K := K, ring := ring] \as Base;
+\import \root.EmptyPair[A := E, source := total, subset := preimage U, K := K, ring := ring] \as Range;
+\import Modules.Hom[V := Source.Carrier, W := totalFamily.Carrier z, source := Source.space, target := totalFamily.space z] \as Maps;
+\definition sourceZero: \forall (x: Source.Carrier) -> x = Source.space.zero :=
+  \fun (x: Source.Carrier) => coordinateInjective x Source.space.zero
+    (Product.ext (coordinates.apply x) (coordinates.apply Source.space.zero)
+      (\fun (i: Index) => trans!{{family.Carrier i}} _ _ _
+        (Base.At[z := inputDegree i].zero empty (coordinates.apply x i))
+        (sym!{{family.Carrier i}} _ _ (Base.At[z := inputDegree i].zero empty (coordinates.apply Source.space.zero i)))));
+\definition targetZero: \forall (y: totalFamily.Carrier z) -> y = (totalFamily.space z).zero :=
+  Range.At[z := z].zero (\fun (e: E) => empty (projection e));
+\import Modules.Isomorphism[V := Source.Carrier, W := totalFamily.Carrier z, source := Source.space, target := totalFamily.space z]
+  .OfBijective[f := linear] \as Inverse;
+\definition injective: Inverse.Injective := \fun (x, y: Source.Carrier)(same: _) => trans!{Source.Carrier} _ _ _
+  (sourceZero x) (sym!{Source.Carrier} _ _ (sourceZero y));
+\definition onto: Inverse.Onto := \fun (y: totalFamily.Carrier z) =>
+  Logic.existsIntro[Source.Carrier, { x: Source.Carrier \where linear.apply x = y }] Source.space.zero
+    (trans!{{totalFamily.Carrier z}} _ _ _ (Maps.zeroPreserved linear) (sym!{{totalFamily.Carrier z}} _ _ (targetZero y)));
+\definition isomorphism: _ := Inverse.isomorphism injective onto;

@@ -76,3 +76,5 @@
   scalar := \fun (n: N.Nat^)(r: I.Int^)(x: family.Carrier n) => \refl((C.family.space n).smul r x),
   commutes := \fun (n: N.Nat^)(x: family.Carrier (N.Nat^::succ n)) => \refl(C.differential.apply n x),
 };
+
+\module TensorWindow(D: Chains.Complex);

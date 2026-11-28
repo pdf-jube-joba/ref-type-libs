@@ -1,0 +1,51 @@
+\import std.Data[].Nat[] \as N;
+\import N.Basic[].Def[] \as Nat;
+\import N.Basic[].Prop[] \as Order;
+\import N.Order[].Prop[] \as Natural;
+\import std.Logic[].Equality[] \as Equality;
+\import std.Logic[].Proposition[] \as Logic;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import chain_complexes.Cochain[].Over[R := K, ring := ring] \as Cochains;
+\import module_theory.Module[].Over[R := K, ring := ring] \as Modules;
+\module Of(C: Cochains.Complex) {
+  \definition LowerZero[cutoff: N.Nat^]: \Prop := \forall (n: N.Nat^) -> Order.Lt n cutoff ->
+    \forall (x: C.family.Carrier n) -> x = (C.family.space n).zero;
+  \definition Before[cutoff: N.Nat^]: \Prop := LowerZero cutoff -> \forall (a: C.family.Carrier cutoff) ->
+    \In[C.family.Carrier cutoff] Cochains.At[C := C, k := cutoff].boundaries.carrier a -> a = (C.family.space cutoff).zero;
+  \definition before: \forall (cutoff: N.Nat^) -> Before cutoff :=
+    \induction (cutoff: N.Nat^) \return Before cutoff \with {
+      | zero: \fun (z: LowerZero N.Nat^::zero)(a: C.family.Carrier N.Nat^::zero)(h: a = (C.family.space N.Nat^::zero).zero) => h
+      | succ: \block {
+          \fun (n: N.Nat^)(prior: Before n)(z: LowerZero (N.Nat^::succ n))(a: C.family.Carrier (N.Nat^::succ n))
+            (h: \exists (x: C.family.Carrier n \where C.differential.apply n x = a)) \then
+          \takefrom x: \Cast[C.family.Carrier n] ({ x: C.family.Carrier n \where C.differential.apply n x = a }) \by h \then
+          \return trans!{{C.family.Carrier (N.Nat^::succ n)}} _ _ _
+            (sym!{{C.family.Carrier (N.Nat^::succ n)}} _ _ (\bysub(C.family.Carrier n,
+              { x: C.family.Carrier n \where C.differential.apply n x = a }, x)))
+            (trans!{{C.family.Carrier (N.Nat^::succ n)}} _ _ _
+              (congr!{{C.family.Carrier n} {C.family.Carrier (N.Nat^::succ n)}} (C.differential.apply n) _ _ (z n (Natural.ltSelfSucc n) x))
+              Cochains.At[C := C, k := n].differentialZero)
+        }
+    };
+  \module Drop(cutoff: N.Nat^) {
+    \definition grade[q: N.Nat^]: N.Nat^ := Nat.add cutoff q;
+    \definition family: Cochains.Family := Cochains.Family {
+      Carrier := \fun (q: N.Nat^) => C.family.Carrier (grade q),
+      space := \fun (q: N.Nat^) => C.family.space (grade q),
+    };
+    \definition differential: Cochains.DifferentialData[family] := Cochains.DifferentialData[family] {
+      apply := \fun (q: N.Nat^) => C.differential.apply (grade q),
+    };
+    \definition complex: Cochains.Complex := Cochains.Complex {
+      family := family, differential := differential,
+      laws := Cochains.DifferentialLaws[family, differential] {
+        addition := \fun (q: N.Nat^) => C.laws.addition (grade q),
+        scalar := \fun (q: N.Nat^) => C.laws.scalar (grade q),
+        squareZero := \fun (q: N.Nat^) => C.laws.squareZero (grade q),
+      }
+    };
+    \module Compare(zeros: LowerZero cutoff);
+  }
+}

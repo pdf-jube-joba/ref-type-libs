@@ -1,0 +1,100 @@
+\import Chains.ZeroExtension[C := Source.complex] \as SignedSource;
+\import Chains.ZeroExtension[C := Target.complex] \as SignedTarget;
+\import Chains.Map[C := Source.complex, D := Target.complex].ZeroExtension[f := map] \as Extension;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Signed;
+\import Signed.Map[C := SignedSource.complex, D := SignedTarget.complex] \as SignedMap;
+\definition Retains: I.Int^ -> \Prop := \induction (z: I.Int^) \return \Prop \with {
+  | ofNat: \fun (n: N.Nat^) => Kept n
+  | negSucc: \fun (n: N.Nat^) => Logic.True
+};
+\module At(z: I.Int^) {
+  \import SignedMap.At[k := z] \as Maps;
+  \import Modules.Isomorphism[V := SignedSource.Carrier z, W := SignedTarget.Carrier z,
+    source := SignedSource.space z, target := SignedTarget.space z].OfBijective[f := Maps.linear Extension.map] \as Iso;
+  \definition Injective: \Prop := Iso.Injective;
+  \definition Onto: \Prop := Iso.Onto;
+  \definition invert[inj: Injective][surj: Onto]: _ := Iso.isomorphism inj surj;
+}
+\module Positive(n: N.Nat^, support: Kept n) {
+  \definition z: I.Int^ := I.Int^::ofNat n;
+  \import \parent.\parent.At[n := n, support := support] \as Native;
+  \import Modules.Isomorphism[V := SignedSource.Carrier z, W := Source.Carrier n,
+    source := SignedSource.space z, target := Source.space n].Composition[U := Target.Carrier n, final := Target.space n] \as First;
+  \import Modules.Isomorphism[V := SignedSource.Carrier z, W := Target.Carrier n,
+    source := SignedSource.space z, target := Target.space n].Composition[U := SignedTarget.Carrier z, final := SignedTarget.space z] \as Second;
+  \import Modules.Isomorphism[V := Source.Carrier n, W := SignedSource.Carrier z,
+    source := Source.space n, target := SignedSource.space z].Inverse[] \as Reverse;
+  \definition isomorphism: _ := Second.compose SignedTarget.Positive[n := n].isomorphism
+    (First.compose Native.isomorphism (Reverse.inverse SignedSource.Positive[n := n].isomorphism));
+  \import \parent.At[z := z] \as At;
+  \definition injective: At.Injective := \fun (x, y: SignedSource.Carrier z)(same: _) => trans!{{SignedSource.Carrier z}} _ _ _
+    (sym!{{SignedSource.Carrier z}} _ _ (isomorphism.leftInverse x))
+    (trans!{{SignedSource.Carrier z}} _ _ _
+      (congr!{{SignedTarget.Carrier z} {SignedSource.Carrier z}} isomorphism.backward.apply _ _ same) (isomorphism.leftInverse y));
+  \definition onto: At.Onto := \fun (y: SignedTarget.Carrier z) =>
+    Logic.existsIntro[SignedSource.Carrier z, { x: SignedSource.Carrier z \where Extension.map.apply z x = y }]
+      (isomorphism.backward.apply y) (isomorphism.rightInverse y);
+}
+\module Negative(n: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::negSucc n;
+  \import SignedMap.At[k := z] \as Maps;
+  \import Modules.Isomorphism[V := SignedSource.Carrier z, W := SignedTarget.Carrier z,
+    source := SignedSource.space z, target := SignedTarget.space z].OfBijective[f := Maps.linear Extension.map] \as Iso;
+  \definition injective: Iso.Injective := \fun (x, y: SignedSource.Carrier z)(same: _) =>
+    trans!{{SignedSource.Carrier z}} _ _ _ (SignedSource.Negative[n := n].zero x) (sym!{{SignedSource.Carrier z}} _ _ (SignedSource.Negative[n := n].zero y));
+  \definition onto: Iso.Onto := \fun (y: SignedTarget.Carrier z) =>
+    Logic.existsIntro[SignedSource.Carrier z, { x: SignedSource.Carrier z \where Extension.map.apply z x = y }]
+      (SignedSource.space z).zero (trans!{{SignedTarget.Carrier z}} _ _ _ (Maps.zeroPreserved Extension.map)
+        (sym!{{SignedTarget.Carrier z}} _ _ (SignedTarget.Negative[n := n].zero y)));
+  \definition isomorphism: _ := Iso.isomorphism injective onto;
+}
+\definition injective: \forall (z: I.Int^) -> Retains z -> At[z := z].Injective :=
+  \induction (z: I.Int^) \return Retains z -> At[z := z].Injective \with {
+    | ofNat: \fun (n: N.Nat^)(h: Kept n) => Positive[n := n, support := h].injective
+    | negSucc: \fun (n: N.Nat^)(h: Logic.True) => Negative[n := n].injective
+  };
+\definition onto: \forall (z: I.Int^) -> Retains z -> At[z := z].Onto :=
+  \induction (z: I.Int^) \return Retains z -> At[z := z].Onto \with {
+    | ofNat: \fun (n: N.Nat^)(h: Kept n) => Positive[n := n, support := h].onto
+    | negSucc: \fun (n: N.Nat^)(h: Logic.True) => Negative[n := n].onto
+  };
+\import module_theory.Module[].Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring] \as KModules;
+\definition coefficients: KModules.Bundle := KModules.Bundle { Carrier := K, space := KModules.scalarModule };
+\import KModules.End[V := K, space := KModules.scalarModule] \as Coefficients;
+\import resolutions.HomComplex[].Over[R := K, ring := ring].Abelian[N := coefficients] \as Hom;
+\import Hom.On[P := SignedTarget.complex] \as Input;
+\import Hom.On[P := SignedSource.complex] \as Output;
+\import Hom.Mapping[P := SignedSource.complex, Q := SignedTarget.complex, L := coefficients].On[f := Extension.map, u := Coefficients.identity] \as Pull;
+\import chain_complexes.Integer[] \as Degrees;
+\import \root.CohomologyWindow[K := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].Of[C := Input.complex, D := Output.complex] \as Window;
+\module Term(z: I.Int^, support: Retains z) {
+  \definition iso: _ := \parent.At[z := z].invert (injective z support) (onto z support);
+  \import KModules.AbelianHom[N := coefficients] \as Restricted;
+  \import Modules.Hom[V := SignedSource.Carrier z, W := K, source := SignedSource.space z, target := Restricted.coefficients.space]
+    .Composition[U := SignedTarget.Carrier z, domain := SignedTarget.space z] \as Compose;
+  \definition reextend[h: Output.Carrier z]: Input.Carrier z := Compose.compose h iso.backward;
+  \definition leftInverse: \forall (a: Input.Carrier z) -> reextend (Pull.map.apply z a) = a :=
+    \fun (a: Input.Carrier z) => Input.At[z := z].ext (reextend (Pull.map.apply z a)) a
+      (\fun (x: SignedTarget.Carrier z) => congr!{{SignedTarget.Carrier z} K} a.apply _ _
+        (iso.rightInverse x));
+  \definition rightInverse: \forall (b: Output.Carrier z) -> Pull.map.apply z (reextend b) = b :=
+    \fun (b: Output.Carrier z) => Output.At[z := z].ext (Pull.map.apply z (reextend b)) b
+      (\fun (x: SignedSource.Carrier z) => congr!{{SignedSource.Carrier z} K} b.apply _ _
+        (iso.leftInverse x));
+  \definition injective: \forall (a, b: Input.Carrier z) -> Pull.map.apply z a = Pull.map.apply z b -> a = b :=
+    \fun (a, b: Input.Carrier z)(same: _) => trans!{{Input.Carrier z}} _ _ _
+      (sym!{{Input.Carrier z}} _ _ (leftInverse a))
+      (trans!{{Input.Carrier z}} _ _ _ (congr!{{Output.Carrier z} {Input.Carrier z}} reextend _ _ same) (leftInverse b));
+  \definition onto: \forall (b: Output.Carrier z) -> \exists (a: Input.Carrier z \where Pull.map.apply z a = b) :=
+    \fun (b: Output.Carrier z) => Logic.existsIntro[Input.Carrier z, { a: Input.Carrier z \where Pull.map.apply z a = b }] (reextend b) (rightInverse b);
+}
+\module In(z: I.Int^, below: Retains (Degrees.previous z), here: Retains z, above: Retains (Degrees.next z)) {
+  \import Window.At[f := Pull.map, z := z] \as Compare;
+  \import \parent.Term[z := Degrees.previous z, support := below] \as Prior;
+  \import \parent.Term[z := z, support := here] \as Current;
+  \import \parent.Term[z := Degrees.next z, support := above] \as Next;
+  \definition injective: _ := Compare.injective Prior.onto Current.injective;
+  \definition onto: _ := Compare.onto Current.onto Next.injective;
+  \import Degrees.Over[R := K, ring := std.Alg[].Ring[].commutativeRingAsRing K ring].Map[C := Input.complex, D := Output.complex].At[k := z] \as PullAt;
+  \definition isomorphism: _ := PullAt.Invert[f := Pull.map].isomorphism (PullAt.Bijective[Pull.map] { injective := injective, onto := onto });
+}

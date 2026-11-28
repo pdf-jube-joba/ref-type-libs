@@ -1,0 +1,20 @@
+\import Upper.TensorWindow[D := D] \as Window;
+\import Window.Cohomology[K := K, ring := ring] \as Cohomology;
+\import chain_complexes.Integer[] \as Degrees;
+\definition supported[n: N.Nat^][bound: Bounds.Le n cutoff]: Window.Kept n :=
+  \fun (p: N.Nat^)(prior: Bounds.Le p n) => Bounds.ltOfSuccLe (N.Nat^::succ cutoff) p
+    (Bounds.leSuccSucc p cutoff (Bounds.leTrans p n cutoff prior bound));
+\definition priorSupport: \forall (n: N.Nat^) -> Bounds.Le (N.Nat^::succ n) cutoff ->
+  Cohomology.Retains (Degrees.previous (I.Int^::ofNat n)) :=
+  \induction (n: N.Nat^) \return Bounds.Le (N.Nat^::succ n) cutoff -> Cohomology.Retains (Degrees.previous (I.Int^::ofNat n)) \with {
+    | zero: \fun (h: Bounds.Le (N.Nat^::succ N.Nat^::zero) cutoff) => Logic.True::intro
+    | succ: \fun (n: N.Nat^)(prior: _)(h: Bounds.Le (N.Nat^::succ (N.Nat^::succ n)) cutoff) => supported n
+        (Bounds.leTrans n (N.Nat^::succ (N.Nat^::succ n)) cutoff
+          (Bounds.leStep (N.Nat^::succ n) n (Bounds.leStep n n (Bounds.leRefl n))) h)
+  };
+\module At(n: N.Nat^, bound: Bounds.Le (N.Nat^::succ n) cutoff) {
+  \definition here: Window.Kept n := supported n
+    (Bounds.leTrans n (N.Nat^::succ n) cutoff (Bounds.leStep n n (Bounds.leRefl n)) bound);
+  \import Cohomology.In[z := I.Int^::ofNat n, below := priorSupport n bound, here := here, above := supported (N.Nat^::succ n) bound] \as Comparison;
+  \definition isomorphism: _ := Comparison.isomorphism;
+}

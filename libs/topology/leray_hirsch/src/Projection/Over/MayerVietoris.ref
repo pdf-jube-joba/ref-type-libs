@@ -43,3 +43,7 @@
 \module Cup(p, q: N.Nat^);
 
 \module SignedCup(q: N.Nat^, u: TotalCohomology.Group q);
+
+\module FiniteConnecting(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

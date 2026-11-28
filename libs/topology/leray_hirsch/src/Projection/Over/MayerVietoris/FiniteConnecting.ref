@@ -1,0 +1,107 @@
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as IntegerModules;
+\import chain_complexes.Integer[] \as Indices;
+\import std.Logic[].Equality[] \as Equality;
+\import Equality.Transport[A := I.Int^] \as Transport;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients] \as TotalSequence;
+\import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients] \as BaseSequence;
+\definition Index: \Set := Finite.Fin count;
+\definition baseOverlap[z: I.Int^]: IntegerModules.Bundle := BaseSequence.Degree[z := z].intersection;
+\definition totalOverlap[z: I.Int^]: IntegerModules.Bundle := TotalSequence.Degree[z := z].intersection;
+\definition totalWhole[z: I.Int^]: IntegerModules.Bundle := TotalSequence.Degree[z := z].whole;
+\definition overlapFamily[z: I.Int^]: \Set := (totalOverlap z).Carrier;
+\definition totalDelta[z: I.Int^]: _ := TotalSequence.At[z := z].connecting;
+\module At(z: I.Int^) {
+  \definition next: I.Int^ := Indices.next z;
+  \definition input[i: Index]: I.Int^ := Degrees.unshift (degree i) z;
+  \definition Components: \Set := \forall (i: Index) -> (baseOverlap (input i)).Carrier;
+  \module Term(i: Index) {
+    \definition q: N.Nat^ := degree i;
+    \definition p: I.Int^ := input i;
+    \definition p1: I.Int^ := Indices.next p;
+    \definition n: I.Int^ := Degrees.shift q p;
+    \definition n1: I.Int^ := Degrees.shift q p1;
+    \definition p2: I.Int^ := Degrees.unshift q next;
+    \definition s: I.Int^ := Degrees.shift q p2;
+    \definition degreeLaw: n = z := Degrees.shiftUnshift q z;
+    \definition successorLaw: n1 = Indices.next n := cohomology_thom.LocalDisk[].shiftNext q p;
+    \definition baseLaw: p1 = p2 := sym!{I.Int^} _ _ (Degrees.unshiftNext q z);
+    \definition nextLaw: s = next := Degrees.shiftUnshift q next;
+    \import \parent.\parent.\parent.SignedCup[q := q, u := classes i] \as Cup;
+    \import \parent.\parent.\parent.\parent.Shifted[q := q, u := classes i] \as Whole;
+    \definition overlap[a: (baseOverlap p).Carrier]: overlapFamily z :=
+      Transport.cast overlapFamily n z degreeLaw (Cup.overlap p a);
+    \definition boundary[a: (baseOverlap p).Carrier]: baseFamily.Carrier p1 := (Cup.baseDelta p).apply a;
+    \definition upperInput[a: (baseOverlap p).Carrier]: baseFamily.Carrier p2 :=
+      Transport.cast baseFamily.Carrier p1 p2 baseLaw (boundary a);
+    \definition whole[a: (baseOverlap p).Carrier]: totalFamily.Carrier next :=
+      Whole.To[z := next].linear.apply (upperInput a);
+    \definition ungrade[a: (baseOverlap p).Carrier]: totalFamily.Carrier n1 := (Whole.map p1).apply (boundary a);
+    \definition shiftedValue[a: (baseOverlap p).Carrier]: totalFamily.Carrier (Indices.next n) := (totalDelta n).apply (Cup.overlap p a);
+    \definition rawLaw: \forall (a: (baseOverlap p).Carrier) ->
+      (totalDelta z).apply (overlap a) = Transport.cast totalFamily.Carrier (Indices.next n) next
+        (congr!{I.Int^ I.Int^} Indices.next _ _ degreeLaw) (shiftedValue a) :=
+      \fun (a: (baseOverlap p).Carrier) => trans!{{totalFamily.Carrier next}} _ _ _
+        (sym!{{totalFamily.Carrier next}} _ _
+          (Transport.natural overlapFamily (\fun (t: I.Int^) => totalFamily.Carrier (Indices.next t))
+            (\fun (t: I.Int^) => (totalDelta t).apply) n z degreeLaw (Cup.overlap p a)))
+        (Transport.reindex totalFamily.Carrier Indices.next n z degreeLaw (shiftedValue a));
+    \definition ordinaryLaw: \forall (a: (baseOverlap p).Carrier) -> whole a =
+      Transport.cast totalFamily.Carrier n1 next (trans!{I.Int^} n1 s next
+        (congr!{I.Int^ I.Int^} (Degrees.shift q) _ _ baseLaw) nextLaw) (ungrade a) :=
+      \fun (a: (baseOverlap p).Carrier) => eq_reason_in!{{totalFamily.Carrier next} _
+        "=" _ "by" { congr!{{totalFamily.Carrier s} {totalFamily.Carrier next}}
+          (Transport.cast totalFamily.Carrier s next nextLaw) _ _
+          (sym!{{totalFamily.Carrier s}} _ _
+            (Transport.natural baseFamily.Carrier (\fun (t: I.Int^) => totalFamily.Carrier (Degrees.shift q t))
+              (\fun (t: I.Int^) => (Whole.map t).apply) p1 p2 baseLaw (boundary a))) }
+        "=" _ "by" { congr!{{totalFamily.Carrier s} {totalFamily.Carrier next}}
+          (Transport.cast totalFamily.Carrier s next nextLaw) _ _
+          (Transport.reindex totalFamily.Carrier (Degrees.shift q) p1 p2 baseLaw (ungrade a)) }
+        "=" _ "by" { Transport.castComposition totalFamily.Carrier n1 s next
+          (congr!{I.Int^ I.Int^} (Degrees.shift q) _ _ baseLaw) nextLaw (ungrade a) }
+      };
+    \definition law: \forall (a: (baseOverlap p).Carrier) -> (totalDelta z).apply (overlap a) = whole a :=
+      \fun (a: (baseOverlap p).Carrier) => eq_reason_in!{{totalFamily.Carrier next} _
+        "=" _ "by" { rawLaw a }
+        "=" _ "by" { congr!{{totalFamily.Carrier (Indices.next n)} {totalFamily.Carrier next}}
+          (Transport.cast totalFamily.Carrier (Indices.next n) next (congr!{I.Int^ I.Int^} Indices.next _ _ degreeLaw)) _ _
+          (Cup.connectingLaw p a) }
+        "=" _ "by" { Transport.castComposition totalFamily.Carrier n1 (Indices.next n) next successorLaw
+          (congr!{I.Int^ I.Int^} Indices.next _ _ degreeLaw) (ungrade a) }
+        "=" _ "by" { sym!{{totalFamily.Carrier next}} _ _ (ordinaryLaw a) }
+      };
+  }
+  \import IntegerModules.Sums[I := Index].Vector[V := overlapFamily z, space := (totalOverlap z).space] \as Source;
+  \import IntegerModules.Sums[I := Index].Vector[V := totalFamily.Carrier next, space := (totalWhole next).space] \as Target;
+  \import Source.Mapping[W := totalFamily.Carrier next, target := (totalWhole next).space] \as Sum;
+  \definition overlapSum[a: Components]: overlapFamily z := Source.sum (Finite.elements count) (\fun (i: Index) => Term[i := i].overlap (a i));
+  \definition sumOfComponents[a: Components]: totalFamily.Carrier next := Target.sum (Finite.elements count) (\fun (i: Index) => Term[i := i].whole (a i));
+  \definition law: \forall (a: Components) -> (totalDelta z).apply (overlapSum a) = sumOfComponents a :=
+    \fun (a: Components) => trans!{{totalFamily.Carrier next}} _ _ _
+      (Sum.law (totalDelta z) (Finite.elements count) (\fun (i: Index) => Term[i := i].overlap (a i)))
+      (Target.congruent (Finite.elements count) (\fun (i: Index) => (totalDelta z).apply (Term[i := i].overlap (a i)))
+        (\fun (i: Index) => Term[i := i].whole (a i)) (\fun (i: Index) => Term[i := i].law (a i)));
+  \import \parent.\parent.\parent.Comparison[count := count].With[degree := degree, classes := classes].At[z := next] \as Comparison;
+  \import Modules.DirectSum[Index := Index, family := Comparison.family] \as ShiftedClasses;
+  \import ShiftedClasses.FiniteSupport[] \as Coordinates;
+  \import Modules.Sums[I := Index].Vector[V := ShiftedClasses.Carrier, space := ShiftedClasses.space] \as Combinations;
+  \import Combinations.Mapping[W := totalFamily.Carrier next, target := totalFamily.space next] \as WholeSums;
+  \definition connectingCoordinates[a: Components][i: Index]: Comparison.family.Carrier i :=
+    Term[i := i].upperInput (a i);
+  \definition connectingVector[a: Components]: ShiftedClasses.Carrier := Coordinates.combination (Finite.elements count) (connectingCoordinates a);
+  \definition onComparison: \forall (a: Components) -> Comparison.linear.apply (connectingVector a) = sumOfComponents a :=
+    \fun (a: Components) => trans!{{totalFamily.Carrier next}} _ _ _
+      (WholeSums.law Comparison.linear (Finite.elements count) (Coordinates.term (connectingCoordinates a)))
+      (Target.congruent (Finite.elements count)
+        (\fun (i: Index) => Comparison.linear.apply (Coordinates.term (connectingCoordinates a) i))
+        (\fun (i: Index) => Term[i := i].whole (a i))
+        (\fun (i: Index) => Comparison.onSummand i (connectingCoordinates a i)));
+  \definition connectingLaw: \forall (a: Components) -> (totalDelta z).apply (overlapSum a) = Comparison.linear.apply (connectingVector a) :=
+    \fun (a: Components) => trans!{{totalFamily.Carrier next}} _ _ _ (law a)
+      (sym!{{totalFamily.Carrier next}} _ _ (onComparison a));
+}

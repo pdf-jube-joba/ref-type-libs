@@ -66,3 +66,13 @@
       "=" _ "by" { Laws.zeroLeft ((Sign.map cutoff).apply (Maps.vertical.apply (Next.isomorphism.forward.apply x))) }
     };
 }
+
+\module Below(n: N.Nat^) {
+  \import Coordinates.Degree[n := n] \as Values;
+  \definition zero[lower: Bounds.Lt n cutoff]: \forall (x: Total.Carrier n) -> x = (Total.space n).zero :=
+    \fun (x: Total.Carrier n) => Values.zero x (\fun (i: Double.Index n) =>
+      \parent.Off[p := i.first, q := i.second].zero
+        (Bounds.ltNe i.first cutoff (Bounds.leLtTrans i.first n cutoff (Double.firstBound n i) lower))
+        (Values.coordinate i x));
+}
+\module Model;

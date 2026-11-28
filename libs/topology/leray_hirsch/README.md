@@ -14,21 +14,25 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | --- | --- |
 | `Projection.Charts.LocallyTrivial` | Open local product charts over the projection |
 | `Projection.Charts.Cover.finite` | Finite chart subcover from a finite CW structure |
+| `Projection.Charts.On.Paired.chains` | Pair homeomorphism on a local product chart |
 | `Projection.Charts.Cover.Induction.whole` | Finite-union induction from local and gluing lemmas |
 | `Projection.Lifts.Given.LiftsBasis` | Homogeneous basis hypothesis on each actual fiber |
 | `Projection.Lifts.Fiber.Model.Given.isomorphism` | Fiber cocycle model built from a lifted basis |
 | `Projection.Over.Component.linear` | Relative pullback followed by cup with a total-space class |
 | `Projection.Over.Comparison.With.At.linear` | Finite direct-sum comparison in integer total degree |
+| `Projection.Over.Comparison.With.At.Empty.isomorphism` | Comparison isomorphism on the empty base |
 | `Projection.Pullback.Over.Degree.law` | Bidegree naturality for base change and inverse-image pairs |
 | `Projection.Over.Change.Degree.law` | Bidegree naturality for unital ring homomorphisms |
 | `Projection.Over.MayerVietoris.At.connectingLaw` | Naturality of the relative connecting map under projection |
 | `Projection.Over.MayerVietoris.SignedCup.connectingLaw` | Compatibility of the relative connecting map with a comparison summand in integer degrees |
+| `Projection.Over.MayerVietoris.FiniteConnecting.At.connectingLaw` | Connecting map on the finite sum of restricted components |
 | `ProductPair.AlexanderWhitney.RelativeMap.CohomologyComparison.At.isomorphism` | Relative Alexander–Whitney cohomology isomorphism over the coefficient ring |
 | `ProductPair.AlexanderWhitney.RelativeMap.ExternalFormula.Cochains.law` | Relative external cup as the pullback of tensor cochains along Alexander–Whitney |
 | `ProductPair.AlexanderWhitney.BaseTensor.Free.isomorphism` | Free basis of the relative base chain module |
 | `FreeTensorCochains.OneColumn.On.Cohomology.comparison` | Cohomology of an unsigned tensor column with free base module |
 | `ChainTruncation.Layer.Sequence.Tensor.exact` | Split exact truncation layer after tensoring |
-| `ChainTruncation.Layer.TensorColumn.Boundary.law` | Differential on the one-column truncation quotient |
+| `ChainTruncation.Layer.TensorColumn.Model.Coefficients.At.isomorphism` | Cohomology of the reindexed tensor layer with its differential sign accounted for |
+| `ChainTruncation.Layer.Stable.At.isomorphism` | Stabilization of tensor cohomology when the cutoff contains degree $n+1$ |
 | `TensorCochainCup.Of.At.Differential.law` | Tensor cochain differential with a closed right factor |
 | `Projection.Over.MayerVietoris.Shifted.At` | Exact products of the shifted base terms |
 | `Trivial.Over.Degree.law` | Agreement with relative external cup on a product bundle |

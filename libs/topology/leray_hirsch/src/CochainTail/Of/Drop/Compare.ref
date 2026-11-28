@@ -1,0 +1,49 @@
+\definition TailBoundary[q: N.Nat^][x: family.Carrier q]: \Prop :=
+  \In[family.Carrier q] Cochains.At[C := complex, k := q].boundaries.carrier x;
+\definition FullBoundary[q: N.Nat^][x: family.Carrier q]: \Prop :=
+  \In[family.Carrier q] Cochains.At[C := C, k := grade q].boundaries.carrier x;
+\definition ToBoundary[q: N.Nat^]: \Prop := \forall (x: family.Carrier q) -> TailBoundary q x -> FullBoundary q x;
+\definition FromBoundary[q: N.Nat^]: \Prop := \forall (x: family.Carrier q) -> FullBoundary q x -> TailBoundary q x;
+\definition toBoundary: \forall (q: N.Nat^) -> ToBoundary q :=
+  \induction (q: N.Nat^) \return ToBoundary q \with {
+    | zero: \fun (x: C.family.Carrier cutoff)(same: x = (C.family.space cutoff).zero) =>
+      \idelim (C.family.space cutoff).zero = x \with y: C.family.Carrier cutoff =>
+        FullBoundary N.Nat^::zero y \by {
+          base: Cochains.At[C := C, k := cutoff].boundaryZero cutoff, equality: sym!{{C.family.Carrier cutoff}} _ _ same
+        }
+    | succ: \fun (q: N.Nat^)(prior: ToBoundary q)(x: family.Carrier (N.Nat^::succ q))(h: TailBoundary (N.Nat^::succ q) x) => h
+  };
+\definition fromBoundary: \forall (q: N.Nat^) -> FromBoundary q :=
+  \induction (q: N.Nat^) \return FromBoundary q \with {
+    | zero: before cutoff zeros
+    | succ: \fun (q: N.Nat^)(prior: FromBoundary q)(x: family.Carrier (N.Nat^::succ q))(h: FullBoundary (N.Nat^::succ q) x) => h
+  };
+\module At(q: N.Nat^) {
+  \import Cochains.At[C := complex, k := q] \as Source;
+  \import Cochains.At[C := C, k := grade q] \as Target;
+  \import Modules.Of[V := Source.CycleCarrier, space := Source.cycleSpace].Submodule[] \as Cycles;
+  \import Cycles.Quotient[S := Source.boundariesInside].To[W := Target.Cohomology, target := Target.cohomologySpace] \as To;
+  \import Cycles.Quotient[S := Target.boundariesInside].To[W := Source.Cohomology, target := Source.cohomologySpace] \as From;
+  \definition vanishes: To.Vanishes Target.classLinear :=
+    \fun (x: Source.CycleCarrier)(boundary: _) => Target.boundaryClassZero x (toBoundary q x boundary);
+  \definition reverseVanishes: From.Vanishes Source.classLinear :=
+    \fun (x: Source.CycleCarrier)(boundary: _) => Source.boundaryClassZero x (fromBoundary q x boundary);
+  \definition forward: _ := To.descend Target.classLinear vanishes;
+  \definition backward: _ := From.descend Source.classLinear reverseVanishes;
+  \definition forwardOnClass: \forall (x: Source.CycleCarrier) -> forward.apply (Source.classOf x) = Target.classOf x :=
+    To.onClass Target.classLinear vanishes;
+  \definition backwardOnClass: \forall (x: Target.CycleCarrier) -> backward.apply (Target.classOf x) = Source.classOf x :=
+    From.onClass Source.classLinear reverseVanishes;
+  \definition leftInverse: \forall (a: Source.Cohomology) -> backward.apply (forward.apply a) = a :=
+    Source.classInduction (\fun (a: Source.Cohomology) => backward.apply (forward.apply a) = a)
+      (\fun (x: Source.CycleCarrier) => trans!{Source.Cohomology} _ _ _
+        (congr!{Target.Cohomology Source.Cohomology} backward.apply _ _ (forwardOnClass x)) (backwardOnClass x));
+  \definition rightInverse: \forall (a: Target.Cohomology) -> forward.apply (backward.apply a) = a :=
+    Target.classInduction (\fun (a: Target.Cohomology) => forward.apply (backward.apply a) = a)
+      (\fun (x: Target.CycleCarrier) => trans!{Target.Cohomology} _ _ _
+        (congr!{Source.Cohomology Target.Cohomology} forward.apply _ _ (backwardOnClass x)) (forwardOnClass x));
+  \import Modules.Isomorphism[V := Source.Cohomology, W := Target.Cohomology, source := Source.cohomologySpace, target := Target.cohomologySpace] \as Iso;
+  \definition isomorphism: Iso.Isomorphism := Iso.Isomorphism {
+    forward := forward, backward := backward, leftInverse := leftInverse, rightInverse := rightInverse,
+  };
+}

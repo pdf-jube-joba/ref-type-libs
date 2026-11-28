@@ -115,10 +115,14 @@ modules on the complement of the subspace simplices.
 The cutoff construction gives degreewise split exact chains for each
 successive truncation of the base complex. On the layer at cutoff $p$,
 the horizontal term vanishes and the remaining differential is the
-vertical differential multiplied by $(-1)^p$. The cohomology of a product
-of cochain complexes is computed coordinatewise. Evaluation on a free
-basis identifies the cochain complex of one unsigned tensor column with
-a product of fiber cochain complexes. The tensor cup differential
+vertical differential multiplied by $(-1)^p$. The layer vanishes below
+$p$. Reindexing the layer by fiber degree and applying the sign change
+identifies its cohomology with that of the unsigned row. Cutting the
+base complex through degree $n+1$ preserves degree-$n$ cohomology of
+the dual tensor total. Evaluation on a free basis identifies the
+cochain complex of one free tensor column with a product of fiber
+cochain complexes and carries a fiber quasi-isomorphism to a
+quasi-isomorphism for the column. The tensor cup differential
 formula for a closed right factor has only the horizontal term, and the
 cohomology comparison at the middle of a short exact sequence follows
 from the five lemma. For a cochain complex in integer degrees, the
@@ -131,13 +135,21 @@ identity with naturality of the connecting map. For a right factor of
 degree $q$ and base degree $p$, its degree reindexing uses
 $(p+1)+q=(p+q)+1$. The signed-degree formulation includes the negative
 base degrees, where relative cohomology vanishes. The Leibniz rule
-contributes no extra sign because the right factor is closed.
+contributes no extra sign because the right factor is closed. Summing
+the reindexed components gives an equality between the connecting map
+of the overlap sum and the whole-space comparison on the vector of
+componentwise connecting classes.
 
-The remaining steps are to identify the signed, shifted columns of
-the two filtered totals with their one-column models and prove the
-finite-cutoff comparison for the actual map induced by the chosen
-fiber cocycles. It then remains to prove the triangular change of
-lifts on a chart and assemble the shifted restrictions, differences,
-and connections into the five-term Mayer–Vietoris diagram for the
-actual comparison. Those steps would instantiate the existing
-finite-cover induction with the isomorphism predicate.
+The pair homeomorphism over a chart and the comparison isomorphism
+for an empty base are formalized. The remaining algebraic step is to
+assemble the cocycle maps on the signed layers into a morphism of the
+cutoff short exact sequences. For the relative base chain complex
+$P_*=C_*(V,W;\mathbb Z)$, this should show that the map with
+components $(x,y)\mapsto a_i(x)u_i(y)$ induces an isomorphism from the
+direct sum of shifted cohomology groups of
+$\operatorname{Hom}_{\mathbb Z}(P_*,K)$ to the cohomology of
+$\operatorname{Hom}_{\mathbb Z}(\operatorname{Tot}(P_*\otimes C_*(F;\mathbb Z)),K)$.
+The triangular change of lifts on chart pairs and the assembly of
+the restriction and difference squares in the five-term
+Mayer–Vietoris diagram also remain. These results would instantiate
+the finite-cover induction with the isomorphism predicate.

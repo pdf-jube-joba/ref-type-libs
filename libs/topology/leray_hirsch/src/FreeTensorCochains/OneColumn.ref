@@ -108,4 +108,5 @@
       .Composition[U := Second.classes.Carrier, final := Second.classes.space] \as Composition;
     \definition comparison: _ := Composition.compose Second.isomorphism First.isomorphism;
   }
+  \module Mapping(V: Cochains.Complex, j: Cochains.Map[C := V, D := FiberCochains.complex].Map);
 }

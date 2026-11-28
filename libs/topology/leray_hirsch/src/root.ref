@@ -38,3 +38,11 @@
 \module TensorCochainCup(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
 
 \module CohomologySign(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module CohomologyWindow(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
+
+\module EmptyPair(A: \Set, source: topology.Topology[Carrier := A].Topology, subset: \Pow A,
+
+  K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+
+\module CochainTail(K: \Set, ring: std.Alg[].Ring[].Ring[K]);
