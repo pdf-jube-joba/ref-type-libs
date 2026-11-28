@@ -1,0 +1,28 @@
+\use Equality.eq_reason_in;
+\import Products.Maps[source := Input.family, target := Output.family].Isomorphism[] \as CoordinateIso;
+\import Modules.Isomorphism[V := InputCoordinates.range.Carrier, W := OutputCoordinates.range.Carrier,
+  source := InputCoordinates.range.space, target := OutputCoordinates.range.space] \as TotalIsomorphism;
+\import Modules.IsomorphismSquare[A := InputCoordinates.domain, B := InputCoordinates.range,
+  C := OutputCoordinates.domain, D := OutputCoordinates.range] \as Square;
+\module Given(baseIsos: (\forall (i: Index) -> CoordinateIso.Component[i := i].Isomorphism), totalIso: TotalIsomorphism.Isomorphism,
+  baseLaw: \forall (i: Index)(a: Input.family.Carrier i) -> ((baseIsos i).forward).apply a = (baseRestriction (Input.inputDegree i)).apply a,
+  totalLaw: \forall (a: InputCoordinates.range.Carrier) -> totalIso.forward.apply a = (totalRestriction z).apply a) {
+  \definition sourceIso: _ := CoordinateIso.With[isos := baseIsos].isomorphism;
+  \import Modules.Product[Index := Index, family := Output.family] \as Product;
+  \definition commutes: \forall (x: InputCoordinates.domain.Carrier) ->
+    OutputCoordinates.finite.apply (sourceIso.forward.apply x) = totalIso.forward.apply (InputCoordinates.finite.apply x) :=
+    \fun (x: InputCoordinates.domain.Carrier) => eq_reason_in!{{OutputCoordinates.range.Carrier} _
+      "=" _ "by" { congr!{{OutputCoordinates.domain.Carrier} {OutputCoordinates.range.Carrier}} OutputCoordinates.finite.apply _ _
+        (Product.ext _ _ (\fun (i: Index) => baseLaw i (x i))) }
+      "=" _ "by" { sym!{{OutputCoordinates.range.Carrier}} _ _ (productLaw x) }
+      "=" _ "by" { sym!{{OutputCoordinates.range.Carrier}} _ _ (totalLaw (InputCoordinates.finite.apply x)) }
+    };
+  \import Modules.Isomorphism[V := InputCoordinates.domain.Carrier, W := InputCoordinates.range.Carrier,
+    source := InputCoordinates.domain.space, target := InputCoordinates.range.space] \as Before;
+  \module With(iso: Before.Isomorphism, law: \forall (x: InputCoordinates.domain.Carrier) -> iso.forward.apply x = InputCoordinates.finite.apply x) {
+    \import Square.On[a := sourceIso, b := totalIso, c := iso, f := OutputCoordinates.finite] \as Glue;
+    \definition comparison: _ := Glue.isomorphism (\fun (x: InputCoordinates.domain.Carrier) =>
+      trans!{{OutputCoordinates.range.Carrier}} _ _ _ (commutes x)
+        (congr!{{InputCoordinates.range.Carrier} {OutputCoordinates.range.Carrier}} totalIso.forward.apply _ _ (sym!{{InputCoordinates.range.Carrier}} _ _ (law x))));
+  }
+}

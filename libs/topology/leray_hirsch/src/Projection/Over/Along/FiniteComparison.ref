@@ -40,4 +40,5 @@
         (InputCoordinates.onCoordinates a))
       (trans!{{OutputCoordinates.range.Carrier}} _ _ _ (productLaw (Input.coordinates.apply a))
         (sym!{{OutputCoordinates.range.Carrier}} _ _ (OutputCoordinates.formula (coordinates.apply (Input.coordinates.apply a)))));
+  \module Transfer;
 }

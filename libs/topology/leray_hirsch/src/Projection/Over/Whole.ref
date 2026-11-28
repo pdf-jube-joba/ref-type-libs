@@ -1,0 +1,33 @@
+\import \parent.Restriction[V := Base.Whole] \as Whole;
+\import topology.Homeomorphism[A := X, B := Whole.BaseCarrier] \as BaseGeometry;
+\import topology.Homeomorphism[A := E, B := Whole.TotalCarrier] \as TotalGeometry;
+\definition baseForward[x: X]: Whole.BaseCarrier := \into[X](x, Base.Whole) \by { \refl(x) };
+\definition totalForward[e: E]: Whole.TotalCarrier := \into[E](e, preimage Base.Whole) \by { \refl(projection e) };
+\import topology.Continuity[A := X, B := X].Corestriction[S := Base.Whole] \as BaseIn;
+\import topology.Continuity[A := E, B := E].Corestriction[S := preimage Base.Whole] \as TotalIn;
+\definition baseHomeomorphism: BaseGeometry.Homeomorphism[base, Whole.baseTopology] := BaseGeometry.Homeomorphism[base, Whole.baseTopology] {
+  forward := baseForward, backward := Whole.baseInclude,
+  leftInverse := \fun (x: X) => \refl(x), rightInverse := \fun (x: Whole.BaseCarrier) => \refl(x),
+  forwardContinuous := BaseIn.corestrictContinuous base base baseForward (topology.Maps[A := X, B := X].Identity[].continuous base),
+  backwardContinuous := Whole.baseContinuous,
+};
+\definition totalHomeomorphism: TotalGeometry.Homeomorphism[total, Whole.totalTopology] := TotalGeometry.Homeomorphism[total, Whole.totalTopology] {
+  forward := totalForward, backward := Whole.totalInclude,
+  leftInverse := \fun (e: E) => \refl(e), rightInverse := \fun (e: Whole.TotalCarrier) => \refl(e),
+  forwardContinuous := TotalIn.corestrictContinuous total total totalForward (topology.Maps[A := E, B := E].Identity[].continuous total),
+  backwardContinuous := Whole.totalContinuous,
+};
+\import singular_cohomology.Relative[A := Whole.BaseCarrier, source := Whole.baseTopology, subset := Whole.basePart] \as TargetBase;
+\import singular_cohomology.Relative[A := Whole.TotalCarrier, source := Whole.totalTopology, subset := Whole.totalPart] \as TargetTotal;
+\import BasePair.Homeomorphism[B := Whole.BaseCarrier].Over[target := Whole.baseTopology, targetSubset := Whole.basePart] \as BaseMaps;
+\import TotalPair.Homeomorphism[B := Whole.TotalCarrier].Over[target := Whole.totalTopology, targetSubset := Whole.totalPart] \as TotalMaps;
+\definition baseData: BaseMaps.Data := BaseMaps.Data {
+  homeomorphism := baseHomeomorphism,
+  forwardPreserves := \fun (x: BasePair.SubspaceCarrier) => \bysub(X, U, x),
+  backwardPreserves := \fun (x: TargetBase.SubspaceCarrier) => \bysub(Whole.BaseCarrier, Whole.basePart, x),
+};
+\definition totalData: TotalMaps.Data := TotalMaps.Data {
+  homeomorphism := totalHomeomorphism,
+  forwardPreserves := \fun (e: TotalPair.SubspaceCarrier) => \bysub(E, preimage U, e),
+  backwardPreserves := \fun (x: TargetTotal.SubspaceCarrier) => \bysub(Whole.TotalCarrier, Whole.totalPart, x),
+};

@@ -1,0 +1,40 @@
+\definition Index: \Set := Finite.Fin count;
+\import Outer.Comparison[count := count, degree := degree, classes := classes] \as Original;
+\import Along.FiniteComparison[count := count, degree := degree, classes := Original.localClasses] \as Natural;
+\import singular_products.Cochains[A := Nested.TotalCarrier, source := Nested.totalTopology, R := K, ring := ring].Cohomology[] \as NewClasses;
+\import singular_products.Cochains[A := Outer.TotalCarrier, source := Outer.totalTopology, R := K, ring := ring].Cohomology[] \as MidClasses;
+\import NewClasses.Pullback[B := TotalCarrier, target := totalTopology] \as ToWhole;
+\import singular_cohomology.Maps[A := Nested.TotalCarrier, B := Outer.TotalCarrier, source := Nested.totalTopology, target := Outer.totalTopology]
+  .Composition[C := E, final := total].Coefficients[M := TotalProduct.integerCoefficients] \as DirectComposition;
+\import singular_cohomology.Maps[A := Nested.TotalCarrier, B := TotalCarrier, source := Nested.totalTopology, target := totalTopology]
+  .Composition[C := E, final := total].Coefficients[M := TotalProduct.integerCoefficients] \as NestedComposition;
+\definition nestedClasses[i: Index]: NewClasses.Group (degree i) := Nested.lift (degree i) (lift (degree i) (classes i));
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\import TargetTotalPair.Maps[B := Outer.TotalCarrier].Over[target := Outer.totalTopology, targetSubset := Outer.totalPart] \as Maps;
+\definition totalRegular: _ := (Maps.laws totalForward).continuous;
+\definition classesAgree: \forall (i: Index) -> Natural.newClasses i = nestedClasses i :=
+  \fun (i: Index) => trans!{{NewClasses.Group (degree i)}} _ _ _
+    (sym!{{NewClasses.Group (degree i)}} _ _
+      (DirectComposition.onCohomology totalForward totalRegular Outer.totalInclude Outer.totalContinuous
+        (degree i) (classes i)))
+    (NestedComposition.onCohomology Nested.totalInclude Nested.totalContinuous totalInclude totalContinuous (degree i) (classes i));
+\module At(z: I.Int^) {
+  \import Natural.At[z := z].Transfer[] \as Transport;
+  \import Source.Comparison[count := count].With[degree := degree, classes := Original.localClasses].At[z := z] \as Input;
+  \import Input.ProductCoordinates[] \as InputCoordinates;
+  \definition baseIsomorphisms[i: Index]: _ :=
+    BaseIso.At[z := Input.inputDegree i].isomorphism;
+  \definition totalIsomorphism: _ := TotalIso.At[z := z].isomorphism;
+  \definition baseLaw: \forall (i: Index)(a: Input.family.Carrier i) ->
+    (baseIsomorphisms i).forward.apply a = (Along.baseRestriction (Input.inputDegree i)).apply a :=
+    \fun (i: Index)(a: Input.family.Carrier i) => \refl((Along.baseRestriction (Input.inputDegree i)).apply a);
+  \definition totalLaw: \forall (a: InputCoordinates.range.Carrier) -> totalIsomorphism.forward.apply a = (Along.totalRestriction z).apply a :=
+    \fun (a: InputCoordinates.range.Carrier) => \refl((Along.totalRestriction z).apply a);
+  \import Transport.Given[baseIsos := baseIsomorphisms, totalIso := totalIsomorphism, baseLaw := baseLaw, totalLaw := totalLaw] \as Transfer;
+  \definition input[h: Original.Isomorphisms]: _ := Original.At[z := z].isomorphism (h.injective z) (h.onto z);
+  \definition inputLaw[h: Original.Isomorphisms]: \forall (a: Original.At[z := z].domain.Carrier) -> (input h).forward.apply a = Original.At[z := z].linear.apply a :=
+    \fun (a: Original.At[z := z].domain.Carrier) => \refl(Original.At[z := z].linear.apply a);
+  \definition isomorphism[h: Original.Isomorphisms]: _ := Transfer.With[iso := input h, law := inputLaw h].comparison;
+}

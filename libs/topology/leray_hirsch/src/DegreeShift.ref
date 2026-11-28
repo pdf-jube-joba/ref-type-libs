@@ -87,3 +87,12 @@
         (sym!{{F (I.Int^::ofNat n)}} _ _ (IntegerCast.castRefl F (I.Int^::ofNat n) x)),
       equality: eq
     }) eq;
+\definition unshiftNegative: \forall (q, n: N.Nat^) ->
+  unshift q (I.Int^::negSucc n) = I.Int^::negSucc (Nat.add n q) :=
+  \induction (q: N.Nat^) \return \forall (n: N.Nat^) -> unshift q (I.Int^::negSucc n) = I.Int^::negSucc (Nat.add n q) \with {
+    | zero: \fun (n: N.Nat^) => \refl(I.Int^::negSucc n)
+    | succ: \fun (q: N.Nat^)(previous: \forall (n: N.Nat^) -> unshift q (I.Int^::negSucc n) = I.Int^::negSucc (Nat.add n q))(n: N.Nat^) =>
+      trans!{I.Int^} _ _ _ (previous (N.Nat^::succ n))
+        (congr!{N.Nat^ I.Int^} (\fun (k: N.Nat^) => I.Int^::negSucc k) _ _
+          (trans!{N.Nat^} _ _ _ (NatLaws.addSuccLeft n q) (sym!{N.Nat^} _ _ (NatLaws.addSuccRight n q))))
+  };

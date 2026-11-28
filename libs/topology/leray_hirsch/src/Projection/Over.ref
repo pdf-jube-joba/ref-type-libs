@@ -44,4 +44,5 @@
 
 \module Restriction(V: \Pow X);
 
+\module Whole;
 \module Union(L, R: \Pow X, leftOpen: Base.IsOpenIn base L, rightOpen: Base.IsOpenIn base R);

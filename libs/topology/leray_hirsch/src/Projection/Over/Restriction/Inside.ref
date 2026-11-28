@@ -25,3 +25,34 @@
 \definition projectionSquare: \forall (x: Outer.TotalCarrier) ->
   Nested.project (TotalMaps.forwardMap totalData x) = BaseMaps.forwardMap baseData (Outer.project x) :=
   \fun (x: Outer.TotalCarrier) => \refl(Nested.project (TotalMaps.forwardMap totalData x));
+
+\import topology.Homeomorphism[A := Outer.BaseCarrier, B := Nested.BaseCarrier].Inverse[] \as ReverseBase;
+\import topology.Homeomorphism[A := Outer.TotalCarrier, B := Nested.TotalCarrier].Inverse[] \as ReverseTotal;
+\import TargetBasePair.Homeomorphism[B := Outer.BaseCarrier].Over[target := Outer.baseTopology, targetSubset := Outer.basePart] \as BackBase;
+\import TargetTotalPair.Homeomorphism[B := Outer.TotalCarrier].Over[target := Outer.totalTopology, targetSubset := Outer.totalPart] \as BackTotal;
+\definition backBaseData: BackBase.Data := BackBase.Data {
+  homeomorphism := ReverseBase.inverse Outer.baseTopology Nested.baseTopology baseHomeomorphism,
+  forwardPreserves := baseData.backwardPreserves,
+  backwardPreserves := baseData.forwardPreserves,
+};
+\definition backTotalData: BackTotal.Data := BackTotal.Data {
+  homeomorphism := ReverseTotal.inverse Outer.totalTopology Nested.totalTopology totalHomeomorphism,
+  forwardPreserves := totalData.backwardPreserves,
+  backwardPreserves := totalData.forwardPreserves,
+};
+\definition baseForward: _ := BackBase.forwardMap backBaseData;
+\definition totalForward: _ := BackTotal.forwardMap backTotalData;
+\definition square: \forall (p: Nested.TotalCarrier) -> Outer.project (totalForward p) = baseForward (Nested.project p) :=
+  \fun (p: Nested.TotalCarrier) => \refl(Outer.project (totalForward p));
+\import \root.PairHomeomorphism[A := Nested.BaseCarrier, B := Outer.BaseCarrier, source := Nested.baseTopology, target := Outer.baseTopology,
+  part := Nested.basePart, boundary := Outer.basePart, K := K, ring := ring, data := backBaseData] \as BaseIso;
+\import \root.PairHomeomorphism[A := Nested.TotalCarrier, B := Outer.TotalCarrier, source := Nested.totalTopology, target := Outer.totalTopology,
+  part := Nested.totalPart, boundary := Outer.totalPart, K := K, ring := ring, data := backTotalData] \as TotalIso;
+\import \root.Projection[X := Outer.BaseCarrier, E := Outer.TotalCarrier, base := Outer.baseTopology, total := Outer.totalTopology,
+  projection := Outer.project, continuous := Outer.regular].Over[U := Outer.basePart, K := K, ring := ring] \as Source;
+\import Source.Along[Y := Nested.BaseCarrier, Z := Nested.TotalCarrier, newBase := Nested.baseTopology, newTotal := Nested.totalTopology,
+  newPart := Nested.basePart, newProjection := Nested.project, newContinuous := Nested.regular,
+  baseMap := baseForward, totalMap := totalForward, square := square] \as Along;
+\import std.Data[].FinSet[] \as Finite;
+\module With(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
+  classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));

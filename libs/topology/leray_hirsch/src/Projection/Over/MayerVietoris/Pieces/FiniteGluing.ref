@@ -15,3 +15,5 @@
 \import OverlapProjection.Comparison[count := count].With[degree := degree, classes := overlapLifted] \as OverlapComparison;
 \import WholeProjection.Comparison[count := count].With[degree := degree, classes := classes] \as WholeComparison;
 \module Level(z: I.Int^, before: Index -> I.Int^, same: \forall (i: Index) -> before i = Degrees.unshift (degree i) z);
+
+\module AllDegrees(z: I.Int^);

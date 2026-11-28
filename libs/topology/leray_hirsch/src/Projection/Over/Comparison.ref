@@ -49,5 +49,6 @@
       Universal.onInjection components;
     \module ProductCoordinates;
     \module Empty(empty: \forall (x: X) -> Logic.False);
+    \module Negative(n: N.Nat^, same: z = I.Int^::negSucc n);
   }
 }

@@ -4,6 +4,7 @@
 \import Upper.Known[] \as UpperComparison;
 \definition LocalLower: \Prop := LowerComparison.Here;
 \definition LocalUpper: \Prop := UpperComparison.Here;
+\definition UpperBijective: \Prop := UpperComparison.WholeBijective;
 \definition raw[lower: LocalLower][upper: LocalUpper]: _ :=
   fiveLemma (LowerComparison.pairOnto lower) (LowerComparison.overlapInjective lower) (LowerComparison.overlapOnto lower)
     (UpperComparison.pairInjective upper) (UpperComparison.pairOnto upper) (UpperComparison.overlapInjective upper);
@@ -17,7 +18,7 @@
 \definition onto[lower: LocalLower][upper: LocalUpper]: Z.Surjective Upper.wholeDomain T1.whole Upper.wholeMap :=
   \fun (y: T1.whole.Carrier) => Logic.existsIntro[Upper.wholeDomain.Carrier,
     { x: Upper.wholeDomain.Carrier \where Upper.wholeMap.apply x = y }] ((raw lower upper).backward.apply y) ((raw lower upper).rightInverse y);
-\definition bijective[lower: LocalLower][upper: LocalUpper]: UpperComparison.WholeBijective :=
+\definition bijective[lower: LocalLower][upper: LocalUpper]: UpperBijective :=
   UpperComparison.WholeBijective { injective := UpperComparison.wholeInjective (injective lower upper),
     onto := UpperComparison.wholeOnto (onto lower upper) };
 \definition isomorphism[lower: LocalLower][upper: LocalUpper]: _ :=

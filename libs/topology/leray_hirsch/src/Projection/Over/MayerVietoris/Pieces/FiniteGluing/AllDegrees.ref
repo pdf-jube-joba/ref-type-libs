@@ -1,0 +1,41 @@
+\import LeftComparison.At[z := z].ProductCoordinates[] \as L;
+\import RightComparison.At[z := z].ProductCoordinates[] \as R;
+\import OverlapComparison.At[z := z].ProductCoordinates[] \as O;
+\import WholeComparison.At[z := z].ProductCoordinates[] \as W;
+\import Modules.Isomorphism[V := L.domain.Carrier, W := L.range.Carrier, source := L.domain.space, target := L.range.space]
+  .OfBijective[f := L.finite] \as Left;
+\import Modules.Isomorphism[V := R.domain.Carrier, W := R.range.Carrier, source := R.domain.space, target := R.range.space]
+  .OfBijective[f := R.finite] \as Right;
+\import Modules.Isomorphism[V := O.domain.Carrier, W := O.range.Carrier, source := O.domain.space, target := O.range.space]
+  .OfBijective[f := O.finite] \as Overlap;
+\import Modules.Isomorphism[V := W.domain.Carrier, W := W.range.Carrier, source := W.domain.space, target := W.range.space]
+  .OfBijective[f := W.finite] \as Whole;
+\structure Pieces: \Prop := {
+  leftInjective: Left.Injective,
+  leftOnto: Left.Onto,
+  rightInjective: Right.Injective,
+  rightOnto: Right.Onto,
+  overlapInjective: Overlap.Injective,
+  overlapOnto: Overlap.Onto,
+};
+\structure WholeBijective: \Prop := { injective: Whole.Injective, onto: Whole.Onto };
+\definition isomorphism[h: WholeBijective]: _ := Whole.isomorphism h.injective h.onto;
+\definition fromPieces[h: \forall (d: I.Int^) -> \parent.AllDegrees[z := d].Pieces]: WholeBijective := \block {
+  \let p: I.Int^ := Indices.previous z \then
+  \let n: I.Int^ := Indices.next p \then
+  \let l: \parent.AllDegrees[z := p].Pieces := h p \then
+  \let u: \parent.AllDegrees[z := n].Pieces := h n \then
+  \let low: \parent.At[z := p].Glued[].LocalLower := \parent.At[z := p].Glued[].LocalLower {
+    leftInjective := l.leftInjective, leftOnto := l.leftOnto, rightInjective := l.rightInjective, rightOnto := l.rightOnto,
+    overlapInjective := l.overlapInjective, overlapOnto := l.overlapOnto,
+  } \then
+  \let high: \parent.At[z := p].Glued[].LocalUpper := \parent.At[z := p].Glued[].LocalUpper {
+    leftInjective := u.leftInjective, leftOnto := u.leftOnto, rightInjective := u.rightInjective, rightOnto := u.rightOnto,
+    overlapInjective := u.overlapInjective, overlapOnto := u.overlapOnto,
+  } \then
+  \let glued: \parent.At[z := p].Glued[].UpperBijective := \parent.At[z := p].Glued[].bijective low high \then
+  \return \idelim n = z \with d: I.Int^ => \parent.AllDegrees[z := d].WholeBijective \by {
+    base: \parent.AllDegrees[z := n].WholeBijective { injective := glued.injective, onto := glued.onto },
+    equality: Indices.nextPrevious z
+  }
+};
