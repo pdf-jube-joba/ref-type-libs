@@ -1,0 +1,4 @@
+\module Directed(Index: \Set, before: Index -> Index -> \Prop);
+\module On(A: \Set, space: topology.Topology[Carrier := A].Topology);
+\module Proper(A, B: \Set, source: topology.Topology[Carrier := A].Topology,
+  target: topology.Topology[Carrier := B].Topology);

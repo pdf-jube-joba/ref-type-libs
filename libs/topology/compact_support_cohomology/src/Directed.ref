@@ -1,0 +1,20 @@
+\structure Order: \Prop := {
+  reflexive: \forall (i: Index) -> before i i,
+  transitive: \forall (i, j, k: Index) -> before i j -> before j k -> before i k,
+};
+
+\structure Upper[i, j, k: Index]: \Prop := {
+  left: before i k,
+  right: before j k,
+};
+
+\definition EvidenceSet[i, j: Index]: \Pow Index := { x: Index \where before i j };
+\definition Evidence[i, j: Index]: \Set := \Cast[Index] (EvidenceSet i j);
+\definition evidence[i, j: Index][inclusion: before i j]: Evidence i j :=
+  \into[Index](i, EvidenceSet i j) \by { inclusion };
+\definition included[i, j: Index][witness: Evidence i j]: before i j :=
+  \bysub(Index, EvidenceSet i j, witness);
+
+\module System(Stage: Index -> \Set, order: Order, join: Index -> Index -> Index,
+  upper: \forall (i, j: Index) -> Upper[i, j, join i j],
+  action: \forall (i, j: Index) -> Evidence i j -> Stage i -> Stage j);

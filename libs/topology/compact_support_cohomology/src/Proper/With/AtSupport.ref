@@ -1,0 +1,16 @@
+\import singular_cohomology.Relative[A := A, source := source, subset := Source.outside (preimage K)] \as PairSource;
+\import PairSource.Maps[B := B].Over[target := target, targetSubset := Target.outside K] \as Pairs;
+\definition pairMap: Pairs.Map := \into[A -> B](f, Pairs.Map) \by {
+  Pairs.Laws[f] {
+    continuous := continuous,
+    contained := \fun (x: PairSource.SubspaceCarrier) => \bysub(A, Source.outside (preimage K), x),
+  }
+};
+\import Pairs.On[f := pairMap].Integer[] \as Pullback;
+\module Degree(coefficients: Modules.Bundle, z: I.Int^) {
+  \import Source.With[coefficients := coefficients].Degree[z := z] \as SourceDegree;
+  \import Target.With[coefficients := coefficients].Degree[z := z] \as TargetDegree;
+  \definition pull: _ := Pullback.With[coefficients := coefficients].At[z := z].induced;
+  \definition apply[x: TargetDegree.Stage K]: SourceDegree.Stage (preimage K) := (pull).apply x;
+}
+\module Through(L: Target.Support, inclusion: Target.before K L, coefficients: Modules.Bundle);

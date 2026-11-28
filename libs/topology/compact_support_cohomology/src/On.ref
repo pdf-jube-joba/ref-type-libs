@@ -1,0 +1,29 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\import topology.Topology[Carrier := A] \as Top;
+\import Top.Compactness[] \as Compactness;
+\import Top.Finite[] \as Finite;
+\import std.Logic[].Proposition[] \as Logic;
+
+\definition Supports: \Pow (\Pow A) := { K: \Pow A \where Top.IsCompactIn space K };
+\definition Support: \Set := \Cast[\Pow A] Supports;
+\definition compact[K: Support]: Top.IsCompactIn space K := \bysub(\Pow A, Supports, K);
+\definition empty: Support := \into[\Pow A](Top.Empty, Supports) \by { Compactness.emptyCompact space };
+\definition whole[h: Top.IsCompact space]: Support := \into[\Pow A](Top.Whole, Supports) \by { h };
+\definition union[K, L: Support]: Support :=
+  \into[\Pow A](Finite.Join K L, Supports) \by { Compactness.joinCompact space K L (compact K) (compact L) };
+\definition before[K, L: Support]: \Prop := Top.Subset K L;
+\import \root.Directed[Index := Support, before := before] \as Directed;
+\definition order: Directed.Order := Directed.Order {
+  reflexive := \fun (K: Support)(x: A)(member: Top.Member K x) => member,
+  transitive := \fun (K, L, M: Support) => Top.subsetTrans K L M,
+};
+\definition upper[K, L: Support]: Directed.Upper[K, L, union K L] := Directed.Upper[K, L, union K L] {
+  left := \fun (x: A)(member: Top.Member K x) => Logic.Or[_, _]::left member,
+  right := \fun (x: A)(member: Top.Member L x) => Logic.Or[_, _]::right member,
+};
+\definition outside[K: Support]: \Pow A := Top.Complement K;
+\definition outsideReverse[K, L: Support][inclusion: before K L]: Top.Subset (outside L) (outside K) :=
+  \fun (x: A)(notInL: Top.Member (outside L) x)(inK: Top.Member K x) => notInL (inclusion x inK);
+\module With(coefficients: Modules.Bundle);

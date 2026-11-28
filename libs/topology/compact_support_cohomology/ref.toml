@@ -1,0 +1,8 @@
+[package]
+name = "compact_support_cohomology"
+
+[dependencies]
+std = { path = "../../std" }
+topology = { path = "../basic" }
+module_theory = { path = "../../algebra/module_theory" }
+singular_cohomology = { path = "../singular/cohomology" }

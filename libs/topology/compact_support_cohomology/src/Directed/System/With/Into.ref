@@ -1,0 +1,23 @@
+\import Quotient.Maps[B := Target] \as Maps;
+\definition onRepresentative[r: Representative]: Target := stageMap r.index r.value;
+
+\definition respects: Maps.Respects onRepresentative := \block {
+  \fun (x, y: Representative)(related: Equivalent x y) \then
+  \takefrom common: Agreement[x, y] \by related \then
+  \return eq_reason_in!{Target _
+    "=" _ "by" { compatibleMap x.index common.index common.bounds.left x.value }
+    "=" _ "by" { congr!{{Stage common.index} Target} (stageMap common.index) _ _ common.equal }
+    "=" _ "by" { sym!{Target} _ _ (compatibleMap y.index common.index common.bounds.right y.value) }}
+};
+
+\definition map[c: Carrier]: Target := Maps.value equivalence onRepresentative respects c;
+\definition onStage[i: Index][x: Stage i]: map (ofStage i x) = stageMap i x :=
+  Maps.onClass equivalence onRepresentative respects (represent i x);
+
+\definition unique[f: Carrier -> Target]:
+  (\forall (i: Index)(x: Stage i) -> f (ofStage i x) = stageMap i x) ->
+  \forall (c: Carrier) -> f c = map c :=
+  \fun (agrees: _) => Maps.uniqueness equivalence onRepresentative respects f
+    (\fun (r: Representative) => \idelim represent r.index r.value = r
+      \with u: Representative => f (Quotient.class u) = onRepresentative u
+      \by { base: agrees r.index r.value, equality: representativeEta r });

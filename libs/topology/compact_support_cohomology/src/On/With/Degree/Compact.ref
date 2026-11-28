@@ -1,0 +1,7 @@
+\definition include[K: Support]: before K (whole compactSpace) :=
+  \fun (x: A)(member: Top.Member K x) => \refl(x);
+\import Limit.Terminal[last := whole compactSpace, above := include] \as Comparison;
+\definition forward: _ := Comparison.forward;
+\definition backward: _ := Comparison.backward;
+\definition forwardBackward: _ := Comparison.forwardBackward;
+\definition backwardForward: _ := Comparison.backwardForward;

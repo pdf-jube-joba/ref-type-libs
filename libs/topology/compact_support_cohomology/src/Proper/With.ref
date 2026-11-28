@@ -1,0 +1,10 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Modules;
+\definition preimage[K: Target.Support]: Source.Support :=
+  \into[\Pow A](Maps.Preimage f K, Source.Supports) \by { proper K (Target.compact K) };
+\definition monotone[K, L: Target.Support][inclusion: Target.before K L]: Source.before (preimage K) (preimage L) :=
+  \fun (x: A)(member: SourceTop.Member (preimage K) x) => inclusion (f x) member;
+
+\module AtSupport(K: Target.Support);
+\module WithCoefficients(coefficients: Modules.Bundle, z: I.Int^);

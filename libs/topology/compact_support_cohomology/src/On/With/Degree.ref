@@ -1,0 +1,31 @@
+\definition Stage[K: Support]: \Set :=
+  singular_cohomology.Relative[A := A, source := space, subset := outside K].With[coefficients := coefficients].At[z := z].Carrier;
+\definition advance[K, L: Support][inclusion: before K L][x: Stage K]: Stage L :=
+  (\parent.Enlarge[K := K, L := L, inclusion := inclusion].advance z).apply x;
+\definition action[K, L: Support][witness: Directed.Evidence K L][x: Stage K]: Stage L :=
+  advance K L (Directed.included K L witness) x;
+\import Directed.System[Stage := Stage, order := order, join := union, upper := upper, action := action] \as System;
+\definition identity[K: Support][x: Stage K]: advance K K (order.reflexive K) x = x :=
+  singular_cohomology.Relative[A := A, source := space, subset := outside K].Identity[].With[coefficients := coefficients].law z x;
+\definition compose[K, L, M: Support][KL: before K L][LM: before L M][x: Stage K]:
+  advance K M (order.transitive K L M KL LM) x = advance L M LM (advance K L KL x) :=
+  \parent.Enlarge[K := K, L := L, inclusion := KL].Through[M := M, next := LM].law z x;
+\definition laws: System.Laws := System.Laws { identity := identity, compose := compose };
+\import System.With[laws := laws] \as Limit;
+\definition Cohomology: \Set := Limit.Carrier;
+\definition ofSupport[K: Support][x: Stage K]: Cohomology := Limit.ofStage K x;
+
+\definition compatible: _ := Limit.compatible;
+\definition induction: _ := Limit.induction;
+\definition agreementOf: _ := Limit.agreementOf;
+
+\module Descend(Target: \Set, stageMap: \forall (K: Support) -> Stage K -> Target,
+  compatibleMap: \forall (K, L: Support)(inclusion: before K L)(x: Stage K) ->
+    stageMap K x = stageMap L (advance K L inclusion x)) {
+  \import Limit.Into[Target := Target, stageMap := stageMap, compatibleMap := compatibleMap] \as Into;
+  \definition map: _ := Into.map;
+  \definition onStage: _ := Into.onStage;
+  \definition unique: _ := Into.unique;
+}
+
+\module Compact(compactSpace: Top.IsCompact space);

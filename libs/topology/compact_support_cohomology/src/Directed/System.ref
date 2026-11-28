@@ -1,0 +1,46 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.eq_reason_in;
+\use Equality.sym;
+\use Equality.congr;
+
+\definition advance[i, j: Index][inclusion: before i j][x: Stage i]: Stage j :=
+  action i j (evidence i j inclusion) x;
+
+\structure Laws: \Prop := {
+  identity: \forall (i: Index)(x: Stage i) -> advance i i (order.reflexive i) x = x,
+  compose: \forall (i, j, k: Index)(ij: before i j)(jk: before j k)(x: Stage i) ->
+    advance i k (order.transitive i j k ij jk) x = advance j k jk (advance i j ij x),
+};
+
+\structure Representative: \Set := {
+  index: Index,
+  value: Stage index,
+};
+
+\structure Agreement[x, y: Representative]: \Set := {
+  index: Index,
+  bounds: Upper[x.index, y.index, index],
+  equal: advance x.index index bounds.left x.value = advance y.index index bounds.right y.value,
+};
+
+\definition Equivalent[x, y: Representative]: \Prop := \exists Agreement[x, y];
+\import std.Set[].Quotient[A := Representative, Equivalent := Equivalent] \as Quotient;
+
+\definition reflexive[x: Representative]: Equivalent x x :=
+  \exact(Agreement[x, x] {
+    index := x.index,
+    bounds := Upper[x.index, x.index, x.index] { left := order.reflexive x.index, right := order.reflexive x.index },
+    equal := \refl(advance x.index x.index (order.reflexive x.index) x.value),
+  }, Agreement[x, x]);
+
+\definition symmetric[x, y: Representative]: Equivalent x y -> Equivalent y x := \block {
+  \fun (related: Equivalent x y) \then
+  \takefrom at: Agreement[x, y] \by related \then
+  \return \exact(Agreement[y, x] {
+    index := at.index,
+    bounds := Upper[y.index, x.index, at.index] { left := at.bounds.right, right := at.bounds.left },
+    equal := sym!{{Stage at.index}} _ _ at.equal,
+  }, Agreement[y, x])
+};
+
+\module With(laws: Laws);
