@@ -19,5 +19,6 @@
 \definition stratum[h: GradedBasis]: \forall (p: N.Nat^) -> \parent.Cutoff[p := p].GradedIso :=
   \fun (p: N.Nat^) => Column[p := p].bijective h;
 \module At(z: I.Int^) {
+  \definition productIsomorphism[h: GradedBasis]: _ := \parent.\parent.Stable[].At[z := z].With[layer := stratum h].productIsomorphism;
   \definition isomorphism[h: GradedBasis]: _ := \parent.\parent.Stable[].At[z := z].With[layer := stratum h].isomorphism;
 }

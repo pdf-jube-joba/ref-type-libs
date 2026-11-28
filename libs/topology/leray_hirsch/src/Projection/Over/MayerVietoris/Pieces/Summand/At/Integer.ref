@@ -1,0 +1,65 @@
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Integer;
+\use Equality.eq_reason_in;
+\import cohomology_thom.RelativeMayerVietoris[].IntegerLinear[] \as Linear;
+\import BaseMV.Cohomology[coefficients := BaseProduct.integerCoefficients] \as Source;
+\import TotalMV.Cohomology[coefficients := TotalProduct.integerCoefficients] \as Target;
+\import Source.Degree[z := input] \as S;
+\import Target.Degree[z := z] \as T;
+\import Source.At[z := input] \as SourceMaps;
+\import Target.At[z := z] \as TargetMaps;
+\import \parent.\parent.\parent.Groups[z := input] \as Base;
+\import \parent.\parent.\parent.Groups[z := z] \as TargetGroups;
+\import Integer.Biproduct[V := Base.baseLeft.Carrier, W := Base.baseRight.Carrier, left := Base.baseLeft.space, right := Base.baseRight.space] \as SourcePair;
+\import Integer.Biproduct[V := TargetGroups.totalLeft.Carrier, W := TargetGroups.totalRight.Carrier, left := TargetGroups.totalLeft.space, right := TargetGroups.totalRight.space] \as TargetPair;
+\import std.Data[].Pair[].Prop[A := TargetGroups.totalLeft.Carrier, B := TargetGroups.totalRight.Carrier] \as EqualityPair;
+\import Linear.On[A := S.whole, B := T.whole, f := whole.apply, addition := whole.addition] \as WholeMap;
+\import Linear.On[A := S.intersection, B := T.intersection, f := overlap.apply, addition := overlap.addition] \as OverlapMap;
+\import Linear.On[A := Base.baseLeft, B := TargetGroups.totalLeft, f := left.apply, addition := left.addition] \as LeftMap;
+\import Linear.On[A := Base.baseRight, B := TargetGroups.totalRight, f := right.apply, addition := right.addition] \as RightMap;
+\definition leftProjection: _ := LeftMap.map;
+\definition rightProjection: _ := RightMap.map;
+\definition wholeMap: Integer.MapBetween S.whole T.whole := WholeMap.map;
+\definition overlapMap: Integer.MapBetween S.intersection T.intersection := OverlapMap.map;
+\import Integer.Hom[V := S.directSum.Carrier, W := T.directSum.Carrier, source := S.directSum.space, target := T.directSum.space] \as PairMap;
+\definition pair: PairMap.Map := PairMap.Map {
+  apply := \fun (x: SourcePair.Carrier) => TargetPair.make (left.apply (SourcePair.first x)) (right.apply (SourcePair.second x)),
+  addition := \fun (a, b: SourcePair.Carrier) => EqualityPair.ext _ _
+    (LeftMap.map.addition (SourcePair.first a) (SourcePair.first b)) (RightMap.map.addition (SourcePair.second a) (SourcePair.second b)),
+  scalar := \fun (r: I.Int^)(a: SourcePair.Carrier) => EqualityPair.ext _ _
+    (LeftMap.map.scalar r (SourcePair.first a)) (RightMap.map.scalar r (SourcePair.second a)),
+};
+\import BaseMV.With[coefficients := BaseProduct.integerCoefficients].Coordinates[].Cohomology[z := input] \as SourceRestriction;
+\import TotalMV.With[coefficients := TotalProduct.integerCoefficients].Coordinates[].Cohomology[z := z] \as TargetRestriction;
+\definition restriction: \forall (a: S.whole.Carrier) ->
+  pair.apply (SourceMaps.restriction.apply a) = TargetMaps.restriction.apply (wholeMap.apply a) :=
+  \fun (a: S.whole.Carrier) => eq_reason_in!{TargetPair.Carrier _
+    "=" _ "by" { congr!{SourcePair.Carrier TargetPair.Carrier} pair.apply _ _ (SourceRestriction.law a) }
+    "=" _ "by" { EqualityPair.ext _ _ (sym!{{TargetGroups.totalLeft.Carrier}} _ _ (leftRestriction a))
+      (sym!{{TargetGroups.totalRight.Carrier}} _ _ (rightRestriction a)) }
+    "=" _ "by" { sym!{TargetPair.Carrier} _ _ (TargetRestriction.law (wholeMap.apply a)) }
+  };
+\import BaseMV.With[coefficients := BaseProduct.integerCoefficients].Coordinates[].Difference[z := input] \as SourceDifference;
+\import TotalMV.With[coefficients := TotalProduct.integerCoefficients].Coordinates[].Difference[z := z] \as TargetDifference;
+\import Integer.Hom[V := S.intersection.Carrier, W := T.intersection.Carrier, source := S.intersection.space, target := T.intersection.space] \as OverlapMaps;
+\definition differenceOnPair: \forall (a: Base.baseLeft.Carrier)(b: Base.baseRight.Carrier) ->
+  overlapMap.apply (SourceMaps.difference.apply (SourcePair.make a b)) = TargetMaps.difference.apply (pair.apply (SourcePair.make a b)) :=
+  \fun (a: Base.baseLeft.Carrier)(b: Base.baseRight.Carrier) => eq_reason_in!{{T.intersection.Carrier} _
+    "=" _ "by" { congr!{{S.intersection.Carrier} {T.intersection.Carrier}} overlapMap.apply _ _ (SourceDifference.law a b) }
+    "=" _ "by" { overlapMap.addition ((OverlapLeft.baseRestriction input).apply a)
+      (S.intersection.space.neg ((OverlapRight.baseRestriction input).apply b)) }
+    "=" _ "by" { congr!{{T.intersection.Carrier} {T.intersection.Carrier}}
+      (T.intersection.space.add (overlapMap.apply ((OverlapLeft.baseRestriction input).apply a))) _ _
+      (OverlapMaps.negativePreserved overlapMap ((OverlapRight.baseRestriction input).apply b)) }
+    "=" _ "by" { congr!{{T.intersection.Carrier} {T.intersection.Carrier} {T.intersection.Carrier}}
+      (\fun (x, y: T.intersection.Carrier) => T.intersection.space.add x (T.intersection.space.neg y)) _ _ _ _
+      (sym!{{T.intersection.Carrier}} _ _ (leftOverlap a)) (sym!{{T.intersection.Carrier}} _ _ (rightOverlap b)) }
+    "=" _ "by" { sym!{{T.intersection.Carrier}} _ _ (TargetDifference.law (left.apply a) (right.apply b)) }
+  };
+\import std.Data[].Pair[].Prop[A := Base.baseLeft.Carrier, B := Base.baseRight.Carrier] \as SourceEquality;
+\definition difference: \forall (a: S.directSum.Carrier) ->
+  overlapMap.apply (SourceMaps.difference.apply a) = TargetMaps.difference.apply (pair.apply a) :=
+  \fun (a: S.directSum.Carrier) => \idelim SourcePair.make (SourcePair.first a) (SourcePair.second a) = a
+    \with b: S.directSum.Carrier => overlapMap.apply (SourceMaps.difference.apply b) = TargetMaps.difference.apply (pair.apply b) \by {
+      base: differenceOnPair (SourcePair.first a) (SourcePair.second a), equality: SourceEquality.eta a
+    };

@@ -34,3 +34,10 @@
 \module Change(L: \Set, targetRing: std.Alg[].Ring[].CommutativeRing[L],
   morphism: cohomology_thom.CoefficientChange[].OnSpace[A := E, source := total, R := K, S := L, ring := ring, targetRing := targetRing].Morphism);
 \module MayerVietoris(cover: singular_excision.MayerVietoris[A := X].Over[source := base].Cover);
+
+\module Along(Y, Z: \Set, newBase: topology.Topology[Carrier := Y].Topology, newTotal: topology.Topology[Carrier := Z].Topology,
+  newPart: \Pow Y, newProjection: Z -> Y, newContinuous: topology.Continuity[A := Z, B := Y].Continuous newTotal newBase newProjection,
+  baseMap: singular_cohomology.Relative[A := Y, source := newBase, subset := newPart].Maps[B := X].Over[target := base, targetSubset := U].Map,
+  totalMap: singular_cohomology.Relative[A := Z, source := newTotal, subset := { e: Z \where \In[Y] newPart (newProjection e) }]
+    .Maps[B := E].Over[target := total, targetSubset := preimage U].Map,
+  square: \forall (e: Z) -> projection (totalMap e) = baseMap (newProjection e));

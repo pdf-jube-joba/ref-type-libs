@@ -1,0 +1,41 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.trans;
+\use Equality.sym;
+\use Equality.congr;
+\import \root.Projection[X := BaseMV.Left, E := TotalMV.Left, base := BaseMV.leftTopology,
+  total := TotalMV.leftTopology, projection := Projection.left, continuous := Projection.leftContinuous]
+  .Over[U := BaseMV.leftPart, K := K, ring := ring] \as LeftProjection;
+\import \root.Projection[X := BaseMV.Right, E := TotalMV.Right, base := BaseMV.rightTopology,
+  total := TotalMV.rightTopology, projection := Projection.right, continuous := Projection.rightContinuous]
+  .Over[U := BaseMV.rightPart, K := K, ring := ring] \as RightProjection;
+\import \root.Projection[X := BaseMV.Overlap, E := TotalMV.Overlap, base := BaseMV.overlapTopology,
+  total := TotalMV.overlapTopology, projection := Projection.overlap, continuous := Projection.overlapContinuous]
+  .Over[U := BaseMV.overlapPart, K := K, ring := ring] \as OverlapProjection;
+\import \root.Projection[X := X, E := E, base := base, total := total, projection := projection, continuous := continuous]
+  .Over[U := U, K := K, ring := ring] \as WholeProjection;
+\import WholeProjection.Along[Y := BaseMV.Left, Z := TotalMV.Left, newBase := BaseMV.leftTopology,
+  newTotal := TotalMV.leftTopology, newPart := BaseMV.leftPart,
+  newProjection := Projection.left, newContinuous := Projection.leftContinuous,
+  baseMap := BaseMV.leftPairMap, totalMap := TotalMV.leftPairMap, square := (\fun (x: TotalMV.Left) => \refl(projection x))] \as Left;
+\import WholeProjection.Along[Y := BaseMV.Right, Z := TotalMV.Right, newBase := BaseMV.rightTopology,
+  newTotal := TotalMV.rightTopology, newPart := BaseMV.rightPart,
+  newProjection := Projection.right, newContinuous := Projection.rightContinuous,
+  baseMap := BaseMV.rightPairMap, totalMap := TotalMV.rightPairMap, square := (\fun (x: TotalMV.Right) => \refl(projection x))] \as Right;
+\import LeftProjection.Along[Y := BaseMV.Overlap, Z := TotalMV.Overlap, newBase := BaseMV.overlapTopology,
+  newTotal := TotalMV.overlapTopology, newPart := BaseMV.overlapPart,
+  newProjection := Projection.overlap, newContinuous := Projection.overlapContinuous,
+  baseMap := BaseMV.toLeft, totalMap := TotalMV.toLeft, square := (\fun (x: TotalMV.Overlap) => \refl(Projection.left (TotalMV.toLeft x)))] \as OverlapLeft;
+\import RightProjection.Along[Y := BaseMV.Overlap, Z := TotalMV.Overlap, newBase := BaseMV.overlapTopology,
+  newTotal := TotalMV.overlapTopology, newPart := BaseMV.overlapPart,
+  newProjection := Projection.overlap, newContinuous := Projection.overlapContinuous,
+  baseMap := BaseMV.toRight, totalMap := TotalMV.toRight, square := (\fun (x: TotalMV.Overlap) => \refl(Projection.right (TotalMV.toRight x)))] \as OverlapRight;
+\import singular_products.Cochains[A := TotalMV.Left, source := TotalMV.leftTopology, R := K, ring := ring].Cohomology[] \as LeftClasses;
+\import singular_products.Cochains[A := TotalMV.Right, source := TotalMV.rightTopology, R := K, ring := ring].Cohomology[] \as RightClasses;
+\import singular_products.Cochains[A := TotalMV.Overlap, source := TotalMV.overlapTopology, R := K, ring := ring].Cohomology[] \as OverlapClasses;
+\definition leftLift[q: N.Nat^][u: TotalCohomology.Group q]: LeftClasses.Group q := Left.restricted q u;
+\definition rightLift[q: N.Nat^][u: TotalCohomology.Group q]: RightClasses.Group q := Right.restricted q u;
+\definition overlapLift[q: N.Nat^][u: TotalCohomology.Group q]: OverlapClasses.Group q := OverlapLeft.restricted q (leftLift q u);
+\module Agree(q: N.Nat^);
+\module Summand(q: N.Nat^, u: TotalCohomology.Group q);
+
+\module Groups(z: I.Int^);

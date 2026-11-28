@@ -68,3 +68,5 @@
 \module ZeroExtendedDual(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
 
 \module NonnegativePart;
+
+\module NilpotentComparison(K: \Set, ring: std.Alg[].Ring[].Ring[K]);

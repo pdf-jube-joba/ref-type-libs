@@ -47,3 +47,5 @@
 \module FiniteConnecting(count: N.Nat^, degree: Finite.Fin count -> N.Nat^,
 
   classes: \forall (i: Finite.Fin count) -> TotalCohomology.Group (degree i));
+
+\module Pieces;

@@ -37,3 +37,5 @@
 \module Components(p, q: N.Nat^);
 
 \module ExternalFormula(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K], p, q: N.Nat^);
+
+\module CohomologyModel(K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

@@ -10,6 +10,7 @@
     overBase: \forall (e: LocalTotal.CarrierSet) ->
       basePoint (coordinates.forward e) = projection e,
   };
+  \module Restriction(V: \Pow X, contained: Base.Subset V U, chart: Chart);
   \module Paired(subset: \Pow X, chart: Chart);
 }
 \definition LocallyTrivial: \Prop := \forall (x: X) ->

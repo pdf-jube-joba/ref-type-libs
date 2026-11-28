@@ -1,0 +1,34 @@
+\import LeftProjection.Shifted[q := q, u := leftLift q u] \as LeftAction;
+\import RightProjection.Shifted[q := q, u := rightLift q u] \as RightAction;
+\import OverlapProjection.Shifted[q := q, u := overlapLift q u] \as OverlapAction;
+\import WholeProjection.Shifted[q := q, u := u] \as WholeAction;
+\import Left.Shift[q := q, u := u] \as LeftNatural;
+\import Right.Shift[q := q, u := u] \as RightNatural;
+\import OverlapLeft.Shift[q := q, u := leftLift q u] \as LeftToOverlap;
+\import OverlapRight.Shift[q := q, u := rightLift q u] \as RightToOverlap;
+\import \parent.Agree[q := q] \as Agree;
+\definition fromRight[K0: I.Int^][u0: OverlapClasses.Group q]: _ :=
+  OverlapProjection.Shifted[q := q, u := u0].To[z := K0].linear;
+\module At(z: I.Int^) {
+  \definition input: I.Int^ := Degrees.unshift q z;
+  \definition whole: _ := WholeAction.To[z := z].linear;
+  \definition left: _ := LeftAction.To[z := z].linear;
+  \definition right: _ := RightAction.To[z := z].linear;
+  \definition overlap: _ := OverlapAction.To[z := z].linear;
+  \definition leftRestriction: \forall (a: baseFamily.Carrier input) ->
+    (Left.totalRestriction z).apply (whole.apply a) = left.apply ((Left.baseRestriction input).apply a) :=
+    LeftNatural.At[z := z].law;
+  \definition rightRestriction: \forall (a: baseFamily.Carrier input) ->
+    (Right.totalRestriction z).apply (whole.apply a) = right.apply ((Right.baseRestriction input).apply a) :=
+    RightNatural.At[z := z].law;
+  \definition leftOverlap: \forall (a: LeftProjection.baseFamily.Carrier input) ->
+    (OverlapLeft.totalRestriction z).apply (left.apply a) = overlap.apply ((OverlapLeft.baseRestriction input).apply a) :=
+    LeftToOverlap.At[z := z].law;
+  \definition rightOverlap: \forall (a: RightProjection.baseFamily.Carrier input) ->
+    (OverlapRight.totalRestriction z).apply (right.apply a) = overlap.apply ((OverlapRight.baseRestriction input).apply a) :=
+    \fun (a: RightProjection.baseFamily.Carrier input) => trans!{{OverlapProjection.totalFamily.Carrier z}} _ _ _
+      (RightToOverlap.At[z := z].law a)
+      (congr!{{OverlapClasses.Group q} {OverlapProjection.totalFamily.Carrier z}}
+        (\fun (c: OverlapClasses.Group q) => (fromRight z c).apply ((OverlapRight.baseRestriction input).apply a)) _ _ (Agree.law u));
+  \module Integer;
+}

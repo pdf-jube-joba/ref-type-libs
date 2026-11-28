@@ -1,0 +1,55 @@
+\import std.Logic[].Equality[].Transport[A := I.Int^] \as Transport;
+\use Equality.sym;
+\definition shift: I.Int^ -> I.Int^ := Degree.shift q;
+\import C.At[C := Fiber.complex, k := q] \as FiberH;
+\definition fiberClass: FiberClasses.Group q := FiberH.classOf (\into[Fiber.Carrier q](beta, FiberH.cycles.carrier) \by { closed });
+\import Project.Shifted[q := q, u := Bundle.lift q fiberClass] \as Singular;
+\import Comparison.Fixed[q := q, beta := beta, closed := closed] \as Tensor;
+\definition input[z: I.Int^]: \Set := (Comparison.source z).Carrier;
+\definition tensorTarget[z: I.Int^]: \Set := (Comparison.target z).Carrier;
+\definition singularTarget[z: I.Int^]: \Set := Project.totalFamily.Carrier z;
+\definition targetMap[z: I.Int^]: tensorTarget z -> singularTarget z := \parent.At[z := z].totalComparison.forward.apply;
+\definition baseMap[z: I.Int^]: input z -> Project.baseFamily.Carrier z := \parent.At[z := z].baseComparison.forward.apply;
+\definition Agreement[d: I.Int^]: \Prop := \forall (a: input d) ->
+  targetMap (shift d) ((Tensor.map d).apply a) = (Singular.map d).apply (baseMap d a);
+\module Natural(p: N.Nat^) {
+  \import N.Basic[].Def[] \as Nat;
+  \definition d: I.Int^ := I.Int^::ofNat p;
+  \definition raw: I.Int^ := I.Int^::ofNat (Nat.add p q);
+  \definition result: I.Int^ := shift d;
+  \definition convert: result = raw := Degree.natural q p;
+  \import \parent.\parent.Positive[p := p, q := q, beta := beta, closed := closed] \as Positive;
+  \definition law: Agreement d :=
+    \fun (a: input d) => eq_reason_in!{{singularTarget result} _
+      "=" _ "by" { congr!{{tensorTarget result} {singularTarget result}} (targetMap result) _ _
+        (sym!{{tensorTarget result}} _ _ (Transport.castInverse tensorTarget result raw convert ((Tensor.map d).apply a))) }
+      "=" _ "by" { sym!{{singularTarget result}} _ _ (Transport.natural tensorTarget singularTarget targetMap raw result
+        (sym!{I.Int^} _ _ convert) (Transport.cast tensorTarget result raw convert ((Tensor.map d).apply a))) }
+      "=" _ "by" { congr!{{singularTarget raw} {singularTarget result}}
+        (Transport.cast singularTarget raw result (sym!{I.Int^} _ _ convert)) _ _ (Positive.law a) }
+    };
+}
+\module Negative(n: N.Nat^) {
+  \definition d: I.Int^ := I.Int^::negSucc n;
+  \definition result: I.Int^ := shift d;
+  \import Scalars.Hom[V := tensorTarget result, W := singularTarget result, source := (Comparison.target result).space,
+    target := Project.totalFamily.space result] \as Maps;
+  \import \parent.\parent.At[z := result] \as Output;
+  \definition law: Agreement d := \fun (a: input d) => Maps.zeroPreserved Output.totalComparison.forward;
+}
+\definition inputLaw: \forall (d: I.Int^) -> Agreement d :=
+  \induction (d: I.Int^) \return Agreement d \with {
+    | ofNat: \fun (p: N.Nat^) => Natural[p := p].law
+    | negSucc: \fun (n: N.Nat^) => Negative[n := n].law
+  };
+\module At(z: I.Int^) {
+  \definition d: I.Int^ := Degree.unshift q z;
+  \definition result: I.Int^ := shift d;
+  \definition same: result = z := Degree.shiftUnshift q z;
+  \import Tensor.At[z := z] \as Component;
+  \import Singular.To[z := z] \as Output;
+  \definition law: \forall (a: input d) -> targetMap z (Component.linear.apply a) = Output.linear.apply (baseMap d a) :=
+    \fun (a: input d) => trans!{{singularTarget z}} _ _ _
+      (sym!{{singularTarget z}} _ _ (Transport.natural tensorTarget singularTarget targetMap result z same ((Tensor.map d).apply a)))
+      (congr!{{singularTarget result} {singularTarget z}} (Transport.cast singularTarget result z same) _ _ (inputLaw d a));
+}

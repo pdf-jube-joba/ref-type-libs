@@ -161,11 +161,13 @@ cutoff induction and stabilization give the unrestricted comparison
 for any degreewise free nonnegative base chain complex and any finite
 homogeneous cocycle basis of the fiber cohomology.
 
-For the relative base chain complex $P_*=C_*(V,W;\mathbb Z)$, the
-remaining product comparison step is to compose this algebraic
-isomorphism with the relative Alexander–Whitney isomorphism and
-identify the induced map with the external cup comparison on
-relative singular cohomology. The triangular change of lifts on chart
-pairs and the assembly of the restriction and difference squares in
-the five-term Mayer–Vietoris diagram also remain. These results would
-instantiate the finite-cover induction with the isomorphism predicate.
+For the relative base chain complex $P_*=C_*(V,W;\mathbb Z)$,
+the relative Alexander–Whitney isomorphism carries the algebraic
+comparison to the finite sum of external cups on relative singular
+cohomology. This gives the isomorphism for product bundles with classes
+pulled back from a homogeneous fiber basis. The comparison summands
+on the Mayer–Vietoris left and right pieces restrict to the same classes
+on the overlap. The restriction and signed difference squares are
+formalized in integer degrees. The remaining steps are to assemble the
+five-term Mayer–Vietoris diagram and apply it using the change of
+lifts on chart pairs and the finite chart cover.

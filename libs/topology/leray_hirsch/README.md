@@ -15,6 +15,7 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `Projection.Charts.LocallyTrivial` | Open local product charts over the projection |
 | `Projection.Charts.Cover.finite` | Finite chart subcover from a finite CW structure |
 | `Projection.Charts.On.Paired.chains` | Pair homeomorphism on a local product chart |
+| `Projection.Charts.On.Restriction.result` | Restriction of a chart to a smaller subspace |
 | `Projection.Charts.Cover.Induction.whole` | Finite-union induction from local and gluing lemmas |
 | `Projection.Lifts.Given.LiftsBasis` | Homogeneous basis hypothesis on each actual fiber |
 | `Projection.Lifts.Fiber.Model.Given.isomorphism` | Fiber cocycle model built from a lifted basis |
@@ -25,8 +26,10 @@ The input classes \(u_i\) have degrees \(d_i\), and the index type is
 | `Projection.Over.Change.Degree.law` | Bidegree naturality for unital ring homomorphisms |
 | `Projection.Over.MayerVietoris.At.connectingLaw` | Naturality of the relative connecting map under projection |
 | `Projection.Over.MayerVietoris.SignedCup.connectingLaw` | Compatibility of the relative connecting map with a comparison summand in integer degrees |
+| `Projection.Over.MayerVietoris.Pieces.Summand.At.Integer` | Restriction and signed difference squares for the relative comparison summands |
 | `Projection.Over.MayerVietoris.FiniteConnecting.At.connectingLaw` | Connecting map on the finite sum of restricted components |
 | `ProductPair.AlexanderWhitney.RelativeMap.CohomologyComparison.At.isomorphism` | Relative Alexander–Whitney cohomology isomorphism over the coefficient ring |
+| `ProductPair.AlexanderWhitney.RelativeMap.CohomologyModel.With.At.Proved.isomorphism` | Relative external cup isomorphism for a product bundle with a finite homogeneous fiber basis |
 | `ProductPair.AlexanderWhitney.RelativeMap.ExternalFormula.Cochains.law` | Relative external cup as the pullback of tensor cochains along Alexander–Whitney |
 | `ProductPair.AlexanderWhitney.BaseTensor.Free.isomorphism` | Free basis of the relative base chain module |
 | `FreeTensorCochains.OneColumn.On.Cohomology.comparison` | Cohomology of an unsigned tensor column with free base module |

@@ -47,6 +47,7 @@
     \definition onSummand: \forall (i: Index)(a: family.Carrier i) ->
       linear.apply (Source.Injection[i := i].map.apply a) = (components i).apply a :=
       Universal.onInjection components;
+    \module ProductCoordinates;
     \module Empty(empty: \forall (x: X) -> Logic.False);
   }
 }

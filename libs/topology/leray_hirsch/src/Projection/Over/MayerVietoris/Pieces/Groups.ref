@@ -1,0 +1,14 @@
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Integer;
+\import singular_cohomology.Relative[A := BaseMV.Left, source := BaseMV.leftTopology, subset := BaseMV.leftPart]
+  .With[coefficients := BaseProduct.integerCoefficients].At[z := z] \as BL;
+\import singular_cohomology.Relative[A := BaseMV.Right, source := BaseMV.rightTopology, subset := BaseMV.rightPart]
+  .With[coefficients := BaseProduct.integerCoefficients].At[z := z] \as BR;
+\import singular_cohomology.Relative[A := TotalMV.Left, source := TotalMV.leftTopology, subset := TotalMV.leftPart]
+  .With[coefficients := TotalProduct.integerCoefficients].At[z := z] \as TL;
+\import singular_cohomology.Relative[A := TotalMV.Right, source := TotalMV.rightTopology, subset := TotalMV.rightPart]
+  .With[coefficients := TotalProduct.integerCoefficients].At[z := z] \as TR;
+\definition baseLeft: Integer.Bundle := Integer.Bundle { Carrier := BL.Carrier, space := BL.space };
+\definition baseRight: Integer.Bundle := Integer.Bundle { Carrier := BR.Carrier, space := BR.space };
+\definition totalLeft: Integer.Bundle := Integer.Bundle { Carrier := TL.Carrier, space := TL.space };
+\definition totalRight: Integer.Bundle := Integer.Bundle { Carrier := TR.Carrier, space := TR.space };

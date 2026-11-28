@@ -1,0 +1,101 @@
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.trans;
+\use Equality.sym;
+\import Base.Subspace[S := V] \as BaseInside;
+\import Total.Subspace[S := preimage V] \as TotalInside;
+\import topological_constructions.Product[A := BaseInside.CarrierSet, B := F] \as InsideProduct;
+\import Product.Maps[] \as OldProjections;
+\import InsideProduct.Maps[] \as NewProjections;
+\import \parent.\parent.On[U := V] \as Restricted;
+\import topology.Homeomorphism[A := LocalTotal.CarrierSet, B := Product.CarrierSet] \as Homeo;
+\import topology.Homeomorphism[A := TotalInside.CarrierSet, B := InsideProduct.CarrierSet] \as NewHomeo;
+\definition inclusionBase[x: BaseInside.CarrierSet]: LocalBase.CarrierSet :=
+  \into[X](x, U) \by { contained x (\bysub(X, V, x)) };
+\definition inclusionTotal[e: TotalInside.CarrierSet]: LocalTotal.CarrierSet :=
+  \into[E](e, preimage U) \by { contained (projection e) (\bysub(E, preimage V, e)) };
+\import topology.Continuity[A := BaseInside.CarrierSet, B := X].Corestriction[S := U] \as BaseInclusion;
+\import topology.Continuity[A := BaseInside.CarrierSet, B := X].Corestriction[S := V] \as BaseCarrier;
+\import topology.Continuity[A := TotalInside.CarrierSet, B := E].Corestriction[S := preimage U] \as TotalInclusion;
+\import topology.Continuity[A := TotalInside.CarrierSet, B := E].Corestriction[S := preimage V] \as TotalCarrier;
+\definition baseInclusionContinuous: _ := BaseInclusion.corestrictContinuous (BaseInside.topology base) base
+  inclusionBase (BaseCarrier.inclusionContinuous base);
+\definition totalInclusionContinuous: _ := TotalInclusion.corestrictContinuous (TotalInside.topology total) total
+  inclusionTotal (TotalCarrier.inclusionContinuous total);
+\definition baseCoordinate[e: TotalInside.CarrierSet]: BaseInside.CarrierSet :=
+  \into[X](projection e, V) \by { \bysub(E, preimage V, e) };
+\import topology.Continuity[A := E, B := X].Restriction[S := preimage V] \as RestrictProjection;
+\import topology.Continuity[A := TotalInside.CarrierSet, B := X].Corestriction[S := V] \as CorestrictProjection;
+\definition projectionContinuous: _ := CorestrictProjection.corestrictContinuous (TotalInside.topology total) base baseCoordinate
+  (RestrictProjection.restrictContinuous total base projection continuous);
+\definition oldPoint[e: TotalInside.CarrierSet]: Product.CarrierSet := chart.coordinates.forward (inclusionTotal e);
+\definition fiberCoordinate[e: TotalInside.CarrierSet]: F := Pair.second LocalBase.CarrierSet F (oldPoint e);
+\import topology.Composition[A := TotalInside.CarrierSet, B := LocalTotal.CarrierSet, C := Product.CarrierSet] \as OldChart;
+\import topology.Composition[A := TotalInside.CarrierSet, B := Product.CarrierSet, C := F] \as Factor;
+\definition fiberContinuous: _ := Factor.composeContinuous (TotalInside.topology total) chartTarget fiber oldPoint (Pair.second LocalBase.CarrierSet F)
+  (OldChart.composeContinuous (TotalInside.topology total) (LocalTotal.topology total) chartTarget inclusionTotal chart.coordinates.forward
+    totalInclusionContinuous (Homeo.laws (LocalTotal.topology total) chartTarget chart.coordinates).forwardContinuous)
+  (OldProjections.secondContinuous (LocalBase.topology base) fiber);
+\import InsideProduct.Universal[X := TotalInside.CarrierSet] \as Into;
+\definition forward[e: TotalInside.CarrierSet]: InsideProduct.CarrierSet :=
+  Pair.pair BaseInside.CarrierSet F (baseCoordinate e) (fiberCoordinate e);
+\definition forwardContinuous: _ := Into.pairContinuous (TotalInside.topology total) (BaseInside.topology base) fiber
+  baseCoordinate fiberCoordinate projectionContinuous fiberContinuous;
+\definition embed[a: InsideProduct.CarrierSet]: Product.CarrierSet :=
+  Pair.pair LocalBase.CarrierSet F (inclusionBase (Pair.first BaseInside.CarrierSet F a)) (Pair.second BaseInside.CarrierSet F a);
+\import Product.Universal[X := InsideProduct.CarrierSet] \as IntoOld;
+\import topology.Composition[A := InsideProduct.CarrierSet, B := BaseInside.CarrierSet, C := LocalBase.CarrierSet] \as EmbedBase;
+\definition productInclusionContinuous: _ := IntoOld.pairContinuous Restricted.chartTarget (LocalBase.topology base) fiber
+  (\fun (a: InsideProduct.CarrierSet) => inclusionBase (Pair.first BaseInside.CarrierSet F a)) (Pair.second BaseInside.CarrierSet F)
+  (EmbedBase.composeContinuous Restricted.chartTarget (BaseInside.topology base) (LocalBase.topology base)
+    (Pair.first BaseInside.CarrierSet F) inclusionBase (NewProjections.firstContinuous (BaseInside.topology base) fiber) baseInclusionContinuous)
+  (NewProjections.secondContinuous (BaseInside.topology base) fiber);
+\definition inverseOverBase[x: Product.CarrierSet]: projection (chart.coordinates.backward x) = basePoint x :=
+  trans!{X} _ _ _ (sym!{X} _ _ (chart.overBase (chart.coordinates.backward x)))
+    (congr!{Product.CarrierSet X} basePoint _ _ ((Homeo.laws (LocalTotal.topology total) chartTarget chart.coordinates).rightInverse x));
+\definition inverseValue[a: InsideProduct.CarrierSet]: LocalTotal.CarrierSet := chart.coordinates.backward (embed a);
+\definition backward[a: InsideProduct.CarrierSet]: TotalInside.CarrierSet :=
+  \into[E](inverseValue a, preimage V) \by {
+    \idelim Pair.first BaseInside.CarrierSet F a = projection (inverseValue a) \with x: X => Base.Member V x \by {
+      base: \bysub(X, V, Pair.first BaseInside.CarrierSet F a), equality: sym!{X} _ _ (inverseOverBase (embed a))
+    }
+  };
+\import topology.Composition[A := InsideProduct.CarrierSet, B := Product.CarrierSet, C := LocalTotal.CarrierSet] \as IntoTotal;
+\import topology.Composition[A := InsideProduct.CarrierSet, B := LocalTotal.CarrierSet, C := E] \as IntoAmbient;
+\import topology.Continuity[A := LocalTotal.CarrierSet, B := E].Corestriction[S := preimage U] \as OldCarrier;
+\import topology.Continuity[A := InsideProduct.CarrierSet, B := E].Corestriction[S := preimage V] \as BackwardMap;
+\definition backwardContinuous: _ := BackwardMap.corestrictContinuous Restricted.chartTarget total backward
+  (IntoAmbient.composeContinuous Restricted.chartTarget (LocalTotal.topology total) total inverseValue (\fun (e: LocalTotal.CarrierSet) => e)
+    (IntoTotal.composeContinuous Restricted.chartTarget chartTarget (LocalTotal.topology total)
+      embed chart.coordinates.backward productInclusionContinuous ((Homeo.laws (LocalTotal.topology total) chartTarget chart.coordinates).backwardContinuous))
+    (OldCarrier.inclusionContinuous total));
+\import Pair.Prop[A := LocalBase.CarrierSet, B := F] \as OldPair;
+\import Pair.Prop[A := BaseInside.CarrierSet, B := F] \as NewPair;
+\import singular_cellular_algebra.Algebra[].Refinement[A := X, S := U] \as BaseEq;
+\import singular_cellular_algebra.Algebra[].Refinement[A := X, S := V] \as NewBaseEq;
+\import singular_cellular_algebra.Algebra[].Refinement[A := E, S := preimage V] \as TotalEq;
+\definition forwardCommutes: \forall (e: TotalInside.CarrierSet) -> embed (forward e) = oldPoint e :=
+  \fun (e: TotalInside.CarrierSet) => OldPair.ext (embed (forward e)) (oldPoint e)
+    (BaseEq.ext (inclusionBase (baseCoordinate e)) (Pair.first LocalBase.CarrierSet F (oldPoint e))
+      (sym!{X} _ _ (chart.overBase (inclusionTotal e)))) (\refl(fiberCoordinate e));
+\definition leftInverse: \forall (e: TotalInside.CarrierSet) -> backward (forward e) = e :=
+  \fun (e: TotalInside.CarrierSet) => TotalEq.ext (backward (forward e)) e
+    (trans!{E} _ _ _ (congr!{Product.CarrierSet E} (\fun (x: Product.CarrierSet) => chart.coordinates.backward x) _ _ (forwardCommutes e))
+      (congr!{LocalTotal.CarrierSet E} (\fun (x: LocalTotal.CarrierSet) => x) _ _
+        ((Homeo.laws (LocalTotal.topology total) chartTarget chart.coordinates).leftInverse (inclusionTotal e))));
+\definition embedInjective: \forall (a, b: InsideProduct.CarrierSet) -> embed a = embed b -> a = b :=
+  \fun (a, b: InsideProduct.CarrierSet)(same: embed a = embed b) => NewPair.ext a b
+    (NewBaseEq.ext (Pair.first BaseInside.CarrierSet F a) (Pair.first BaseInside.CarrierSet F b) (congr!{Product.CarrierSet X} basePoint _ _ same))
+    (congr!{Product.CarrierSet F} (Pair.second LocalBase.CarrierSet F) _ _ same);
+\definition rightInverse: \forall (a: InsideProduct.CarrierSet) -> forward (backward a) = a :=
+  \fun (a: InsideProduct.CarrierSet) => embedInjective (forward (backward a)) a
+    (trans!{Product.CarrierSet} _ _ _ (forwardCommutes (backward a))
+      ((Homeo.laws (LocalTotal.topology total) chartTarget chart.coordinates).rightInverse (embed a)));
+\definition coordinates: NewHomeo.Homeomorphism[TotalInside.topology total, Restricted.chartTarget] :=
+  NewHomeo.Homeomorphism[TotalInside.topology total, Restricted.chartTarget] {
+    forward := forward, backward := backward, leftInverse := leftInverse, rightInverse := rightInverse,
+    forwardContinuous := forwardContinuous, backwardContinuous := backwardContinuous,
+  };
+\definition result: Restricted.Chart := Restricted.Chart {
+  coordinates := coordinates, overBase := \fun (e: TotalInside.CarrierSet) => \refl(projection e),
+};

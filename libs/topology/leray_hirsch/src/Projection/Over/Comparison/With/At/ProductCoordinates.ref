@@ -1,0 +1,43 @@
+\import \root.ProductExact[K := K, ring := ring, Index := Index] \as Products;
+\import Products.SumMaps[indices := Finite.elements count].From[source := family,
+  target := Modules.Bundle { Carrier := totalFamily.Carrier z, space := totalFamily.space z }] \as Comparison;
+\definition domain: Modules.Bundle := Products.bundle family;
+\definition range: Modules.Bundle := Modules.Bundle { Carrier := totalFamily.Carrier z, space := totalFamily.space z };
+\definition finite: Modules.MapBetween domain range := Comparison.map components;
+\import Finite.Enumeration[] \as FiniteEnumeration;
+\import Modules.Sums[I := Index].Vector[V := Source.Carrier, space := Source.space].Mapping[W := range.Carrier, target := range.space] \as Apply;
+\import Modules.Sums[I := Index].Vector[V := range.Carrier, space := range.space] \as Values;
+\use std.Logic[].Equality[].congr;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].sym;
+\definition reconstruction: \forall (x: domain.Carrier) -> coordinateIsomorphism.backward.apply x = Coordinates.combination (Finite.elements count) x :=
+  \fun (x: domain.Carrier) => coordinateInjective _ _
+    (trans!{domain.Carrier} _ _ _ (coordinateIsomorphism.rightInverse x)
+      (sym!{domain.Carrier} _ _ (Coordinates.recover (Finite.elements count) (FiniteEnumeration.distinct count) x
+        (\fun (i: Index)(missing: Logic.Not (\In[Index] (Enumeration.keys (Finite.elements count)) i)) =>
+          Logic.falseElim _ (missing (Finite.exhaustive count i))))));
+\definition formula: \forall (x: domain.Carrier) -> linear.apply (coordinateIsomorphism.backward.apply x) = finite.apply x :=
+  \fun (x: domain.Carrier) => trans!{range.Carrier} _ _ _
+    (congr!{Source.Carrier range.Carrier} linear.apply _ _ (reconstruction x))
+    (trans!{range.Carrier} _ _ _
+      (Apply.law linear (Finite.elements count) (Coordinates.term x))
+      (Values.congruent (Finite.elements count) (\fun (i: Index) => linear.apply (Coordinates.term x i))
+        (\fun (i: Index) => (components i).apply (x i)) (\fun (i: Index) => onSummand i (x i))));
+\import Modules.Isomorphism[V := domain.Carrier, W := range.Carrier, source := domain.space, target := range.space] \as Iso;
+\module With(iso: Iso.Isomorphism, law: \forall (x: domain.Carrier) -> iso.forward.apply x = finite.apply x) {
+  \import Modules.Isomorphism[V := Source.Carrier, W := domain.Carrier, source := Source.space, target := domain.space]
+    .Composition[U := range.Carrier, final := range.space] \as Compose;
+  \definition composition: _ := Compose.compose iso coordinateIsomorphism;
+  \definition consequence: \forall (x: Source.Carrier) -> linear.apply x = composition.forward.apply x :=
+    \fun (x: Source.Carrier) => trans!{range.Carrier} _ _ _
+      (congr!{Source.Carrier range.Carrier} linear.apply _ _ (sym!{Source.Carrier} _ _ (coordinateIsomorphism.leftInverse x)))
+      (trans!{range.Carrier} _ _ _ (formula (coordinates.apply x)) (sym!{range.Carrier} _ _ (law (coordinates.apply x))));
+  \import Modules.Isomorphism[V := Source.Carrier, W := range.Carrier, source := Source.space, target := range.space] \as Actual;
+  \definition isomorphism: Actual.Isomorphism := Actual.Isomorphism {
+    forward := linear, backward := composition.backward,
+    leftInverse := \fun (x: Source.Carrier) => trans!{Source.Carrier} _ _ _
+      (congr!{range.Carrier Source.Carrier} composition.backward.apply _ _ (consequence x)) (composition.leftInverse x),
+    rightInverse := \fun (y: range.Carrier) => trans!{range.Carrier} _ _ _
+      (consequence (composition.backward.apply y)) (composition.rightInverse y),
+  };
+}
