@@ -16,3 +16,5 @@
 \module SphereCoverSign(n: std.Data[].Nat[].Nat^);
 \module CircleSmallSign;
 \module DiskBoundary(n: std.Data[].Nat[].Nat^);
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\module OrdinaryComposition(A, B, C: \Set, source: topology.Topology[Carrier := A].Topology, target: topology.Topology[Carrier := B].Topology, final: topology.Topology[Carrier := C].Topology, coefficients: Modules.Bundle, z: I.Int^);

@@ -1,0 +1,36 @@
+\import singular_cohomology.Chains[A := A, source := source] \as InitialChains;
+\import singular_cohomology.Chains[A := B, source := target] \as MiddleChains;
+\import singular_cohomology.Chains[A := C, source := final] \as FinalChains;
+\import Nonnegative.ZeroExtension[C := InitialChains.complex] \as Initial;
+\import Nonnegative.ZeroExtension[C := MiddleChains.complex] \as Middle;
+\import Nonnegative.ZeroExtension[C := FinalChains.complex] \as Final;
+\import singular_cohomology.Maps[A := A, B := B, source := source, target := target] \as First;
+\import singular_cohomology.Maps[A := B, B := C, source := target, target := final] \as Second;
+\import singular_cohomology.Maps[A := A, B := C, source := source, target := final] \as Direct;
+\import singular_cohomology.Maps[A := A, B := B, source := source, target := target].Composition[C := C, final := final].Integer[] \as Compare;
+\import topology.Composition[A := A, B := B, C := C] \as Functions;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing] \as Hom;
+\import Hom.IntegerComposition[P := Initial.complex, Q := Middle.complex, T := Final.complex, N := coefficients] \as Action;
+\import Hom.Integer[P := Initial.complex, N := coefficients] \as Last;
+\import Hom.Integer[P := Final.complex, N := coefficients] \as Start;
+\import Hom.Integer[P := Middle.complex, N := coefficients] \as Mid;
+\import Cochains.Map[C := Start.complex, D := Mid.complex].At[k := z] \as ToMiddle;
+\import Cochains.Map[C := Mid.complex, D := Last.complex].At[k := z] \as ToFinal;
+\import Cochains.At[C := Last.complex, z := z] \as LastH;
+\import Cochains.At[C := Start.complex, z := z] \as StartH;
+\import Cochains.Map[C := Start.complex, D := Last.complex].At[k := z] \as Map;
+\import Chains.Map[C := Initial.complex, D := Final.complex] \as ChainMaps;
+\import Modules.End[V := coefficients.Carrier, space := coefficients.space] \as Scalars;
+\import Hom.IntegerMapping[P := Initial.complex, Q := Final.complex, N := coefficients, L := coefficients] \as Pull;
+\definition apply[chain: ChainMaps.Map][u: StartH.Cohomology]: LastH.Cohomology := (Map.induced Pull.On[f := chain, u := Scalars.identity].map).apply u;
+\definition continuous[f: A -> B][fc: topology.Continuity[A := A, B := B].Continuous source target f]
+  [g: B -> C][gc: topology.Continuity[A := B, B := C].Continuous target final g]: _ := Functions.composeContinuous source target final f g fc gc;
+\definition law[f: A -> B][fc: topology.Continuity[A := A, B := B].Continuous source target f]
+  [g: B -> C][gc: topology.Continuity[A := B, B := C].Continuous target final g][u: StartH.Cohomology]:
+  apply (Direct.integerPush (\fun (x: A) => g (f x)) (continuous f fc g gc)) u =
+    (ToFinal.induced (Action.second (First.integerPush f fc))).apply
+      ((ToMiddle.induced (Action.first (Second.integerPush g gc))).apply u) :=
+  trans!{LastH.Cohomology} _ _ _
+    (congr!{ChainMaps.Map LastH.Cohomology} (\fun (arrow: ChainMaps.Map) => apply arrow u) _ _
+      (sym!{ChainMaps.Map} _ _ (Compare.law f fc g gc)))
+    (Action.At[k := z].onCohomology (First.integerPush f fc) (Second.integerPush g gc) u);

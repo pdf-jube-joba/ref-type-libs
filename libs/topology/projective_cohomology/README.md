@@ -45,6 +45,7 @@ The real and complex spaces in dimension (n) are the rank-one Grassmannians in a
 | `ComplexLineSphere.Section.Frame.DiskCoordinates.Puncture` | The northern section gives a map into the disk relative to its punctured subspace. Its normalized equatorial restriction is the identity on the circle |
 | `ComplexLineSphere.Section.Frame.DiskCoordinates.LocalPuncture` and `OpenToModel` | The northern punctured disk bundle retracts onto its boundary. The northern chart map preserves the boundary and the punctured disk pairs |
 | `ComplexLineSphere.Section.Frame.DiskCoordinates.EquatorialPull` | The angular section map induces the same integral degree-one pullback as the equatorial retraction |
+| `ComplexLineSphere.Section.Frame.DiskCoordinates.Connecting` | The connecting class of the punctured disk restricts to the connecting class of the boundary-circle pullback in the closed disk pair |
 | `ComplexLineSphere.Orientation` | The chosen integral generator of the standard two-sphere is obtained from its northern relative generator by the excision comparison and forgetting |
 | `ComplexLineSphere.Orientation.PositiveConnecting` | The positive-degree comparison from ordinary to reduced cohomology commutes with the connecting map of a pair |
 | `ComplexLineSphere.Orientation.PullCompatibility` | Positive-degree integral pullbacks commute with the reduced-to-ordinary comparison |
