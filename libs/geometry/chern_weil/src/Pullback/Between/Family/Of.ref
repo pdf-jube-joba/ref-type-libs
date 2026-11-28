@@ -1,0 +1,7 @@
+\import bundle_connections.PullbackGlobal[n := n, m := m, r := r].Between[X := X, Y := Y].Family[F := F, space := space].Of[I := I, bundle := bundle, f := f] \as BundlesPull;
+\import bundle_connections.Real[n := m, r := r].On[M := Y].Family[F := F, space := space].Of[I := I, bundle := bundle] \as TargetConnection;
+\import \root.Global[n := m, r := r].On[M := Y].Family[F := F, space := space].Of[I := I, bundle := bundle] \as TargetChernWeil;
+\import \root.Global[n := n, r := r].On[M := X].Family[F := BundlesPull.Fiber, space := BundlesPull.fiberSpace].Of[I := BundlesPull.Index, bundle := BundlesPull.pullback] \as SourceChernWeil;
+\import \root.Global[n := n, r := r].On[M := X].Atlas[I := BundlesPull.Index, chart := \fun (i: BundlesPull.Index) => i.chart, covers := BundlesPull.covers] \as SourceAtlas;
+\import differential_forms.Pullback[n := n, m := m].Between[M := X, N := Y].Of[f := f] \as Pull;
+\module Naturality(connection: TargetConnection.Connection);

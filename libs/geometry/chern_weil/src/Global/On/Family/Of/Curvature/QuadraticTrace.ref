@@ -1,0 +1,48 @@
+\definition four: N.Nat^ := N.Nat^::succ three;
+\definition five: N.Nat^ := N.Nat^::succ four;
+\import \root.Global[n := n, r := r].On[M := M].Atlas[I := I, chart := Bundle.chart, covers := bundle.atlas.covers] \as Atlas;
+\definition square[i: I]: \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Matrix four :=
+  \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].QuadraticTrace[].square;
+\definition chartwise[i: I]: Euclidean.LocalForm (Bundle.chart i).image four :=
+  \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].QuadraticTrace[].form;
+\module OnOverlap(i, j: I);
+\definition agrees: \forall (i, j: I) -> Atlas.Agreement (Bundle.chart i) (Bundle.chart j) four (chartwise i) (chartwise j) :=
+  \fun (i, j: I) => OnOverlap[i := i, j := j].law;
+\import Atlas.Glue[k := four, forms := chartwise, overlaps := agrees] \as Glue;
+\definition form: BaseForms.Form four := Glue.global;
+\definition coordinates: \forall (i: I) -> form (Bundle.chart i) = chartwise i := Glue.comparison;
+\import BaseForms.ExteriorDerivative[k := four] \as Derivative;
+\import BaseForms.At[k := five] \as Global5;
+\definition closed: Derivative.apply form = Global5.zero :=
+  Atlas.At[k := five].ext (Derivative.apply form) Global5.zero (\fun (i: I) =>
+    trans!{{Euclidean.LocalForm (Bundle.chart i).image five}} _ _ _
+      (congr!{{Euclidean.LocalForm (Bundle.chart i).image four} {Euclidean.LocalForm (Bundle.chart i).image five}}
+        Euclidean.On[U := (Bundle.chart i).image].ExteriorDerivative[k := four].apply _ _ (coordinates i))
+      \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].QuadraticTrace[].closed);
+\import BaseForms.DeRham[].At[k := four] \as DeRham;
+\definition deRhamClass: DeRham.H :=
+  DeRham.classOf (\into[BaseForms.Form four](form, DeRham.Cycle) \by { closed });
+\import \parent.TraceForm[] \as LinearTrace;
+\import BaseForms.Wedge[p := two, q := two] \as Wedge;
+\import BaseForms.DeRham[].Product[p := two, q := two] \as ClosedProduct;
+\import BaseForms.At[k := four] \as Global4;
+\import Spaces.Laws[V := BaseForms.Form five, space := Global5.space] \as Laws5;
+\definition traceProduct: BaseForms.Form four := Wedge.apply LinearTrace.form LinearTrace.form;
+\definition traceProductClosed: Derivative.apply traceProduct = Global5.zero :=
+  ClosedProduct.closed LinearTrace.form LinearTrace.form LinearTrace.closed LinearTrace.closed;
+\definition evaluate[traceSquared, traceOfSquare: R.Real]: BaseForms.Form four :=
+  Global4.plus (Global4.scale traceSquared traceProduct) (Global4.scale traceOfSquare form);
+\definition evaluateClosed: \forall (traceSquared, traceOfSquare: R.Real) -> Derivative.apply (evaluate traceSquared traceOfSquare) = Global5.zero :=
+  \fun (traceSquared, traceOfSquare: R.Real) => eq_reason_in!{{BaseForms.Form five} _
+    "=" _ "by" { Derivative.addition (Global4.scale traceSquared traceProduct) (Global4.scale traceOfSquare form) }
+    "=" {Global5.plus (Global5.scale traceSquared (Derivative.apply traceProduct)) (Global5.scale traceOfSquare (Derivative.apply form))} "by" {
+      congr!{{BaseForms.Form five} {BaseForms.Form five} {BaseForms.Form five}} Global5.plus _ _ _ _
+        (Derivative.scalar traceSquared traceProduct) (Derivative.scalar traceOfSquare form) }
+    "=" {Global5.plus Global5.zero Global5.zero} "by" {
+      congr!{{BaseForms.Form five} {BaseForms.Form five} {BaseForms.Form five}} Global5.plus _ _ _ _
+        (trans!{{BaseForms.Form five}} _ _ _
+          (congr!{{BaseForms.Form five} {BaseForms.Form five}} (Global5.scale traceSquared) _ _ traceProductClosed) (Laws5.scaleZero traceSquared))
+        (trans!{{BaseForms.Form five}} _ _ _
+          (congr!{{BaseForms.Form five} {BaseForms.Form five}} (Global5.scale traceOfSquare) _ _ closed) (Laws5.scaleZero traceOfSquare)) }
+    "=" _ "by" { Laws5.zeroLeft Global5.zero }
+  };

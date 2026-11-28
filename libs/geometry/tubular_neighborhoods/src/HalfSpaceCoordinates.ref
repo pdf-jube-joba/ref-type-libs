@@ -1,0 +1,50 @@
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as R;
+\import calculus.Real[].OneDimension[] \as One;
+\import compact_embeddings.HalfSpace[k := p] \as Half;
+\import compact_embeddings.Neat[n := p] \as Height;
+\import boundary_manifolds.Model[n := Half.dimension] \as Model;
+\import calculus.Real[].Multivariable[n := Half.dimension].Open[] \as Open;
+\import calculus.Real[].Multivariable[n := One.dimension].Open[] \as LineOpen;
+\import boundary_manifolds.Model[n := One.dimension] \as LineModel;
+\import topological_algebra.Euclidean[].Dimension[n := Half.dimension].Topology[] \as CoordinateSpace;
+\import topological_algebra.Euclidean[].Dimension[n := One.dimension].Topology[] \as LineTopology;
+\definition valueInjective[y,z: Half.manifold.Point][same: Half.value y = Half.value z]: y = z :=
+  trans!{{Half.manifold.Point}} _ _ _ (sym!{{Half.manifold.Point}} _ _ (Half.leftInverse y))
+    (trans!{{Half.manifold.Point}} _ _ _
+      (congr!{{Half.Coordinates} {Half.manifold.Point}} Half.point _ _
+        (Model.equality Half.constraints Open.whole (Half.coordinates y) (Half.coordinates z) same)) (Half.leftInverse z));
+\import boundary_manifolds.Tangent[n := Half.dimension].On[M := Half.manifold] \as HalfTangent;
+\import manifolds.Dimension[n := p].Examples[].Euclidean[] \as HalfOrdinary;
+\import boundary_manifolds.Boundaryless[n := p].Of[M := HalfOrdinary.smoothManifold] \as HalfEuclidean;
+\import boundary_manifolds.Product[n := p, m := calculus.Real[].OneDimension[].dimension].Of[
+  M := HalfEuclidean.manifold, N := compact_embeddings.Neat[n := p].halfLine] \as HalfProduct;
+\definition boundaryCriterion[y: Half.manifold.Point]: Logic.PropEquiv[HalfTangent.At[x := y].Cones[].Boundary, Half.value y Half.normal = R.zero] := \block {
+  \let height: Logic.PropEquiv[_, _] := compact_embeddings.Neat[n := p].LineAt[t := HalfProduct.second y].boundary \then
+  \let product: Logic.PropEquiv[_, _] := HalfProduct.At[x := y].boundaryCriterion \then
+  \return Logic.PropEquiv[HalfTangent.At[x := y].Cones[].Boundary, Half.value y Half.normal = R.zero] {
+    ltr := \fun (member: _) => trans!{{R.Real}} _ _ _ (Half.last y)
+      (Logic.orElim _ _ _ (product.ltr member)
+        (\fun (left: _) => Logic.falseElim _ (Half.noBoundary (HalfProduct.first y) left)) height.ltr),
+    rtl := \fun (zero: _) => product.rtl (Logic.Or[_, _]::right
+      (height.rtl (trans!{{R.Real}} _ _ _ (sym!{{R.Real}} _ _ (Half.last y)) zero))),
+  }
+};
+\import topology.Homeomorphism[A := HalfOrdinary.smoothManifold.Point,B := HalfEuclidean.manifold.Point] \as LeftComparison;
+\import topological_constructions.Product[A := HalfEuclidean.manifold.Point,B := Height.halfLine.Point] \as PairSpace;
+\definition valueContinuous: topology.Continuity[A := Half.manifold.Point,B := Model.Point].Continuous Half.manifold.space CoordinateSpace.topology Half.value :=
+  topological_algebra.Euclidean[].Blocks[n := p,m := One.dimension].Joining[X := Half.manifold.Point].continuous Half.manifold.space
+    (\fun (y: Half.manifold.Point) => HalfEuclidean.backward (HalfProduct.first y))
+    (\fun (y: Half.manifold.Point) => HalfProduct.second y)
+    (topology.Composition[A := Half.manifold.Point,B := HalfEuclidean.manifold.Point,C := HalfOrdinary.smoothManifold.Point].composeContinuous
+      Half.manifold.space HalfEuclidean.manifold.space HalfOrdinary.smoothManifold.space HalfProduct.first HalfEuclidean.backward
+      (PairSpace.Maps[].firstContinuous HalfEuclidean.manifold.space Height.halfLine.space)
+      (LeftComparison.laws _ _ HalfEuclidean.comparison).backwardContinuous)
+    (topology.Composition[A := Half.manifold.Point,B := Height.halfLine.Point,C := LineModel.Point].composeContinuous
+      Half.manifold.space Height.halfLine.space LineTopology.topology HalfProduct.second (\fun (t: Height.halfLine.Point) => t)
+      (PairSpace.Maps[].secondContinuous HalfEuclidean.manifold.space Height.halfLine.space)
+      (LineModel.Topology[C := Height.constraints,U := LineOpen.whole].ambient));

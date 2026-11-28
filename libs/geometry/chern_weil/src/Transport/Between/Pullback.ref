@@ -1,0 +1,20 @@
+\import euclidean_forms.Euclidean[n := n].Pullback[m := m, U := U, V := V, f := f] \as Pull;
+\import \parent.Using[maps := \fun (k: N.Nat^) => Pull.At[k := k].map] \as MatrixPull;
+\definition apply: \forall (k: N.Nat^) -> Target.Matrix k -> Source.Matrix k := MatrixPull.apply;
+\definition connection: TargetConnections.Connection -> SourceConnections.Connection := MatrixPull.connection;
+\definition curvature: \forall (A: TargetConnections.Connection) -> apply two (Target.Curvature[connection := A].value) = Source.Curvature[connection := connection A].value :=
+  MatrixPull.curvature Pull.Naturality[k := one].law Pull.Product[p := one, q := one].law;
+\definition trace[k: N.Nat^]: \forall (A: Target.Matrix k) -> Pull.apply k (Target.Trace[k := k].apply A) = Source.Trace[k := k].apply (apply k A) :=
+  MatrixPull.Trace[k := k].law;
+\import Source.ConnectionTrace[] \as SourceTrace;
+\import Target.ConnectionTrace[] \as TargetTrace;
+\definition difference: \forall (A, B: Target.Matrix one) ->
+  apply one (TargetTrace.difference A B) = SourceTrace.difference (apply one A) (apply one B) :=
+  MatrixPull.difference;
+\module Product(p, q: N.Nat^) {
+  \definition total: N.Nat^ := N.Basic[].Def[].add p q;
+  \import Target.Product[p := p, q := q] \as Input;
+  \import Source.Product[p := p, q := q] \as Output;
+  \definition law: \forall (A: Target.Matrix p)(B: Target.Matrix q) ->
+    apply total (Input.apply A B) = Output.apply (apply p A) (apply q B) := MatrixPull.Product[p := p, q := q].law Pull.Product[p := p, q := q].law;
+}

@@ -1,0 +1,28 @@
+\import Euclidean.On[U := U] \as Scalar;
+\import Spaces.Sign[] \as Sign;
+\import bundle_connections.Forms[n := n, r := r].On[U := U] \as Connections;
+\definition Matrix[k: N.Nat^]: \Set := Fin.Fin r -> Fin.Fin r -> Scalar.Form k;
+\definition ext[k: N.Nat^]: \forall (A, B: Matrix k) -> (\forall (a, b: Fin.Fin r) -> A a b = B a b) -> A = B :=
+  \fun (A, B: Matrix k)(same: _) => \axiom:funext(A, B, \fun (a: Fin.Fin r) => \axiom:funext(A a, B a, same a));
+\definition derivative[k: N.Nat^][A: Matrix k][a, b: Fin.Fin r]: Scalar.Form (N.Nat^::succ k) := Scalar.ExteriorDerivative[k := k].apply (A a b);
+\module At(k: N.Nat^) {
+  \import Scalar.At[k := k] \as Forms;
+  \import Spaces.Laws[V := Scalar.Form k, space := Forms.space] \as Laws;
+  \import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form k, space := Forms.space] \as Sums;
+  \definition sum: (Fin.Fin r -> Scalar.Form k) -> Scalar.Form k := Sums.sum (Fin.elements r);
+  \definition origin: Matrix k := \fun (a, b: Fin.Fin r) => Forms.zero;
+  \definition plus[A, B: Matrix k][a, b: Fin.Fin r]: Scalar.Form k := Forms.plus (A a b) (B a b);
+  \definition scale[c: R.Real][A: Matrix k][a, b: Fin.Fin r]: Scalar.Form k := Forms.scale c (A a b);
+  \definition negative[A: Matrix k][a, b: Fin.Fin r]: Scalar.Form k := Laws.negative (A a b);
+}
+\module Product(p, q: N.Nat^);
+\module Associativity(p, q, s: N.Nat^);
+\module Differential(k: N.Nat^);
+\module Leibniz(p, q: N.Nat^);
+\module Curvature(connection: Connections.Connection);
+\module Trace(k: N.Nat^);
+\module Cyclic(p, q: N.Nat^);
+\module Gauge;
+\module Functions;
+\module TraceGauge(k: N.Nat^);
+\module ConnectionTrace;

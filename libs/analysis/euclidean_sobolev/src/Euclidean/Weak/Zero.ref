@@ -1,0 +1,92 @@
+\import \parent.Measure[] \as Bridge;
+\import \parent.Classes[k := N.Nat^::zero] \as Classes;
+\import Weak.Space[k := N.Nat^::zero, p := PA.two] \as W0;
+\import \parent.RealL2[] \as RealL2;
+\import \root.Euclidean[n := n].Order[k := N.Nat^::zero] \as H;
+\import H.Weight[] \as Bessel;
+\import Fourier.Weighted[weight := Bessel.weight] \as Weighted;
+\import Multiplication.By[symbol := Weighted.reciprocal] \as Reciprocal;
+\import functional_analysis.Sobolev[n := n] \as Sobolev;
+\import std.Data[].Bool[].Prop[] \as Bool;
+\import Real.Inverse[] \as Inverse;
+\definition orderZero: \forall (d: E.Directions) -> Nat.Le (Sobolev.order d) N.Nat^::zero -> d = E.Directions::nil :=
+  \induction (d: E.Directions) \return Nat.Le (Sobolev.order d) N.Nat^::zero -> d = E.Directions::nil \with {
+    | nil: \fun (bound: _) => \refl(E.Directions::nil)
+    | cons: \fun (i: E.Coordinate)(d: E.Directions)(previous: _)(bound: _) => Bool.absurd _ bound
+  };
+\definition constant[f: Local.Representatives]: E.Directions -> Whole.Functions := \fun (d: E.Directions) => f;
+\definition ofRepresentative[f: Global.Representatives]: Weak.Representatives N.Nat^::zero PA.two := \block {
+  \let g: Local.Representatives := restrict f \then
+  \let finite: \forall (d: E.Directions) -> Nat.Le (Sobolev.order d) N.Nat^::zero ->
+    LocalMeasure.Lp[mu := Transport.measure].HasFiniteMoment[constant g d, PA.two] :=
+      \fun (d: E.Directions)(bound: _) => Local.properties g \then
+  \let regular: Regular.Representatives := DistributionL2.regular g (Local.properties g) \then
+  \let jets: DistributionL2.DistributionDerivatives[g, N.Nat^::zero, constant g] :=
+    DistributionL2.DistributionDerivatives[g, N.Nat^::zero, constant g] {
+      function := \refl(g), integrable := finite,
+      weak := \fun (d: E.Directions)(bound: _) =>
+        \idelim E.Directions::nil = d \with e: E.Directions =>
+          Dual.derivative e (Regular.distribution regular) = Regular.distribution regular \by {
+          base: \refl(Regular.distribution regular), equality: sym!{E.Directions} _ _ (orderZero d bound)
+        },
+    } \then
+  \return \into[Whole.Functions](g, Weak.Representatives N.Nat^::zero PA.two) \by {
+    Logic.existsIntro[E.Directions -> Whole.Functions, { jets: E.Directions -> Whole.Functions \where
+      Weak.Derivatives[g, N.Nat^::zero, PA.two, jets] }] (constant g) (DistributionL2.toExisting g N.Nat^::zero (constant g) jets)
+  }
+};
+\import GQ.Maps[B := W0.Wkp] \as Maps;
+\definition weakClass[f: Global.Representatives]: W0.Wkp := W0.ofFunction (ofRepresentative f);
+\definition respects: Maps.Respects weakClass := \fun (f,g: Global.Representatives)(same: _) =>
+  Classes.classAlmost (ofRepresentative f) (ofRepresentative g) (Bridge.localAlmost f g same);
+\definition ofL2: Global.Space -> W0.Wkp := Maps.value Global.equivalence weakClass respects;
+\definition ofL2Class[f: Global.Representatives]: ofL2 (Global.ofFunction f) = weakClass f :=
+  Maps.onClass Global.equivalence weakClass respects f;
+\definition underlyingOfL2: \forall (x: Global.Space) -> Classes.underlying (ofL2 x) = x :=
+  GQ.induction (\fun (x: Global.Space) => Classes.underlying (ofL2 x) = x)
+    (\fun (f: Global.Representatives) => eq_reason_in!{Global.Space _
+      "=" _ "by" { congr!{{W0.Wkp} Global.Space} Classes.underlying _ _ (ofL2Class f) }
+      "=" _ "by" { Classes.onClass (ofRepresentative f) }
+      "=" _ "by" { Global.classPointwise _ _ (\fun (x: Point) => \refl(f x)) }
+    });
+\definition weightOne[x: Point]: Bessel.value x = Real.one :=
+  Root.squaresInjective _ _ (Root.nonnegative _) Laws.oneNonnegative
+    (trans!{Real.Real} _ _ _ (Bessel.square x) (sym!{Real.Real} _ _ (Laws.fieldMulOneLeft Real.one)));
+\definition inverseOne[x: Point]: Bessel.inverse x = Real.one :=
+  sym!{Real.Real} _ _ (Inverse.inverseUnique _ _ (Inverse.positiveNonzero _ (Bessel.positive x))
+    (trans!{Real.Real} _ _ _ (Laws.fieldMulOneLeft _) (weightOne x)));
+\import std.Set[].Quotient[A := L2.Representatives, Equivalent := L2.Equivalent] \as Q;
+\definition frequencyIdentity: \forall (x: H.Positive) -> Weighted.frequency x = x :=
+  Q.induction (\fun (x: H.Positive) => Weighted.frequency x = x) (\fun (f: L2.Representatives) =>
+    trans!{L2.Space} _ _ _ (Reciprocal.onClass f)
+      (L2.classPointwise _ _ (\fun (x: Point) => eq_reason_in!{C.Complex _
+        "=" _ "by" { congr!{C.Complex C.Complex} (\fun (z: C.Complex) => D.mul z (f x)) _ _ (Bessel.weight.reciprocalValue x) }
+        "=" _ "by" { congr!{Real.Real C.Complex} (\fun (a: Real.Real) => D.mul (D.ofReal a) (f x)) _ _ (inverseOne x) }
+        "=" _ "by" { CL.mulOneLeft (f x) }
+      })));
+\definition physicalIdentity[x: H.Positive]: H.physical x = U.backward x :=
+  congr!{L2.Space L2.Space} U.backward _ _ (frequencyIdentity x);
+\definition RealPhysical[x: H.Positive]: \Prop := RealL2.complexify (RealL2.realPart (H.physical x)) = H.physical x;
+\definition toWeak[x: H.Positive]: W0.Wkp := ofL2 (RealL2.realPart (H.physical x));
+\definition fromWeak[x: W0.Wkp]: H.Positive := U.forward (RealL2.complexify (Classes.underlying x));
+\definition fromWeakPhysical[x: W0.Wkp]: H.physical (fromWeak x) = RealL2.complexify (Classes.underlying x) :=
+  trans!{L2.Space} _ _ _ (physicalIdentity (fromWeak x)) (U.leftInverse (RealL2.complexify (Classes.underlying x)));
+\definition toWeakPhysical[x: H.Positive]: RealPhysical x -> RealL2.complexify (Classes.underlying (toWeak x)) = H.physical x :=
+  \fun (real: _) => trans!{L2.Space} _ _ _ (congr!{Global.Space L2.Space} RealL2.complexify _ _ (underlyingOfL2 (RealL2.realPart (H.physical x)))) real;
+\definition toFrom[x: W0.Wkp]: toWeak (fromWeak x) = x := Classes.injective _ _ (eq_reason_in!{Global.Space _
+  "=" _ "by" { underlyingOfL2 (RealL2.realPart (H.physical (fromWeak x))) }
+  "=" _ "by" { congr!{L2.Space Global.Space} RealL2.realPart _ _ (fromWeakPhysical x) }
+  "=" _ "by" { RealL2.realComplexify (Classes.underlying x) }
+});
+\definition fromTo[x: H.Positive]: RealPhysical x -> fromWeak (toWeak x) = x :=
+  \fun (real: _) => H.injective _ _ (trans!{L2.Space} _ _ _ (fromWeakPhysical (toWeak x)) (toWeakPhysical x real));
+\definition norm[x: W0.Wkp]: H.norm (fromWeak x) = Global.norm (Classes.underlying x) :=
+  trans!{Real.Real} _ _ _ (U.norm (RealL2.complexify (Classes.underlying x))) (RealL2.norm (Classes.underlying x));
+\definition fromWeakReal[x: W0.Wkp]: RealPhysical (fromWeak x) := eq_reason_in!{L2.Space _
+  "=" _ "by" { congr!{L2.Space L2.Space} (\fun (u: L2.Space) => RealL2.complexify (RealL2.realPart u)) _ _ (fromWeakPhysical x) }
+  "=" _ "by" { congr!{Global.Space L2.Space} RealL2.complexify _ _ (RealL2.realComplexify (Classes.underlying x)) }
+  "=" _ "by" { sym!{L2.Space} _ _ (fromWeakPhysical x) }
+};
+\definition toWeakNorm[x: H.Positive]: RealPhysical x -> Global.norm (Classes.underlying (toWeak x)) = H.norm x :=
+  \fun (real: _) => trans!{Real.Real} _ _ _ (sym!{Real.Real} _ _ (norm (toWeak x)))
+    (congr!{L2.Space Real.Real} H.norm _ _ (fromTo x real));

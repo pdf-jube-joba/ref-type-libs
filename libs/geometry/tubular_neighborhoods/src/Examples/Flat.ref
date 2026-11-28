@@ -1,0 +1,94 @@
+\import compact_embeddings.HalfSpace[k := zero] \as Half;
+\import manifolds.Dimension[n := Half.dimension].Examples[].Euclidean[] \as Space;
+\import manifolds.ImmersionIdentity[n := Half.dimension].On[M := Space.smoothManifold] \as OrdinaryIdentity;
+\import boundary_manifolds.NeatIdentity[n := Half.dimension].On[M := Half.manifold] \as HalfIdentity;
+\import \root.Euclidean[n := Half.dimension,k := zero].On[M := Space.smoothManifold].Of[e := OrdinaryIdentity.embedding] \as Euclidean;
+\import Euclidean.HalfSpace[p := zero,dimension := \refl(Half.dimension),B := Half.manifold] \as Model;
+\import Euclidean.Neat[j := Model.j] \as Slice;
+\import normal_bundles.Dimension[n := Half.dimension,k := zero] \as Bundle;
+\import manifolds.Immersion[n := Half.dimension,m := Half.dimension].Between[M := Space.smoothManifold,N := Space.smoothManifold] \as Embeddings;
+\import Bundle.On[M := Space.smoothManifold].Of[i := Embeddings.asImmersion OrdinaryIdentity.embedding] \as Normal;
+\import linear_algebra.Euclidean[n := Half.dimension] \as E;
+\import manifolds.Tangent[n := Half.dimension].On[M := Space.smoothManifold] \as Tangent;
+\import manifolds.DifferentialIdentity[n := Half.dimension].On[M := Space.smoothManifold] \as IdentityDerivative;
+\module At(x: Space.smoothManifold.Point) {
+  \import Normal.At[x := x] \as Derivative;
+  \import Tangent.At[x := x].Coordinate[chart := Derivative.chart] \as Coordinates;
+  \definition encode[w: E.Vector]: Tangent.Vector x := Coordinates.encode w;
+  \definition coordinate[w: E.Vector]: Derivative.differential.apply (encode w) = w :=
+    trans!{{E.Vector}} _ _ _
+      (congr!{{Tangent.Vector x} {E.Vector}} Coordinates.decode _ _ (IdentityDerivative.At[x := x].pointwise (encode w)))
+      (Coordinates.decodeEncode w);
+  \definition vector: Tangent.Vector x := encode (E.basis Model.j);
+  \definition value: Derivative.differential.apply vector Model.j = R.one :=
+    trans!{{R.Real}} _ _ _
+      (congr!{{E.Vector} {R.Real}} (\fun (v: E.Vector) => v Model.j) _ _ (coordinate (E.basis Model.j)))
+      (E.basisDiagonal Model.j);
+  \definition nonzero: Logic.Not (Derivative.differential.apply vector Model.j = R.zero) :=
+    \fun (vanishes: _) => Order.Arithmetic[].Prop[].zeroNotOne
+      (trans!{{R.Real}} _ _ _ (sym!{{R.Real}} _ _ vanishes) value);
+}
+\definition extension: Model.Extension[HalfIdentity.map] := Model.Extension[HalfIdentity.map] {
+  base := Model.coordinates,
+  agrees := \fun (y: Half.manifold.Point) => \refl(Model.coordinates y),
+  covers := \fun (x: Space.smoothManifold.Point)(member: _) =>
+    Logic.existsIntro[Half.manifold.Point, { y: Half.manifold.Point \where Model.coordinates y = x }]
+      (Model.point x member) (Model.coordinatesPoint x member),
+  transverse := \fun (x: Space.smoothManifold.Point)(boundary: _) =>
+    Logic.existsIntro[Tangent.Vector x, { v: Tangent.Vector x \where Logic.Not ((Normal.At[x := x].differential.apply v) Model.j = R.zero) }]
+      At[x := x].vector At[x := x].nonzero,
+};
+\definition boundaryPoint: Half.manifold.Point :=
+  Model.point E.space.zero (Order.leRefl R.zero);
+\definition boundaryExample: boundary_manifolds.Tangent[n := Half.dimension].On[M := Half.manifold].At[x := boundaryPoint].Cones[].Boundary :=
+  (Model.boundaryCriterion boundaryPoint).rtl
+    (congr!{{E.Vector} {R.Real}} (\fun (v: E.Vector) => v Model.j) _ _ (Model.coordinatesPoint E.space.zero (Order.leRefl R.zero)));
+\import Slice.Crossing[transverse := extension.transverse] \as Regular;
+\import Euclidean.With[lift := Regular.horizontalLift] \as Tube;
+\import Normal.Zero[] \as Zero;
+\import calculus.Real[].Multivariable[n := Half.dimension].Open[] \as Open;
+\import topology.Topology[Carrier := Normal.Point] \as NormalSpace;
+\definition normalZero[q: Normal.Point]: Normal.ambientVector q = E.space.zero :=
+  E.separated (Normal.ambientVector q)
+    (trans!{{R.Real}} _ _ _
+      (congr!{{E.Vector} {R.Real}} (E.dot (Normal.ambientVector q)) _ _
+        (sym!{{E.Vector}} _ _ (At[x := q.base].coordinate (Normal.ambientVector q))))
+      (Normal.orthogonal q (At[x := q.base].encode (Normal.ambientVector q))));
+\definition zeroSection[q: Normal.Point]: q = Zero.value q.base :=
+  Normal.SubspaceTopology[].ext q (Zero.value q.base) (\refl(q.base)) (normalZero q);
+\definition endpoint[q: Normal.Point]: Tube.endpoint q = q.base :=
+  trans!{{E.Vector}} _ _ _
+    (congr!{{Normal.Point} {E.Vector}} Tube.endpoint _ _ (zeroSection q))
+    (Tube.atZero q.base);
+\import manifolds.Dimension[n := Half.dimension].Chart[M := Space.smoothManifold.Point,space := Space.smoothManifold.space] \as Charts;
+\import manifolds.Dimension[n := Half.dimension].Atlas[M := Space.smoothManifold.Point,space := Space.smoothManifold.space] \as Atlas;
+\definition chart: \Cast[Charts.Chart] Space.smoothManifold.atlas.charts :=
+  \into[Charts.Chart](Space.standard,Space.smoothManifold.atlas.charts) \by { Atlas.includedInSaturation Space.atlas Space.standard (\refl(Space.standard)) };
+\import manifolds.ChartMap[n := Half.dimension].On[M := Space.smoothManifold].At[chart := chart] \as Include;
+\definition inverse: Tube.InverseMap Open.whole :=
+  manifolds.Composition[n := Half.dimension,m := Half.dimension,l := Half.dimension].Between[M := Include.source,N := Space.smoothManifold,P := Normal.manifold].compose Include.map Zero.map;
+\definition inverseFormula[y: Open.Carrier Open.whole]: inverse.apply y = Zero.value y :=
+  congr!{{Space.smoothManifold.Point -> Normal.Point} {Normal.Point}}
+    (\fun (f: Space.smoothManifold.Point -> Normal.Point) => f y) _ _ Zero.formula;
+\definition neighborhood: Tube.Neighborhood := Tube.Neighborhood {
+  domain := NormalSpace.Whole, open := (NormalSpace.topologyLaws Normal.topology).wholeOpen,
+  section := \fun (x: Space.smoothManifold.Point) => \refl(Zero.value x),
+  image := Open.whole, inverse := inverse,
+  into := \fun (q: \Cast[Normal.Point] NormalSpace.Whole) => \refl(Tube.endpoint q),
+  back := \fun (y: Open.Carrier Open.whole) => \refl(inverse.apply y),
+  left := \fun (q: \Cast[Normal.Point] NormalSpace.Whole) =>
+    trans!{{Normal.Point}} _ _ _ (inverseFormula (Open.Whole[].point (Tube.endpoint q)))
+      (trans!{{Normal.Point}} _ _ _ (congr!{{E.Vector} {Normal.Point}} Zero.value _ _ (endpoint q))
+        (sym!{{Normal.Point}} _ _ (zeroSection q))),
+  right := \fun (y: Open.Carrier Open.whole) =>
+    trans!{{E.Vector}} _ _ _ (congr!{{Normal.Point} {E.Vector}} Tube.endpoint _ _ (inverseFormula y)) (Tube.atZero y),
+};
+\definition result: Regular.Result := Regular.Result {
+  tube := neighborhood,
+  positive := \fun (q: \Cast[Normal.Point] NormalSpace.Whole) => Order.ltReplaceRight R.zero R.one (Regular.factor q)
+    (sym!{{R.Real}} _ _ (trans!{{R.Real}} _ _ _ (congr!{{Normal.Point} {R.Real}} Regular.factor _ _ (zeroSection q)) (Regular.factorZero q.base)))
+    R.Estimates[].Product[].onePositive,
+};
+\import Model.Of[f := HalfIdentity.map,extension := extension].Tube[t := result] \as HalfTube;
+\definition origin: HalfTube.range := \into[Half.manifold.Point](boundaryPoint,HalfTube.Image) \by { \refl(Model.coordinates boundaryPoint) };
+\definition originRoundTrip: HalfTube.send (HalfTube.undo origin) = origin := HalfTube.right origin;

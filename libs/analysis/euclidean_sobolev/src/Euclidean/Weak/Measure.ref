@@ -1,0 +1,32 @@
+\import product_integration.MeasureMap[A := Point, B := Open.Carrier Open.whole, source := LE.measure, target := Transport.measure].On[map := Transport.forward] \as Push;
+\definition globalAlmost[f,g: Whole.Functions]: LocalMeasure.AlmostEqual Transport.measure f g ->
+  M.AlmostEqual LE.measure (Open.Whole[].function f) (Open.Whole[].function g) := \fun (same: _) => \block {
+    \takefrom cover: \Cast[\Pow (Open.Carrier Open.whole)] ({ cover: \Pow (Open.Carrier Open.whole) \where
+      LocalMeasure.NullCover[Transport.measure, { x: Open.Carrier Open.whole \where Logic.Not (f x = g x) }, cover] }) \by same \then
+    \let law: LocalMeasure.NullCover[Transport.measure, { x: Open.Carrier Open.whole \where Logic.Not (f x = g x) }, cover] :=
+      \bysub(\Pow (Open.Carrier Open.whole), { cover: \Pow (Open.Carrier Open.whole) \where
+        LocalMeasure.NullCover[Transport.measure, { x: Open.Carrier Open.whole \where Logic.Not (f x = g x) }, cover] }, cover) \then
+    \return Logic.existsIntro[\Pow Point, { cover: \Pow Point \where M.NullCover[LE.measure,
+      { x: Point \where Logic.Not (Open.Whole[].function f x = Open.Whole[].function g x) }, cover] }] (Push.preimage cover)
+      (M.NullCover[LE.measure, { x: Point \where Logic.Not (Open.Whole[].function f x = Open.Whole[].function g x) }, Push.preimage cover] {
+        measurable := Transport.forward.measurable cover law.measurable,
+        measure := trans!{M.Value} _ _ _ (Transport.forward.value cover law.measurable) law.measure,
+        included := \fun (x: Point)(different: _) => law.included (Transport.forward.function x) different,
+      })
+  };
+\definition localAlmost[f,g: E.Point -> Real.Real]: M.AlmostEqual LE.measure f g ->
+  LocalMeasure.AlmostEqual Transport.measure (Open.Restriction[].function Open.whole f) (Open.Restriction[].function Open.whole g) := \fun (same: _) => \block {
+    \takefrom cover: \Cast[\Pow Point] ({ cover: \Pow Point \where
+      M.NullCover[LE.measure, { x: Point \where Logic.Not (f x = g x) }, cover] }) \by same \then
+    \let law: M.NullCover[LE.measure, { x: Point \where Logic.Not (f x = g x) }, cover] :=
+      \bysub(\Pow Point, { cover: \Pow Point \where
+        M.NullCover[LE.measure, { x: Point \where Logic.Not (f x = g x) }, cover] }, cover) \then
+    \return Logic.existsIntro[\Pow (Open.Carrier Open.whole), { cover: \Pow (Open.Carrier Open.whole) \where
+      LocalMeasure.NullCover[Transport.measure, { x: Open.Carrier Open.whole \where Logic.Not (f x = g x) }, cover] }] (Pull.preimage cover)
+      (LocalMeasure.NullCover[Transport.measure, { x: Open.Carrier Open.whole \where Logic.Not (f x = g x) }, Pull.preimage cover] {
+        measurable := Transport.backward.measurable cover law.measurable,
+        measure := trans!{LocalMeasure.Value} _ _ _ (Transport.backward.value cover law.measurable) law.measure,
+        included := \fun (x: Open.Carrier Open.whole)(different: _) => law.included (Transport.backward.function x) different,
+      })
+  };
+\definition extend[f: Local.Representatives]: Global.Representatives := DistributionL2.extend f;

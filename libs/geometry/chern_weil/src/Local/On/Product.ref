@@ -1,0 +1,21 @@
+\definition total: N.Nat^ := Nat.add p q;
+\import \parent.At[k := total] \as Result;
+\import Scalar.Wedge[p := p, q := q] \as Wedge;
+\import \parent.At[k := p] \as Left;
+\import \parent.At[k := q] \as Right;
+\import Scalar.At[k := total] \as Output;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form total, space := Output.space] \as Sums;
+\definition apply[A: Matrix p][B: Matrix q][a, b: Fin.Fin r]: Scalar.Form total :=
+  Result.sum (\fun (c: Fin.Fin r) => Wedge.apply (A a c) (B c b));
+\definition additionLeft: \forall (A, B: Matrix p)(C: Matrix q) ->
+  apply (Left.plus A B) C = Result.plus (apply A C) (apply B C) :=
+  \fun (A, B: Matrix p)(C: Matrix q) => ext total _ _ (\fun (a, b: Fin.Fin r) =>
+    trans!{{Scalar.Form total}} _ _ _
+      (Sums.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => Wedge.additiveLeft (A a c) (B a c) (C c b)))
+      (Sums.addition (Fin.elements r) _ _));
+\definition additionRight: \forall (A: Matrix p)(B, C: Matrix q) ->
+  apply A (Right.plus B C) = Result.plus (apply A B) (apply A C) :=
+  \fun (A: Matrix p)(B, C: Matrix q) => ext total _ _ (\fun (a, b: Fin.Fin r) =>
+    trans!{{Scalar.Form total}} _ _ _
+      (Sums.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => Wedge.additiveRight (A a c) (B c b) (C c b)))
+      (Sums.addition (Fin.elements r) _ _));

@@ -1,0 +1,13 @@
+\import std.Data[].Nat[] \as N;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\import real.Analysis[] \as R;
+\import dedekind_reals.DedekindReal[] \as Order;
+\definition zero: N.Nat^ := N.Nat^::zero;
+\definition one: N.Nat^ := N.Nat^::succ zero;
+\module Flat;
+\module Point(a: R.Real, positive: Order.Lt R.zero a);
+\module Interval;

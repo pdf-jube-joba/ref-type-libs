@@ -1,0 +1,125 @@
+\import \root.Euclidean[n := n].Order[k := k] \as H;
+\import H.Schwartz[] \as Core;
+\import H.Density[] \as Density;
+\import Fourier.Weighted[weight := H.Weight[].weight] \as Weighted;
+\import Smooth.Derivative[].Linear[U := Open.whole] \as Differential;
+\import functional_analysis.Metric[Carrier := L2.Space] \as Metric;
+\import L2.Complete[] \as Complete;
+\import L2.Vector[] \as Vector;
+\import linear_algebra.Commutative[K := C.Complex, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing C.Complex C.Algebra[].field].Laws[V := L2.Space, space := Vector.space] \as VL;
+\import functional_analysis.Normed[V := L2.Space, space := CS.realSpace] \as Normed;
+\import Real.Sequence[].Operations[] \as Sequence;
+\definition difference[f,g: S.Function]: S.Function := S.add f (S.scale (D.neg D.one) g);
+\definition source[s: Density.Sequence]: N.Nat^ -> L2.Space := \fun (j: N.Nat^) => Core.value (s j);
+\definition image[s: Density.Sequence][d: E.Directions]: N.Nat^ -> L2.Space :=
+  \fun (j: N.Nat^) => Embedding.value (Derivatives.iterated (s j) d);
+\definition sourceDifference[f,g: S.Function]: Core.value (difference f g) = Normed.sub (Core.value f) (Core.value g) :=
+  eq_reason_in!{L2.Space _
+    "=" _ "by" { Core.additive f (S.scale (D.neg D.one) g) }
+    "=" _ "by" { congr!{L2.Space L2.Space} (L2.add (Core.value f)) _ _ (Core.scalar (D.neg D.one) g) }
+    "=" _ "by" { congr!{L2.Space L2.Space} (L2.add (Core.value f)) _ _ (VL.minusOneScale (Core.value g)) }
+  };
+\definition iteratedReal[f: S.Function]: \forall (d: E.Directions) -> (Derivatives.iterated f d).real = Ops.iterated f.real d :=
+  \induction (d: E.Directions) \return (Derivatives.iterated f d).real = Ops.iterated f.real d \with {
+    | nil: \refl(f.real)
+    | cons: \fun (i: E.Coordinate)(tail: E.Directions)(previous: _) =>
+      congr!{E.Schwartz E.Schwartz} (\fun (g: E.Schwartz) => Ops.partial g i) _ _ previous
+  };
+\definition iteratedImaginary[f: S.Function]: \forall (d: E.Directions) -> (Derivatives.iterated f d).imaginary = Ops.iterated f.imaginary d :=
+  \induction (d: E.Directions) \return (Derivatives.iterated f d).imaginary = Ops.iterated f.imaginary d \with {
+    | nil: \refl(f.imaginary)
+    | cons: \fun (i: E.Coordinate)(tail: E.Directions)(previous: _) =>
+      congr!{E.Schwartz E.Schwartz} (\fun (g: E.Schwartz) => Ops.partial g i) _ _ previous
+  };
+\definition underlyingFunction[f: E.Schwartz]: E.Function := f;
+\definition iteratedJet[f: E.Schwartz]: \forall (d: E.Directions) -> underlyingFunction (Ops.iterated f d) = E.jet f d :=
+  \induction (d: E.Directions) \return underlyingFunction (Ops.iterated f d) = E.jet f d \with {
+    | nil: \refl(underlyingFunction f)
+    | cons: \fun (i: E.Coordinate)(tail: E.Directions)(previous: underlyingFunction (Ops.iterated f tail) = E.jet f tail) =>
+      congr!{E.Function E.Function} (Differential.apply i) (underlyingFunction (Ops.iterated f tail)) (E.jet f tail) previous
+  };
+\definition iteratedValue[f: S.Function][x: Point][d: E.Directions]:
+  S.value (Derivatives.iterated f d) x = S.jet f d x := CL.ext _ _
+    (trans!{Real.Real} _ _ _ (congr!{E.Schwartz Real.Real} (\fun (g: E.Schwartz) => E.value g x) _ _ (iteratedReal f d))
+      (congr!{E.Function Real.Real} (\fun (g: E.Function) => E.value g x) _ _ (iteratedJet f.real d)))
+    (trans!{Real.Real} _ _ _ (congr!{E.Schwartz Real.Real} (\fun (g: E.Schwartz) => E.value g x) _ _ (iteratedImaginary f d))
+      (congr!{E.Function Real.Real} (\fun (g: E.Function) => E.value g x) _ _ (iteratedJet f.imaginary d)));
+\definition minusOneMul[z: C.Complex]: D.mul (D.neg D.one) z = D.neg z := eq_reason_in!{C.Complex _
+  "=" _ "by" { congr!{C.Complex C.Complex} (\fun (c: C.Complex) => D.mul c z) _ _
+    (sym!{C.Complex} _ _ (CL.ofRealNeg Real.one)) }
+  "=" _ "by" { Scalars.realProduct (Real.neg Real.one) z }
+  "=" _ "by" { CL.ext _ _
+    (trans!{Real.Real} _ _ _ (Laws.fieldMulNegLeft Real.one (C.re z)) (congr!{Real.Real Real.Real} Real.neg _ _ (Laws.fieldMulOneLeft _)))
+    (trans!{Real.Real} _ _ _ (Laws.fieldMulNegLeft Real.one (C.im z)) (congr!{Real.Real Real.Real} Real.neg _ _ (Laws.fieldMulOneLeft _))) }
+};
+\definition jetDifference[f,g: S.Function][d: E.Directions][x: Point]:
+  S.value (Derivatives.iterated (difference f g) d) x =
+  D.sub (S.value (Derivatives.iterated f d) x) (S.value (Derivatives.iterated g d) x) := eq_reason_in!{C.Complex _
+    "=" _ "by" { iteratedValue (difference f g) x d }
+    "=" _ "by" { S.jetAdd f (S.scale (D.neg D.one) g) d x }
+    "=" _ "by" { congr!{C.Complex C.Complex} (D.add (S.jet f d x)) _ _
+      (trans!{C.Complex} _ _ _ (S.jetScale (D.neg D.one) g d x) (minusOneMul (S.jet g d x))) }
+    "=" _ "by" { congr!{C.Complex C.Complex C.Complex} D.sub _ _ _ _
+      (sym!{C.Complex} _ _ (iteratedValue f x d)) (sym!{C.Complex} _ _ (iteratedValue g x d)) }
+  };
+\definition imageDifference[f,g: S.Function][d: E.Directions]:
+  Embedding.value (Derivatives.iterated (difference f g) d) =
+  Normed.sub (Embedding.value (Derivatives.iterated f d)) (Embedding.value (Derivatives.iterated g d)) := \block {
+    \let a: L2.Representatives := Embedding.representative (Derivatives.iterated f d) \then
+    \let b: L2.Representatives := Embedding.representative (Derivatives.iterated g d) \then
+    \return eq_reason_in!{L2.Space _
+      "=" _ "by" { L2.classPointwise _ (Complete.difference a b) (jetDifference f g d) }
+      "=" _ "by" { sym!{L2.Space} _ _ (L2.addClass a (L2.negRepresentative b)) }
+      "=" _ "by" { congr!{L2.Space L2.Space} (L2.add (L2.ofFunction a)) _ _ (sym!{L2.Space} _ _ (L2.negClass b)) }
+    }
+  };
+\definition distance[f,g: S.Function][d: E.Directions][bound: Nat.Le (Derivatives.order d) k]:
+  R.Le (Geometry.metric.distance (Embedding.value (Derivatives.iterated f d)) (Embedding.value (Derivatives.iterated g d)))
+    (Geometry.metric.distance (Core.value f) (Core.value g)) :=
+    R.leReplace _ _ _ _ (congr!{L2.Space Real.Real} L2.normValue _ _ (imageDifference f g d))
+      (congr!{L2.Space Real.Real} L2.normValue _ _ (sourceDifference f g)) (Core.derivativeBound (difference f g) d bound);
+\definition imageCauchy[s: Density.Sequence][d: E.Directions][bound: Nat.Le (Derivatives.order d) k]:
+  Metric.Cauchy Geometry.metric (source s) -> Metric.Cauchy Geometry.metric (image s d) := \fun (cauchy: _)(epsilon: Real.Real)(positive: _) => \block {
+    \takefrom j: \Cast[N.Nat^] ({ j: N.Nat^ \where Metric.CauchyControl Geometry.metric (source s) epsilon j }) \by cauchy epsilon positive \then
+    \let control: Metric.CauchyControl Geometry.metric (source s) epsilon j :=
+      \bysub(N.Nat^, { j: N.Nat^ \where Metric.CauchyControl Geometry.metric (source s) epsilon j }, j) \then
+    \return Logic.existsIntro[N.Nat^, { j: N.Nat^ \where Metric.CauchyControl Geometry.metric (image s d) epsilon j }] j
+      (\fun (a,b: N.Nat^)(ja: _)(jb: _) => R.leLtTrans _ _ _ (distance (s a) (s b) d bound) (control a b ja jb))
+  };
+\definition imageExists[s: Density.Sequence][x: H.Positive][d: E.Directions][bound: Nat.Le (Derivatives.order d) k]:
+  Metric.Converges Geometry.metric (source s) x -> \exists ( y: L2.Space \where Metric.Converges Geometry.metric (image s d) y ) :=
+  \fun (limit: _) => Complete.complete (image s d) (imageCauchy s d bound (Metric.convergentCauchy Geometry.metric (source s) x limit));
+\definition physicalSub[x,y: H.Positive]: H.physical (Normed.sub x y) = Normed.sub (H.physical x) (H.physical y) :=
+  trans!{L2.Space} _ _ _ (Weighted.additive x (L2.neg y))
+    (congr!{L2.Space L2.Space} (L2.add (H.physical x)) _ _ (eq_reason_in!{L2.Space _
+      "=" _ "by" { congr!{L2.Space L2.Space} H.physical _ _ (sym!{L2.Space} _ _ (VL.minusOneScale y)) }
+      "=" _ "by" { Weighted.scalar (D.neg D.one) y }
+      "=" _ "by" { VL.minusOneScale (H.physical y) }
+    }));
+\definition physicalDistance[x,y: H.Positive]: R.Le (Geometry.metric.distance (H.physical x) (H.physical y)) (Geometry.metric.distance x y) :=
+  R.leReplaceLeft _ _ _ (congr!{L2.Space Real.Real} L2.normValue _ _ (physicalSub x y)) (H.physicalBound (Normed.sub x y));
+\definition physicalLimit[s: Density.Sequence][x: H.Positive]: Metric.Converges Geometry.metric (source s) x ->
+  Metric.Converges Geometry.metric (image s E.Directions::nil) (H.physical x) := \fun (limit: _)(epsilon: Real.Real)(positive: _) => \block {
+    \takefrom j: \Cast[N.Nat^] ({ j: N.Nat^ \where Metric.LimitControl Geometry.metric (source s) x epsilon j }) \by limit epsilon positive \then
+    \let control: Metric.LimitControl Geometry.metric (source s) x epsilon j :=
+      \bysub(N.Nat^, { j: N.Nat^ \where Metric.LimitControl Geometry.metric (source s) x epsilon j }, j) \then
+    \return Logic.existsIntro[N.Nat^, { j: N.Nat^ \where Metric.LimitControl Geometry.metric (image s E.Directions::nil) (H.physical x) epsilon j }] j
+      (\fun (a: N.Nat^)(ja: _) => R.leLtTrans _ _ _
+        (R.leReplaceLeft _ _ _ (congr!{L2.Space Real.Real} (\fun (y: L2.Space) => Geometry.metric.distance y (H.physical x)) _ _ (Core.recovers (s a)))
+          (physicalDistance (source s a) x)) (control a ja))
+  };
+
+\definition imageNormBound[s: Density.Sequence][x: H.Positive][d: E.Directions][bound: Nat.Le (Derivatives.order d) k][y: L2.Space]:
+  Metric.Converges Geometry.metric (source s) x -> Metric.Converges Geometry.metric (image s d) y ->
+  R.Le (L2.normValue y) (H.norm x) := \fun (sourceLimit: _)(imageLimit: _) => \block {
+    \let a: N.Nat^ -> Real.Real := \fun (j: N.Nat^) => H.norm (source s j) \then
+    \let b: N.Nat^ -> Real.Real := \fun (j: N.Nat^) => L2.normValue (image s d j) \then
+    \let nonnegative: R.Le Real.zero (Real.sub (H.norm x) (L2.normValue y)) :=
+      Sequence.lowerBoundLimit (\fun (j: N.Nat^) => Real.sub (a j) (b j)) _ Real.zero N.Nat^::zero
+        (Sequence.subConverges a b _ _
+          (Normed.normConverges Geometry.norm.realNorm (source s) x sourceLimit)
+          (Normed.normConverges Geometry.norm.realNorm (image s d) y imageLimit))
+        (\fun (j: N.Nat^)(later: _) => Real.Distance[].subNonnegative _ _ (Core.derivativeBound (s j) d bound)) \then
+    \return Laws.leAddCancelRight (L2.normValue y) (H.norm x) (Real.neg (L2.normValue y))
+      (R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (Laws.addNegRight (L2.normValue y))) nonnegative)
+  };

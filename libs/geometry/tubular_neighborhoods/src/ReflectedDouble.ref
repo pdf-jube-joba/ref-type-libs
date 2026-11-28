@@ -1,0 +1,15 @@
+\import std.Data[].Nat[] \as Nat;
+\import Nat.Basic[].Def[] \as NatDef;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\import real.Analysis[] \as R;
+\import dedekind_reals.DedekindReal[] \as O;
+\import O.Arithmetic[].Prop[] \as Arithmetic;
+\import calculus.Real[].OneDimension[] \as One;
+\definition dimension: Nat.Nat^ := NatDef.add One.dimension n;
+\import boundary_manifolds.Dimension[n := NatDef.add One.dimension n] \as Domains;
+\module On(B: Domains.Manifold);

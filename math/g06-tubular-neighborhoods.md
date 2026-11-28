@@ -15,18 +15,15 @@
 
 ## Status
 
-Read-only inspection of main `dce3d353e75972c507928253d6c33420f6f55a0f` on 2026-11-19.
-`tubular_neighborhoods` is registered in the workspace with 40 `.ref` files.
-An implementation exists, but the following verification remains; full-plan completion is unconfirmed.
+G06 remains partially complete. The November 2026 follow-up uses the package registered in the workspace and the G05 interfaces on main at `9b1387b8`.
 
 | Scope | Implementation and outstanding verification |
 | --- | --- |
 | Compact submanifolds | [Euclidean.On.Of.tubularNeighborhood](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of.ref) and `With.Compact` construct normal disk neighborhoods; [Restriction.diffeomorphism](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/With/Restriction.ref) gives a diffeomorphism. |
-| Boundary compatibility | [Neat.Crossing.HalfTube](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/Neat/Crossing/HalfTube.ref) provides a half-space homeomorphism and boundary preservation. [HalfSpace.Of](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/HalfSpace.ref) requires `Extension[f]`; construction from G05 neat embeddings remains unconfirmed. |
-| Choices and homotopies | [With.Compare](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/With/Compare.ref) compares neighborhoods/radii for the same `lift`, providing embedding families and collapse homotopies. Coverage of comparisons between different tubular-map choices remains unconfirmed. |
+| Boundary compatibility | [HalfSpace.Of](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/HalfSpace.ref) constructs a homeomorphism onto an open subset of the G05 half-space and identifies its boundary with height zero on the base image. [Reflection on the double](../libs/geometry/tubular_neighborhoods/src/ReflectedDouble/On/With/Into/Reflected.ref) gives a continuous injective map whose nonnegative preimage is the original copy. [The signed collar formula](../libs/geometry/tubular_neighborhoods/src/ReflectedDouble/On/With/Into/Reflected/WithCollar/Using.ref) uses the collar supplied by G05. To construct `Extension[f]` for the general compact case, the reflected map still needs an ordinary smooth immersion proof and transverse differential. |
+| Choices and homotopies | [With.Compare](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/With/Compare.ref) supplies embedding families and collapse homotopies for a fixed lift. [Transition.Between](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/Transition/Between.ref) compares different lifts over their common open image by a diffeomorphism fixing the zero section. Homotopies between different lifts remain open. |
 | Collapse and products | [Collapse.Of](../libs/geometry/tubular_neighborhoods/src/Collapse/Of.ref) provides continuity, `Disk.CollapseLaw` inside/outside-disk formulas, and [Product.Of](../libs/geometry/tubular_neighborhoods/src/Product/Of.ref) provides `multiplicative`. |
 | Stabilization | [Stabilized](../libs/geometry/tubular_neighborhoods/src/Euclidean/On/Of/Stabilized.ref) contains `endpointFormula` and product-model `suspension`. Completeness of comparison, including stabilized normal Thom-space identification, remains unconfirmed. |
-| Documentation and examples | The [package README](../libs/geometry/tubular_neighborhoods/README.md) now describes the available modules and remaining gaps. Standalone examples are still missing; `Line` is the disk model used in construction. |
+| Examples | [Flat](../libs/geometry/tubular_neighborhoods/src/Examples/Flat.ref) constructs a half-line extension and a tube through the boundary point. [Point](../libs/geometry/tubular_neighborhoods/src/Examples/Point.ref) constructs a compact interior tube using the G05 point embedding. [Interval](../libs/geometry/tubular_neighborhoods/src/Examples/Interval/Reflected.ref) uses the G05 neat embedding of the compact interval and locates both endpoints on the seam of its reflected double. |
 
-No record confirming successful type checking of the current sources and dependency closure has been found.
-The scope of inspected records is documented in the [roadmap check status](_roadmap.md#progress-and-checks).
+Check the package through `python3 scripts/check.py run --scope changed --package tubular_neighborhoods` with the official checker. The [roadmap check status](_roadmap.md#progress-and-checks) describes the distinction between newly checked and reused modules.

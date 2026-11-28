@@ -1,0 +1,89 @@
+\import Heights.From[construction := collar.collar].Of[width := collar.width] \as Height;
+\import Height.Compact[compact := compact].Collapse[] \as Collapse;
+\import manifold_gluing.Parameter[] \as Time;
+\import manifold_gluing.BoundaryInclusion[n := n].On[M := B].With[cover := cover] \as BoundaryModel;
+\import boundary_manifolds.Product[n := n,m := One.dimension].Of[M := BoundaryModel.manifold,N := Time.manifold] \as Parameters;
+\import manifold_gluing.SeamCollar[n := n].Between[M := B,N := B].With[leftCover := cover,rightCover := cover].Along[d := Identity.value] \as Collars;
+\import Collars.From[left := collar.collar.deformation,right := collar.collar.deformation].Using[leftRegular := collar.collar.regular,rightRegular := collar.collar.regular] \as Symmetric;
+\definition belowHeight: O.Lt Collapse.radius Height.radius :=
+  O.leLtTrans _ _ _
+    (R.Algebra[].leAddRight Collapse.radius Collapse.radius (O.Order[].leOfLt R.zero Collapse.radius Collapse.positive)) Collapse.supportSmall;
+\definition belowOuter: O.Lt Collapse.radius Height.outer :=
+  O.Order[].ltTrans _ _ _ belowHeight
+    (O.Order[].ltTrans _ _ _ (R.Estimates[].halfStrict Height.middle Height.middlePositive) Height.middleSmall);
+\definition bounded: O.Le Collapse.radius R.one :=
+  O.Order[].leOfLt _ _ (O.Order[].ltTrans _ _ _ belowOuter Height.outerBounded);
+\definition within[t: Time.Point][small: O.Lt (Time.value t) Collapse.radius]: \In[Time.Point] collar.collar.regular.uniform.neighborhood t :=
+  Height.within t (O.Order[].ltTrans _ _ _ small belowOuter);
+\definition parameters: Symmetric.Parameters := Symmetric.Parameters {
+  epsilon := Collapse.radius, positive := Collapse.positive, bounded := bounded, leftWithin := within, rightWithin := within,
+};
+\definition collars: Collars.Construction := Collars.Construction {
+  left := collar.collar.deformation, right := collar.collar.deformation,
+  leftRegular := collar.collar.regular, rightRegular := collar.collar.regular, parameters := parameters,
+};
+\import Symmetric.At[epsilon := Collapse.radius,positive := Collapse.positive,bounded := bounded,leftWithin := within,rightWithin := within] \as Stage;
+\import manifold_gluing.SignedParameter[].At[epsilon := Collapse.radius,positive := Collapse.positive,bounded := bounded] \as Signed;
+\import boundary_manifolds.Product[n := n,m := One.dimension].Of[M := BoundaryModel.manifold,N := Signed.manifold] \as SignedProduct;
+\import manifold_gluing.CollarWindow[n := n].On[M := B].With[cover := cover].From[deformation := collar.collar.deformation].Of[regular := collar.collar.regular].At[
+  a := Height.outer, positive := Height.outerPositive, bounded := Height.outerBounded, within := Height.within] \as Window;
+\definition parameter[x: Parameters.Point][small: O.Lt (Time.value (Parameters.second x)) Collapse.radius]: Collapse.parameters.Point :=
+  \into[Parameters.Point](x,Window.points) \by { O.Order[].ltTrans _ _ _ small belowOuter };
+\import calculus.Blocks[n := p,m := One.dimension] \as Blocks;
+\definition tangential[b: BoundaryModel.manifold.Point]: HalfOrdinary.smoothManifold.Point :=
+  HalfProduct.first (Maps.apply f (BoundaryModel.apply b));
+\definition oneSide[x: Parameters.Point][small: O.Lt (Time.value (Parameters.second x)) Collapse.radius]:
+  (positive (Collapse.collarMap.apply (parameter x small)) \of Model.Point) = Blocks.join (tangential (Parameters.first x)) (Parameters.second x) :=
+  congr!{{Half.manifold.Point} {Model.Point}} Half.value _ _
+    (compatible (parameter x small) (O.Order[].leOfLt _ _ small));
+\definition leftParameter[q: SignedProduct.Point]: Collapse.parameters.Point :=
+  parameter (Stage.leftParameter q) (Signed.positiveSmall (SignedProduct.second q));
+\definition rightParameter[q: SignedProduct.Point]: Collapse.parameters.Point :=
+  parameter (Stage.rightParameter q) (Signed.negativeBound (SignedProduct.second q));
+\definition seamFormula[q: SignedProduct.Point]: Model.Point :=
+  Blocks.join (tangential (SignedProduct.first q)) (SignedProduct.second q);
+\definition leftFormula[q: SignedProduct.Point][member: O.Le R.zero (Stage.scalar q)]: (value (Stage.apply q) \of Model.Point) = seamFormula q :=
+  eq_reason_in!{{Model.Point} _
+    "=" _ "by" { congr!{{Seam.Point} {Model.Point}} (\fun (y: Seam.Point) => value y) _ _ (Stage.onLeft q member) }
+    "=" _ "by" { inCoordinates _ _ (onLeft (Collapse.collarMap.apply (leftParameter q))) }
+    "=" _ "by" { oneSide (Stage.leftParameter q) (Signed.positiveSmall (SignedProduct.second q)) }
+    "=" _ "by" { congr!{{LineModel.Point} {Model.Point}} (Blocks.join (tangential (SignedProduct.first q))) _ _ (Signed.plusIdentity (SignedProduct.second q) member) }
+  };
+\definition flipJoin[u: HalfOrdinary.smoothManifold.Point][t: Signed.Point][member: O.Le (Signed.value t) R.zero]:
+  Reflection.flip (Blocks.join u (Signed.minus t)) = Blocks.join u t :=
+  congr!{{HalfOrdinary.smoothManifold.Point} {LineModel.Point} {Model.Point}} Blocks.join _ _ _ _
+    (Blocks.leftJoin u (Signed.minus t))
+    (\axiom:funext((\fun (i: One.Index) => R.neg (Blocks.right (Blocks.join u (Signed.minus t)) i)),(t \of LineModel.Point),
+      \fun (i: One.Index) => trans!{{R.Real}} _ _ _
+        (congr!{{LineModel.Point} {R.Real}} (\fun (v: LineModel.Point) => R.neg (v i)) _ _
+          (trans!{{LineModel.Point}} _ _ _ (Blocks.rightJoin u (Signed.minus t)) (Signed.minusReflection t member)))
+        (Arithmetic.negInvolutive (t i))));
+\definition rightFormula[q: SignedProduct.Point][member: O.Le (Stage.scalar q) R.zero]: (value (Stage.apply q) \of Model.Point) = seamFormula q :=
+  eq_reason_in!{{Model.Point} _
+    "=" _ "by" { congr!{{Seam.Point} {Model.Point}} (\fun (y: Seam.Point) => value y) _ _ (Stage.onRight q member) }
+    "=" _ "by" { inCoordinates _ _ (onRight (Collapse.collarMap.apply (rightParameter q))) }
+    "=" _ "by" {
+      congr!{{Model.Point} {Model.Point}} Reflection.flip _ _
+        (oneSide (Stage.rightParameter q) (Signed.negativeBound (SignedProduct.second q)))
+    }
+    "=" _ "by" { flipJoin (tangential (SignedProduct.first q)) (SignedProduct.second q) member }
+  };
+\definition agreesInCollar[q: SignedProduct.Point]: (value (Stage.apply q) \of Model.Point) = seamFormula q :=
+  Logic.orElim _ _ _ (O.Order[].leTotal R.zero (Stage.scalar q)) (leftFormula q) (rightFormula q);
+\import manifold_gluing.CompactGluing[n := n].Between[M := B,N := B].With[leftCover := cover,rightCover := cover].Along[d := Identity.value].Compact[
+  leftCompact := compact,rightCompact := compact] \as Gluing;
+\definition double: Gluing.Result := Gluing.Build[c := collars].result;
+\import compact_embeddings.Bridge[n := dimension,m := dimension].Interior[M := Gluing.manifold double,noBoundary := double.noBoundary] \as Interior;
+\import manifolds.Dimension[n := dimension].Smooth[] \as Ordinary;
+\definition ordinary: Ordinary.Manifold := Interior.ordinary;
+\definition ordinaryCompact: topology.Topology[Carrier := ordinary.Point].IsCompact ordinary.space :=
+  Interior.Compact[].ordinaryCompact (Seam.compact compact compact);
+\import boundary_manifolds.Interior[n := dimension].Of[M := Gluing.manifold double] \as OrdinaryInterior;
+\definition ordinaryBase[x: B.Point]: ordinary.Point := Interior.intrinsic (left x);
+\definition ordinaryValue[x: ordinary.Point]: Target.AmbientPoint := value x;
+\definition ordinaryCovers[x: ordinary.Point][member: O.Le R.zero (ordinaryValue x Half.normal)]: \exists (b: B.Point \where ordinaryBase b = x) := \block {
+  \takefrom b: \Cast[B.Point] ({ b: B.Point \where left b = (x \of Seam.Point) }) \by covered x member \then
+  \return Logic.existsIntro[B.Point,{ b: B.Point \where ordinaryBase b = x }] b
+    (boundary_manifolds.Refinement[A := Seam.Point].equality OrdinaryInterior.points (ordinaryBase b) x
+      (\bysub(B.Point,{ b: B.Point \where left b = (x \of Seam.Point) },b)))
+};

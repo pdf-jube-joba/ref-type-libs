@@ -1,0 +1,11 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\import real.Analysis[] \as R;
+\import linear_algebra.Commutative[K := R.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing R.Real R.Algebra[].field] \as Spaces;
+\import calculus.Real[].Multivariable[n := n].Open[] \as SourceOpen;
+\import calculus.Real[].Multivariable[n := m].Open[] \as TargetOpen;
+\module Between(U: SourceOpen.OpenSet, V: TargetOpen.OpenSet);

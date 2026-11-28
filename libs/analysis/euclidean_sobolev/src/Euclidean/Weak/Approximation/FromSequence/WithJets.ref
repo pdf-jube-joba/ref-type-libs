@@ -1,0 +1,50 @@
+\definition LimitOf[d: E.Directions]: \Set := \Cast[L2.Space] ({ y: L2.Space \where JetLimit[s,d,f d,y] });
+\definition limitExists[d: E.Directions][degree: Nat.Le (Sobolev.order d) k]: \exists LimitOf d :=
+  (\bysub(Global.Representatives, { g: Global.Representatives \where Jet s d g }, f d)) degree;
+\definition limitLaw[d: E.Directions][y: LimitOf d]: JetLimit[s,d,f d,y] :=
+  \bysub(L2.Space, { y: L2.Space \where JetLimit[s,d,f d,y] }, y);
+\definition physical: Global.ofFunction (f E.Directions::nil) = RealL2.realPart (H.physical x) := \block {
+  \takefrom y: LimitOf E.Directions::nil \by limitExists E.Directions::nil (Nat.zeroLe k) \then
+  \let law: JetLimit[s,E.Directions::nil,f E.Directions::nil,y] := limitLaw E.Directions::nil y \then
+  \return trans!{Global.Space} _ _ _ law.underlying (congr!{L2.Space Global.Space} RealL2.realPart _ _
+    (Metric.limitUnique Geometry.metric (Limits.image s E.Directions::nil) y (H.physical x) law.converges (Limits.physicalLimit s x limit)))
+};
+\definition normBound[d: E.Directions][degree: Nat.Le (Sobolev.order d) k]: R.Le (Global.norm (Global.ofFunction (f d))) (H.norm x) := \block {
+  \takefrom y: LimitOf d \by limitExists d degree \then
+  \let law: JetLimit[s,d,f d,y] := limitLaw d y \then
+  \return R.leReplaceLeft _ _ _ (sym!{Real.Real} _ _ (congr!{Global.Space Real.Real} Global.norm _ _ law.underlying))
+    (R.leTrans _ _ _ (RealL2.realNormBound y) (Limits.imageNormBound s x d degree y limit law.converges))
+};
+\definition local[d: E.Directions]: Local.Representatives := restrict (f d);
+\definition derivative[d: E.Directions][degree: Nat.Le (Sobolev.order d) k]: Dual.derivative d
+  (Regular.distribution (DistributionL2.regular (local E.Directions::nil) (Local.properties (local E.Directions::nil)))) =
+  Regular.distribution (DistributionL2.regular (local d) (Local.properties (local d))) := \block {
+    \takefrom y: LimitOf d \by limitExists d degree \then
+    \let law: JetLimit[s,d,f d,y] := limitLaw d y \then
+    \return eq_reason_in!{Dist.Distribution _
+      "=" _ "by" { congr!{Dist.Distribution Dist.Distribution} (Dual.derivative d) _ _
+        (trans!{Dist.Distribution} _ _ _ (regularRestriction (f E.Directions::nil))
+          (congr!{Global.Space Dist.Distribution} Pairing.value _ _ physical)) }
+      "=" _ "by" { weakJet s d (H.physical x) y (Limits.physicalLimit s x limit) law.converges }
+      "=" _ "by" { congr!{Global.Space Dist.Distribution} Pairing.value _ _ (sym!{Global.Space} _ _ law.underlying) }
+      "=" _ "by" { sym!{Dist.Distribution} _ _ (regularRestriction (f d)) }
+    }
+  };
+\definition functions[d: E.Directions]: Whole.Functions := local d;
+\definition distributionJets: DistributionL2.DistributionDerivatives[functions E.Directions::nil, k, functions] :=
+  DistributionL2.DistributionDerivatives[functions E.Directions::nil, k, functions] {
+    function := \refl(functions E.Directions::nil),
+    integrable := \fun (d: E.Directions)(degree: _) => Local.properties (local d),
+    weak := derivative,
+  };
+\definition representative: Weak.Representatives k PA.two := \into[Whole.Functions](functions E.Directions::nil, Weak.Representatives k PA.two) \by {
+  Logic.existsIntro[E.Directions -> Whole.Functions, { jets: E.Directions -> Whole.Functions \where
+    Weak.Derivatives[functions E.Directions::nil, k, PA.two, jets] }] functions
+    (DistributionL2.toExisting (functions E.Directions::nil) k functions distributionJets)
+};
+\definition value: W.Wkp := W.ofFunction representative;
+\definition underlying: Classes.underlying value = RealL2.realPart (H.physical x) := eq_reason_in!{Global.Space _
+  "=" _ "by" { Classes.onClass representative }
+  "=" _ "by" { Global.classPointwise _ (f E.Directions::nil) (\fun (p: Point) => \refl(f E.Directions::nil p)) }
+  "=" _ "by" { physical }
+};

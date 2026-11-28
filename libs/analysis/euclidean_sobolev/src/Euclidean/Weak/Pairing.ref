@@ -1,0 +1,60 @@
+\import LE.Compact[p := PA.two] \as Compact;
+\import Regular.Lp[p := PA.two] \as RegularL2;
+\import L.Hilbert[] \as RH;
+\import L.Holder[exponents := RH.exponents] \as Holder;
+\import L.Norm[p := PA.two] \as RN;
+\import Global.Vector[] \as RV;
+\import functional_analysis.Normed[V := Global.Space, space := RV.space] \as Normed;
+\import Normed.Hilbert[norm := RN.norm].Riesz[inner := RH.inner] \as Riesz;
+\import linear_algebra.Commutative[K := R.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing R.Real Algebra.field] \as Linear;
+\import Linear.Linear[V := Global.Space, W := Real.Real, source := RV.space, target := Linear.scalarSpace] \as LinearMaps;
+\import Normed.Operators[W := Real.Real, target := Linear.scalarSpace, norm := RN.norm, targetNorm := Riesz.realNorm] \as Operators;
+\import Real.Sequence[] \as Sequence;
+\import Sequence.Operations[] \as Seq;
+\import functional_analysis.Metric[Carrier := Global.Space] \as RealMetric;
+\import GQ.Maps[B := Dist.Distribution] \as Maps;
+\definition representativeDistribution[f: Global.Representatives]: Dist.Distribution := Regular.distribution (RegularL2.representative f);
+\definition respects: Maps.Respects representativeDistribution := \fun (f,g: Global.Representatives)(same: _) =>
+  Regular.respects (RegularL2.representative f) (RegularL2.representative g) same;
+\definition value: Global.Space -> Dist.Distribution := Maps.value Global.equivalence representativeDistribution respects;
+\definition onClass[f: Global.Representatives]: value (Global.ofFunction f) = representativeDistribution f :=
+  Maps.onClass Global.equivalence representativeDistribution respects f;
+\definition testClass[test: LE.SmoothCompact]: Global.Space := Global.ofFunction (Compact.smoothRepresentative test);
+\definition onTest: \forall (x: Global.Space)(test: LE.SmoothCompact) -> (value x).eval test = RH.value (testClass test) x :=
+  GQ.induction (\fun (x: Global.Space) => \forall (test: LE.SmoothCompact) -> (value x).eval test = RH.value (testClass test) x)
+    (\fun (f: Global.Representatives)(test: LE.SmoothCompact) => eq_reason_in!{Real.Real _
+      "=" _ "by" { congr!{Dist.Distribution Real.Real} (\fun (T: Dist.Distribution) => T.eval test) _ _ (onClass f) }
+      "=" _ "by" { Holder.integralPointwise (Regular.For[f := RegularL2.representative f].representative test)
+        (Holder.representative (Compact.smoothRepresentative test) f) (\fun (x: Point) => Laws.fieldMulComm (f x) (test x)) }
+      "=" _ "by" { sym!{Real.Real} _ _ (RH.onClass (Compact.smoothRepresentative test) f) }
+    });
+\definition bound: \forall (x,y: Global.Space) -> R.Le (Product.abs (RH.value x y)) (Real.mul (Global.norm x) (Global.norm y)) :=
+  GQ.induction2 (\fun (x,y: Global.Space) => R.Le (Product.abs (RH.value x y)) (Real.mul (Global.norm x) (Global.norm y)))
+    (\fun (f,g: Global.Representatives) => R.leReplace _ _ _ _
+      (sym!{Real.Real} _ _ (congr!{Real.Real Real.Real} Product.abs _ _ (RH.onClass f g)))
+      (sym!{Real.Real} _ _ (congr!{Real.Real Real.Real Real.Real} Real.mul _ _ _ _ (Global.normOfFunction f) (Global.normOfFunction g)))
+      (R.leTrans _ _ _ (I.Absolute[].integralAbsBound (Holder.representative f g)) (Holder.inequality f g)));
+\definition linear[test: LE.SmoothCompact]: LinearMaps.Map := LinearMaps.Map {
+  apply := RH.value (testClass test),
+  preservesAdd := RH.addRight (testClass test),
+  preservesScale := \fun (c: Real.Real)(x: Global.Space) => RH.scaleRight c (testClass test) x,
+};
+\definition functional[test: LE.SmoothCompact]: Riesz.Functional := \into[LinearMaps.Map](linear test, Riesz.Functional) \by {
+  Logic.existsIntro[Real.Real, { c: Real.Real \where Operators.Bound[linear test, c] }] (Global.norm (testClass test))
+    (Operators.Bound[linear test, Global.norm (testClass test)] {
+      nonnegative := Global.nonnegative (testClass test),
+      estimate := bound (testClass test),
+    })
+};
+\definition converges[s: N.Nat^ -> Global.Space][x: Global.Space]: RealMetric.Converges RN.metric s x ->
+  Dual.Converges (\fun (j: N.Nat^) => value (s j)) (value x) := \fun (limit: _)(test: LE.SmoothCompact) =>
+  \idelim RH.value (testClass test) x = (value x).eval test \with l: Real.Real =>
+    Sequence.Converges (\fun (j: N.Nat^) => (value (s j)).eval test) l \by {
+    base: Seq.congruent _ _ _ (\fun (j: N.Nat^) => sym!{Real.Real} _ _ (onTest (s j) test))
+      (Riesz.imageConverges (functional test) s x limit),
+    equality: sym!{Real.Real} _ _ (onTest x test)
+  };
+\definition onSchwartz[f: E.Schwartz]: value (Global.ofFunction (Embedding.real f)) = distribution f :=
+  trans!{Dist.Distribution} _ _ _ (onClass (Embedding.real f))
+    (Regular.respects (RegularL2.representative (Embedding.real f)) (regular f)
+      (GlobalAE.reflexive (Embedding.real f)));

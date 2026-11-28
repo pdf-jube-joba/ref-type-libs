@@ -1,0 +1,13 @@
+\import compact_embeddings.HalfSpace[k := p] \as Half;
+\import compact_embeddings.Neat[n := p] \as Height;
+\import boundary_manifolds.Model[n := Half.dimension] \as Model;
+\import calculus.Real[].Multivariable[n := Half.dimension].Open[] \as Open;
+\import boundary_manifolds.Model[n := One.dimension] \as LineModel;
+\import topological_algebra.Euclidean[].Dimension[n := Half.dimension].Topology[] \as CoordinateSpace;
+\import manifolds.Dimension[n := p].Examples[].Euclidean[] \as HalfOrdinary;
+\import boundary_manifolds.Boundaryless[n := p].Of[M := HalfOrdinary.smoothManifold] \as HalfEuclidean;
+\import boundary_manifolds.Product[n := p, m := calculus.Real[].OneDimension[].dimension].Of[
+  M := HalfEuclidean.manifold, N := compact_embeddings.Neat[n := p].halfLine] \as HalfProduct;
+\import \root.HalfSpaceCoordinates[p := p] \as Coordinates;
+\import boundary_manifolds.Neat[n := dimension,m := Half.dimension].Between[M := B,N := Half.manifold] \as Neat;
+\module Reflected(f: Neat.Embedding);

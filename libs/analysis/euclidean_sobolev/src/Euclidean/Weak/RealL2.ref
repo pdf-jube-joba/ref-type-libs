@@ -1,0 +1,35 @@
+\import L2.Complete[] \as Components;
+\import std.Set[].Quotient[A := L2.Representatives, Equivalent := L2.Equivalent] \as CQ;
+\import GQ.Maps[B := L2.Space] \as Maps;
+\definition representative[f: Global.Representatives]: L2.Representatives := L2.join f Global.zeroRepresentative;
+\definition class[f: Global.Representatives]: L2.Space := L2.ofFunction (representative f);
+\definition respects: Maps.Respects class := \fun (f,g: Global.Representatives)(same: _) =>
+  CQ.classOfEq L2.equivalence (representative f) (representative g)
+    (Logic.And[_, _]::# same (GlobalAE.reflexive Global.zeroRepresentative));
+\definition complexify: Global.Space -> L2.Space := Maps.value Global.equivalence class respects;
+\definition onClass[f: Global.Representatives]: complexify (Global.ofFunction f) = class f :=
+  Maps.onClass Global.equivalence class respects f;
+\definition realPart: L2.Space -> Global.Space := Components.realClass;
+\definition realComplexify: \forall (x: Global.Space) -> realPart (complexify x) = x :=
+  GQ.induction (\fun (x: Global.Space) => realPart (complexify x) = x)
+    (\fun (f: Global.Representatives) => eq_reason_in!{Global.Space _
+      "=" _ "by" { congr!{L2.Space Global.Space} realPart _ _ (onClass f) }
+      "=" _ "by" { Components.realOnClass (representative f) }
+      "=" _ "by" { Global.classPointwise _ _ (\fun (x: Point) => \refl(f x)) }
+    });
+\definition norm: \forall (x: Global.Space) -> L2.normValue (complexify x) = Global.norm x :=
+  GQ.induction (\fun (x: Global.Space) => L2.normValue (complexify x) = Global.norm x)
+    (\fun (f: Global.Representatives) => eq_reason_in!{Real.Real _
+      "=" _ "by" { congr!{L2.Space Real.Real} L2.normValue _ _ (onClass f) }
+      "=" _ "by" { L2.normOfFunction (representative f) }
+      "=" _ "by" { Geometry.realPointwise _ _ (\fun (x: Point) => Scalars.realAxisAbs (f x)) }
+      "=" _ "by" { Global.normAbsolute f }
+      "=" _ "by" { sym!{Real.Real} _ _ (Global.normOfFunction f) }
+    });
+\definition realNormBound: \forall (x: L2.Space) -> R.Le (Global.norm (realPart x)) (L2.normValue x) :=
+  CQ.induction (\fun (x: L2.Space) => R.Le (Global.norm (realPart x)) (L2.normValue x))
+    (\fun (f: L2.Representatives) => R.leReplace _ _ _ _
+      (sym!{Real.Real} _ _ (trans!{Real.Real} _ _ _
+        (congr!{Global.Space Real.Real} Global.norm _ _ (Components.realOnClass f))
+        (Global.normOfFunction (L2.realPart f))))
+      (sym!{Real.Real} _ _ (L2.normOfFunction f)) (Components.realNormBound f));
