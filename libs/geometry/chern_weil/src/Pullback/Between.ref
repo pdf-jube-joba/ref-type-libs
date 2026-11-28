@@ -1,0 +1,4 @@
+\import manifolds.SmoothMap[n := n, m := m].Between[M := X, N := Y] \as Maps;
+\import differential_forms.Forms[n := n].On[M := X] \as SourceForms;
+\import differential_forms.Forms[n := m].On[M := Y] \as TargetForms;
+\module Family(F: Y.Point -> \Set, space: \forall (y: Y.Point) -> Spaces.VectorSpace (F y));

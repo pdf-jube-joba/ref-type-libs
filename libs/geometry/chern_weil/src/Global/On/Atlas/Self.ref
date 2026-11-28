@@ -1,0 +1,13 @@
+\import \parent.Overlap[c := c, d := c] \as Overlap;
+\import Charts.Transition[left := c, right := c] \as Domain;
+\import Euclidean.On[U := Domain.domain] \as Common;
+\import Euclidean.On[U := c.image] \as Forms;
+\import Spaces.Coordinates[I := Fin.Fin n] \as Vectors;
+\definition argument[x: Open.Carrier c.image]: Open.Carrier Domain.domain :=
+  \into[Vectors.Vector](x, Domain.domain.points) \by {
+    Domain.intro x (\bysub(M.Point, c.domain, Charts.point c x))
+  };
+\definition restrictInjective: \forall (k: N.Nat^)(alpha, beta: Forms.Form k) -> Overlap.restrict k alpha = Overlap.restrict k beta -> alpha = beta :=
+  \fun (k: N.Nat^)(alpha, beta: Forms.Form k)(same: _) => Forms.ext k alpha beta
+    (\fun (x: Open.Carrier c.image)(args: Fin.Fin k -> Vectors.Vector) =>
+      congr!{{Common.Form k} {R.Real}} (\fun (v: Common.Form k) => v (argument x) args) _ _ same);

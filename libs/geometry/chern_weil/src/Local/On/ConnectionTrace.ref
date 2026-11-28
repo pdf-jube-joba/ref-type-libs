@@ -1,0 +1,67 @@
+\import bundle_connections.MatrixCalculus[n := n, r := r].On[U := U] \as M;
+\import M.Associativity[] \as Algebra;
+\import M.Linearity[] \as Linear;
+\import Spaces.Laws[V := Matrix one, space := Linear.space] \as Laws;
+\import \parent.Trace[k := one] \as Trace;
+\import \parent.Cyclic[p := zero, q := one] \as Cyclic;
+\import \parent.Product[p := zero, q := one] \as P01;
+\import \parent.Product[p := one, q := zero] \as P10;
+\import \parent.Functions[] \as Functions;
+\import Scalar.At[k := one] \as Forms;
+\definition difference[A, B: Matrix one]: Matrix one := M.plus A (Linear.negative B);
+\definition restore: \forall (A, B: Matrix one) -> M.plus B (difference A B) = A :=
+  \fun (A, B: Matrix one) => eq_reason_in!{{Matrix one} _
+    "=" {M.plus B (M.plus (Linear.negative B) A)} "by" {
+      congr!{{Matrix one} {Matrix one}} (M.plus B) _ _ (Laws.comm A (Linear.negative B)) }
+    "=" _ "by" { sym!{{Matrix one}} _ _ (Laws.assoc B (Linear.negative B) A) }
+    "=" {M.plus Linear.origin A} "by" {
+      congr!{{Matrix one} {Matrix one}} (\fun (C: Matrix one) => M.plus C A) _ _
+        (trans!{{Matrix one}} _ _ _ (Laws.comm B (Linear.negative B)) (Laws.inverseLeft B)) }
+    "=" _ "by" { Laws.zeroLeft A }
+  };
+\definition differenceGauge: \forall (T: M.Matrix0)(A, B, C, D: Matrix one) ->
+  M.product01 T A = M.plus (M.dMatrix T) (M.product10 C T) ->
+  M.product01 T B = M.plus (M.dMatrix T) (M.product10 D T) ->
+  M.product01 T (difference A B) = M.product10 (difference C D) T :=
+  \fun (T: M.Matrix0)(A, B, C, D: Matrix one)(first: _)(second: _) =>
+    Laws.cancelLeft (M.product01 T B) _ _ (eq_reason_in!{{Matrix one} _
+      "=" _ "by" { sym!{{Matrix one}} _ _ ((Linear.leftMap T).preservesAdd B (difference A B)) }
+      "=" _ "by" { congr!{{Matrix one} {Matrix one}} (M.product01 T) _ _ (restore A B) }
+      "=" _ "by" { first }
+      "=" _ "by" { congr!{{Matrix one} {Matrix one}} (M.plus (M.dMatrix T)) _ _
+        (congr!{{Matrix one} {Matrix one}} (\fun (H: Matrix one) => M.product10 H T) _ _ (sym!{{Matrix one}} _ _ (restore C D))) }
+      "=" _ "by" { congr!{{Matrix one} {Matrix one}} (M.plus (M.dMatrix T)) _ _
+        ((Linear.rightMap T).preservesAdd D (difference C D)) }
+      "=" _ "by" { sym!{{Matrix one}} _ _ (Laws.assoc (M.dMatrix T) (M.product10 D T) (M.product10 (difference C D) T)) }
+      "=" _ "by" { congr!{{Matrix one} {Matrix one}}
+        (\fun (H: Matrix one) => M.plus H (M.product10 (difference C D) T)) _ _ (sym!{{Matrix one}} _ _ second) }
+    });
+\definition cyclic: \forall (T: M.Matrix0)(A: Matrix one) -> Trace.apply (M.product10 A T) = Trace.apply (M.product01 T A) :=
+  \fun (T: M.Matrix0)(A: Matrix one) => eq_reason_in!{{Scalar.Form one} _
+    "=" {Trace.apply (P10.apply A (Functions.forms T))} "by" {
+      congr!{{Matrix one} {Scalar.Form one}} Trace.apply _ _ (sym!{{Matrix one}} _ _ (Functions.right A T)) }
+    "=" _ "by" { Cyclic.law (Functions.forms T) A }
+    "=" {Forms.scale Cyclic.sign (Trace.apply (P01.apply (Functions.forms T) A))} "by" {
+      congr!{{Scalar.Form one} {Scalar.Form one}} (Forms.scale Cyclic.sign) _ _
+        (\transporteq one \with k: _ => Scalar.Form k \by { base: Trace.apply (P01.apply (Functions.forms T) A) }) }
+    "=" _ "by" { Forms.space.scalarOne (Trace.apply (P01.apply (Functions.forms T) A)) }
+    "=" _ "by" { congr!{{Matrix one} {Scalar.Form one}} Trace.apply _ _ (Functions.left T A) }
+  };
+\definition invariant: \forall (T, S: M.Matrix0)(A, B: Matrix one) ->
+  M.product00 S T = Algebra.identity -> M.product00 T S = Algebra.identity ->
+  M.product01 T A = M.product10 B T -> Trace.apply A = Trace.apply B :=
+  \fun (T, S: M.Matrix0)(A, B: Matrix one)(left: _)(right: _)(same: _) => eq_reason_in!{{Scalar.Form one} _
+    "=" {Trace.apply (M.product01 Algebra.identity A)} "by" {
+      congr!{{Matrix one} {Scalar.Form one}} Trace.apply _ _ (sym!{{Matrix one}} _ _ (Algebra.identityLeft A)) }
+    "=" {Trace.apply (M.product01 (M.product00 S T) A)} "by" {
+      congr!{{M.Matrix0} {Scalar.Form one}} (\fun (Q: M.Matrix0) => Trace.apply (M.product01 Q A)) _ _ (sym!{{M.Matrix0}} _ _ left) }
+    "=" _ "by" { congr!{{Matrix one} {Scalar.Form one}} Trace.apply _ _ (Algebra.assoc001 S T A) }
+    "=" {Trace.apply (M.product01 S (M.product10 B T))} "by" {
+      congr!{{Matrix one} {Scalar.Form one}} (\fun (H: Matrix one) => Trace.apply (M.product01 S H)) _ _ same }
+    "=" _ "by" { congr!{{Matrix one} {Scalar.Form one}} Trace.apply _ _ (sym!{{Matrix one}} _ _ (Algebra.assoc010 S B T)) }
+    "=" {Trace.apply (M.product01 T (M.product01 S B))} "by" { cyclic T (M.product01 S B) }
+    "=" _ "by" { congr!{{Matrix one} {Scalar.Form one}} Trace.apply _ _ (sym!{{Matrix one}} _ _ (Algebra.assoc001 T S B)) }
+    "=" {Trace.apply (M.product01 Algebra.identity B)} "by" {
+      congr!{{M.Matrix0} {Scalar.Form one}} (\fun (Q: M.Matrix0) => Trace.apply (M.product01 Q B)) _ _ right }
+    "=" _ "by" { congr!{{Matrix one} {Scalar.Form one}} Trace.apply _ _ (Algebra.identityLeft B) }
+  };

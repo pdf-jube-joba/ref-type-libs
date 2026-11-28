@@ -1,0 +1,6 @@
+\import smooth_bundles.Real[n := n, r := r].On[M := M] \as SmoothBundles;
+\import bundle_connections.Real[n := n, r := r].On[M := M] \as RealConnections;
+\module Family(F: M.Point -> \Set, space: \forall (x: M.Point) -> Spaces.VectorSpace (F x));
+\import differential_forms.Forms[n := n].On[M := M] \as BaseForms;
+\import manifolds.Dimension[n := n].Chart[M := M.Point, space := M.space] \as Charts;
+\module Atlas(I: \Set, chart: I -> BaseForms.Chart, covers: \forall (x: M.Point) -> \exists (i: I \where Charts.Contains (chart i) x));

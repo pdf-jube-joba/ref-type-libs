@@ -1,0 +1,102 @@
+\import bundle_connections.MatrixCalculus[n := n, r := r].On[U := U] \as Matrices;
+\import Matrices.Associativity[] \as Algebra;
+\import bundle_connections.GlobalForms[n := n, r := r].On[U := U] \as BundleForms;
+\import BundleForms.Action[k := k] \as Action;
+\import BundleForms.Multiply[k := k] \as Multiply;
+\import \parent.At[k := k] \as Rank;
+\import \parent.Trace[k := k] \as Trace;
+\import \parent.Functions[] \as Functions;
+\import \parent.Product[p := zero, q := k] \as P0;
+\import \parent.Product[p := k, q := zero] \as Q0;
+\import Scalar.DegreeZero[] \as DegreeZero;
+\import Scalar.At[k := k] \as Forms;
+\import Scalar.At[k := Nat.add zero k] \as Uncast;
+\import Scalar.Wedge[p := zero, q := k] \as WedgeLeft;
+\import Scalar.Wedge[p := k, q := zero] \as WedgeRight;
+\import Scalar.Regrade[k := Nat.add zero k, l := k] \as Degree;
+\import Scalar.Summation[k := k, I := Fin.Fin r] \as Evaluation;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form k, space := Forms.space] \as Sums;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form (Nat.add zero k), space := Uncast.space].Mapping[W := Scalar.Form k, target := Forms.space] \as RegradeSum;
+\import Spaces.Coordinates[I := Fin.Fin n] \as Vectors;
+\import Spaces.Multilinear[V := Vectors.Vector, space := Vectors.space] \as Arguments;
+\import Spaces.FiniteCoordinates[n := r] \as Basis;
+\import Spaces.FiniteCoordinateEnumeration[] \as Enumeration;
+\import R.FiniteSums[] \as Finite;
+\definition left[T: Matrices.Matrix0][F: Matrix k][a, b: Fin.Fin r]: Scalar.Form k :=
+  Action.apply T (\fun (c: Fin.Fin r) => F c b) a;
+\definition right[F: Matrix k][T: Matrices.Matrix0][a, b: Fin.Fin r]: Scalar.Form k :=
+  Rank.sum (\fun (c: Fin.Fin r) => Forms.multiply (T c b) (F a c));
+\definition leftWedge: \forall (T: Matrices.Matrix0)(F: Matrix k)(a, b: Fin.Fin r) ->
+  Degree.cast (P0.apply (Functions.forms T) F a b) Multiply.degree = left T F a b :=
+  \fun (T: Matrices.Matrix0)(F: Matrix k)(a, b: Fin.Fin r) => trans!{{Scalar.Form k}} _ _ _
+    (RegradeSum.law (Degree.map Multiply.degree) (Fin.elements r)
+      (\fun (c: Fin.Fin r) => WedgeLeft.apply (DegreeZero.apply (T a c)) (F c b)))
+    (Sums.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => Multiply.law (T a c) (F c b)));
+\definition rightWedge: \forall (F: Matrix k)(T: Matrices.Matrix0) -> Q0.apply F (Functions.forms T) = right F T :=
+  \fun (F: Matrix k)(T: Matrices.Matrix0) => ext k _ _ (\fun (a, b: Fin.Fin r) =>
+    Sums.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => Multiply.rightLaw (T c b) (F a c)));
+\definition identityLeft: \forall (F: Matrix k) -> left Algebra.identity F = F :=
+  \fun (F: Matrix k) => ext k _ _ (\fun (a, b: Fin.Fin r) =>
+    Scalar.ext k (left Algebra.identity F a b) (F a b)
+      (\fun (x: Open.Carrier U)(args: Arguments.Arguments k) => eq_reason_in!{R.Real _
+        "=" _ "by" { Action.value Algebra.identity (\fun (c: Fin.Fin r) => F c b) a x args }
+        "=" _ "by" { Finite.congruent r _ _ (\fun (c: Fin.Fin r) => Spaces.mulComm (Basis.vectors a c) (F c b x args)) }
+        "=" _ "by" { sym!{R.Real} _ _ (Enumeration.sumLaw r (\fun (c: Fin.Fin r) => Spaces.mul (F c b x args) (Basis.vectors a c))) }
+        "=" _ "by" { Basis.dualReconstruction (\fun (c: Fin.Fin r) => F c b x args) a }
+      }));
+\definition associativeLeft: \forall (T, S: Matrices.Matrix0)(F: Matrix k) ->
+  left (Matrices.product00 T S) F = left T (left S F) :=
+  \fun (T, S: Matrices.Matrix0)(F: Matrix k) => ext k _ _ (\fun (a, b: Fin.Fin r) => sym!{{Scalar.Form k}} _ _
+    (congr!{{Fin.Fin r -> Scalar.Form k} {Scalar.Form k}} (\fun (C: Fin.Fin r -> Scalar.Form k) => C a) _ _
+      (Action.assoc T S (\fun (c: Fin.Fin r) => F c b))));
+\definition eval[F: Matrix k][x: Open.Carrier U][args: Arguments.Arguments k][a, b: Fin.Fin r]: R.Real := F a b x args;
+\definition evaluateLeft: \forall (T: Matrices.Matrix0)(F: Matrix k)(x: Open.Carrier U)(args: Arguments.Arguments k) ->
+  eval (left T F) x args = Algebra.product (Algebra.eval0 T x) (eval F x args) :=
+  \fun (T: Matrices.Matrix0)(F: Matrix k)(x: Open.Carrier U)(args: Arguments.Arguments k) =>
+    Algebra.numericExt (eval (left T F) x args) (Algebra.product (Algebra.eval0 T x) (eval F x args))
+      (\fun (a, b: Fin.Fin r) => Action.value T (\fun (c: Fin.Fin r) => F c b) a x args);
+\definition evaluateRight: \forall (F: Matrix k)(T: Matrices.Matrix0)(x: Open.Carrier U)(args: Arguments.Arguments k) ->
+  eval (right F T) x args = Algebra.product (eval F x args) (Algebra.eval0 T x) :=
+  \fun (F: Matrix k)(T: Matrices.Matrix0)(x: Open.Carrier U)(args: Arguments.Arguments k) =>
+    Algebra.numericExt (eval (right F T) x args) (Algebra.product (eval F x args) (Algebra.eval0 T x)) (\fun (a, b: Fin.Fin r) =>
+    eq_reason_in!{R.Real {right F T a b x args}
+      "=" _ "by" { Evaluation.evaluateSum (Fin.elements r) (\fun (c: Fin.Fin r) => Forms.multiply (T c b) (F a c)) x args }
+      "=" _ "by" { Enumeration.sumLaw r (\fun (c: Fin.Fin r) => R.mul (T c b x) (F a c x args)) }
+      "=" _ "by" { Finite.congruent r _ _ (\fun (c: Fin.Fin r) => Spaces.mulComm (T c b x) (F a c x args)) }
+    });
+\definition associativeMiddle: \forall (T: Matrices.Matrix0)(F: Matrix k)(S: Matrices.Matrix0) ->
+  right (left T F) S = left T (right F S) :=
+  \fun (T: Matrices.Matrix0)(F: Matrix k)(S: Matrices.Matrix0) => ext k _ _ (\fun (a, b: Fin.Fin r) =>
+    Scalar.ext k _ _ (\fun (x: Open.Carrier U)(args: Arguments.Arguments k) =>
+      congr!{Algebra.Numeric R.Real} (\fun (A: Algebra.Numeric) => A a b) _ _ (eq_reason_in!{Algebra.Numeric _
+        "=" _ "by" { evaluateRight (left T F) S x args }
+        "=" _ "by" { congr!{Algebra.Numeric Algebra.Numeric} (\fun (A: Algebra.Numeric) => Algebra.product A (Algebra.eval0 S x)) _ _
+          (evaluateLeft T F x args) }
+        "=" _ "by" { Algebra.associative (Algebra.eval0 T x) (eval F x args) (Algebra.eval0 S x) }
+        "=" _ "by" { congr!{Algebra.Numeric Algebra.Numeric} (Algebra.product (Algebra.eval0 T x)) _ _
+          (sym!{Algebra.Numeric} _ _ (evaluateRight F S x args)) }
+        "=" _ "by" { sym!{Algebra.Numeric} _ _ (evaluateLeft T (right F S) x args) }
+      })));
+\definition cyclic: \forall (T: Matrices.Matrix0)(F: Matrix k) -> Trace.apply (right F T) = Trace.apply (left T F) :=
+  \fun (T: Matrices.Matrix0)(F: Matrix k) => Sums.exchange (Fin.elements r) (Fin.elements r)
+    (\fun (a, b: Fin.Fin r) => Forms.multiply (T b a) (F a b));
+\definition law: \forall (T, S: Matrices.Matrix0)(F, G: Matrix k) ->
+  Matrices.product00 S T = Algebra.identity -> Matrices.product00 T S = Algebra.identity ->
+  left T F = right G T -> Trace.apply F = Trace.apply G :=
+  \fun (T, S: Matrices.Matrix0)(F, G: Matrix k)(st: _)(ts: _)(same: _) => eq_reason_in!{{Scalar.Form k} {Trace.apply F}
+    "=" {Trace.apply (left Algebra.identity F)} "by" {
+      congr!{{Matrix k} {Scalar.Form k}} Trace.apply _ _ (sym!{{Matrix k}} _ _ (identityLeft F)) }
+    "=" {Trace.apply (left (Matrices.product00 S T) F)} "by" {
+      congr!{{Matrices.Matrix0} {Scalar.Form k}} (\fun (H: Matrices.Matrix0) => Trace.apply (left H F)) _ _ (sym!{{Matrices.Matrix0}} _ _ st) }
+    "=" {Trace.apply (left S (left T F))} "by" { congr!{{Matrix k} {Scalar.Form k}} Trace.apply _ _ (associativeLeft S T F) }
+    "=" {Trace.apply (left S (right G T))} "by" {
+      congr!{{Matrix k} {Scalar.Form k}} (\fun (H: Matrix k) => Trace.apply (left S H)) _ _ same }
+    "=" {Trace.apply (right (left S G) T)} "by" {
+      congr!{{Matrix k} {Scalar.Form k}} Trace.apply _ _ (sym!{{Matrix k}} _ _ (associativeMiddle S G T)) }
+    "=" {Trace.apply (left T (left S G))} "by" { cyclic T (left S G) }
+    "=" {Trace.apply (left (Matrices.product00 T S) G)} "by" {
+      congr!{{Matrix k} {Scalar.Form k}} Trace.apply _ _ (sym!{{Matrix k}} _ _ (associativeLeft T S G)) }
+    "=" {Trace.apply (left Algebra.identity G)} "by" {
+      congr!{{Matrices.Matrix0} {Scalar.Form k}} (\fun (H: Matrices.Matrix0) => Trace.apply (left H G)) _ _ ts }
+    "=" _ "by" { congr!{{Matrix k} {Scalar.Form k}} Trace.apply _ _ (identityLeft G) }
+  };

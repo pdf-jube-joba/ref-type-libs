@@ -1,0 +1,14 @@
+\definition local: Data two :=
+  \fun (i: I) => \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].value;
+\module OnOverlap(i, j: I);
+\definition compatible: Compatible local := \fun (i, j: I) => OnOverlap[i := i, j := j].law;
+\definition value: EndomorphismTwoForm := \into[Data two](local, EndomorphismTwoForm) \by { compatible };
+\definition covariant: Data three :=
+  \fun (i: I) => \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].covariant (value i);
+\definition zeroThree: Data three :=
+  \fun (i: I) => \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].At[k := three].origin;
+\definition bianchi: covariant = zeroThree :=
+  \axiom:funext(covariant, zeroThree, \fun (i: I) =>
+    \root.Local[n := n, r := r].On[U := (Bundle.chart i).image].Curvature[connection := connection i].bianchi);
+\module TraceForm;
+\module QuadraticTrace;

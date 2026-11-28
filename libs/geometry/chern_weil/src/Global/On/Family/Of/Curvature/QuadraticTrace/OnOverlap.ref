@@ -1,0 +1,58 @@
+\import Bundle.Pair[i := i, j := j] \as Change;
+\import Charts.Transition[left := Change.c, right := Change.d] \as Domain;
+\import \root.Local[n := n, r := r].On[U := Domain.domain] \as Overlap;
+\import \root.Local[n := n, r := r].Restriction[U := Domain.domain, V := Change.c.image, included := Change.included] \as Restriction;
+\import \root.Transport[n := n, m := n, r := r].Between[U := Domain.domain, V := Change.d.image].Pullback[f := Change.map] \as Pullback;
+\import \root.Global[n := n, r := r].On[M := M].Family[F := F, space := space].Of[I := I, bundle := bundle].Pair[i := i, j := j] \as Frame;
+\import Overlap.TraceGauge[k := four] \as TraceGauge;
+\import Overlap.Trace[k := four] \as Trace;
+\import Overlap.Product[p := zero, q := two] \as P02;
+\import Overlap.Product[p := two, q := zero] \as P20;
+\import Overlap.Product[p := two, q := two] \as P22;
+\import Overlap.Product[p := zero, q := four] \as P04;
+\import Overlap.Product[p := four, q := zero] \as P40;
+\import Overlap.Associativity[p := zero, q := two, s := two] \as A022;
+\import Overlap.Associativity[p := two, q := zero, s := two] \as A202;
+\import Overlap.Associativity[p := two, q := two, s := zero] \as A220;
+\definition Scalar4: \Set := Euclidean.LocalForm Domain.domain four;
+\definition source: Overlap.Matrix two := Restriction.apply two (local i);
+\definition target: Overlap.Matrix two := Pullback.apply two (local j);
+\definition squareSource: Overlap.Matrix four := P22.apply source source;
+\definition squareTarget: Overlap.Matrix four := P22.apply target target;
+\definition T: Overlap.Matrix zero := Frame.transition;
+\definition intertwines: TraceGauge.left Change.transition squareSource = TraceGauge.right squareTarget Change.transition :=
+  eq_reason_in!{{Overlap.Matrix four} _
+    "=" {P04.apply T squareSource} "by" {
+      Overlap.ext four _ _ (\fun (a, b: Fin.Fin r) => sym!{Scalar4} _ _
+        (trans!{Scalar4} _ _ _
+          (sym!{Scalar4} _ _ (\transporteq four \with k: _ => Euclidean.LocalForm Domain.domain k \by { base: P04.apply T squareSource a b }))
+          (TraceGauge.leftWedge Change.transition squareSource a b))) }
+    "=" {P22.apply (P02.apply T source) source} "by" {
+      Overlap.ext four _ _ (\fun (a, b: Fin.Fin r) => trans!{Scalar4} _ _ _
+        (sym!{Scalar4} _ _ (A022.law T source source a b))
+        (\transporteq four \with k: _ => Euclidean.LocalForm Domain.domain k \by { base: P22.apply (P02.apply T source) source a b })) }
+    "=" {P22.apply (P20.apply target T) source} "by" {
+      congr!{{Overlap.Matrix two} {Overlap.Matrix four}} (\fun (G: Overlap.Matrix two) => P22.apply G source) _ _ (compatible i j) }
+    "=" {P22.apply target (P02.apply T source)} "by" {
+      Overlap.ext four _ _ (\fun (a, b: Fin.Fin r) => trans!{Scalar4} _ _ _
+        (sym!{Scalar4} _ _ (\transporteq four \with k: _ => Euclidean.LocalForm Domain.domain k \by { base: P22.apply (P20.apply target T) source a b }))
+        (A202.law target T source a b)) }
+    "=" {P22.apply target (P20.apply target T)} "by" {
+      congr!{{Overlap.Matrix two} {Overlap.Matrix four}} (P22.apply target) _ _ (compatible i j) }
+    "=" {P40.apply squareTarget T} "by" {
+      Overlap.ext four _ _ (\fun (a, b: Fin.Fin r) => trans!{Scalar4} _ _ _
+        (sym!{Scalar4} _ _ (A220.law target target T a b))
+        (\transporteq four \with k: _ => Euclidean.LocalForm Domain.domain k \by { base: P40.apply squareTarget T a b })) }
+    "=" _ "by" { TraceGauge.rightWedge squareTarget Change.transition }
+  };
+\definition law: Atlas.Agreement (Bundle.chart i) (Bundle.chart j) four (chartwise i) (chartwise j) :=
+  eq_reason_in!{Scalar4 _
+    "=" _ "by" { Restriction.trace four (square i) }
+    "=" {Trace.apply squareSource} "by" {
+      congr!{{Overlap.Matrix four} Scalar4} Trace.apply _ _ (Restriction.Product[p := two, q := two].law (local i) (local i)) }
+    "=" {Trace.apply squareTarget} "by" {
+      TraceGauge.law Change.transition Change.inverse squareSource squareTarget Change.Inverse[].left Change.Inverse[].right intertwines }
+    "=" {Trace.apply (Pullback.apply four (square j))} "by" {
+      congr!{{Overlap.Matrix four} Scalar4} Trace.apply _ _ (sym!{{Overlap.Matrix four}} _ _ (Pullback.Product[p := two, q := two].law (local j) (local j))) }
+    "=" _ "by" { sym!{Scalar4} _ _ (Pullback.trace four (square j)) }
+  };

@@ -1,0 +1,30 @@
+\import Bundle.Pair[i := i, j := j] \as Change;
+\import manifolds.Dimension[n := n].Chart[M := M.Point, space := M.space].Transition[left := Change.c, right := Change.d] \as Transition;
+\import \root.Local[n := n, r := r].On[U := Transition.domain] \as Overlap;
+\import \root.Local[n := n, r := r].Restriction[U := Transition.domain, V := Change.c.image, included := Change.included] \as Restriction;
+\import \root.Transport[n := n, m := n, r := r].Between[U := Transition.domain, V := Change.d.image].Pullback[f := Change.map] \as Pullback;
+\import Overlap.Functions[] \as MatrixFunctions;
+\import Overlap.Gauge[] \as Gauge;
+\import Overlap.Product[p := zero, q := one] \as P01;
+\import Overlap.Product[p := one, q := zero] \as P10;
+\import Overlap.Product[p := zero, q := two] \as P02;
+\import Overlap.Product[p := two, q := zero] \as P20;
+\import Overlap.At[k := one] \as M1;
+\import bundle_connections.Forms[n := n, r := r].On[U := Transition.domain] \as Connections;
+\import \parent.\parent.Pair[i := i, j := j] \as Pair;
+\definition first: Connections.Connection := Restriction.connection (connection i);
+\definition second: Connections.Connection := Pullback.connection (connection j);
+\definition affine: P01.apply Pair.transition first.matrix = M1.plus (Overlap.derivative zero Pair.transition) (P10.apply second.matrix Pair.transition) :=
+  eq_reason_in!{{Overlap.Matrix one} _
+    "=" _ "by" { MatrixFunctions.left Change.transition first.matrix }
+    "=" _ "by" { Overlap.ext one _ _ (Bundle.compatible connection i j) }
+    "=" _ "by" { congr!{{Overlap.Matrix one} {Overlap.Matrix one}} (M1.plus (Overlap.derivative zero Pair.transition)) _ _
+      (sym!{{Overlap.Matrix one}} _ _ (MatrixFunctions.right second.matrix Change.transition)) }
+  };
+\definition law: Pair.Agreement local :=
+  eq_reason_in!{{Overlap.Matrix two} _
+    "=" _ "by" { congr!{{Overlap.Matrix two} {Overlap.Matrix two}} (P02.apply Pair.transition) _ _ (Restriction.curvature (connection i)) }
+    "=" _ "by" { Gauge.law Pair.transition first second affine }
+    "=" _ "by" { congr!{{Overlap.Matrix two} {Overlap.Matrix two}} (\fun (G: Overlap.Matrix two) => P20.apply G Pair.transition) _ _
+      (sym!{{Overlap.Matrix two}} _ _ (Pullback.curvature (connection j))) }
+  };

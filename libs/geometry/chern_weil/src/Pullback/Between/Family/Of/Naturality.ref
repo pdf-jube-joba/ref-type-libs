@@ -1,0 +1,29 @@
+\import BundlesPull.Connection[connection := connection] \as PulledConnection;
+\import SourceChernWeil.Curvature[connection := PulledConnection.value].TraceForm[] \as SourceTrace;
+\import TargetChernWeil.Curvature[connection := connection].TraceForm[] \as TargetTrace;
+\import Pull.At[k := two] \as FormsPull;
+\definition four: N.Nat^ := N.Nat^::succ (N.Nat^::succ two);
+\import SourceChernWeil.Curvature[connection := PulledConnection.value].QuadraticTrace[] \as SourceQuadratic;
+\import TargetChernWeil.Curvature[connection := connection].QuadraticTrace[] \as TargetQuadratic;
+\import Pull.At[k := four] \as QuadraticPull;
+\module OnChart(i: BundlesPull.Index);
+\definition traceForm: FormsPull.apply TargetTrace.form = SourceTrace.form :=
+  SourceAtlas.At[k := two].ext (FormsPull.apply TargetTrace.form) SourceTrace.form (\fun (i: BundlesPull.Index) => OnChart[i := i].law);
+\import TargetForms.DeRham[].At[k := two] \as TargetH;
+\import SourceForms.DeRham[].At[k := two] \as SourceH;
+\import Pull.DeRham[].At[k := two] \as ClassesPull;
+\definition originalCycle: TargetH.Cycle := \into[TargetForms.Form two](TargetTrace.form, TargetH.Cycle) \by { TargetTrace.closed };
+\definition pulledCycle: SourceH.Cycle := \into[SourceForms.Form two](SourceTrace.form, SourceH.Cycle) \by { SourceTrace.closed };
+\definition deRhamClass: ClassesPull.apply TargetTrace.deRhamClass = SourceTrace.deRhamClass :=
+  trans!{{SourceH.H}} _ _ _ (ClassesPull.onClass originalCycle)
+    (congr!{{SourceH.Cycle} {SourceH.H}} SourceH.classOf (ClassesPull.cycle originalCycle) pulledCycle traceForm);
+\definition quadraticTraceForm: QuadraticPull.apply TargetQuadratic.form = SourceQuadratic.form :=
+  SourceAtlas.At[k := four].ext (QuadraticPull.apply TargetQuadratic.form) SourceQuadratic.form (\fun (i: BundlesPull.Index) => OnChart[i := i].quadratic);
+\import TargetForms.DeRham[].At[k := four] \as TargetH4;
+\import SourceForms.DeRham[].At[k := four] \as SourceH4;
+\import Pull.DeRham[].At[k := four] \as ClassesPull4;
+\definition originalQuadraticCycle: TargetH4.Cycle := \into[TargetForms.Form four](TargetQuadratic.form, TargetH4.Cycle) \by { TargetQuadratic.closed };
+\definition pulledQuadraticCycle: SourceH4.Cycle := \into[SourceForms.Form four](SourceQuadratic.form, SourceH4.Cycle) \by { SourceQuadratic.closed };
+\definition quadraticDeRhamClass: ClassesPull4.apply TargetQuadratic.deRhamClass = SourceQuadratic.deRhamClass :=
+  trans!{{SourceH4.H}} _ _ _ (ClassesPull4.onClass originalQuadraticCycle)
+    (congr!{{SourceH4.Cycle} {SourceH4.H}} SourceH4.classOf (ClassesPull4.cycle originalQuadraticCycle) pulledQuadraticCycle quadraticTraceForm);

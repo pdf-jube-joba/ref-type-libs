@@ -1,0 +1,24 @@
+\import Euclidean.Restriction[U := U, V := V] \as Restrict;
+\import \root.Local[n := n, r := r].On[U := U] \as Source;
+\import \root.Local[n := n, r := r].On[U := V] \as Target;
+\import bundle_connections.Forms[n := n, r := r].On[U := U] \as SourceConnections;
+\import bundle_connections.Forms[n := n, r := r].On[U := V] \as TargetConnections;
+\import \root.Transport[n := n, m := n, r := r].Between[U := U, V := V].Using[maps := \fun (k: N.Nat^) => Restrict.At[k := k].map included] \as MatrixRestriction;
+\definition apply: \forall (k: N.Nat^) -> Target.Matrix k -> Source.Matrix k := MatrixRestriction.apply;
+\definition connection: TargetConnections.Connection -> SourceConnections.Connection := MatrixRestriction.connection;
+\definition curvature: \forall (A: TargetConnections.Connection) -> apply two (Target.Curvature[connection := A].value) = Source.Curvature[connection := connection A].value :=
+  MatrixRestriction.curvature (Restrict.Differential[k := one].law included) (Restrict.Product[p := one, q := one].law included);
+\definition trace[k: N.Nat^]: \forall (A: Target.Matrix k) -> Restrict.apply k included (Target.Trace[k := k].apply A) = Source.Trace[k := k].apply (apply k A) :=
+  MatrixRestriction.Trace[k := k].law;
+\import Source.ConnectionTrace[] \as SourceTrace;
+\import Target.ConnectionTrace[] \as TargetTrace;
+\definition difference: \forall (A, B: Target.Matrix one) ->
+  apply one (TargetTrace.difference A B) = SourceTrace.difference (apply one A) (apply one B) :=
+  MatrixRestriction.difference;
+\module Product(p, q: N.Nat^) {
+  \definition total: N.Nat^ := N.Basic[].Def[].add p q;
+  \import Target.Product[p := p, q := q] \as Input;
+  \import Source.Product[p := p, q := q] \as Output;
+  \definition law: \forall (A: Target.Matrix p)(B: Target.Matrix q) ->
+    apply total (Input.apply A B) = Output.apply (apply p A) (apply q B) := MatrixRestriction.Product[p := p, q := q].law (Restrict.Product[p := p, q := q].law included);
+}

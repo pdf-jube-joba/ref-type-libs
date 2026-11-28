@@ -1,0 +1,29 @@
+\definition center: BaseForms.Chart := Small.globalChart c;
+\import \parent.\parent.Self[c := center] \as Self;
+\import \parent.\parent.Overlap[c := center, d := center] \as SameChart;
+\import Charts.Transition[left := center, right := center] \as Domain;
+\definition shared: \forall (alpha, beta, omega: LocalForm c) ->
+  SameChart.agrees k alpha omega -> SameChart.agrees k beta omega -> alpha = beta :=
+  \fun (alpha, beta, omega: LocalForm c)(first: SameChart.agrees k alpha omega)(second: SameChart.agrees k beta omega) =>
+    Self.restrictInjective k alpha beta
+      (trans!{{Euclidean.LocalForm Domain.domain k}} (SameChart.restrict k alpha) (SameChart.pull k omega) (SameChart.restrict k beta)
+        first (sym!{{Euclidean.LocalForm Domain.domain k}} (SameChart.restrict k beta) (SameChart.pull k omega) second));
+\definition compare:
+  \forall (alpha, beta: LocalForm c)(d: BaseForms.Chart)(same: center = d)
+    (omega: Euclidean.LocalForm d.image k) ->
+  Agreement center d k alpha omega -> Agreement center d k beta omega -> alpha = beta :=
+  \fun (alpha, beta: LocalForm c)(d: BaseForms.Chart)(same: center = d) =>
+    \idelim center = d \with right: BaseForms.Chart =>
+      \forall (omega: Euclidean.LocalForm right.image k) ->
+      Agreement center right k alpha omega -> Agreement center right k beta omega -> alpha = beta
+    \by { base: shared alpha beta, equality: same };
+\definition unique: \forall (alpha, beta: Choice c) -> alpha = beta := \block {
+  \fun (alpha, beta: Choice c) \then
+  \takefrom i: Indices c \by \bysub(Charts.Chart, members, c) \then
+  \return compare alpha beta (chart i)
+    (sym!{{BaseForms.Chart}} (chart i) center (\bysub(I, Indices c, i))) (forms i)
+    ((\bysub(LocalForm c, choices c, alpha)) i) ((\bysub(LocalForm c, choices c, beta)) i)
+};
+\definition value: Choice c := \choice Choice c \by { existence: exists c, uniqueness: unique };
+\definition agrees[j: I]: Agreement center (chart j) k value (forms j) :=
+  (\bysub(LocalForm c, choices c, value)) j;

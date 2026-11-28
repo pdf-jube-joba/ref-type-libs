@@ -1,0 +1,32 @@
+\definition LocalForm[c: Small.Chart]: \Set := Euclidean.LocalForm c.image k;
+\definition choices[c: Small.Chart]: \Pow (LocalForm c) :=
+  { omega: LocalForm c \where \forall (j: I) -> \parent.Overlap[c := Small.globalChart c, d := chart j].agrees k omega (forms j) };
+\definition Choice[c: Small.Chart]: \Set := \Cast[LocalForm c] (choices c);
+\definition exists: \forall (c: Small.Chart) -> \exists Choice c := \block {
+  \fun (c: Small.Chart) \then
+  \takefrom i: Indices c \by \bysub(Charts.Chart, members, c) \then
+  \return \idelim (chartOf i) = c \with d: Small.Chart => \exists Choice d \by {
+    base: \exact(\into[LocalForm (chartOf i)](forms i, choices (chartOf i)) \by { overlaps i }, Choice (chartOf i)),
+    equality: \bysub(I, Indices c, i)
+  }
+};
+\module At(c: Small.Chart);
+\definition family: Small.Family k := \fun (c: Small.Chart) => At[c := c].value;
+\definition local: \forall (i: I) -> family (chartOf i) = forms i :=
+  \fun (i: I) => sym!{{LocalForm (chartOf i)}} _ _ (At[c := chartOf i].unique (\into[LocalForm (chartOf i)](forms i, choices (chartOf i)) \by { overlaps i }) (At[c := chartOf i].value));
+\definition compatible: Small.Compatible k family := \block {
+  \fun (c, d: Small.Chart) \then
+  \takefrom j: Indices d \by \bysub(Charts.Chart, members, d) \then
+  \return \idelim (chartOf j) = d \with right: Small.Chart => Small.Pair[left := c, right := right].Agreement k family \by {
+    base: trans!{{Euclidean.LocalForm (Charts.Transition[left := c, right := chartOf j].domain) k}} _ _ _
+      (At[c := c].agrees j)
+      (congr!{{LocalForm (chartOf j)} {Euclidean.LocalForm (Charts.Transition[left := c, right := chartOf j].domain) k}}
+        (\parent.Overlap[c := Small.globalChart c, d := chart j].pull k) _ _ (sym!{{LocalForm (chartOf j)}} _ _ (local j))),
+    equality: \bysub(I, Indices d, j)
+  }
+};
+\definition small: Small.Form k := \into[Small.Family k](family, Small.Form k) \by { compatible };
+\definition global: BaseForms.Form k := Small.At[k := k].extend small;
+\definition comparison: \forall (i: I) -> global (chart i) = forms i :=
+  \fun (i: I) => trans!{{Euclidean.LocalForm (chart i).image k}} _ _ _
+    (Small.At[k := k].Recovery[chart := chartOf i].law small) (local i);

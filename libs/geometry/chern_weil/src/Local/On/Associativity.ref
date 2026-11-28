@@ -1,0 +1,46 @@
+\definition pq: N.Nat^ := Nat.add p q;
+\definition qs: N.Nat^ := Nat.add q s;
+\definition from: N.Nat^ := Nat.add pq s;
+\definition total: N.Nat^ := Nat.add p qs;
+\import \parent.Product[p := p, q := q] \as PQ;
+\import \parent.Product[p := q, q := s] \as QS;
+\import \parent.Product[p := pq, q := s] \as Left;
+\import \parent.Product[p := p, q := qs] \as Right;
+\import Scalar.Regrade[k := from, l := total] \as Degree;
+\import Scalar.Associativity[p := p, q := q, r := s] \as ScalarLaw;
+\import \parent.At[k := total] \as After;
+\import Scalar.At[k := from] \as Input;
+\import Scalar.At[k := total] \as Output;
+\import Scalar.At[k := pq] \as PQOutput;
+\import Scalar.At[k := qs] \as QSOutput;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form total, space := Output.space] \as Sums;
+\import Scalar.Wedge[p := pq, q := s] \as LeftWedge;
+\import Scalar.Wedge[p := p, q := qs] \as RightWedge;
+\import Scalar.Wedge[p := p, q := q] \as PQWedge;
+\import Scalar.Wedge[p := q, q := s] \as QSWedge;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form from, space := Input.space].Mapping[W := Scalar.Form total, target := Output.space] \as RegradeSum;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form pq, space := PQOutput.space].Mapping[W := Scalar.Form from, target := Input.space] \as LeftSum;
+\import Spaces.Sums[I := Fin.Fin r].Vector[V := Scalar.Form qs, space := QSOutput.space].Mapping[W := Scalar.Form total, target := Output.space] \as RightSum;
+\definition law: \forall (A: Matrix p)(B: Matrix q)(C: Matrix s)(a, b: Fin.Fin r) ->
+  Degree.cast (Left.apply (PQ.apply A B) C a b) ScalarLaw.degree = Right.apply A (QS.apply B C) a b :=
+  \fun (A: Matrix p)(B: Matrix q)(C: Matrix s)(a, b: Fin.Fin r) => \block {
+    \let leftTerms: Fin.Fin r -> Fin.Fin r -> Scalar.Form from :=
+      \fun (c, d: Fin.Fin r) => LeftWedge.apply (PQWedge.apply (A a d) (B d c)) (C c b) \then
+    \let rightTerms: Fin.Fin r -> Fin.Fin r -> Scalar.Form total :=
+      \fun (d, c: Fin.Fin r) => RightWedge.apply (A a d) (QSWedge.apply (B d c) (C c b)) \then
+    \return eq_reason_in!{{Scalar.Form total} _
+      "=" _ "by" { RegradeSum.law (Degree.map ScalarLaw.degree) (Fin.elements r)
+        (\fun (c: Fin.Fin r) => LeftWedge.apply (PQ.apply A B a c) (C c b)) }
+      "=" {After.sum (\fun (c: Fin.Fin r) => After.sum (\fun (d: Fin.Fin r) => rightTerms d c))} "by" {
+        Sums.congruent (Fin.elements r) _ _ (\fun (c: Fin.Fin r) => eq_reason_in!{{Scalar.Form total} _
+          "=" _ "by" { congr!{{Scalar.Form from} {Scalar.Form total}} (\fun (v: Scalar.Form from) => Degree.cast v ScalarLaw.degree) _ _
+            (LeftSum.law (LeftWedge.leftLinear (C c b)) (Fin.elements r) (\fun (d: Fin.Fin r) => PQWedge.apply (A a d) (B d c))) }
+          "=" _ "by" { RegradeSum.law (Degree.map ScalarLaw.degree) (Fin.elements r) (leftTerms c) }
+          "=" _ "by" { Sums.congruent (Fin.elements r) _ _ (\fun (d: Fin.Fin r) => ScalarLaw.law (A a d) (B d c) (C c b)) }
+        }) }
+      "=" _ "by" { Sums.exchange (Fin.elements r) (Fin.elements r) (\fun (c, d: Fin.Fin r) => rightTerms d c) }
+      "=" _ "by" { Sums.congruent (Fin.elements r) _ _ (\fun (d: Fin.Fin r) =>
+        sym!{{Scalar.Form total}} _ _ (RightSum.law (RightWedge.rightLinear (A a d)) (Fin.elements r)
+          (\fun (c: Fin.Fin r) => QSWedge.apply (B d c) (C c b)))) }
+    }
+  };

@@ -1,0 +1,102 @@
+\definition four: N.Nat^ := N.Nat^::succ three;
+\definition five: N.Nat^ := N.Nat^::succ four;
+\import \parent.\parent.Product[p := two, q := two] \as P22;
+\import \parent.\parent.Product[p := three, q := two] \as P32;
+\import \parent.\parent.Product[p := two, q := three] \as P23;
+\import \parent.\parent.Product[p := one, q := four] \as P14;
+\import \parent.\parent.Product[p := four, q := one] \as P41;
+\import \parent.\parent.At[k := five] \as M5;
+\import Scalar.At[k := five] \as Forms5;
+\import Spaces.Laws[V := Scalar.Form five, space := Forms5.space] \as Laws5;
+\import \parent.\parent.Associativity[p := one, q := two, s := two] \as A122;
+\import \parent.\parent.Associativity[p := two, q := one, s := two] \as A212;
+\import \parent.\parent.Associativity[p := two, q := two, s := one] \as A221;
+\import \parent.\parent.Differential[k := four] \as D4;
+\import \parent.\parent.Leibniz[p := two, q := two] \as Leibniz22;
+\import \parent.\parent.Trace[k := four] \as Trace4;
+\import \parent.\parent.Trace[k := five] \as Trace5;
+\import \parent.\parent.Cyclic[p := one, q := four] \as Cyclic;
+\import Scalar.ExteriorDerivative[k := four] \as D;
+\definition square: Matrix four := P22.apply value value;
+\definition form: Scalar.Form four := Trace4.apply square;
+\definition differentialCurvature: Three.plus (D2.apply value) (P12.apply A value) = P21.apply value A :=
+  ext three _ _ (\fun (a, b: Fin.Fin r) => \block {
+    \let x: Scalar.Form three := Three.plus (D2.apply value) (P12.apply A value) a b \then
+    \let y: Scalar.Form three := P21.apply value A a b \then
+    \let equation: Forms3.plus x (Laws3.negative y) = Forms3.zero :=
+      congr!{{Matrix three} {Scalar.Form three}} (\fun (F: Matrix three) => F a b) _ _ bianchi \then
+    \return Laws3.cancelLeft (Laws3.negative y) x y (eq_reason_in!{{Scalar.Form three} _
+      "=" _ "by" { Laws3.comm (Laws3.negative y) x }
+      "=" _ "by" { equation }
+      "=" _ "by" { sym!{{Scalar.Form three}} _ _ (Laws3.inverseLeft y) }
+    })
+  });
+\definition differentialSquare: D4.apply square = M5.plus (P32.apply (D2.apply value) value) (P23.apply value (D2.apply value)) :=
+  trans!{{Matrix five}} _ _ _ (Leibniz22.law value value)
+    (ext five _ _ (\fun (a, b: Fin.Fin r) =>
+      congr!{{Scalar.Form five} {Scalar.Form five} {Scalar.Form five}} Forms5.plus _ _ _ _
+        (\transporteq five \with k: _ => Scalar.Form k \by { base: P32.apply (D2.apply value) value a b })
+        (trans!{{Scalar.Form five}} _ _ _
+          (congr!{R.Real {Scalar.Form five}} (\fun (t: R.Real) => Forms5.scale t (P23.apply value (D2.apply value) a b)) _ _
+            (Sign.doubleNegative Spaces.one))
+          (Forms5.space.scalarOne (P23.apply value (D2.apply value) a b)))));
+\definition commute: M5.plus (D4.apply square) (P14.apply A square) = P41.apply square A :=
+  \block {
+    \let F: Matrix two := value \then
+    \let dF: Matrix three := D2.apply F \then
+    \let AF: Matrix three := P12.apply A F \then
+    \let FA: Matrix three := P21.apply F A \then
+    \let x: Matrix five := P32.apply dF F \then
+    \let y: Matrix five := P23.apply F dF \then
+    \let z: Matrix five := P32.apply AF F \then
+    \return eq_reason_in!{{Matrix five} _
+      "=" {M5.plus (M5.plus x y) (P14.apply A square)} "by" {
+        congr!{{Matrix five} {Matrix five}} (\fun (G: Matrix five) => M5.plus G (P14.apply A square)) _ _ differentialSquare }
+      "=" {M5.plus (M5.plus x y) z} "by" {
+        congr!{{Matrix five} {Matrix five}} (M5.plus (M5.plus x y)) _ _
+          (ext five _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form five}} _ _ _
+            (sym!{{Scalar.Form five}} _ _ (A122.law A F F a b))
+            (\transporteq five \with k: _ => Scalar.Form k \by { base: z a b }))) }
+      "=" {M5.plus (M5.plus x z) y} "by" { ext five _ _ (\fun (a, b: Fin.Fin r) => eq_reason_in!{{Scalar.Form five} _
+        "=" _ "by" { Laws5.assoc (x a b) (y a b) (z a b) }
+        "=" _ "by" { congr!{{Scalar.Form five} {Scalar.Form five}} (Forms5.plus (x a b)) _ _ (Laws5.comm (y a b) (z a b)) }
+        "=" _ "by" { sym!{{Scalar.Form five}} _ _ (Laws5.assoc (x a b) (z a b) (y a b)) }
+      }) }
+      "=" {M5.plus (P32.apply (Three.plus dF AF) F) y} "by" {
+        congr!{{Matrix five} {Matrix five}} (\fun (G: Matrix five) => M5.plus G y) _ _
+          (sym!{{Matrix five}} _ _ (P32.additionLeft dF AF F)) }
+      "=" {M5.plus (P32.apply FA F) y} "by" { congr!{{Matrix three} {Matrix five}}
+        (\fun (G: Matrix three) => M5.plus (P32.apply G F) y) _ _ differentialCurvature }
+      "=" {M5.plus (P23.apply F AF) y} "by" {
+        congr!{{Matrix five} {Matrix five}} (\fun (G: Matrix five) => M5.plus G y) _ _
+          (ext five _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form five}} _ _ _
+            (sym!{{Scalar.Form five}} _ _ (\transporteq five \with k: _ => Scalar.Form k \by { base: P32.apply FA F a b }))
+            (A212.law F A F a b))) }
+      "=" {M5.plus y (P23.apply F AF)} "by" {
+        ext five _ _ (\fun (a, b: Fin.Fin r) => Laws5.comm (P23.apply F AF a b) (y a b)) }
+      "=" {P23.apply F (Three.plus dF AF)} "by" { sym!{{Matrix five}} _ _ (P23.additionRight F dF AF) }
+      "=" {P23.apply F FA} "by" { congr!{{Matrix three} {Matrix five}} (P23.apply F) _ _ differentialCurvature }
+      "=" _ "by" { ext five _ _ (\fun (a, b: Fin.Fin r) => trans!{{Scalar.Form five}} _ _ _
+        (sym!{{Scalar.Form five}} _ _ (A221.law F F A a b))
+        (\transporteq five \with k: _ => Scalar.Form k \by { base: P41.apply square A a b })) }
+    }
+  };
+\definition cyclic: Trace5.apply (P41.apply square A) = Trace5.apply (P14.apply A square) :=
+  eq_reason_in!{{Scalar.Form five} _
+    "=" _ "by" { Cyclic.law A square }
+    "=" {Forms5.scale Cyclic.sign (Trace5.apply (P14.apply A square))} "by" {
+      congr!{{Scalar.Form five} {Scalar.Form five}} (Forms5.scale Cyclic.sign) _ _
+        (\transporteq five \with k: _ => Scalar.Form k \by { base: Trace5.apply (P14.apply A square) }) }
+    "=" _ "by" { congr!{R.Real {Scalar.Form five}} (\fun (a: R.Real) => Forms5.scale a (Trace5.apply (P14.apply A square))) _ _
+      (trans!{R.Real} _ _ _ (Sign.doubleNegative (Sign.value two)) (Sign.doubleNegative Spaces.one)) }
+    "=" _ "by" { Forms5.space.scalarOne (Trace5.apply (P14.apply A square)) }
+  };
+\definition closed: D.apply form = Forms5.zero :=
+  trans!{{Scalar.Form five}} _ _ _ (Trace4.differential square)
+    (Laws5.cancelLeft (Trace5.apply (P14.apply A square)) _ _ (eq_reason_in!{{Scalar.Form five} _
+      "=" _ "by" { Laws5.comm (Trace5.apply (P14.apply A square)) (Trace5.apply (D4.apply square)) }
+      "=" _ "by" { sym!{{Scalar.Form five}} _ _ (Trace5.addition (D4.apply square) (P14.apply A square)) }
+      "=" _ "by" { congr!{{Matrix five} {Scalar.Form five}} Trace5.apply _ _ commute }
+      "=" _ "by" { cyclic }
+      "=" _ "by" { sym!{{Scalar.Form five}} _ _ (Laws5.zeroRight (Trace5.apply (P14.apply A square))) }
+    }));

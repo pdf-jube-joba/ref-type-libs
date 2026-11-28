@@ -1,0 +1,17 @@
+\import std.Data[].Nat[] \as N;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.eq_reason_in;
+\use Equality.sym;
+\use Equality.trans;
+\import real.Analysis[] \as R;
+\import linear_algebra.Commutative[K := R.Real, scalarRing := std.Alg[].Field[].fieldAsCommutativeRing R.Real R.Algebra[].field] \as Spaces;
+\import euclidean_forms.Euclidean[n := n] \as Euclidean;
+\import manifolds.Dimension[n := n].Smooth[] \as Model;
+\import calculus.Real[].Multivariable[n := n].Open[] \as Open;
+\definition zero: N.Nat^ := N.Nat^::zero;
+\definition one: N.Nat^ := N.Nat^::succ zero;
+\definition two: N.Nat^ := N.Nat^::succ one;
+\definition three: N.Nat^ := N.Nat^::succ two;
+\module On(M: Model.Manifold);

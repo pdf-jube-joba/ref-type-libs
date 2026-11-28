@@ -1,0 +1,60 @@
+\import \parent.\parent.Trace[k := two] \as Trace2;
+\import \parent.\parent.Trace[k := three] \as Trace3;
+\import \parent.\parent.Cyclic[p := one, q := two] \as Cyclic;
+\import Scalar.ExteriorDerivative[k := two] \as D;
+\definition form: Scalar.Form two := Trace2.apply value;
+\definition cyclic: Trace3.apply (P21.apply value A) = Trace3.apply (P12.apply A value) :=
+  eq_reason_in!{{Scalar.Form three} _
+    "=" _ "by" { Cyclic.law A value }
+    "=" _ "by" { congr!{{Scalar.Form three} {Scalar.Form three}} (Forms3.scale Cyclic.sign) _ _
+      (\transporteq three \with k: _ => Scalar.Form k \by { base: Trace3.apply (P12.apply A value) }) }
+    "=" _ "by" { congr!{R.Real {Scalar.Form three}} (\fun (c: R.Real) => Forms3.scale c (Trace3.apply (P12.apply A value))) _ _
+      (Sign.doubleNegative Spaces.one) }
+    "=" _ "by" { Forms3.space.scalarOne (Trace3.apply (P12.apply A value)) }
+  };
+\definition covariantTrace: Trace3.apply (covariant value) = D.apply form :=
+  \block {
+    \let d: Scalar.Form three := Trace3.apply (D2.apply value) \then
+    \let x: Scalar.Form three := Trace3.apply (P12.apply A value) \then
+    \return eq_reason_in!{{Scalar.Form three} _
+      "=" _ "by" { Trace3.addition (Three.plus (D2.apply value) (P12.apply A value)) (Three.negative (P21.apply value A)) }
+      "=" {Forms3.plus (Forms3.plus d x) (Laws3.negative x)} "by" {
+        congr!{{Scalar.Form three} {Scalar.Form three} {Scalar.Form three}} Forms3.plus _ _ _ _
+          (Trace3.addition (D2.apply value) (P12.apply A value))
+          (trans!{{Scalar.Form three}} _ _ _ (Trace3.negative (P21.apply value A))
+            (congr!{{Scalar.Form three} {Scalar.Form three}} Laws3.negative _ _ cyclic)) }
+      "=" _ "by" { Laws3.assoc d x (Laws3.negative x) }
+      "=" _ "by" { congr!{{Scalar.Form three} {Scalar.Form three}} (Forms3.plus d) _ _
+        (trans!{{Scalar.Form three}} _ _ _ (Laws3.comm x (Laws3.negative x)) (Laws3.inverseLeft x)) }
+      "=" {d} "by" { Laws3.zeroRight d }
+      "=" _ "by" { sym!{{Scalar.Form three}} _ _ (Trace2.differential value) }
+    }
+  };
+\definition closed: D.apply form = Forms3.zero :=
+  trans!{{Scalar.Form three}} _ _ _ (sym!{{Scalar.Form three}} _ _ covariantTrace)
+    (trans!{{Scalar.Form three}} _ _ _ (congr!{{Matrix three} {Scalar.Form three}} Trace3.apply _ _ bianchi) Trace3.origin);
+\import \parent.\parent.Trace[k := one] \as Trace1;
+\import \parent.\parent.Cyclic[p := one, q := one] \as OddTrace;
+\import Scalar.ExteriorDerivative[k := one] \as D1Scalar;
+\import Scalar.At[k := two] \as Forms2;
+\import Spaces.Laws[V := Scalar.Form two, space := Forms2.space] \as Laws2;
+\definition squareTrace: Trace2.apply (P11.apply A A) = Forms2.zero :=
+  \block {
+    \let omega: Scalar.Form two := Trace2.apply (P11.apply A A) \then
+    \let opposite: omega = Laws2.negative omega := eq_reason_in!{{Scalar.Form two} omega
+      "=" _ "by" { OddTrace.law A A }
+      "=" {Forms2.scale OddTrace.sign omega} "by" { congr!{{Scalar.Form two} {Scalar.Form two}} (Forms2.scale OddTrace.sign) _ _
+        (\transporteq two \with k: _ => Scalar.Form k \by { base: omega }) }
+      "=" _ "by" { Laws2.minusOneScale omega }
+    } \then
+    \return Laws2.oppositeSelfZero R.half omega R.Estimates[].halfDouble opposite
+  };
+\definition primitive: Scalar.Form one := Trace1.apply A;
+\definition localDerivative: D1Scalar.apply primitive = form :=
+  eq_reason_in!{{Scalar.Form two} _
+    "=" {Trace2.apply (D1.apply A)} "by" { Trace1.differential A }
+    "=" {Forms2.plus (Trace2.apply (D1.apply A)) Forms2.zero} "by" { sym!{{Scalar.Form two}} _ _ (Laws2.zeroRight (Trace2.apply (D1.apply A))) }
+    "=" {Forms2.plus (Trace2.apply (D1.apply A)) (Trace2.apply (P11.apply A A))} "by" {
+      congr!{{Scalar.Form two} {Scalar.Form two}} (Forms2.plus (Trace2.apply (D1.apply A))) _ _ (sym!{{Scalar.Form two}} _ _ squareTrace) }
+    "=" _ "by" { sym!{{Scalar.Form two}} _ _ (Trace2.addition (D1.apply A) (P11.apply A A)) }
+  };

@@ -1,0 +1,24 @@
+\import Bundle.Pair[i := i, j := j] \as Change;
+\import Charts.Transition[left := Change.c, right := Change.d] \as Domain;
+\import \root.Local[n := n, r := r].On[U := Domain.domain] \as Overlap;
+\import \root.Local[n := n, r := r].Restriction[U := Domain.domain, V := Change.c.image, included := Change.included] \as Restriction;
+\import \root.Transport[n := n, m := n, r := r].Between[U := Domain.domain, V := Change.d.image].Pullback[f := Change.map] \as Pullback;
+\import Overlap.ConnectionTrace[] \as ConnectionTrace;
+\import Overlap.Trace[k := one] \as Trace;
+\definition source: Overlap.Matrix one := ConnectionTrace.difference (Change.source (current i)) (Change.source (previous i));
+\definition target: Overlap.Matrix one := ConnectionTrace.difference (Change.target (current j)) (Change.target (previous j));
+\definition invariant: Trace.apply source = Trace.apply target :=
+  ConnectionTrace.invariant Change.transition Change.inverse source target Change.Inverse[].left Change.Inverse[].right
+    (ConnectionTrace.differenceGauge Change.transition (Change.source (current i)) (Change.source (previous i))
+      (Change.target (current j)) (Change.target (previous j))
+      (Overlap.ext one _ _ (Bundle.compatible current i j)) (Overlap.ext one _ _ (Bundle.compatible previous i j)));
+\definition law: Atlas.Agreement (Bundle.chart i) (Bundle.chart j) one (chartwise i) (chartwise j) :=
+  eq_reason_in!{{Euclidean.LocalForm Domain.domain one} _
+    "=" _ "by" { Restriction.trace one (localDifference i) }
+    "=" {Trace.apply source} "by" { congr!{{Overlap.Matrix one} {Euclidean.LocalForm Domain.domain one}} Trace.apply _ _
+      (Restriction.difference (current i).matrix (previous i).matrix) }
+    "=" {Trace.apply target} "by" { invariant }
+    "=" {Trace.apply (Pullback.apply one (localDifference j))} "by" { congr!{{Overlap.Matrix one} {Euclidean.LocalForm Domain.domain one}} Trace.apply _ _
+      (sym!{{Overlap.Matrix one}} _ _ (Pullback.difference (current j).matrix (previous j).matrix)) }
+    "=" _ "by" { sym!{{Euclidean.LocalForm Domain.domain one}} _ _ (Pullback.trace one (localDifference j)) }
+  };
