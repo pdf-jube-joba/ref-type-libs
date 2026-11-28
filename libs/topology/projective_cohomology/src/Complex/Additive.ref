@@ -1,0 +1,31 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import N.Basic[].Prop[] \as Order;
+\import singular_products.Cochains[A := Space, source := topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\import singular_cohomology.Cochains[A := Space, source := topology].With[coefficients := Product.integerCoefficients].Integer[] \as Groups;
+\definition maximum: N.Nat^ := Degrees.double dimension;
+\definition Vanishes[k: N.Nat^]: \Prop :=
+  \forall (a: Groups.cohomology (I.Int^::ofNat k)) -> a = (Groups.cohomologySpace (I.Int^::ofNat k)).zero;
+\definition above[k: N.Nat^]: Order.Lt maximum k -> Vanishes k := \block {
+  \fun (bound: Order.Lt maximum k)(a: Groups.cohomology (I.Int^::ofNat k)) \then
+  \takefrom choices: SchubertData \by schubertDataExists \then
+  \return \parent.Schubert[disks := choices.disks, symbols := choices.symbols, exhaustive := choices.exhaustive]
+    .Additive[].Degree[k := k].above bound a
+};
+\definition odd[i: N.Nat^]: Vanishes (N.Nat^::succ (Degrees.double i)) := \block {
+  \fun (a: Groups.cohomology (I.Int^::ofNat (N.Nat^::succ (Degrees.double i)))) \then
+  \takefrom choices: SchubertData \by schubertDataExists \then
+  \return \parent.Schubert[disks := choices.disks, symbols := choices.symbols, exhaustive := choices.exhaustive]
+    .Additive[].Odd[i := i].vanishes a
+};
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import std.Data[].FinSet[] \as Fin;
+\definition EvenBasis[i: Fin.Fin ambient]: \Set :=
+  Abelian.Isomorphism[V := I.Int^, W := Groups.cohomology (I.Int^::ofNat (Degrees.double i)),
+    source := Abelian.scalarModule, target := Groups.cohomologySpace (I.Int^::ofNat (Degrees.double i))].Isomorphism;
+\definition even: \forall (i: Fin.Fin ambient) -> \exists EvenBasis i := \block {
+  \fun (i: Fin.Fin ambient) \then
+  \takefrom choices: SchubertData \by schubertDataExists \then
+  \return \parent.Schubert[disks := choices.disks, symbols := choices.symbols, exhaustive := choices.exhaustive]
+    .Additive[].At[i := i].basisExists
+};

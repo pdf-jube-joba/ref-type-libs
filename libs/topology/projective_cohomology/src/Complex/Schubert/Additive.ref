@@ -1,0 +1,82 @@
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import singular_cellular.On[A := Space, source := topology, complex := complex] \as Native;
+\import \root.Cellular[X := Space, space := topology, complex := complex, K := I.Int^, ring := Integers.commutativeRing] \as Cellular;
+\module Degree(k: N.Nat^) {
+  \import Native.Filtration[].CellInteriors[n := k] \as Interior;
+  \definition Cell: \Set := Interior.Index;
+  \definition emptyAbove: Order.Lt maximum k -> \forall (c: Cell) -> Logic.False :=
+    \fun (above: Order.Lt maximum k)(c: Cell) => Order.ltNe maximum k above
+      (Order.leAntisym maximum k (Order.leTrans maximum (N.Nat^::succ maximum) k (Order.leSelfSucc maximum) (Order.succLeOfLt k maximum above))
+        (\idelim c.dimension = k \with j: N.Nat^ => Order.Le j maximum \by {
+          base: cellBound c (Interior.member c), equality: Interior.dimension c
+        }));
+  \definition above: _ := \fun (bound: Order.Lt maximum k) => Cellular.Layer[n := k].singularZero (emptyAbove bound);
+}
+\module Odd(i: N.Nat^) {
+  \definition k: N.Nat^ := N.Nat^::succ (Degrees.double i);
+  \import Native.Filtration[].CellInteriors[n := k] \as Interior;
+  \definition empty[c: Interior.Index]: Logic.False := noOddCell i c (Interior.member c) (Interior.dimension c);
+  \definition cochainZero: _ := Cellular.Layer[n := k].cochainZero empty;
+  \definition vanishes: _ := Cellular.Layer[n := k].singularZero empty;
+}
+
+\import chain_complexes.Integer[] \as IntegerDegree;
+\definition PreviousZero[i: N.Nat^]: \Prop :=
+  \forall (f: Cellular.integerCochain.family.Carrier (IntegerDegree.previous (I.Int^::ofNat (Degrees.double i)))) ->
+    f = (Cellular.integerCochain.family.space (IntegerDegree.previous (I.Int^::ofNat (Degrees.double i)))).zero;
+\definition previousZero: \forall (i: N.Nat^) -> PreviousZero i :=
+  \induction (i: N.Nat^) \return PreviousZero i \with {
+    | zero: Cellular.negativeCochainZero N.Nat^::zero
+    | succ: \fun (j: N.Nat^)(previous: PreviousZero j) =>
+      \idelim N.Nat^::succ (N.Nat^::succ (Degrees.double j)) = Degrees.double (N.Nat^::succ j)
+        \with k: N.Nat^ => \forall (f: Cellular.integerCochain.family.Carrier (IntegerDegree.previous (I.Int^::ofNat k))) ->
+          f = (Cellular.integerCochain.family.space (IntegerDegree.previous (I.Int^::ofNat k))).zero \by {
+            base: Odd[i := j].cochainZero, equality: sym!{N.Nat^} _ _ (Degrees.doubleSucc j)
+          }
+  };
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Cochains;
+\import singular_products.Cochains[A := Space, source := topology, R := I.Int^, ring := Integers.commutativeRing] \as Product;
+\import singular_cohomology.Cochains[A := Space, source := topology].With[coefficients := Product.integerCoefficients].Integer[] \as Groups;
+\import Native.Cellular[].Representatives[] \as Representatives;
+\definition nativeIntegers: Abelian.Bundle := Abelian.Bundle { Carrier := I.Int^, space := Abelian.scalarModule };
+\definition coefficientIntegers: Abelian.Bundle := Product.integerCoefficients;
+\import cohomology_thom.RelativeMayerVietoris[].IntegerLinear[] \as Linear;
+\import Linear.On[A := nativeIntegers, B := coefficientIntegers, f := \fun (a: I.Int^) => a,
+  addition := \fun (a, b: I.Int^) => \refl((Integers.ring).add a b)] \as IntoCoefficients;
+\import Linear.On[A := coefficientIntegers, B := nativeIntegers, f := \fun (a: I.Int^) => a,
+  addition := \fun (a, b: I.Int^) => \refl((Integers.ring).add a b)] \as FromCoefficients;
+\import Abelian.Isomorphism[V := I.Int^, W := I.Int^, source := Abelian.scalarModule, target := Cellular.coefficientSpace] \as Scalars;
+\definition scalarComparison: Scalars.Isomorphism := Scalars.Isomorphism {
+  forward := IntoCoefficients.map, backward := FromCoefficients.map,
+  leftInverse := \fun (a: I.Int^) => \refl(a), rightInverse := \fun (a: I.Int^) => \refl(a)
+};
+\module At(i: Fin.Fin ambient) {
+  \import Native.Filtration[].CellInteriors[n := degree i] \as Interior;
+  \definition point: Interior.Index := \into[CW.CellData](cell i, Interior.Selected) \by {
+    Logic.And[_, _]::# (cellMember i) (cellDimension i)
+  };
+  \definition unique[c: Interior.Index]: c = point := cellAt i c (Interior.member c) (Interior.dimension c);
+  \definition chainBasis: _ := Cellular.Layer[n := degree i].Singleton[cell := point, unique := unique].integerBasis;
+  \definition cohomologyBasis: _ := Cellular.Layer[n := degree i].Singleton[cell := point, unique := unique].cohomologyBasis
+    \parent.Odd[i := i].cochainZero (previousZero i);
+  \definition z: I.Int^ := I.Int^::ofNat (degree i);
+  \import Cochains.At[C := Cellular.integerCochain, z := z] \as CellH;
+  \import Scalars.Composition[U := CellH.Cohomology, final := CellH.cohomologySpace] \as Standardize;
+  \import Abelian.Isomorphism[V := I.Int^, W := CellH.Cohomology, source := Abelian.scalarModule, target := CellH.cohomologySpace]
+    .Composition[U := Groups.cohomology z, final := Groups.cohomologySpace z] \as IntoSingular;
+  \import Abelian.Isomorphism[V := Groups.cohomology z, W := CellH.Cohomology, source := Groups.cohomologySpace z,
+    target := CellH.cohomologySpace].Inverse[] \as Reverse;
+  \definition SingularBasis: \Set := Abelian.Isomorphism[V := I.Int^, W := Groups.cohomology z,
+    source := Abelian.scalarModule, target := Groups.cohomologySpace z].Isomorphism;
+  \module Compared(selection: Representatives.Selection) {
+    \definition comparison: SingularBasis :=
+      IntoSingular.compose (Reverse.inverse Cellular.With[selection := selection].Degree[z := z].comparison) (Standardize.compose cohomologyBasis scalarComparison);
+  }
+  \definition basisExists: \exists SingularBasis := \block {
+    \takefrom selection: Representatives.Selection \by Cellular.representativesExist \then
+    \return \exact(Compared[selection := selection].comparison, SingularBasis)
+  };
+
+}

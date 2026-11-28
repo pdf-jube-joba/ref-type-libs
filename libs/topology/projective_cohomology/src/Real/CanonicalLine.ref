@@ -1,0 +1,51 @@
+\import real.Analysis[] \as Numbers;
+\import hermitian_frames.Hermitian[] \as Hermitian;
+\import vector_bundles.Bundles[].Over[K := Numbers.Real, field := Numbers.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Bundles;
+\import grassmannians.Real[n := ambient, k := Degrees.one].Model[] \as Model;
+\import bundle_complements.Complements[].Over[K := Numbers.Real, field := Numbers.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].Projection[X := Space, n := ambient, baseSpace := topology, P := Model.projection, regular := Model.regular] \as Universal;
+\import Bundles.Family[X := Space, F := Line].Of[bundle := lineBundle] \as Bundle;
+\import bundle_complements.Complements[].Over[K := Numbers.Real, field := Numbers.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar].For[X := Space, F := Line, bundle := lineBundle] \as Metrics;
+\definition embedding: Metrics.Embedding := Metrics.Embedding {
+  dimension := ambient,
+  map := Universal.inclusion,
+  injective := \fun (x: Space)(v, w: Line x)(same: (Universal.inclusion.fiber x).apply v = (Universal.inclusion.fiber x).apply w) => same
+};
+\definition metric: Metrics.Metric := Metrics.FromEmbedding[embedding := embedding].metric;
+\import Hermitian.Over[K := Numbers.Real, field := Numbers.Algebra[].field, scalar := Hermitian.Real[].scalar,
+  topological := Hermitian.Real[].topological].At[n := ambient] \as Ambient;
+\import std.Alg[].Field[] \as Fields;
+\import linear_algebra.Commutative[K := Numbers.Real, scalarRing := Fields.fieldAsCommutativeRing Numbers.Real Numbers.Algebra[].field] \as Linear;
+\use std.Logic[].Equality[].trans;
+\module At(x: Space) {
+  \import Ambient.OnProjection[P := Model.projection x].Rank[k := Degrees.one] \as ImageRank;
+  \definition Basis: \Set := ImageRank.Basis;
+  \module With(basis: Basis) {
+    \import Linear.Linear[V := Line x, W := Bundles.Vector Degrees.one, source := lineBundle.space x, target := Bundles.coordinates Degrees.one] \as Forward;
+    \import Linear.Linear[V := Bundles.Vector Degrees.one, W := Line x, source := Bundles.coordinates Degrees.one, target := lineBundle.space x] \as Backward;
+    \definition forward: Forward.Map := Forward.Map {
+      apply := \fun (v: Line x) => basis.coordinate.apply v,
+      preservesAdd := \fun (v, w: Line x) => basis.coordinate.preservesAdd v w,
+      preservesScale := \fun (a: Numbers.Real)(v: Line x) => basis.coordinate.preservesScale a v
+    };
+    \definition backward: Backward.Map := Backward.Map {
+      apply := \fun (v: Bundles.Vector Degrees.one) => \into[Bundles.Vector ambient](basis.value.apply v, Universal.Image x) \by { ImageRank.fixed basis v },
+      preservesAdd := basis.value.preservesAdd,
+      preservesScale := basis.value.preservesScale
+    };
+    \import Linear.Isomorphism[V := Line x, W := Bundles.Vector Degrees.one, source := lineBundle.space x, target := Bundles.coordinates Degrees.one] \as Isos;
+    \definition frame: Isos.Isomorphism := Isos.Isomorphism {
+      forward := forward, backward := backward,
+      leftInverse := \fun (v: Line x) => trans!{{Bundles.Vector ambient}} _ _ _ (basis.reconstruction v) (\bysub(Bundles.Vector ambient, Universal.Image x, v)),
+      rightInverse := basis.leftInverse
+    };
+  }
+}
+\definition rank: \forall (x: Space) -> Bundle.rank x = Degrees.one := \block {
+  \fun (x: Space) \then
+  \takefrom basis: At[x := x].Basis \by Model.rank x \then
+  \return Bundle.rankFrame x Degrees.one At[x := x].With[basis := basis].frame
+};
+\module Hopf;

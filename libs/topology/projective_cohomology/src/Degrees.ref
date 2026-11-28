@@ -1,0 +1,50 @@
+\import std.Data[].Nat[] \as N;
+\definition one: N.Nat^ := N.Nat^::succ N.Nat^::zero;
+\definition two: N.Nat^ := N.Nat^::succ one;
+\import N.Basic[].Def[] \as Nat;
+\import N.Basic[].Prop[] \as Basic;
+\import N.Order[].Prop[] \as Order;
+\import std.Logic[].Proposition[] \as Logic;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].trans;
+\use std.Logic[].Equality[].congr;
+\definition double[i: N.Nat^]: N.Nat^ := Nat.add i i;
+\definition doubleSucc[i: N.Nat^]: double (N.Nat^::succ i) = N.Nat^::succ (N.Nat^::succ (double i)) :=
+  Basic.addSuccLeft i (N.Nat^::succ i);
+\definition doubleStrict[i, j: N.Nat^]: Basic.Lt i j -> Basic.Lt (double i) (double j) :=
+  \fun (less: Basic.Lt i j) => Order.ltAdd i j i j less less;
+\definition doubleInjective[i, j: N.Nat^]: double i = double j -> i = j :=
+  \fun (equal: double i = double j) =>
+    \match Order.trichotomy i j \in std.Logic[].Order[].Trichotomy
+      \return (\fun (_: Order.Trichotomy i j) => i = j) \with {
+      | less less: Logic.falseElim _ (Basic.ltNe (double i) (double j) (doubleStrict i j less) equal)
+      | equal same: same
+      | greater greater: Logic.falseElim _ (Basic.ltNe (double j) (double i) (doubleStrict j i greater) (sym!{N.Nat^} _ _ equal))
+    };
+\definition gap[i: N.Nat^]: Basic.Lt (N.Nat^::succ (double i)) (double (N.Nat^::succ i)) :=
+  \idelim N.Nat^::succ (N.Nat^::succ (double i)) = double (N.Nat^::succ i)
+    \with d: N.Nat^ => Basic.Lt (N.Nat^::succ (double i)) d \by {
+      base: Order.ltSelfSucc (N.Nat^::succ (double i)),
+      equality: sym!{N.Nat^} _ _ (doubleSucc i)
+    };
+\definition doubleMonotone[i, j: N.Nat^]: Basic.Le i j -> Basic.Le (double i) (double j) :=
+  \fun (bound: Basic.Le i j) => grassmannian_cells.NaturalBounds[].add i j i j bound bound;
+\definition noAdjacent[i, j: N.Nat^]: double j = N.Nat^::succ (double i) -> Logic.False :=
+  \fun (same: double j = N.Nat^::succ (double i)) =>
+    \match Order.trichotomy i j \in std.Logic[].Order[].Trichotomy
+      \return (\fun (_: Order.Trichotomy i j) => Logic.False) \with {
+      | less less: Basic.ltNe (N.Nat^::succ (double i)) (double j)
+          (Basic.ltLeTrans _ _ _ (gap i) (doubleMonotone (N.Nat^::succ i) j (Basic.succLeOfLt j i less)))
+          (sym!{N.Nat^} _ _ same)
+      | equal equal: Basic.ltNe (double i) (N.Nat^::succ (double i)) (Order.ltSelfSucc (double i))
+          (trans!{N.Nat^} _ _ _ (congr!{N.Nat^ N.Nat^} double _ _ equal) same)
+      | greater greater: Basic.ltNe (double j) (N.Nat^::succ (double i))
+          (Basic.ltLeTrans _ _ _ (doubleStrict j i greater) (Basic.leSelfSucc (double i))) same
+    };
+\definition positivePredecessor: \forall (d: N.Nat^) -> Basic.Lt N.Nat^::zero d ->
+  \exists (k: N.Nat^ \where N.Nat^::succ k = d) :=
+  \induction (d: N.Nat^) \return Basic.Lt N.Nat^::zero d -> \exists (k: N.Nat^ \where N.Nat^::succ k = d) \with {
+    | zero: \fun (lt: Basic.Lt N.Nat^::zero N.Nat^::zero) => Logic.falseElim _ (Basic.ltIrrefl N.Nat^::zero lt)
+    | succ: \fun (k: N.Nat^)(previous: _) (lt: _) =>
+      Logic.existsIntro[N.Nat^, { j: N.Nat^ \where N.Nat^::succ j = N.Nat^::succ k }] k (\refl(N.Nat^::succ k))
+  };

@@ -1,0 +1,14 @@
+\use std.Logic[].Equality[].congr;
+\use std.Logic[].Equality[].trans;
+\import Cohomology.Pullback[B := Y, target := target] \as Pull;
+\import \root.Powers[X := Y, space := target, K := K, ring := ring, degree := degree, generator := other] \as Other;
+\definition compatible: \Prop := Pull.apply degree f continuous other = generator;
+\definition law: compatible -> \forall (k: N.Nat^) -> Pull.apply (grading k) f continuous (Other.power k) = power k :=
+  \fun (agree: compatible) => \induction (k: N.Nat^) \return Pull.apply (grading k) f continuous (Other.power k) = power k \with {
+    | zero: Pull.Unit[].law f continuous
+    | succ: \fun (k: N.Nat^)(previous: _) =>
+      trans!{{Cohomology.Group (grading (N.Nat^::succ k))}} _ _ _
+        (Pull.Cup[p := grading k, q := degree].law f continuous (Other.power k) other)
+        (congr!{{Cohomology.Group (grading k)} {Cohomology.Group degree} {Cohomology.Group (grading (N.Nat^::succ k))}}
+          Cohomology.Cup[p := grading k, q := degree].apply _ _ _ _ previous agree)
+  };

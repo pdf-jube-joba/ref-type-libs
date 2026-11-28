@@ -1,0 +1,13 @@
+\module Degrees;
+\module Symbols(n: std.Data[].Nat[].Nat^);
+\module Real(dimension: std.Data[].Nat[].Nat^);
+\module Complex(dimension: std.Data[].Nat[].Nat^);
+\module Cellular(X: \Set, space: topology.Topology[Carrier := X].Topology,
+  complex: algebraic_topology.CW[A := X].FiniteComplex[space], K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);
+\module Powers(X: \Set, space: topology.Topology[Carrier := X].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K],
+  degree: std.Data[].Nat[].Nat^, generator: singular_products.Cochains[A := X, source := space, R := K, ring := ring].Cohomology[].Group degree);
+\module UnitProjection(K: \Set, field: std.Alg[].Field[].Field[K],
+  scalar: linear_algebra.Hermitian[].Scalar[K, field],
+  topological: hermitian_frames.Hermitian[].ScalarTopology[K, field, scalar],
+  n: std.Data[].Nat[].Nat^);
+\module ZeroDegree(X: \Set, space: topology.Topology[Carrier := X].Topology, K: \Set, ring: std.Alg[].Ring[].CommutativeRing[K]);

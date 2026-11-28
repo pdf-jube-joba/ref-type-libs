@@ -1,0 +1,60 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import chain_complexes.Chain[].Over[R := I.Int^, ring := Integers.ring] \as Chains;
+\import singular_cohomology.Chains[A := X, source := space] \as SingularChains;
+\import singular_cellular.On[A := X, source := space, complex := complex] \as Cells;
+\import singular_cellular.On[A := X, source := space, complex := complex].Cellular[] \as CellularChains;
+\import CellularChains.Representatives[] \as Representatives;
+\import singular_products.Cochains[A := X, source := space, R := K, ring := ring] \as Singular;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import chain_complexes.Integer[].Over[R := I.Int^, ring := Integers.ring] \as Cochains;
+\import double_complexes.NonnegativeChain[].Over[R := I.Int^, ring := Integers.ring] \as Nonnegative;
+\definition chain: Nonnegative.Complex := CellularChains.complex;
+\definition integerChain: Chains.Complex := CellularChains.integerComplex;
+\import resolutions.HomComplex[].Over[R := I.Int^, ring := Integers.commutativeRing].Integer[P := integerChain, N := Singular.integerCoefficients] \as Hom;
+\import Nonnegative.ZeroExtension[C := chain] \as Extension;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\definition integerCochain: Cochains.Complex := Hom.complex;
+\definition coefficientSpace: Abelian.Space K := Singular.integerCoefficients.space;
+\definition negativeCochainZero[k: N.Nat^]: \forall (f: Hom.Carrier (I.Int^::negSucc k)) -> f = (Hom.space (I.Int^::negSucc k)).zero :=
+  \fun (f: Hom.Carrier (I.Int^::negSucc k)) => Hom.At[z := I.Int^::negSucc k].ext f (Hom.space (I.Int^::negSucc k)).zero
+    (\fun (x: integerChain.family.Carrier (I.Int^::negSucc k)) =>
+      trans!{K} _ _ _ (congr!{{integerChain.family.Carrier (I.Int^::negSucc k)} K} f.apply _ _ (Extension.Negative[n := k].zero x))
+        (Hom.At[z := I.Int^::negSucc k].zeroPreserved f));
+\definition representativesExist: \exists Representatives.Selection := Representatives.selectionExists;
+\module With(selection: Representatives.Selection) {
+  \import Representatives.Selected[selection := selection] \as Selected;
+  \definition chainMap: _ := Selected.map;
+  \definition integerChainMap: _ := Selected.integerMap;
+  \definition quasiIsomorphism: _ := Selected.quasiIsomorphism;
+  \definition equivalenceExists: _ := Selected.equivalenceExists;
+  \import Selected.With[coefficients := Singular.integerCoefficients] \as Comparison;
+  \definition cochainMap: _ := Comparison.pullback;
+  \definition cochainQuasiIsomorphism: _ := Comparison.quasiIsomorphism;
+  \module Degree(z: I.Int^) {
+    \import singular_cohomology.Cochains[A := X, source := space].With[coefficients := Singular.integerCoefficients].Integer[] \as SingularInteger;
+    \import Cochains.At[C := integerCochain, z := z] \as CellH;
+    \definition comparison: Abelian.Isomorphism[V := SingularInteger.cohomology z, W := CellH.Cohomology,
+      source := SingularInteger.cohomologySpace z, target := CellH.cohomologySpace].Isomorphism :=
+      Comparison.At[z := z].isomorphism;
+  }
+  \module WithEquivalence(e: Chains.Equivalence[C := integerChain, D := SingularChains.integerComplex].Equivalence) {
+    \import Selected.Native[e := e] \as Native;
+    \definition chainEquivalence: _ := Native.equivalence;
+    \definition diagonal: _ := Native.Diagonal[].map;
+    \module Cup(p, q: N.Nat^) {
+      \import Native.Diagonal[].Cup[R := K, ring := ring, p := p, q := q] \as Product;
+      \definition apply: _ := Product.apply;
+      \definition comparison: _ := Product.comparison;
+      \definition agreement: _ := Product.agreement;
+      \definition cochain: _ := Product.cochain;
+      \definition diagonalLaw: _ := Product.diagonalCycle;
+      \definition realizes: _ := Product.realizes;
+    }
+  }
+}
+\module Layer(n: N.Nat^);

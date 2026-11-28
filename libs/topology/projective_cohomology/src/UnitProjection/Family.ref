@@ -1,0 +1,9 @@
+\import grassmannian_cells.Reflection[K := K, field := field, scalar := scalar, topological := topological, n := n].Families[X := X] \as Formula;
+\import Ambient.Families[X := X].Matrix[m := n] \as Components;
+\definition projection[x: X]: Ambient.Projection := \parent.At[v := v x, unit := unit x].projection;
+\definition rank[x: X]: Ambient.OnProjection[P := projection x].Rank[k := Degrees.one].HasRank :=
+  \parent.At[v := v x, unit := unit x].rank;
+\definition fixed[x: X]: (projection x).map.apply (v x) = v x :=
+  \parent.At[v := v x, unit := unit x].fixed;
+\definition regular: Components.Regular space (\fun (x: X) => (projection x).map) :=
+  Components.regularOfComponents space (\fun (x: X) => (projection x).map) (Formula.rankOneRegular space v unit continuous);

@@ -1,0 +1,40 @@
+\import std.Data[].Nat[] \as N;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import std.Logic[].Proposition[] \as Logic;
+\import std.Logic[].Equality[] \as Equality;
+\use Equality.congr;
+\use Equality.sym;
+\use Equality.trans;
+\import singular_products.Cochains[A := X, source := space, R := K, ring := ring] \as Product;
+\import singular_cohomology.Zero[A := X, source := space].With[coefficients := Product.integerCoefficients] \as Zero;
+\import Zero.Functions[] \as Functions;
+\import cohomology_thom.ZeroEvaluation[A := X, source := space, K := K, ring := ring] \as Evaluation;
+\import algebraic_topology.PathComponent[A := X, source := space] \as Components;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import singular_cohomology.Cochains[A := X, source := space].With[coefficients := Product.integerCoefficients] \as Ordinary;
+\import Ordinary.Integer[] \as Signed;
+\definition Group: \Set := Product.Cohomology[].Group N.Nat^::zero;
+\definition unit: Group := Product.Cohomology[].Unit[].class;
+\definition constant[a: K]: Group := Functions.isomorphism.forward.apply (\fun (_: Components.Carrier) => a);
+\definition constantValue[a: K][x: X]: Evaluation.value (constant a) x = a :=
+  congr!{Functions.Function K} (\fun (f: Functions.Function) => f (Components.class x)) _ _
+    (Functions.isomorphism.leftInverse (\fun (_: Components.Carrier) => a));
+\definition unitValue[x: X]: Evaluation.value unit x = ring.base.one :=
+  trans!{K} _ _ _ (Evaluation.onClasses Product.Cohomology[].Unit[].cycle x) (Product.Unit[].onSimplex (Zero.constant x));
+\definition constantOne: constant ring.base.one = unit :=
+  Evaluation.detected _ _ (\fun (x: X) => trans!{K} _ _ _ (constantValue ring.base.one x) (sym!{K} _ _ (unitValue x)));
+\import Abelian.Hom[V := Group, W := Functions.Function, source := Ordinary.cohomologySpace N.Nat^::zero, target := Functions.functionSpace] \as Coordinates;
+\definition zeroValue[x: X]: Evaluation.value (Product.Cohomology[].moduleSpace N.Nat^::zero).zero x = ring.base.zero :=
+  congr!{Functions.Function K} (\fun (f: Functions.Function) => f (Components.class x)) _ _ (Coordinates.zeroPreserved Functions.isomorphism.backward);
+\definition unitNonzero[x: X][nontrivial: Logic.Not (ring.base.zero = ring.base.one)]:
+  Logic.Not (unit = (Product.Cohomology[].moduleSpace N.Nat^::zero).zero) :=
+  \fun (same: _) => nontrivial (trans!{K} _ _ _ (sym!{K} _ _ (zeroValue x))
+    (trans!{K} _ _ _ (congr!{Group K} (\fun (a: Group) => Evaluation.value a x) _ _ (sym!{Group} _ _ same)) (unitValue x)));
+\definition connectedConstant[connected: Components.PathConnected][point: X][a: Group]:
+  a = constant (Evaluation.value a point) :=
+  Evaluation.detected _ _ (\fun (x: X) => trans!{K} _ _ _
+    (congr!{Components.Carrier K} (Functions.isomorphism.backward.apply a) _ _ (Components.sameClass x point (connected x point)))
+    (sym!{K} _ _ (constantValue (Evaluation.value a point) x)));
+\module Along(Y: \Set, target: topology.Topology[Carrier := Y].Topology,
+  f: X -> Y, continuous: topology.Continuity[A := X, B := Y].Continuous space target f);

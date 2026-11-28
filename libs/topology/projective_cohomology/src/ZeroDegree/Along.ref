@@ -1,0 +1,31 @@
+\import \root.ZeroDegree[X := Y, space := target, K := K, ring := ring] \as Other;
+\import singular_products.Cochains[A := Y, source := target, R := K, ring := ring] \as OtherProduct;
+\import singular_cohomology.Cochains[A := Y, source := target].With[coefficients := Product.integerCoefficients].Integer[] \as OtherSigned;
+\import Product.Cohomology[].Pullback[B := Y, target := target] \as Pull;
+\import cohomology_thom.ZeroEvaluation[A := Y, source := target, K := K, ring := ring].Along[B := X, target := space, f := f, regular := continuous] \as Law;
+\definition constantLaw[a: K]: Pull.apply N.Nat^::zero f continuous (Other.constant a) = constant a :=
+  Evaluation.detected _ _ (\fun (x: X) => trans!{K} _ _ _ (Law.law (Other.constant a) x)
+    (trans!{K} _ _ _ (Other.constantValue a (f x)) (sym!{K} _ _ (constantValue a x))));
+\definition z: I.Int^ := I.Int^::ofNat N.Nat^::zero;
+\import Abelian.End[V := K, space := Product.integerCoefficients.space] \as Coefficients;
+\import singular_cohomology.Maps[A := X, B := Y, source := space, target := target]
+  .Coefficients[M := Product.integerCoefficients, L := Product.integerCoefficients]
+  .Integer[f := f, continuous := continuous, coefficientMap := Coefficients.identity].At[n := N.Nat^::zero] \as SignedMap;
+\definition map: _ := SignedMap.induced;
+\definition onto[connected: Components.PathConnected][point: X]:
+  \forall (a: Signed.cohomology z) -> \exists (b: OtherSigned.cohomology z \where map.apply b = a) := \block {
+    \fun (a: Signed.cohomology z) \then
+    \let ordinary: Group := Signed.At[n := N.Nat^::zero].isomorphism.forward.apply a \then
+    \let b: OtherSigned.cohomology z := OtherSigned.At[n := N.Nat^::zero].isomorphism.backward.apply (Other.constant (Evaluation.value ordinary point)) \then
+    \return Logic.existsIntro[OtherSigned.cohomology z, { b: OtherSigned.cohomology z \where map.apply b = a }] b
+      (trans!{{Signed.cohomology z}} _ _ _
+        (sym!{{Signed.cohomology z}} _ _ (Signed.At[n := N.Nat^::zero].isomorphism.leftInverse (map.apply b)))
+        (trans!{{Signed.cohomology z}} _ _ _
+          (congr!{Group {Signed.cohomology z}} Signed.At[n := N.Nat^::zero].isomorphism.backward.apply _ _
+            (trans!{Group} _ _ _ (SignedMap.law b)
+              (trans!{Group} _ _ _
+                (congr!{Other.Group Group} (Pull.apply N.Nat^::zero f continuous) _ _
+                  (OtherSigned.At[n := N.Nat^::zero].isomorphism.rightInverse (Other.constant (Evaluation.value ordinary point))))
+                (trans!{Group} _ _ _ (constantLaw (Evaluation.value ordinary point)) (sym!{Group} _ _ (connectedConstant connected point ordinary))))))
+          (Signed.At[n := N.Nat^::zero].isomorphism.leftInverse a)))
+  };

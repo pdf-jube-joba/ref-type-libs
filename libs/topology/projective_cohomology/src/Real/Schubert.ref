@@ -1,0 +1,55 @@
+\import SchubertCW.With[disks := disks, symbols := symbols, exhaustive := exhaustive] \as Presentation;
+\definition complex: _ := Finite.build Presentation.presentation;
+\definition skeleton: _ := SchubertCW.skeleton;
+\definition filtrationLaw: _ := Presentation.filtrationEquals;
+\import algebraic_topology.CW[A := Space] \as CW;
+\import thom_spaces.Thom[].CWType[].ListMapping[A := RankOne.Symbol, B := CW.CellData, transform := Presentation.cell] \as CellList;
+\import std.Data[].FinSet[] \as Fin;
+\import std.Logic[].Equality[] \as Equality;
+\import std.Logic[].Proposition[] \as Logic;
+\use Equality.sym;
+\use Equality.trans;
+\use Equality.congr;
+\definition degree[i: Fin.Fin ambient]: N.Nat^ := i;
+\definition cell[i: Fin.Fin ambient]: CW.CellData := Presentation.cell (RankOne.symbol i);
+\definition cellMember[i: Fin.Fin ambient]: CW.CellMember complex.cells (cell i) := Presentation.member (RankOne.symbol i);
+\definition cellDimension[i: Fin.Fin ambient]: (cell i).dimension = degree i :=
+  RankOne.realDegree (RankOne.symbol i);
+\structure CellLabel[c: CW.CellData]: \Set := {
+  pivot: Fin.Fin ambient,
+  equality: c = cell pivot
+};
+\definition cellLabel: \forall (c: CW.CellData) -> CW.CellMember complex.cells c -> \exists CellLabel[c] := \block {
+  \fun (c: CW.CellData)(member: _) \then
+  \takefrom witness: CellList.Witness[symbols, c] \by CellList.witness symbols c member \then
+  \return \exact(CellLabel[c] {
+    pivot := RankOne.pivot witness.cell,
+    equality := trans!{CW.CellData} _ _ _ witness.same
+      (congr!{RankOne.Symbol CW.CellData} Presentation.cell _ _ (sym!{RankOne.Symbol} _ _ (RankOne.leftInverse witness.cell)))
+  }, CellLabel[c])
+};
+\definition degreeInjective[i, j: Fin.Fin ambient]: degree i = degree j -> i = j :=
+  \fun (equal: degree i = degree j) => equal;
+\definition labelDegree[c: CW.CellData][label: CellLabel[c]]: c.dimension = degree label.pivot :=
+  trans!{N.Nat^} _ _ _ (congr!{CW.CellData N.Nat^} (\fun (d: CW.CellData) => d.dimension) _ _ label.equality)
+    (cellDimension label.pivot);
+\definition cellAt[i: Fin.Fin ambient]: \forall (c: CW.CellData) -> CW.CellMember complex.cells c -> c.dimension = degree i -> c = cell i := \block {
+  \fun (c: CW.CellData)(member: _)(same: _) \then
+  \takefrom label: CellLabel[c] \by cellLabel c member \then
+  \let degreeSame: degree label.pivot = degree i := trans!{N.Nat^} _ _ _
+    (sym!{N.Nat^} _ _ (labelDegree c label)) same \then
+  \return trans!{CW.CellData} _ _ _ label.equality (congr!{{Fin.Fin ambient} CW.CellData} cell _ _ (degreeInjective label.pivot i degreeSame))
+};
+\import N.Basic[].Prop[] \as Order;
+\definition maximum: N.Nat^ := dimension;
+\definition cellBound: \forall (c: CW.CellData) -> CW.CellMember complex.cells c -> Order.Le c.dimension maximum := \block {
+  \fun (c: CW.CellData)(member: _) \then
+  \takefrom label: CellLabel[c] \by cellLabel c member \then
+  \let pivotBound: Order.Le label.pivot dimension :=
+    Order.leOfSuccSucc label.pivot dimension (Order.succLeOfLt ambient label.pivot (Fin.bound ambient label.pivot)) \then
+  \return \idelim degree label.pivot = c.dimension \with k: N.Nat^ => Order.Le k maximum \by {
+    base: pivotBound,
+    equality: sym!{N.Nat^} _ _ (labelDegree c label)
+  }
+};
+\module Additive;

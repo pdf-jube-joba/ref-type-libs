@@ -1,0 +1,104 @@
+\import algebraic_topology.Euclidean[] \as Euclidean;
+\import Euclidean.Dimension[n := ambient] \as Standard;
+\import algebraic_topology.Spheres[] \as Spheres;
+\import N.Basic[].Def[] \as Nat;
+\definition normLaw: \forall (n: N.Nat^)(v: Euclidean.coordinateCarrier n) ->
+  R.FiniteSums[].sum n (\fun (i: Fin.Fin n) => R.mul (v i) (v i)) = Euclidean.normSquaredAt n v :=
+  \induction (n: N.Nat^) \return \forall (v: Euclidean.coordinateCarrier n) ->
+    R.FiniteSums[].sum n (\fun (i: Fin.Fin n) => R.mul (v i) (v i)) = Euclidean.normSquaredAt n v \with {
+      | zero: \fun (v: Euclidean.coordinateCarrier N.Nat^::zero) => \refl(R.zero)
+      | succ: \fun (n: N.Nat^)(previous: _)(v: Euclidean.coordinateCarrier (N.Nat^::succ n)) =>
+        trans!{R.Real} _ _ _
+          (congr!{R.Real R.Real} (R.add (R.mul (v (Fin.zero n)) (v (Fin.zero n)))) _ _
+            (previous (\fun (i: Fin.Fin n) => v (Fin.succ n i))))
+          (sym!{R.Real} _ _ (Euclidean.Dimension[n := n].Splitting[].normSplit v))
+    };
+\definition fromStandard[v: Spheres.Carrier dimension]: Sphere :=
+  \into[E.Vector](v, UnitVectors) \by {
+    trans!{R.Real} _ _ _ (normLaw ambient v) (\bysub(E.Vector, Standard.Boundary, v))
+  };
+\definition toStandard[v: Sphere]: Spheres.Carrier dimension :=
+  \into[E.Vector](v, Standard.Boundary) \by {
+    trans!{R.Real} _ _ _ (sym!{R.Real} _ _ (normLaw ambient v)) (\bysub(E.Vector, UnitVectors, v))
+  };
+\import topology.Continuity[A := Spheres.Carrier dimension, B := E.Vector].Corestriction[S := UnitVectors] \as IntoNative;
+\import topology.Continuity[A := Sphere, B := E.Vector].Corestriction[S := Standard.Boundary] \as IntoStandard;
+\definition homeomorphism: topology.Homeomorphism[A := Spheres.Carrier dimension, B := Sphere].Homeomorphism[Spheres.topology dimension, sphereTopology] :=
+  topology.Homeomorphism[A := Spheres.Carrier dimension, B := Sphere].Homeomorphism[Spheres.topology dimension, sphereTopology] {
+    forward := fromStandard, backward := toStandard,
+    forwardContinuous := IntoNative.corestrictContinuous (Spheres.topology dimension) (Bundles.coordinateTopology ambient) fromStandard
+      (topology.Continuity[A := Spheres.Carrier dimension, B := E.Vector].Corestriction[S := Standard.Boundary].inclusionContinuous Standard.topology),
+    backwardContinuous := IntoStandard.corestrictContinuous sphereTopology Standard.topology toStandard vectorContinuous,
+    leftInverse := \fun (v: Spheres.Carrier dimension) => \refl(v),
+    rightInverse := \fun (v: Sphere) => \refl(v)
+  };
+\definition sphereBundle: _ :=
+  topology.Homeomorphism[A := Spheres.Carrier dimension, B := Sphere].Composition[C := Disk.SphereBundle].compose
+    (Spheres.topology dimension) sphereTopology Disk.sphereTopology homeomorphism \root.Real[dimension := dimension].CanonicalLine[].Hopf[].homeomorphism;
+\import algebra.Two[] \as Two;
+\import std.Arithmetic[].Int[] \as I;
+\import std.Arithmetic[].IntAlgebra[].Ring[] \as Integers;
+\import module_theory.Module[].Over[R := I.Int^, ring := Integers.ring] \as Abelian;
+\import singular_products.Cochains[A := Space, source := topology, R := Two.Carrier, ring := Two.commutativeRing] \as Product;
+\import cohomology_models.Spheres[].With[coefficients := Product.integerCoefficients] \as SphereCohomology;
+\import singular_cohomology.Cochains[A := Disk.SphereBundle, source := Disk.sphereTopology].With[coefficients := Product.integerCoefficients] \as Total;
+\import singular_cohomology.Cochains[A := Spheres.Carrier dimension, source := Spheres.topology dimension].With[coefficients := Product.integerCoefficients] \as StandardSingular;
+\definition equivalence: _ :=
+  algebraic_topology.HomotopyEquivalence[A := Spheres.Carrier dimension, B := Disk.SphereBundle].fromHomeomorphism
+    (Spheres.topology dimension) Disk.sphereTopology sphereBundle;
+\import singular_cohomology.Equivalence[A := Spheres.Carrier dimension, B := Disk.SphereBundle,
+  source := Spheres.topology dimension, target := Disk.sphereTopology].Integer[e := equivalence].With[coefficients := Product.integerCoefficients] \as Comparison;
+\import N.Basic[].Prop[] \as Basic;
+\definition below[k: N.Nat^]: Basic.Lt (N.Nat^::succ k) dimension ->
+  \forall (x: SphereCohomology.cohomology dimension (N.Nat^::succ k)) ->
+    x = (SphereCohomology.space dimension (N.Nat^::succ k)).zero :=
+  \fun (less: Basic.Lt (N.Nat^::succ k) dimension) =>
+  \idelim Nat.add (N.Nat^::succ (Nat.sub dimension (N.Nat^::succ (N.Nat^::succ k)))) (N.Nat^::succ k) = dimension
+    \with m: N.Nat^ =>
+      \forall (x: SphereCohomology.cohomology m (N.Nat^::succ k)) -> x = (SphereCohomology.space m (N.Nat^::succ k)).zero \by {
+        base: SphereCohomology.Below[k := k, distance := Nat.sub dimension (N.Nat^::succ (N.Nat^::succ k))].zero,
+        equality: trans!{N.Nat^} _ _ _ (Basic.addSuccLeft _ _)
+          (trans!{N.Nat^} _ _ _
+            (congr!{N.Nat^ N.Nat^} (\fun (s: N.Nat^) => N.Nat^::succ s) _ _ (Basic.addComm _ _))
+            (trans!{N.Nat^} _ _ _ (sym!{N.Nat^} _ _ (Basic.addSuccLeft _ _))
+              (Basic.addSubOfLe (N.Nat^::succ (N.Nat^::succ k)) dimension (Basic.succLeOfLt dimension (N.Nat^::succ k) less))))
+      };
+\module Below(k: N.Nat^) {
+  \definition z: I.Int^ := I.Int^::ofNat (N.Nat^::succ k);
+  \import Abelian.Isomorphism[V := StandardSingular.Integer[].cohomology z, W := Total.Integer[].cohomology z,
+    source := StandardSingular.Integer[].cohomologySpace z, target := Total.Integer[].cohomologySpace z].Vanishing[] \as Transfer;
+  \import Abelian.Isomorphism[V := StandardSingular.Integer[].cohomology z, W := StandardSingular.cohomology (N.Nat^::succ k),
+    source := StandardSingular.Integer[].cohomologySpace z, target := StandardSingular.cohomologySpace (N.Nat^::succ k)].Vanishing[] \as CompareDegree;
+  \definition zero: Basic.Lt (N.Nat^::succ k) dimension ->
+    \forall (x: Total.Integer[].cohomology z) -> x = (Total.Integer[].cohomologySpace z).zero :=
+    \fun (less: Basic.Lt (N.Nat^::succ k) dimension) => Transfer.targetZero Comparison.At[z := z].isomorphism
+      (CompareDegree.sourceZero StandardSingular.Integer[].At[n := N.Nat^::succ k].isomorphism (below k less));
+}
+\import algebraic_topology.PathComponent[A := Spheres.Carrier dimension, source := Spheres.topology dimension] \as Paths;
+\import algebraic_topology.PathComponent[A := Disk.SphereBundle, source := Disk.sphereTopology] \as TotalPaths;
+\definition connectedPositive[n: N.Nat^][same: N.Nat^::succ n = dimension]: Paths.PathConnected :=
+  \idelim N.Nat^::succ n = dimension \with d: N.Nat^ =>
+    algebraic_topology.PathComponent[A := Spheres.Carrier d, source := Spheres.topology d].PathConnected \by {
+      base: Spheres.Positive[n := n].Connected[].connected, equality: same
+    };
+\import topology.Homeomorphism[A := Spheres.Carrier dimension, B := Disk.SphereBundle] \as Compared;
+\definition bundleConnected: Paths.PathConnected -> TotalPaths.PathConnected :=
+  \fun (connected: Paths.PathConnected)(x, y: Disk.SphereBundle) =>
+    \idelim sphereBundle.forward (sphereBundle.backward y) = y \with b: Disk.SphereBundle =>
+      TotalPaths.Related x b \by {
+        base: \idelim sphereBundle.forward (sphereBundle.backward x) = x \with a: Disk.SphereBundle =>
+          TotalPaths.Related a (sphereBundle.forward (sphereBundle.backward y)) \by {
+            base: Paths.Maps[B := Disk.SphereBundle, target := Disk.sphereTopology].preserves
+              sphereBundle.forward (Compared.laws (Spheres.topology dimension) Disk.sphereTopology sphereBundle).forwardContinuous
+              (sphereBundle.backward x) (sphereBundle.backward y) (connected (sphereBundle.backward x) (sphereBundle.backward y)),
+            equality: (Compared.laws (Spheres.topology dimension) Disk.sphereTopology sphereBundle).rightInverse x
+          },
+        equality: (Compared.laws (Spheres.topology dimension) Disk.sphereTopology sphereBundle).rightInverse y
+      };
+\definition bundlePoint: Disk.SphereBundle := sphereBundle.forward (Spheres.point dimension);
+\definition connected: Basic.Lt N.Nat^::zero dimension -> TotalPaths.PathConnected := \block {
+  \fun (positive: Basic.Lt N.Nat^::zero dimension) \then
+  \takefrom pred: \Cast[N.Nat^] ({ k: N.Nat^ \where N.Nat^::succ k = dimension }) \by
+    \root.Degrees[].positivePredecessor dimension positive \then
+  \return bundleConnected (connectedPositive pred (\bysub(N.Nat^, { k: N.Nat^ \where N.Nat^::succ k = dimension }, pred)))
+};

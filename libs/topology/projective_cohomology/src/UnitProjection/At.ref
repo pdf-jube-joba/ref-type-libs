@@ -1,0 +1,34 @@
+\import Inner.Unit[v := v, norm := unit] \as Unit;
+\definition projection: Ambient.Projection := Ambient.Projection {
+  map := Unit.rankOne, selfAdjoint := Unit.symmetric, idempotent := Unit.idempotent
+};
+\import Ambient.OnProjection[P := projection].Rank[k := Degrees.one] \as Span;
+\import Linear.Linear[V := Domain.Vector, W := E.Vector, source := Domain.space, target := E.space] \as Into;
+\import Linear.Linear[V := E.Vector, W := Domain.Vector, source := E.space, target := Domain.space] \as Out;
+\definition value: Into.Map := Into.Map {
+  apply := \fun (a: Domain.Vector) => E.space.smul (a index) v,
+  preservesAdd := \fun (a, b: Domain.Vector) => E.space.scalarAdd (a index) (b index) v,
+  preservesScale := \fun (a: K)(b: Domain.Vector) => E.space.scalarAssoc a (b index) v
+};
+\definition coordinate: Out.Map := Out.Map {
+  apply := \fun (w: E.Vector) => constant (E.dot v w),
+  preservesAdd := \fun (u, w: E.Vector) => congr!{K {Domain.Vector}} constant _ _ (E.addRight v u w),
+  preservesScale := \fun (a: K)(w: E.Vector) => congr!{K {Domain.Vector}} constant _ _ (E.scaleRight a v w)
+};
+\definition basis: Span.Basis := Span.Basis {
+  value := value,
+  coordinate := coordinate,
+  leftInverse := \fun (a: Domain.Vector) => eq_reason_in!{{Domain.Vector} _
+    "=" _ "by" { congr!{K {Domain.Vector}} constant _ _ (E.scaleRight (a index) v v) }
+    "=" _ "by" { congr!{K {Domain.Vector}} (\fun (x: K) => constant (Linear.mul (a index) x)) _ _ unit }
+    "=" _ "by" { congr!{K {Domain.Vector}} constant _ _ (Linear.mulOneRight (a index)) }
+    "=" _ "by" { constantLaw a }
+  },
+  reconstruction := \fun (w: E.Vector) => \refl(projection.map.apply w)
+};
+\definition rank: Span.HasRank := \exact(basis, Span.Basis);
+\definition fixed: projection.map.apply v = v := Unit.fixes;
+\definition nonzero: Logic.Not (v = E.space.zero) := \fun (zero: v = E.space.zero) =>
+  field.nontrivial (trans!{K} _ _ _ (sym!{K} _ _ (E.zeroRight v))
+    (trans!{K} _ _ _ (congr!{{E.Vector} K} (E.dot v) _ _ (sym!{{E.Vector}} _ _ zero)) unit));
+\module Recover(P: Ambient.Projection, hasRank: Ambient.OnProjection[P := P].Rank[k := Degrees.one].HasRank, fixes: P.map.apply v = v);

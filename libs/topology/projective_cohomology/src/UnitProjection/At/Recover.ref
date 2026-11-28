@@ -1,0 +1,54 @@
+\import Ambient.OnProjection[P := P].Rank[k := Degrees.one] \as Rank;
+\module With(b: Rank.Basis) {
+  \definition direction: E.Vector := b.value.apply (constant field.one);
+  \definition expand[a: Domain.Vector]: b.value.apply a = E.space.smul (a index) direction :=
+    trans!{{E.Vector}} _ _ _
+      (congr!{{Domain.Vector} {E.Vector}} b.value.apply _ _ (sym!{{Domain.Vector}} _ _ (constantLaw a)))
+      (trans!{{E.Vector}} _ _ _
+        (congr!{{Domain.Vector} {E.Vector}} b.value.apply _ _
+          (congr!{K {Domain.Vector}} constant _ _ (sym!{K} _ _ (Linear.mulOneRight (a index)))))
+        (b.value.preservesScale (a index) (constant field.one)));
+  \definition scalar: K := b.coordinate.apply v index;
+  \definition along: E.space.smul scalar direction = v :=
+    trans!{{E.Vector}} _ _ _
+      (sym!{{E.Vector}} _ _ (expand (b.coordinate.apply v)))
+      (trans!{{E.Vector}} _ _ _ (b.reconstruction v) fixes);
+  \definition scalarNonzero: Logic.Not (scalar = field.zero) :=
+    \fun (zero: scalar = field.zero) => nonzero (eq_reason_in!{{E.Vector} v
+      "=" _ "by" { sym!{{E.Vector}} _ _ along }
+      "=" _ "by" { congr!{K {E.Vector}} (\fun (c: K) => E.space.smul c direction) _ _ zero }
+      "=" _ "by" { Vector.zeroScale direction }
+    });
+  \definition directionLaw: direction = E.space.smul (field.inv scalar) v := eq_reason_in!{{E.Vector} direction
+    "=" _ "by" { sym!{{E.Vector}} _ _ (E.space.scalarOne direction) }
+    "=" _ "by" { congr!{K {E.Vector}} (\fun (c: K) => E.space.smul c direction) _ _
+      (sym!{K} _ _ (field.inverse scalar scalarNonzero)) }
+    "=" _ "by" { E.space.scalarAssoc (field.inv scalar) scalar direction }
+    "=" _ "by" { congr!{{E.Vector} {E.Vector}} (E.space.smul (field.inv scalar)) _ _ along }
+  };
+  \definition coefficient[w: E.Vector]: K := Linear.mul (b.coordinate.apply w index) (field.inv scalar);
+  \definition image[w: E.Vector]: P.map.apply w = E.space.smul (coefficient w) v := eq_reason_in!{{E.Vector} _
+    "=" _ "by" { sym!{{E.Vector}} _ _ (b.reconstruction w) }
+    "=" _ "by" { expand (b.coordinate.apply w) }
+    "=" _ "by" { congr!{{E.Vector} {E.Vector}} (E.space.smul (b.coordinate.apply w index)) _ _ directionLaw }
+    "=" _ "by" { sym!{{E.Vector}} _ _ (E.space.scalarAssoc (b.coordinate.apply w index) (field.inv scalar) v) }
+  };
+  \definition sameCoefficient[w: E.Vector]: coefficient w = E.dot v w := eq_reason_in!{K _
+    "=" _ "by" { sym!{K} _ _ (Linear.mulOneRight (coefficient w)) }
+    "=" _ "by" { congr!{K K} (Linear.mul (coefficient w)) _ _ (sym!{K} _ _ unit) }
+    "=" _ "by" { sym!{K} _ _ (E.scaleRight (coefficient w) v v) }
+    "=" _ "by" { congr!{{E.Vector} K} (E.dot v) _ _ (sym!{{E.Vector}} _ _ (image w)) }
+    "=" _ "by" { sym!{K} _ _ (P.selfAdjoint v w) }
+    "=" _ "by" { congr!{{E.Vector} K} (\fun (x: E.Vector) => E.dot x w) _ _ fixes }
+  };
+  \definition onVector[w: E.Vector]: P.map.apply w = projection.map.apply w :=
+    trans!{{E.Vector}} _ _ _ (image w)
+      (congr!{K {E.Vector}} (\fun (a: K) => E.space.smul a v) _ _ (sameCoefficient w));
+  \import Linear.Linear[V := E.Vector, W := E.Vector, source := E.space, target := E.space] \as End;
+  \definition law: P.map = projection.map :=
+    End.ext P.map projection.map (\axiom:funext(P.map.apply, projection.map.apply, \fun (w: E.Vector) => onVector w));
+}
+\definition law: P.map = projection.map := \block {
+  \takefrom chosen: Rank.Basis \by hasRank \then
+  \return With[b := chosen].law
+};

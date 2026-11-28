@@ -1,0 +1,44 @@
+\import std.Data[].Nat[] \as N;
+\import \root.Degrees[] \as Degrees;
+\import std.Data[].List[] \as Lists;
+\definition ambient: N.Nat^ := N.Nat^::succ dimension;
+\import grassmannians.ProjectiveReal[n := ambient] \as Projective;
+\import grassmannian_cells.CWReal[n := ambient, k := Degrees.one] \as SchubertCW;
+\import grassmannian_cells.FiniteCW[A := Projective.Space, space := Projective.topology] \as Finite;
+\import \root.Symbols[n := ambient] \as RankOne;
+\import Lists.Membership[A := RankOne.Symbol] \as Members;
+\import grassmannian_cells.Symbols[n := ambient, k := Degrees.one].Enumeration[] \as Enumeration;
+\import std.Set[].FiniteSubset[A := RankOne.Symbol].Enumeration[] \as CellEnumeration;
+\structure SchubertData: \Set := {
+  disks: SchubertCW.Disks,
+  symbols: Lists.List[RankOne.Symbol],
+  exhaustive: \forall (s: RankOne.Symbol) -> Members.Occurs s symbols
+};
+\definition schubertDataExists: \exists SchubertData := \block {
+  \takefrom disks: SchubertCW.Disks \by SchubertCW.disksExist \then
+  \takefrom symbols: CellEnumeration.DistinctEnumeration[Enumeration.whole] \by Enumeration.enumerationExists \then
+  \let laws: CellEnumeration.DistinctEnumerationLaws[Enumeration.whole, symbols] :=
+    \bysub(Lists.List[RankOne.Symbol], CellEnumeration.DistinctEnumeration[Enumeration.whole], symbols) \then
+  \return \exact(SchubertData {
+    disks := disks, symbols := symbols, exhaustive := \fun (s: RankOne.Symbol) => laws.enumerates.exhaustive s (\refl(s))
+  }, SchubertData)
+};
+\definition Space: \Set := Projective.Space;
+\definition topology: topology.Topology[Carrier := Space].Topology := Projective.topology;
+\definition Line[x: Space]: \Set := Projective.Line x;
+\definition lineBundle: _ := Projective.lineBundle;
+\definition cwExists: _ := SchubertCW.exists;
+\module Schubert(disks: SchubertCW.Disks, symbols: Lists.List[RankOne.Symbol],
+  exhaustive: \forall (s: RankOne.Symbol) -> Members.Occurs s symbols);
+\module Inclusion(extra: N.Nat^) {
+  \import grassmannian_cells.AmbientReal[n := ambient, k := Degrees.one, m := extra] \as Ambient;
+  \definition map: _ := Ambient.map;
+  \definition continuous: _ := Ambient.continuous;
+  \definition injective: _ := Ambient.injective;
+  \definition imageHomeomorphism: _ := Ambient.imageHomeomorphism;
+  \definition cellular: _ := Ambient.CW[].cellular;
+  \definition reflectsSkeleton: _ := Ambient.CW[].reflects;
+  \definition cellHomeomorphism: _ := Ambient.CW[].cellHomeomorphism;
+}
+\module CanonicalLine;
+\module Additive;

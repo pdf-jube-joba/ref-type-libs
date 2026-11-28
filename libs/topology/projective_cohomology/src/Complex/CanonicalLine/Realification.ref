@@ -1,0 +1,76 @@
+\import real.Analysis[] \as R;
+\import bundle_operations.Operations[].Scalars[] \as Scalars;
+\import Scalars.Realification[X := Space, F := Line, source := lineBundle] \as Realify;
+\import vector_bundles.Bundles[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as RealBundles;
+\definition bundle: RealBundles.Family[X := Space, F := Line].Bundle := Realify.bundle;
+\import RealBundles.Family[X := Space, F := Line] \as Family;
+\import Family.Of[bundle := bundle] \as BundleRank;
+\import Bundles.Family[X := Space, F := Line].With[data := lineBundle] \as Charts;
+\import topology.Topology[Carrier := Space] \as Base;
+\definition realDimension[k: N.Nat^]: N.Nat^ := Scalars.RealCoordinates[n := k].dimension;
+\use std.Logic[].Equality[].sym;
+\use std.Logic[].Equality[].congr;
+\definition realRank: \forall (x: Space) -> BundleRank.rank x = Degrees.two := \block {
+  \fun (x: Space) \then
+  \takefrom chart: \Cast[Charts.Chart] ({ c: Charts.Chart \where Base.Member c.domain x }) \by Bundle.locallyTrivial x \then
+  \let point: \Cast[Space] chart.domain := \into[Space](x, chart.domain) \by {
+    \bysub(Charts.Chart, { c: Charts.Chart \where Base.Member c.domain x }, chart)
+  } \then
+  \let complexRank: chart.dimension = Degrees.one := trans!{N.Nat^} _ _ _
+    (sym!{N.Nat^} _ _ (Bundle.rankFrame x chart.dimension (chart.frame point)))
+    (rank x) \then
+  \return trans!{N.Nat^} _ _ _
+    (BundleRank.rankFrame x (realDimension chart.dimension) (Realify.In[c := chart].trivialization.frame point))
+    (congr!{N.Nat^ N.Nat^} realDimension _ _ complexRank)
+};
+\import Bundles.Trivial[X := Space, n := ambient, baseSpace := topology] \as ComplexTrivial;
+\import Scalars.Realification[X := Space, F := \fun (x: Space) => Bundles.Vector ambient, source := ComplexTrivial.bundle] \as AmbientReal;
+\import Realify.Maps[Y := Space, G := \fun (x: Space) => Bundles.Vector ambient, target := ComplexTrivial.bundle, f := \fun (x: Space) => x] \as Include;
+\import Scalars.RealCoordinates[n := ambient] \as Coordinates;
+\import RealBundles.Trivial[X := Space, n := realDimension ambient, baseSpace := topology] \as RealTrivial;
+\import RealBundles.Morphisms[X := Space, Y := Space, F := Line, G := \fun (x: Space) => Bundles.Vector ambient,
+  source := bundle, target := AmbientReal.bundle, f := \fun (x: Space) => x] \as First;
+\definition inclusion: First.Map := Include.map Universal.inclusion;
+\import linear_algebra.Commutative[K := R.Real, scalarRing := Fields.fieldAsCommutativeRing R.Real R.Algebra[].field] \as RealLinear;
+\import RealBundles.Morphisms[X := Space, Y := Space, F := Line,
+  G := \fun (x: Space) => RealBundles.Vector (realDimension ambient),
+  source := bundle, target := RealTrivial.bundle, f := \fun (x: Space) => x] \as Into;
+\module At(x: Space) {
+  \import RealLinear.Linear[V := Bundles.Vector ambient, W := RealBundles.Vector (realDimension ambient),
+    source := AmbientReal.bundle.space x, target := RealBundles.coordinates (realDimension ambient)]
+    .Composition[U := Line x, domain := bundle.space x] \as Composition;
+  \definition map: _ := Composition.compose Coordinates.frame.forward (inclusion.fiber x);
+}
+\definition embeddingData: Into.Data := Into.Data { fiber := \fun (x: Space) => At[x := x].map };
+\import bundle_complements.Complements[].Over[K := R.Real, field := R.Algebra[].field, conjugation := Hermitian.Real[].scalar,
+  scalar := vector_bundles.Bundles[].Real[].scalar] \as Complements;
+\import Complements.TrivialMaps[X := Space, n := realDimension ambient, baseSpace := topology]
+  .Into[Y := Family.Point, source := bundle.totalSpace] \as Regular;
+\definition nativeCoordinates[p: Family.Point]: Bundles.Vector ambient := p.vector;
+\definition nativeContinuous: topology.Continuity[A := Family.Point, B := Bundles.Vector ambient].Continuous
+  bundle.totalSpace (Bundles.coordinateTopology ambient) nativeCoordinates :=
+  topology.Composition[A := Family.Point, B := Bundles.Family[X := Space, F := Line].Point, C := Bundles.Vector ambient]
+    .composeContinuous bundle.totalSpace lineBundle.totalSpace (Bundles.coordinateTopology ambient)
+      Realify.backward (\fun (p: Bundles.Family[X := Space, F := Line].Point) => p.vector)
+      Realify.backwardContinuous Universal.vectorContinuous;
+\definition coordinates[p: Family.Point]: RealBundles.Vector (realDimension ambient) := Coordinates.frame.forward.apply (nativeCoordinates p);
+\definition coordinatesContinuous: topology.Continuity[A := Family.Point, B := RealBundles.Vector (realDimension ambient)].Continuous
+  bundle.totalSpace (RealBundles.coordinateTopology (realDimension ambient)) coordinates :=
+  topology.Composition[A := Family.Point, B := Bundles.Vector ambient, C := RealBundles.Vector (realDimension ambient)]
+    .composeContinuous bundle.totalSpace (Bundles.coordinateTopology ambient) (RealBundles.coordinateTopology (realDimension ambient))
+      nativeCoordinates Coordinates.frame.forward.apply nativeContinuous Coordinates.Topology[].forwardContinuous;
+\definition embeddingMap: Into.Map := \into[Into.Data](embeddingData, Into.Map) \by {
+  Regular.continuous Family.projection coordinates BundleRank.projectionContinuous coordinatesContinuous
+};
+\import Complements.For[X := Space, F := Line, bundle := bundle] \as Metrics;
+\definition embedding: Metrics.Embedding := Metrics.Embedding {
+  dimension := realDimension ambient,
+  map := embeddingMap,
+  injective := \fun (x: Space)(v, w: Line x)(same: _) =>
+    trans!{{Bundles.Vector ambient}} _ _ _ (sym!{{Bundles.Vector ambient}} _ _ (Coordinates.frame.leftInverse v))
+      (trans!{{Bundles.Vector ambient}} _ _ _
+        (congr!{{RealBundles.Vector (realDimension ambient)} {Bundles.Vector ambient}} Coordinates.frame.backward.apply _ _ same)
+        (Coordinates.frame.leftInverse w))
+};
+\definition metric: Metrics.Metric := Metrics.FromEmbedding[embedding := embedding].metric;
